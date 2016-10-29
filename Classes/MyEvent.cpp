@@ -4,13 +4,7 @@
 USING_NS_CC;
 //id has to match the image id
 MyEvent::MyEvent(int id,std::string desc):id(id),description(desc){}
-MyEvent::MyEvent(Floor *f,int id,std::string desc,int x,int y):floor(f),id(id),description(desc),x(x),y(y){}
-
-void MyEvent::setFloorInfo(Floor *f,int x,int y){
-	floor=f;
-	x=x;
-	y=y;
-}
+MyEvent::MyEvent(int id,std::string desc,int x,int y):id(id),description(desc),x(x),y(y){}
 
 MyEvent::~MyEvent(){}
 

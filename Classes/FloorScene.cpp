@@ -2,6 +2,7 @@
 #include "HelloWorldScene.h"
 #include <sstream>
 #include "GameData.h"
+#include <utility>
 
 USING_NS_CC;
 
@@ -28,7 +29,7 @@ bool FloorScene::init()
 	Point origin = Director::getInstance()->getVisibleOrigin();
 	log("height %d",height);
 
-	//make a global variable to hold these
+	//for now assume everything is the same
 	int tiles[]={6,6,6,6,6,6,6,6,6,6,6,
 				6,6,6,6,6,6,6,6,6,6,6,
 				6,6,6,6,6,6,6,6,6,6,6,
@@ -41,20 +42,6 @@ bool FloorScene::init()
 				6,6,6,6,6,6,6,6,6,6,6,
 				6,6,6,6,6,6,6,6,6,6,6
 	};
-	int events[]={
-		11,0,0,0,0,0,0,0,0,0,0,
-		8,8,8,8,8,8,8,8,8,8,0,
-		32,0,0,1,0,8,0,29,0,8,0,
-		0,77,0,8,0,8,0,32,0,8,0,
-		8,1,8,8,0,8,8,8,1,8,0,
-		29,0,0,8,0,1,67,69,67,8,0,
-		0,79,0,8,0,8,8,8,8,8,0,
-		8,1,8,8,0,0,0,0,0,0,0,
-		0,0,0,8,8,1,8,8,8,1,8,
-		32,0,29,8,29,0,0,8,0,67,0,
-		32,38,29,8,0,0,0,8,61,33,61
-	};
-
 
 	//left static image
 	float leftX=0;
@@ -66,7 +53,7 @@ bool FloorScene::init()
 
 	float lineRadius=3;
 
-	float startX=leftX+sprite1->getBoundingBox().size.width+lineRadius;
+	startX=leftX+sprite1->getBoundingBox().size.width+lineRadius;
 
 	//draw a border
 	float borderTopY=height-lineRadius;
@@ -88,31 +75,35 @@ bool FloorScene::init()
 	this->addChild(sprite2,0);
 
 	
-
+	floorContent = Node::create();
 	//display the floor
 	//load the floor info
 	//should use cache
-	float startY=height-40-lineRadius;
+
+	
+	startY=height-40-lineRadius;
+	CCLOG("start x %f y %f",startX,startY);
 	for (int i=0;i<11;i++){
 		for (int j=0;j<11;j++){
+
 			//this is animatable as well
 			//add a class for this
 			std::stringstream ss1;
-			ss1<<"tile ("<<tiles[i+11*j]<<").png";
+			ss1<<"tile ("<<tiles[j+11*i]<<").png";
 			auto sprite1=Sprite::create(ss1.str());
-			sprite1->setPosition(startX+i*40,startY-j*40);
+			sprite1->setPosition(startX+j*40,startY-i*40);
 			sprite1->setAnchorPoint(Vec2(0,0));
 			sprite1->setScale(Director::getInstance()->getContentScaleFactor());
-			this->addChild(sprite1,0);
+			floorContent->addChild(sprite1,0);
 
-			if (events[i+11*j]){
-				auto temp=GameData::getInstance()->getEventData(events[i+11*j]);
-				auto sprite2=temp->getSprite(startX+i*40,startY-j*40);
+			auto sprite2=GameData::getInstance()->getSprite(i,j,startX+j*40,startY-i*40);
+			if (sprite2!=nullptr){
 				sprite2->setScale(Director::getInstance()->getContentScaleFactor());
-				this->addChild(sprite2,1);
+				floorContent->addChild(sprite2,1);
 			}
 		}
 	}
+	this->addChild(floorContent);
 
 	auto listener = EventListenerTouchAllAtOnce::create();
 	listener->onTouchesEnded = CC_CALLBACK_2(FloorScene::onTouchesEnded,this);
@@ -122,15 +113,37 @@ bool FloorScene::init()
 	return true;
 }
 
+//one of it is not right.
+std::pair<int,int> FloorScene::computeBlock(float x,float y){
+	for (int i=0;i<11;i++)
+		for (int j=0;j<11;j++){
+			int curX = startX+j*40;
+			int curY = startY-i*40;
+			if (x>(curX)&&x<=curX+40&&y>curY&&y<=(curY+40)){
+				CCLOG("block %d %d",i,j);
+				return std::pair<int,int>(i,j);
+			}
+		}
+	return std::pair<int,int>(-1,-1); //return empty?
+}
+
 void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches,cocos2d::Event * event)
 {
-	log("touched");
+
 	if (touches.size()==0){
 		return;
 	}
+	//this->removeChild(floorContent);
 	//ignore all touches except the last one
 	for (auto touch : touches){
-		auto loc = touch->getLocationInView();
+		auto loc = touch->getLocation();
+		CCLOG("clicked %f %f",loc.x,loc.y);
+		//need to first check if the loc is within the UI region.
+		auto blockDest=computeBlock(loc.x,loc.y);
+		auto path=GameData::getInstance()->pathFind(blockDest);
+		for (auto pathNode: path){
+			CCLOG("path %d %d",pathNode.first,pathNode.second);
+		}
 	}
 }
 
