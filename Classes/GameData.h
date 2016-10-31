@@ -3,6 +3,12 @@
 #include "MyEvent.h"
 #include "cocos2d.h"
 #include <vector>
+#include "HeroX.h"
+
+
+enum DIR{
+	UP,DOWN,LEFT,RIGHT
+};
 
 class GameData
 {
@@ -12,22 +18,29 @@ private:
 
 public:
 	static GameData* getInstance();
-	MyEvent* getEventData(int id);
-	MyEvent* getEventData(int x,int y);
+	MyEvent* getEvent(int x,int y);
 	const int height =500;
 	const int width =800;
+	const static int MAXFLOOR=2;
 	int goUpStairs();
 	int goDownStairs();
 	int setFloor(int);
-	cocos2d::Sprite* getSprite(int x,int y,int px,int py);
+	cocos2d::Sprite* getSprite(int x,int y);
+	void moveHero(enum DIR direction);
+	void moveHero(std::pair<int,int> dest);
+	void moveHero(std::vector<std::pair<int,int>> path);
 	std::vector<std::pair<int,int>> pathFind(std::pair<int,int> dest);
 	std::vector<std::pair<int,int> > pathFind(int dx,int dy);
+	HeroX hero;
 
 private:
+	MyEvent* getEventData(int id);
+	MyEvent* getEventData(int x,int y);
 	MyEvent* EVENTDATA[500]={NULL};
-	int FLOOREVENTS[2][11][11];
+	int FLOOREVENTS[MAXFLOOR][11][11]; //int representation - read from config?
+	MyEvent* FloorEvents[MAXFLOOR][11][11]; //the actual objects
+	void loadFloor();
 	int floor=1;
-	int heroX=0;
-	int heroY=0;
+	
 };
 

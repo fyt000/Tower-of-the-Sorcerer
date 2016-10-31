@@ -2,7 +2,9 @@
 #include "HelloWorldScene.h"
 #include <sstream>
 #include "GameData.h"
+#include "HeroX.h"
 #include <utility>
+#include "TransformCoordinate.h"
 
 USING_NS_CC;
 
@@ -83,6 +85,9 @@ bool FloorScene::init()
 	
 	startY=height-40-lineRadius;
 	CCLOG("start x %f y %f",startX,startY);
+
+	TransformCoordinate::startX=startX;
+	TransformCoordinate::startY=startY;
 	for (int i=0;i<11;i++){
 		for (int j=0;j<11;j++){
 
@@ -91,18 +96,22 @@ bool FloorScene::init()
 			std::stringstream ss1;
 			ss1<<"tile ("<<tiles[j+11*i]<<").png";
 			auto sprite1=Sprite::create(ss1.str());
-			sprite1->setPosition(startX+j*40,startY-i*40);
+			std::pair<int,int> pxy=TransformCoordinate::transform(i,j);
+			sprite1->setPosition(pxy.first,pxy.second);
 			sprite1->setAnchorPoint(Vec2(0,0));
 			sprite1->setScale(Director::getInstance()->getContentScaleFactor());
 			floorContent->addChild(sprite1,0);
 
-			auto sprite2=GameData::getInstance()->getSprite(i,j,startX+j*40,startY-i*40);
+			auto sprite2=GameData::getInstance()->getSprite(i,j);
 			if (sprite2!=nullptr){
 				sprite2->setScale(Director::getInstance()->getContentScaleFactor());
 				floorContent->addChild(sprite2,1);
 			}
 		}
 	}
+
+	floorContent->addChild(GameData::getInstance()->hero.getSprite());
+
 	this->addChild(floorContent);
 
 	auto listener = EventListenerTouchAllAtOnce::create();
@@ -114,6 +123,7 @@ bool FloorScene::init()
 }
 
 //one of it is not right.
+//TODO do this in TransformCoordinate.
 std::pair<int,int> FloorScene::computeBlock(float x,float y){
 	for (int i=0;i<11;i++)
 		for (int j=0;j<11;j++){
@@ -141,9 +151,12 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches,coco
 		//need to first check if the loc is within the UI region.
 		auto blockDest=computeBlock(loc.x,loc.y);
 		auto path=GameData::getInstance()->pathFind(blockDest);
+		/*
 		for (auto pathNode: path){
 			CCLOG("path %d %d",pathNode.first,pathNode.second);
-		}
+			GameData::getInstance()->moveHero(pathNode);
+		}*/
+		GameData::getInstance()->moveHero(path);
 	}
 }
 

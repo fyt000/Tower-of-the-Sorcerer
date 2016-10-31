@@ -7,6 +7,7 @@ static GameData* gameData = nullptr;
 //this will initialize the game data
 //this FLOOREVENTS intialization is pretty stupid
 //I will change this.
+//this must be changed actually, since we can't initialize like this for loading saves
 GameData::GameData():FLOOREVENTS{
 	{
 		{0}
@@ -24,7 +25,9 @@ GameData::GameData():FLOOREVENTS{
 		{0,0,0,8,8,1,8,8,8,1,8},
 		{32,0,29,8,29,0,0,8,0,67,0},
 		{32,38,29,8,0,0,0,8,61,33,61}
-	}}
+	}},
+	FloorEvents{0},
+	hero(213,"the 213 hero",1000,100,100)
 {
 	EVENTDATA[0]=NULL;
 	EVENTDATA[1]=new MyEvent(1,"yellow door");
@@ -41,8 +44,9 @@ GameData::GameData():FLOOREVENTS{
 	EVENTDATA[77]=new Enemy(77,"Skeleton C",78,50,42,6);
 	EVENTDATA[79]=new Enemy(79,"Skeleton B",80,55,52,12);
 
-	heroX=7;heroY=4;
+	floor=1;
 
+	loadFloor();
 }
 
 //kinda singleton
@@ -53,10 +57,15 @@ GameData* GameData::getInstance(){
 	return gameData;
 }
 
+MyEvent * GameData::getEvent(int x,int y)
+{
+	return FloorEvents[floor][x][y];
+}
+
 //get event pointer given the id
 MyEvent * GameData::getEventData(int id)
 {
-	if (id<0||id>=500){
+	if (id<0||id>=500){ //?
 		return NULL;
 	}
 	return EVENTDATA[id];
@@ -66,6 +75,24 @@ MyEvent * GameData::getEventData(int id)
 MyEvent * GameData::getEventData(int x,int y)
 {
 	return getEventData(FLOOREVENTS[floor][x][y]);
+}
+
+void GameData::loadFloor(){
+	int curFloor=floor;
+	for (int k=0;k<MAXFLOOR;k++){
+		floor=k;
+		for (int i=0;i<11;i++)
+			for (int j=0;j<11;j++){
+				delete FloorEvents[k][i][j]; //if I call loadFloor on loading save files
+				FloorEvents[k][i][j]=NULL;
+				MyEvent* event=getEventData(i,j);
+				if (event){
+					FloorEvents[k][i][j]=event->clone();
+					FloorEvents[k][i][j]->setXY(i,j);
+				}
+			}
+	}
+	floor=curFloor;
 }
 
 
@@ -88,13 +115,31 @@ int GameData::setFloor(int f){
 	return floor;
 }
 
-cocos2d::Sprite * GameData::getSprite(int x,int y,int px,int py)
+cocos2d::Sprite * GameData::getSprite(int x,int y)
 {
-	auto curFloor=FLOOREVENTS[floor];
-	if (!curFloor[x][y])
+	if (!FloorEvents[floor][x][y])
 		return nullptr;
-	return getEventData(curFloor[x][y])->getSprite(px,py);
+	return FloorEvents[floor][x][y]->getSprite();
 }
+
+
+void GameData::moveHero(enum DIR direction){
+	hero.move(direction);
+}
+
+//should not return void...?
+//what to show if the hero engages?
+//... think and fix this
+void GameData::moveHero(std::pair<int,int> dest){
+	hero.move(dest);
+}
+
+void GameData::moveHero(std::vector<std::pair<int,int>> path)
+{
+	hero.move(path);
+}
+
+
 
 std::vector<std::pair<int,int>> GameData::pathFind(std::pair<int,int> dest){
 	return pathFind(dest.first,dest.second);
@@ -106,19 +151,19 @@ std::vector<std::pair<int,int>> GameData::pathFind(std::pair<int,int> dest){
 std::vector<std::pair<int,int>> GameData::pathFind(int dx,int dy)
 {
 
-	if (dx==-1||dy==-1||heroX==dx&&heroY==dy||getEventData(dx,dy)){ 
+	if (dx==-1||dy==-1||hero.getX()==dx&&hero.getY()==dy||getEventData(dx,dy)){
 		return std::vector<std::pair<int,int>>(); //do nothing
 	}
 
 	int vis[11][11]={0};
-	vis[heroX][heroY]=1;
+	vis[hero.getX()][hero.getY()]=1;
 	std::vector<std::pair<int,int> > path;
 
 	std::vector<std::pair<int,int> > bfsQ;
 	std::vector<int> parent;
 
 	//for every bfsQ push, we need a parent push
-	bfsQ.push_back(std::pair<int,int>(heroX,heroY));
+	bfsQ.push_back(std::pair<int,int>(hero.getX(),hero.getY()));
 	parent.push_back(-1); //no parent for the root
 	int idx=0;
 
@@ -156,7 +201,9 @@ std::vector<std::pair<int,int>> GameData::pathFind(int dx,int dy)
 		}
 		//we could do recursion to flip the vector
 		//but I don't want another method just to do this
+		path.pop_back(); //this is just the src loc
 		std::reverse(path.begin(),path.end());
+		path.push_back(std::pair<int,int>(dx,dy)); //push destination to the path.
 	}
 	return path;
 }

@@ -6,8 +6,9 @@ class MyEvent
 {
 public:
 	MyEvent(int id,std::string decription);
-	MyEvent(int id,std::string description,int x,int y);
+	virtual MyEvent* clone();
 	~MyEvent(); 
+	void setXY(int x,int y);
 	int getID();
 	bool passable(); 
 	//virtual bool isEnemy();
@@ -16,7 +17,16 @@ public:
 	bool canInteract();
 	bool specialEffect();
 	std::string getDescription();
-	virtual cocos2d::Sprite* getSprite(int px,int py);
+	virtual cocos2d::Sprite* getSprite();
+	int getX();
+	int getY();
+	//virtual int calcDamage();
+
+	//this method works like this:
+	//f is a function ptr that expects a MyEvent and returns void
+	//hit the enemy, pass the enemy back to f, f will then update the graphics
+	//f will probably also fetch hero data .. I don't know
+	//virtual int engage(void (*f) (MyEvent*));
 	//bool hasAnimation();
 	//virtual bool hasFrameAnimation();
 
@@ -25,7 +35,7 @@ protected:
 	int x;
 	int y;
 	std::string description;
-
+	cocos2d::Sprite* sprite;
 
 	/*
 	std::string imageName1;
