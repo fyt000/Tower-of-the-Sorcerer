@@ -17,6 +17,7 @@ public:
 	cocos2d::Sprite* getSprite();
 	void move(enum DIR dir);
 	void move(std::pair<int,int> dest);
+	Animate * getDirMoveAnimate(DIR dir,int steps);
 	void move(std::vector<std::pair<int,int>> path);
 	//items?
 	virtual HeroX* clone();
@@ -26,7 +27,9 @@ public:
 private:
 	int secondImageID;
 	enum DIR heroDir;
-	
+	float animateRate=0.1f;
+	void changeDirAnimate(Node * node,DIR newDir,int steps);
 	void Destined(Node* node,int x,int y);
+	void StopAll(Node * node);
 };
 
