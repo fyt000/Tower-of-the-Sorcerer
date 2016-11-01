@@ -2,8 +2,7 @@
 #include "TransformCoordinate.h"
 #include "GameData.h"
 
-//this is getting ugly... just going to typedef this
-typedef std::vector<std::pair<int,int>> PATH;
+
 
 HeroX::HeroX(int id,std::string desc,int hp,int atk,int def):Fightable(id,desc,hp,atk,def){
 	//hard coding these for now
@@ -32,50 +31,8 @@ Sprite* HeroX::getSprite(){
 	return sprite2;
 }
 
-//there are a lot of stuff that can happen with move
-//for now, just do the animation
-//and the logic for hitting the wall should be done else where maybe GameData
-//TODO FIX THIS
-void HeroX::move(enum DIR direction){
-	MoveTo* moveTo;
-	int oldX=x;int oldY=y;
-	switch (direction){
-	case (DIR::UP):
-		x--;break;
-	case(DIR::DOWN):
-		x++;break;
-	case(DIR::LEFT):
-		y--;break;
-	case(DIR::RIGHT):
-		y++;break;
-	}
-	//could just use moveTo.... ok
-	moveTo = MoveTo::create(0.5,TransformCoordinate::transformVec2(x,y));
-	sprite->runAction(moveTo);
 
-	
-}
 
-//TODO FIX THIS
-void HeroX::move(std::pair<int,int> dest){
-	/*
-	if (dest.first-x>0)
-		move(DIR::DOWN);
-	else if (dest.first-x<0)
-		move(DIR::UP);
-	else if (dest.second-y>0)
-		move(DIR::RIGHT);
-	else if (dest.second-y<0)
-		move(DIR::LEFT);
-		*/
-	x=dest.first;y=dest.second;
-	auto destCoord=TransformCoordinate::transformVec2(x,y);
-	CCLOG("dest coord %f %f",destCoord.x,destCoord.y);
-	sprite->stopAllActions();
-	//sprite->setPosition(destCoord.x,destCoord.y);
-	auto moveTo = MoveTo::create(0.3,destCoord);
-	sprite->runAction(moveTo);
-}
 
 enum DIR nextNodeDir(std::pair<int,int> cur,std::pair<int,int> next){
 	if (next.first-cur.first>0)
@@ -117,7 +74,32 @@ Animate* HeroX::getDirMoveAnimate(enum DIR dir,int steps){
 	return animate;
 }
 
+
+//this is used for arrow(keyboard) movement if I happen to implement it
+//but again, this does not make any assumption on its surroundings
+//just move
+void HeroX::move(enum DIR direction){
+	MoveTo* moveTo;
+	int newX=x;int newY=y;
+	switch (direction){
+	case (DIR::UP):
+		newX--;break;
+	case(DIR::DOWN):
+		newX++;break;
+	case(DIR::LEFT):
+		newY--;break;
+	case(DIR::RIGHT):
+		newY++;break;
+	}
+	PATH singleMovement;
+	singleMovement.push_back(std::pair<int,int>(newX,newY));
+	move(singleMovement);
+}
+
 //THIS WORKS!!
+//there are a lot of stuff that can happen with move
+//for now, just do the animation
+//and the logic for hitting the wall should be done else where maybe GameData
 void HeroX::move(PATH path){
 	sprite->stopAllActions();
 	if (path.size()==0)

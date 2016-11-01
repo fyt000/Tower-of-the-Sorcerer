@@ -4,11 +4,8 @@
 #include "cocos2d.h"
 #include <vector>
 #include "HeroX.h"
+#include "GlobalDefs.h"
 
-
-enum DIR{
-	UP,DOWN,LEFT,RIGHT
-};
 
 class GameData
 {
@@ -27,10 +24,9 @@ public:
 	int setFloor(int);
 	cocos2d::Sprite* getSprite(int x,int y);
 	void moveHero(enum DIR direction);
-	void moveHero(std::pair<int,int> dest);
-	void moveHero(std::vector<std::pair<int,int>> path);
-	std::vector<std::pair<int,int>> pathFind(std::pair<int,int> dest);
-	std::vector<std::pair<int,int> > pathFind(int dx,int dy);
+	void moveHero(PATH path);
+	PATH pathFind(std::pair<int,int> dest);
+	PATH pathFind(int dx,int dy);
 	HeroX hero;
 
 private:

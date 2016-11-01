@@ -3,6 +3,7 @@
 #include "cocos2d.h"
 #include "Fightable.h"
 #include <utility>
+#include "GlobalDefs.h"
 
 USING_NS_CC;
 //there might be a name conflict somewhere I don't know about
@@ -16,9 +17,8 @@ public:
 	bool canAtk();
 	cocos2d::Sprite* getSprite();
 	void move(enum DIR dir);
-	void move(std::pair<int,int> dest);
 	Animate * getDirMoveAnimate(DIR dir,int steps);
-	void move(std::vector<std::pair<int,int>> path);
+	void move(PATH path);
 	//items?
 	virtual HeroX* clone();
 	~HeroX();

@@ -127,28 +127,21 @@ void GameData::moveHero(enum DIR direction){
 	hero.move(direction);
 }
 
-//should not return void...?
-//what to show if the hero engages?
-//... think and fix this
-void GameData::moveHero(std::pair<int,int> dest){
-	hero.move(dest);
-}
-
-void GameData::moveHero(std::vector<std::pair<int,int>> path)
+void GameData::moveHero(PATH path)
 {
 	hero.move(path);
 }
 
 
 
-std::vector<std::pair<int,int>> GameData::pathFind(std::pair<int,int> dest){
+PATH GameData::pathFind(std::pair<int,int> dest){
 	return pathFind(dest.first,dest.second);
 }
 
 //find a path from the current location (heroX,heroY) to the specified path
 //use simple bfs will gurantee shortest path, since distance between each block is always 1
 //this is called if the destination is not an event
-std::vector<std::pair<int,int>> GameData::pathFind(int dx,int dy)
+PATH GameData::pathFind(int dx,int dy)
 {
 
 	if (dx==-1||dy==-1||hero.getX()==dx&&hero.getY()==dy||getEventData(dx,dy)){
