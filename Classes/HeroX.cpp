@@ -63,12 +63,12 @@ Animate* HeroX::getDirMoveAnimate(enum DIR dir,int steps){
 	}
 
 	for (int i=0;i<steps+1;i++){
-		if (i%2==0)
+		//if (i%2==0)
 			animFrames.pushBack(SpriteFrame::create(stepFrame1,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
-		else
+		//else
 			animFrames.pushBack(SpriteFrame::create(stepFrame2,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
 	}
-	Animation* animation = Animation::createWithSpriteFrames(animFrames,animateRate);
+	Animation* animation = Animation::createWithSpriteFrames(animFrames,animateRate/2);
 	Animate* animate = Animate::create(animation);
 	animate->setTag(0); //all animations are 0
 	return animate;

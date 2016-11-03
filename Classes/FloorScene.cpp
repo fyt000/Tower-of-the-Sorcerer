@@ -124,6 +124,7 @@ bool FloorScene::init()
 
 //one of it is not right.
 //TODO do this in TransformCoordinate.
+/*
 std::pair<int,int> FloorScene::computeBlock(float x,float y){
 	for (int i=0;i<11;i++)
 		for (int j=0;j<11;j++){
@@ -135,7 +136,7 @@ std::pair<int,int> FloorScene::computeBlock(float x,float y){
 			}
 		}
 	return std::pair<int,int>(-1,-1); //return empty?
-}
+}*/
 
 void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches,cocos2d::Event * event)
 {
@@ -149,7 +150,7 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches,coco
 		auto loc = touch->getLocation();
 		CCLOG("clicked %f %f",loc.x,loc.y);
 		//need to first check if the loc is within the UI region.
-		auto blockDest=computeBlock(loc.x,loc.y);
+		auto blockDest=TransformCoordinate::computeBlock(loc.x,loc.y);
 		auto path=GameData::getInstance()->pathFind(blockDest);
 		/*
 		for (auto pathNode: path){

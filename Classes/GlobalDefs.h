@@ -4,6 +4,7 @@
 #include <vector>
 
 //just defines nothing else
+//I will run into forward decl issues if I put everything in gamedata (eg. Hero class)
 
 enum DIR{
 	UP,DOWN,LEFT,RIGHT

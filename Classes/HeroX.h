@@ -6,7 +6,7 @@
 #include "GlobalDefs.h"
 
 USING_NS_CC;
-//there might be a name conflict somewhere I don't know about
+
 class HeroX:
 	public Fightable
 {

@@ -16,8 +16,6 @@ private:
 public:
 	static GameData* getInstance();
 	MyEvent* getEvent(int x,int y);
-	const int height =500;
-	const int width =800;
 	const static int MAXFLOOR=2;
 	int goUpStairs();
 	int goDownStairs();

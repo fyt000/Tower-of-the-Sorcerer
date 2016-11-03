@@ -18,6 +18,7 @@ public:
 	bool specialEffect();
 	std::string getDescription();
 	virtual cocos2d::Sprite* getSprite();
+	virtual void triggerEvent();
 	int getX();
 	int getY();
 	//virtual int calcDamage();

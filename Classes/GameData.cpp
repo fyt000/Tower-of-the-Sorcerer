@@ -8,6 +8,7 @@ static GameData* gameData = nullptr;
 //this FLOOREVENTS intialization is pretty stupid
 //I will change this.
 //this must be changed actually, since we can't initialize like this for loading saves
+//but that's ok... we can read one by one
 GameData::GameData():FLOOREVENTS{
 	{
 		{0}

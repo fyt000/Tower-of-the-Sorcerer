@@ -1,8 +1,8 @@
 #pragma once
 #include "MyEvent.h"
 #include "cocos2d.h"
-#include "string"
-#include "map"
+#include <string>
+#include <map>
 
 //uhm. things are not as straight forward
 //to cheat - make things easier to implement
@@ -15,7 +15,12 @@ public:
 	//virtual cocos2d::Sprite* getSprite(int px,int py);
 	~Fightable();
 	virtual Fightable* clone()=0;
-
+	int fight(Fightable * target,std::function<void(const Fightable&)> hpCallback1,std::function<void(const Fightable&)> hpCallback2);
+	virtual void triggerEvent();
+	//special attack effects on this later...
+	virtual int hitBy(Fightable*);
+	virtual int hit(Fightable*);
+	void decHp(int amt);
 
 protected:
 	int hp;

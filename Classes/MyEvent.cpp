@@ -56,6 +56,10 @@ Sprite* MyEvent::getSprite(){
 	return sprite1;
 }
 
+void MyEvent::triggerEvent()
+{
+}
+
 int MyEvent::getX()
 {
 	return x;
