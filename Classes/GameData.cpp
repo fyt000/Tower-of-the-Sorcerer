@@ -17,7 +17,7 @@ GameData::GameData():FLOOREVENTS{
 	{
 		{11,0,0,0,0,0,0,0,0,0,0},
 		{8,8,8,8,8,8,8,8,8,8,0},
-		{32,0,0,1,0,8,0,29,0,8,0},
+		{32,0,0,0,0,8,0,29,0,8,0},
 		{0,77,0,8,0,8,0,32,0,8,0},
 		{8,1,8,8,0,8,8,8,1,8,0},
 		{29,0,0,8,0,1,67,69,67,8,0},
@@ -28,7 +28,7 @@ GameData::GameData():FLOOREVENTS{
 		{32,38,29,8,0,0,0,8,61,33,61}
 	}},
 	FloorEvents{0},
-	hero(213,"the 213 hero",1000,100,100)
+	hero(213,"the 213 hero",1000,15,1,0)
 {
 	EVENTDATA[0]=NULL;
 	EVENTDATA[1]=new MyEvent(1,"yellow door");
@@ -133,7 +133,24 @@ void GameData::moveHero(PATH path)
 	hero.move(path);
 }
 
-
+void GameData::moveHero(std::pair<int,int> dest){
+	auto eventPtr=getEventData(dest.first,dest.second);
+	if (eventPtr==NULL){//check if it is an event
+		moveHero(pathFind(dest));
+		return;
+	}
+	//check if distance is 1
+	if ((dest.first==hero.getX()&&abs(hero.getY()-dest.second)==1)||
+		(dest.second==hero.getY()&&abs(hero.getX()-dest.first)==1)){
+		if (eventPtr->triggerEvent())
+			if (eventPtr->stepOnEvent())
+				delete eventPtr;
+	}
+	else{
+		//else do a path find and move to the place
+		moveHero(pathFind(dest));
+	}
+}
 
 PATH GameData::pathFind(std::pair<int,int> dest){
 	return pathFind(dest.first,dest.second);

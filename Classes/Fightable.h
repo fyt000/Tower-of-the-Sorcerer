@@ -15,8 +15,12 @@ public:
 	//virtual cocos2d::Sprite* getSprite(int px,int py);
 	~Fightable();
 	virtual Fightable* clone()=0;
-	int fight(Fightable * target,std::function<void(const Fightable&)> hpCallback1,std::function<void(const Fightable&)> hpCallback2);
-	virtual void triggerEvent();
+	int fight(Fightable * target,std::function<void(Fightable&)> hpCallback1,std::function<void(Fightable&)> hpCallback2);
+	const int getHp();
+	const int getAtk();
+	const int getDef();
+	virtual bool triggerEvent();
+	virtual bool stepOnEvent();
 	//special attack effects on this later...
 	virtual int hitBy(Fightable*);
 	virtual int hit(Fightable*);

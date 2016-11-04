@@ -4,16 +4,33 @@
 
 
 
-HeroX::HeroX(int id,std::string desc,int hp,int atk,int def):Fightable(id,desc,hp,atk,def){
+HeroX::HeroX(int id,std::string desc,int hp,int atk,int def,int gold):Fightable(id,desc,hp,atk,def),gold(gold){
 	//hard coding these for now
 	x=0;y=1;
 	heroDir=DIR::UP;
 }
 
 
-bool HeroX::canAtk(){
+bool HeroX::canAtk(){ //?
 	return true;
 }
+
+int HeroX::getGold(){
+	return gold;
+}
+
+void HeroX::gainGold(int amt){
+	gold+=amt;
+}
+
+bool HeroX::spendGold(int amt){
+	if (gold>=amt){
+		gold-=amt;
+		return true;
+	}
+	return false;
+}
+
 
 Sprite* HeroX::getSprite(){
 	/*

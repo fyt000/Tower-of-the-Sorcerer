@@ -23,6 +23,7 @@ public:
 	cocos2d::Sprite* getSprite(int x,int y);
 	void moveHero(enum DIR direction);
 	void moveHero(PATH path);
+	void moveHero(std::pair<int,int>);
 	PATH pathFind(std::pair<int,int> dest);
 	PATH pathFind(int dx,int dy);
 	HeroX hero;

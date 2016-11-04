@@ -8,6 +8,7 @@ class FloorScene: public cocos2d::Layer
 	float startX;
 	float startY;
 
+
 public:
 	static cocos2d::Scene* createScene();
 	virtual bool init();

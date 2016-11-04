@@ -27,7 +27,7 @@ void Fightable::decHp(int amt)
 //this method is implemented for Fight only because,
 //IIRC, Zeno will engage the character (or some other Mob will)
 //accept callback so that I'll return hp after each hit to the caller
-int Fightable::fight(Fightable* target,std::function<void(const Fightable&)> hpCallback1,std::function<void(const Fightable&)> hpCallback2){
+int Fightable::fight(Fightable* target,std::function<void(Fightable&)> hpCallback1,std::function<void(Fightable&)> hpCallback2){
 	int totalDamageTaken=0;
 	if (hit(target)==0)
 		return -1;
@@ -47,9 +47,24 @@ int Fightable::fight(Fightable* target,std::function<void(const Fightable&)> hpC
 	return totalDamageTaken;
 }
 
-void Fightable::triggerEvent(){
-	//now the question is, how do I pass the function pointers....
-	GameData::getInstance()->hero.fight(this,nullptr,nullptr);
+const int Fightable::getHp(){
+	return hp;
+}
+const int Fightable::getAtk(){
+	return atk;
+}
+const int Fightable::getDef(){
+	return def;
+}
+
+//I don't like this... override it in enemy?
+bool Fightable::triggerEvent(){
+	return true;
+}
+
+bool Fightable::stepOnEvent(){
+	GameData::getInstance()->hero.fight(this,[](Fightable &f) { log("hp %d",f.getHp()); },[](Fightable &f) { log("hp %d",f.getHp()); });
+	return false;
 }
 
 Fightable::~Fightable(){

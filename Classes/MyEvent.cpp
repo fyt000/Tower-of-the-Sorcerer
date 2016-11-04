@@ -56,8 +56,13 @@ Sprite* MyEvent::getSprite(){
 	return sprite1;
 }
 
-void MyEvent::triggerEvent()
+bool MyEvent::triggerEvent()
 {
+	return true;
+}
+
+bool MyEvent::stepOnEvent(){
+	return false;
 }
 
 int MyEvent::getX()

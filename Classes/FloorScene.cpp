@@ -53,37 +53,67 @@ bool FloorScene::init()
 	sprite1->setScale(Director::getInstance()->getContentScaleFactor());
 	this->addChild(sprite1,0);
 
-	float lineRadius=3;
+	float lineRadius=5;
 
 	startX=leftX+sprite1->getBoundingBox().size.width+lineRadius;
 
 	//draw a border
 	float borderTopY=height-lineRadius;
 	log("borderTop %d",borderTopY);
-	float borderBottomY=borderTopY-11*40-lineRadius;
+	float borderBottomY=borderTopY-11*40-lineRadius*2;
+	float borderLeftX=startX;
+	float borderRightX=startX+11*40+lineRadius*2;
 	auto color=Color4F(156/255.0,99/255.0,66/255.0,1);
 	auto drawNode = DrawNode::create();
-	drawNode->drawSegment(Vec2(startX,borderTopY),Vec2(startX+11*40,borderTopY),lineRadius,color);
-	drawNode->drawSegment(Vec2(startX,borderBottomY),Vec2(startX+11*40,borderBottomY),lineRadius,color);
-	drawNode->drawSegment(Vec2(startX,borderTopY),Vec2(startX,borderBottomY),lineRadius,color);
-	drawNode->drawSegment(Vec2(startX+11*40,borderTopY),Vec2(startX+11*40,borderBottomY),lineRadius,color);
+	drawNode->drawSegment(Vec2(borderLeftX,borderTopY),Vec2(borderRightX,borderTopY),lineRadius,color);
+	drawNode->drawSegment(Vec2(borderLeftX,borderBottomY),Vec2(borderRightX,borderBottomY),lineRadius,color);
+	drawNode->drawSegment(Vec2(borderLeftX,borderTopY),Vec2(borderLeftX,borderBottomY),lineRadius,color);
+	drawNode->drawSegment(Vec2(borderRightX,borderTopY),Vec2(borderRightX,borderBottomY),lineRadius,color);
 	this->addChild(drawNode,2);
 
 	//right static image
 	auto sprite2=Sprite::create("Right.png");
-	sprite2->setPosition(startX+11*40+lineRadius,0);
+	sprite2->setPosition(borderRightX+lineRadius,0);
 	sprite2->setAnchorPoint(Vec2(0,0));
 	sprite2->setScale(Director::getInstance()->getContentScaleFactor());
 	this->addChild(sprite2,0);
 
-	
+	startX=startX+lineRadius;
+
+	auto theHero = &GameData::getInstance()->hero;
+
+	std::string font="fonts/arial.ttf";
+	int fontSize=15;
+	float statX=137.5;
+	float statY=397.5;
+
+	theHero->charHp = Label::createWithTTF(ToString(GameData::getInstance()->hero.getHp()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	theHero->charHp->setPosition(statX,statY);
+	theHero->charHp->setAnchorPoint(Vec2(1,1));
+	this->addChild(theHero->charHp,2);
+
+	theHero->charAtk = Label::createWithTTF(ToString(GameData::getInstance()->hero.getAtk()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	theHero->charAtk->setPosition(statX,statY-30);
+	theHero->charAtk->setAnchorPoint(Vec2(1,1));
+	this->addChild(theHero->charAtk,2);
+
+	theHero->charDef = Label::createWithTTF(ToString(GameData::getInstance()->hero.getDef()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	theHero->charDef->setPosition(statX,statY-60);
+	theHero->charDef->setAnchorPoint(Vec2(1,1));
+	this->addChild(theHero->charDef,2);
+
+	theHero->charGold = Label::createWithTTF(ToString(GameData::getInstance()->hero.getGold()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	theHero->charGold->setPosition(statX,statY-90);
+	theHero->charGold->setAnchorPoint(Vec2(1,1));
+	this->addChild(theHero->charGold,2);
+
 	floorContent = Node::create();
 	//display the floor
 	//load the floor info
 	//should use cache
 
 	
-	startY=height-40-lineRadius;
+	startY=height-40-lineRadius*2;
 	CCLOG("start x %f y %f",startX,startY);
 
 	TransformCoordinate::startX=startX;
@@ -110,7 +140,7 @@ bool FloorScene::init()
 		}
 	}
 
-	floorContent->addChild(GameData::getInstance()->hero.getSprite());
+	floorContent->addChild(theHero->getSprite());
 
 	this->addChild(floorContent);
 
@@ -138,6 +168,8 @@ std::pair<int,int> FloorScene::computeBlock(float x,float y){
 	return std::pair<int,int>(-1,-1); //return empty?
 }*/
 
+
+
 void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches,cocos2d::Event * event)
 {
 
@@ -151,13 +183,8 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches,coco
 		CCLOG("clicked %f %f",loc.x,loc.y);
 		//need to first check if the loc is within the UI region.
 		auto blockDest=TransformCoordinate::computeBlock(loc.x,loc.y);
-		auto path=GameData::getInstance()->pathFind(blockDest);
-		/*
-		for (auto pathNode: path){
-			CCLOG("path %d %d",pathNode.first,pathNode.second);
-			GameData::getInstance()->moveHero(pathNode);
-		}*/
-		GameData::getInstance()->moveHero(path);
+		//auto path=GameData::getInstance()->pathFind(blockDest);
+		GameData::getInstance()->moveHero(blockDest);
 	}
 }
 
