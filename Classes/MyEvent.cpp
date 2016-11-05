@@ -14,7 +14,9 @@ MyEvent * MyEvent::clone()
 	return new MyEvent(*this);
 }
 
-MyEvent::~MyEvent(){}
+MyEvent::~MyEvent(){
+	sprite->removeFromParent();
+}
 
 void MyEvent::setXY(int x,int y)
 {

@@ -11,7 +11,6 @@ class HeroX:
 	public Fightable
 {
 public:
-	HeroX(int id,std::string desc,int hp,int atk,int def);
 
 	HeroX(int id,std::string desc,int hp,int atk,int def,int gold);
 
@@ -23,7 +22,8 @@ public:
 	cocos2d::Sprite* getSprite();
 	void move(enum DIR dir);
 	Animate * getDirMoveAnimate(DIR dir,int steps);
-	void move(PATH path);
+	void move(PATH path,bool isLastMove=false);
+	void move(std::pair<int,int>);
 	//items?
 	virtual HeroX* clone();
 	~HeroX();
@@ -40,7 +40,7 @@ private:
 	float animateRate=0.1f;
 	void changeDirAnimate(Node * node,DIR newDir,int steps);
 	void Destined(Node* node,int x,int y);
-	void StopAll(Node * node);
-
+	void StopAll(Node * node,std::pair<int,int>);
+	void StopAllFinal(Node* node);
 };
 

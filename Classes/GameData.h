@@ -1,5 +1,4 @@
 #pragma once
-#include "Enemy.h"
 #include "MyEvent.h"
 #include "cocos2d.h"
 #include <vector>
@@ -21,12 +20,14 @@ public:
 	int goDownStairs();
 	int setFloor(int);
 	cocos2d::Sprite* getSprite(int x,int y);
-	void moveHero(enum DIR direction);
+	//void moveHero(enum DIR direction);
 	void moveHero(PATH path);
 	void moveHero(std::pair<int,int>);
+	void moveHeroFinalStep(std::pair<int,int> dest);
 	PATH pathFind(std::pair<int,int> dest);
 	PATH pathFind(int dx,int dy);
 	HeroX hero;
+	EventListenerTouchAllAtOnce* floorMouseListener;
 
 private:
 	MyEvent* getEventData(int id);
@@ -36,6 +37,7 @@ private:
 	MyEvent* FloorEvents[MAXFLOOR][11][11]; //the actual objects
 	void loadFloor();
 	int floor=1;
+	
 	
 };
 

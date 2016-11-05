@@ -64,7 +64,7 @@ bool Fightable::triggerEvent(){
 
 bool Fightable::stepOnEvent(){
 	GameData::getInstance()->hero.fight(this,[](Fightable &f) { log("hp %d",f.getHp()); },[](Fightable &f) { log("hp %d",f.getHp()); });
-	return false;
+	return true;
 }
 
 Fightable::~Fightable(){

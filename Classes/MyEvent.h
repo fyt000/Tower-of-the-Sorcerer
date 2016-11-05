@@ -7,7 +7,7 @@ class MyEvent
 public:
 	MyEvent(int id,std::string decription);
 	virtual MyEvent* clone();
-	~MyEvent(); 
+	virtual ~MyEvent(); 
 	void setXY(int x,int y);
 	int getID();
 	bool passable(); 

@@ -13,7 +13,7 @@ class Fightable:
 public:
 	Fightable(int id,std::string desc,int hp,int atk,int def);
 	//virtual cocos2d::Sprite* getSprite(int px,int py);
-	~Fightable();
+	virtual ~Fightable();
 	virtual Fightable* clone()=0;
 	int fight(Fightable * target,std::function<void(Fightable&)> hpCallback1,std::function<void(Fightable&)> hpCallback2);
 	const int getHp();

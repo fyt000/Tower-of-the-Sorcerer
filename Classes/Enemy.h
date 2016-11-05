@@ -12,7 +12,7 @@ public:
 	//Enemy(Floor *f,int id,int x,int y,int secondImageID,int hp,int atk,int def);
 	bool canAtk();
 	cocos2d::Sprite* getSprite();
-	~Enemy();
+	virtual ~Enemy();
 	Enemy* clone();
 
 private:

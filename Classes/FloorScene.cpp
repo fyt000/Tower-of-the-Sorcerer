@@ -144,10 +144,10 @@ bool FloorScene::init()
 
 	this->addChild(floorContent);
 
-	auto listener = EventListenerTouchAllAtOnce::create();
-	listener->onTouchesEnded = CC_CALLBACK_2(FloorScene::onTouchesEnded,this);
+	GameData::getInstance()->floorMouseListener = EventListenerTouchAllAtOnce::create();
+	GameData::getInstance()->floorMouseListener->onTouchesEnded = CC_CALLBACK_2(FloorScene::onTouchesEnded,this);
 
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener,this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(GameData::getInstance()->floorMouseListener,this);
 
 	return true;
 }

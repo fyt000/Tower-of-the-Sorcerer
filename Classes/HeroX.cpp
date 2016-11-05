@@ -108,19 +108,25 @@ void HeroX::move(enum DIR direction){
 	case(DIR::RIGHT):
 		newY++;break;
 	}
-	PATH singleMovement;
-	singleMovement.push_back(std::pair<int,int>(newX,newY));
-	move(singleMovement);
+
+	move(std::pair<int,int>(newX,newY));
 }
 
 //THIS WORKS!!
 //there are a lot of stuff that can happen with move
 //for now, just do the animation
 //and the logic for hitting the wall should be done else where maybe GameData
-void HeroX::move(PATH path){
+void HeroX::move(PATH path,bool isLastStep){
 	sprite->stopAllActions();
 	if (path.size()==0)
 		return;
+
+	/*
+	if (isLastStep&&path.size()!=1)
+		return;*/
+	std::pair<int,int> lastStep = path.back();
+	if (!isLastStep)
+		path.pop_back();
 
 	//break down the path into directions...
 	//because each direction has a different animation
@@ -159,11 +165,22 @@ void HeroX::move(PATH path){
 			actions.pushBack(callback);
 		}
 	}
-	actions.pushBack(DelayTime::create(animateRate));
-	auto stopCallBack = CallFuncN::create(CC_CALLBACK_1(HeroX::StopAll,this));
+	if (isLastStep)
+		actions.pushBack(DelayTime::create(animateRate));
+	auto stopCallBack =
+		isLastStep?CallFuncN::create(CC_CALLBACK_1(HeroX::StopAllFinal,this)):CallFuncN::create(CC_CALLBACK_1(HeroX::StopAll,this,lastStep));
 	actions.pushBack(stopCallBack);
+	
+
 	auto seq = Sequence::create(actions);
 	sprite->runAction(seq);
+}
+
+void HeroX::move(std::pair<int,int> dest)
+{
+	PATH p;
+	p.push_back(dest);
+	move(p,true);
 }
 
 void HeroX::changeDirAnimate(Node* node,enum DIR newDir,int steps){
@@ -177,7 +194,24 @@ void HeroX::Destined(Node* node,int x,int y){
 	this->x=x;this->y=y;
 }
 
-void HeroX::StopAll(Node* node){
+void HeroX::StopAll(Node* node,std::pair<int,int> dest){
+	Director::getInstance()->getEventDispatcher()->setEnabled(false);
+	//sprite->stopAllActions();
+	std::string stopStr;
+	switch (heroDir){
+	case DIR::DOWN:stopStr="tile (189).png";break;
+	case DIR::LEFT:stopStr="tile (197).png";break;
+	case DIR::RIGHT:stopStr="tile (205).png";break;
+	case DIR::UP:stopStr="tile (213).png";break;
+	default:stopStr="tile (213).png";
+	}
+	sprite->setSpriteFrame(SpriteFrame::create(stopStr,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
+	GameData::getInstance()->moveHeroFinalStep(dest);
+}
+
+//theres a few lines of copied code... get ride of it maybe
+void HeroX::StopAllFinal(Node * node)
+{
 	sprite->stopAllActions();
 	std::string stopStr;
 	switch (heroDir){
@@ -188,7 +222,13 @@ void HeroX::StopAll(Node* node){
 	default:stopStr="tile (213).png";
 	}
 	sprite->setSpriteFrame(SpriteFrame::create(stopStr,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
+
+	Director::getInstance()->getEventDispatcher()->setEnabled(true);
+	
 }
+
+
+
 
 HeroX::~HeroX(){
 }

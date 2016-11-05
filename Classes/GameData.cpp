@@ -1,5 +1,7 @@
 #include "GameData.h"
 #include <queue>
+#include "Wall.h"
+#include "Enemy.h"
 
 static GameData* gameData = nullptr;
 
@@ -32,7 +34,7 @@ GameData::GameData():FLOOREVENTS{
 {
 	EVENTDATA[0]=NULL;
 	EVENTDATA[1]=new MyEvent(1,"yellow door");
-	EVENTDATA[8]=new MyEvent(8,"wall");
+	EVENTDATA[8]=new Wall(8,"wall");
 	EVENTDATA[11]=new MyEvent(11,"upstairs"); //?
 	EVENTDATA[29]=new MyEvent(29,"yellow key");
 	EVENTDATA[32]=new MyEvent(32,"red exlixir");
@@ -124,32 +126,52 @@ cocos2d::Sprite * GameData::getSprite(int x,int y)
 }
 
 
-void GameData::moveHero(enum DIR direction){
-	hero.move(direction);
-}
 
 void GameData::moveHero(PATH path)
 {
+	//floorMouseListener->setEnabled(false);
+	if (path.size()==0)
+		return;
 	hero.move(path);
+	//Director::getInstance()->getEventDispatcher()->setEnabled(false);
 }
 
 void GameData::moveHero(std::pair<int,int> dest){
-	auto eventPtr=getEventData(dest.first,dest.second);
+	auto eventPtr=getEvent(dest.first,dest.second);
 	if (eventPtr==NULL){//check if it is an event
+		hero.move(pathFind(dest),true);
+	}
+	else
 		moveHero(pathFind(dest));
+}
+
+void GameData::moveHeroFinalStep(std::pair<int,int> dest){
+	auto eventPtr=getEvent(dest.first,dest.second);
+	if (eventPtr==NULL){//check if it is an event
+		//do single move if nothing will happen
+		hero.move(dest);
 		return;
 	}
+	
 	//check if distance is 1
 	if ((dest.first==hero.getX()&&abs(hero.getY()-dest.second)==1)||
 		(dest.second==hero.getY()&&abs(hero.getX()-dest.first)==1)){
-		if (eventPtr->triggerEvent())
-			if (eventPtr->stepOnEvent())
-				delete eventPtr;
+		if (eventPtr->triggerEvent()){
+			moveHero(dest);
+			if (!eventPtr->stepOnEvent())
+				Director::getInstance()->getEventDispatcher()->setEnabled(true);
+			FloorEvents[floor][dest.first][dest.second]=NULL;
+			delete eventPtr;
+		}
+		else{
+			Director::getInstance()->getEventDispatcher()->setEnabled(true);
+		}
 	}
 	else{
 		//else do a path find and move to the place
 		moveHero(pathFind(dest));
 	}
+	
 }
 
 PATH GameData::pathFind(std::pair<int,int> dest){
@@ -159,12 +181,15 @@ PATH GameData::pathFind(std::pair<int,int> dest){
 //find a path from the current location (heroX,heroY) to the specified path
 //use simple bfs will gurantee shortest path, since distance between each block is always 1
 //this is called if the destination is not an event
+//change to accept 1 obstacle.
 PATH GameData::pathFind(int dx,int dy)
 {
 
-	if (dx==-1||dy==-1||hero.getX()==dx&&hero.getY()==dy||getEventData(dx,dy)){
+	if (dx==-1||dy==-1||hero.getX()==dx&&hero.getY()==dy){
 		return std::vector<std::pair<int,int>>(); //do nothing
 	}
+
+	//||getEvent(dx,dy)
 
 	int vis[11][11]={0};
 	vis[hero.getX()][hero.getY()]=1;
@@ -187,8 +212,8 @@ PATH GameData::pathFind(int dx,int dy)
 			int newX=dirX[i]+curPos.first;
 			int newY=dirY[i]+curPos.second;
 			if (newX>=0&&newX<11&&newY>=0&&newY<11&&!vis[newX][newY]){
-				auto event=getEventData(newX,newY);
-				if (!event){ //can only walk on NULL, do not try to trigger on any event
+				auto event=getEvent(newX,newY);
+				if (!event||(newX==dx&&newY==dy)){ //can only walk on NULL, do not try to trigger on any event
 					//this could give away 'hidden' events... so ok we could add an extra parameter or something I don't know
 					bfsQ.push_back(std::pair<int,int>(newX,newY));
 					parent.push_back(idx);
