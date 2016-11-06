@@ -80,32 +80,32 @@ bool FloorScene::init()
 
 	startX=startX+lineRadius;
 
-	auto theHero = &GameData::getInstance()->hero;
+	auto gInstance = GameData::getInstance();
 
 	std::string font="fonts/arial.ttf";
 	int fontSize=15;
 	float statX=137.5;
 	float statY=397.5;
 
-	theHero->charHp = Label::createWithTTF(ToString(GameData::getInstance()->hero.getHp()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
-	theHero->charHp->setPosition(statX,statY);
-	theHero->charHp->setAnchorPoint(Vec2(1,1));
-	this->addChild(theHero->charHp,2);
+	gInstance->charHp = Label::createWithTTF(ToString(gInstance->hero.getHp()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	gInstance->charHp->setPosition(statX,statY);
+	gInstance->charHp->setAnchorPoint(Vec2(1,1));
+	this->addChild(gInstance->charHp,2);
 
-	theHero->charAtk = Label::createWithTTF(ToString(GameData::getInstance()->hero.getAtk()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
-	theHero->charAtk->setPosition(statX,statY-30);
-	theHero->charAtk->setAnchorPoint(Vec2(1,1));
-	this->addChild(theHero->charAtk,2);
+	gInstance->charAtk = Label::createWithTTF(ToString(gInstance->hero.getAtk()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	gInstance->charAtk->setPosition(statX,statY-30);
+	gInstance->charAtk->setAnchorPoint(Vec2(1,1));
+	this->addChild(gInstance->charAtk,2);
 
-	theHero->charDef = Label::createWithTTF(ToString(GameData::getInstance()->hero.getDef()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
-	theHero->charDef->setPosition(statX,statY-60);
-	theHero->charDef->setAnchorPoint(Vec2(1,1));
-	this->addChild(theHero->charDef,2);
+	gInstance->charDef = Label::createWithTTF(ToString(gInstance->hero.getDef()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	gInstance->charDef->setPosition(statX,statY-60);
+	gInstance->charDef->setAnchorPoint(Vec2(1,1));
+	this->addChild(gInstance->charDef,2);
 
-	theHero->charGold = Label::createWithTTF(ToString(GameData::getInstance()->hero.getGold()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
-	theHero->charGold->setPosition(statX,statY-90);
-	theHero->charGold->setAnchorPoint(Vec2(1,1));
-	this->addChild(theHero->charGold,2);
+	gInstance->charGold = Label::createWithTTF(ToString(gInstance->hero.getGold()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	gInstance->charGold->setPosition(statX,statY-90);
+	gInstance->charGold->setAnchorPoint(Vec2(1,1));
+	this->addChild(gInstance->charGold,2);
 
 	floorContent = Node::create();
 	//display the floor
@@ -132,7 +132,7 @@ bool FloorScene::init()
 			sprite1->setScale(Director::getInstance()->getContentScaleFactor());
 			floorContent->addChild(sprite1,0);
 
-			auto sprite2=GameData::getInstance()->getSprite(i,j);
+			auto sprite2=gInstance->getSprite(i,j);
 			if (sprite2!=nullptr){
 				sprite2->setScale(Director::getInstance()->getContentScaleFactor());
 				floorContent->addChild(sprite2,1);
@@ -140,12 +140,12 @@ bool FloorScene::init()
 		}
 	}
 
-	floorContent->addChild(theHero->getSprite());
+	floorContent->addChild(gInstance->hero.getSprite(),3);
 
 	this->addChild(floorContent);
 
-	GameData::getInstance()->floorMouseListener = EventListenerTouchAllAtOnce::create();
-	GameData::getInstance()->floorMouseListener->onTouchesEnded = CC_CALLBACK_2(FloorScene::onTouchesEnded,this);
+	gInstance->floorMouseListener = EventListenerTouchAllAtOnce::create();
+	gInstance->floorMouseListener->onTouchesEnded = CC_CALLBACK_2(FloorScene::onTouchesEnded,this);
 
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(GameData::getInstance()->floorMouseListener,this);
 

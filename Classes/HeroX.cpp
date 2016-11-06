@@ -1,6 +1,7 @@
 #include "HeroX.h"
 #include "TransformCoordinate.h"
 #include "GameData.h"
+#include "FightableSnapshot.h"
 
 
 
@@ -48,8 +49,77 @@ Sprite* HeroX::getSprite(){
 	return sprite2;
 }
 
+int HeroX::fight(Fightable * target,std::function<void(Fightable&)> hpCallback1,std::function<void(Fightable&)> hpCallback2){
+	//hpCallBack should really just be null... I don't care
+	//this may change
 
+	Director::getInstance()->getEventDispatcher()->setEnabled(false);
 
+	std::vector<FightableSnapshot> heroSnapshots;
+	std::vector<FightableSnapshot> enemySnapshots;
+	int ret=Fightable::fight(target,
+		[&enemySnapshots](Fightable &f) {
+			FightableSnapshot ss(f.getHp(),f.getAtk(),f.getDef());
+			enemySnapshots.push_back(ss);
+		},
+		[&heroSnapshots](Fightable &f) { //capture heroSnapshots 
+			FightableSnapshot ss(f.getHp(),f.getAtk(),f.getDef());
+			heroSnapshots.push_back(ss);
+		}
+	);
+	
+	//simulate everything by callbacks...
+	//because this is way too advanced for me
+
+	std::string stepFrame1;
+	std::string stepFrame2;
+	switch (heroDir){
+		case DIR::DOWN:stepFrame1="tile (189).png";stepFrame2="tile (191).png";break;
+		case DIR::LEFT:stepFrame1="tile (197).png";stepFrame2="tile (199).png";break;
+		case DIR::RIGHT:stepFrame1="tile (205).png";stepFrame2="tile (207).png";break;
+		case DIR::UP:stepFrame1="tile (213).png";stepFrame2="tile (215).png";break;
+		default:stepFrame1="tile (213).png";stepFrame2="tile (215).png";
+	}
+	log("has frames %d",heroSnapshots.size());
+	Vector<FiniteTimeAction*> actions;
+	int hSSIdx=0;
+	int eSSIdx=0;
+	for (int i=0;i<heroSnapshots.size()+enemySnapshots.size();i++){
+		if (i%2==0){
+			//enemy action		
+			auto newFrame=SpriteFrame::create(stepFrame2,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor()));
+			auto enemyCallback=CallFuncN::create(CC_CALLBACK_1(HeroX::updateBetweenFight,this,enemySnapshots,eSSIdx,newFrame,false));
+			eSSIdx++;
+			actions.pushBack(enemyCallback);
+			actions.pushBack(DelayTime::create(0.3));
+		}
+		else{
+			auto newFrame=SpriteFrame::create(stepFrame1,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor()));
+			auto heroCallback=CallFuncN::create(CC_CALLBACK_1(HeroX::updateBetweenFight,this,heroSnapshots,hSSIdx,newFrame,true));
+			hSSIdx++;
+			actions.pushBack(heroCallback);
+			actions.pushBack(DelayTime::create(0.3));
+		}
+	}
+	actions.pushBack(CallFuncN::create(CC_CALLBACK_1(HeroX::StopAllFinal,this)));
+	actions.pushBack(CallFuncN::create(CC_CALLBACK_1(HeroX::cleanUpTarget,this,target)));
+	sprite->runAction(Sequence::create(actions));
+	return ret;
+}
+
+void HeroX::cleanUpTarget(Node* node,Fightable * target){
+	GameData::getInstance()->killEvent(std::pair<int,int>(target->getX(),target->getY()));
+}
+
+void HeroX::updateBetweenFight(Node* n,std::vector<FightableSnapshot> &snapshots,int hSSIdx,SpriteFrame* newFrame,bool isHero){
+	auto gInst=GameData::getInstance();
+	if (isHero){
+		gInst->charAtk->setString(ToString(snapshots[hSSIdx].atk));
+		gInst->charDef->setString(ToString(snapshots[hSSIdx].def));
+		gInst->charHp->setString(ToString(snapshots[hSSIdx].hp));
+	}
+	//this->sprite->setSpriteFrame(newFrame);
+}
 
 enum DIR nextNodeDir(std::pair<int,int> cur,std::pair<int,int> next){
 	if (next.first-cur.first>0)
@@ -149,7 +219,7 @@ void HeroX::move(PATH path,bool isLastStep){
 		directedPaths.push_back(std::pair<PATH,enum DIR>(singleDirPath,curDir));
 
 
-
+	
 	//I could have combined this with the above code
 	//but just in case I decide to do something different
 	Vector<FiniteTimeAction*> actions;
@@ -171,6 +241,16 @@ void HeroX::move(PATH path,bool isLastStep){
 		isLastStep?CallFuncN::create(CC_CALLBACK_1(HeroX::StopAllFinal,this)):CallFuncN::create(CC_CALLBACK_1(HeroX::StopAll,this,lastStep));
 	actions.pushBack(stopCallBack);
 	
+	if (isLastStep){
+		// isLastStep is set to true when an event has triggered... Now trigger StepOn
+		//this is probably not the right way to do it, but I don't know how aside from cascading it
+		auto idk = GameData::getInstance()->getEvent(lastStep.first,lastStep.second);
+		if (idk){
+			auto stepOnCallBack = CallFuncN::create(CC_CALLBACK_1(HeroX::triggeredCallback,this,idk));
+			actions.pushBack(stepOnCallBack);
+		}
+	}
+
 
 	auto seq = Sequence::create(actions);
 	sprite->runAction(seq);
@@ -224,9 +304,17 @@ void HeroX::StopAllFinal(Node * node)
 	sprite->setSpriteFrame(SpriteFrame::create(stopStr,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
 
 	Director::getInstance()->getEventDispatcher()->setEnabled(true);
-	
 }
 
+void HeroX::triggeredCallback(Node * node,MyEvent* ev){
+	if (ev==nullptr)
+		return;
+	if (!ev->stepOnEvent()){
+		Director::getInstance()->getEventDispatcher()->setEnabled(true);
+		//GameData::getInstance()->killEvent(std::pair<int,int>(ev->getX(),ev->getY()));
+	}
+	
+}
 
 
 

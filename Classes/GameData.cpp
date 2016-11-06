@@ -141,8 +141,21 @@ void GameData::moveHero(std::pair<int,int> dest){
 	if (eventPtr==NULL){//check if it is an event
 		hero.move(pathFind(dest),true);
 	}
-	else
+	else{
 		moveHero(pathFind(dest));
+	}
+}
+/*
+void GameData::moveAndTriggerStepOnEvent(std::pair<int,int> dest,std::function<void> hpCallback1){
+
+}*/
+
+void GameData::killEvent(std::pair<int,int> place){
+	auto eventPtr=getEvent(place.first,place.second);
+	if (eventPtr){
+		FloorEvents[floor][place.first][place.second]=NULL;
+		delete eventPtr;
+	}
 }
 
 void GameData::moveHeroFinalStep(std::pair<int,int> dest){
@@ -157,11 +170,13 @@ void GameData::moveHeroFinalStep(std::pair<int,int> dest){
 	if ((dest.first==hero.getX()&&abs(hero.getY()-dest.second)==1)||
 		(dest.second==hero.getY()&&abs(hero.getX()-dest.first)==1)){
 		if (eventPtr->triggerEvent()){
-			moveHero(dest);
+			hero.move(pathFind(dest),true);
+			/*
 			if (!eventPtr->stepOnEvent())
-				Director::getInstance()->getEventDispatcher()->setEnabled(true);
+				Director::getInstance()->getEventDispatcher()->setEnabled(true);*/
+			/*
 			FloorEvents[floor][dest.first][dest.second]=NULL;
-			delete eventPtr;
+			delete eventPtr;*/
 		}
 		else{
 			Director::getInstance()->getEventDispatcher()->setEnabled(true);
@@ -243,8 +258,6 @@ PATH GameData::pathFind(int dx,int dy)
 	}
 	return path;
 }
-
-
 
 
 GameData::~GameData(){

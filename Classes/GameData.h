@@ -6,6 +6,7 @@
 #include "GlobalDefs.h"
 
 
+
 class GameData
 {
 private:
@@ -23,11 +24,17 @@ public:
 	//void moveHero(enum DIR direction);
 	void moveHero(PATH path);
 	void moveHero(std::pair<int,int>);
+	void killEvent(std::pair<int,int> place);
 	void moveHeroFinalStep(std::pair<int,int> dest);
 	PATH pathFind(std::pair<int,int> dest);
 	PATH pathFind(int dx,int dy);
 	HeroX hero;
 	EventListenerTouchAllAtOnce* floorMouseListener;
+
+	Label* charHp;
+	Label* charAtk;
+	Label* charDef;
+	Label* charGold;
 
 private:
 	MyEvent* getEventData(int id);

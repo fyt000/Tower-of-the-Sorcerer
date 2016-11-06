@@ -4,6 +4,7 @@
 #include "Fightable.h"
 #include <utility>
 #include "GlobalDefs.h"
+#include "FightableSnapshot.h"
 
 USING_NS_CC;
 
@@ -20,6 +21,8 @@ public:
 	void gainGold(int amt);
 	bool spendGold(int amt);
 	cocos2d::Sprite* getSprite();
+	int fight(Fightable * target,std::function<void(Fightable&)> hpCallback1,std::function<void(Fightable&)> hpCallback2);
+	void cleanUpTarget(Node * node,Fightable * target);
 	void move(enum DIR dir);
 	Animate * getDirMoveAnimate(DIR dir,int steps);
 	void move(PATH path,bool isLastMove=false);
@@ -27,11 +30,6 @@ public:
 	//items?
 	virtual HeroX* clone();
 	~HeroX();
-
-	Label* charHp;
-	Label* charAtk;
-	Label* charDef;
-	Label* charGold;
 
 private:
 	int gold;
@@ -42,5 +40,7 @@ private:
 	void Destined(Node* node,int x,int y);
 	void StopAll(Node * node,std::pair<int,int>);
 	void StopAllFinal(Node* node);
+	void triggeredCallback(Node* node,MyEvent * ev);
+	void updateBetweenFight(Node* n,std::vector<FightableSnapshot> &snapshots,int hSSIdx,SpriteFrame* newFrame,bool isHero=false);
 };
 

@@ -1,6 +1,7 @@
 #include "MyEvent.h"
 #include "TransformCoordinate.h"
 #include <sstream>
+#include "GameData.h"
 
 USING_NS_CC;
 //id has to match the image id
@@ -60,10 +61,12 @@ Sprite* MyEvent::getSprite(){
 
 bool MyEvent::triggerEvent()
 {
+	GameData::getInstance()->killEvent(std::pair<int,int>(getX(),getY()));
 	return true;
 }
 
 bool MyEvent::stepOnEvent(){
+	GameData::getInstance()->killEvent(std::pair<int,int>(getX(),getY()));
 	return false;
 }
 

@@ -15,7 +15,7 @@ public:
 	//virtual cocos2d::Sprite* getSprite(int px,int py);
 	virtual ~Fightable();
 	virtual Fightable* clone()=0;
-	int fight(Fightable * target,std::function<void(Fightable&)> hpCallback1,std::function<void(Fightable&)> hpCallback2);
+	virtual int fight(Fightable * target,std::function<void(Fightable&)> hpCallback1,std::function<void(Fightable&)> hpCallback2);
 	const int getHp();
 	const int getAtk();
 	const int getDef();
