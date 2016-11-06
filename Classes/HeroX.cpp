@@ -87,15 +87,14 @@ int HeroX::fight(Fightable * target,std::function<void(Fightable&)> hpCallback1,
 	for (int i=0;i<heroSnapshots.size()+enemySnapshots.size();i++){
 		if (i%2==0){
 			//enemy action		
-			auto newFrame=SpriteFrame::create(stepFrame2,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor()));
-			auto enemyCallback=CallFuncN::create(CC_CALLBACK_1(HeroX::updateBetweenFight,this,enemySnapshots,eSSIdx,newFrame,false));
+			auto enemyCallback=CallFuncN::create(CC_CALLBACK_1(HeroX::updateBetweenFight,this,enemySnapshots,eSSIdx,stepFrame2,false));
 			eSSIdx++;
 			actions.pushBack(enemyCallback);
 			actions.pushBack(DelayTime::create(0.3));
 		}
 		else{
-			auto newFrame=SpriteFrame::create(stepFrame1,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor()));
-			auto heroCallback=CallFuncN::create(CC_CALLBACK_1(HeroX::updateBetweenFight,this,heroSnapshots,hSSIdx,newFrame,true));
+			
+			auto heroCallback=CallFuncN::create(CC_CALLBACK_1(HeroX::updateBetweenFight,this,heroSnapshots,hSSIdx,stepFrame1,true));
 			hSSIdx++;
 			actions.pushBack(heroCallback);
 			actions.pushBack(DelayTime::create(0.3));
@@ -111,14 +110,15 @@ void HeroX::cleanUpTarget(Node* node,Fightable * target){
 	GameData::getInstance()->killEvent(std::pair<int,int>(target->getX(),target->getY()));
 }
 
-void HeroX::updateBetweenFight(Node* n,std::vector<FightableSnapshot> &snapshots,int hSSIdx,SpriteFrame* newFrame,bool isHero){
+void HeroX::updateBetweenFight(Node* n,std::vector<FightableSnapshot> &snapshots,int hSSIdx,std::string &frameName,bool isHero){
 	auto gInst=GameData::getInstance();
 	if (isHero){
 		gInst->charAtk->setString(ToString(snapshots[hSSIdx].atk));
 		gInst->charDef->setString(ToString(snapshots[hSSIdx].def));
 		gInst->charHp->setString(ToString(snapshots[hSSIdx].hp));
 	}
-	//this->sprite->setSpriteFrame(newFrame);
+	auto newFrame=SpriteFrame::create(frameName,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor()));
+	this->sprite->setSpriteFrame(newFrame);
 }
 
 enum DIR nextNodeDir(std::pair<int,int> cur,std::pair<int,int> next){

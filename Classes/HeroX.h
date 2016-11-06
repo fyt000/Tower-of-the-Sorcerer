@@ -23,6 +23,7 @@ public:
 	cocos2d::Sprite* getSprite();
 	int fight(Fightable * target,std::function<void(Fightable&)> hpCallback1,std::function<void(Fightable&)> hpCallback2);
 	void cleanUpTarget(Node * node,Fightable * target);
+
 	void move(enum DIR dir);
 	Animate * getDirMoveAnimate(DIR dir,int steps);
 	void move(PATH path,bool isLastMove=false);
@@ -41,6 +42,6 @@ private:
 	void StopAll(Node * node,std::pair<int,int>);
 	void StopAllFinal(Node* node);
 	void triggeredCallback(Node* node,MyEvent * ev);
-	void updateBetweenFight(Node* n,std::vector<FightableSnapshot> &snapshots,int hSSIdx,SpriteFrame* newFrame,bool isHero=false);
+	void updateBetweenFight(Node * n,std::vector<FightableSnapshot>& snapshots,int hSSIdx,std::string & frameName,bool isHero);
 };
 
