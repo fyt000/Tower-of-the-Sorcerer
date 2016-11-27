@@ -137,10 +137,11 @@ enum DIR nextNodeDir(std::pair<int,int> cur,std::pair<int,int> next){
 Animate* HeroX::getDirMoveAnimate(enum DIR dir,int steps){
 	Vector<SpriteFrame*> animFrames;
 	animFrames.reserve(steps);
-	//all direction uses the same png for now... will fix!
+
 
 	std::string stepFrame1;
 	std::string stepFrame2;
+	//hard coding the pngs
 	switch (dir){
 		case DIR::DOWN:stepFrame1="tile (185).png";stepFrame2="tile (187).png";break;
 		case DIR::LEFT:stepFrame1="tile (193).png";stepFrame2="tile (195).png";break;
@@ -150,12 +151,12 @@ Animate* HeroX::getDirMoveAnimate(enum DIR dir,int steps){
 	}
 
 	for (int i=0;i<steps+1;i++){
-		//if (i%2==0)
+		if (i%2==0)
 			animFrames.pushBack(SpriteFrame::create(stepFrame1,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
-		//else
+		else
 			animFrames.pushBack(SpriteFrame::create(stepFrame2,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
 	}
-	Animation* animation = Animation::createWithSpriteFrames(animFrames,animateRate/2);
+	Animation* animation = Animation::createWithSpriteFrames(animFrames,animateRate);
 	Animate* animate = Animate::create(animation);
 	animate->setTag(0); //all animations are 0
 	return animate;
@@ -249,6 +250,7 @@ void HeroX::move(PATH path,bool isLastStep){
 			auto stepOnCallBack = CallFuncN::create(CC_CALLBACK_1(HeroX::triggeredCallback,this,idk));
 			actions.pushBack(stepOnCallBack);
 		}
+		
 	}
 
 
@@ -302,7 +304,7 @@ void HeroX::StopAllFinal(Node * node)
 	default:stopStr="tile (213).png";
 	}
 	sprite->setSpriteFrame(SpriteFrame::create(stopStr,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
-
+	GameData::getInstance()->showLog();
 	Director::getInstance()->getEventDispatcher()->setEnabled(true);
 }
 
@@ -311,9 +313,7 @@ void HeroX::triggeredCallback(Node * node,MyEvent* ev){
 		return;
 	if (!ev->stepOnEvent()){
 		Director::getInstance()->getEventDispatcher()->setEnabled(true);
-		//GameData::getInstance()->killEvent(std::pair<int,int>(ev->getX(),ev->getY()));
 	}
-	
 }
 
 

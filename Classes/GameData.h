@@ -22,15 +22,19 @@ public:
 	int setFloor(int);
 	cocos2d::Sprite* getSprite(int x,int y);
 	//void moveHero(enum DIR direction);
-	void moveHero(PATH path);
+	//void moveHero(PATH path);
 	void moveHero(std::pair<int,int>);
 	void killEvent(std::pair<int,int> place);
 	void moveHeroFinalStep(std::pair<int,int> dest);
 	PATH pathFind(std::pair<int,int> dest);
 	PATH pathFind(int dx,int dy);
+	void log(std::string message,bool instant=true);
+	void showLog();
 	HeroX hero;
 	EventListenerTouchAllAtOnce* floorMouseListener;
+	
 
+	Label* logLable;
 	Label* charHp;
 	Label* charAtk;
 	Label* charDef;
@@ -44,7 +48,6 @@ private:
 	MyEvent* FloorEvents[MAXFLOOR][11][11]; //the actual objects
 	void loadFloor();
 	int floor=1;
-	
 	
 };
 

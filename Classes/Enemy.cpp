@@ -1,12 +1,23 @@
 #include "Enemy.h"
+#include "GlobalDefs.h"
 #include "TransformCoordinate.h"
+#include "GameData.h"
 USING_NS_CC;
 
-Enemy::Enemy(int id,std::string desc,int secondImageID,int hp,int atk,int def):Fightable(id,desc,hp,atk,def),secondImageID(secondImageID){}
+Enemy::Enemy(int id,std::string desc,int secondImageID,int hp,int atk,int def,int gold):
+	Fightable(id,desc,hp,atk,def),secondImageID(secondImageID),gold(gold){}
 
 
 bool Enemy::canAtk(){
 	return true;
+}
+
+bool Enemy::stepOnEvent()
+{
+	bool fightR = Fightable::stepOnEvent();
+	if (fightR)
+		GameData::getInstance()->log("Beat "+description+". Received "+ToString(gold)+" gold.",false);
+	return fightR;
 }
 
 Sprite* Enemy::getSprite(){
@@ -30,6 +41,7 @@ Sprite* Enemy::getSprite(){
 	sprite=sprite2;
 	return sprite2;
 }
+
 
 
 Enemy::~Enemy(){

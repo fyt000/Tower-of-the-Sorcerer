@@ -11,9 +11,9 @@ static GameData* gameData = nullptr;
 //I will change this.
 //this must be changed actually, since we can't initialize like this for loading saves
 //but that's ok... we can read one by one
-GameData::GameData():FLOOREVENTS{
+GameData::GameData():FLOOREVENTS{ 
 	{
-		{0}
+		{0} //yes, there is a floor 0
 	},
 	//floor 1
 	{
@@ -41,11 +41,11 @@ GameData::GameData():FLOOREVENTS{
 	EVENTDATA[33]=new MyEvent(33,"blue exlixir");
 	EVENTDATA[38]=new MyEvent(38,"special item no3");
 
-	EVENTDATA[61]=new Enemy(61,"Green Slime",62,35,18,1);
-	EVENTDATA[67]=new Enemy(67,"Bat",68,35,38,3);
-	EVENTDATA[69]=new Enemy(69,"Priest",70,60,32,8);
-	EVENTDATA[77]=new Enemy(77,"Skeleton C",78,50,42,6);
-	EVENTDATA[79]=new Enemy(79,"Skeleton B",80,55,52,12);
+	EVENTDATA[61]=new Enemy(61,"Green Slime",62,35,18,1,1);
+	EVENTDATA[67]=new Enemy(67,"Bat",68,35,38,3,1);
+	EVENTDATA[69]=new Enemy(69,"Priest",70,60,32,8,1);
+	EVENTDATA[77]=new Enemy(77,"Skeleton C",78,50,42,6,1);
+	EVENTDATA[79]=new Enemy(79,"Skeleton B",80,55,52,12,1);
 
 	floor=1;
 
@@ -126,7 +126,7 @@ cocos2d::Sprite * GameData::getSprite(int x,int y)
 }
 
 
-
+/*
 void GameData::moveHero(PATH path)
 {
 	//floorMouseListener->setEnabled(false);
@@ -135,14 +135,19 @@ void GameData::moveHero(PATH path)
 	hero.move(path);
 	//Director::getInstance()->getEventDispatcher()->setEnabled(false);
 }
-
+*/
+//this method is only being called from FloorScene
+//no one else should call this
 void GameData::moveHero(std::pair<int,int> dest){
+	logLable->setVisible(false);
+	logLable->setString("");
 	auto eventPtr=getEvent(dest.first,dest.second);
 	if (eventPtr==NULL){//check if it is an event
 		hero.move(pathFind(dest),true);
 	}
 	else{
-		moveHero(pathFind(dest));
+		hero.move(pathFind(dest));
+		//moveHero(pathFind(dest));
 	}
 }
 /*
@@ -184,7 +189,8 @@ void GameData::moveHeroFinalStep(std::pair<int,int> dest){
 	}
 	else{
 		//else do a path find and move to the place
-		moveHero(pathFind(dest));
+		//moveHero(pathFind(dest));
+		hero.move(pathFind(dest));
 	}
 	
 }
@@ -259,6 +265,28 @@ PATH GameData::pathFind(int dx,int dy)
 	return path;
 }
 
+void GameData::log(std::string message,bool inst)
+{
+	CCLOG("log message: %s",message);
+	logLable->setString(message);
+	logLable->setVisible(inst);
+	if (inst){
+		logLable->setOpacity(0);
+		logLable->runAction(FadeIn::create(1));
+	}
+}
+
+void GameData::showLog(){
+	if (logLable->isVisible()){
+		return;
+	}
+	logLable->setVisible(true);	
+	if (logLable->getString()!=""){
+		logLable->setOpacity(0);
+		logLable->runAction(FadeIn::create(1));
+	}
+
+}
 
 GameData::~GameData(){
 	//closing the app will clean up everything.

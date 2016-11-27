@@ -27,7 +27,6 @@ bool FloorScene::init()
 
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	float height=visibleSize.height;
-	height=500;
 	Point origin = Director::getInstance()->getVisibleOrigin();
 	log("height %d",height);
 
@@ -84,6 +83,16 @@ bool FloorScene::init()
 
 	std::string font="fonts/arial.ttf";
 	int fontSize=15;
+
+	//FadeIn::
+	gInstance->logLable = Label::createWithTTF("",font,20,Size::ZERO,TextHAlignment::CENTER);
+	gInstance->logLable->enableGlow(Color4B::WHITE);
+	gInstance->logLable->setPosition(visibleSize.width/2,visibleSize.height/2);
+	//gInstance->logLable->setAnchorPoint
+	this->addChild(gInstance->logLable,2);
+	floorContent = Node::create();
+
+
 	float statX=137.5;
 	float statY=397.5;
 
@@ -107,7 +116,7 @@ bool FloorScene::init()
 	gInstance->charGold->setAnchorPoint(Vec2(1,1));
 	this->addChild(gInstance->charGold,2);
 
-	floorContent = Node::create();
+
 	//display the floor
 	//load the floor info
 	//should use cache
