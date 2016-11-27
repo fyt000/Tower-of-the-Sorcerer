@@ -46,22 +46,29 @@ bool FloorScene::init()
 
 	//left static image
 	float leftX=0;
-	auto sprite1=Sprite::create("Left.png");
-	sprite1->setPosition(leftX,0);
-	sprite1->setAnchorPoint(Vec2(0,0));
-	sprite1->setScale(Director::getInstance()->getContentScaleFactor());
-	this->addChild(sprite1,0);
+	auto leftSprite=Sprite::create("Left.png");
+	leftSprite->setPosition(leftX,0);
+	leftSprite->setAnchorPoint(Vec2(0,0));
+	leftSprite->setScale(Director::getInstance()->getContentScaleFactor());
+	this->addChild(leftSprite,0);
 
-	float lineRadius=5;
+	float lineRadiusH=24;
+	float lineRadiusV=30;
 
-	startX=leftX+sprite1->getBoundingBox().size.width+lineRadius;
+	startX=leftX+leftSprite->getBoundingBox().size.width;
+	auto centerSprite=Sprite::create("CENTER.png");
+	centerSprite->setPosition(startX,0);
+	centerSprite->setAnchorPoint(Vec2(0,0));
+	centerSprite->setScale(Director::getInstance()->getContentScaleFactor());
+	this->addChild(centerSprite,1);
 
 	//draw a border
-	float borderTopY=height-lineRadius;
+	float borderTopY=height-lineRadiusV;
+	float borderBottomY=borderTopY-centerSprite->getBoundingBox().size.height-lineRadiusV;
+	float borderLeftX=startX+lineRadiusH;
+	float borderRightX=startX+centerSprite->getBoundingBox().size.width;
+	/*
 	log("borderTop %d",borderTopY);
-	float borderBottomY=borderTopY-11*40-lineRadius*2;
-	float borderLeftX=startX;
-	float borderRightX=startX+11*40+lineRadius*2;
 	auto color=Color4F(156/255.0,99/255.0,66/255.0,1);
 	auto drawNode = DrawNode::create();
 	drawNode->drawSegment(Vec2(borderLeftX,borderTopY),Vec2(borderRightX,borderTopY),lineRadius,color);
@@ -69,27 +76,27 @@ bool FloorScene::init()
 	drawNode->drawSegment(Vec2(borderLeftX,borderTopY),Vec2(borderLeftX,borderBottomY),lineRadius,color);
 	drawNode->drawSegment(Vec2(borderRightX,borderTopY),Vec2(borderRightX,borderBottomY),lineRadius,color);
 	this->addChild(drawNode,2);
-
+	*/
 	//right static image
-	auto sprite2=Sprite::create("Right.png");
-	sprite2->setPosition(borderRightX+lineRadius,0);
-	sprite2->setAnchorPoint(Vec2(0,0));
-	sprite2->setScale(Director::getInstance()->getContentScaleFactor());
-	this->addChild(sprite2,0);
+	auto rightSprite=Sprite::create("Right.png");
+	rightSprite->setPosition(borderRightX,0);
+	rightSprite->setAnchorPoint(Vec2(0,0));
+	rightSprite->setScale(Director::getInstance()->getContentScaleFactor());
+	this->addChild(rightSprite,0);
 
-	startX=startX+lineRadius;
+	startX=startX+lineRadiusH;
 
 	auto gInstance = GameData::getInstance();
 
 	std::string font="fonts/arial.ttf";
 	int fontSize=15;
 
-	//FadeIn::
 	gInstance->logLable = Label::createWithTTF("",font,20,Size::ZERO,TextHAlignment::CENTER);
-	gInstance->logLable->enableGlow(Color4B::WHITE);
+	gInstance->logLable->enableGlow(Color4B::BLACK);
+	//gInstance->logLable->enableShadow();
 	gInstance->logLable->setPosition(visibleSize.width/2,visibleSize.height/2);
 	//gInstance->logLable->setAnchorPoint
-	this->addChild(gInstance->logLable,2);
+	this->addChild(gInstance->logLable,20);
 	floorContent = Node::create();
 
 
@@ -122,7 +129,7 @@ bool FloorScene::init()
 	//should use cache
 
 	
-	startY=height-40-lineRadius*2;
+	startY=height-40-lineRadiusV;
 	CCLOG("start x %f y %f",startX,startY);
 
 	TransformCoordinate::startX=startX;
@@ -139,19 +146,19 @@ bool FloorScene::init()
 			sprite1->setPosition(pxy.first,pxy.second);
 			sprite1->setAnchorPoint(Vec2(0,0));
 			sprite1->setScale(Director::getInstance()->getContentScaleFactor());
-			floorContent->addChild(sprite1,0);
+			floorContent->addChild(sprite1,2);
 
 			auto sprite2=gInstance->getSprite(i,j);
 			if (sprite2!=nullptr){
 				sprite2->setScale(Director::getInstance()->getContentScaleFactor());
-				floorContent->addChild(sprite2,1);
+				floorContent->addChild(sprite2,3);
 			}
 		}
 	}
 
-	floorContent->addChild(gInstance->hero.getSprite(),3);
+	floorContent->addChild(gInstance->hero.getSprite(),10);
 
-	this->addChild(floorContent);
+	this->addChild(floorContent,3);
 
 	gInstance->floorMouseListener = EventListenerTouchAllAtOnce::create();
 	gInstance->floorMouseListener->onTouchesEnded = CC_CALLBACK_2(FloorScene::onTouchesEnded,this);

@@ -272,7 +272,7 @@ void GameData::log(std::string message,bool inst)
 	logLable->setVisible(inst);
 	if (inst){
 		logLable->setOpacity(0);
-		logLable->runAction(FadeIn::create(1));
+		logLable->runAction(FadeIn::create(0.75));
 	}
 }
 
@@ -283,7 +283,7 @@ void GameData::showLog(){
 	logLable->setVisible(true);	
 	if (logLable->getString()!=""){
 		logLable->setOpacity(0);
-		logLable->runAction(FadeIn::create(1));
+		logLable->runAction(FadeIn::create(0.75));
 	}
 
 }
