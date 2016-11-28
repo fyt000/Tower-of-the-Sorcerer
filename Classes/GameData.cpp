@@ -2,6 +2,7 @@
 #include <queue>
 #include "Wall.h"
 #include "Enemy.h"
+#include "Consumable.h"
 
 static GameData* gameData = nullptr;
 
@@ -37,10 +38,9 @@ GameData::GameData():FLOOREVENTS{
 	EVENTDATA[8]=new Wall(8,"wall");
 	EVENTDATA[11]=new MyEvent(11,"upstairs"); //?
 	EVENTDATA[29]=new MyEvent(29,"yellow key");
-	EVENTDATA[32]=new MyEvent(32,"red exlixir");
-	EVENTDATA[33]=new MyEvent(33,"blue exlixir");
+	EVENTDATA[32]=new Consumable(32,"red exlixir",200,0,0,0);
+	EVENTDATA[33]=new Consumable(33,"blue exlixir",400,0,0,0);
 	EVENTDATA[38]=new MyEvent(38,"special item no3");
-
 	EVENTDATA[61]=new Enemy(61,"Green Slime",62,35,18,1,1);
 	EVENTDATA[67]=new Enemy(67,"Bat",68,35,38,3,1);
 	EVENTDATA[69]=new Enemy(69,"Priest",70,60,32,8,1);

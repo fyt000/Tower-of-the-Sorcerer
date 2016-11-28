@@ -20,6 +20,9 @@ public:
 	int getGold();
 	void gainGold(int amt);
 	bool spendGold(int amt);
+	int gainAtk(int amt);
+	int gainDef(int amt);
+	int gainHp(int amt);
 	cocos2d::Sprite* getSprite();
 	int fight(Fightable * target,std::function<void(Fightable&)> hpCallback1,std::function<void(Fightable&)> hpCallback2);
 	void cleanUpTarget(Node * node,Fightable * target);

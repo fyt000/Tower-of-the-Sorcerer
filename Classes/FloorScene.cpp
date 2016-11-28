@@ -93,7 +93,7 @@ bool FloorScene::init()
 
 	gInstance->logLable = Label::createWithTTF("",font,20,Size::ZERO,TextHAlignment::CENTER);
 	gInstance->logLable->enableGlow(Color4B::BLACK);
-	//gInstance->logLable->enableShadow();
+	gInstance->logLable->enableShadow();
 	gInstance->logLable->setPosition(visibleSize.width/2,visibleSize.height/2);
 	//gInstance->logLable->setAnchorPoint
 	this->addChild(gInstance->logLable,20);

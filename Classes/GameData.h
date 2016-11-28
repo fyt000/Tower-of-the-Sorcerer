@@ -6,7 +6,11 @@
 #include "GlobalDefs.h"
 
 
-
+//mostly handle the logic
+//Hero class handles the rest
+//Doesn't handle the graphics...
+//animation are handle by each MyEvent
+//and set at FloorScene
 class GameData
 {
 private:

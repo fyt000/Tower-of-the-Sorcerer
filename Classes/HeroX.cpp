@@ -32,6 +32,27 @@ bool HeroX::spendGold(int amt){
 	return false;
 }
 
+int HeroX::gainAtk(int amt)
+{
+	atk+=amt;
+	GameData::getInstance()->charAtk->setString(ToString(atk));
+	return atk;
+}
+
+int HeroX::gainDef(int amt)
+{
+	def+=amt;
+	GameData::getInstance()->charDef->setString(ToString(def));
+	return def;
+}
+
+int HeroX::gainHp(int amt)
+{
+	hp+=amt;
+	GameData::getInstance()->charHp->setString(ToString(hp));
+	return hp;
+}
+
 
 Sprite* HeroX::getSprite(){
 	/*

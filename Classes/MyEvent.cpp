@@ -61,13 +61,13 @@ Sprite* MyEvent::getSprite(){
 
 bool MyEvent::triggerEvent()
 {
-	GameData::getInstance()->log("You used The destructible Ball! Enemies on all sides died!");
+	//GameData::getInstance()->log("You used The destructible Ball! Enemies on all sides died!");
 	GameData::getInstance()->killEvent(std::pair<int,int>(getX(),getY()));
 	return true;
 }
 
 bool MyEvent::stepOnEvent(){
-	GameData::getInstance()->log("step on event");
+	//GameData::getInstance()->log("step on event");
 	GameData::getInstance()->killEvent(std::pair<int,int>(getX(),getY()));
 	return false;
 }

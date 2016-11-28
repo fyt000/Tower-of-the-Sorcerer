@@ -47,6 +47,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
         director->setOpenGLView(glview);
     }
 
+	director->setProjection(Director::Projection::_2D);
     // turn on display FPS
     director->setDisplayStats(true);
 
