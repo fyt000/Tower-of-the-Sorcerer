@@ -1,10 +1,10 @@
 #include "FloorScene.h"
-#include "HelloWorldScene.h"
 #include <sstream>
 #include "GameData.h"
 #include "HeroX.h"
 #include <utility>
 #include "TransformCoordinate.h"
+#include "LabelBinder.h"
 
 USING_NS_CC;
 
@@ -46,7 +46,7 @@ bool FloorScene::init()
 
 	//left static image
 	float leftX=0;
-	auto leftSprite=Sprite::create("Left.png");
+	auto leftSprite=Sprite::create("images/Left.png");
 	leftSprite->setPosition(leftX,0);
 	leftSprite->setAnchorPoint(Vec2(0,0));
 	leftSprite->setScale(Director::getInstance()->getContentScaleFactor());
@@ -56,7 +56,7 @@ bool FloorScene::init()
 	float lineRadiusV=30;
 
 	startX=leftX+leftSprite->getBoundingBox().size.width;
-	auto centerSprite=Sprite::create("CENTER.png");
+	auto centerSprite=Sprite::create("images/CENTER.png");
 	centerSprite->setPosition(startX,0);
 	centerSprite->setAnchorPoint(Vec2(0,0));
 	centerSprite->setScale(Director::getInstance()->getContentScaleFactor());
@@ -78,7 +78,7 @@ bool FloorScene::init()
 	this->addChild(drawNode,2);
 	*/
 	//right static image
-	auto rightSprite=Sprite::create("Right.png");
+	auto rightSprite=Sprite::create("images/Right.png");
 	rightSprite->setPosition(borderRightX,0);
 	rightSprite->setAnchorPoint(Vec2(0,0));
 	rightSprite->setScale(Director::getInstance()->getContentScaleFactor());
@@ -91,44 +91,88 @@ bool FloorScene::init()
 	std::string font="fonts/arial.ttf";
 	int fontSize=15;
 
-	gInstance->logLable = Label::createWithTTF("",font,20,Size::ZERO,TextHAlignment::CENTER);
-	gInstance->logLable->enableGlow(Color4B::BLACK);
-	gInstance->logLable->enableShadow();
-	gInstance->logLable->setPosition(visibleSize.width/2,visibleSize.height/2);
-	//gInstance->logLable->setAnchorPoint
-	this->addChild(gInstance->logLable,20);
-	floorContent = Node::create();
+	gInstance->logLabel = Label::createWithTTF("",font,20,Size::ZERO,TextHAlignment::CENTER);
+	gInstance->logLabel->enableGlow(Color4B::BLACK);
+	gInstance->logLabel->enableShadow();
+	gInstance->logLabel->setPosition(visibleSize.width/2,0);
+	gInstance->logLabel->setAnchorPoint(Vec2(0.5,0));
+	this->addChild(gInstance->logLabel,20);
+	
 
 
 	float statX=137.5;
 	float statY=397.5;
 
-	gInstance->charHp = Label::createWithTTF(ToString(gInstance->hero.getHp()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
-	gInstance->charHp->setPosition(statX,statY);
-	gInstance->charHp->setAnchorPoint(Vec2(1,1));
-	this->addChild(gInstance->charHp,2);
+	
+	auto charHpLabel = Label::createWithTTF("",font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	charHpLabel->setPosition(statX,statY);
+	charHpLabel->setAnchorPoint(Vec2(1,1));
+	this->addChild(charHpLabel,2);
+	gInstance->hero.hp.attach(charHpLabel);
+	//gInstance->hero.charHpLabel = charHpLabel;
 
-	gInstance->charAtk = Label::createWithTTF(ToString(gInstance->hero.getAtk()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
-	gInstance->charAtk->setPosition(statX,statY-30);
-	gInstance->charAtk->setAnchorPoint(Vec2(1,1));
-	this->addChild(gInstance->charAtk,2);
+	auto charAtkLabel = Label::createWithTTF("",font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	charAtkLabel->setPosition(statX,statY-30);
+	charAtkLabel->setAnchorPoint(Vec2(1,1));
+	this->addChild(charAtkLabel,2);
+	gInstance->hero.atk.attach(charAtkLabel);
+	//gInstance->hero.charAtkLabel = charAtkLabel;
 
-	gInstance->charDef = Label::createWithTTF(ToString(gInstance->hero.getDef()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
-	gInstance->charDef->setPosition(statX,statY-60);
-	gInstance->charDef->setAnchorPoint(Vec2(1,1));
-	this->addChild(gInstance->charDef,2);
+	auto charDefLabel = Label::createWithTTF("",font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	charDefLabel->setPosition(statX,statY-60);
+	charDefLabel->setAnchorPoint(Vec2(1,1));
+	this->addChild(charDefLabel,2);
+	gInstance->hero.def.attach(charDefLabel);
+	//gInstance->hero.charDefLabel = charDefLabel;
 
-	gInstance->charGold = Label::createWithTTF(ToString(gInstance->hero.getGold()),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
-	gInstance->charGold->setPosition(statX,statY-90);
-	gInstance->charGold->setAnchorPoint(Vec2(1,1));
-	this->addChild(gInstance->charGold,2);
+	auto charGoldLabel = Label::createWithTTF("",font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	charGoldLabel->setPosition(statX,statY-90);
+	charGoldLabel->setAnchorPoint(Vec2(1,1));
+	this->addChild(charGoldLabel,2);
+	gInstance->hero.gold.attach(charGoldLabel);
+	//gInstance->hero.charGoldLabel = charGoldLabel;
+
+	for (int i=0;i<KeyType::LAST;i++)
+	{
+		std::stringstream ss1;
+		ss1<<"images/key_"<<i<<".png";
+		auto keySprite=Sprite::create(ss1.str());
+		keySprite->setPosition(Vec2(664,287-24*i));
+		keySprite->setAnchorPoint(Vec2(0,0));
+		keySprite->setScale(Director::getInstance()->getContentScaleFactor());
+		this->addChild(keySprite,2);
+		auto keyLabel = Label::createWithTTF("",font,18,Size::ZERO,TextHAlignment::RIGHT);
+		keyLabel->setPosition(Vec2(664+60,296-24*i));
+		keyLabel->setAnchorPoint(Vec2(0,0));
+		this->addChild(keyLabel,2);
+		gInstance->hero.keys[i]->attach(keyLabel);
+		/*
+		auto charGoldLabel = Label::createWithTTF(ToString(gInstance->hero.),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+		charGoldLabel->setPosition(statX,statY-90);
+		charGoldLabel->setAnchorPoint(Vec2(1,1));
+		this->addChild(charGoldLabel,2);
+		*/
+	}
+
+
+	//29 430, 130 430
+	auto floorTxtLabel = Label::createWithTTF("Floor",font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	floorTxtLabel->setPosition(Vec2(29,430));
+	floorTxtLabel->setAnchorPoint(Vec2(0,0.5));
+	this->addChild(floorTxtLabel,2);
+
+	auto floorNumLabel = Label::createWithTTF("",font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	floorNumLabel->setPosition(Vec2(130,430));
+	floorNumLabel->setAnchorPoint(Vec2(0,0.5));
+	this->addChild(floorNumLabel,2);
+	gInstance->floor.attach(floorNumLabel);
 
 
 	//display the floor
 	//load the floor info
 	//should use cache
 
-	
+	floorContent = Node::create();
 	startY=height-40-lineRadiusV;
 	CCLOG("start x %f y %f",startX,startY);
 
@@ -140,7 +184,7 @@ bool FloorScene::init()
 			//this is animatable as well
 			//add a class for this
 			std::stringstream ss1;
-			ss1<<"tile ("<<tiles[j+11*i]<<").png";
+			ss1<<"images/tile ("<<tiles[j+11*i]<<").png";
 			auto sprite1=Sprite::create(ss1.str());
 			std::pair<int,int> pxy=TransformCoordinate::transform(i,j);
 			sprite1->setPosition(pxy.first,pxy.second);

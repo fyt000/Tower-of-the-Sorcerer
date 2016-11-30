@@ -3,6 +3,7 @@
 #include "cocos2d.h"
 #include <string>
 #include <map>
+#include "LabelBinder.h"
 
 //uhm. things are not as straight forward
 //to cheat - make things easier to implement
@@ -11,7 +12,7 @@ class Fightable:
 	public MyEvent
 {
 public:
-	Fightable(int id,std::string desc,int hp,int atk,int def);
+	Fightable(int id,std::string desc,int hp,int atk,int def,int gold);
 	//virtual cocos2d::Sprite* getSprite(int px,int py);
 	virtual ~Fightable();
 	virtual Fightable* clone()=0;
@@ -25,13 +26,16 @@ public:
 	virtual int hitBy(Fightable*);
 	virtual int hit(Fightable*);
 	void decHp(int amt);
+	void setLabelNofity(bool n);
+
+	LabelBinder<int> hp;
+	LabelBinder<int> atk;
+	LabelBinder<int> def;
+	LabelBinder<int> gold;
 
 protected:
-	int hp;
-	int atk;
-	int def;
 	std::map<std::string,int> effects;
-
+	
 
 private:
 	int secondImageID;

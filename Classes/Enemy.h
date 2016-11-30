@@ -18,6 +18,5 @@ public:
 
 private:
 	int secondImageID;
-	int gold;
 };
 

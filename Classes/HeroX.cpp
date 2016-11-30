@@ -2,13 +2,20 @@
 #include "TransformCoordinate.h"
 #include "GameData.h"
 #include "FightableSnapshot.h"
+#include "LabelBinder.h"
 
+USING_NS_CC;
 
-
-HeroX::HeroX(int id,std::string desc,int hp,int atk,int def,int gold):Fightable(id,desc,hp,atk,def),gold(gold){
+HeroX::HeroX(int id,std::string desc,int hp,int atk,int def,int gold):Fightable(id,desc,hp,atk,def,gold){
 	//hard coding these for now
-	x=0;y=1;
+	x=2;y=4;
 	heroDir=DIR::UP;
+	//these are fightable labels
+	//this->setLabelNofity(true);
+	//key labels
+	for (int i=0;i<KeyType::LAST;i++){
+		keys[i] = new LabelBinder<int>(3);
+	}
 }
 
 
@@ -16,41 +23,12 @@ bool HeroX::canAtk(){ //?
 	return true;
 }
 
-int HeroX::getGold(){
-	return gold;
-}
-
-void HeroX::gainGold(int amt){
-	gold+=amt;
-}
-
 bool HeroX::spendGold(int amt){
-	if (gold>=amt){
-		gold-=amt;
+	if (gold.V()>=amt){
+		gold.subVal(amt);
 		return true;
 	}
 	return false;
-}
-
-int HeroX::gainAtk(int amt)
-{
-	atk+=amt;
-	GameData::getInstance()->charAtk->setString(ToString(atk));
-	return atk;
-}
-
-int HeroX::gainDef(int amt)
-{
-	def+=amt;
-	GameData::getInstance()->charDef->setString(ToString(def));
-	return def;
-}
-
-int HeroX::gainHp(int amt)
-{
-	hp+=amt;
-	GameData::getInstance()->charHp->setString(ToString(hp));
-	return hp;
 }
 
 
@@ -60,7 +38,7 @@ Sprite* HeroX::getSprite(){
 		sprite->removeFromParentAndCleanup(true);
 	}*/
 	std::stringstream ss2;
-	ss2<<"tile ("<<id<<").png";
+	ss2<<"images/tile ("<<id<<").png";
 	auto sprite2=Sprite::create(ss2.str());
 	std::pair<int,int> pxy=TransformCoordinate::transform(x,y);
 	sprite2->setPosition(pxy.first,pxy.second);
@@ -75,7 +53,8 @@ int HeroX::fight(Fightable * target,std::function<void(Fightable&)> hpCallback1,
 	//this may change
 
 	Director::getInstance()->getEventDispatcher()->setEnabled(false);
-
+	target->setLabelNofity(false);
+	this->setLabelNofity(false);
 	std::vector<FightableSnapshot> heroSnapshots;
 	std::vector<FightableSnapshot> enemySnapshots;
 	int ret=Fightable::fight(target,
@@ -95,27 +74,29 @@ int HeroX::fight(Fightable * target,std::function<void(Fightable&)> hpCallback1,
 	std::string stepFrame1;
 	std::string stepFrame2;
 	switch (heroDir){
-		case DIR::DOWN:stepFrame1="tile (189).png";stepFrame2="tile (191).png";break;
-		case DIR::LEFT:stepFrame1="tile (197).png";stepFrame2="tile (199).png";break;
-		case DIR::RIGHT:stepFrame1="tile (205).png";stepFrame2="tile (207).png";break;
-		case DIR::UP:stepFrame1="tile (213).png";stepFrame2="tile (215).png";break;
-		default:stepFrame1="tile (213).png";stepFrame2="tile (215).png";
+		case DIR::DOWN:stepFrame1="images/tile (189).png";stepFrame2="images/tile (191).png";break;
+		case DIR::LEFT:stepFrame1="images/tile (197).png";stepFrame2="images/tile (199).png";break;
+		case DIR::RIGHT:stepFrame1="images/tile (205).png";stepFrame2="images/tile (207).png";break;
+		case DIR::UP:stepFrame1="images/tile (213).png";stepFrame2="images/tile (215).png";break;
+		default:stepFrame1="images/tile (213).png";stepFrame2="images/tile (215).png";
 	}
 	log("has frames %d",heroSnapshots.size());
 	Vector<FiniteTimeAction*> actions;
 	int hSSIdx=0;
 	int eSSIdx=0;
+	target->setLabelNofity(true);
+	this->setLabelNofity(true);
 	for (int i=0;i<heroSnapshots.size()+enemySnapshots.size();i++){
 		if (i%2==0){
 			//enemy action		
-			auto enemyCallback=CallFuncN::create(CC_CALLBACK_1(HeroX::updateBetweenFight,this,enemySnapshots,eSSIdx,stepFrame2,false));
+			auto enemyCallback=CallFuncN::create(CC_CALLBACK_1(HeroX::updateBetweenFight,this,target,enemySnapshots,eSSIdx,stepFrame2,false));
 			eSSIdx++;
 			actions.pushBack(enemyCallback);
 			actions.pushBack(DelayTime::create(0.3));
 		}
 		else{
 			
-			auto heroCallback=CallFuncN::create(CC_CALLBACK_1(HeroX::updateBetweenFight,this,heroSnapshots,hSSIdx,stepFrame1,true));
+			auto heroCallback=CallFuncN::create(CC_CALLBACK_1(HeroX::updateBetweenFight,this,this,heroSnapshots,hSSIdx,stepFrame1,true));
 			hSSIdx++;
 			actions.pushBack(heroCallback);
 			actions.pushBack(DelayTime::create(0.3));
@@ -131,13 +112,11 @@ void HeroX::cleanUpTarget(Node* node,Fightable * target){
 	GameData::getInstance()->killEvent(std::pair<int,int>(target->getX(),target->getY()));
 }
 
-void HeroX::updateBetweenFight(Node* n,std::vector<FightableSnapshot> &snapshots,int hSSIdx,std::string &frameName,bool isHero){
+void HeroX::updateBetweenFight(Node* n,Fightable* f,std::vector<FightableSnapshot> &snapshots,int hSSIdx,std::string &frameName,bool isHero){
 	auto gInst=GameData::getInstance();
-	if (isHero){
-		gInst->charAtk->setString(ToString(snapshots[hSSIdx].atk));
-		gInst->charDef->setString(ToString(snapshots[hSSIdx].def));
-		gInst->charHp->setString(ToString(snapshots[hSSIdx].hp));
-	}
+	f->hp.setVal(snapshots[hSSIdx].hp);
+	f->atk.setVal(snapshots[hSSIdx].atk);
+	f->def.setVal(snapshots[hSSIdx].def);
 	auto newFrame=SpriteFrame::create(frameName,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor()));
 	this->sprite->setSpriteFrame(newFrame);
 }
@@ -155,20 +134,20 @@ enum DIR nextNodeDir(std::pair<int,int> cur,std::pair<int,int> next){
 
 
 
-Animate* HeroX::getDirMoveAnimate(enum DIR dir,int steps){
+Animate* HeroX::getDirMoveAnimate(enum DIR dir,int steps,bool stop){
 	Vector<SpriteFrame*> animFrames;
-	animFrames.reserve(steps);
+	animFrames.reserve(steps+2);
 
 
 	std::string stepFrame1;
 	std::string stepFrame2;
 	//hard coding the pngs
 	switch (dir){
-		case DIR::DOWN:stepFrame1="tile (185).png";stepFrame2="tile (187).png";break;
-		case DIR::LEFT:stepFrame1="tile (193).png";stepFrame2="tile (195).png";break;
-		case DIR::RIGHT:stepFrame1="tile (201).png";stepFrame2="tile (203).png";break;
-		case DIR::UP:stepFrame1="tile (209).png";stepFrame2="tile (211).png";break;
-		default:stepFrame1="tile (209).png";stepFrame2="tile (211).png";
+		case DIR::DOWN:stepFrame1="images/tile (185).png";stepFrame2="images/tile (187).png";break;
+		case DIR::LEFT:stepFrame1="images/tile (193).png";stepFrame2="images/tile (195).png";break;
+		case DIR::RIGHT:stepFrame1="images/tile (201).png";stepFrame2="images/tile (203).png";break;
+		case DIR::UP:stepFrame1="images/tile (209).png";stepFrame2="images/tile (211).png";break;
+		default:stepFrame1="images/tile (209).png";stepFrame2="images/tile (211).png";
 	}
 
 	for (int i=0;i<steps+1;i++){
@@ -176,6 +155,9 @@ Animate* HeroX::getDirMoveAnimate(enum DIR dir,int steps){
 			animFrames.pushBack(SpriteFrame::create(stepFrame1,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
 		else
 			animFrames.pushBack(SpriteFrame::create(stepFrame2,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
+	}
+	if (stop){
+		animFrames.pushBack(stopSprite(dir));
 	}
 	Animation* animation = Animation::createWithSpriteFrames(animFrames,animateRate);
 	Animate* animate = Animate::create(animation);
@@ -248,7 +230,7 @@ void HeroX::move(PATH path,bool isLastStep){
 
 	//now directedPaths stores all the stuff... 
 	for (auto singPath:directedPaths){
-		auto changeDirCallBack = CallFuncN::create(CC_CALLBACK_1(HeroX::changeDirAnimate,this,singPath.second,singPath.first.size()));
+		auto changeDirCallBack = CallFuncN::create(CC_CALLBACK_1(HeroX::changeDirAnimate,this,singPath.second,singPath.first.size(),false));
 		actions.pushBack(changeDirCallBack);
 		for (auto pathNode:singPath.first){
 			auto destCoord=TransformCoordinate::transformVec2(pathNode.first,pathNode.second);
@@ -286,9 +268,9 @@ void HeroX::move(std::pair<int,int> dest)
 	move(p,true);
 }
 
-void HeroX::changeDirAnimate(Node* node,enum DIR newDir,int steps){
+void HeroX::changeDirAnimate(Node* node,enum DIR newDir,int steps,bool stop){
 	heroDir=newDir;
-	auto animate=getDirMoveAnimate(newDir,steps);
+	auto animate=getDirMoveAnimate(newDir,steps,stop);
 	sprite->stopActionByTag(0); //stop cur animation if any
 	sprite->runAction(animate);
 }
@@ -300,15 +282,7 @@ void HeroX::Destined(Node* node,int x,int y){
 void HeroX::StopAll(Node* node,std::pair<int,int> dest){
 	Director::getInstance()->getEventDispatcher()->setEnabled(false);
 	//sprite->stopAllActions();
-	std::string stopStr;
-	switch (heroDir){
-	case DIR::DOWN:stopStr="tile (189).png";break;
-	case DIR::LEFT:stopStr="tile (197).png";break;
-	case DIR::RIGHT:stopStr="tile (205).png";break;
-	case DIR::UP:stopStr="tile (213).png";break;
-	default:stopStr="tile (213).png";
-	}
-	sprite->setSpriteFrame(SpriteFrame::create(stopStr,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
+	sprite->setSpriteFrame(stopSprite(heroDir));
 	GameData::getInstance()->moveHeroFinalStep(dest);
 }
 
@@ -316,17 +290,21 @@ void HeroX::StopAll(Node* node,std::pair<int,int> dest){
 void HeroX::StopAllFinal(Node * node)
 {
 	sprite->stopAllActions();
-	std::string stopStr;
-	switch (heroDir){
-	case DIR::DOWN:stopStr="tile (189).png";break;
-	case DIR::LEFT:stopStr="tile (197).png";break;
-	case DIR::RIGHT:stopStr="tile (205).png";break;
-	case DIR::UP:stopStr="tile (213).png";break;
-	default:stopStr="tile (213).png";
-	}
-	sprite->setSpriteFrame(SpriteFrame::create(stopStr,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
+	sprite->setSpriteFrame(stopSprite(heroDir));
 	GameData::getInstance()->showLog();
 	Director::getInstance()->getEventDispatcher()->setEnabled(true);
+}
+
+SpriteFrame* HeroX::stopSprite(DIR dir){
+	std::string stopStr;
+	switch (dir){
+	case DIR::DOWN:stopStr="images/tile (189).png";break;
+	case DIR::LEFT:stopStr="images/tile (197).png";break;
+	case DIR::RIGHT:stopStr="images/tile (205).png";break;
+	case DIR::UP:stopStr="images/tile (213).png";break;
+	default:stopStr="images/tile (213).png";
+	}
+	return SpriteFrame::create(stopStr,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor()));
 }
 
 void HeroX::triggeredCallback(Node * node,MyEvent* ev){
@@ -337,9 +315,14 @@ void HeroX::triggeredCallback(Node * node,MyEvent* ev){
 	}
 }
 
-
-
 HeroX::~HeroX(){
+	for (int i=0;i<KeyType::LAST;i++)
+		delete keys[i];
+}
+
+void HeroX::changeFacingDir(std::pair<int,int> dest)
+{
+	HeroX::changeDirAnimate(NULL,nextNodeDir(std::pair<int,int>(x,y),dest),1,true);
 }
 
 HeroX * HeroX::clone()

@@ -2,10 +2,11 @@
 #include "GlobalDefs.h"
 #include "TransformCoordinate.h"
 #include "GameData.h"
+
 USING_NS_CC;
 
 Enemy::Enemy(int id,std::string desc,int secondImageID,int hp,int atk,int def,int gold):
-	Fightable(id,desc,hp,atk,def),secondImageID(secondImageID),gold(gold){}
+	Fightable(id,desc,hp,atk,def,gold),secondImageID(secondImageID){}
 
 
 bool Enemy::canAtk(){
@@ -16,19 +17,19 @@ bool Enemy::stepOnEvent()
 {
 	bool fightR = Fightable::stepOnEvent();
 	if (fightR)
-		GameData::getInstance()->log("Beat "+description+". Received "+ToString(gold)+" gold.",false);
+		GameData::getInstance()->log("Beat "+description+". Received "+ToString(gold.V())+" gold.",false);
 	return fightR;
 }
 
 Sprite* Enemy::getSprite(){
 	std::stringstream ss2;
-	ss2<<"tile ("<<id<<").png";
+	ss2<<"images/tile ("<<id<<").png";
 	auto sprite2=Sprite::create(ss2.str());
 	std::pair<int,int> pxy=TransformCoordinate::transform(x,y);
 	sprite2->setPosition(pxy.first,pxy.second);
 	sprite2->setAnchorPoint(Vec2(0,0));
 	std::stringstream ss3;
-	ss3<<"tile ("<<secondImageID<<").png";
+	ss3<<"images/tile ("<<secondImageID<<").png";
 	//add animation
 	Vector<SpriteFrame*> animFrames;
 	animFrames.reserve(2);

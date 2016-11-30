@@ -2,12 +2,13 @@
 #include "GameData.h"
 USING_NS_CC;
 
-Fightable::Fightable(int id,std::string desc,int hp,int atk,int def):MyEvent(id,desc),hp(hp),atk(atk),def(def){}
+Fightable::Fightable(int id,std::string desc,int hp,int atk,int def,int gold):MyEvent(id,desc),hp(hp),atk(atk),def(def),gold(gold){
+}
 
 
 int Fightable::hitBy(Fightable* hitter){
-	if (hitter->atk-def>0)
-		return hitter->atk-def;
+	if (hitter->atk.V()-def.V()>0)
+		return hitter->atk.V()-def.V();
 	return 0;
 }
 
@@ -17,9 +18,21 @@ int Fightable::hit(Fightable* target){
 
 void Fightable::decHp(int amt)
 {
-	hp-=amt;
-	if (hp<=0)
-		hp=0;
+	
+	if (hp.V()-amt<=0)
+		hp.setVal(0);
+	else
+	{
+		hp.subVal(amt);
+	}
+}
+
+void Fightable::setLabelNofity(bool n)
+{
+	hp.setNofify(n);
+	atk.setNofify(n);
+	def.setNofify(n);
+	gold.setNofify(n);
 }
 
 
@@ -36,7 +49,7 @@ int Fightable::fight(Fightable* target,std::function<void(Fightable&)> hpCallbac
 		target->decHp(dmg);
 		if (hpCallback1!=nullptr)
 			hpCallback1(*target);
-		if (target->hp<=0)
+		if (target->hp.V()<=0)
 			break;
 		dmg=hitBy(target);
 		decHp(dmg);
@@ -48,16 +61,15 @@ int Fightable::fight(Fightable* target,std::function<void(Fightable&)> hpCallbac
 }
 
 const int Fightable::getHp(){
-	return hp;
+	return hp.V();
 }
 const int Fightable::getAtk(){
-	return atk;
+	return atk.V();
 }
 const int Fightable::getDef(){
-	return def;
+	return def.V();
 }
 
-//I don't like this... override it in enemy?
 bool Fightable::triggerEvent(){
 	return true;
 }

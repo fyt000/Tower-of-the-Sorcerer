@@ -50,7 +50,7 @@ std::string MyEvent::getDescription()
 Sprite* MyEvent::getSprite(){
 	std::pair<int,int> pxy=TransformCoordinate::transform(x,y);
 	std::stringstream ss1;
-	ss1<<"tile ("<<id<<").png";
+	ss1<<"images/tile ("<<id<<").png";
 	auto sprite1=Sprite::create(ss1.str());
 	sprite1->setPosition(pxy.first,pxy.second);
 	sprite1->setAnchorPoint(Vec2(0,0));
@@ -62,13 +62,13 @@ Sprite* MyEvent::getSprite(){
 bool MyEvent::triggerEvent()
 {
 	//GameData::getInstance()->log("You used The destructible Ball! Enemies on all sides died!");
-	GameData::getInstance()->killEvent(std::pair<int,int>(getX(),getY()));
+	selfDestruct();
 	return true;
 }
 
 bool MyEvent::stepOnEvent(){
 	//GameData::getInstance()->log("step on event");
-	GameData::getInstance()->killEvent(std::pair<int,int>(getX(),getY()));
+	selfDestruct();
 	return false;
 }
 
@@ -80,6 +80,11 @@ int MyEvent::getX()
 int MyEvent::getY()
 {
 	return y;
+}
+
+void MyEvent::selfDestruct()
+{
+	GameData::getInstance()->killEvent(std::pair<int,int>(getX(),getY()));
 }
 
 

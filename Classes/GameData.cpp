@@ -3,6 +3,9 @@
 #include "Wall.h"
 #include "Enemy.h"
 #include "Consumable.h"
+#include "Door.h"
+
+USING_NS_CC;
 
 static GameData* gameData = nullptr;
 
@@ -20,8 +23,8 @@ GameData::GameData():FLOOREVENTS{
 	{
 		{11,0,0,0,0,0,0,0,0,0,0},
 		{8,8,8,8,8,8,8,8,8,8,0},
-		{32,0,0,0,0,8,0,29,0,8,0},
-		{0,77,0,8,0,8,0,32,0,8,0},
+		{32,0,0,0,0,8,34,29,0,8,0},
+		{0,77,0,8,0,8,35,32,0,8,0},
 		{8,1,8,8,0,8,8,8,1,8,0},
 		{29,0,0,8,0,1,67,69,67,8,0},
 		{0,79,0,8,0,8,8,8,8,8,0},
@@ -31,23 +34,24 @@ GameData::GameData():FLOOREVENTS{
 		{32,38,29,8,0,0,0,8,61,33,61}
 	}},
 	FloorEvents{0},
-	hero(213,"the 213 hero",1000,15,1,0)
+	hero(213,"the 213 hero",1000,20,15,0),
+	floor(1)
 {
 	EVENTDATA[0]=NULL;
-	EVENTDATA[1]=new MyEvent(1,"yellow door");
+	EVENTDATA[1]=new Door(1,"yellow door",KeyType::YELLOW);
 	EVENTDATA[8]=new Wall(8,"wall");
 	EVENTDATA[11]=new MyEvent(11,"upstairs"); //?
-	EVENTDATA[29]=new MyEvent(29,"yellow key");
+	EVENTDATA[29]=new Key(29,"yellow key",KeyType::YELLOW);
 	EVENTDATA[32]=new Consumable(32,"red exlixir",200,0,0,0);
 	EVENTDATA[33]=new Consumable(33,"blue exlixir",400,0,0,0);
+	EVENTDATA[34]=new Consumable(34,"red crystal",0,1,0,0);
+	EVENTDATA[35]=new Consumable(35,"blue crystal",0,0,2,0);
 	EVENTDATA[38]=new MyEvent(38,"special item no3");
 	EVENTDATA[61]=new Enemy(61,"Green Slime",62,35,18,1,1);
 	EVENTDATA[67]=new Enemy(67,"Bat",68,35,38,3,1);
 	EVENTDATA[69]=new Enemy(69,"Priest",70,60,32,8,1);
 	EVENTDATA[77]=new Enemy(77,"Skeleton C",78,50,42,6,1);
 	EVENTDATA[79]=new Enemy(79,"Skeleton B",80,55,52,12,1);
-
-	floor=1;
 
 	loadFloor();
 }
@@ -62,7 +66,7 @@ GameData* GameData::getInstance(){
 
 MyEvent * GameData::getEvent(int x,int y)
 {
-	return FloorEvents[floor][x][y];
+	return FloorEvents[floor.V()][x][y];
 }
 
 //get event pointer given the id
@@ -77,11 +81,11 @@ MyEvent * GameData::getEventData(int id)
 //get event based on the location of the current floor
 MyEvent * GameData::getEventData(int x,int y)
 {
-	return getEventData(FLOOREVENTS[floor][x][y]);
+	return getEventData(FLOOREVENTS[floor.V()][x][y]);
 }
 
 void GameData::loadFloor(){
-	int curFloor=floor;
+	int curFloor=floor.V();
 	for (int k=0;k<MAXFLOOR;k++){
 		floor=k;
 		for (int i=0;i<11;i++)
@@ -103,26 +107,26 @@ void GameData::loadFloor(){
 
 int GameData::goUpStairs()
 {
-	floor++;
-	return floor;
+	floor.addVal(1);
+	return floor.V();
 }
 
 int GameData::goDownStairs()
 {
-	floor--;
-	return floor;
+	floor.subVal(1);
+	return floor.V();
 }
 
 int GameData::setFloor(int f){
 	floor=f;
-	return floor;
+	return floor.V();
 }
 
 cocos2d::Sprite * GameData::getSprite(int x,int y)
 {
-	if (!FloorEvents[floor][x][y])
+	if (!FloorEvents[floor.V()][x][y])
 		return nullptr;
-	return FloorEvents[floor][x][y]->getSprite();
+	return FloorEvents[floor.V()][x][y]->getSprite();
 }
 
 
@@ -139,8 +143,8 @@ void GameData::moveHero(PATH path)
 //this method is only being called from FloorScene
 //no one else should call this
 void GameData::moveHero(std::pair<int,int> dest){
-	logLable->setVisible(false);
-	logLable->setString("");
+	logLabel->setVisible(false);
+	logLabel->setString("");
 	auto eventPtr=getEvent(dest.first,dest.second);
 	if (eventPtr==NULL){//check if it is an event
 		hero.move(pathFind(dest),true);
@@ -158,7 +162,7 @@ void GameData::moveAndTriggerStepOnEvent(std::pair<int,int> dest,std::function<v
 void GameData::killEvent(std::pair<int,int> place){
 	auto eventPtr=getEvent(place.first,place.second);
 	if (eventPtr){
-		FloorEvents[floor][place.first][place.second]=NULL;
+		FloorEvents[floor.V()][place.first][place.second]=NULL;
 		delete eventPtr;
 	}
 }
@@ -176,14 +180,9 @@ void GameData::moveHeroFinalStep(std::pair<int,int> dest){
 		(dest.second==hero.getY()&&abs(hero.getX()-dest.first)==1)){
 		if (eventPtr->triggerEvent()){
 			hero.move(pathFind(dest),true);
-			/*
-			if (!eventPtr->stepOnEvent())
-				Director::getInstance()->getEventDispatcher()->setEnabled(true);*/
-			/*
-			FloorEvents[floor][dest.first][dest.second]=NULL;
-			delete eventPtr;*/
 		}
 		else{
+			hero.changeFacingDir(dest);
 			Director::getInstance()->getEventDispatcher()->setEnabled(true);
 		}
 	}
@@ -268,22 +267,22 @@ PATH GameData::pathFind(int dx,int dy)
 void GameData::log(std::string message,bool inst)
 {
 	CCLOG("log message: %s",message);
-	logLable->setString(message);
-	logLable->setVisible(inst);
+	logLabel->setString(message);
+	logLabel->setVisible(inst);
 	if (inst){
-		logLable->setOpacity(0);
-		logLable->runAction(FadeIn::create(0.75));
+		logLabel->setOpacity(0);
+		logLabel->runAction(FadeIn::create(0.75));
 	}
 }
 
 void GameData::showLog(){
-	if (logLable->isVisible()){
+	if (logLabel->isVisible()){
 		return;
 	}
-	logLable->setVisible(true);	
-	if (logLable->getString()!=""){
-		logLable->setOpacity(0);
-		logLable->runAction(FadeIn::create(0.75));
+	logLabel->setVisible(true);	
+	if (logLabel->getString()!=""){
+		logLabel->setOpacity(0);
+		logLabel->runAction(FadeIn::create(0.75));
 	}
 
 }

@@ -22,7 +22,7 @@ bool MenuScene::init()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
-	auto sprite = Sprite::create("open0.png");
+	auto sprite = Sprite::create("images/open0.png");
 	sprite->setAnchorPoint(Vec2(0,0));
 	sprite->setPosition(0,0);
 	sprite->setScale(Director::getInstance()->getContentScaleFactor()); //no auto scaling?

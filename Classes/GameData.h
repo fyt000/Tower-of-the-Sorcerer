@@ -3,6 +3,7 @@
 #include "cocos2d.h"
 #include <vector>
 #include "HeroX.h"
+#include "Key.h"
 #include "GlobalDefs.h"
 
 
@@ -13,10 +14,6 @@
 //and set at FloorScene
 class GameData
 {
-private:
-	GameData();
-	~GameData();
-
 public:
 	static GameData* getInstance();
 	MyEvent* getEvent(int x,int y);
@@ -25,8 +22,6 @@ public:
 	int goDownStairs();
 	int setFloor(int);
 	cocos2d::Sprite* getSprite(int x,int y);
-	//void moveHero(enum DIR direction);
-	//void moveHero(PATH path);
 	void moveHero(std::pair<int,int>);
 	void killEvent(std::pair<int,int> place);
 	void moveHeroFinalStep(std::pair<int,int> dest);
@@ -35,14 +30,11 @@ public:
 	void log(std::string message,bool instant=true);
 	void showLog();
 	HeroX hero;
-	EventListenerTouchAllAtOnce* floorMouseListener;
+	cocos2d::EventListenerTouchAllAtOnce* floorMouseListener;
 	
-
-	Label* logLable;
-	Label* charHp;
-	Label* charAtk;
-	Label* charDef;
-	Label* charGold;
+	//all the display labels... location set at FloorScene
+	cocos2d::Label* logLabel;
+	LabelBinder<int> floor;
 
 private:
 	MyEvent* getEventData(int id);
@@ -51,7 +43,7 @@ private:
 	int FLOOREVENTS[MAXFLOOR][11][11]; //int representation - read from config?
 	MyEvent* FloorEvents[MAXFLOOR][11][11]; //the actual objects
 	void loadFloor();
-	int floor=1;
-	
+	GameData();
+	~GameData();
 };
 

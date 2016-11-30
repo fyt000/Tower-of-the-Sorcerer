@@ -38,6 +38,7 @@ protected:
 	int y;
 	std::string description;
 	cocos2d::Sprite* sprite;
+	void selfDestruct();
 
 	/*
 	std::string imageName1;
