@@ -3,7 +3,7 @@
 
 
 
-Door::Door(int id,std::string desc,KeyType doorType):MyEvent(id,desc),doorType(doorType)
+Door::Door(int imageIdx,std::string desc,KeyType doorType):MyEvent(imageIdx,desc),doorType(doorType)
 {
 }
 

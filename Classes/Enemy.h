@@ -7,7 +7,7 @@ class Enemy:
 	public Fightable
 {
 public:
-	Enemy(int id,std::string desc,int secondImageID,int hp,int atk,int def,int gold);
+	Enemy(int imageIdx,std::string desc,int secondImageID,int hp,int atk,int def,int gold);
 	
 	//Enemy(Floor *f,int id,int x,int y,int secondImageID,int hp,int atk,int def);
 	bool canAtk();

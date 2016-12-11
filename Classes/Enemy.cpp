@@ -5,8 +5,8 @@
 
 USING_NS_CC;
 
-Enemy::Enemy(int id,std::string desc,int secondImageID,int hp,int atk,int def,int gold):
-	Fightable(id,desc,hp,atk,def,gold),secondImageID(secondImageID){}
+Enemy::Enemy(int imageIdx,std::string desc,int secondImageID,int hp,int atk,int def,int gold):
+	Fightable(imageIdx,desc,hp,atk,def,gold),secondImageID(secondImageID){}
 
 
 bool Enemy::canAtk(){
@@ -23,7 +23,7 @@ bool Enemy::stepOnEvent()
 
 Sprite* Enemy::getSprite(){
 	std::stringstream ss2;
-	ss2<<"images/tile ("<<id<<").png";
+	ss2<<"images/tile ("<<imageIdx<<").png";
 	auto sprite2=Sprite::create(ss2.str());
 	std::pair<int,int> pxy=TransformCoordinate::transform(x,y);
 	sprite2->setPosition(pxy.first,pxy.second);

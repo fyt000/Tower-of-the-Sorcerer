@@ -5,7 +5,7 @@ class Consumable:
 	public MyEvent
 {
 public:
-	Consumable(int id,std::string desc,int hp,int atk,int def,int gold);
+	Consumable(int imageIdx,std::string desc,int hp,int atk,int def,int gold);
 	bool triggerEvent();
 	virtual ~Consumable();
 	Consumable* clone();

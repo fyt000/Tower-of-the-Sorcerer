@@ -5,7 +5,7 @@
 
 USING_NS_CC;
 //id has to match the image id
-MyEvent::MyEvent(int id,std::string desc):id(id),description(desc),sprite(NULL){
+MyEvent::MyEvent(int imageIdx,std::string desc):imageIdx(imageIdx),description(desc),sprite(NULL){
 	x=-1;
 	y=-1;
 }
@@ -26,7 +26,7 @@ void MyEvent::setXY(int x,int y)
 }
 
 int MyEvent::getID(){
-	return id;
+	return imageIdx;
 }
 bool MyEvent::passable(){
 	return false;
@@ -50,7 +50,7 @@ std::string MyEvent::getDescription()
 Sprite* MyEvent::getSprite(){
 	std::pair<int,int> pxy=TransformCoordinate::transform(x,y);
 	std::stringstream ss1;
-	ss1<<"images/tile ("<<id<<").png";
+	ss1<<"images/tile ("<<imageIdx<<").png";
 	auto sprite1=Sprite::create(ss1.str());
 	sprite1->setPosition(pxy.first,pxy.second);
 	sprite1->setAnchorPoint(Vec2(0,0));

@@ -3,7 +3,7 @@
 #include "HeroX.h"
 #include "LabelBinder.h"
 
-Key::Key(int id,std::string desc,KeyType keyType):MyEvent(id,desc),keyType(keyType)
+Key::Key(int imageIdx,std::string desc,KeyType keyType):MyEvent(imageIdx,desc),keyType(keyType)
 {
 }
 

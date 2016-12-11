@@ -6,7 +6,7 @@
 
 USING_NS_CC;
 
-HeroX::HeroX(int id,std::string desc,int hp,int atk,int def,int gold):Fightable(id,desc,hp,atk,def,gold){
+HeroX::HeroX(int imageIdx,std::string desc,int hp,int atk,int def,int gold):Fightable(imageIdx,desc,hp,atk,def,gold){
 	//hard coding these for now
 	x=2;y=4;
 	heroDir=DIR::UP;
@@ -38,7 +38,7 @@ Sprite* HeroX::getSprite(){
 		sprite->removeFromParentAndCleanup(true);
 	}*/
 	std::stringstream ss2;
-	ss2<<"images/tile ("<<id<<").png";
+	ss2<<"images/tile ("<<imageIdx<<").png";
 	auto sprite2=Sprite::create(ss2.str());
 	std::pair<int,int> pxy=TransformCoordinate::transform(x,y);
 	sprite2->setPosition(pxy.first,pxy.second);

@@ -11,7 +11,7 @@ class Key:
 	public MyEvent
 {
 public:
-	Key(int id,std::string desc,enum KeyType keyType);
+	Key(int imageIdx,std::string desc,enum KeyType keyType);
 	bool triggerEvent();
 	virtual ~Key();
 	Key* clone();

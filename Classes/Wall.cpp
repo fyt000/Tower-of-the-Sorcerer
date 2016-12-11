@@ -1,7 +1,7 @@
 #include "Wall.h"
 
 
-Wall::Wall(int id,std::string desc):MyEvent(id,desc){
+Wall::Wall(int imageIdx,std::string desc):MyEvent(imageIdx,desc){
 }
 
 bool Wall::triggerEvent()

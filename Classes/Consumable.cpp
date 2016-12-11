@@ -5,8 +5,8 @@
 #include <sstream>
 
 //no use for gold...yet..maybe not
-Consumable::Consumable(int id,std::string desc,int hp,int atk,int def,int gold):
-	MyEvent(id,desc),hp(hp),atk(atk),def(def),gold(gold)
+Consumable::Consumable(int imageIdx,std::string desc,int hp,int atk,int def,int gold):
+	MyEvent(imageIdx,desc),hp(hp),atk(atk),def(def),gold(gold)
 {
 }
 
@@ -27,7 +27,7 @@ bool Consumable::triggerEvent()
 		GameData::getInstance()->hero.def.addVal(def);
 	}
 	GameData::getInstance()->log(msgBuilder.str());
-	GameData::getInstance()->killEvent(std::pair<int,int>(getX(),getY()));
+	selfDestruct();
 	return true;
 }
 

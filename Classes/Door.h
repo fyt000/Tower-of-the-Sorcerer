@@ -6,7 +6,7 @@ class Door:
 	public MyEvent
 {
 public:
-	Door(int id,std::string desc,enum KeyType doorType);
+	Door(int imageIdx,std::string desc,enum KeyType doorType);
 	bool triggerEvent();
 	virtual ~Door();
 	Door* clone();

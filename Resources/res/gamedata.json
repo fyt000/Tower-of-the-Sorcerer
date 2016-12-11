@@ -1,0 +1,95 @@
+{
+	"floorevents": [
+		{	
+			"floor":1,
+			"data":
+				[
+					[11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+					[8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0],
+					[32, 0, 0, 0, 0, 8, 34, 29, 0, 8, 0],
+					[0, 77, 0, 8, 0, 8, 35, 32, 0, 8, 0],
+					[8, 1, 8, 8, 0, 8, 8, 8, 1, 8, 0],
+					[29, 0, 0, 8, 0, 1, 67, 69, 67, 8, 0],
+					[0, 79, 0, 8, 0, 8, 8, 8, 8, 8, 0],
+					[8, 1, 8, 8, 0, 0, 0, 0, 0, 0, 0],
+					[0, 0, 0, 8, 8, 1, 8, 8, 8, 1, 8],
+					[32, 0, 29, 8, 29, 0, 0, 8, 0, 67, 0],
+					[32, 38, 29, 8, 0, 0, 0, 8, 61, 33, 61]
+				]
+		}
+		
+	],
+	"eventdata": [
+		{
+			"id":1,
+			"type": "Door",
+			"params": [1,"yellow door", 0]
+		},
+		{
+			"id":8,
+			"type": "Wall",
+			"params": [8,"wall"]
+		},
+		{
+			"id":11,
+			"type": "MyEvent",
+			"params": [11,"upstairs"]
+		},
+		{
+			"id":29,
+			"type": "Key",
+			"params": [29,"yellow key", 0]
+		},
+		{
+			"id":32,
+			"type": "Consumable",
+			"params": [32,"red elixir", 200, 0, 0, 0]
+		},
+		{
+			"id":33,
+			"type": "Consumable",
+			"params": [33,"blue elixir", 400, 0, 0, 0]
+		},
+		{
+			"id":34,
+			"type": "Consumable",
+			"params": [34,"red crystal", 0, 1, 0, 0]
+		},
+		{
+			"id":35,
+			"type": "Consumable",
+			"params": [35,"blue crystal", 0, 0, 2, 0]
+		},
+		{
+			"id":38,
+			"type": "MyEvent",
+			"params": [38,"special item no3"]
+		},
+		{
+			"id":61,
+			"type": "Enemy",
+			"params": [61,"Green Slime", 62, 35, 18, 1, 1]
+		},
+		{
+			"id":67,
+			"type": "Enemy",
+			"params": [67,"Bat", 68, 35, 38, 3, 1]
+		},
+		{
+			"id":69,
+			"type": "Enemy",
+			"params": [69,"Priest", 70, 60, 32, 8, 1]
+		},
+		{
+			"id":77,
+			"type": "Enemy",
+			"params": [77,"Skeleton C", 78, 50, 42, 6, 1]
+		},
+		{
+			"id":79,
+			"type": "Enemy",
+			"params": [79,"Skeleton B", 80, 55, 52, 12, 1]
+		}
+	]
+
+}

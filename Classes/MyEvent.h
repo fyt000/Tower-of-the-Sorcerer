@@ -5,7 +5,7 @@
 class MyEvent
 {
 public:
-	MyEvent(int id,std::string decription);
+	MyEvent(int imageIdx,std::string decription);
 	virtual MyEvent* clone();
 	virtual ~MyEvent(); 
 	void setXY(int x,int y);
@@ -33,7 +33,7 @@ public:
 	//virtual bool hasFrameAnimation();
 
 protected:
-	int id;
+	int imageIdx;
 	int x;
 	int y;
 	std::string description;

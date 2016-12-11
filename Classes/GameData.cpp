@@ -4,6 +4,7 @@
 #include "Enemy.h"
 #include "Consumable.h"
 #include "Door.h"
+#include "Configureader.h"
 
 USING_NS_CC;
 
@@ -15,28 +16,14 @@ static GameData* gameData = nullptr;
 //I will change this.
 //this must be changed actually, since we can't initialize like this for loading saves
 //but that's ok... we can read one by one
-GameData::GameData():FLOOREVENTS{ 
-	{
-		{0} //yes, there is a floor 0
-	},
-	//floor 1
-	{
-		{11,0,0,0,0,0,0,0,0,0,0},
-		{8,8,8,8,8,8,8,8,8,8,0},
-		{32,0,0,0,0,8,34,29,0,8,0},
-		{0,77,0,8,0,8,35,32,0,8,0},
-		{8,1,8,8,0,8,8,8,1,8,0},
-		{29,0,0,8,0,1,67,69,67,8,0},
-		{0,79,0,8,0,8,8,8,8,8,0},
-		{8,1,8,8,0,0,0,0,0,0,0},
-		{0,0,0,8,8,1,8,8,8,1,8},
-		{32,0,29,8,29,0,0,8,0,67,0},
-		{32,38,29,8,0,0,0,8,61,33,61}
-	}},
-	FloorEvents{0},
+GameData::GameData():
 	hero(213,"the 213 hero",1000,20,15,0),
 	floor(1)
 {
+
+	Configureader::ReadEventData(EVENTDATA,EVENT_MAX);
+	Configureader::ReadFloorEvents(FLOOREVENTS,MAXFLOOR,11,11);
+	/*
 	EVENTDATA[0]=NULL;
 	EVENTDATA[1]=new Door(1,"yellow door",KeyType::YELLOW);
 	EVENTDATA[8]=new Wall(8,"wall");
@@ -52,7 +39,7 @@ GameData::GameData():FLOOREVENTS{
 	EVENTDATA[69]=new Enemy(69,"Priest",70,60,32,8,1);
 	EVENTDATA[77]=new Enemy(77,"Skeleton C",78,50,42,6,1);
 	EVENTDATA[79]=new Enemy(79,"Skeleton B",80,55,52,12,1);
-
+	*/
 	loadFloor();
 }
 

@@ -7,6 +7,8 @@
 #include "GlobalDefs.h"
 
 
+const int MAXEVENT=500;
+
 //mostly handle the logic
 //Hero class handles the rest
 //Doesn't handle the graphics...
@@ -39,9 +41,9 @@ public:
 private:
 	MyEvent* getEventData(int id);
 	MyEvent* getEventData(int x,int y);
-	MyEvent* EVENTDATA[500]={NULL};
-	int FLOOREVENTS[MAXFLOOR][11][11]; //int representation - read from config?
-	MyEvent* FloorEvents[MAXFLOOR][11][11]; //the actual objects
+	MyEvent* EVENTDATA[MAXEVENT]={NULL};
+	int FLOOREVENTS[MAXFLOOR][11][11]={0}; //int representation - read from config?
+	MyEvent* FloorEvents[MAXFLOOR][11][11]={NULL}; //the actual objects
 	void loadFloor();
 	GameData();
 	~GameData();

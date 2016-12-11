@@ -12,7 +12,7 @@ class Fightable:
 	public MyEvent
 {
 public:
-	Fightable(int id,std::string desc,int hp,int atk,int def,int gold);
+	Fightable(int imageIdx,std::string desc,int hp,int atk,int def,int gold);
 	//virtual cocos2d::Sprite* getSprite(int px,int py);
 	virtual ~Fightable();
 	virtual Fightable* clone()=0;

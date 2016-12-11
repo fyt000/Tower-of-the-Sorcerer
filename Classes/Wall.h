@@ -5,7 +5,7 @@ class Wall:
 	public MyEvent
 {
 public:
-	Wall(int id,std::string desc);
+	Wall(int imageIdx,std::string desc);
 	bool triggerEvent();
 	Wall* clone();
 	~Wall();
