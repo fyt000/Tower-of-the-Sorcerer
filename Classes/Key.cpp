@@ -9,7 +9,7 @@ Key::Key(int imageIdx,std::string desc,KeyType keyType):MyEvent(imageIdx,desc),k
 
 bool Key::triggerEvent(){
 	GameData::getInstance()->hero.keys[keyType]->addVal(1);
-	GameData::getInstance()->log("obtained a key"); //tomorrow, add JSON text reader
+	GameData::getInstance()->log(stdsprintf(GStr("get_key"),GStr("key_"+ToString((int)keyType)))); //tomorrow, add JSON text reader
 	return true;
 }
 

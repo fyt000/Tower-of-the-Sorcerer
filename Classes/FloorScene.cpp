@@ -67,16 +67,7 @@ bool FloorScene::init()
 	float borderBottomY=borderTopY-centerSprite->getBoundingBox().size.height-lineRadiusV;
 	float borderLeftX=startX+lineRadiusH;
 	float borderRightX=startX+centerSprite->getBoundingBox().size.width;
-	/*
-	log("borderTop %d",borderTopY);
-	auto color=Color4F(156/255.0,99/255.0,66/255.0,1);
-	auto drawNode = DrawNode::create();
-	drawNode->drawSegment(Vec2(borderLeftX,borderTopY),Vec2(borderRightX,borderTopY),lineRadius,color);
-	drawNode->drawSegment(Vec2(borderLeftX,borderBottomY),Vec2(borderRightX,borderBottomY),lineRadius,color);
-	drawNode->drawSegment(Vec2(borderLeftX,borderTopY),Vec2(borderLeftX,borderBottomY),lineRadius,color);
-	drawNode->drawSegment(Vec2(borderRightX,borderTopY),Vec2(borderRightX,borderBottomY),lineRadius,color);
-	this->addChild(drawNode,2);
-	*/
+
 	//right static image
 	auto rightSprite=Sprite::create("images/Right.png");
 	rightSprite->setPosition(borderRightX,0);
@@ -88,10 +79,9 @@ bool FloorScene::init()
 
 	auto gInstance = GameData::getInstance();
 
-	std::string font="fonts/arial.ttf";
+	//std::string font="fonts/arial.ttf";
 	int fontSize=15;
-
-	gInstance->logLabel = Label::createWithTTF("",font,20,Size::ZERO,TextHAlignment::CENTER);
+	gInstance->logLabel = Label::createWithSystemFont("","Arial",20,Size::ZERO,TextHAlignment::CENTER);
 	gInstance->logLabel->enableGlow(Color4B::BLACK);
 	gInstance->logLabel->enableShadow();
 	gInstance->logLabel->setPosition(visibleSize.width/2,0);
@@ -104,28 +94,28 @@ bool FloorScene::init()
 	float statY=397.5;
 
 	
-	auto charHpLabel = Label::createWithTTF("",font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	auto charHpLabel = Label::createWithSystemFont("","Arial",fontSize,Size::ZERO,TextHAlignment::RIGHT);
 	charHpLabel->setPosition(statX,statY);
 	charHpLabel->setAnchorPoint(Vec2(1,1));
 	this->addChild(charHpLabel,2);
 	gInstance->hero.hp.attach(charHpLabel);
 	//gInstance->hero.charHpLabel = charHpLabel;
 
-	auto charAtkLabel = Label::createWithTTF("",font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	auto charAtkLabel = Label::createWithSystemFont("","Arial",fontSize,Size::ZERO,TextHAlignment::RIGHT);
 	charAtkLabel->setPosition(statX,statY-30);
 	charAtkLabel->setAnchorPoint(Vec2(1,1));
 	this->addChild(charAtkLabel,2);
 	gInstance->hero.atk.attach(charAtkLabel);
 	//gInstance->hero.charAtkLabel = charAtkLabel;
 
-	auto charDefLabel = Label::createWithTTF("",font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	auto charDefLabel = Label::createWithSystemFont("","Arial",fontSize,Size::ZERO,TextHAlignment::RIGHT);
 	charDefLabel->setPosition(statX,statY-60);
 	charDefLabel->setAnchorPoint(Vec2(1,1));
 	this->addChild(charDefLabel,2);
 	gInstance->hero.def.attach(charDefLabel);
 	//gInstance->hero.charDefLabel = charDefLabel;
 
-	auto charGoldLabel = Label::createWithTTF("",font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	auto charGoldLabel = Label::createWithSystemFont("","Arial",fontSize,Size::ZERO,TextHAlignment::RIGHT);
 	charGoldLabel->setPosition(statX,statY-90);
 	charGoldLabel->setAnchorPoint(Vec2(1,1));
 	this->addChild(charGoldLabel,2);
@@ -141,13 +131,13 @@ bool FloorScene::init()
 		keySprite->setAnchorPoint(Vec2(0,0));
 		keySprite->setScale(Director::getInstance()->getContentScaleFactor());
 		this->addChild(keySprite,2);
-		auto keyLabel = Label::createWithTTF("",font,18,Size::ZERO,TextHAlignment::RIGHT);
+		auto keyLabel = Label::createWithSystemFont("","Arial",18,Size::ZERO,TextHAlignment::RIGHT);
 		keyLabel->setPosition(Vec2(664+60,296-24*i));
 		keyLabel->setAnchorPoint(Vec2(0,0));
 		this->addChild(keyLabel,2);
 		gInstance->hero.keys[i]->attach(keyLabel);
 		/*
-		auto charGoldLabel = Label::createWithTTF(ToString(gInstance->hero.),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+		auto charGoldLabel = Label::createWithSystemFont(ToString(gInstance->hero.),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
 		charGoldLabel->setPosition(statX,statY-90);
 		charGoldLabel->setAnchorPoint(Vec2(1,1));
 		this->addChild(charGoldLabel,2);
@@ -156,12 +146,12 @@ bool FloorScene::init()
 
 
 	//29 430, 130 430
-	auto floorTxtLabel = Label::createWithTTF("Floor",font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	auto floorTxtLabel = Label::createWithSystemFont(GStr("floor"),"Arial",fontSize,Size::ZERO,TextHAlignment::RIGHT);
 	floorTxtLabel->setPosition(Vec2(29,430));
 	floorTxtLabel->setAnchorPoint(Vec2(0,0.5));
 	this->addChild(floorTxtLabel,2);
 
-	auto floorNumLabel = Label::createWithTTF("",font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	auto floorNumLabel = Label::createWithSystemFont("","Arial",fontSize,Size::ZERO,TextHAlignment::RIGHT);
 	floorNumLabel->setPosition(Vec2(130,430));
 	floorNumLabel->setAnchorPoint(Vec2(0,0.5));
 	this->addChild(floorNumLabel,2);

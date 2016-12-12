@@ -16,8 +16,9 @@ bool Enemy::canAtk(){
 bool Enemy::stepOnEvent()
 {
 	bool fightR = Fightable::stepOnEvent();
+	//"Beat "+description+". Received "+ToString(gold.V())+" gold."
 	if (fightR)
-		GameData::getInstance()->log("Beat "+description+". Received "+ToString(gold.V())+" gold.",false);
+		GameData::getInstance()->log(stdsprintf(GStr("beat_enemy"),getDescription(),gold.V()),false);
 	return fightR;
 }
 

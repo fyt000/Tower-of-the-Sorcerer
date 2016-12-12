@@ -36,10 +36,10 @@ protected:
 	int imageIdx;
 	int x;
 	int y;
-	std::string description;
 	cocos2d::Sprite* sprite;
 	void selfDestruct();
-
+private:
+	std::string description;
 	/*
 	std::string imageName1;
 	std::string imageName2;

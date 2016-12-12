@@ -1,6 +1,5 @@
 #include "Configureader.h"
-#include "json/document.h"
-#include "json/reader.h"
+#include "MyEvent.h"
 #include "cocos2d.h"
 #include "Wall.h"
 #include "Enemy.h"
@@ -8,12 +7,19 @@
 #include "Door.h"
 #include "Key.h"
 
+rapidjson::Document* Configureader::langStrDoc=nullptr;
+
+std::string Configureader::curLanguageFile="res/res_english.json";
+
 bool Configureader::ReadEventData(MyEvent ** EventArr,int maxEvent)
 {
 	rapidjson::Document edJSON;
 	//comment not supported in the bundled version of rapidjson
 	//TODO use proper buffering or filestream
-	edJSON.Parse(cocos2d::FileUtils::getInstance()->getStringFromFile("res/gamedata.json").c_str());
+	//using fullPathForFilename made this work for reasons I do not understand
+	//might be some other settings I've changed but I don't know
+	std::string path = cocos2d::FileUtils::getInstance()->fullPathForFilename("res/gamedata.json");
+	edJSON.Parse(cocos2d::FileUtils::getInstance()->getStringFromFile(path).c_str());
 	auto err=edJSON.GetParseError();
 	auto errPos=edJSON.GetErrorOffset();
 	rapidjson::Value& eventdata = edJSON["eventdata"];
@@ -65,7 +71,8 @@ bool Configureader::ReadFloorEvents(int FloorArr[][11][11],int maxFloor,int maxx
 	rapidjson::Document feJSON;
 	//comment not supported in the bundled version of rapidjson
 	//TODO use proper buffering or filestream
-	feJSON.Parse(cocos2d::FileUtils::getInstance()->getStringFromFile("res/gamedata.json").c_str());
+	std::string path = cocos2d::FileUtils::getInstance()->fullPathForFilename("res/gamedata.json");
+	feJSON.Parse(cocos2d::FileUtils::getInstance()->getStringFromFile(path).c_str());
 	auto err=feJSON.GetParseError();
 	auto errPos=feJSON.GetErrorOffset();
 	rapidjson::Value& floorevent = feJSON["floorevents"];
@@ -81,4 +88,33 @@ bool Configureader::ReadFloorEvents(int FloorArr[][11][11],int maxFloor,int maxx
 		}
 	}
 	return true;
+}
+
+std::string Configureader::GetStr(std::string tag){
+	if (langStrDoc==nullptr){
+		initLangDoc();
+	}
+	return ((*langStrDoc)["English"])[tag.c_str()].GetString();
+}
+
+std::string Configureader::GetDescription(std::string desc){
+	if (langStrDoc==nullptr){
+		initLangDoc();
+	}
+	return ((*langStrDoc)["English"])["description"][desc.c_str()].GetString();
+}
+
+void Configureader::initLangDoc()
+{
+	langStrDoc = new rapidjson::Document();
+	std::string path = cocos2d::FileUtils::getInstance()->fullPathForFilename(curLanguageFile);
+	auto strdata=cocos2d::FileUtils::getInstance()->getStringFromFile(path);
+	langStrDoc->Parse<0>(strdata.c_str());
+	auto err=langStrDoc->GetParseError(); //for debugging
+	auto errPos=langStrDoc->GetErrorOffset();
+}
+
+
+Configureader::~Configureader(){
+	delete langStrDoc;
 }

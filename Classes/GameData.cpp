@@ -23,23 +23,7 @@ GameData::GameData():
 
 	Configureader::ReadEventData(EVENTDATA,EVENT_MAX);
 	Configureader::ReadFloorEvents(FLOOREVENTS,MAXFLOOR,11,11);
-	/*
-	EVENTDATA[0]=NULL;
-	EVENTDATA[1]=new Door(1,"yellow door",KeyType::YELLOW);
-	EVENTDATA[8]=new Wall(8,"wall");
-	EVENTDATA[11]=new MyEvent(11,"upstairs"); //?
-	EVENTDATA[29]=new Key(29,"yellow key",KeyType::YELLOW);
-	EVENTDATA[32]=new Consumable(32,"red exlixir",200,0,0,0);
-	EVENTDATA[33]=new Consumable(33,"blue exlixir",400,0,0,0);
-	EVENTDATA[34]=new Consumable(34,"red crystal",0,1,0,0);
-	EVENTDATA[35]=new Consumable(35,"blue crystal",0,0,2,0);
-	EVENTDATA[38]=new MyEvent(38,"special item no3");
-	EVENTDATA[61]=new Enemy(61,"Green Slime",62,35,18,1,1);
-	EVENTDATA[67]=new Enemy(67,"Bat",68,35,38,3,1);
-	EVENTDATA[69]=new Enemy(69,"Priest",70,60,32,8,1);
-	EVENTDATA[77]=new Enemy(77,"Skeleton C",78,50,42,6,1);
-	EVENTDATA[79]=new Enemy(79,"Skeleton B",80,55,52,12,1);
-	*/
+
 	loadFloor();
 }
 

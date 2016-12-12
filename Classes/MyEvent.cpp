@@ -45,7 +45,7 @@ bool MyEvent::specialEffect(){
 }
 std::string MyEvent::getDescription()
 {
-	return description;
+	return Configureader::GetDescription(description);
 }
 Sprite* MyEvent::getSprite(){
 	std::pair<int,int> pxy=TransformCoordinate::transform(x,y);

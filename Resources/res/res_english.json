@@ -1,0 +1,36 @@
+{
+	"English":{
+		"start":"START",
+		"setting":"SETTING",
+		"key":"key",
+		"key_0":"yellow",
+		"key_1":"blue",
+		"key_2":"red",
+		"floor":"Floor",
+		"door_open":"You opened a %s door",
+		"door_nokey":"You do not have a %s key to open the door",
+		"consume":"Consumed %s.%s%s%s",
+		"hp_change":" Vitality increased by %d",
+		"atk_change":" Attack increased by %d",
+		"def_change":" Defence increased by %d",
+		"get_key":"Obtained a %s key",
+		"beat_enemy":"Beat %s. Received %d gold",
+		"description":{
+				"yellow door":"yellow door",
+				"wall":"wall",
+				"upstairs":"upstairs",
+				"yellow key":"yellow key",
+				"red elixir":"red elixir",
+				"blue elixir":"blue elixir",
+				"red crystal":"red crystal",
+				"blue crystal":"blue crystal",
+				"special item no3":"special item no3",
+				"Green Slime":"Green Slime",
+				"Bat":"Bat",
+				"Priest":"Priest",
+				"Skeleton C":"Skeleton C",
+				"Skeleton B":"Skeleton B",
+				"Hero":"Hero"
+			}
+		}
+}

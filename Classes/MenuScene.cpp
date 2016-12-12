@@ -1,5 +1,6 @@
 #include "MenuScene.h"
 #include "FloorScene.h"
+#include "GlobalDefs.h"
 
 USING_NS_CC;
 
@@ -33,16 +34,16 @@ bool MenuScene::init()
 	int fontSize=25;
 
 	MenuItemFont::setFontSize(fontSize);
-	MenuItemFont::setFontName("OpenSans-Regular");
+	MenuItemFont::setFontName("Arial");
 
-	auto menu_item_1 = MenuItemFont::create("START",[](Ref *pSender)->void{
+	auto menu_item_1 = MenuItemFont::create(GStr("start"),[](Ref *pSender)->void{
 		auto scene = FloorScene::createScene();
 		Director::getInstance()->pushScene(scene);
 	});
 	auto menu_item_2 = MenuItemFont::create("HIGHSCORE",[](Ref *pSender)->void{
 		log("highscore");
 	});
-	auto menu_item_3 = MenuItemFont::create("SETTING",[](Ref *pSender)->void{
+	auto menu_item_3 = MenuItemFont::create(GStr("setting"),[](Ref *pSender)->void{
 		log("settings");
 	});
 
