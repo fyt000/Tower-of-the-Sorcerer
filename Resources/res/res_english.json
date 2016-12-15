@@ -15,6 +15,8 @@
 		"def_change":" Defence increased by %d",
 		"get_key":"Obtained a %s key",
 		"beat_enemy":"Beat %s. Received %d gold",
+		"yes":"Yes",
+		"no":"No",
 		"description":{
 				"yellow door":"yellow door",
 				"wall":"wall",
@@ -31,6 +33,6 @@
 				"Skeleton C":"Skeleton C",
 				"Skeleton B":"Skeleton B",
 				"Hero":"Hero"
-			}
 		}
+	}
 }

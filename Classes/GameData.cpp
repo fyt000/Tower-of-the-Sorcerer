@@ -5,6 +5,7 @@
 #include "Consumable.h"
 #include "Door.h"
 #include "Configureader.h"
+#include "DialogStruct.h"
 
 USING_NS_CC;
 
@@ -40,6 +41,8 @@ MyEvent * GameData::getEvent(int x,int y)
 	return FloorEvents[floor.V()][x][y];
 }
 
+
+
 //get event pointer given the id
 MyEvent * GameData::getEventData(int id)
 {
@@ -54,6 +57,38 @@ MyEvent * GameData::getEventData(int x,int y)
 {
 	return getEventData(FLOOREVENTS[floor.V()][x][y]);
 }
+
+void GameData::showDialog(std::queue<DialogStruct>& dq,std::function<void(int)> callback)
+{
+	dialogQ=dq;
+	dialogCallback=callback;
+	if (dialogQ.size()!=0){
+		DialogStruct& ds=dq.front();
+		flScn->drawDialog(ds.text,ds.dialogType,ds.options);
+		dialogQ.pop();
+	}
+}
+
+void GameData::showDialog(DialogStruct& ds,DIALOGTYPE,std::function<void(int)> callback)
+{
+	dialogQ=std::queue<DialogStruct>(); //empty
+	dialogCallback=callback;
+	flScn->drawDialog(ds.text,ds.dialogType,ds.options);
+}
+
+void GameData::dialogCompleted(int choice)
+{
+	if (dialogQ.size()!=0){
+		DialogStruct& ds=dialogQ.front();
+		flScn->drawDialog(ds.text,ds.dialogType,ds.options);
+		dialogQ.pop();
+	}
+	else{
+		if (dialogCallback!=nullptr)
+			dialogCallback(choice);
+	}
+}
+
 
 void GameData::loadFloor(){
 	int curFloor=floor.V();
@@ -235,7 +270,7 @@ PATH GameData::pathFind(int dx,int dy)
 	return path;
 }
 
-void GameData::log(std::string message,bool inst)
+void GameData::log(std::string& message,bool inst)
 {
 	CCLOG("log message: %s",message);
 	logLabel->setString(message);

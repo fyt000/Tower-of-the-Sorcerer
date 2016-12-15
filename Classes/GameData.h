@@ -5,7 +5,8 @@
 #include "HeroX.h"
 #include "Key.h"
 #include "GlobalDefs.h"
-
+#include "FloorScene.h"
+#include "DialogStruct.h"
 
 const int MAXEVENT=500;
 
@@ -29,7 +30,7 @@ public:
 	void moveHeroFinalStep(std::pair<int,int> dest);
 	PATH pathFind(std::pair<int,int> dest);
 	PATH pathFind(int dx,int dy);
-	void log(std::string message,bool instant=true);
+	void log(std::string& message,bool instant=true);
 	void showLog();
 	HeroX hero;
 	cocos2d::EventListenerTouchAllAtOnce* floorMouseListener;
@@ -37,6 +38,12 @@ public:
 	//all the display labels... location set at FloorScene
 	cocos2d::Label* logLabel;
 	LabelBinder<int> floor;
+	FloorScene* flScn;
+
+	//dialog
+	void showDialog(std::queue<DialogStruct>& dq,std::function<void(int)> callback);
+	void showDialog(DialogStruct & ds,DIALOGTYPE,std::function<void(int)> callback);
+	void dialogCompleted(int choice); //used by FloorScene, call callback if any
 
 private:
 	MyEvent* getEventData(int id);
@@ -45,6 +52,11 @@ private:
 	int FLOOREVENTS[MAXFLOOR][11][11]={0}; //int representation - read from config?
 	MyEvent* FloorEvents[MAXFLOOR][11][11]={NULL}; //the actual objects
 	void loadFloor();
+
+	
+	std::queue<DialogStruct> dialogQ;
+	std::function<void(int)> dialogCallback;
+
 	GameData();
 	~GameData();
 };

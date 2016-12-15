@@ -79,6 +79,8 @@ bool FloorScene::init()
 
 	auto gInstance = GameData::getInstance();
 
+	gInstance->flScn=this;
+
 	//std::string font="fonts/arial.ttf";
 	int fontSize=15;
 	gInstance->logLabel = Label::createWithSystemFont("","Arial",20,Size::ZERO,TextHAlignment::CENTER);
@@ -198,30 +200,106 @@ bool FloorScene::init()
 	gInstance->floorMouseListener->onTouchesEnded = CC_CALLBACK_2(FloorScene::onTouchesEnded,this);
 
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(GameData::getInstance()->floorMouseListener,this);
-
+	/*
+	std::string longText="I need to write a sentence. I need to write a sentence. I need to write a sentence. I need to write a sentence. I need to write a sentence. I need to write a sentence.";
+	drawDialog(longText,DIALOGTYPE::SHOP,{"hello","darkness","myold","friend"});
+	*/
 	return true;
 }
 
-//one of it is not right.
-//TODO do this in TransformCoordinate.
-/*
-std::pair<int,int> FloorScene::computeBlock(float x,float y){
-	for (int i=0;i<11;i++)
-		for (int j=0;j<11;j++){
-			int curX = startX+j*40;
-			int curY = startY-i*40;
-			if (x>(curX)&&x<=curX+40&&y>curY&&y<=(curY+40)){
-				CCLOG("block %d %d",i,j);
-				return std::pair<int,int>(i,j);
-			}
-		}
-	return std::pair<int,int>(-1,-1); //return empty?
-}*/
+void FloorScene::drawDialog(std::string& text,enum DIALOGTYPE dType,std::vector<std::string> options)
+{
+	dialogType=dType;
+	dialogOpen=true;
+	dialogNode = DrawNode::create();
+	Vec2 rectangle[4];
+	int startx=150;
+	int vsize=500;
+	rectangle[0] = Vec2(150,450);
+	rectangle[1] = Vec2(startx+vsize,450);
+	rectangle[2] = Vec2(startx+vsize,100);
+	rectangle[3] = Vec2(150,100);
+	Color4F transGray(Color3B::GRAY,0.75);
+	dialogNode->drawPolygon(rectangle,4,transGray,1,Color4F::WHITE);
+	auto textLabel = Label::createWithSystemFont(text,"Arial",18);
+	textLabel->setPosition(Vec2(startx+10,440));
+	textLabel->setAlignment(TextHAlignment::LEFT,TextVAlignment::TOP);
+	textLabel->setDimensions(vsize-20,0);
+	textLabel->setAnchorPoint(Vec2(0,1));
+	dialogNode->addChild(textLabel,2);
 
+	switch (dType){
+		case DIALOGTYPE::YN:{
+			int fontSize = 18;
+			MenuItemFont::setFontSize(fontSize);
+			MenuItemFont::setFontName("Arial");
+
+			auto yesItem = MenuItemFont::create(GStr("yes"),[this](Ref *pSender)->void{
+				closeDialog(0);
+			});
+			auto noItem = MenuItemFont::create(GStr("no"),[this](Ref *pSender)->void{
+				closeDialog(1);
+			});
+
+			float menuX=550;
+			float menuY=130;
+
+			auto *menu = Menu::create(yesItem,noItem, NULL);
+			menu->alignItemsHorizontallyWithPadding(50);
+			menu->setAnchorPoint(Vec2(0,0));
+			menu->setPosition(Vec2(menuX,menuY));
+			dialogNode->addChild(menu,3);
+		}
+		case DIALOGTYPE::SHOP:{
+			int fontSize = 25;
+			MenuItemFont::setFontSize(fontSize);
+			MenuItemFont::setFontName("Arial");
+
+			auto *menu = Menu::create();
+
+			int idx=0;
+			for (auto option: options){
+				auto item = MenuItemFont::create(option,[this,idx](Ref *pSender)->void{
+					closeDialog(idx);
+				});
+				menu->addChild(item);
+				idx++;
+
+			}
+			//float menuX=550; //auto middle
+			float menuY=300;
+			menu->setPositionY(menuY);
+			menu->setAnchorPoint(Vec2(0,0));
+			menu->alignItemsVerticallyWithPadding(10);
+			dialogNode->addChild(menu,3);
+		}
+	}
+	this->addChild(dialogNode,100);
+}
+
+void FloorScene::closeDialog(int c)
+{
+	if (dialogNode!=nullptr){
+		dialogNode->removeFromParent();
+		dialogNode=nullptr;
+	}
+	GameData::getInstance()->dialogCompleted(c);
+}
 
 
 void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches,cocos2d::Event * event)
 {
+	//clicking on menuitem will actually trigger onTouchesEnded as well
+	//so we use dialogOpen to ignore the first click after closeDialog
+	if (dialogOpen){
+		if (dialogType==DIALOGTYPE::NONE){
+			closeDialog(0);
+		}
+		if (dialogNode==nullptr){
+			dialogOpen=false;
+		}
+		return;
+	}
 
 	if (touches.size()==0){
 		return;

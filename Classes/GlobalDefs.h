@@ -12,6 +12,10 @@ enum DIR{
 	UP,DOWN,LEFT,RIGHT
 };
 
+enum DIALOGTYPE{
+	NONE,YN,SHOP
+};
+
 //this is getting ugly... just going to typedef this
 typedef std::vector<std::pair<int,int>> PATH;
 
