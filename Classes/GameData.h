@@ -20,10 +20,9 @@ class GameData
 public:
 	static GameData* getInstance();
 	MyEvent* getEvent(int x,int y);
-	const static int MAXFLOOR=2;
-	int goUpStairs();
-	int goDownStairs();
-	int setFloor(int);
+	const static int MAXFLOOR=3;
+
+	int setFloor(int f);
 	cocos2d::Sprite* getSprite(int x,int y);
 	void moveHero(std::pair<int,int>);
 	void killEvent(std::pair<int,int> place);
@@ -50,9 +49,9 @@ private:
 	MyEvent* getEventData(int x,int y);
 	MyEvent* EVENTDATA[MAXEVENT]={NULL};
 	int FLOOREVENTS[MAXFLOOR][11][11]={0}; //int representation - read from config?
-	MyEvent* FloorEvents[MAXFLOOR][11][11]={NULL}; //the actual objects
-	void loadFloor();
-
+	MyEvent* FloorEvents[11][11]={NULL}; //the actual objects
+	void loadFloor(int);
+	bool floorChange=false;
 	
 	std::queue<DialogStruct> dialogQ;
 	std::function<void(int)> dialogCallback;

@@ -36,7 +36,7 @@ protected:
 	int imageIdx;
 	int x;
 	int y;
-	cocos2d::Sprite* sprite;
+	cocos2d::Sprite* sprite=nullptr;
 	void selfDestruct();
 private:
 	std::string description;

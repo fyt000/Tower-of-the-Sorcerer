@@ -33,10 +33,10 @@ bool HeroX::spendGold(int amt){
 
 
 Sprite* HeroX::getSprite(){
-	/*
+	
 	if (sprite!=NULL){
-		sprite->removeFromParentAndCleanup(true);
-	}*/
+		return sprite;
+	}
 	std::stringstream ss2;
 	ss2<<"images/tile ("<<imageIdx<<").png";
 	auto sprite2=Sprite::create(ss2.str());
@@ -324,6 +324,21 @@ void HeroX::changeFacingDir(std::pair<int,int> dest)
 {
 	HeroX::changeDirAnimate(NULL,nextNodeDir(std::pair<int,int>(x,y),dest),1,true);
 }
+
+void HeroX::setAbsPos(int absx,int absy,enum DIR dir)
+{
+	setXY(absx,absy);
+	std::pair<int,int> pxy=TransformCoordinate::transform(absx,absy);
+	sprite->setPosition(pxy.first,pxy.second);
+	heroDir=dir;
+	changeFacingDir(dir);
+}
+
+void HeroX::changeFacingDir(enum DIR dir)
+{
+	HeroX::changeDirAnimate(NULL,dir,1,true);
+}
+
 
 HeroX * HeroX::clone()
 {

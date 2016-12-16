@@ -32,7 +32,10 @@
 				"Priest":"Priest",
 				"Skeleton C":"Skeleton C",
 				"Skeleton B":"Skeleton B",
-				"Hero":"Hero"
+				"Hero":"Hero",
+				"old man":"old man",
+				"merchant":"merchant",
+				"Gate-Keeper B":"Gate-Keeper B"
 		}
 	}
 }

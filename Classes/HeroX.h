@@ -30,8 +30,9 @@ public:
 
 	//initialized in Hero constructor
 	LabelBinder<int>* keys[KeyType::LAST]; //3 types of keys - each key will be the same type
-
+	void changeFacingDir(enum DIR);
 	void changeFacingDir(std::pair<int,int>);
+	void setAbsPos(int,int,enum DIR);
 	virtual HeroX* clone();
 	~HeroX();
 

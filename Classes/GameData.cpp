@@ -25,7 +25,7 @@ GameData::GameData():
 	Configureader::ReadEventData(EVENTDATA,EVENT_MAX);
 	Configureader::ReadFloorEvents(FLOOREVENTS,MAXFLOOR,11,11);
 
-	loadFloor();
+	loadFloor(1);
 }
 
 //kinda singleton
@@ -38,7 +38,7 @@ GameData* GameData::getInstance(){
 
 MyEvent * GameData::getEvent(int x,int y)
 {
-	return FloorEvents[floor.V()][x][y];
+	return FloorEvents[x][y];
 }
 
 
@@ -90,27 +90,23 @@ void GameData::dialogCompleted(int choice)
 }
 
 
-void GameData::loadFloor(){
-	int curFloor=floor.V();
-	for (int k=0;k<MAXFLOOR;k++){
-		floor=k;
-		for (int i=0;i<11;i++)
-			for (int j=0;j<11;j++){
-				delete FloorEvents[k][i][j]; //if I call loadFloor on loading save files
-				FloorEvents[k][i][j]=NULL;
-				MyEvent* event=getEventData(i,j);
-				if (event){
-					FloorEvents[k][i][j]=event->clone();
-					FloorEvents[k][i][j]->setXY(i,j);
-				}
+void GameData::loadFloor(int nextFloor){
+	floor.setVal(nextFloor);
+	for (int i=0;i<11;i++)
+		for (int j=0;j<11;j++){
+			delete FloorEvents[i][j]; //if I call loadFloor on loading save files
+			FloorEvents[i][j]=NULL;
+			MyEvent* event=getEventData(i,j);
+			if (event){
+				FloorEvents[i][j]=event->clone();
+				FloorEvents[i][j]->setXY(i,j);
 			}
-	}
-	floor=curFloor;
+		}
 }
 
 
 
-
+/*
 int GameData::goUpStairs()
 {
 	floor.addVal(1);
@@ -122,17 +118,19 @@ int GameData::goDownStairs()
 	floor.subVal(1);
 	return floor.V();
 }
-
+*/
 int GameData::setFloor(int f){
-	floor=f;
+	loadFloor(f);
+	flScn->loadFloor();
+	floorChange=true;
 	return floor.V();
 }
 
 cocos2d::Sprite * GameData::getSprite(int x,int y)
 {
-	if (!FloorEvents[floor.V()][x][y])
+	if (!FloorEvents[x][y])
 		return nullptr;
-	return FloorEvents[floor.V()][x][y]->getSprite();
+	return FloorEvents[x][y]->getSprite();
 }
 
 
@@ -168,7 +166,8 @@ void GameData::moveAndTriggerStepOnEvent(std::pair<int,int> dest,std::function<v
 void GameData::killEvent(std::pair<int,int> place){
 	auto eventPtr=getEvent(place.first,place.second);
 	if (eventPtr){
-		FloorEvents[floor.V()][place.first][place.second]=NULL;
+		FLOOREVENTS[floor.V()][place.first][place.second]=0;
+		FloorEvents[place.first][place.second]=NULL;
 		delete eventPtr;
 	}
 }
@@ -188,7 +187,13 @@ void GameData::moveHeroFinalStep(std::pair<int,int> dest){
 			hero.move(pathFind(dest),true);
 		}
 		else{
-			hero.changeFacingDir(dest);
+			if (!floorChange){
+				hero.changeFacingDir(dest);
+			}
+			else
+			{
+				floorChange=false;
+			}
 			Director::getInstance()->getEventDispatcher()->setEnabled(true);
 		}
 	}

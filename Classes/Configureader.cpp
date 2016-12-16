@@ -6,6 +6,7 @@
 #include "Consumable.h"
 #include "Door.h"
 #include "Key.h"
+#include "Stairs.h"
 
 rapidjson::Document* Configureader::langStrDoc=nullptr;
 
@@ -52,6 +53,9 @@ bool Configureader::ReadEventData(MyEvent ** EventArr,int maxEvent)
 		}
 		else if (type=="Enemy"){
 			EventArr[idx]=new Enemy(p[0].GetInt(),p[1].GetString(),p[2].GetInt(),p[3].GetInt(),p[4].GetInt(),p[5].GetInt(),p[6].GetInt());
+		}
+		else if (type=="Stairs"){
+			EventArr[idx]=new Stairs(p[0].GetInt(),p[1].GetString(),p[2].GetInt(),p[3].GetInt(),p[4].GetInt(),static_cast<DIR>(p[5].GetInt()));
 		}
 		/*
 		else if (type==""){

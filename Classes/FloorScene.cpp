@@ -30,20 +30,6 @@ bool FloorScene::init()
 	Point origin = Director::getInstance()->getVisibleOrigin();
 	log("height %d",height);
 
-	//for now assume everything is the same
-	int tiles[]={6,6,6,6,6,6,6,6,6,6,6,
-				6,6,6,6,6,6,6,6,6,6,6,
-				6,6,6,6,6,6,6,6,6,6,6,
-				6,6,6,6,6,6,6,6,6,6,6,
-				6,6,6,6,6,6,6,6,6,6,6,
-				6,6,6,6,6,6,6,6,6,6,6,
-				6,6,6,6,6,6,6,6,6,6,6,
-				6,6,6,6,6,6,6,6,6,6,6,
-				6,6,6,6,6,6,6,6,6,6,6,
-				6,6,6,6,6,6,6,6,6,6,6,
-				6,6,6,6,6,6,6,6,6,6,6
-	};
-
 	//left static image
 	float leftX=0;
 	auto leftSprite=Sprite::create("images/Left.png");
@@ -160,23 +146,42 @@ bool FloorScene::init()
 	gInstance->floor.attach(floorNumLabel);
 
 
-	//display the floor
-	//load the floor info
-	//should use cache
-
-	floorContent = Node::create();
 	startY=height-40-lineRadiusV;
 	CCLOG("start x %f y %f",startX,startY);
 
 	TransformCoordinate::startX=startX;
 	TransformCoordinate::startY=startY;
+
+	loadFloor();
+
+
+	gInstance->floorMouseListener = EventListenerTouchAllAtOnce::create();
+	gInstance->floorMouseListener->onTouchesEnded = CC_CALLBACK_2(FloorScene::onTouchesEnded,this);
+
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(GameData::getInstance()->floorMouseListener,this);
+	/*
+	std::string longText="I need to write a sentence. I need to write a sentence. I need to write a sentence. I need to write a sentence. I need to write a sentence. I need to write a sentence.";
+	drawDialog(longText,DIALOGTYPE::SHOP,{"hello","darkness","myold","friend"});
+	*/
+	return true;
+}
+
+void FloorScene::loadFloor()
+{
+	auto gInstance = GameData::getInstance();
+	if (floorContent!=nullptr){
+		floorContent->removeFromParent();
+	}
+	//display the floor
+	//load the floor info
+	//should use cache
+	floorContent = Node::create();
 	for (int i=0;i<11;i++){
 		for (int j=0;j<11;j++){
-
 			//this is animatable as well
 			//add a class for this
 			std::stringstream ss1;
-			ss1<<"images/tile ("<<tiles[j+11*i]<<").png";
+			ss1<<"images/tile (6).png";
 			auto sprite1=Sprite::create(ss1.str());
 			std::pair<int,int> pxy=TransformCoordinate::transform(i,j);
 			sprite1->setPosition(pxy.first,pxy.second);
@@ -195,16 +200,6 @@ bool FloorScene::init()
 	floorContent->addChild(gInstance->hero.getSprite(),10);
 
 	this->addChild(floorContent,3);
-
-	gInstance->floorMouseListener = EventListenerTouchAllAtOnce::create();
-	gInstance->floorMouseListener->onTouchesEnded = CC_CALLBACK_2(FloorScene::onTouchesEnded,this);
-
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(GameData::getInstance()->floorMouseListener,this);
-	/*
-	std::string longText="I need to write a sentence. I need to write a sentence. I need to write a sentence. I need to write a sentence. I need to write a sentence. I need to write a sentence.";
-	drawDialog(longText,DIALOGTYPE::SHOP,{"hello","darkness","myold","friend"});
-	*/
-	return true;
 }
 
 void FloorScene::drawDialog(std::string& text,enum DIALOGTYPE dType,std::vector<std::string> options)
@@ -311,6 +306,7 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches,coco
 		CCLOG("clicked %f %f",loc.x,loc.y);
 		//need to first check if the loc is within the UI region.
 		auto blockDest=TransformCoordinate::computeBlock(loc.x,loc.y);
+		//CCLOG("block %d %d",blockDest.first,blockDest.second);
 		//auto path=GameData::getInstance()->pathFind(blockDest);
 		GameData::getInstance()->moveHero(blockDest);
 	}

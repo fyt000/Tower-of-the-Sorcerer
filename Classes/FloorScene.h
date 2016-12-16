@@ -5,7 +5,7 @@
 
 class FloorScene: public cocos2d::Layer
 {
-	Node* floorContent;
+	
 	float startX;
 	float startY;
 
@@ -14,7 +14,7 @@ public:
 	static cocos2d::Scene* createScene();
 	virtual bool init();
 	
-	
+	void loadFloor();
 
 	//drawDialogs
 	CREATE_FUNC(FloorScene);
@@ -26,6 +26,7 @@ public:
 	void drawDialog(std::string & text,enum DIALOGTYPE dType,std::vector<std::string>options={});
 
 private:
+	Node* floorContent=nullptr;
 	cocos2d::DrawNode* dialogNode;
 	bool dialogOpen=false;
 	enum DIALOGTYPE dialogType;
