@@ -21,8 +21,8 @@ bool Door::triggerEvent()
 	});
 	return false;
 	*/
-	if (GameData::getInstance()->hero.keys[doorType]->V() >= 1){
-		GameData::getInstance()->hero.keys[doorType]->subVal(1);
+	if (GameData::getInstance()->hero->keys[doorType]->V() >= 1){
+		GameData::getInstance()->hero->keys[doorType]->subVal(1);
 		GameData::getInstance()->log(stdsprintf(GStr("door_open"),GStr("key_"+ToString((int)doorType))));
 		selfDestruct();
 		return true;

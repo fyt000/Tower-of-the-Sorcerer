@@ -86,29 +86,29 @@ bool FloorScene::init()
 	charHpLabel->setPosition(statX,statY);
 	charHpLabel->setAnchorPoint(Vec2(1,1));
 	this->addChild(charHpLabel,2);
-	gInstance->hero.hp.attach(charHpLabel);
-	//gInstance->hero.charHpLabel = charHpLabel;
+	gInstance->hero->hp.attach(charHpLabel);
+	//gInstance->hero->charHpLabel = charHpLabel;
 
 	auto charAtkLabel = Label::createWithSystemFont("","Arial",fontSize,Size::ZERO,TextHAlignment::RIGHT);
 	charAtkLabel->setPosition(statX,statY-30);
 	charAtkLabel->setAnchorPoint(Vec2(1,1));
 	this->addChild(charAtkLabel,2);
-	gInstance->hero.atk.attach(charAtkLabel);
-	//gInstance->hero.charAtkLabel = charAtkLabel;
+	gInstance->hero->atk.attach(charAtkLabel);
+	//gInstance->hero->charAtkLabel = charAtkLabel;
 
 	auto charDefLabel = Label::createWithSystemFont("","Arial",fontSize,Size::ZERO,TextHAlignment::RIGHT);
 	charDefLabel->setPosition(statX,statY-60);
 	charDefLabel->setAnchorPoint(Vec2(1,1));
 	this->addChild(charDefLabel,2);
-	gInstance->hero.def.attach(charDefLabel);
-	//gInstance->hero.charDefLabel = charDefLabel;
+	gInstance->hero->def.attach(charDefLabel);
+	//gInstance->hero->charDefLabel = charDefLabel;
 
 	auto charGoldLabel = Label::createWithSystemFont("","Arial",fontSize,Size::ZERO,TextHAlignment::RIGHT);
 	charGoldLabel->setPosition(statX,statY-90);
 	charGoldLabel->setAnchorPoint(Vec2(1,1));
 	this->addChild(charGoldLabel,2);
-	gInstance->hero.gold.attach(charGoldLabel);
-	//gInstance->hero.charGoldLabel = charGoldLabel;
+	gInstance->hero->gold.attach(charGoldLabel);
+	//gInstance->hero->charGoldLabel = charGoldLabel;
 
 	for (int i=0;i<KeyType::LAST;i++)
 	{
@@ -123,9 +123,9 @@ bool FloorScene::init()
 		keyLabel->setPosition(Vec2(664+60,296-24*i));
 		keyLabel->setAnchorPoint(Vec2(0,0));
 		this->addChild(keyLabel,2);
-		gInstance->hero.keys[i]->attach(keyLabel);
+		gInstance->hero->keys[i]->attach(keyLabel);
 		/*
-		auto charGoldLabel = Label::createWithSystemFont(ToString(gInstance->hero.),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
+		auto charGoldLabel = Label::createWithSystemFont(ToString(gInstance->hero->),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
 		charGoldLabel->setPosition(statX,statY-90);
 		charGoldLabel->setAnchorPoint(Vec2(1,1));
 		this->addChild(charGoldLabel,2);
@@ -143,7 +143,7 @@ bool FloorScene::init()
 	floorNumLabel->setPosition(Vec2(130,430));
 	floorNumLabel->setAnchorPoint(Vec2(0,0.5));
 	this->addChild(floorNumLabel,2);
-	gInstance->floor.attach(floorNumLabel);
+	gInstance->floor->attach(floorNumLabel);
 
 
 	startY=height-40-lineRadiusV;
@@ -197,7 +197,7 @@ void FloorScene::loadFloor()
 		}
 	}
 
-	floorContent->addChild(gInstance->hero.getSprite(),10);
+	floorContent->addChild(gInstance->hero->getSprite(),10);
 
 	this->addChild(floorContent,3);
 }

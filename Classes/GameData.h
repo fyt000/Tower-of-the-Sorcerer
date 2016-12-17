@@ -31,19 +31,21 @@ public:
 	PATH pathFind(int dx,int dy);
 	void log(std::string& message,bool instant=true);
 	void showLog();
-	HeroX hero;
+	HeroX* hero;
 	cocos2d::EventListenerTouchAllAtOnce* floorMouseListener;
 	
 	//all the display labels... location set at FloorScene
 	cocos2d::Label* logLabel;
-	LabelBinder<int> floor;
+	LabelBinder<int>* floor;
 	FloorScene* flScn;
 
 	//dialog
 	void showDialog(std::queue<DialogStruct>& dq,std::function<void(int)> callback);
-	void showDialog(DialogStruct & ds,DIALOGTYPE,std::function<void(int)> callback);
+	void showDialog(DialogStruct& ds,std::function<void(int)> callback);
 	void dialogCompleted(int choice); //used by FloorScene, call callback if any
 
+	void init();
+	void gameover();
 private:
 	MyEvent* getEventData(int id);
 	MyEvent* getEventData(int x,int y);
@@ -55,6 +57,7 @@ private:
 	
 	std::queue<DialogStruct> dialogQ;
 	std::function<void(int)> dialogCallback;
+
 
 	GameData();
 	~GameData();

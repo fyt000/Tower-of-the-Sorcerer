@@ -17,15 +17,8 @@ static GameData* gameData = nullptr;
 //I will change this.
 //this must be changed actually, since we can't initialize like this for loading saves
 //but that's ok... we can read one by one
-GameData::GameData():
-	hero(213,"the 213 hero",1000,20,15,0),
-	floor(1)
-{
-
-	Configureader::ReadEventData(EVENTDATA,EVENT_MAX);
-	Configureader::ReadFloorEvents(FLOOREVENTS,MAXFLOOR,11,11);
-
-	loadFloor(1);
+GameData::GameData(){
+	init();
 }
 
 //kinda singleton
@@ -55,7 +48,7 @@ MyEvent * GameData::getEventData(int id)
 //get event based on the location of the current floor
 MyEvent * GameData::getEventData(int x,int y)
 {
-	return getEventData(FLOOREVENTS[floor.V()][x][y]);
+	return getEventData(FLOOREVENTS[floor->V()][x][y]);
 }
 
 void GameData::showDialog(std::queue<DialogStruct>& dq,std::function<void(int)> callback)
@@ -69,7 +62,7 @@ void GameData::showDialog(std::queue<DialogStruct>& dq,std::function<void(int)> 
 	}
 }
 
-void GameData::showDialog(DialogStruct& ds,DIALOGTYPE,std::function<void(int)> callback)
+void GameData::showDialog(DialogStruct& ds,std::function<void(int)> callback)
 {
 	dialogQ=std::queue<DialogStruct>(); //empty
 	dialogCallback=callback;
@@ -78,7 +71,7 @@ void GameData::showDialog(DialogStruct& ds,DIALOGTYPE,std::function<void(int)> c
 
 void GameData::dialogCompleted(int choice)
 {
-	if (dialogQ.size()!=0){
+	if (!dialogQ.empty()){
 		DialogStruct& ds=dialogQ.front();
 		flScn->drawDialog(ds.text,ds.dialogType,ds.options);
 		dialogQ.pop();
@@ -89,9 +82,32 @@ void GameData::dialogCompleted(int choice)
 	}
 }
 
+void GameData::init()
+{
+	hero = new HeroX(213,"hahaha",10,10,10,0);
+	floor = new LabelBinder<int>(1);
+
+	Configureader::ReadEventData(EVENTDATA,EVENT_MAX);
+	Configureader::ReadFloorEvents(FLOOREVENTS,MAXFLOOR,11,11);
+
+	loadFloor(1);
+}
+
+
+void GameData::gameover()
+{
+	Director::getInstance()->getEventDispatcher()->setEnabled(true);
+	showDialog(DialogStruct("You've been slain. Game over.",DIALOGTYPE::NONE),[this](int notUsed)->void{
+		gameData=nullptr;
+		delete this;
+		Director::getInstance()->popScene();
+	});
+
+}
+
 
 void GameData::loadFloor(int nextFloor){
-	floor.setVal(nextFloor);
+	floor->setVal(nextFloor);
 	for (int i=0;i<11;i++)
 		for (int j=0;j<11;j++){
 			delete FloorEvents[i][j]; //if I call loadFloor on loading save files
@@ -109,21 +125,21 @@ void GameData::loadFloor(int nextFloor){
 /*
 int GameData::goUpStairs()
 {
-	floor.addVal(1);
-	return floor.V();
+	floor->addVal(1);
+	return floor->V();
 }
 
 int GameData::goDownStairs()
 {
-	floor.subVal(1);
-	return floor.V();
+	floor->subVal(1);
+	return floor->V();
 }
 */
 int GameData::setFloor(int f){
 	loadFloor(f);
 	flScn->loadFloor();
 	floorChange=true;
-	return floor.V();
+	return floor->V();
 }
 
 cocos2d::Sprite * GameData::getSprite(int x,int y)
@@ -140,7 +156,7 @@ void GameData::moveHero(PATH path)
 	//floorMouseListener->setEnabled(false);
 	if (path.size()==0)
 		return;
-	hero.move(path);
+	hero->move(path);
 	//Director::getInstance()->getEventDispatcher()->setEnabled(false);
 }
 */
@@ -151,10 +167,10 @@ void GameData::moveHero(std::pair<int,int> dest){
 	logLabel->setString("");
 	auto eventPtr=getEvent(dest.first,dest.second);
 	if (eventPtr==NULL){//check if it is an event
-		hero.move(pathFind(dest),true);
+		hero->move(pathFind(dest),true);
 	}
 	else{
-		hero.move(pathFind(dest));
+		hero->move(pathFind(dest));
 		//moveHero(pathFind(dest));
 	}
 }
@@ -166,7 +182,7 @@ void GameData::moveAndTriggerStepOnEvent(std::pair<int,int> dest,std::function<v
 void GameData::killEvent(std::pair<int,int> place){
 	auto eventPtr=getEvent(place.first,place.second);
 	if (eventPtr){
-		FLOOREVENTS[floor.V()][place.first][place.second]=0;
+		FLOOREVENTS[floor->V()][place.first][place.second]=0;
 		FloorEvents[place.first][place.second]=NULL;
 		delete eventPtr;
 	}
@@ -176,19 +192,19 @@ void GameData::moveHeroFinalStep(std::pair<int,int> dest){
 	auto eventPtr=getEvent(dest.first,dest.second);
 	if (eventPtr==NULL){//check if it is an event
 		//do single move if nothing will happen
-		hero.move(dest);
+		hero->move(dest);
 		return;
 	}
 	
 	//check if distance is 1
-	if ((dest.first==hero.getX()&&abs(hero.getY()-dest.second)==1)||
-		(dest.second==hero.getY()&&abs(hero.getX()-dest.first)==1)){
+	if ((dest.first==hero->getX()&&abs(hero->getY()-dest.second)==1)||
+		(dest.second==hero->getY()&&abs(hero->getX()-dest.first)==1)){
 		if (eventPtr->triggerEvent()){
-			hero.move(pathFind(dest),true);
+			hero->move(pathFind(dest),true);
 		}
 		else{
 			if (!floorChange){
-				hero.changeFacingDir(dest);
+				hero->changeFacingDir(dest);
 			}
 			else
 			{
@@ -200,7 +216,7 @@ void GameData::moveHeroFinalStep(std::pair<int,int> dest){
 	else{
 		//else do a path find and move to the place
 		//moveHero(pathFind(dest));
-		hero.move(pathFind(dest));
+		hero->move(pathFind(dest));
 	}
 	
 }
@@ -216,21 +232,21 @@ PATH GameData::pathFind(std::pair<int,int> dest){
 PATH GameData::pathFind(int dx,int dy)
 {
 
-	if (dx==-1||dy==-1||hero.getX()==dx&&hero.getY()==dy){
+	if (dx==-1||dy==-1||hero->getX()==dx&&hero->getY()==dy){
 		return std::vector<std::pair<int,int>>(); //do nothing
 	}
 
 	//||getEvent(dx,dy)
 
 	int vis[11][11]={0};
-	vis[hero.getX()][hero.getY()]=1;
+	vis[hero->getX()][hero->getY()]=1;
 	std::vector<std::pair<int,int> > path;
 
 	std::vector<std::pair<int,int> > bfsQ;
 	std::vector<int> parent;
 
 	//for every bfsQ push, we need a parent push
-	bfsQ.push_back(std::pair<int,int>(hero.getX(),hero.getY()));
+	bfsQ.push_back(std::pair<int,int>(hero->getX(),hero->getY()));
 	parent.push_back(-1); //no parent for the root
 	int idx=0;
 
@@ -300,4 +316,18 @@ void GameData::showLog(){
 
 GameData::~GameData(){
 	//closing the app will clean up everything.
+	delete hero;
+	hero=nullptr;
+	delete floor;
+	floor=nullptr;
+	for (int i=0;i<11;i++)
+		for (int j=0;j<11;j++){
+			delete FloorEvents[i][j]; //if I call loadFloor on loading save files
+			FloorEvents[i][j]=NULL;
+		}
+	for (int i=0;i<MAXEVENT;i++){
+		delete EVENTDATA[i];
+		EVENTDATA[i]=NULL;
+	}
+	
 }

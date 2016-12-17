@@ -57,6 +57,7 @@ int HeroX::fight(Fightable * target,std::function<void(Fightable&)> hpCallback1,
 	this->setLabelNofity(false);
 	std::vector<FightableSnapshot> heroSnapshots;
 	std::vector<FightableSnapshot> enemySnapshots;
+	//this allows calculation done in one method... without jumping around
 	int ret=Fightable::fight(target,
 		[&enemySnapshots](Fightable &f) {
 			FightableSnapshot ss(f.getHp(),f.getAtk(),f.getDef());
@@ -117,8 +118,14 @@ void HeroX::updateBetweenFight(Node* n,Fightable* f,std::vector<FightableSnapsho
 	f->hp.setVal(snapshots[hSSIdx].hp);
 	f->atk.setVal(snapshots[hSSIdx].atk);
 	f->def.setVal(snapshots[hSSIdx].def);
+	//f==this means its hero->..
+	if (isHero&&hp.V()<=0){
+		sprite->stopAllActions();
+		gInst->gameover();
+		return;
+	}
 	auto newFrame=SpriteFrame::create(frameName,Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor()));
-	this->sprite->setSpriteFrame(newFrame);
+	sprite->setSpriteFrame(newFrame);
 }
 
 enum DIR nextNodeDir(std::pair<int,int> cur,std::pair<int,int> next){
