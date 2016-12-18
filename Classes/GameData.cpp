@@ -91,7 +91,7 @@ void GameData::dialogCompleted(int choice)
 		if (dialogCallback!=nullptr)
 			dialogCallback(choice);
 	}
-	GameData::getInstance()->freeList();
+	GameData::getInstance()->freePendingFreeList();
 }
 
 void GameData::init()
@@ -124,7 +124,7 @@ void GameData::addToFree(MyEvent *evt)
 	freeListLock.unlock();
 }
 
-void GameData::freeList()
+void GameData::freePendingFreeList()
 {
 	freeListLock.lock();
 	for (int i=0;i<pendingFreeList.size();i++){
@@ -357,6 +357,7 @@ void GameData::showLog(){
 }
 
 GameData::~GameData(){
+	freePendingFreeList();
 	//closing the app will clean up everything.
 	delete hero;
 	hero=nullptr;

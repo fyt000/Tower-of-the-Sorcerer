@@ -10,13 +10,9 @@ public:
 	virtual MyEvent* clone();
 	virtual ~MyEvent(); 
 	void setXY(int x,int y);
-	int getID();
-	bool passable(); 
+
 	//virtual bool isEnemy();
 	virtual bool canAtk();
-	bool canGet();
-	bool canInteract();
-	bool specialEffect();
 	std::string getDescription();
 	virtual cocos2d::Sprite* getSprite();
 	virtual bool triggerEvent();
@@ -24,9 +20,8 @@ public:
 	int getX();
 	int getY();
 	void attachAction(MyAction*);
-	//if this function returns true, the event will be destructed by that time
 	int performActions();
-	bool markedForDeletion=false;
+
 
 protected:
 	int imageIdx;

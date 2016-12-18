@@ -27,24 +27,10 @@ void MyEvent::setXY(int x,int y)
 	this->y=y;
 }
 
-int MyEvent::getID(){
-	return imageIdx;
-}
-bool MyEvent::passable(){
-	return false;
-}
 bool MyEvent::canAtk(){
 	return false;
 }
-bool MyEvent::canGet(){
-	return false;
-}
-bool MyEvent::canInteract(){
-	return false;
-}
-bool MyEvent::specialEffect(){
-	return false;
-}
+
 std::string MyEvent::getDescription()
 {
 	return Configureader::GetDescription(description);
@@ -98,10 +84,7 @@ int MyEvent::performActions()
 	//if performActions marked to delete this
 	//sigh... async problems again
 	//introduce some global callback stack and callback chaining mechanism maybe
-	if (markedForDeletion){
-		//selfDestruct();
-		return 0;
-	}
+
 	return 1;
 }
 
