@@ -2,7 +2,7 @@
 #include "GameData.h"
 USING_NS_CC;
 
-Fightable::Fightable(int imageIdx,std::string desc,int hp,int atk,int def,int gold):MyEvent(imageIdx,desc),hp(hp),atk(atk),def(def),gold(gold){
+Fightable::Fightable(int imageIdx,std::string desc,int imageIdx2,int hp,int atk,int def,int gold):MyEvent(imageIdx,desc,imageIdx2),hp(hp),atk(atk),def(def),gold(gold){
 }
 
 

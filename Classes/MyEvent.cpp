@@ -5,9 +5,13 @@
 
 USING_NS_CC;
 //id has to match the image id
-MyEvent::MyEvent(int imageIdx,std::string desc):imageIdx(imageIdx),description(desc),sprite(NULL){
+MyEvent::MyEvent(int imageIdx,std::string desc):imageIdx(imageIdx),description(desc){
 	x=-1;
 	y=-1;
+}
+
+MyEvent::MyEvent(int imageIdx,std::string decription,int imageIdx2):imageIdx(imageIdx),description(decription),imageIdx2(imageIdx2)
+{
 }
 
 MyEvent * MyEvent::clone()
@@ -39,15 +43,39 @@ Sprite* MyEvent::getSprite(){
 	if (sprite!=nullptr){
 		return sprite;
 	}
-	std::pair<int,int> pxy=TransformCoordinate::transform(x,y);
-	std::stringstream ss1;
-	ss1<<"images/tile ("<<imageIdx<<").png";
-	auto sprite1=Sprite::create(ss1.str());
-	sprite1->setPosition(pxy.first,pxy.second);
-	sprite1->setAnchorPoint(Vec2(0,0));
-	sprite1->setScale(Director::getInstance()->getContentScaleFactor()); 
-	sprite=sprite1;
-	return sprite1;
+	//TODO refactor
+	if (imageIdx2==-1){
+		std::pair<int,int> pxy=TransformCoordinate::transform(x,y);
+		std::stringstream ss1;
+		ss1<<"images/tile ("<<imageIdx<<").png";
+		auto sprite1=Sprite::create(ss1.str());
+		sprite1->setPosition(pxy.first,pxy.second);
+		sprite1->setAnchorPoint(Vec2(0,0));
+		sprite1->setScale(Director::getInstance()->getContentScaleFactor());
+		sprite=sprite1;
+		return sprite1;
+	}
+	else{
+		std::stringstream ss2;
+		ss2<<"images/tile ("<<imageIdx<<").png";
+		auto sprite2=Sprite::create(ss2.str());
+		std::pair<int,int> pxy=TransformCoordinate::transform(x,y);
+		sprite2->setPosition(pxy.first,pxy.second);
+		sprite2->setAnchorPoint(Vec2(0,0));
+		std::stringstream ss3;
+		ss3<<"images/tile ("<<imageIdx2<<").png";
+		//add animation
+		Vector<SpriteFrame*> animFrames;
+		animFrames.reserve(2);
+		animFrames.pushBack(SpriteFrame::create(ss3.str(),Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
+		animFrames.pushBack(SpriteFrame::create(ss2.str(),Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
+		Animation* animation = Animation::createWithSpriteFrames(animFrames,0.3f);
+		Animate* animate = Animate::create(animation);
+		sprite2->setScale(Director::getInstance()->getContentScaleFactor());
+		sprite2->runAction(RepeatForever::create(animate));
+		sprite=sprite2;
+		return sprite2;
+	}
 }
 
 bool MyEvent::triggerEvent()

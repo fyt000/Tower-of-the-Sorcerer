@@ -7,6 +7,7 @@ class MyEvent
 {
 public:
 	MyEvent(int imageIdx,std::string decription);
+	MyEvent(int imageIdx,std::string decription,int imageIdx2);
 	virtual MyEvent* clone();
 	virtual ~MyEvent(); 
 	void setXY(int x,int y);
@@ -25,6 +26,7 @@ public:
 
 protected:
 	int imageIdx;
+	int imageIdx2=-1;
 	int x;
 	int y;
 	cocos2d::Sprite* sprite=nullptr;

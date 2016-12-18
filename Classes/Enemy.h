@@ -12,11 +12,8 @@ public:
 	//Enemy(Floor *f,int id,int x,int y,int secondImageID,int hp,int atk,int def);
 	bool canAtk();
 	bool stepOnEvent();
-	cocos2d::Sprite* getSprite();
 	virtual ~Enemy();
 	Enemy* clone();
 
-private:
-	int secondImageID;
 };
 

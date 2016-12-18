@@ -6,7 +6,7 @@
 
 USING_NS_CC;
 
-HeroX::HeroX(int imageIdx,std::string desc,int hp,int atk,int def,int gold):Fightable(imageIdx,desc,hp,atk,def,gold){
+HeroX::HeroX(int imageIdx,std::string desc,int hp,int atk,int def,int gold):Fightable(imageIdx,desc,-1,hp,atk,def,gold){
 	//hard coding these for now
 	x=2;y=4;
 	heroDir=DIR::UP;

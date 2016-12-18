@@ -46,7 +46,10 @@ bool Configureader::ReadEventData(MyEvent ** EventArr,int maxEvent)
 			EventArr[idx]=new Wall(p[0].GetInt(),p[1].GetString());
 		}
 		else if (type=="MyEvent"){
-			EventArr[idx]=new MyEvent(p[0].GetInt(),p[1].GetString());
+			if (p.Size()==2)
+				EventArr[idx]=new MyEvent(p[0].GetInt(),p[1].GetString());
+			else 
+				EventArr[idx]=new MyEvent(p[0].GetInt(),p[1].GetString(),p[2].GetInt());
 		}
 		else if (type=="Key"){
 			EventArr[idx]=new Key(p[0].GetInt(),p[1].GetString(),static_cast<KeyType>(p[2].GetInt()));
