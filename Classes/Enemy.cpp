@@ -9,18 +9,22 @@ Enemy::Enemy(int imageIdx,std::string desc,int secondImageID,int hp,int atk,int 
 	Fightable(imageIdx,desc,secondImageID,hp,atk,def,gold){}
 
 
-bool Enemy::canAtk(){
+bool Enemy::triggerEvent()
+{
+	if (!attackable(GameData::getInstance()->hero)){
+		GameData::getInstance()->log(stdsprintf(std::string("%s is too strong."),getDescription()));
+		return false;
+	}
 	return true;
 }
 
 bool Enemy::stepOnEvent()
 {
-	
-	GameData::getInstance()->attachEnemyInfo(this);
 	bool fightR = Fightable::stepOnEvent();
 	//"Beat "+description+". Received "+ToString(gold.V())+" gold."
 	if (fightR)
 		GameData::getInstance()->log(stdsprintf(GStr("beat_enemy"),getDescription(),gold.V()),false);
+
 	return fightR;
 }
 

@@ -5,6 +5,8 @@
 #include <map>
 #include "LabelBinder.h"
 
+class HeroX;
+
 //uhm. things are not as straight forward
 //to cheat - make things easier to implement
 //use special map to check if there are special effects etc...
@@ -27,6 +29,7 @@ public:
 	virtual int hit(Fightable*);
 	void decHp(int amt);
 	void setLabelNofity(bool n);
+	bool attackable(HeroX*);
 
 	LabelBinder<int> hp;
 	LabelBinder<int> atk;

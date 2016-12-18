@@ -62,7 +62,7 @@ public:
 	void addToFree(MyEvent*);
 	void freePendingFreeList();
 
-	void attachEnemyInfo(Enemy* enemy);
+	void attachEnemyInfo(Fightable* enemy);
 
 private:
 	//now, do I need a lock.... I have no idea how cocos2dx works here

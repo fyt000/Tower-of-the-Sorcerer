@@ -96,7 +96,7 @@ void GameData::dialogCompleted(int choice)
 
 void GameData::init()
 {
-	hero = new HeroX(213,"hahaha",10,10,10,0);
+	hero = new HeroX(213,"hahaha",1000,5,12,0);
 	floor = new LabelBinder<int>(1);
 
 	Configureader::ReadEventData(EVENTDATA,EVENT_MAX);
@@ -134,7 +134,7 @@ void GameData::freePendingFreeList()
 	freeListLock.unlock();
 }
 
-void GameData::attachEnemyInfo(Enemy * enemy)
+void GameData::attachEnemyInfo(Fightable * enemy)
 {
 	enemy->hp.attach(eHpLabel);
 	enemy->atk.attach(eAtkLabel);

@@ -1,5 +1,6 @@
 #include "Fightable.h"
 #include "GameData.h"
+#include "HeroX.h"
 USING_NS_CC;
 
 Fightable::Fightable(int imageIdx,std::string desc,int imageIdx2,int hp,int atk,int def,int gold):MyEvent(imageIdx,desc,imageIdx2),hp(hp),atk(atk),def(def),gold(gold){
@@ -35,6 +36,14 @@ void Fightable::setLabelNofity(bool n)
 	gold.setNofify(n);
 }
 
+//change this to acoomodate items?
+bool Fightable::attackable(HeroX *h)
+{
+	if (h->atk.V()>this->def.V())
+		return true;
+	return false;
+}
+
 
 //fight until the enemy is dead
 //this method is implemented for Fight only because,
@@ -42,8 +51,6 @@ void Fightable::setLabelNofity(bool n)
 //accept callback so that I'll return hp after each hit to the caller
 int Fightable::fight(Fightable* target,std::function<void(Fightable&)> hpCallback1,std::function<void(Fightable&)> hpCallback2){
 	int totalDamageTaken=0;
-	if (hit(target)==0)
-		return -1;
 	while (1){
 		int dmg=hit(target);
 		target->decHp(dmg);
@@ -76,7 +83,9 @@ bool Fightable::triggerEvent(){
 
 //think about extensions later... I don't care right now
 bool Fightable::stepOnEvent(){
-	GameData::getInstance()->hero->fight(this,
+
+	GameData::getInstance()->attachEnemyInfo(this);
+	int dmgTaken=GameData::getInstance()->hero->fight(this,
 		[](Fightable &f) { log("hp %d",f.getHp()); },
 		[](Fightable &f) { log("hp %d",f.getHp()); });
 	//GameData::getInstance()->killEvent(std::pair<int,int>(x,y));
