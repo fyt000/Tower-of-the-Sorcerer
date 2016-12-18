@@ -7,6 +7,7 @@
 #include "GlobalDefs.h"
 #include "FloorScene.h"
 #include "DialogStruct.h"
+#include <mutex>
 
 const int MAXEVENT=500;
 
@@ -26,6 +27,9 @@ public:
 	cocos2d::Sprite* getSprite(int x,int y);
 	void moveHero(std::pair<int,int>);
 	void killEvent(std::pair<int,int> place);
+	//f==-1 for cur floor
+	//note that setEvent DO NOT call delete on the current event occupying x,y
+	void setEvent(int id,int x,int y,int f=-1);
 	void moveHeroFinalStep(std::pair<int,int> dest);
 	PATH pathFind(std::pair<int,int> dest);
 	PATH pathFind(int dx,int dy);
@@ -46,7 +50,14 @@ public:
 
 	void init();
 	void gameover();
+
+	void addToFree(MyEvent*);
+	void freeList();
 private:
+	//now, do I need a lock.... I have no idea how cocos2dx works here
+	//adding a lock for safety concerns
+	std::mutex freeListLock;
+	std::vector<MyEvent*> pendingFreeList;
 	MyEvent* getEventData(int id);
 	MyEvent* getEventData(int x,int y);
 	MyEvent* EVENTDATA[MAXEVENT]={NULL};

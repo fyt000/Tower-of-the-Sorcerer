@@ -17,6 +17,7 @@
 		"beat_enemy":"Beat %s. Received %d gold",
 		"yes":"Yes",
 		"no":"No",
+		"gameover":"You've been slain. Game over",
 		"description":{
 				"yellow door":"yellow door",
 				"wall":"wall",
@@ -36,6 +37,10 @@
 				"old man":"old man",
 				"merchant":"merchant",
 				"Gate-Keeper B":"Gate-Keeper B"
+		},
+		"dialog":{
+			"1":["first dialog window","second dialog window","third dialog window"],
+			"2":["first dialog window","second dialog window","third dialog window"]
 		}
 	}
 }

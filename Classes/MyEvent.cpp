@@ -50,6 +50,9 @@ std::string MyEvent::getDescription()
 	return Configureader::GetDescription(description);
 }
 Sprite* MyEvent::getSprite(){
+	if (sprite!=nullptr){
+		return sprite;
+	}
 	std::pair<int,int> pxy=TransformCoordinate::transform(x,y);
 	std::stringstream ss1;
 	ss1<<"images/tile ("<<imageIdx<<").png";
@@ -63,13 +66,12 @@ Sprite* MyEvent::getSprite(){
 
 bool MyEvent::triggerEvent()
 {
-	//GameData::getInstance()->log("You used The destructible Ball! Enemies on all sides died!");
-	selfDestruct();
-	return true;
+	performActions();
+	return false;
 }
 
 bool MyEvent::stepOnEvent(){
-	//GameData::getInstance()->log("step on event");
+	//GameData::getInstance()->log("step on event")
 	selfDestruct();
 	return false;
 }
@@ -84,9 +86,33 @@ int MyEvent::getY()
 	return y;
 }
 
+void MyEvent::attachAction(MyAction *action)
+{
+	actions.push_back(action);
+}
+
+int MyEvent::performActions()
+{
+	for (int i=0;i<actions.size();i++)
+		actions[i]->perform(this);
+	//if performActions marked to delete this
+	//sigh... async problems again
+	//introduce some global callback stack and callback chaining mechanism maybe
+	if (markedForDeletion){
+		//selfDestruct();
+		return 0;
+	}
+	return 1;
+}
+
 void MyEvent::selfDestruct()
 {
-	GameData::getInstance()->killEvent(std::pair<int,int>(getX(),getY()));
+	if (GameData::getInstance()->getEvent(getX(),getY())==this) //could have been replaced already
+		GameData::getInstance()->killEvent(std::pair<int,int>(getX(),getY()));
+	else
+	{
+		delete this;
+	}
 }
 
 

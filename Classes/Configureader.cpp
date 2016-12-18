@@ -7,6 +7,7 @@
 #include "Door.h"
 #include "Key.h"
 #include "Stairs.h"
+#include "MyAction.h"
 
 rapidjson::Document* Configureader::langStrDoc=nullptr;
 
@@ -30,12 +31,14 @@ bool Configureader::ReadEventData(MyEvent ** EventArr,int maxEvent)
 	std::string type=evt->value["type"].GetString();
 	}*/
 	for (rapidjson::SizeType i=0;i<eventdata.Size();i++){
-		int idx=eventdata[i]["id"].GetInt();
-		std::string type=eventdata[i]["type"].GetString();
-		rapidjson::Value& p=eventdata[i]["params"];
+		auto& data = eventdata[i];
+		int idx=data["id"].GetInt();
+		std::string type=data["type"].GetString();
+		rapidjson::Value& p=data["params"];
 		if (idx>=maxEvent)
 			continue;
 		delete EventArr[idx];
+		EventArr[idx]=NULL;
 		if (type=="Door"){
 			EventArr[idx]=new Door(p[0].GetInt(),p[1].GetString(),static_cast<KeyType>(p[2].GetInt()));
 		}
@@ -65,10 +68,39 @@ bool Configureader::ReadEventData(MyEvent ** EventArr,int maxEvent)
 
 		}
 		*/
+		auto actions = data.FindMember("actions");
+		if (actions!= data.MemberEnd()){
+			rapidjson::Value& actionsData = actions->value;
+			for (rapidjson::SizeType j=0;j<actionsData.Size();j++){
+				EventArr[idx]->attachAction(getAction(actionsData[j]));
+			}
+		}
 	}
-
 	return true;
 }
+
+
+MyAction * Configureader::getAction(rapidjson::Value &data)
+{
+	MyAction* action=nullptr;
+	MyAction* next=nullptr;
+	auto nextData = data.FindMember("next");
+	if (nextData!=data.MemberEnd()){
+		next = getAction(nextData->value);
+	}
+	std::string type=data["action"].GetString();
+	if (type=="Talk"){
+		action = new Talk(next,data["tag"].GetString());
+	}
+	else if (type=="TalkYN"){
+		action = new TalkYN(next,data["tag"].GetString());
+	}
+	else if (type=="TransformSelf"){
+		action = new TransformSelf(next,data["new"].GetInt());
+	}
+	return action;
+}
+
 
 bool Configureader::ReadFloorEvents(int FloorArr[][11][11],int maxFloor,int maxx,int maxy)
 {
@@ -101,12 +133,26 @@ std::string Configureader::GetStr(std::string tag){
 	return ((*langStrDoc)["English"])[tag.c_str()].GetString();
 }
 
-std::string Configureader::GetDescription(std::string desc){
+std::string Configureader::GetDescription(std::string& desc){
 	if (langStrDoc==nullptr){
 		initLangDoc();
 	}
 	return ((*langStrDoc)["English"])["description"][desc.c_str()].GetString();
 }
+
+void Configureader::GetDialog(std::string& tag,std::vector<std::string>& strVec)
+{
+	if (langStrDoc==nullptr){
+		initLangDoc();
+	}
+	rapidjson::Value& dialogs=((*langStrDoc)["English"])["dialog"][tag.c_str()];
+	for (rapidjson::SizeType i=0;i<dialogs.Size();i++){
+		strVec.push_back(dialogs[i].GetString());
+	}
+}
+
+
+
 
 void Configureader::initLangDoc()
 {

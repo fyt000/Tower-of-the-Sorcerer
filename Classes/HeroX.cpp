@@ -137,6 +137,7 @@ enum DIR nextNodeDir(std::pair<int,int> cur,std::pair<int,int> next){
 		return(DIR::RIGHT);
 	else if (next.second-cur.second<0)
 		return(DIR::LEFT);
+	return DIR::UP;
 }
 
 

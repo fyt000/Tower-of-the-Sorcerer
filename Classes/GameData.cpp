@@ -53,10 +53,21 @@ MyEvent * GameData::getEventData(int x,int y)
 
 void GameData::showDialog(std::queue<DialogStruct>& dq,std::function<void(int)> callback)
 {
-	dialogQ=dq;
-	dialogCallback=callback;
+	dialogCallback=callback; //always override callback...to make life simple
+	//10 thousand string copying going around
+	//need to fix this
+	if (dialogQ.empty())
+		dialogQ=dq; //make a copy
+	else{
+		while (!dq.empty()){
+			dialogQ.push(dq.front());
+			dq.pop();
+		}
+		return;
+	}
+	
 	if (dialogQ.size()!=0){
-		DialogStruct& ds=dq.front();
+		DialogStruct& ds=dialogQ.front();
 		flScn->drawDialog(ds.text,ds.dialogType,ds.options);
 		dialogQ.pop();
 	}
@@ -80,6 +91,7 @@ void GameData::dialogCompleted(int choice)
 		if (dialogCallback!=nullptr)
 			dialogCallback(choice);
 	}
+	GameData::getInstance()->freeList();
 }
 
 void GameData::init()
@@ -97,12 +109,29 @@ void GameData::init()
 void GameData::gameover()
 {
 	Director::getInstance()->getEventDispatcher()->setEnabled(true);
-	showDialog(DialogStruct("You've been slain. Game over.",DIALOGTYPE::NONE),[this](int notUsed)->void{
+	showDialog(DialogStruct(GStr("gameover"),DIALOGTYPE::NONE),[this](int notUsed)->void{
 		gameData=nullptr;
 		delete this;
 		Director::getInstance()->popScene();
 	});
 
+}
+
+void GameData::addToFree(MyEvent *evt)
+{
+	freeListLock.lock();
+	pendingFreeList.push_back(evt);
+	freeListLock.unlock();
+}
+
+void GameData::freeList()
+{
+	freeListLock.lock();
+	for (int i=0;i<pendingFreeList.size();i++){
+		delete pendingFreeList[i];
+	}
+	pendingFreeList=std::vector<MyEvent*>();
+	freeListLock.unlock();
 }
 
 
@@ -186,6 +215,19 @@ void GameData::killEvent(std::pair<int,int> place){
 		FloorEvents[place.first][place.second]=NULL;
 		delete eventPtr;
 	}
+}
+
+//do not destruct the current occupying event
+void GameData::setEvent(int id,int x,int y,int f)
+{
+	if (f==-1)
+		f=floor->V();
+	FLOOREVENTS[floor->V()][x][y]=id;
+	if (f==floor->V()){
+		FloorEvents[x][y]=getEventData(id);
+	}
+	//reload floor
+	//flScn->loadFloor();
 }
 
 void GameData::moveHeroFinalStep(std::pair<int,int> dest){

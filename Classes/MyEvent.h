@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "cocos2d.h"
+#include "MyAction.h"
 
 class MyEvent
 {
@@ -22,15 +23,10 @@ public:
 	virtual bool stepOnEvent();
 	int getX();
 	int getY();
-	//virtual int calcDamage();
-
-	//this method works like this:
-	//f is a function ptr that expects a MyEvent and returns void
-	//hit the enemy, pass the enemy back to f, f will then update the graphics
-	//f will probably also fetch hero data .. I don't know
-	//virtual int engage(void (*f) (MyEvent*));
-	//bool hasAnimation();
-	//virtual bool hasFrameAnimation();
+	void attachAction(MyAction*);
+	//if this function returns true, the event will be destructed by that time
+	int performActions();
+	bool markedForDeletion=false;
 
 protected:
 	int imageIdx;
@@ -38,8 +34,11 @@ protected:
 	int y;
 	cocos2d::Sprite* sprite=nullptr;
 	void selfDestruct();
+
+
 private:
 	std::string description;
+	std::vector<MyAction*> actions;
 	/*
 	std::string imageName1;
 	std::string imageName2;

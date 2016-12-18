@@ -202,6 +202,7 @@ void FloorScene::loadFloor()
 	this->addChild(floorContent,3);
 }
 
+//TODO can I get away with string& or do I need to copy it
 void FloorScene::drawDialog(std::string& text,enum DIALOGTYPE dType,std::vector<std::string> options)
 {
 	dialogType=dType;
@@ -310,6 +311,7 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches,coco
 		//auto path=GameData::getInstance()->pathFind(blockDest);
 		GameData::getInstance()->moveHero(blockDest);
 	}
+	GameData::getInstance()->freeList();
 }
 
 
