@@ -134,6 +134,16 @@ void GameData::freePendingFreeList()
 	freeListLock.unlock();
 }
 
+void GameData::attachEnemyInfo(Enemy * enemy)
+{
+	enemy->hp.attach(eHpLabel);
+	enemy->atk.attach(eAtkLabel);
+	enemy->def.attach(eDefLabel);
+	eDescLabel->setString(enemy->getDescription());
+	auto sprite=enemy->getSprite(true);
+	flScn->drawEnemyPortrait(sprite);
+}
+
 
 void GameData::loadFloor(int nextFloor){
 	floor->setVal(nextFloor);
@@ -150,20 +160,6 @@ void GameData::loadFloor(int nextFloor){
 }
 
 
-
-/*
-int GameData::goUpStairs()
-{
-	floor->addVal(1);
-	return floor->V();
-}
-
-int GameData::goDownStairs()
-{
-	floor->subVal(1);
-	return floor->V();
-}
-*/
 int GameData::setFloor(int f){
 	loadFloor(f);
 	flScn->loadFloor();
@@ -203,10 +199,7 @@ void GameData::moveHero(std::pair<int,int> dest){
 		//moveHero(pathFind(dest));
 	}
 }
-/*
-void GameData::moveAndTriggerStepOnEvent(std::pair<int,int> dest,std::function<void> hpCallback1){
 
-}*/
 
 void GameData::killEvent(std::pair<int,int> place){
 	auto eventPtr=getEvent(place.first,place.second);

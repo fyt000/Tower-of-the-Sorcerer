@@ -15,7 +15,7 @@ public:
 	//virtual bool isEnemy();
 	virtual bool canAtk();
 	std::string getDescription();
-	virtual cocos2d::Sprite* getSprite();
+	virtual cocos2d::Sprite* getSprite(bool createNew=false);
 	virtual bool triggerEvent();
 	virtual bool stepOnEvent();
 	int getX();

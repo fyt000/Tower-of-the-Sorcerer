@@ -25,10 +25,15 @@ public:
 	//SeemsGood C++11 SeemsGood
 	void drawDialog(std::string & text,enum DIALOGTYPE dType,std::vector<std::string>options={});
 
+	void drawEnemyPortrait(cocos2d::Sprite* s);
 private:
-	Node* floorContent=nullptr;
+	cocos2d::Node* floorContent=nullptr;
 	cocos2d::DrawNode* dialogNode;
 	bool dialogOpen=false;
 	enum DIALOGTYPE dialogType;
+	int eSpriteX=-1;
+	int eSpriteY=-1;
+	cocos2d::Sprite* enemyInfoSprite=nullptr;
+
 	void closeDialog(int);
 };

@@ -110,6 +110,49 @@ bool FloorScene::init()
 	gInstance->hero->gold.attach(charGoldLabel);
 	//gInstance->hero->charGoldLabel = charGoldLabel;
 
+	int enemyInfoX=700;
+	int enemyInfoY=170;
+
+	eSpriteX=enemyInfoX;
+	eSpriteY=enemyInfoY;
+
+	//enemyInfoX-=25;
+	enemyInfoY-=25;
+
+	enemyInfoX=720;
+
+	auto eDescLabel = Label::createWithSystemFont("","Arial",fontSize,Size::ZERO,TextHAlignment::CENTER);
+	eDescLabel->setPosition(enemyInfoX,enemyInfoY);
+	eDescLabel->setAnchorPoint(Vec2(0.5,0));
+	this->addChild(eDescLabel,2);
+	gInstance->eDescLabel=eDescLabel;
+
+	enemyInfoX=775;
+	enemyInfoY-=25;
+
+	auto eHpLabel = Label::createWithSystemFont("","Arial",fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	eHpLabel->setPosition(enemyInfoX,enemyInfoY);
+	eHpLabel->setAnchorPoint(Vec2(1,0));
+	this->addChild(eHpLabel,2);
+	gInstance->eHpLabel=eHpLabel;
+
+	enemyInfoY-=25;
+
+	auto eAtkLabel = Label::createWithSystemFont("","Arial",fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	eAtkLabel->setPosition(enemyInfoX,enemyInfoY);
+	eAtkLabel->setAnchorPoint(Vec2(1,0));
+	this->addChild(eAtkLabel,2);
+	gInstance->eAtkLabel=eAtkLabel;
+
+	enemyInfoY-=25;
+
+	auto eDefLabel = Label::createWithSystemFont("","Arial",fontSize,Size::ZERO,TextHAlignment::RIGHT);
+	eDefLabel->setPosition(enemyInfoX,enemyInfoY);
+	eDefLabel->setAnchorPoint(Vec2(1,0));
+	this->addChild(eDefLabel,2);
+	gInstance->eDefLabel=eDefLabel;
+
+
 	for (int i=0;i<KeyType::LAST;i++)
 	{
 		std::stringstream ss1;
@@ -271,6 +314,18 @@ void FloorScene::drawDialog(std::string& text,enum DIALOGTYPE dType,std::vector<
 		}
 	}
 	this->addChild(dialogNode,100);
+}
+
+void FloorScene::drawEnemyPortrait(Sprite * s)
+{
+	if (enemyInfoSprite!=nullptr){
+		enemyInfoSprite->removeFromParent();
+	}
+	s->setPositionX(eSpriteX);
+	s->setPositionY(eSpriteY);
+	enemyInfoSprite=s;
+	if (floorContent!=nullptr)
+		floorContent->addChild(s);
 }
 
 void FloorScene::closeDialog(int c)

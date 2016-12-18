@@ -15,6 +15,8 @@ bool Enemy::canAtk(){
 
 bool Enemy::stepOnEvent()
 {
+	
+	GameData::getInstance()->attachEnemyInfo(this);
 	bool fightR = Fightable::stepOnEvent();
 	//"Beat "+description+". Received "+ToString(gold.V())+" gold."
 	if (fightR)

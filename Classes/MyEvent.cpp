@@ -39,10 +39,11 @@ std::string MyEvent::getDescription()
 {
 	return Configureader::GetDescription(description);
 }
-Sprite* MyEvent::getSprite(){
-	if (sprite!=nullptr){
+Sprite* MyEvent::getSprite(bool createNew){
+	if (sprite!=nullptr&&!createNew){
 		return sprite;
 	}
+	
 	//TODO refactor
 	if (imageIdx2==-1){
 		std::pair<int,int> pxy=TransformCoordinate::transform(x,y);
@@ -52,7 +53,8 @@ Sprite* MyEvent::getSprite(){
 		sprite1->setPosition(pxy.first,pxy.second);
 		sprite1->setAnchorPoint(Vec2(0,0));
 		sprite1->setScale(Director::getInstance()->getContentScaleFactor());
-		sprite=sprite1;
+		if (sprite==nullptr)
+			sprite=sprite1;
 		return sprite1;
 	}
 	else{
@@ -73,7 +75,8 @@ Sprite* MyEvent::getSprite(){
 		Animate* animate = Animate::create(animation);
 		sprite2->setScale(Director::getInstance()->getContentScaleFactor());
 		sprite2->runAction(RepeatForever::create(animate));
-		sprite=sprite2;
+		if (sprite==nullptr)
+			sprite=sprite2;
 		return sprite2;
 	}
 }
@@ -125,10 +128,3 @@ void MyEvent::selfDestruct()
 		delete this;
 	}
 }
-
-
-
-/*
-bool MyEvent::hasAnimation(){
-	return false;
-}*/

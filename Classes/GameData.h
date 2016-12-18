@@ -8,6 +8,7 @@
 #include "FloorScene.h"
 #include "DialogStruct.h"
 #include <mutex>
+#include "Enemy.h"
 
 const int MAXEVENT=500;
 
@@ -43,6 +44,13 @@ public:
 	LabelBinder<int>* floor;
 	FloorScene* flScn;
 
+	//enemy info display
+	cocos2d::Label* eDescLabel;
+	cocos2d::Label* eHpLabel;
+	cocos2d::Label* eAtkLabel;
+	cocos2d::Label* eDefLabel;
+	
+
 	//dialog
 	void showDialog(std::queue<DialogStruct>& dq,std::function<void(int)> callback);
 	void showDialog(DialogStruct& ds,std::function<void(int)> callback);
@@ -53,6 +61,9 @@ public:
 
 	void addToFree(MyEvent*);
 	void freePendingFreeList();
+
+	void attachEnemyInfo(Enemy* enemy);
+
 private:
 	//now, do I need a lock.... I have no idea how cocos2dx works here
 	//adding a lock for safety concerns
