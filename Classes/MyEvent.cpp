@@ -21,7 +21,7 @@ MyEvent * MyEvent::clone()
 
 MyEvent::~MyEvent(){
 	if (sprite!=nullptr){
-		sprite->removeFromParent();
+		sprite->removeFromParentAndCleanup(true);
 	}
 }
 

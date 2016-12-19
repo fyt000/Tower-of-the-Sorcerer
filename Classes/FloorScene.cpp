@@ -213,7 +213,8 @@ void FloorScene::loadFloor()
 {
 	auto gInstance = GameData::getInstance();
 	if (floorContent!=nullptr){
-		floorContent->removeFromParent();
+		floorContent->removeAllChildrenWithCleanup(true);
+		floorContent->removeFromParentAndCleanup(true);
 	}
 	//display the floor
 	//load the floor info
@@ -240,6 +241,13 @@ void FloorScene::loadFloor()
 		}
 	}
 
+	gInstance->eDescLabel->setString("");
+	gInstance->eHpLabel->setString("");
+	gInstance->eAtkLabel->setString("");
+	gInstance->eDefLabel->setString("");
+
+	enemyInfoSprite=nullptr; //?
+
 	floorContent->addChild(gInstance->hero->getSprite(),10);
 
 	this->addChild(floorContent,3);
@@ -258,13 +266,15 @@ void FloorScene::drawDialog(std::string& text,enum DIALOGTYPE dType,std::vector<
 	rectangle[1] = Vec2(startx+vsize,450);
 	rectangle[2] = Vec2(startx+vsize,100);
 	rectangle[3] = Vec2(150,100);
-	Color4F transGray(Color3B::GRAY,0.75);
-	dialogNode->drawPolygon(rectangle,4,transGray,1,Color4F::WHITE);
+	Color4F transGray(Color3B::GRAY,0.5);
+	dialogNode->drawPolygon(rectangle,4,transGray,1,transGray);
 	auto textLabel = Label::createWithSystemFont(text,"Arial",18);
 	textLabel->setPosition(Vec2(startx+10,440));
 	textLabel->setAlignment(TextHAlignment::LEFT,TextVAlignment::TOP);
 	textLabel->setDimensions(vsize-20,0);
 	textLabel->setAnchorPoint(Vec2(0,1));
+	textLabel->enableGlow(Color4B::GRAY);
+	textLabel->enableShadow(Color4B::BLACK,cocos2d::Size(1,-1),1);
 	dialogNode->addChild(textLabel,2);
 
 	switch (dType){
@@ -272,7 +282,6 @@ void FloorScene::drawDialog(std::string& text,enum DIALOGTYPE dType,std::vector<
 			int fontSize = 18;
 			MenuItemFont::setFontSize(fontSize);
 			MenuItemFont::setFontName("Arial");
-
 			auto yesItem = MenuItemFont::create(GStr("yes"),[this](Ref *pSender)->void{
 				closeDialog(0);
 			});
