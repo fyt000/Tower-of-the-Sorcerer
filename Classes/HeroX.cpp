@@ -48,7 +48,7 @@ Sprite* HeroX::getSprite(){
 	return sprite2;
 }
 
-int HeroX::fight(Fightable * target,std::function<void(Fightable&)> hpCallback1,std::function<void(Fightable&)> hpCallback2){
+int HeroX::fightX(Fightable * target,std::function<void(Fightable&)> hpCallback1,std::function<void(Fightable&)> hpCallback2){
 	//hpCallBack should really just be null... I don't care
 	//this may change
 

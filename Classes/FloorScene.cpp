@@ -260,16 +260,19 @@ void FloorScene::drawDialog(std::string& text,enum DIALOGTYPE dType,std::vector<
 	dialogOpen=true;
 	dialogNode = DrawNode::create();
 	Vec2 rectangle[4];
+
 	int startx=150;
 	int vsize=500;
-	rectangle[0] = Vec2(150,450);
-	rectangle[1] = Vec2(startx+vsize,450);
-	rectangle[2] = Vec2(startx+vsize,100);
-	rectangle[3] = Vec2(150,100);
+	int startY=450;
+	int hsize=300;
+	rectangle[0] = Vec2(startx,startY);
+	rectangle[1] = Vec2(startx+vsize,startY);
+	rectangle[2] = Vec2(startx+vsize,startY-hsize);
+	rectangle[3] = Vec2(startx,startY-hsize);
 	Color4F transGray(Color3B::GRAY,0.5);
 	dialogNode->drawPolygon(rectangle,4,transGray,1,transGray);
 	auto textLabel = Label::createWithSystemFont(text,"Arial",18);
-	textLabel->setPosition(Vec2(startx+10,440));
+	textLabel->setPosition(Vec2(startx+10,startY-10));
 	textLabel->setAlignment(TextHAlignment::LEFT,TextVAlignment::TOP);
 	textLabel->setDimensions(vsize-20,0);
 	textLabel->setAnchorPoint(Vec2(0,1));
@@ -337,6 +340,78 @@ void FloorScene::drawEnemyPortrait(Sprite * s)
 		floorContent->addChild(s);
 }
 
+//fake it with dialog, since whatever, or refactor dialog into something more general
+void FloorScene::showFloorEnemyStats(std::vector<std::tuple<Sprite*,std::string,int,int,int,int>>& stats)
+{
+	dialogOpen=true;
+	dialogType=DIALOGTYPE::NONE;
+
+	//using the same code as dialog for now, will change this
+	dialogNode = DrawNode::create();
+	Vec2 rectangle[4];
+
+	int startx=TransformCoordinate::startX;
+	int vsize=11*40;
+	int startY=TransformCoordinate::startY+40;
+	int hsize=11*40;
+
+	rectangle[0] = Vec2(startx,startY);
+	rectangle[1] = Vec2(startx+vsize,startY);
+	rectangle[2] = Vec2(startx+vsize,startY-hsize);
+	rectangle[3] = Vec2(startx,startY-hsize);
+	Color4F transGray(Color3B::GRAY,0.75);
+	dialogNode->drawPolygon(rectangle,4,transGray,1,transGray);
+	
+	int spriteX=startx+15;
+	int spriteY=startY-10;
+
+	int descX=spriteX+40+10;
+	int descY=spriteY;
+
+	int expectedDmgX=descX+150;
+	int expectedDmgY=descY;
+
+	int statX=descX;
+	int statY=spriteY-20;
+
+	int fontSize=18;
+
+	for (auto& item: stats){
+		Sprite* sprite=std::get<0>(item);
+		std::string& desc=std::get<1>(item);
+		int hp=std::get<2>(item);
+		int atk=std::get<3>(item);
+		int def=std::get<4>(item);
+		int dmg=std::get<5>(item);
+		
+		sprite->setPositionX(spriteX);
+		sprite->setPositionY(spriteY);
+		sprite->setAnchorPoint(Vec2(0,1));
+		dialogNode->addChild(sprite);
+		
+		auto descLabel = Label::createWithSystemFont(desc,"Arial",fontSize,Size::ZERO,TextHAlignment::LEFT);
+		descLabel->setPosition(Vec2(descX,descY));
+		descLabel->setAnchorPoint(Vec2(0,1));
+		dialogNode->addChild(descLabel,2);
+
+		auto dmgLabel = Label::createWithSystemFont(stdsprintf(GStr("expected_damage"),dmg),"Arial",fontSize,Size::ZERO,TextHAlignment::LEFT);
+		dmgLabel->setPosition(Vec2(expectedDmgX,expectedDmgY));
+		dmgLabel->setAnchorPoint(Vec2(0,1));
+		dialogNode->addChild(dmgLabel,2);
+
+		auto statLabel = Label::createWithSystemFont(stdsprintf(GStr("enemy_stat"),hp,atk,def),"Arial",fontSize,Size::ZERO,TextHAlignment::LEFT);
+		statLabel->setPosition(Vec2(statX,statY));
+		statLabel->setAnchorPoint(Vec2(0,1));
+		dialogNode->addChild(statLabel,2);
+
+		spriteY-=55;
+		descY-=55;
+		expectedDmgY-=55;
+		statY-=55;
+	}
+	this->addChild(dialogNode,100);
+}
+
 void FloorScene::closeDialog(int c)
 {
 	if (dialogNode!=nullptr){
@@ -373,6 +448,9 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches,coco
 		auto blockDest=TransformCoordinate::computeBlock(loc.x,loc.y);
 		//CCLOG("block %d %d",blockDest.first,blockDest.second);
 		//auto path=GameData::getInstance()->pathFind(blockDest);
+		if (blockDest==std::make_pair(-1,-1)){
+			GameData::getInstance()->showFloorEnemyStats();
+		}
 		GameData::getInstance()->moveHero(blockDest);
 	}
 	GameData::getInstance()->freePendingFreeList();

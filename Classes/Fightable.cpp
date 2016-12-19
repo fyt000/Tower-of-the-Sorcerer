@@ -50,7 +50,17 @@ bool Fightable::attackable(HeroX *h)
 //IIRC, Zeno will engage the character (or some other Mob will)
 //accept callback so that I'll return hp after each hit to the caller
 int Fightable::fight(Fightable* target,std::function<void(Fightable&)> hpCallback1,std::function<void(Fightable&)> hpCallback2){
+	
+	
 	int totalDamageTaken=0;
+
+	//ok code is going in loops
+	//add another loop here, refactor later
+	//store the snapshots before fight and restore after fight...
+
+	FightableSnapshot targetSS(target->getHp(),target->getAtk(),target->getDef());
+	FightableSnapshot thisSS(getHp(),getAtk(),getDef());
+
 	while (1){
 		int dmg=hit(target);
 		target->decHp(dmg);
@@ -63,7 +73,18 @@ int Fightable::fight(Fightable* target,std::function<void(Fightable&)> hpCallbac
 		if (hpCallback2!=nullptr)
 			hpCallback2(*this);
 		totalDamageTaken+=dmg;
+		if (hp.V()<=0)
+			break;
 	}
+	//do I need to disable notify? or is it already disabled
+	target->hp.setVal(targetSS.hp);
+	target->atk.setVal(targetSS.atk);
+	target->def.setVal(targetSS.def);
+
+	hp.setVal(thisSS.hp);
+	atk.setVal(thisSS.atk);
+	def.setVal(thisSS.def);
+
 	return totalDamageTaken;
 }
 
@@ -85,7 +106,7 @@ bool Fightable::triggerEvent(){
 bool Fightable::stepOnEvent(){
 
 	GameData::getInstance()->attachEnemyInfo(this);
-	int dmgTaken=GameData::getInstance()->hero->fight(this,
+	int dmgTaken=GameData::getInstance()->hero->fightX(this,
 		[](Fightable &f) { log("hp %d",f.getHp()); },
 		[](Fightable &f) { log("hp %d",f.getHp()); });
 	//GameData::getInstance()->killEvent(std::pair<int,int>(x,y));

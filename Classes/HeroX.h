@@ -20,7 +20,7 @@ public:
 	bool canAtk();
 	bool spendGold(int amt);
 	cocos2d::Sprite* getSprite();
-	int fight(Fightable * target,std::function<void(Fightable&)> hpCallback1,std::function<void(Fightable&)> hpCallback2);
+	int fightX(Fightable * target,std::function<void(Fightable&)> hpCallback1,std::function<void(Fightable&)> hpCallback2);
 	void cleanUpTarget(cocos2d::Node * node,Fightable * target);
 
 	void move(enum DIR dir);

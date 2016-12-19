@@ -6,6 +6,7 @@
 #include "Door.h"
 #include "Configureader.h"
 #include "DialogStruct.h"
+#include <set>
 
 USING_NS_CC;
 
@@ -142,6 +143,35 @@ void GameData::attachEnemyInfo(Fightable * enemy)
 	eDescLabel->setString(enemy->getDescription());
 	auto sprite=enemy->getSprite(true);
 	flScn->drawEnemyPortrait(sprite);
+}
+
+//the other way to do this is do it for each floor load
+//and delete from enemy list
+void GameData::showFloorEnemyStats()
+{
+	//store the set of unique pointers
+	//then dynamic cast them to enemy
+	std::set<MyEvent*> eventSet;
+	for (int i=0;i<11;i++)
+		for (int j=0;j<11;j++){
+			MyEvent* evt=getEventData(i,j);
+			if (evt){
+				eventSet.insert(evt);
+			}
+		}
+	
+	//SeemsGood C++11 SeemsGood
+	//sprite, description, hp, atk, def, expectedDmg
+	std::vector<std::tuple<Sprite*,std::string,int,int,int,int>> displayInfo;
+
+	for (auto evt: eventSet){
+		if (Enemy* e=dynamic_cast<Enemy*>(evt)){
+			int expectedDmg=hero->fight(e,nullptr,nullptr);
+			displayInfo.emplace_back(e->getSprite(true),e->getDescription(),e->getHp(),e->getAtk(),e->getDef(),expectedDmg);
+		}
+	}
+	
+	flScn->showFloorEnemyStats(displayInfo);
 }
 
 

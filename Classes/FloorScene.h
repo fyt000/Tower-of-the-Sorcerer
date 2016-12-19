@@ -26,6 +26,9 @@ public:
 	void drawDialog(std::string & text,enum DIALOGTYPE dType,std::vector<std::string>options={});
 
 	void drawEnemyPortrait(cocos2d::Sprite* s);
+
+	void showFloorEnemyStats(std::vector<std::tuple<cocos2d::Sprite*,std::string,int,int,int,int>>& stats);
+
 private:
 	cocos2d::Node* floorContent=nullptr;
 	cocos2d::DrawNode* dialogNode;
