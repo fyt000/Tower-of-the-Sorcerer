@@ -8,6 +8,7 @@
 #include "Key.h"
 #include "Stairs.h"
 #include "MyAction.h"
+#include "HeroItem.h"
 
 rapidjson::Document* Configureader::langStrDoc=nullptr;
 
@@ -101,6 +102,9 @@ MyAction * Configureader::getAction(rapidjson::Value &data)
 	else if (type=="TransformSelf"){
 		action = new TransformSelf(next,data["new"].GetInt());
 	}
+	else if (type=="Obtain"){
+		action = new Obtain(next,data["id"].GetInt());
+	}
 	return action;
 }
 
@@ -125,6 +129,23 @@ bool Configureader::ReadFloorEvents(int FloorArr[][11][11],int maxFloor,int maxx
 				FloorArr[idx][x][y]=floorevent[i]["data"][x][y].GetInt();
 			}
 		}
+	}
+	return true;
+}
+
+bool Configureader::ReadItemData(HeroItem **itemArr,int maxItem)
+{
+	rapidjson::Document feJSON;
+	std::string path = cocos2d::FileUtils::getInstance()->fullPathForFilename("res/gamedata.json");
+	feJSON.Parse(cocos2d::FileUtils::getInstance()->getStringFromFile(path).c_str());
+	rapidjson::Value& itemdata = feJSON["items"];
+	for (rapidjson::SizeType i=0;i<itemdata.Size();i++){
+		auto& data = itemdata[i];
+		int idx=data["id"].GetInt();
+		if (idx>=maxItem)
+			continue;
+		itemArr[idx] = new HeroItem(idx,data["name"].GetString(),data["image"].GetInt(),
+			HeroItem::getEffectFunction(data["effect"].GetString()),data["uses"].GetInt());
 	}
 	return true;
 }

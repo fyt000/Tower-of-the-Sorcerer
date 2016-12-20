@@ -16,6 +16,7 @@ HeroX::HeroX(int imageIdx,std::string desc,int hp,int atk,int def,int gold):Figh
 	for (int i=0;i<KeyType::LAST;i++){
 		keys[i] = new LabelBinder<int>(3);
 	}
+
 }
 
 

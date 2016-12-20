@@ -18,12 +18,15 @@ protected:
 	MyAction* next;
 };
 
-/*
+
 class Obtain:public MyAction{
 public:
-	Obtain(int item); //TODO make items
-	int perform();
-};*/
+	Obtain(MyAction*,int item); //TODO make items
+	int perform(MyEvent*);
+private:
+	int item;
+};
+
 class Talk: public MyAction{
 public:
 	Talk(MyAction*,std::string tag);

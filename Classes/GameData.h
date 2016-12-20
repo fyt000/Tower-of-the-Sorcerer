@@ -9,8 +9,11 @@
 #include "DialogStruct.h"
 #include <mutex>
 #include "Enemy.h"
+#include "HeroItem.h"
 
 const int MAXEVENT=500;
+const int MAXFLOOR=3;
+const int MAXITEMS=9;
 
 //mostly handle the logic
 //Hero class handles the rest
@@ -22,7 +25,7 @@ class GameData
 public:
 	static GameData* getInstance();
 	MyEvent* getEvent(int x,int y);
-	const static int MAXFLOOR=3;
+	
 
 	int setFloor(int f);
 	cocos2d::Sprite* getSprite(int x,int y);
@@ -64,6 +67,11 @@ public:
 
 	void attachEnemyInfo(Fightable* enemy);
 
+
+
+
+	//items
+	void obtainItem(int idx);
 	void showFloorEnemyStats();
 
 
@@ -74,9 +82,11 @@ private:
 	std::vector<MyEvent*> pendingFreeList;
 	MyEvent* getEventData(int id);
 	MyEvent* getEventData(int x,int y);
-	MyEvent* EVENTDATA[MAXEVENT]={NULL};
+	MyEvent* EVENTDATA[MAXEVENT]={0};
 	int FLOOREVENTS[MAXFLOOR][11][11]={0}; //int representation - read from config?
-	MyEvent* FloorEvents[11][11]={NULL}; //the actual objects
+	MyEvent* FloorEvents[11][11]={0}; //the actual objects
+	HeroItem* ITEMS[MAXITEMS]={0};
+
 	void loadFloor(int);
 	bool floorChange=false;
 	

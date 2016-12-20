@@ -91,6 +91,7 @@ void GameData::dialogCompleted(int choice)
 	else{
 		if (dialogCallback!=nullptr)
 			dialogCallback(choice);
+		dialogCallback=nullptr;
 	}
 	GameData::getInstance()->freePendingFreeList();
 }
@@ -100,8 +101,9 @@ void GameData::init()
 	hero = new HeroX(213,"hahaha",1000,5,12,0);
 	floor = new LabelBinder<int>(1);
 
-	Configureader::ReadEventData(EVENTDATA,EVENT_MAX);
+	Configureader::ReadEventData(EVENTDATA,MAXEVENT);
 	Configureader::ReadFloorEvents(FLOOREVENTS,MAXFLOOR,11,11);
+	Configureader::ReadItemData(ITEMS,MAXITEMS);
 
 	loadFloor(1);
 }
@@ -145,10 +147,21 @@ void GameData::attachEnemyInfo(Fightable * enemy)
 	flScn->drawEnemyPortrait(sprite);
 }
 
+void GameData::obtainItem(int idx)
+{
+	if (idx<0||idx>=MAXITEMS)
+		return;
+	if (!ITEMS[idx])
+		return;
+	ITEMS[idx]->attachTo(flScn);
+}
+
 //the other way to do this is do it for each floor load
 //and delete from enemy list
 void GameData::showFloorEnemyStats()
 {
+	hero->StopAllFinal(nullptr);
+
 	//store the set of unique pointers
 	//then dynamic cast them to enemy
 	std::set<MyEvent*> eventSet;
@@ -394,6 +407,10 @@ GameData::~GameData(){
 	for (int i=0;i<MAXEVENT;i++){
 		delete EVENTDATA[i];
 		EVENTDATA[i]=NULL;
+	}
+	for (int i=0;i<MAXITEMS;i++){
+		delete ITEMS[i];
+		ITEMS[i]=NULL;
 	}
 	
 }

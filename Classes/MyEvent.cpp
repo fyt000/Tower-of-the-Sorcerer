@@ -53,7 +53,7 @@ Sprite* MyEvent::getSprite(bool createNew){
 		sprite1->setPosition(pxy.first,pxy.second);
 		sprite1->setAnchorPoint(Vec2(0,0));
 		sprite1->setScale(Director::getInstance()->getContentScaleFactor());
-		if (sprite==nullptr)
+		if (sprite==nullptr&&!createNew)
 			sprite=sprite1;
 		return sprite1;
 	}
@@ -75,7 +75,7 @@ Sprite* MyEvent::getSprite(bool createNew){
 		Animate* animate = Animate::create(animation);
 		sprite2->setScale(Director::getInstance()->getContentScaleFactor());
 		sprite2->runAction(RepeatForever::create(animate));
-		if (sprite==nullptr)
+		if (sprite==nullptr&&!createNew)
 			sprite=sprite2;
 		return sprite2;
 	}

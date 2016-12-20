@@ -81,3 +81,13 @@ int TransformSelf::perform(MyEvent *evt)
 		next->perform(evt);
 	return 1;
 }
+
+Obtain::Obtain(MyAction *,int item):MyAction(next),item(item)
+{
+}
+
+int Obtain::perform(MyEvent *evt)
+{
+	GameData::getInstance()->obtainItem(item);
+	return 0;
+}

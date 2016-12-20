@@ -42,7 +42,8 @@
 		},
 		"dialog":{
 			"1":["first dialog window","second dialog window","third dialog window"],
-			"2":["first dialog window","second dialog window","third dialog window"]
+			"2":["first dialog window","second dialog window","third dialog window"],
+			"3":["Hello","Take this item"]
 		}
 	}
 }

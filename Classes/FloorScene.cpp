@@ -63,6 +63,7 @@ bool FloorScene::init()
 
 	startX=startX+lineRadiusH;
 
+	//this is likely the place where GameData gets instantiated
 	auto gInstance = GameData::getInstance();
 
 	gInstance->flScn=this;
@@ -195,6 +196,9 @@ bool FloorScene::init()
 	TransformCoordinate::startX=startX;
 	TransformCoordinate::startY=startY;
 
+	TransformCoordinate::itemX=20;
+	TransformCoordinate::itemY=255;
+
 	loadFloor();
 
 
@@ -218,7 +222,7 @@ void FloorScene::loadFloor()
 	}
 	//display the floor
 	//load the floor info
-	//should use cache
+
 	floorContent = Node::create();
 	for (int i=0;i<11;i++){
 		for (int j=0;j<11;j++){
@@ -261,18 +265,18 @@ void FloorScene::drawDialog(std::string& text,enum DIALOGTYPE dType,std::vector<
 	dialogNode = DrawNode::create();
 	Vec2 rectangle[4];
 
-	int startx=150;
+	int startX=150;
 	int vsize=500;
 	int startY=450;
 	int hsize=300;
-	rectangle[0] = Vec2(startx,startY);
-	rectangle[1] = Vec2(startx+vsize,startY);
-	rectangle[2] = Vec2(startx+vsize,startY-hsize);
-	rectangle[3] = Vec2(startx,startY-hsize);
+	rectangle[0] = Vec2(startX,startY);
+	rectangle[1] = Vec2(startX+vsize,startY);
+	rectangle[2] = Vec2(startX+vsize,startY-hsize);
+	rectangle[3] = Vec2(startX,startY-hsize);
 	Color4F transGray(Color3B::GRAY,0.5);
 	dialogNode->drawPolygon(rectangle,4,transGray,1,transGray);
 	auto textLabel = Label::createWithSystemFont(text,"Arial",18);
-	textLabel->setPosition(Vec2(startx+10,startY-10));
+	textLabel->setPosition(Vec2(startX+10,startY-10));
 	textLabel->setAlignment(TextHAlignment::LEFT,TextVAlignment::TOP);
 	textLabel->setDimensions(vsize-20,0);
 	textLabel->setAnchorPoint(Vec2(0,1));
@@ -292,8 +296,8 @@ void FloorScene::drawDialog(std::string& text,enum DIALOGTYPE dType,std::vector<
 				closeDialog(1);
 			});
 
-			float menuX=550;
-			float menuY=130;
+			float menuX=startX+vsize-100;
+			float menuY=startY-hsize+30;
 
 			auto *menu = Menu::create(yesItem,noItem, NULL);
 			menu->alignItemsHorizontallyWithPadding(50);
@@ -343,6 +347,10 @@ void FloorScene::drawEnemyPortrait(Sprite * s)
 //fake it with dialog, since whatever, or refactor dialog into something more general
 void FloorScene::showFloorEnemyStats(std::vector<std::tuple<Sprite*,std::string,int,int,int,int>>& stats)
 {
+
+	if (dialogOpen)
+		return;
+
 	dialogOpen=true;
 	dialogType=DIALOGTYPE::NONE;
 
@@ -448,9 +456,11 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches,coco
 		auto blockDest=TransformCoordinate::computeBlock(loc.x,loc.y);
 		//CCLOG("block %d %d",blockDest.first,blockDest.second);
 		//auto path=GameData::getInstance()->pathFind(blockDest);
+		/*
 		if (blockDest==std::make_pair(-1,-1)){
-			GameData::getInstance()->showFloorEnemyStats();
-		}
+			GameData::getInstance()->obtainItem(0);
+		}*/
+		
 		GameData::getInstance()->moveHero(blockDest);
 	}
 	GameData::getInstance()->freePendingFreeList();

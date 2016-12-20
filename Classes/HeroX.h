@@ -34,6 +34,7 @@ public:
 	void changeFacingDir(std::pair<int,int>);
 	void setAbsPos(int,int,enum DIR);
 	virtual HeroX* clone();
+	void StopAllFinal(cocos2d::Node* node);
 	~HeroX();
 
 private:
@@ -43,7 +44,7 @@ private:
 	void changeDirAnimate(cocos2d::Node * node,DIR newDir,int steps,bool stop=false);
 	void Destined(cocos2d::Node* node,int x,int y);
 	void StopAll(cocos2d::Node * node,std::pair<int,int>);
-	void StopAllFinal(cocos2d::Node* node);
+
 	void triggeredCallback(cocos2d::Node* node,MyEvent * ev);
 	void updateBetweenFight(cocos2d::Node * n,Fightable * f,std::vector<FightableSnapshot>& snapshots,int hSSIdx,std::string & frameName,bool isHero);
 	cocos2d::SpriteFrame* stopSprite(DIR dir);
