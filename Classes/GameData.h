@@ -72,8 +72,12 @@ public:
 
 	//items
 	void obtainItem(int idx);
+	//item 1
 	void showFloorEnemyStats();
-
+	//item 2
+	bool fastStairs();
+	//item 3
+	void replayDialog();
 
 private:
 	//now, do I need a lock.... I have no idea how cocos2dx works here

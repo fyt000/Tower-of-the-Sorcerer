@@ -187,6 +187,13 @@ void GameData::showFloorEnemyStats()
 	flScn->showFloorEnemyStats(displayInfo);
 }
 
+bool GameData::fastStairs()
+{
+	int curX = hero->getX();
+	int curY = hero->getY();
+	return false;
+}
+
 
 void GameData::loadFloor(int nextFloor){
 	floor->setVal(nextFloor);

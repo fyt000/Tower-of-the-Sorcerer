@@ -420,6 +420,8 @@ void FloorScene::showFloorEnemyStats(std::vector<std::tuple<Sprite*,std::string,
 	this->addChild(dialogNode,100);
 }
 
+
+
 void FloorScene::closeDialog(int c)
 {
 	if (dialogNode!=nullptr){
