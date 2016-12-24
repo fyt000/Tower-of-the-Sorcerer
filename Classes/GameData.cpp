@@ -74,7 +74,7 @@ void GameData::showDialog(std::queue<DialogStruct>& dq,std::function<void(int)> 
 	}
 }
 
-void GameData::showDialog(DialogStruct& ds,std::function<void(int)> callback)
+void GameData::showDialog(const DialogStruct& ds,std::function<void(int)> callback)
 {
 	dialogQ=std::queue<DialogStruct>(); //empty
 	dialogCallback=callback;
@@ -376,9 +376,9 @@ PATH GameData::pathFind(int dx,int dy)
 	return path;
 }
 
-void GameData::log(std::string& message,bool inst)
+void GameData::log(const std::string& message,bool inst)
 {
-	CCLOG("log message: %s",message);
+	CCLOG("log message: %s",message.c_str());
 	logLabel->setString(message);
 	logLabel->setVisible(inst);
 	if (inst){

@@ -37,7 +37,7 @@ public:
 	void moveHeroFinalStep(std::pair<int,int> dest);
 	PATH pathFind(std::pair<int,int> dest);
 	PATH pathFind(int dx,int dy);
-	void log(std::string& message,bool instant=true);
+	void log(const std::string& message,bool instant=true);
 	void showLog();
 	HeroX* hero;
 	cocos2d::EventListenerTouchAllAtOnce* floorMouseListener;
@@ -56,7 +56,7 @@ public:
 
 	//dialog
 	void showDialog(std::queue<DialogStruct>& dq,std::function<void(int)> callback);
-	void showDialog(DialogStruct& ds,std::function<void(int)> callback);
+	void showDialog(const DialogStruct& ds,std::function<void(int)> callback);
 	void dialogCompleted(int choice); //used by FloorScene, call callback if any
 
 	void init();
@@ -87,8 +87,8 @@ private:
 	MyEvent* getEventData(int id);
 	MyEvent* getEventData(int x,int y);
 	MyEvent* EVENTDATA[MAXEVENT]={0};
-	int FLOOREVENTS[MAXFLOOR][11][11]={0}; //int representation - read from config?
-	MyEvent* FloorEvents[11][11]={0}; //the actual objects
+	int FLOOREVENTS[MAXFLOOR][11][11]={{{0}}}; //int representation - read from config?
+	MyEvent* FloorEvents[11][11]={{0}}; //the actual objects
 	HeroItem* ITEMS[MAXITEMS]={0};
 
 	void loadFloor(int);

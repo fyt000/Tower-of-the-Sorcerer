@@ -1,3 +1,4 @@
 cocos2d/
 proj.*/
-CMakeLists.txt
+bin/
+linux-build/

@@ -33,14 +33,6 @@ static std::string ToString(const T& val){
 //replace %d %s etc.. with string, number... %% -> %
 //thinking of just using @ as the placeholder
 //no further formating (eg. %lf will not work)
-template<typename... Args>
-static std::string stdsprintf(std::string &s,Args... args){
-	std::stringstream ss;
-	stdsprintf(ss,&s[0],args...);
-	return ss.str();
-}
-
-
 static void stdsprintf(std::stringstream& ss,const char* s){
 	while (s && *s){
 		ss << *s++;
@@ -56,6 +48,14 @@ static void stdsprintf(std::stringstream& ss,const char* s,T value,Args... args)
 		}
 		ss << *s++;
 	}
+}
+
+
+template<typename... Args>
+static std::string stdsprintf(const std::string& s,Args... args){
+	std::stringstream ss;
+	stdsprintf(ss,&s[0],args...);
+	return ss.str();
 }
 
 

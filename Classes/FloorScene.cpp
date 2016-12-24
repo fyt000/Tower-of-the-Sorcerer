@@ -72,7 +72,7 @@ bool FloorScene::init()
 	int fontSize=15;
 	gInstance->logLabel = Label::createWithSystemFont("","Arial",20,Size::ZERO,TextHAlignment::CENTER);
 	gInstance->logLabel->enableGlow(Color4B::BLACK);
-	gInstance->logLabel->enableShadow();
+	gInstance->logLabel->enableShadow(Color4B::BLACK); //shadow appears to be white on KDE (perhaps it has to do with my theme?)
 	gInstance->logLabel->setPosition(visibleSize.width/2,0);
 	gInstance->logLabel->setAnchorPoint(Vec2(0.5,0));
 	this->addChild(gInstance->logLabel,20);
@@ -258,7 +258,7 @@ void FloorScene::loadFloor()
 }
 
 //TODO can I get away with string& or do I need to copy it
-void FloorScene::drawDialog(std::string& text,enum DIALOGTYPE dType,std::vector<std::string> options)
+void FloorScene::drawDialog(const std::string& text,enum DIALOGTYPE dType,std::vector<std::string> options)
 {
 	dialogType=dType;
 	dialogOpen=true;

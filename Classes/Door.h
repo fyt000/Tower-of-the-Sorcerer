@@ -1,6 +1,6 @@
 #pragma once
 #include "MyEvent.h"
-
+#include "Key.h"
 
 class Door:
 	public MyEvent

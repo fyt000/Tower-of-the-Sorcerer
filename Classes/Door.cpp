@@ -1,6 +1,7 @@
 #include "Door.h"
 #include "GameData.h"
 #include "DialogStruct.h"
+#include "GlobalDefs.h"
 #include <queue>
 
 

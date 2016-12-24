@@ -2,6 +2,7 @@
 
 #include "cocos2d.h"
 #include <queue>
+#include "GlobalDefs.h"
 
 class FloorScene: public cocos2d::Layer
 {
@@ -23,7 +24,7 @@ public:
 	void onTouchesEnded(const std::vector<cocos2d::Touch *> &touches,cocos2d::Event *event);
 
 	//SeemsGood C++11 SeemsGood
-	void drawDialog(std::string & text,enum DIALOGTYPE dType,std::vector<std::string>options={});
+	void drawDialog(const std::string & text,enum DIALOGTYPE dType,std::vector<std::string>options={});
 
 	void drawEnemyPortrait(cocos2d::Sprite* s);
 
