@@ -9,6 +9,8 @@ public:
 	bool triggerEvent();
 	virtual ~Stairs();
 	Stairs* clone();
+	int getTargetFloor();
+
 private:
 	int targetFloor;
 	int tx;

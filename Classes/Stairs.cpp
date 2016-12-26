@@ -8,12 +8,22 @@ Stairs::Stairs(int imageIdx,std::string desc,int targetFloor,int x,int y,enum DI
 
 bool Stairs::triggerEvent()
 {
+	//auto retainSprite=getSprite();
+	//retainSprite->retain(); //do not delete yet...
+	//CCLOG("walk the stairs");
 	GameData::getInstance()->hero->getSprite()->stopAllActions(); //actually need to stop...
 	int x=tx;int y=ty;enum DIR dir=heroDir; //setFloor will destruct this object and these fields will be unaccessible
+	//CCLOG("setting floor");
 	GameData::getInstance()->setFloor(targetFloor);
+	//CCLOG("floor set");
 	//use the var saved on stack
 	GameData::getInstance()->hero->setAbsPos(x,y,dir);
+	//CCLOG("done changing floor");
 	return false;
+}
+
+int Stairs::getTargetFloor(){
+	return targetFloor;
 }
 
 Stairs::~Stairs()

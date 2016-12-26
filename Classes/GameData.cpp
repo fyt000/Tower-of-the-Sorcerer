@@ -7,6 +7,7 @@
 #include "Configureader.h"
 #include "DialogStruct.h"
 #include <set>
+#include "Stairs.h"
 
 USING_NS_CC;
 
@@ -189,22 +190,90 @@ void GameData::showFloorEnemyStats()
 
 bool GameData::fastStairs()
 {
+	bool isBesideStair=false;
 	int curX = hero->getX();
 	int curY = hero->getY();
-	return false;
+	int dirX[]={1,0,-1,0};
+	int dirY[]={0,1,0,-1};
+	for (int i=0;i<4;i++){
+		int newX=curX+dirX[i];
+		int newY=curY+dirY[i];
+		if (0<=newX&&newX<11&&0<=newY&&newY<11){
+			//must be beside a staircase
+			auto evt=getEvent(newX,newY);
+			/*
+			if (evt!=nullptr&&(evt==upstair||evt==downstair)){
+				isBesideStair=true;
+				break;
+			}*/
+			
+			if (dynamic_cast<Stairs *>(evt)){
+				isBesideStair=true;
+				break;
+			}
+		}
+	}
+	if (isBesideStair){
+		showDialog(DialogStruct("Go up or down stairs?",DIALOGTYPE::SHOP,{"UP","DOWN","CANCEL"}),[this](int choice){
+			if (choice==0){ //up
+				if (upstair!=nullptr) //TODO add check for current max floor # visited
+					upstair->triggerEvent();
+				else
+					log("reached max floor");
+			}
+			else if (choice==1){
+				if (downstair!=nullptr)
+					downstair->triggerEvent();
+			}
+			else{ //cancel
+				return;
+			}
+			//fastStairs();
+		});
+	}
+	else{
+		log("you need to be beside a staircase");
+	}
+	return isBesideStair;
 }
 
 
 void GameData::loadFloor(int nextFloor){
 	floor->setVal(nextFloor);
+	Stairs* stairs=nullptr;
+	Stairs* oldDownstair=downstair;
+	Stairs* oldUpstair=upstair;
+	downstair=nullptr;
+	upstair=nullptr;
+	if (hero->sprite!=nullptr)
+		hero->sprite->removeFromParent();
+	hero->sprite=nullptr;
+	//hero->getSprite()->removeFromParent();
 	for (int i=0;i<11;i++)
 		for (int j=0;j<11;j++){
-			delete FloorEvents[i][j]; //if I call loadFloor on loading save files
+			auto toDeleteEvt=FloorEvents[i][j];
+			if (toDeleteEvt){
+				delete toDeleteEvt;
+				/*
+				if (oldUpstair==toDeleteEvt||oldDownstair==toDeleteEvt){
+					addToFree(toDeleteEvt);
+				}
+				else{
+					delete toDeleteEvt; //if I call loadFloor on loading save files
+				}*/
+			}
 			FloorEvents[i][j]=NULL;
 			MyEvent* event=getEventData(i,j);
 			if (event){
 				FloorEvents[i][j]=event->clone();
 				FloorEvents[i][j]->setXY(i,j);
+				if (stairs=dynamic_cast<Stairs*>(event)){
+					int sf=stairs->getTargetFloor();
+					if (sf<nextFloor)
+						downstair=stairs;
+					else
+						upstair=stairs;
+				}
 			}
 		}
 }

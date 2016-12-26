@@ -69,8 +69,7 @@
 			"params": [19,"merchant",20],
 			"actions":
 			[
-				{"action":"Talk","tag":"1"},
-				{"action":"TalkYN","tag":"2","next":{"action":"TransformSelf","new":0}}
+				{"action":"TalkYN","tag":"3","next":{"action":"TransformSelf","new":0,"next":{"action":"Obtain","id":1}}}
 			]
 		},
 		{
@@ -172,6 +171,13 @@
 			"image":36,
 			"uses":-1,
 			"effect":"showFloorEnemyStats"
+		},
+		{
+			"id":1,
+			"name":"Orb of fly - forgot name",
+			"image":37,
+			"uses":-1,
+			"effect":"fastStairs"
 		}
 	]
 

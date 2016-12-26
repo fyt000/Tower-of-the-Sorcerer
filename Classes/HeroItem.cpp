@@ -45,8 +45,16 @@ std::function<void()> HeroItem::getEffectFunction(std::string e)
 			GameData::getInstance()->showFloorEnemyStats();
 		};
 	}
+	if (e=="fastStairs"){
+		return [](){
+			GameData::getInstance()->fastStairs();
+		};
+	}
 	return nullptr;
 }
+
+
+
 /*
 void HeroItem::showFloorEnemyStats()
 {

@@ -22,14 +22,14 @@ public:
 	int getY();
 	void attachAction(MyAction*);
 	int performActions();
-
+	cocos2d::Sprite* sprite=nullptr;
 
 protected:
 	int imageIdx;
 	int imageIdx2=-1;
 	int x;
 	int y;
-	cocos2d::Sprite* sprite=nullptr;
+	
 	void selfDestruct();
 
 

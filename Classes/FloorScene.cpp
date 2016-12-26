@@ -217,7 +217,8 @@ void FloorScene::loadFloor()
 {
 	auto gInstance = GameData::getInstance();
 	if (floorContent!=nullptr){
-		floorContent->removeAllChildrenWithCleanup(true);
+		//all children should be removed by now, except hero
+		//floorContent->removeAllChildrenWithCleanup(true);
 		floorContent->removeFromParentAndCleanup(true);
 	}
 	//display the floor

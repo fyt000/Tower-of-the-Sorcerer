@@ -10,6 +10,7 @@
 #include <mutex>
 #include "Enemy.h"
 #include "HeroItem.h"
+#include "Stairs.h"
 
 const int MAXEVENT=500;
 const int MAXFLOOR=3;
@@ -90,6 +91,9 @@ private:
 	int FLOOREVENTS[MAXFLOOR][11][11]={{{0}}}; //int representation - read from config?
 	MyEvent* FloorEvents[11][11]={{0}}; //the actual objects
 	HeroItem* ITEMS[MAXITEMS]={0};
+
+	Stairs* upstair;
+	Stairs* downstair;
 
 	void loadFloor(int);
 	bool floorChange=false;
