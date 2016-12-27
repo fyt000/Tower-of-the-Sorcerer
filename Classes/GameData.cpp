@@ -55,7 +55,7 @@ MyEvent * GameData::getEventData(int x,int y)
 
 void GameData::showDialog(std::queue<DialogStruct>& dq,std::function<void(int)> callback)
 {
-	dialogCallback=callback; //always override callback...to make life simple
+	dialogCallbackQ.push(callback); //always override callback...to make life simple
 	//10 thousand string copying going around
 	//need to fix this
 	if (dialogQ.empty())
@@ -78,7 +78,7 @@ void GameData::showDialog(std::queue<DialogStruct>& dq,std::function<void(int)> 
 void GameData::showDialog(const DialogStruct& ds,std::function<void(int)> callback)
 {
 	dialogQ=std::queue<DialogStruct>(); //empty
-	dialogCallback=callback;
+	dialogCallbackQ.push(callback);
 	flScn->drawDialog(ds.text,ds.dialogType,ds.options);
 }
 
@@ -90,9 +90,11 @@ void GameData::dialogCompleted(int choice)
 		dialogQ.pop();
 	}
 	else{
-		if (dialogCallback!=nullptr)
-			dialogCallback(choice);
-		dialogCallback=nullptr;
+		if (!dialogCallbackQ.empty()){
+			auto callback = dialogCallbackQ.front();
+			dialogCallbackQ.pop();
+			callback(choice);
+		}
 	}
 	GameData::getInstance()->freePendingFreeList();
 }
@@ -162,7 +164,6 @@ void GameData::obtainItem(int idx)
 void GameData::showFloorEnemyStats()
 {
 	hero->StopAllFinal(nullptr);
-
 	//store the set of unique pointers
 	//then dynamic cast them to enemy
 	std::set<MyEvent*> eventSet;
@@ -214,7 +215,9 @@ bool GameData::fastStairs()
 		}
 	}
 	if (isBesideStair){
-		showDialog(DialogStruct("Go up or down stairs?",DIALOGTYPE::SHOP,{"UP","DOWN","CANCEL"}),[this](int choice){
+		CCLOG("is beside stair");
+		showDialog(DialogStruct("Go up or down stairs?",DIALOGTYPE::LIST,{"UP","DOWN","CANCEL"}),[this](int choice){
+			CCLOG("made a choice");
 			if (choice==0){ //up
 				if (upstair!=nullptr) //TODO add check for current max floor # visited
 					upstair->triggerEvent();
@@ -228,13 +231,19 @@ bool GameData::fastStairs()
 			else{ //cancel
 				return;
 			}
-			//fastStairs();
+			fastStairs();
 		});
 	}
 	else{
 		log("you need to be beside a staircase");
 	}
 	return isBesideStair;
+}
+
+void GameData::replayDialog(){
+	showDialog(DialogStruct("this is a matrix",DIALOGTYPE::MATRIX,{"1","2","3","4","5","6","7","8","9"}),[this](int choice){
+		log("you choosed "+ToString(choice));
+	});
 }
 
 

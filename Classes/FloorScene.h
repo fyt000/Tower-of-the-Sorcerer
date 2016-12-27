@@ -34,6 +34,7 @@ private:
 	cocos2d::Node* floorContent=nullptr;
 	cocos2d::DrawNode* dialogNode;
 	bool dialogOpen=false;
+	int absorbClick=0;
 	enum DIALOGTYPE dialogType;
 	int eSpriteX=-1;
 	int eSpriteY=-1;

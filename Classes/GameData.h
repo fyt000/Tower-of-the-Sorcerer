@@ -99,7 +99,7 @@ private:
 	bool floorChange=false;
 	
 	std::queue<DialogStruct> dialogQ;
-	std::function<void(int)> dialogCallback;
+	std::queue<std::function<void(int)> > dialogCallbackQ; //probably need a queue as well
 
 
 	GameData();

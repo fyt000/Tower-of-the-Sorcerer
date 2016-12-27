@@ -38,7 +38,7 @@ bool HeroItem::isObtained()
 	return obtained;
 }
 
-std::function<void()> HeroItem::getEffectFunction(std::string e)
+std::function<void()> HeroItem::getEffectFunction(const std::string& e)
 {
 	if (e=="showFloorEnemyStats"){
 		return [](){
@@ -49,6 +49,11 @@ std::function<void()> HeroItem::getEffectFunction(std::string e)
 		return [](){
 			GameData::getInstance()->fastStairs();
 		};
+	}
+	if (e=="replayDialog"){
+		return [](){
+			GameData::getInstance()->replayDialog();
+		};		
 	}
 	return nullptr;
 }

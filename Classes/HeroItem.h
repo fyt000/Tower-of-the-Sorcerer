@@ -15,7 +15,7 @@ public:
 	void attachTo(cocos2d::Node*);
 	bool isObtained();
 	//all of the effects avaliable 
-	static std::function<void()> getEffectFunction(std::string);
+	static std::function<void()> getEffectFunction(const std::string&);
 	//static void showFloorEnemyStats();
 
 

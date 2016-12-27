@@ -13,7 +13,7 @@ enum DIR{
 };
 
 enum DIALOGTYPE{
-	NONE,YN,SHOP
+	NONE,YN,LIST,MATRIX
 };
 
 //this is getting ugly... just going to typedef this

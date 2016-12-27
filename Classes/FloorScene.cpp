@@ -5,6 +5,7 @@
 #include <utility>
 #include "TransformCoordinate.h"
 #include "LabelBinder.h"
+#include <vector>
 
 USING_NS_CC;
 
@@ -208,7 +209,7 @@ bool FloorScene::init()
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(GameData::getInstance()->floorMouseListener,this);
 	/*
 	std::string longText="I need to write a sentence. I need to write a sentence. I need to write a sentence. I need to write a sentence. I need to write a sentence. I need to write a sentence.";
-	drawDialog(longText,DIALOGTYPE::SHOP,{"hello","darkness","myold","friend"});
+	drawDialog(longText,DIALOGTYPE::LIST,{"hello","darkness","myold","friend"});
 	*/
 	return true;
 }
@@ -261,13 +262,16 @@ void FloorScene::loadFloor()
 //TODO can I get away with string& or do I need to copy it
 void FloorScene::drawDialog(const std::string& text,enum DIALOGTYPE dType,std::vector<std::string> options)
 {
+	if (dialogOpen)
+		return;
+
 	dialogType=dType;
 	dialogOpen=true;
 	dialogNode = DrawNode::create();
 	Vec2 rectangle[4];
 
-	int startX=150;
-	int vsize=500;
+	int startX=160;
+	int vsize=490;
 	int startY=450;
 	int hsize=300;
 	rectangle[0] = Vec2(startX,startY);
@@ -285,8 +289,11 @@ void FloorScene::drawDialog(const std::string& text,enum DIALOGTYPE dType,std::v
 	textLabel->enableShadow(Color4B::BLACK,cocos2d::Size(1,-1),1);
 	dialogNode->addChild(textLabel,2);
 
+	absorbClick++;
+
 	switch (dType){
 		case DIALOGTYPE::YN:{
+			
 			int fontSize = 18;
 			MenuItemFont::setFontSize(fontSize);
 			MenuItemFont::setFontName("Arial");
@@ -304,9 +311,12 @@ void FloorScene::drawDialog(const std::string& text,enum DIALOGTYPE dType,std::v
 			menu->alignItemsHorizontallyWithPadding(50);
 			menu->setAnchorPoint(Vec2(0,0));
 			menu->setPosition(Vec2(menuX,menuY));
+			//menu->setSwallowTouches(true);
 			dialogNode->addChild(menu,3);
+			break;
 		}
-		case DIALOGTYPE::SHOP:{
+		case DIALOGTYPE::LIST:{
+
 			int fontSize = 25;
 			MenuItemFont::setFontSize(fontSize);
 			MenuItemFont::setFontName("Arial");
@@ -328,6 +338,69 @@ void FloorScene::drawDialog(const std::string& text,enum DIALOGTYPE dType,std::v
 			menu->setAnchorPoint(Vec2(0,0));
 			menu->alignItemsVerticallyWithPadding(10);
 			dialogNode->addChild(menu,3);
+			break;
+		}
+		case DIALOGTYPE::MATRIX:{
+			int fontSize=18;
+			int itemsPerRow=5; //hopefully no long strings, so it will fit
+			int startY=350;
+			int itemsLeft=options.size();
+			for (int i=0;;i++){
+				if (!itemsLeft)
+					break;
+				int curItems=itemsPerRow;
+				if (itemsLeft<itemsPerRow){
+					curItems=itemsLeft;
+				}
+				auto* subMenu = Menu::create();
+				for (int j=0;j<curItems;j++){
+					auto item=MenuItemFont::create(options[i*itemsPerRow+j],[i,itemsPerRow,j,this](Ref *pSender)->void{
+						closeDialog(i*itemsPerRow+j);
+					});
+					subMenu->addChild(item);
+				}
+				itemsLeft-=curItems;
+				subMenu->setPositionY(startY);
+				startY-=(fontSize*1.5);
+				subMenu->setAnchorPoint(Vec2(0,0));
+				subMenu->alignItemsHorizontallyWithPadding(10);
+				dialogNode->addChild(subMenu);
+			}
+
+			/*
+			MenuItemFont::setFontSize(fontSize);
+			MenuItemFont::setFontName("Arial");
+
+			auto *menu = Menu::create();
+			menu->setContentSize(Size(vsize,hsize)); //uselss
+			
+			std::vector<Value> itemsInCol;
+
+			int idx=0;
+			for (auto option: options){
+				auto item = MenuItemFont::create(option,[this,idx](Ref *pSender)->void{
+					closeDialog(idx);
+				});
+				menu->addChild(item);
+				idx++;
+				if (idx%itemsPerRow==0){
+					itemsInCol.emplace_back(itemsPerRow);
+				}
+			}
+			if (idx%itemsPerRow!=0){
+				itemsInCol.emplace_back(idx%itemsPerRow);
+			}
+
+			float menuY=300;
+			menu->setPositionY(menuY);
+			menu->setAnchorPoint(Vec2(0,0));
+
+			//this uses Size winSize = Director::getInstance()->getWinSize();
+			//why do they think this is a good idea?
+			menu->alignItemsInColumnsWithArray(itemsInCol);
+			dialogNode->addChild(menu,3);
+			*/
+			break;
 		}
 	}
 	this->addChild(dialogNode,100);
@@ -425,6 +498,7 @@ void FloorScene::showFloorEnemyStats(std::vector<std::tuple<Sprite*,std::string,
 
 void FloorScene::closeDialog(int c)
 {
+	dialogOpen=false;
 	if (dialogNode!=nullptr){
 		dialogNode->removeFromParent();
 		dialogNode=nullptr;
@@ -439,13 +513,19 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches,coco
 	//so we use dialogOpen to ignore the first click after closeDialog
 	if (dialogOpen){
 		if (dialogType==DIALOGTYPE::NONE){
+			absorbClick=0;
 			closeDialog(0);
+			return;
 		}
-		if (dialogNode==nullptr){
-			dialogOpen=false;
-		}
+	}
+	
+	if (absorbClick){
+		absorbClick--;
+		if (dialogNode!=nullptr)
+			absorbClick++;
 		return;
 	}
+	
 
 	if (touches.size()==0){
 		return;

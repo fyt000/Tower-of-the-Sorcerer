@@ -69,7 +69,7 @@
 			"params": [19,"merchant",20],
 			"actions":
 			[
-				{"action":"TalkYN","tag":"3","next":{"action":"TransformSelf","new":0,"next":{"action":"Obtain","id":1}}}
+				{"action":"TalkYN","tag":"3","next":{"action":"TransformSelf","new":0,"next":{"action":"Obtain","id":2}}}
 			]
 		},
 		{
@@ -78,7 +78,7 @@
 			"params": [25,"old man",26],
 			"actions":
 			[
-				{"action":"TalkYN","tag":"3","next":{"action":"TransformSelf","new":0,"next":{"action":"Obtain","id":0}}}
+				{"action":"TalkYN","tag":"3","next":{"action":"TransformSelf","new":0,"next":{"action":"Obtain","id":1}}}
 			]
 		},
 		{
@@ -178,6 +178,13 @@
 			"image":37,
 			"uses":-1,
 			"effect":"fastStairs"
+		},
+		{
+			"id":2,
+			"name":"Orb of Memory - forgot name",
+			"image":38,
+			"uses":-1,
+			"effect":"replayDialog"
 		}
 	]
 

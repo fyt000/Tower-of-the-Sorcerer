@@ -18,7 +18,7 @@ cocos2d::Vec2 TransformCoordinate::itemIDVec2(int id)
 {
 	int row=id/3;
 	int col=id%3;
-	return cocos2d::Vec2(itemX+col*50,itemY-row*50);
+	return cocos2d::Vec2(itemX+col*45,itemY-row*45);
 }
 
 cocos2d::Vec2 TransformCoordinate::getVec2Diff(int x,int y,int nx,int ny)
