@@ -174,13 +174,13 @@ Condition* Configureader::getCondition(rapidjson::Value& v){
 			continue;
 		rapidjson::Value& events = data["events"];
 		for (rapidjson::SizeType j=0;j<events.Size();j++){
-			auto& data = globalevts[i];
+			auto& evtData = events[j];
 			GlobalEvent* gEvt= new GlobalEvent();
-			rapidjson::Value& conditionData = data["conditions"];
+			rapidjson::Value& conditionData = evtData["conditions"];
 			for (rapidjson::SizeType k=0;k<conditionData.Size();k++){
 				gEvt->addCondition(getCondition(conditionData[k]));
 			}			
-			rapidjson::Value& actionsData = data["actions"];
+			rapidjson::Value& actionsData = evtData["actions"];
 			for (rapidjson::SizeType k=0;k<actionsData.Size();k++){
 				gEvt->attachAction(getAction(actionsData[k]));
 			}

@@ -113,6 +113,7 @@ void GameData::init()
 	Configureader::ReadEventData(EVENTDATA);
 	Configureader::ReadFloorEvents(FLOOREVENTS);
 	Configureader::ReadItemData(ITEMS);
+	Configureader::ReadGlobalEvents(GLOBALEVENT);
 
 	loadFloor(1);
 }
