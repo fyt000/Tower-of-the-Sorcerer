@@ -286,6 +286,7 @@ void HeroX::changeDirAnimate(Node* node,enum DIR newDir,int steps,bool stop){
 
 void HeroX::Destined(Node* node,int x,int y){
 	this->x=x;this->y=y;
+	//TODO check for hidden event, call StopAllFinal if needed
 }
 
 void HeroX::StopAll(Node* node,std::pair<int,int> dest){
@@ -301,6 +302,7 @@ void HeroX::StopAllFinal(Node * node)
 	sprite->stopAllActions();
 	sprite->setSpriteFrame(stopSprite(heroDir));
 	GameData::getInstance()->showLog();
+	GameData::getInstance()->triggerGlobalEvents();
 	Director::getInstance()->getEventDispatcher()->setEnabled(true);
 }
 

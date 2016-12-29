@@ -8,6 +8,7 @@
 #include "DialogStruct.h"
 #include <set>
 #include "Stairs.h"
+#include "GlobalEvent.h"
 
 USING_NS_CC;
 
@@ -46,6 +47,11 @@ MyEvent * GameData::getEventData(int id)
 	}
 	return EVENTDATA[id];
 }
+
+int GameData::getEventID(int floorNum,int x,int y){
+	return FLOOREVENTS[floorNum][x][y];
+}
+
 
 //get event based on the location of the current floor
 MyEvent * GameData::getEventData(int x,int y)
@@ -104,9 +110,9 @@ void GameData::init()
 	hero = new HeroX(213,"hahaha",1000,5,12,0);
 	floor = new LabelBinder<int>(1);
 
-	Configureader::ReadEventData(EVENTDATA,MAXEVENT);
-	Configureader::ReadFloorEvents(FLOOREVENTS,MAXFLOOR,11,11);
-	Configureader::ReadItemData(ITEMS,MAXITEMS);
+	Configureader::ReadEventData(EVENTDATA);
+	Configureader::ReadFloorEvents(FLOOREVENTS);
+	Configureader::ReadItemData(ITEMS);
 
 	loadFloor(1);
 }
@@ -425,6 +431,7 @@ PATH GameData::pathFind(int dx,int dy)
 				auto event=getEvent(newX,newY);
 				if (!event||(newX==dx&&newY==dy)){ //can only walk on NULL, do not try to trigger on any event
 					//this could give away 'hidden' events... so ok we could add an extra parameter or something I don't know
+					//TODO add hidden field to bypass pathFind as a non-obstacle(evnt)
 					bfsQ.push_back(std::pair<int,int>(newX,newY));
 					parent.push_back(idx);
 					vis[newX][newY]=1;
@@ -475,6 +482,23 @@ void GameData::showLog(){
 		logLabel->runAction(FadeIn::create(0.75));
 	}
 
+}
+
+//called after
+//1. final hero movement
+//2. used a HeroItem
+void GameData::triggerGlobalEvents(){
+	if (!GLOBALEVENT[floor->V()].empty()){
+		auto& gList=GLOBALEVENT[floor->V()];
+		for (auto iter=gList.begin();iter!=gList.end();){
+			if ((*iter)->tryTrigger()){
+				iter=gList.erase(iter);
+			}
+			else{
+				++iter;
+			}
+		}
+	}
 }
 
 GameData::~GameData(){

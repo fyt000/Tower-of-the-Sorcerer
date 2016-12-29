@@ -158,10 +158,7 @@
 			"id":301,
 			"type":"Stairs",
 			"params":[12,"downstairs",1,0,1,3]
-		}		
-		
-		
-		
+		}
 	],
 	"items":
 	[
@@ -185,6 +182,23 @@
 			"image":38,
 			"uses":-1,
 			"effect":"replayDialog"
+		}
+	],
+	"globalevents":
+	[
+		{
+			"floor":1,
+			"events":
+			[
+				{
+					"conditions":
+					[{"type":"DNE","params":[1,1,2]},{"type":"DNE","params":[1,2,3]}],
+					"actions":
+					[
+						{"action":"Obtain","id":0}
+					]
+				}
+			]
 		}
 	]
 

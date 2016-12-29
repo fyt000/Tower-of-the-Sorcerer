@@ -9,23 +9,23 @@
 #include "Stairs.h"
 #include "MyAction.h"
 #include "HeroItem.h"
+#include "Condition.h"
+#include "GlobalEvent.h"
+#include "GlobalDefs.h"
 
 rapidjson::Document* Configureader::langStrDoc=nullptr;
-
+rapidjson::Document* Configureader::dataDoc=nullptr;
 std::string Configureader::curLanguageFile="res/res_english.json";
 
-bool Configureader::ReadEventData(MyEvent ** EventArr,int maxEvent)
+void Configureader::ReadEventData(MyEvent ** EventArr)
 {
-	rapidjson::Document edJSON;
-	//comment not supported in the bundled version of rapidjson
-	//TODO use proper buffering or filestream
-	//using fullPathForFilename made this work for reasons I do not understand
-	//might be some other settings I've changed but I don't know
-	std::string path = cocos2d::FileUtils::getInstance()->fullPathForFilename("res/gamedata.json");
-	edJSON.Parse(cocos2d::FileUtils::getInstance()->getStringFromFile(path).c_str());
-	auto err=edJSON.GetParseError();
-	auto errPos=edJSON.GetErrorOffset();
-	rapidjson::Value& eventdata = edJSON["eventdata"];
+	int maxEvent=MAXEVENT;
+
+	if (dataDoc==nullptr){
+		initDataDoc();
+	}
+
+	rapidjson::Value& eventdata = (*dataDoc)["eventdata"];
 	/*
 	for (auto evt=eventdata.MemberBegin();evt!=eventdata.MemberEnd();evt++){
 	std::string idx=evt->name.GetString();
@@ -80,7 +80,7 @@ bool Configureader::ReadEventData(MyEvent ** EventArr,int maxEvent)
 			}
 		}
 	}
-	return true;
+	return;
 }
 
 
@@ -109,16 +109,15 @@ MyAction * Configureader::getAction(rapidjson::Value &data)
 }
 
 
-bool Configureader::ReadFloorEvents(int FloorArr[][11][11],int maxFloor,int maxx,int maxy)
+void Configureader::ReadFloorEvents(int FloorArr[][11][11])
 {
-	rapidjson::Document feJSON;
-	//comment not supported in the bundled version of rapidjson
-	//TODO use proper buffering or filestream
-	std::string path = cocos2d::FileUtils::getInstance()->fullPathForFilename("res/gamedata.json");
-	feJSON.Parse(cocos2d::FileUtils::getInstance()->getStringFromFile(path).c_str());
-	auto err=feJSON.GetParseError();
-	auto errPos=feJSON.GetErrorOffset();
-	rapidjson::Value& floorevent = feJSON["floorevents"];
+	int maxFloor=MAXFLOOR;
+	int maxx=11;
+	int maxy=11;
+	if (dataDoc==nullptr){
+		initDataDoc();
+	}
+	rapidjson::Value& floorevent = (*dataDoc)["floorevents"];
 	
 	for (rapidjson::SizeType i=0;i<floorevent.Size();i++){
 		int idx=floorevent[i]["floor"].GetInt();
@@ -130,15 +129,16 @@ bool Configureader::ReadFloorEvents(int FloorArr[][11][11],int maxFloor,int maxx
 			}
 		}
 	}
-	return true;
+	return;
 }
 
-bool Configureader::ReadItemData(HeroItem **itemArr,int maxItem)
+void Configureader::ReadItemData(HeroItem **itemArr)
 {
-	rapidjson::Document feJSON;
-	std::string path = cocos2d::FileUtils::getInstance()->fullPathForFilename("res/gamedata.json");
-	feJSON.Parse(cocos2d::FileUtils::getInstance()->getStringFromFile(path).c_str());
-	rapidjson::Value& itemdata = feJSON["items"];
+	int maxItem=MAXITEMS;
+	if (dataDoc==nullptr){
+		initDataDoc();
+	}
+	rapidjson::Value& itemdata = (*dataDoc)["items"];
 	for (rapidjson::SizeType i=0;i<itemdata.Size();i++){
 		auto& data = itemdata[i];
 		int idx=data["id"].GetInt();
@@ -147,8 +147,48 @@ bool Configureader::ReadItemData(HeroItem **itemArr,int maxItem)
 		itemArr[idx] = new HeroItem(idx,data["name"].GetString(),data["image"].GetInt(),
 			HeroItem::getEffectFunction(data["effect"].GetString()),data["uses"].GetInt());
 	}
-	return true;
+	return;
 }
+
+Condition* Configureader::getCondition(rapidjson::Value& v){
+	std::string type=v["type"].GetString();
+	rapidjson::Value& p=v["params"];
+	if (type=="DNE"){
+		return new Condition(p[0].GetInt(),COND::DNE,p[1].GetInt(),p[2].GetInt());
+	}
+	if (type=="EXISTS"){
+		return new Condition(p[0].GetInt(),COND::EXISTS,p[1].GetInt(),p[2].GetInt());
+	}
+	return nullptr;
+}
+
+ void Configureader::ReadGlobalEvents(std::list<GlobalEvent* >* globEvtArr){
+	if (dataDoc==nullptr){
+		initDataDoc();
+	}
+	rapidjson::Value& globalevts = (*dataDoc)["globalevents"];
+	for (rapidjson::SizeType i=0;i<globalevts.Size();i++){
+		auto& data = globalevts[i];
+		int floor=data["floor"].GetInt();
+		if (floor>MAXFLOOR)
+			continue;
+		rapidjson::Value& events = data["events"];
+		for (rapidjson::SizeType j=0;j<events.Size();j++){
+			auto& data = globalevts[i];
+			GlobalEvent* gEvt= new GlobalEvent();
+			rapidjson::Value& conditionData = data["conditions"];
+			for (rapidjson::SizeType k=0;k<conditionData.Size();k++){
+				gEvt->addCondition(getCondition(conditionData[k]));
+			}			
+			rapidjson::Value& actionsData = data["actions"];
+			for (rapidjson::SizeType k=0;k<actionsData.Size();k++){
+				gEvt->attachAction(getAction(actionsData[k]));
+			}
+			globEvtArr[floor].push_back(gEvt);
+		}
+	}
+ }
+
 
 std::string Configureader::GetStr(std::string tag){
 	if (langStrDoc==nullptr){
@@ -176,7 +216,12 @@ void Configureader::GetDialog(std::string& tag,std::vector<std::string>& strVec)
 }
 
 
-
+void Configureader::initDataDoc(){
+	dataDoc = new rapidjson::Document();
+	std::string path = cocos2d::FileUtils::getInstance()->fullPathForFilename("res/gamedata.json");
+	auto strdata=cocos2d::FileUtils::getInstance()->getStringFromFile(path);
+	dataDoc->Parse<0>(strdata.c_str());
+}
 
 void Configureader::initLangDoc()
 {
@@ -191,4 +236,5 @@ void Configureader::initLangDoc()
 
 Configureader::~Configureader(){
 	delete langStrDoc;
+	delete dataDoc;
 }

@@ -11,10 +11,8 @@
 #include "Enemy.h"
 #include "HeroItem.h"
 #include "Stairs.h"
-
-const int MAXEVENT=500;
-const int MAXFLOOR=3;
-const int MAXITEMS=9;
+#include "GlobalEvent.h"
+#include <list>
 
 //mostly handle the logic
 //Hero class handles the rest
@@ -80,6 +78,11 @@ public:
 	//item 3
 	void replayDialog();
 
+
+	int getEventID(int floor,int x,int y);
+
+	void triggerGlobalEvents();
+
 private:
 	//now, do I need a lock.... I have no idea how cocos2dx works here
 	//adding a lock for safety concerns
@@ -91,6 +94,8 @@ private:
 	int FLOOREVENTS[MAXFLOOR][11][11]={{{0}}}; //int representation - read from config?
 	MyEvent* FloorEvents[11][11]={{0}}; //the actual objects
 	HeroItem* ITEMS[MAXITEMS]={0};
+	std::list<GlobalEvent*> GLOBALEVENT[MAXFLOOR];
+
 
 	Stairs* upstair;
 	Stairs* downstair;

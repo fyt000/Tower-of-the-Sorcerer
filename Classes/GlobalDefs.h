@@ -8,6 +8,15 @@
 //just defines nothing else
 //I will run into forward decl issues if I put everything in gamedata (eg. Hero class)
 
+const int MAXFLOOR=3;
+const int MAXITEMS=9;
+
+//no reason to hard code these limits
+//but anyway...
+const int MAXEVENT=500;
+//const int MAXGLOBAL=10; //per floor
+
+
 enum DIR{
 	UP,DOWN,LEFT,RIGHT
 };

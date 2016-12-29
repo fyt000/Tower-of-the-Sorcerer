@@ -125,6 +125,7 @@ endif( WIN32 )
 
 set(GAME_SRC
   Classes/AppDelegate.cpp
+  Classes/Condition.cpp
   Classes/Configureader.cpp
   Classes/Consumable.cpp
   Classes/Door.cpp
@@ -132,6 +133,7 @@ set(GAME_SRC
   Classes/Fightable.cpp
   Classes/FloorScene.cpp
   Classes/GameData.cpp
+  Classes/GlobalEvent.cpp
   Classes/HelloWorldScene.cpp
   Classes/HeroItem.cpp
   Classes/HeroX.cpp
@@ -148,6 +150,7 @@ set(GAME_SRC
 
 set(GAME_HEADERS
   Classes/AppDelegate.h
+  Classes/Condition.h
   Classes/Configureader.h
   Classes/Consumable.h
   Classes/DialogStruct.h
@@ -158,6 +161,7 @@ set(GAME_HEADERS
   Classes/FloorScene.h
   Classes/GameData.h
   Classes/GlobalDefs.h
+  Classes/GlobalEvent.h
   Classes/HelloWorldScene.h
   Classes/HeroItem.h
   Classes/HeroX.h

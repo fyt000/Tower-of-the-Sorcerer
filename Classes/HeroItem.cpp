@@ -24,6 +24,8 @@ void HeroItem::attachTo(cocos2d::Node *parent)
 		case ui::Widget::TouchEventType::ENDED:
 			if (f)
 				f();
+			GameData::getInstance()->triggerGlobalEvents();
+			break;
 		default:
 			break;
 		}
