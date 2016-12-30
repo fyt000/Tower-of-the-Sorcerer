@@ -396,7 +396,7 @@ void FloorScene::drawDialog(const std::string& text,enum DIALOGTYPE dType,std::v
 			menu->setAnchorPoint(Vec2(0,0));
 
 			//this uses Size winSize = Director::getInstance()->getWinSize();
-			//why do they think this is a good idea?
+			//why do they think this is a good idea? - logged an issue, they are working on it
 			menu->alignItemsInColumnsWithArray(itemsInCol);
 			dialogNode->addChild(menu,3);
 			*/
@@ -498,6 +498,7 @@ void FloorScene::showFloorEnemyStats(std::vector<std::tuple<Sprite*,std::string,
 
 void FloorScene::closeDialog(int c)
 {
+	absorbClick=1;
 	dialogOpen=false;
 	if (dialogNode!=nullptr){
 		dialogNode->removeFromParent();

@@ -11,7 +11,7 @@ class MyAction{
 public:
 	MyAction();
 	MyAction(MyAction*);
-	virtual int perform(MyEvent*)=0;
+	virtual int perform(MyEvent*);
 	virtual ~MyAction();
 protected:
 	//action chaining
@@ -29,7 +29,7 @@ private:
 
 class Talk: public MyAction{
 public:
-	Talk(MyAction*,std::string tag);
+	Talk(MyAction*,const std::string& tag);
 	virtual int perform(MyEvent*);
 	virtual ~Talk();
 protected:
@@ -40,7 +40,7 @@ protected:
 
 class TalkYN: public Talk{
 public:
-	TalkYN(MyAction*,std::string tag);
+	TalkYN(MyAction*,const std::string& tag);
 	virtual int perform(MyEvent*);
 };
 
@@ -50,4 +50,24 @@ public:
 	virtual int perform(MyEvent*);
 private:
 	int id;
+};
+
+//TODO add animation type?
+class Transform: public MyAction{
+public:
+	Transform(MyAction*,int floor,int x,int y,int targetID);
+	virtual int perform(MyEvent*);
+private:
+	int floor;
+	int x;
+	int y;
+	int targetID;
+};
+
+class LogText: public MyAction{
+public:
+	LogText(MyAction*,const std::string& tag);
+	virtual int perform(MyEvent*);
+private:
+	std::string tag;
 };

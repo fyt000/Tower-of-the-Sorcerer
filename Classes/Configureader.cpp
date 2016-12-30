@@ -105,6 +105,12 @@ MyAction * Configureader::getAction(rapidjson::Value &data)
 	else if (type=="Obtain"){
 		action = new Obtain(next,data["id"].GetInt());
 	}
+	else if (type=="LogText"){
+		action = new LogText(next,data["tag"].GetString());
+	}
+	else if (type=="Transform"){
+		action = new Transform(next,data["floor"].GetInt(),data["x"].GetInt(),data["y"].GetInt(),data["id"].GetInt());
+	}
 	return action;
 }
 
@@ -121,7 +127,7 @@ void Configureader::ReadFloorEvents(int FloorArr[][11][11])
 	
 	for (rapidjson::SizeType i=0;i<floorevent.Size();i++){
 		int idx=floorevent[i]["floor"].GetInt();
-		if (idx>=maxFloor)
+		if (idx>maxFloor)
 			continue;
 		for (int x=0;x<maxx;x++){
 			for (int y=0;y<maxy;y++){

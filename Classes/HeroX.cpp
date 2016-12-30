@@ -112,6 +112,7 @@ int HeroX::fightX(Fightable * target,std::function<void(Fightable&)> hpCallback1
 
 void HeroX::cleanUpTarget(Node* node,Fightable * target){
 	GameData::getInstance()->killEvent(std::pair<int,int>(target->getX(),target->getY()));
+	GameData::getInstance()->triggerGlobalEvents();
 }
 
 void HeroX::updateBetweenFight(Node* n,Fightable* f,std::vector<FightableSnapshot> &snapshots,int hSSIdx,std::string &frameName,bool isHero){

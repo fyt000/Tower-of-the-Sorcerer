@@ -20,6 +20,7 @@
 		"gameover":"You've been slain. Game over",
 		"expected_damage":"Expected damage: %d",
 		"enemy_stat":"HP %d Attack %d Defence %d",
+		"open_jail":"You've slained the guards and opened the guaraded door(s)",
 		"description":{
 				"yellow door":"yellow door",
 				"wall":"wall",
@@ -31,6 +32,7 @@
 				"blue crystal":"blue crystal",
 				"special item no3":"special item no3",
 				"Green Slime":"Green Slime",
+				"Red Slime":"Red Slime",
 				"Bat":"Bat",
 				"Priest":"Priest",
 				"Skeleton C":"Skeleton C",

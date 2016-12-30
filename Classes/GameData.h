@@ -90,15 +90,15 @@ private:
 	std::vector<MyEvent*> pendingFreeList;
 	MyEvent* getEventData(int id);
 	MyEvent* getEventData(int x,int y);
-	MyEvent* EVENTDATA[MAXEVENT]={0};
-	int FLOOREVENTS[MAXFLOOR][11][11]={{{0}}}; //int representation - read from config?
+	MyEvent* EVENTDATA[MAXEVENT+1]={0};
+	int FLOOREVENTS[MAXFLOOR+1][11][11]={{{0}}}; //int representation - read from config?
 	MyEvent* FloorEvents[11][11]={{0}}; //the actual objects
 	HeroItem* ITEMS[MAXITEMS]={0};
-	std::list<GlobalEvent*> GLOBALEVENT[MAXFLOOR];
+	std::list<GlobalEvent*> GLOBALEVENT[MAXFLOOR+1];
 
 
-	Stairs* upstair;
-	Stairs* downstair;
+	Stairs* upstair=nullptr;
+	Stairs* downstair=nullptr;
 
 	void loadFloor(int);
 	bool floorChange=false;

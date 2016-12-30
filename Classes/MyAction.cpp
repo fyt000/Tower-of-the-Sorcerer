@@ -2,6 +2,7 @@
 #include "GameData.h"
 #include "Configureader.h"
 #include "DialogStruct.h"
+#include "GlobalDefs.h"
 
 MyAction::MyAction()
 {
@@ -11,13 +12,19 @@ MyAction::MyAction(MyAction *next):next(next)
 {
 }
 
+int MyAction::perform(MyEvent* evt){
+	if (next!=nullptr)
+		return next->perform(evt);
+	return 0;
+}
+
 MyAction::~MyAction()
 {
 	delete next;
 }
 
 
-Talk::Talk(MyAction *next,std::string tag):MyAction(next),tag(tag),type(DIALOGTYPE::NONE)
+Talk::Talk(MyAction *next,const std::string& tag):MyAction(next),tag(tag),type(DIALOGTYPE::NONE)
 {
 }
 
@@ -55,7 +62,7 @@ void Talk::showDialog(std::function<void(int)> callback)
 		GameData::getInstance()->showDialog(q,callback);
 }
 
-TalkYN::TalkYN(MyAction *action,std::string tag):Talk(action,tag)
+TalkYN::TalkYN(MyAction *action,const std::string& tag):Talk(action,tag)
 {
 	type=DIALOGTYPE::YN;
 }
@@ -77,17 +84,43 @@ int TransformSelf::perform(MyEvent *evt)
 	GameData::getInstance()->setEvent(id,evt->getX(),evt->getY());
 	//it is unsafe to call this without making sure FloorEvent does not have a pointer to evt
 	GameData::getInstance()->addToFree(evt);
-	if (next!=nullptr)
-		next->perform(evt);
+	MyAction::perform(evt);
 	return 1;
 }
 
-Obtain::Obtain(MyAction *,int item):MyAction(next),item(item)
+Obtain::Obtain(MyAction *next,int item):MyAction(next),item(item)
 {
 }
 
 int Obtain::perform(MyEvent *evt)
 {
 	GameData::getInstance()->obtainItem(item);
+	MyAction::perform(evt);
+	return 0;
+}
+
+Transform::Transform(MyAction* next,int floor,int x,int y,int targetID):MyAction(next),floor(floor),x(x),y(y),targetID(targetID){
+}
+
+int Transform::perform(MyEvent* evt){
+	//if current
+	if (GameData::getInstance()->floor->V()==floor){
+		//I am not sure what will happen if you are currently interacting with this event
+		//use TransformSelf
+		delete GameData::getInstance()->getEvent(x,y);
+	}
+	GameData::getInstance()->setEvent(targetID,x,y,floor);
+	MyAction::perform(evt);
+	return 0;
+}
+
+LogText::LogText(MyAction *next,const std::string& tag):MyAction(next),tag(tag)
+{
+}
+
+int LogText::perform(MyEvent *evt)
+{
+	GameData::getInstance()->log(GStr(tag));
+	MyAction::perform(evt);
 	return 0;
 }

@@ -107,7 +107,7 @@ void GameData::dialogCompleted(int choice)
 
 void GameData::init()
 {
-	hero = new HeroX(213,"hahaha",1000,5,12,0);
+	hero = new HeroX(213,"hahaha",1000,300,100,0);
 	floor = new LabelBinder<int>(1);
 
 	Configureader::ReadEventData(EVENTDATA);
@@ -115,7 +115,11 @@ void GameData::init()
 	Configureader::ReadItemData(ITEMS);
 	Configureader::ReadGlobalEvents(GLOBALEVENT);
 
+	CCLOG("GameData configuration reading done");
+
 	loadFloor(1);
+
+	CCLOG("GameData floor loaded");
 }
 
 
@@ -265,10 +269,12 @@ void GameData::loadFloor(int nextFloor){
 		hero->sprite->removeFromParent();
 	hero->sprite=nullptr;
 	//hero->getSprite()->removeFromParent();
+	//CCLOG("floor reading...");
 	for (int i=0;i<11;i++)
 		for (int j=0;j<11;j++){
 			auto toDeleteEvt=FloorEvents[i][j];
 			if (toDeleteEvt){
+				//CCLOG("deleting %d %d",i,j);
 				delete toDeleteEvt;
 				/*
 				if (oldUpstair==toDeleteEvt||oldDownstair==toDeleteEvt){
@@ -281,6 +287,7 @@ void GameData::loadFloor(int nextFloor){
 			FloorEvents[i][j]=NULL;
 			MyEvent* event=getEventData(i,j);
 			if (event){
+				//CCLOG("processing %d %d",i,j);
 				FloorEvents[i][j]=event->clone();
 				FloorEvents[i][j]->setXY(i,j);
 				if (stairs=dynamic_cast<Stairs*>(event)){
@@ -292,6 +299,7 @@ void GameData::loadFloor(int nextFloor){
 				}
 			}
 		}
+	CCLOG("floor set to %d",nextFloor);
 }
 
 
