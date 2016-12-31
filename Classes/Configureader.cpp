@@ -12,6 +12,7 @@
 #include "Condition.h"
 #include "GlobalEvent.h"
 #include "GlobalDefs.h"
+#include "Shop.h"
 
 rapidjson::Document* Configureader::langStrDoc=nullptr;
 rapidjson::Document* Configureader::dataDoc=nullptr;
@@ -63,6 +64,9 @@ void Configureader::ReadEventData(MyEvent ** EventArr)
 		}
 		else if (type=="Stairs"){
 			EventArr[idx]=new Stairs(p[0].GetInt(),p[1].GetString(),p[2].GetInt(),p[3].GetInt(),p[4].GetInt(),static_cast<DIR>(p[5].GetInt()));
+		}
+		else if (type=="Shop"){
+			EventArr[idx]=new Shop(p[0].GetInt(),p[1].GetString(),p[2].GetInt(),p[3].GetInt(),p[4].GetInt(),p[5].GetInt());
 		}
 		/*
 		else if (type==""){

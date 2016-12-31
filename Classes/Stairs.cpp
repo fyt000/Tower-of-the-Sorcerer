@@ -1,7 +1,7 @@
 #include "Stairs.h"
 #include "GameData.h"
 
-Stairs::Stairs(int imageIdx,std::string desc,int targetFloor,int x,int y,enum DIR dir):
+Stairs::Stairs(int imageIdx,const std::string& desc,int targetFloor,int x,int y,enum DIR dir):
 	MyEvent(imageIdx,desc),targetFloor(targetFloor),tx(x),ty(y),heroDir(dir)
 {
 }

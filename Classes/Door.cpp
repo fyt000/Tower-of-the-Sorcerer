@@ -5,7 +5,7 @@
 #include <queue>
 
 
-Door::Door(int imageIdx,std::string desc,KeyType doorType):MyEvent(imageIdx,desc),doorType(doorType)
+Door::Door(int imageIdx,const std::string& desc,KeyType doorType):MyEvent(imageIdx,desc),doorType(doorType)
 {
 }
 

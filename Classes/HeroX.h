@@ -14,7 +14,7 @@ class HeroX:
 {
 public:
 
-	HeroX(int imageIdx,std::string desc,int hp,int atk,int def,int gold);
+	HeroX(int imageIdx,const std::string& desc,int hp,int atk,int def,int gold);
 
 	//Enemy(Floor *f,int id,int x,int y,int secondImageID,int hp,int atk,int def);
 	bool canAtk();

@@ -117,7 +117,7 @@ void GameData::init()
 
 	CCLOG("GameData configuration reading done");
 
-	loadFloor(1);
+	loadFloor(3);
 
 	CCLOG("GameData floor loaded");
 }

@@ -5,7 +5,7 @@
 
 USING_NS_CC;
 
-Enemy::Enemy(int imageIdx,std::string desc,int secondImageID,int hp,int atk,int def,int gold):
+Enemy::Enemy(int imageIdx,const std::string& desc,int secondImageID,int hp,int atk,int def,int gold):
 	Fightable(imageIdx,desc,secondImageID,hp,atk,def,gold){}
 
 
@@ -22,8 +22,10 @@ bool Enemy::stepOnEvent()
 {
 	bool fightR = Fightable::stepOnEvent();
 	//"Beat "+description+". Received "+ToString(gold.V())+" gold."
-	if (fightR)
+	if (fightR){
+		GameData::getInstance()->hero->gold.addVal(gold.V());
 		GameData::getInstance()->log(stdsprintf(GStr("beat_enemy"),getDescription(),gold.V()),false);
+	}
 
 	return fightR;
 }

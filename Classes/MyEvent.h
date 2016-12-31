@@ -6,8 +6,8 @@
 class MyEvent
 {
 public:
-	MyEvent(int imageIdx,std::string decription);
-	MyEvent(int imageIdx,std::string decription,int imageIdx2);
+	MyEvent(int imageIdx,const std::string& decription);
+	MyEvent(int imageIdx,const std::string& decription,int imageIdx2);
 	virtual MyEvent* clone();
 	virtual ~MyEvent(); 
 	void setXY(int x,int y);

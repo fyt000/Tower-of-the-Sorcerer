@@ -5,7 +5,7 @@
 #include <sstream>
 
 //no use for gold...yet..maybe not
-Consumable::Consumable(int imageIdx,std::string desc,int hp,int atk,int def,int gold):
+Consumable::Consumable(int imageIdx,const std::string& desc,int hp,int atk,int def,int gold):
 	MyEvent(imageIdx,desc),hp(hp),atk(atk),def(def),gold(gold)
 {
 }

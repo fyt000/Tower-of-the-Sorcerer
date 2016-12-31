@@ -5,12 +5,12 @@
 
 USING_NS_CC;
 //id has to match the image id
-MyEvent::MyEvent(int imageIdx,std::string desc):imageIdx(imageIdx),description(desc){
+MyEvent::MyEvent(int imageIdx,const std::string& desc):imageIdx(imageIdx),description(desc){
 	x=-1;
 	y=-1;
 }
 
-MyEvent::MyEvent(int imageIdx,std::string decription,int imageIdx2):imageIdx(imageIdx),description(decription),imageIdx2(imageIdx2)
+MyEvent::MyEvent(int imageIdx,const std::string& decription,int imageIdx2):imageIdx(imageIdx),description(decription),imageIdx2(imageIdx2)
 {
 }
 

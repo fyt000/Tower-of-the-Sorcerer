@@ -143,6 +143,7 @@ set(GAME_SRC
   Classes/MyAction.cpp
   Classes/MyEvent.cpp
   Classes/Stairs.cpp
+  Classes/Shop.cpp
   Classes/TransformCoordinate.cpp
   Classes/Wall.cpp
   ${PLATFORM_SPECIFIC_SRC}
@@ -171,6 +172,7 @@ set(GAME_HEADERS
   Classes/MyAction.h
   Classes/MyEvent.h
   Classes/Stairs.h
+  Classes/Shop.h
   Classes/TransformCoordinate.h
   Classes/Wall.h
   ${PLATFORM_SPECIFIC_HEADERS}
