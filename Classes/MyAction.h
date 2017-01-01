@@ -71,3 +71,15 @@ public:
 private:
 	std::string tag;
 };
+
+class FlatStat: public MyAction{
+public:
+	FlatStat(MyAction*,const std::string& desc,int hp,int atk,int def,int gold);
+	virtual int perform(MyEvent*);
+private:
+	std::string desc;
+	int hp;
+	int atk;
+	int def;
+	int gold;
+};

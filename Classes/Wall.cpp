@@ -6,6 +6,7 @@ Wall::Wall(int imageIdx,const std::string& desc):MyEvent(imageIdx,desc){
 
 bool Wall::triggerEvent()
 {
+	performActions();
 	return false;
 }
 

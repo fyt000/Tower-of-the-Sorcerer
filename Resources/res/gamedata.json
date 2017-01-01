@@ -75,7 +75,23 @@
 				[1,8,8,1,8,8,8,1,8,8,0],
 				[0,8,0,67,0,8,0,69,0,8,0],
 				[0,8,61,0,29,8,34,0,32,8,0],
-				[0,8,29,61,29,8,0,61,0,8,305]
+				[306,8,29,61,29,8,0,61,0,8,305]
+			]
+		},
+		{
+			"floor":5,
+			"data":[
+				[0,8,0,63,1,0,8,0,0,1,0],
+				[0,8,0,0,8,29,8,61,61,8,63],
+				[0,1,67,0,8,0,8,29,29,8,0],
+				[8,8,8,1,8,67,8,29,29,8,0],
+				[29,0,69,0,8,0,8,8,8,8,0],
+				[29,0,0,67,8,0,61,0,0,0,0],
+				[8,79,8,8,8,0,8,8,8,8,63],
+				[0,0,0,0,8,61,8,0,0,0,0],
+				[35,29,32,37,8,0,8,1,8,8,8],
+				[8,8,8,8,8,0,8,0,8,0,0],
+				[307,0,0,0,0,0,8,0,9,0,51]
 			]
 		}
 		
@@ -93,14 +109,23 @@
 		},
 		{
 			"id":5,
-			"type": "Wall",
+			"type": "MyEvent",
 			"params":[5,"wall"]
-		
 		},
 		{
 			"id":8,
 			"type": "Wall",
 			"params": [8,"wall"]
+		},
+		{
+			"id":9,
+			"type": "Wall",
+			"params":[9,"wall"],
+			"actions":
+			[
+				{"action":"LogText","tag":"collapsed_wall"},
+				{"action":"TransformSelf","new":0}
+			]
 		},
 		{
 			"id":11,
@@ -171,9 +196,27 @@
 			"params": [35,"blue crystal", 0, 0, 2, 0]
 		},
 		{
+			"id":37,
+			"type": "PostEvent",
+			"params": [37,"special item no2"],
+			"actions":
+			[
+				{"action":"Obtain","id":1}
+			]			
+		},		
+		{
 			"id":38,
 			"type": "MyEvent",
 			"params": [38,"special item no3"]
+		},
+		{
+			"id":51,
+			"type":"PostEvent",
+			"params": [51,"Steel Sword"],
+			"actions":
+			[
+				{"action":"FlatStat","description":"steel_sword","hp":0,"atk":10,"def":0,"gold":0}
+			]	
 		},
 		{
 			"id":61,
@@ -242,6 +285,16 @@
 			"id":305,
 			"type":"Stairs",
 			"params":[12,"downstairs",3,9,10,0]
+		},
+		{
+			"id":306,
+			"type":"Stairs",
+			"params":[11,"upstairs",5,10,1,3]
+		},
+		{
+			"id":307,
+			"type":"Stairs",
+			"params":[12,"downstairs",4,9,0,0]
 		}							
 	],
 	"items":

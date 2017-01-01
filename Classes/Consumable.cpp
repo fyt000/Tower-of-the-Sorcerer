@@ -2,7 +2,7 @@
 #include "LabelBinder.h"
 #include "GameData.h"
 #include <string>
-#include <sstream>
+#include "MyAction.h"
 
 //no use for gold...yet..maybe not
 Consumable::Consumable(int imageIdx,const std::string& desc,int hp,int atk,int def,int gold):
@@ -12,7 +12,7 @@ Consumable::Consumable(int imageIdx,const std::string& desc,int hp,int atk,int d
 
 bool Consumable::triggerEvent()
 {
-	std::stringstream msgBuilder;
+/*
 	std::string msg=GStr("consume");
 	std::string hpStr;
 	std::string atkStr;
@@ -30,6 +30,9 @@ bool Consumable::triggerEvent()
 		GameData::getInstance()->hero->def.addVal(def);
 	}
 	GameData::getInstance()->log(stdsprintf(msg,getDescription(),hpStr,atkStr,defStr));
+*/
+	FlatStat flatStat(nullptr,getDescription(),hp,atk,def,gold);
+	flatStat.perform(nullptr);
 	selfDestruct();
 	return true;
 }

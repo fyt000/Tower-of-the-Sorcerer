@@ -102,7 +102,7 @@ void GameData::dialogCompleted(int choice)
 			callback(choice);
 		}
 	}
-	GameData::getInstance()->freePendingFreeList();
+	freePendingFreeList();
 }
 
 void GameData::init()
@@ -117,7 +117,7 @@ void GameData::init()
 
 	CCLOG("GameData configuration reading done");
 
-	loadFloor(3);
+	loadFloor(5);
 
 	CCLOG("GameData floor loaded");
 }

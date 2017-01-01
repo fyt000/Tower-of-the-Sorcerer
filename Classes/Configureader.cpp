@@ -13,6 +13,7 @@
 #include "GlobalEvent.h"
 #include "GlobalDefs.h"
 #include "Shop.h"
+#include "PostEvent.h"
 
 rapidjson::Document* Configureader::langStrDoc=nullptr;
 rapidjson::Document* Configureader::dataDoc=nullptr;
@@ -68,6 +69,13 @@ void Configureader::ReadEventData(MyEvent ** EventArr)
 		else if (type=="Shop"){
 			EventArr[idx]=new Shop(p[0].GetInt(),p[1].GetString(),p[2].GetInt(),p[3].GetInt(),p[4].GetInt(),p[5].GetInt());
 		}
+		else if (type=="PostEvent"){
+			if (p.Size()==2)
+				EventArr[idx]=new PostEvent(p[0].GetInt(),p[1].GetString());
+			else 
+				EventArr[idx]=new PostEvent(p[0].GetInt(),p[1].GetString(),p[2].GetInt());
+		}
+
 		/*
 		else if (type==""){
 
@@ -114,6 +122,9 @@ MyAction * Configureader::getAction(rapidjson::Value &data)
 	}
 	else if (type=="Transform"){
 		action = new Transform(next,data["floor"].GetInt(),data["x"].GetInt(),data["y"].GetInt(),data["id"].GetInt());
+	}
+	else if (type=="FlatStat"){
+		action = new FlatStat(next,GStr(data["description"].GetString()),data["hp"].GetInt(),data["atk"].GetInt(),data["def"].GetInt(),data["gold"].GetInt());
 	}
 	return action;
 }

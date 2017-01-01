@@ -79,12 +79,15 @@ TransformSelf::TransformSelf(MyAction *next,int id):MyAction(next),id(id)
 
 //the event itself has to handle the destruction
 //it will be marked as markedForDeletion
+//why do I not delete myself again?
 int TransformSelf::perform(MyEvent *evt)
 {
+	//setEvent doesn't free the current occupying event
 	GameData::getInstance()->setEvent(id,evt->getX(),evt->getY());
 	//it is unsafe to call this without making sure FloorEvent does not have a pointer to evt
-	GameData::getInstance()->addToFree(evt);
+	//GameData::getInstance()->addToFree(evt);
 	MyAction::perform(evt);
+	delete evt;
 	return 1;
 }
 
@@ -123,4 +126,29 @@ int LogText::perform(MyEvent *evt)
 	GameData::getInstance()->log(GStr(tag));
 	MyAction::perform(evt);
 	return 0;
+}
+
+FlatStat::FlatStat(MyAction* next,const std::string& desc,int hp,int atk,int def,int gold):MyAction(next),desc(desc),hp(hp),atk(atk),def(def),gold(gold){
+}
+
+int FlatStat::perform(MyEvent *evt)
+{
+	std::string msg=GStr("consume");
+	std::string hpStr;
+	std::string atkStr;
+	std::string defStr;
+	if (hp!=0){
+		hpStr=stdsprintf(GStr("hp_change"),hp);
+		GameData::getInstance()->hero->hp.addVal(hp);
+	}
+	if (atk!=0){
+		hpStr=stdsprintf(GStr("atk_change"),atk);
+		GameData::getInstance()->hero->atk.addVal(atk);
+	}
+	if (def!=0){
+		hpStr=stdsprintf(GStr("def_change"),def);
+		GameData::getInstance()->hero->def.addVal(def);
+	}
+	//remove sword shield images... they are useless
+	GameData::getInstance()->log(stdsprintf(msg,desc,hpStr,atkStr,defStr));
 }

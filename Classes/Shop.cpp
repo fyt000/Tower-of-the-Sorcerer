@@ -27,7 +27,7 @@ bool Shop::triggerEvent(){
                     GameData::getInstance()->hero->def.addVal(baseDef);
             }
             else{
-                GameData::getInstance()->log("you do not have enough gold");
+                GameData::getInstance()->log(GStr("not_enough_gold"));
             }
             Shop::shopUses++;
         });

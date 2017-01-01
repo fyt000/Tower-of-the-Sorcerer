@@ -8,7 +8,7 @@
 //just defines nothing else
 //I will run into forward decl issues if I put everything in gamedata (eg. Hero class)
 
-const int MAXFLOOR=4;
+const int MAXFLOOR=5;
 const int MAXITEMS=9;
 
 //no reason to hard code these limits

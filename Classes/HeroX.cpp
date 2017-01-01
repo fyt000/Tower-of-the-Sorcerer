@@ -8,7 +8,7 @@ USING_NS_CC;
 
 HeroX::HeroX(int imageIdx,const std::string& desc,int hp,int atk,int def,int gold):Fightable(imageIdx,desc,-1,hp,atk,def,gold){
 	//hard coding these for now
-	x=2;y=4;
+	x=10;y=1;
 	heroDir=DIR::UP;
 	//these are fightable labels
 	//this->setLabelNofity(true);

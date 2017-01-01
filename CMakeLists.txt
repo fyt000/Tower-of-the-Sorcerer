@@ -142,6 +142,7 @@ set(GAME_SRC
   Classes/MenuScene.cpp
   Classes/MyAction.cpp
   Classes/MyEvent.cpp
+  Classes/PostEvent.cpp
   Classes/Stairs.cpp
   Classes/Shop.cpp
   Classes/TransformCoordinate.cpp
@@ -171,6 +172,7 @@ set(GAME_HEADERS
   Classes/MenuScene.h
   Classes/MyAction.h
   Classes/MyEvent.h
+  Classes/PostEvent.h
   Classes/Stairs.h
   Classes/Shop.h
   Classes/TransformCoordinate.h
