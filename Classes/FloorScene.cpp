@@ -547,7 +547,7 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches,coco
 		
 		GameData::getInstance()->moveHero(blockDest);
 	}
-	GameData::getInstance()->freePendingFreeList();
+	//GameData::getInstance()->freePendingFreeList();
 }
 
 

@@ -83,3 +83,10 @@ private:
 	int def;
 	int gold;
 };
+
+//TransformSelf to 0 without freependinglist
+class DestructSelf: public MyAction{
+public:
+	DestructSelf(MyAction*);
+	virtual int perform(MyEvent*);
+};

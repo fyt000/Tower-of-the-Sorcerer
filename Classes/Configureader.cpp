@@ -126,6 +126,9 @@ MyAction * Configureader::getAction(rapidjson::Value &data)
 	else if (type=="FlatStat"){
 		action = new FlatStat(next,GStr(data["description"].GetString()),data["hp"].GetInt(),data["atk"].GetInt(),data["def"].GetInt(),data["gold"].GetInt());
 	}
+	else if (type=="DestructSelf"){
+		action = new DestructSelf(next);
+	}
 	return action;
 }
 

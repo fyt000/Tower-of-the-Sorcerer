@@ -80,14 +80,21 @@ TransformSelf::TransformSelf(MyAction *next,int id):MyAction(next),id(id)
 //the event itself has to handle the destruction
 //it will be marked as markedForDeletion
 //why do I not delete myself again?
+//problem with TransformSelf deleting itself
+//1. possible double delete if used on PostEvent (will call selfDestruct)
+//2. using the object after TransformSelf deleted itself (other actions followed after TransformSelf)
+//3. event gets deleted before dialog completion(async dialogs)!!! this is the most important reason
+//	for a NONE type dialog, the person will disappear before mouse click to dismiss dialog
+//keep these in mind!
+//
 int TransformSelf::perform(MyEvent *evt)
 {
 	//setEvent doesn't free the current occupying event
 	GameData::getInstance()->setEvent(id,evt->getX(),evt->getY());
 	//it is unsafe to call this without making sure FloorEvent does not have a pointer to evt
-	//GameData::getInstance()->addToFree(evt);
+	GameData::getInstance()->addToFree(evt);
 	MyAction::perform(evt);
-	delete evt;
+	//delete evt;
 	return 1;
 }
 
@@ -151,4 +158,15 @@ int FlatStat::perform(MyEvent *evt)
 	}
 	//remove sword shield images... they are useless
 	GameData::getInstance()->log(stdsprintf(msg,desc,hpStr,atkStr,defStr));
+}
+
+
+DestructSelf::DestructSelf(MyAction* next):MyAction(next){
+}
+
+int DestructSelf::perform(MyEvent* evt){
+	GameData::getInstance()->setEvent(0,evt->getX(),evt->getY());
+	MyAction::perform(evt);
+	delete evt;
+	return 1;
 }
