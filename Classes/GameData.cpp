@@ -351,10 +351,15 @@ void GameData::setEvent(int id,int x,int y,int f)
 			curEvt->sprite=nullptr; //remove sprite but do not delete it yet?
 		}
 		auto newEvt=getEventData(id);
-		FloorEvents[x][y]=newEvt->clone();
-		FloorEvents[x][y]->setXY(x,y);
-		if (FloorEvents[x][y])
-			flScn->attachFloorSprite(FloorEvents[x][y]->getSprite());
+		if (newEvt){
+			FloorEvents[x][y]=newEvt->clone();
+			FloorEvents[x][y]->setXY(x,y);
+			if (FloorEvents[x][y])
+				flScn->attachFloorSprite(FloorEvents[x][y]->getSprite());
+		}
+		else{
+			FloorEvents[x][y]=nullptr;
+		}
 	}
 	
 	//reload floor
