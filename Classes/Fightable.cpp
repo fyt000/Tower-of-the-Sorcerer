@@ -106,7 +106,7 @@ bool Fightable::triggerEvent(){
 bool Fightable::stepOnEvent(){
 
 	GameData::getInstance()->attachEnemyInfo(this);
-	int dmgTaken=GameData::getInstance()->hero->fightX(this,
+	GameData::getInstance()->hero->fightX(this,
 		[](Fightable &f) { log("hp %d",f.getHp()); },
 		[](Fightable &f) { log("hp %d",f.getHp()); });
 	//GameData::getInstance()->killEvent(std::pair<int,int>(x,y));

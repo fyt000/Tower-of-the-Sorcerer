@@ -11,6 +11,7 @@ class Condition{
     public:
         Condition(int floor,COND cond,int x,int y);
         virtual bool check();
+        virtual ~Condition();
     protected:
     int floor;
     enum COND cond;

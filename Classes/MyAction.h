@@ -21,12 +21,13 @@ protected:
 
 class Obtain:public MyAction{
 public:
-	Obtain(MyAction*,int item); //TODO make items
+	Obtain(MyAction*,int item);
 	int perform(MyEvent*);
 private:
 	int item;
 };
 
+//NONE type dialog
 class Talk: public MyAction{
 public:
 	Talk(MyAction*,const std::string& tag);
@@ -38,14 +39,18 @@ protected:
 	enum DIALOGTYPE type;
 };
 
+//Y N choice dialog
 class TalkYN: public Talk{
 public:
 	TalkYN(MyAction*,const std::string& tag);
 	virtual int perform(MyEvent*);
 };
 
-//TalkY class, so I can place transform etc into the callback
+//TODO TalkY class, so I can place transform etc into the callback
 
+
+//transform the attached event into another event
+//this is no state in an event
 class TransformSelf: public MyAction{
 public:
 	TransformSelf(MyAction*,int id);
@@ -66,6 +71,7 @@ private:
 	int targetID;
 };
 
+//show action log on screen
 class LogText: public MyAction{
 public:
 	LogText(MyAction*,const std::string& tag);
@@ -74,6 +80,8 @@ private:
 	std::string tag;
 };
 
+//gain stats...used by weapon consumables
+//TODO PercentStat for percentage increase
 class FlatStat: public MyAction{
 public:
 	FlatStat(MyAction*,const std::string& desc,int hp,int atk,int def,int gold);

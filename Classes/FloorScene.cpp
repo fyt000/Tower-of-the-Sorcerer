@@ -29,7 +29,7 @@ bool FloorScene::init()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	float height=visibleSize.height;
 	Point origin = Director::getInstance()->getVisibleOrigin();
-	log("height %d",height);
+	log("height %lf",height);
 
 	//left static image
 	float leftX=0;
@@ -50,9 +50,9 @@ bool FloorScene::init()
 	this->addChild(centerSprite,1);
 
 	//draw a border
-	float borderTopY=height-lineRadiusV;
-	float borderBottomY=borderTopY-centerSprite->getBoundingBox().size.height-lineRadiusV;
-	float borderLeftX=startX+lineRadiusH;
+	//float borderTopY=height-lineRadiusV;
+	//float borderBottomY=borderTopY-centerSprite->getBoundingBox().size.height-lineRadiusV;
+	//float borderLeftX=startX+lineRadiusH;
 	float borderRightX=startX+centerSprite->getBoundingBox().size.width;
 
 	//right static image
@@ -169,12 +169,6 @@ bool FloorScene::init()
 		keyLabel->setAnchorPoint(Vec2(0,0));
 		this->addChild(keyLabel,2);
 		gInstance->hero->keys[i]->attach(keyLabel);
-		/*
-		auto charGoldLabel = Label::createWithSystemFont(ToString(gInstance->hero->),font,fontSize,Size::ZERO,TextHAlignment::RIGHT);
-		charGoldLabel->setPosition(statX,statY-90);
-		charGoldLabel->setAnchorPoint(Vec2(1,1));
-		this->addChild(charGoldLabel,2);
-		*/
 	}
 
 
@@ -207,10 +201,7 @@ bool FloorScene::init()
 	gInstance->floorMouseListener->onTouchesEnded = CC_CALLBACK_2(FloorScene::onTouchesEnded,this);
 
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(GameData::getInstance()->floorMouseListener,this);
-	/*
-	std::string longText="I need to write a sentence. I need to write a sentence. I need to write a sentence. I need to write a sentence. I need to write a sentence. I need to write a sentence.";
-	drawDialog(longText,DIALOGTYPE::LIST,{"hello","darkness","myold","friend"});
-	*/
+
 	return true;
 }
 
@@ -263,7 +254,7 @@ void FloorScene::attachFloorSprite(cocos2d::Sprite* s){
 	floorContent->addChild(s,3);
 }
 
-//TODO can I get away with string& or do I need to copy it
+
 void FloorScene::drawDialog(const std::string& text,enum DIALOGTYPE dType,std::vector<std::string> options)
 {
 	if (dialogOpen)
@@ -406,6 +397,7 @@ void FloorScene::drawDialog(const std::string& text,enum DIALOGTYPE dType,std::v
 			*/
 			break;
 		}
+		case DIALOGTYPE::NONE:break;
 	}
 	this->addChild(dialogNode,100);
 }
@@ -535,19 +527,13 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches,coco
 	if (touches.size()==0){
 		return;
 	}
-	//this->removeChild(floorContent);
+
 	//ignore all touches except the last one
 	for (auto touch : touches){
 		auto loc = touch->getLocation();
 		CCLOG("clicked %f %f",loc.x,loc.y);
 		//need to first check if the loc is within the UI region.
 		auto blockDest=TransformCoordinate::computeBlock(loc.x,loc.y);
-		//CCLOG("block %d %d",blockDest.first,blockDest.second);
-		//auto path=GameData::getInstance()->pathFind(blockDest);
-		/*
-		if (blockDest==std::make_pair(-1,-1)){
-			GameData::getInstance()->obtainItem(0);
-		}*/
 		
 		GameData::getInstance()->moveHero(blockDest);
 	}

@@ -14,3 +14,5 @@ bool Condition::check(){
     }
     return false;
 }
+
+Condition::~Condition(){}

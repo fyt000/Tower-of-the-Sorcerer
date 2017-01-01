@@ -14,97 +14,9 @@ USING_NS_CC;
 
 static GameData* gameData = nullptr;
 
-//TODO dump this into json/yaml or some other configurable format and read the configuration 
-//this will initialize the game data
-//this FLOOREVENTS intialization is pretty stupid
-//I will change this.
-//this must be changed actually, since we can't initialize like this for loading saves
-//but that's ok... we can read one by one
+
 GameData::GameData(){
 	init();
-}
-
-//kinda singleton
-GameData* GameData::getInstance(){
-	if (!gameData){
-		gameData=new GameData();
-	}
-	return gameData;
-}
-
-MyEvent * GameData::getEvent(int x,int y)
-{
-	return FloorEvents[x][y];
-}
-
-
-
-//get event pointer given the id
-MyEvent * GameData::getEventData(int id)
-{
-	if (id<0||id>=500){ //?
-		return NULL;
-	}
-	return EVENTDATA[id];
-}
-
-int GameData::getEventID(int floorNum,int x,int y){
-	return FLOOREVENTS[floorNum][x][y];
-}
-
-
-//get event based on the location of the current floor
-MyEvent * GameData::getEventData(int x,int y)
-{
-	return getEventData(FLOOREVENTS[floor->V()][x][y]);
-}
-
-void GameData::showDialog(std::queue<DialogStruct>& dq,std::function<void(int)> callback)
-{
-	//if (callback)
-	dialogCallbackQ.push(callback); //always override callback...to make life simple
-	//10 thousand string copying going around
-	//need to fix this
-	if (dialogQ.empty())
-		dialogQ=dq; //make a copy
-	else{
-		while (!dq.empty()){
-			dialogQ.push(dq.front());
-			dq.pop();
-		}
-		return;
-	}
-	
-	if (dialogQ.size()!=0){
-		DialogStruct& ds=dialogQ.front();
-		flScn->drawDialog(ds.text,ds.dialogType,ds.options);
-		dialogQ.pop();
-	}
-}
-
-void GameData::showDialog(const DialogStruct& ds,std::function<void(int)> callback)
-{
-	dialogQ=std::queue<DialogStruct>(); //empty
-	dialogCallbackQ.push(callback);
-	flScn->drawDialog(ds.text,ds.dialogType,ds.options);
-}
-
-void GameData::dialogCompleted(int choice)
-{
-	if (!dialogQ.empty()){
-		DialogStruct& ds=dialogQ.front();
-		flScn->drawDialog(ds.text,ds.dialogType,ds.options);
-		dialogQ.pop();
-	}
-	else{
-		if (!dialogCallbackQ.empty()){
-			auto callback = dialogCallbackQ.front();
-			dialogCallbackQ.pop();
-			if (callback)
-				callback(choice);
-		}
-	}
-	freePendingFreeList();
 }
 
 void GameData::init()
@@ -124,6 +36,90 @@ void GameData::init()
 	CCLOG("GameData floor loaded");
 }
 
+
+//kinda singleton
+GameData* GameData::getInstance(){
+	if (!gameData){
+		gameData=new GameData();
+	}
+	return gameData;
+}
+
+
+MyEvent * GameData::getEvent(int x,int y)
+{
+	return FloorEvents[x][y];
+}
+
+//get event pointer given the id
+MyEvent * GameData::getEventData(int id)
+{
+	if (id<0||id>=MAXEVENT){ 
+		return nullptr;
+	}
+	return EVENTDATA[id];
+}
+
+int GameData::getEventID(int floorNum,int x,int y){
+	return FLOOREVENTS[floorNum][x][y];
+}
+
+
+//get event based on the location of the current floor
+MyEvent * GameData::getEventData(int x,int y)
+{
+	return getEventData(FLOOREVENTS[floor->V()][x][y]);
+}
+
+void GameData::showDialog(std::queue<DialogStruct>& dq,std::function<void(int)> callback)
+{
+	//if (callback)
+	//add to queue of dialogCallback, each dialog dismiss will pop from the queue
+	dialogCallbackQ.push(callback); 
+	if (dialogQ.empty())
+		dialogQ=dq; //make a copy
+	else{ //append dq to dialogQ
+		while (!dq.empty()){
+			dialogQ.push(dq.front());
+			dq.pop();
+		}
+		return;
+	}
+	
+	//draw the topmost dialog
+	if (!dialogQ.empty()){
+		DialogStruct& ds=dialogQ.front();
+		flScn->drawDialog(ds.text,ds.dialogType,ds.options);
+		dialogQ.pop();
+	}
+}
+
+void GameData::showDialog(const DialogStruct& ds,std::function<void(int)> callback)
+{
+	dialogQ=std::queue<DialogStruct>(); //empty the queue
+	dialogCallbackQ.push(callback);
+	flScn->drawDialog(ds.text,ds.dialogType,ds.options);
+}
+
+//this is called from floorscene to return the choice of the dialog
+void GameData::dialogCompleted(int choice)
+{
+	//check if there is another dialog to display
+	if (!dialogQ.empty()){
+		DialogStruct& ds=dialogQ.front();
+		flScn->drawDialog(ds.text,ds.dialogType,ds.options);
+		dialogQ.pop();
+	}
+	else{ //if not, call callback
+		if (!dialogCallbackQ.empty()){
+			auto callback = dialogCallbackQ.front();
+			dialogCallbackQ.pop();
+			if (callback)
+				callback(choice);
+		}
+	}
+	freePendingFreeList();
+}
 
 void GameData::gameover()
 {
@@ -146,7 +142,7 @@ void GameData::addToFree(MyEvent *evt)
 void GameData::freePendingFreeList()
 {
 	freeListLock.lock();
-	for (int i=0;i<pendingFreeList.size();i++){
+	for (std::size_t i=0;i<pendingFreeList.size();i++){
 		delete pendingFreeList[i];
 	}
 	pendingFreeList=std::vector<MyEvent*>();
@@ -202,9 +198,11 @@ void GameData::showFloorEnemyStats()
 	flScn->showFloorEnemyStats(displayInfo);
 }
 
+//used for HeroItem id 1
 bool GameData::fastStairs()
 {
 	bool isBesideStair=false;
+	//check if it is beside a stair
 	int curX = hero->getX();
 	int curY = hero->getY();
 	int dirX[]={1,0,-1,0};
@@ -232,7 +230,7 @@ bool GameData::fastStairs()
 		showDialog(DialogStruct("Go up or down stairs?",DIALOGTYPE::LIST,{"UP","DOWN","CANCEL"}),[this](int choice){
 			CCLOG("made a choice");
 			if (choice==0){ //up
-				if (upstair!=nullptr) //TODO add check for current max floor # visited
+				if (upstair!=nullptr)
 					upstair->triggerEvent();
 				else
 					log("reached max floor");
@@ -253,7 +251,9 @@ bool GameData::fastStairs()
 	return isBesideStair;
 }
 
+//used for item id 2
 void GameData::replayDialog(){
+	//TODO fix this
 	showDialog(DialogStruct("this is a matrix",DIALOGTYPE::MATRIX,{"1","2","3","4","5","6","7","8","9"}),[this](int choice){
 		log("you choosed "+ToString(choice));
 	});
@@ -261,32 +261,26 @@ void GameData::replayDialog(){
 
 
 void GameData::loadFloor(int nextFloor){
-	floor->setVal(nextFloor);
+	floor->setVal(nextFloor); //set the text (and the internal value)
 	Stairs* stairs=nullptr;
-	Stairs* oldDownstair=downstair;
-	Stairs* oldUpstair=upstair;
 	downstair=nullptr;
 	upstair=nullptr;
+
+	//remove hero sprite from current scene
+	//hero doesn't get deleted, so we need to remove the sprite manually
 	if (hero->sprite!=nullptr)
 		hero->sprite->removeFromParent();
 	hero->sprite=nullptr;
-	//hero->getSprite()->removeFromParent();
-	//CCLOG("floor reading...");
+	
+
 	for (int i=0;i<11;i++)
 		for (int j=0;j<11;j++){
 			auto toDeleteEvt=FloorEvents[i][j];
 			if (toDeleteEvt){
 				//CCLOG("deleting %d %d",i,j);
 				delete toDeleteEvt;
-				/*
-				if (oldUpstair==toDeleteEvt||oldDownstair==toDeleteEvt){
-					addToFree(toDeleteEvt);
-				}
-				else{
-					delete toDeleteEvt; //if I call loadFloor on loading save files
-				}*/
 			}
-			FloorEvents[i][j]=NULL;
+			FloorEvents[i][j]=nullptr;
 			MyEvent* event=getEventData(i,j);
 			if (event){
 				//CCLOG("processing %d %d",i,j);
@@ -319,22 +313,11 @@ cocos2d::Sprite * GameData::getSprite(int x,int y)
 	return FloorEvents[x][y]->getSprite();
 }
 
-
-/*
-void GameData::moveHero(PATH path)
-{
-	//floorMouseListener->setEnabled(false);
-	if (path.size()==0)
-		return;
-	hero->move(path);
-	//Director::getInstance()->getEventDispatcher()->setEnabled(false);
-}
-*/
 //this method is only being called from FloorScene
 //no one else should call this
 void GameData::moveHero(std::pair<int,int> dest){
 	logLabel->setVisible(false);
-	logLabel->setString("");
+	logLabel->setString(""); //reset log text on movement
 	auto eventPtr=getEvent(dest.first,dest.second);
 	if (eventPtr==NULL){//check if it is an event
 		hero->move(pathFind(dest),true);
@@ -350,7 +333,7 @@ void GameData::killEvent(std::pair<int,int> place){
 	auto eventPtr=getEvent(place.first,place.second);
 	if (eventPtr){
 		FLOOREVENTS[floor->V()][place.first][place.second]=0;
-		FloorEvents[place.first][place.second]=NULL;
+		FloorEvents[place.first][place.second]=nullptr;
 		delete eventPtr;
 	}
 }
@@ -438,7 +421,7 @@ PATH GameData::pathFind(int dx,int dy)
 	//for every bfsQ push, we need a parent push
 	bfsQ.push_back(std::pair<int,int>(hero->getX(),hero->getY()));
 	parent.push_back(-1); //no parent for the root
-	int idx=0;
+	std::size_t idx=0;
 
 	const int dirX[]={1,0,-1,0};
 	const int dirY[]={0,1,0,-1};
@@ -487,7 +470,7 @@ void GameData::log(const std::string& message,bool inst)
 	CCLOG("log message: %s",message.c_str());
 	logLabel->setString(message);
 	logLabel->setVisible(inst);
-	if (inst){
+	if (inst){ //if there are async actions, you may not want to display the log right away
 		logLabel->setOpacity(0);
 		logLabel->runAction(FadeIn::create(0.75));
 	}
@@ -509,8 +492,11 @@ void GameData::showLog(){
 //1. final hero movement
 //2. used a HeroItem
 void GameData::triggerGlobalEvents(){
+	//check if there are global events on cur floor
 	if (!GLOBALEVENT[floor->V()].empty()){
 		auto& gList=GLOBALEVENT[floor->V()];
+		//go through the list and try to trigger it
+		//remove from list on successful event trigger
 		for (auto iter=gList.begin();iter!=gList.end();){
 			if ((*iter)->tryTrigger()){
 				iter=gList.erase(iter);

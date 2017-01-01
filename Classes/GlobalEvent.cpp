@@ -21,8 +21,8 @@ void GlobalEvent::addCondition(Condition* cond){
 }
 
 GlobalEvent::~GlobalEvent(){
-    for (int i=0;i<conditions.size();i++)
+    for (std::size_t i=0;i<conditions.size();i++)
 		delete conditions[i];
-    for (int i=0;i<actions.size();i++)
+    for (std::size_t i=0;i<actions.size();i++)
 		delete actions[i];
 }

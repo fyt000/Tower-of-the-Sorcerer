@@ -1,5 +1,9 @@
 #include "MyEvent.h"
 
+
+//difference from MyEvent is that performAction is called on stepOnEvent (eg. post triggerEvent)
+//where MyEvent calls performAction before stepping on it
+
 class PostEvent: public MyEvent{
 
 public:

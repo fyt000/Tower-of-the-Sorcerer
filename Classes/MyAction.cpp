@@ -45,7 +45,7 @@ void Talk::showDialog(std::function<void(int)> callback)
 	Configureader::GetDialog(tag,dialogStrs);
 	//there is way too much overhead.... 
 	std::queue<DialogStruct> q;
-	for (int i=0;i<dialogStrs.size();i++){
+	for (std::size_t i=0;i<dialogStrs.size();i++){
 		
 		//handle last one differently
 		if (i==dialogStrs.size()-1){
@@ -94,7 +94,6 @@ int TransformSelf::perform(MyEvent *evt)
 	//it is unsafe to call this without making sure FloorEvent does not have a pointer to evt
 	GameData::getInstance()->addToFree(evt);
 	MyAction::perform(evt);
-	//delete evt;
 	return 1;
 }
 
@@ -158,6 +157,7 @@ int FlatStat::perform(MyEvent *evt)
 	}
 	//remove sword shield images... they are useless
 	GameData::getInstance()->log(stdsprintf(msg,desc,hpStr,atkStr,defStr));
+	return 0;
 }
 
 

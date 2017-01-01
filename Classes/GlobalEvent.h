@@ -3,6 +3,10 @@
 #include "Condition.h"
 #include <vector>
 
+//after every hero action (movement/item usage), check if conditions are met
+//if yes, trigger actions
+//not exactly global, each floor has its own list of global events that it will check
+
 class GlobalEvent{
     public:
         //GlobalEvent(); 

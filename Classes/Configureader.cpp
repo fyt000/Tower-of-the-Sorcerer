@@ -253,8 +253,8 @@ void Configureader::initLangDoc()
 	std::string path = cocos2d::FileUtils::getInstance()->fullPathForFilename(curLanguageFile);
 	auto strdata=cocos2d::FileUtils::getInstance()->getStringFromFile(path);
 	langStrDoc->Parse<0>(strdata.c_str());
-	auto err=langStrDoc->GetParseError(); //for debugging
-	auto errPos=langStrDoc->GetErrorOffset();
+	//auto err=langStrDoc->GetParseError(); //for debugging
+	//auto errPos=langStrDoc->GetErrorOffset();
 }
 
 

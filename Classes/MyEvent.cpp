@@ -31,10 +31,6 @@ void MyEvent::setXY(int x,int y)
 	this->y=y;
 }
 
-bool MyEvent::canAtk(){
-	return false;
-}
-
 std::string MyEvent::getDescription()
 {
 	return Configureader::GetDescription(description);
@@ -110,7 +106,7 @@ void MyEvent::attachAction(MyAction *action)
 
 int MyEvent::performActions()
 {
-	for (int i=0;i<actions.size();i++)
+	for (std::size_t i=0;i<actions.size();i++)
 		actions[i]->perform(this);
 	//if performActions marked to delete this
 	//sigh... async problems again
@@ -123,7 +119,7 @@ void MyEvent::selfDestruct()
 {
 	if (GameData::getInstance()->getEvent(getX(),getY())==this) //could have been replaced already
 		GameData::getInstance()->killEvent(std::pair<int,int>(getX(),getY()));
-	else
+	else //no one else should care, just delete self
 	{
 		delete this;
 	}

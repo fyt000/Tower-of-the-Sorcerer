@@ -20,10 +20,6 @@ HeroX::HeroX(int imageIdx,const std::string& desc,int hp,int atk,int def,int gol
 }
 
 
-bool HeroX::canAtk(){ //?
-	return true;
-}
-
 bool HeroX::spendGold(int amt){
 	if (gold.V()>=amt){
 		gold.subVal(amt);
@@ -82,13 +78,13 @@ int HeroX::fightX(Fightable * target,std::function<void(Fightable&)> hpCallback1
 		case DIR::UP:stepFrame1="images/tile (213).png";stepFrame2="images/tile (215).png";break;
 		default:stepFrame1="images/tile (213).png";stepFrame2="images/tile (215).png";
 	}
-	log("has frames %d",heroSnapshots.size());
+	//log("has frames %d",heroSnapshots.size());
 	Vector<FiniteTimeAction*> actions;
 	int hSSIdx=0;
 	int eSSIdx=0;
 	target->setLabelNofity(true);
 	this->setLabelNofity(true);
-	for (int i=0;i<heroSnapshots.size()+enemySnapshots.size();i++){
+	for (std::size_t i=0;i<heroSnapshots.size()+enemySnapshots.size();i++){
 		if (i%2==0){
 			//enemy action		
 			auto enemyCallback=CallFuncN::create(CC_CALLBACK_1(HeroX::updateBetweenFight,this,target,enemySnapshots,eSSIdx,stepFrame2,false));
@@ -180,7 +176,6 @@ Animate* HeroX::getDirMoveAnimate(enum DIR dir,int steps,bool stop){
 //but again, this does not make any assumption on its surroundings
 //just move
 void HeroX::move(enum DIR direction){
-	MoveTo* moveTo;
 	int newX=x;int newY=y;
 	switch (direction){
 	case (DIR::UP):

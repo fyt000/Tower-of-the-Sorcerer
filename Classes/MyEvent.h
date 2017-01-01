@@ -12,11 +12,19 @@ public:
 	virtual ~MyEvent(); 
 	void setXY(int x,int y);
 
-	//virtual bool isEnemy();
-	virtual bool canAtk();
+	//the description stored is actually the decription tag
+	//this returns the actual string
 	std::string getDescription();
+
+	//create new to create a seprate sprite
 	virtual cocos2d::Sprite* getSprite(bool createNew=false);
+	
+	//called before hero steps on the event
+	//true - yes you can step on it
+	//false - hero cannot step on it
+	//actions are performed here
 	virtual bool triggerEvent();
+	//triggered after stepping on the event
 	virtual bool stepOnEvent();
 	int getX();
 	int getY();
@@ -36,12 +44,5 @@ protected:
 private:
 	std::string description;
 	std::vector<MyAction*> actions;
-	/*
-	std::string imageName1;
-	std::string imageName2;
-	std::string description;
-	int interactive; //0 - no, 1 - mob(fight), 2 - npc(dialog), 3 - store(?)
-	bool passable;
-	*/
 };
 
