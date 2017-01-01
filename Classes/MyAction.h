@@ -44,6 +44,8 @@ public:
 	virtual int perform(MyEvent*);
 };
 
+//TalkY class, so I can place transform etc into the callback
+
 class TransformSelf: public MyAction{
 public:
 	TransformSelf(MyAction*,int id);

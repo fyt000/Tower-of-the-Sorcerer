@@ -61,6 +61,7 @@ MyEvent * GameData::getEventData(int x,int y)
 
 void GameData::showDialog(std::queue<DialogStruct>& dq,std::function<void(int)> callback)
 {
+	//if (callback)
 	dialogCallbackQ.push(callback); //always override callback...to make life simple
 	//10 thousand string copying going around
 	//need to fix this
@@ -99,7 +100,8 @@ void GameData::dialogCompleted(int choice)
 		if (!dialogCallbackQ.empty()){
 			auto callback = dialogCallbackQ.front();
 			dialogCallbackQ.pop();
-			callback(choice);
+			if (callback)
+				callback(choice);
 		}
 	}
 	freePendingFreeList();
@@ -117,7 +119,7 @@ void GameData::init()
 
 	CCLOG("GameData configuration reading done");
 
-	loadFloor(5);
+	loadFloor(3);
 
 	CCLOG("GameData floor loaded");
 }
@@ -360,8 +362,18 @@ void GameData::setEvent(int id,int x,int y,int f)
 		f=floor->V();
 	FLOOREVENTS[floor->V()][x][y]=id;
 	if (f==floor->V()){
-		FloorEvents[x][y]=getEventData(id);
+		auto curEvt=FloorEvents[x][y];
+		if (curEvt&&id!=0){ //if there is a new sprite, then replace it now
+			curEvt->sprite->removeFromParentAndCleanup(true);
+			curEvt->sprite=nullptr; //remove sprite but do not delete it yet?
+		}
+		auto newEvt=getEventData(id);
+		FloorEvents[x][y]=newEvt->clone();
+		FloorEvents[x][y]->setXY(x,y);
+		if (FloorEvents[x][y])
+			flScn->attachFloorSprite(FloorEvents[x][y]->getSprite());
 	}
+	
 	//reload floor
 	//flScn->loadFloor();
 }

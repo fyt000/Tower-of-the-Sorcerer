@@ -52,7 +52,7 @@
 				[29,35,8,29,33,29,8,0,8,0,32],
 				[0,32,8,33,29,33,8,0,1,67,0],
 				[69,0,8,29,31,29,8,0,8,8,8],
-				[1,8,8,8,0,8,8,0,8,0,25],
+				[1,8,8,8,0,8,8,0,8,0,421],
 				[0,0,67,0,0,0,61,0,0,0,0],
 				[1,8,8,0,0,0,8,0,8,8,8],
 				[77,0,8,8,0,8,8,0,8,0,32],
@@ -124,7 +124,7 @@
 			"actions":
 			[
 				{"action":"LogText","tag":"collapsed_wall"},
-				{"action":"TransformSelf","new":0}
+				{"action":"DestructSelf"}
 			]
 		},
 		{
@@ -158,7 +158,7 @@
 			"params": [19,"merchant",20],
 			"actions":
 			[
-				{"action":"TalkYN","tag":"3","next":{"action":"TransformSelf","new":0,"next":{"action":"Obtain","id":0}}}
+				{"action":"Talk","tag":"0"}
 			]
 		},
 		{
@@ -167,7 +167,7 @@
 			"params": [25,"old man",26],
 			"actions":
 			[
-				{"action":"TalkYN","tag":"3","next":{"action":"TransformSelf","new":0,"next":{"action":"Obtain","id":1}}}
+				{"action":"Talk","tag":"0"}
 			]
 		},
 		{
@@ -295,7 +295,20 @@
 			"id":307,
 			"type":"Stairs",
 			"params":[12,"downstairs",4,9,0,0]
-		}							
+		},
+
+
+		{
+			"id":421,
+			"type": "MyEvent",
+			"params": [25,"old man",26],
+			"actions":
+			[
+				{"action":"Talk","tag":"1","next":{"action":"Talk","tag":"0"}},
+				{"action":"Obtain","id":0},
+				{"action":"TransformSelf","new":25}
+			]
+		}			
 	],
 	"items":
 	[

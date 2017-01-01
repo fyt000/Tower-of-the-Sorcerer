@@ -55,8 +55,8 @@
 				"Steel Sword":"Steel Sword"
 		},
 		"dialog":{
-			"1":["first dialog window","second dialog window","third dialog window"],
-			"2":["first dialog window","second dialog window","third dialog window"],
+			"0":["I have done all I can, good luck!"],
+			"1":["Take this with you"],
 			"3":["Hello","Take this item"]
 		}
 	}

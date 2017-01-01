@@ -30,6 +30,9 @@ public:
 
 	void showFloorEnemyStats(std::vector<std::tuple<cocos2d::Sprite*,std::string,int,int,int,int>>& stats);
 
+	//attach the sprite to floorContent
+	void attachFloorSprite(cocos2d::Sprite* s);
+
 private:
 	cocos2d::Node* floorContent=nullptr;
 	cocos2d::DrawNode* dialogNode;

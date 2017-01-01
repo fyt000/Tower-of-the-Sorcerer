@@ -259,6 +259,10 @@ void FloorScene::loadFloor()
 	this->addChild(floorContent,3);
 }
 
+void FloorScene::attachFloorSprite(cocos2d::Sprite* s){
+	floorContent->addChild(s,3);
+}
+
 //TODO can I get away with string& or do I need to copy it
 void FloorScene::drawDialog(const std::string& text,enum DIALOGTYPE dType,std::vector<std::string> options)
 {
@@ -514,8 +518,8 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches,coco
 	//so we use dialogOpen to ignore the first click after closeDialog
 	if (dialogOpen){
 		if (dialogType==DIALOGTYPE::NONE){
-			absorbClick=0;
 			closeDialog(0);
+			absorbClick=0;
 			return;
 		}
 	}
