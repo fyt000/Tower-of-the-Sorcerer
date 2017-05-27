@@ -7,14 +7,14 @@
 //if yes, trigger actions
 //not exactly global, each floor has its own list of global events that it will check
 
-class GlobalEvent{
-    public:
-        //GlobalEvent(); 
-        bool tryTrigger();
-        void attachAction(MyAction*);
-        void addCondition(Condition*);
-        ~GlobalEvent();
-    private:
-    std::vector<Condition*> conditions;
-    std::vector<MyAction*> actions;
+class GlobalEvent {
+public:
+	//GlobalEvent(); 
+	bool tryTrigger();
+	void attachAction(MyAction*);
+	void addCondition(Condition*);
+	~GlobalEvent();
+private:
+	std::vector<Condition*> conditions;
+	std::vector<MyAction*> actions;
 };

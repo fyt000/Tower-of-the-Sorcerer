@@ -2,3 +2,4 @@ cocos2d/
 proj.*/
 bin/
 linux-build/
+.vs/

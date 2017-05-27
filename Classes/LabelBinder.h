@@ -6,11 +6,11 @@
 
 //kinda of observer pattern, not exactly
 template <class T>
-class LabelBinder{
+class LabelBinder {
 public:
 	LabelBinder(T);
 
-	LabelBinder(T,cocos2d::Label* label);
+	LabelBinder(T, cocos2d::Label* label);
 
 	void attach(cocos2d::Label* label);
 	void setVal(T newVal);
@@ -22,6 +22,6 @@ public:
 
 private:
 	cocos2d::Label* theLabel;
-	bool doNotify=true;
+	bool doNotify = true;
 	T value;
 };

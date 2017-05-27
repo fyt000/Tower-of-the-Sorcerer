@@ -5,12 +5,12 @@
 
 USING_NS_CC;
 //id has to match the image id
-MyEvent::MyEvent(int imageIdx,const std::string& desc):imageIdx(imageIdx),description(desc){
-	x=-1;
-	y=-1;
+MyEvent::MyEvent(int imageIdx, const std::string& desc) :imageIdx(imageIdx), description(desc) {
+	x = -1;
+	y = -1;
 }
 
-MyEvent::MyEvent(int imageIdx,const std::string& decription,int imageIdx2):imageIdx(imageIdx),description(decription),imageIdx2(imageIdx2)
+MyEvent::MyEvent(int imageIdx, const std::string& decription, int imageIdx2) : imageIdx(imageIdx), description(decription), imageIdx2(imageIdx2)
 {
 }
 
@@ -19,60 +19,60 @@ MyEvent * MyEvent::clone()
 	return new MyEvent(*this);
 }
 
-MyEvent::~MyEvent(){
-	if (sprite!=nullptr){
+MyEvent::~MyEvent() {
+	if (sprite != nullptr) {
 		sprite->removeFromParentAndCleanup(true);
 	}
 }
 
-void MyEvent::setXY(int x,int y)
+void MyEvent::setXY(int x, int y)
 {
-	this->x=x;
-	this->y=y;
+	this->x = x;
+	this->y = y;
 }
 
 std::string MyEvent::getDescription()
 {
 	return Configureader::GetDescription(description);
 }
-Sprite* MyEvent::getSprite(bool createNew){
-	if (sprite!=nullptr&&!createNew){
+Sprite* MyEvent::getSprite(bool createNew) {
+	if (sprite != nullptr && !createNew) {
 		return sprite;
 	}
-	
+
 	//TODO refactor
-	if (imageIdx2==-1){
-		std::pair<int,int> pxy=TransformCoordinate::transform(x,y);
+	if (imageIdx2 == -1) {
+		std::pair<int, int> pxy = TransformCoordinate::transform(x, y);
 		std::stringstream ss1;
-		ss1<<"images/tile ("<<imageIdx<<").png";
-		auto sprite1=Sprite::create(ss1.str());
-		sprite1->setPosition(pxy.first,pxy.second);
-		sprite1->setAnchorPoint(Vec2(0,0));
+		ss1 << "images/tile (" << imageIdx << ").png";
+		auto sprite1 = Sprite::create(ss1.str());
+		sprite1->setPosition(pxy.first, pxy.second);
+		sprite1->setAnchorPoint(Vec2(0, 0));
 		sprite1->setScale(Director::getInstance()->getContentScaleFactor());
-		if (sprite==nullptr&&!createNew)
-			sprite=sprite1;
+		if (sprite == nullptr && !createNew)
+			sprite = sprite1;
 		return sprite1;
 	}
-	else{
+	else {
 		std::stringstream ss2;
-		ss2<<"images/tile ("<<imageIdx<<").png";
-		auto sprite2=Sprite::create(ss2.str());
-		std::pair<int,int> pxy=TransformCoordinate::transform(x,y);
-		sprite2->setPosition(pxy.first,pxy.second);
-		sprite2->setAnchorPoint(Vec2(0,0));
+		ss2 << "images/tile (" << imageIdx << ").png";
+		auto sprite2 = Sprite::create(ss2.str());
+		std::pair<int, int> pxy = TransformCoordinate::transform(x, y);
+		sprite2->setPosition(pxy.first, pxy.second);
+		sprite2->setAnchorPoint(Vec2(0, 0));
 		std::stringstream ss3;
-		ss3<<"images/tile ("<<imageIdx2<<").png";
+		ss3 << "images/tile (" << imageIdx2 << ").png";
 		//add animation
 		Vector<SpriteFrame*> animFrames;
 		animFrames.reserve(2);
-		animFrames.pushBack(SpriteFrame::create(ss3.str(),Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
-		animFrames.pushBack(SpriteFrame::create(ss2.str(),Rect(0,0,40/Director::getInstance()->getContentScaleFactor(),40/Director::getInstance()->getContentScaleFactor())));
-		Animation* animation = Animation::createWithSpriteFrames(animFrames,0.3f);
+		animFrames.pushBack(SpriteFrame::create(ss3.str(), Rect(0, 0, 40 / Director::getInstance()->getContentScaleFactor(), 40 / Director::getInstance()->getContentScaleFactor())));
+		animFrames.pushBack(SpriteFrame::create(ss2.str(), Rect(0, 0, 40 / Director::getInstance()->getContentScaleFactor(), 40 / Director::getInstance()->getContentScaleFactor())));
+		Animation* animation = Animation::createWithSpriteFrames(animFrames, 0.3f);
 		Animate* animate = Animate::create(animation);
 		sprite2->setScale(Director::getInstance()->getContentScaleFactor());
 		sprite2->runAction(RepeatForever::create(animate));
-		if (sprite==nullptr&&!createNew)
-			sprite=sprite2;
+		if (sprite == nullptr && !createNew)
+			sprite = sprite2;
 		return sprite2;
 	}
 }
@@ -83,7 +83,7 @@ bool MyEvent::triggerEvent()
 	return false;
 }
 
-bool MyEvent::stepOnEvent(){
+bool MyEvent::stepOnEvent() {
 	//GameData::getInstance()->log("step on event")
 	selfDestruct();
 	return false;
@@ -106,7 +106,7 @@ void MyEvent::attachAction(MyAction *action)
 
 int MyEvent::performActions()
 {
-	for (std::size_t i=0;i<actions.size();i++)
+	for (std::size_t i = 0; i < actions.size(); i++)
 		actions[i]->perform(this);
 	//if performActions marked to delete this
 	//sigh... async problems again
@@ -117,8 +117,8 @@ int MyEvent::performActions()
 
 void MyEvent::selfDestruct()
 {
-	if (GameData::getInstance()->getEvent(getX(),getY())==this) //could have been replaced already
-		GameData::getInstance()->killEvent(std::pair<int,int>(getX(),getY()));
+	if (GameData::getInstance()->getEvent(getX(), getY()) == this) //could have been replaced already
+		GameData::getInstance()->killEvent(std::pair<int, int>(getX(), getY()));
 	else //no one else should care, just delete self
 	{
 		delete this;

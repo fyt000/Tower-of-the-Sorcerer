@@ -5,7 +5,7 @@
 
 USING_NS_CC;
 
-HeroItem::HeroItem(int id,std::string s,int imageID,std::function<void()> f,int uses):id(id),uses(uses),desc(s),imageID(imageID),f(f)
+HeroItem::HeroItem(int id, std::string s, int imageID, std::function<void()> f, int uses) :id(id), uses(uses), desc(s), imageID(imageID), f(f)
 {
 }
 
@@ -13,12 +13,12 @@ void HeroItem::attachTo(cocos2d::Node *parent)
 {
 	if (obtained)
 		return;
-	obtained=true;
-	std::string imagePath="images/tile ("+ToString(imageID)+").png";
-	itemButton = ui::Button::create(imagePath,imagePath);
-	itemButton->setAnchorPoint(Vec2(0,1));
+	obtained = true;
+	std::string imagePath = "images/tile (" + ToString(imageID) + ").png";
+	itemButton = ui::Button::create(imagePath, imagePath);
+	itemButton->setAnchorPoint(Vec2(0, 1));
 	//itemButton->setTitleText(desc);
-	itemButton->addTouchEventListener([&](Ref* sender,ui::Widget::TouchEventType type){
+	itemButton->addTouchEventListener([&](Ref* sender, ui::Widget::TouchEventType type) {
 		switch (type)
 		{
 		case ui::Widget::TouchEventType::ENDED:
@@ -32,7 +32,7 @@ void HeroItem::attachTo(cocos2d::Node *parent)
 	});
 
 	itemButton->setPosition(TransformCoordinate::itemIDVec2(id));
-	parent->addChild(itemButton,100);
+	parent->addChild(itemButton, 100);
 }
 
 bool HeroItem::isObtained()
@@ -42,20 +42,20 @@ bool HeroItem::isObtained()
 
 std::function<void()> HeroItem::getEffectFunction(const std::string& e)
 {
-	if (e=="showFloorEnemyStats"){
-		return [](){
+	if (e == "showFloorEnemyStats") {
+		return []() {
 			GameData::getInstance()->showFloorEnemyStats();
 		};
 	}
-	if (e=="fastStairs"){
-		return [](){
+	if (e == "fastStairs") {
+		return []() {
 			GameData::getInstance()->fastStairs();
 		};
 	}
-	if (e=="replayDialog"){
-		return [](){
+	if (e == "replayDialog") {
+		return []() {
 			GameData::getInstance()->replayDialog();
-		};		
+		};
 	}
 	return nullptr;
 }

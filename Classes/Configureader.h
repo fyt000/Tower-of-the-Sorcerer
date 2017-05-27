@@ -11,7 +11,7 @@ class HeroItem;
 class GlobalEvent;
 class Condition;
 
-class Configureader{
+class Configureader {
 	static rapidjson::Document* langStrDoc;
 	static rapidjson::Document* dataDoc;
 	~Configureader();
@@ -23,7 +23,7 @@ public:
 	static void ReadGlobalEvents(std::list<GlobalEvent* >*);
 	static std::string GetStr(std::string tag);
 	static std::string GetDescription(std::string& desc);
-	static void GetDialog(std::string& tag,std::vector<std::string>& strVec);
+	static void GetDialog(std::string& tag, std::vector<std::string>& strVec);
 
 private:
 	static Condition* getCondition(rapidjson::Value&);

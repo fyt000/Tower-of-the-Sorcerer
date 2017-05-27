@@ -8,30 +8,30 @@
 //just defines nothing else
 //I will run into forward decl issues if I put everything in gamedata (eg. Hero class)
 
-const int MAXFLOOR=5;
-const int MAXITEMS=9;
+const int MAXFLOOR = 5;
+const int MAXITEMS = 9;
 
 //no reason to hard code these limits
 //but anyway...
-const int MAXEVENT=500;
+const int MAXEVENT = 500;
 //const int MAXGLOBAL=10; //per floor
 
 
-enum DIR{
-	UP,DOWN,LEFT,RIGHT
+enum DIR {
+	UP, DOWN, LEFT, RIGHT
 };
 
-enum DIALOGTYPE{
-	NONE,YN,LIST,MATRIX
+enum DIALOGTYPE {
+	NONE, YN, LIST, MATRIX
 };
 
 //this is getting ugly... just going to typedef this
-typedef std::vector<std::pair<int,int>> PATH;
+typedef std::vector<std::pair<int, int>> PATH;
 
 template <typename T>
-static std::string ToString(const T& val){
+static std::string ToString(const T& val) {
 	std::stringstream ss;
-	ss<<val;
+	ss << val;
 	return ss.str();
 }
 
@@ -42,18 +42,18 @@ static std::string ToString(const T& val){
 //replace %d %s etc.. with string, number... %% -> %
 //thinking of just using @ as the placeholder
 //no further formating (eg. %lf will not work)
-static void stdsprintf(std::stringstream& ss,const char* s){
-	while (s && *s){
+static void stdsprintf(std::stringstream& ss, const char* s) {
+	while (s && *s) {
 		ss << *s++;
 	}
 }
 
-template<typename T,typename... Args>		
-static void stdsprintf(std::stringstream& ss,const char* s,T value,Args... args){
-	while (s && *s){
-		if (*s=='%' && *++s!='%'){	
-			ss << value;	
-			return stdsprintf(ss,++s,args...);
+template<typename T, typename... Args>
+static void stdsprintf(std::stringstream& ss, const char* s, T value, Args... args) {
+	while (s && *s) {
+		if (*s == '%' && *++s != '%') {
+			ss << value;
+			return stdsprintf(ss, ++s, args...);
 		}
 		ss << *s++;
 	}
@@ -61,9 +61,9 @@ static void stdsprintf(std::stringstream& ss,const char* s,T value,Args... args)
 
 
 template<typename... Args>
-static std::string stdsprintf(const std::string& s,Args... args){
+static std::string stdsprintf(const std::string& s, Args... args) {
 	std::stringstream ss;
-	stdsprintf(ss,&s[0],args...);
+	stdsprintf(ss, &s[0], args...);
 	return ss.str();
 }
 

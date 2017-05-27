@@ -23,24 +23,24 @@ class GameData
 {
 public:
 	static GameData* getInstance();
-	MyEvent* getEvent(int x,int y);
-	
+	MyEvent* getEvent(int x, int y);
+
 
 	int setFloor(int f);
-	cocos2d::Sprite* getSprite(int x,int y);
-	void moveHero(std::pair<int,int>);
-	void killEvent(std::pair<int,int> place);
+	cocos2d::Sprite* getSprite(int x, int y);
+	void moveHero(std::pair<int, int>);
+	void killEvent(std::pair<int, int> place);
 	//f==-1 for cur floor
 	//note that setEvent DO NOT call delete on the current event occupying x,y
-	void setEvent(int id,int x,int y,int f=-1);
-	void moveHeroFinalStep(std::pair<int,int> dest);
-	PATH pathFind(std::pair<int,int> dest);
-	PATH pathFind(int dx,int dy);
-	void log(const std::string& message,bool instant=true);
+	void setEvent(int id, int x, int y, int f = -1);
+	void moveHeroFinalStep(std::pair<int, int> dest);
+	PATH pathFind(std::pair<int, int> dest);
+	PATH pathFind(int dx, int dy);
+	void log(const std::string& message, bool instant = true);
 	void showLog();
 	HeroX* hero;
 	cocos2d::EventListenerTouchAllAtOnce* floorMouseListener;
-	
+
 	//all the display labels... location set at FloorScene
 	cocos2d::Label* logLabel;
 	LabelBinder<int>* floor;
@@ -51,11 +51,11 @@ public:
 	cocos2d::Label* eHpLabel;
 	cocos2d::Label* eAtkLabel;
 	cocos2d::Label* eDefLabel;
-	
+
 
 	//dialog
-	void showDialog(std::queue<DialogStruct>& dq,std::function<void(int)> callback);
-	void showDialog(const DialogStruct& ds,std::function<void(int)> callback);
+	void showDialog(std::queue<DialogStruct>& dq, std::function<void(int)> callback);
+	void showDialog(const DialogStruct& ds, std::function<void(int)> callback);
 	void dialogCompleted(int choice); //used by FloorScene, call callback if any
 
 	void init();
@@ -79,7 +79,7 @@ public:
 	void replayDialog();
 
 
-	int getEventID(int floor,int x,int y);
+	int getEventID(int floor, int x, int y);
 
 	void triggerGlobalEvents();
 
@@ -89,20 +89,20 @@ private:
 	std::mutex freeListLock;
 	std::vector<MyEvent*> pendingFreeList;
 	MyEvent* getEventData(int id);
-	MyEvent* getEventData(int x,int y);
-	MyEvent* EVENTDATA[MAXEVENT+1]={0};
-	int FLOOREVENTS[MAXFLOOR+1][11][11]={{{0}}}; //int representation - read from config?
-	MyEvent* FloorEvents[11][11]={{0}}; //the actual objects
-	HeroItem* ITEMS[MAXITEMS]={0};
-	std::list<GlobalEvent*> GLOBALEVENT[MAXFLOOR+1];
+	MyEvent* getEventData(int x, int y);
+	MyEvent* EVENTDATA[MAXEVENT + 1] = { 0 };
+	int FLOOREVENTS[MAXFLOOR + 1][11][11] = { {{0}} }; //int representation - read from config?
+	MyEvent* FloorEvents[11][11] = { {0} }; //the actual objects
+	HeroItem* ITEMS[MAXITEMS] = { 0 };
+	std::list<GlobalEvent*> GLOBALEVENT[MAXFLOOR + 1];
 
 
-	Stairs* upstair=nullptr;
-	Stairs* downstair=nullptr;
+	Stairs* upstair = nullptr;
+	Stairs* downstair = nullptr;
 
 	void loadFloor(int);
-	bool floorChange=false;
-	
+	bool floorChange = false;
+
 	std::queue<DialogStruct> dialogQ;
 	std::queue<std::function<void(int)> > dialogCallbackQ; //probably need a queue as well
 

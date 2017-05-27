@@ -5,20 +5,20 @@
 #include <queue>
 
 
-Door::Door(int imageIdx,const std::string& desc,KeyType doorType):MyEvent(imageIdx,desc),doorType(doorType)
+Door::Door(int imageIdx, const std::string& desc, KeyType doorType) :MyEvent(imageIdx, desc), doorType(doorType)
 {
 }
 
 bool Door::triggerEvent()
 {
-	if (GameData::getInstance()->hero->keys[doorType]->V() >= 1){
+	if (GameData::getInstance()->hero->keys[doorType]->V() >= 1) {
 		GameData::getInstance()->hero->keys[doorType]->subVal(1);
-		GameData::getInstance()->log(stdsprintf(GStr("door_open"),GStr("key_"+ToString((int)doorType))));
+		GameData::getInstance()->log(stdsprintf(GStr("door_open"), GStr("key_" + ToString((int)doorType))));
 		selfDestruct();
 		return true;
 	}
-	else{
-		GameData::getInstance()->log(stdsprintf(GStr("door_nokey"),GStr("key_"+ToString((int)doorType))));
+	else {
+		GameData::getInstance()->log(stdsprintf(GStr("door_nokey"), GStr("key_" + ToString((int)doorType))));
 	}
 	return false;
 }

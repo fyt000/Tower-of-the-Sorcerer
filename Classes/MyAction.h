@@ -7,7 +7,7 @@
 
 class MyEvent;
 
-class MyAction{
+class MyAction {
 public:
 	MyAction();
 	MyAction(MyAction*);
@@ -19,18 +19,18 @@ protected:
 };
 
 
-class Obtain:public MyAction{
+class Obtain :public MyAction {
 public:
-	Obtain(MyAction*,int item);
+	Obtain(MyAction*, int item);
 	int perform(MyEvent*);
 private:
 	int item;
 };
 
 //NONE type dialog
-class Talk: public MyAction{
+class Talk : public MyAction {
 public:
-	Talk(MyAction*,const std::string& tag);
+	Talk(MyAction*, const std::string& tag);
 	virtual int perform(MyEvent*);
 	virtual ~Talk();
 protected:
@@ -40,9 +40,9 @@ protected:
 };
 
 //Y N choice dialog
-class TalkYN: public Talk{
+class TalkYN : public Talk {
 public:
-	TalkYN(MyAction*,const std::string& tag);
+	TalkYN(MyAction*, const std::string& tag);
 	virtual int perform(MyEvent*);
 };
 
@@ -51,18 +51,18 @@ public:
 
 //transform the attached event into another event
 //this is no state in an event
-class TransformSelf: public MyAction{
+class TransformSelf : public MyAction {
 public:
-	TransformSelf(MyAction*,int id);
+	TransformSelf(MyAction*, int id);
 	virtual int perform(MyEvent*);
 private:
 	int id;
 };
 
 //TODO add animation type?
-class Transform: public MyAction{
+class Transform : public MyAction {
 public:
-	Transform(MyAction*,int floor,int x,int y,int targetID);
+	Transform(MyAction*, int floor, int x, int y, int targetID);
 	virtual int perform(MyEvent*);
 private:
 	int floor;
@@ -72,9 +72,9 @@ private:
 };
 
 //show action log on screen
-class LogText: public MyAction{
+class LogText : public MyAction {
 public:
-	LogText(MyAction*,const std::string& tag);
+	LogText(MyAction*, const std::string& tag);
 	virtual int perform(MyEvent*);
 private:
 	std::string tag;
@@ -82,9 +82,9 @@ private:
 
 //gain stats...used by weapon consumables
 //TODO PercentStat for percentage increase
-class FlatStat: public MyAction{
+class FlatStat : public MyAction {
 public:
-	FlatStat(MyAction*,const std::string& desc,int hp,int atk,int def,int gold);
+	FlatStat(MyAction*, const std::string& desc, int hp, int atk, int def, int gold);
 	virtual int perform(MyEvent*);
 private:
 	std::string desc;
@@ -95,7 +95,7 @@ private:
 };
 
 //TransformSelf to 0 without freependinglist
-class DestructSelf: public MyAction{
+class DestructSelf : public MyAction {
 public:
 	DestructSelf(MyAction*);
 	virtual int perform(MyEvent*);

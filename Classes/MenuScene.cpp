@@ -24,35 +24,35 @@ bool MenuScene::init()
 	Point origin = Director::getInstance()->getVisibleOrigin();
 
 	auto sprite = Sprite::create("images/open0.png");
-	sprite->setAnchorPoint(Vec2(0,0));
-	sprite->setPosition(0,0);
+	sprite->setAnchorPoint(Vec2(0, 0));
+	sprite->setPosition(0, 0);
 	sprite->setScale(Director::getInstance()->getContentScaleFactor()); //no auto scaling?
 
-	this->addChild(sprite,0);
+	this->addChild(sprite, 0);
 
 
-	int fontSize=25;
+	int fontSize = 25;
 
 	MenuItemFont::setFontSize(fontSize);
 	MenuItemFont::setFontName("Arial");
 
-	auto menu_item_1 = MenuItemFont::create(GStr("start"),[](Ref *pSender)->void{
+	auto menu_item_1 = MenuItemFont::create(GStr("start"), [](Ref *pSender)->void {
 		auto scene = FloorScene::createScene();
 		Director::getInstance()->pushScene(scene);
 	});
-	auto menu_item_2 = MenuItemFont::create("HIGHSCORE",[](Ref *pSender)->void{
+	auto menu_item_2 = MenuItemFont::create("HIGHSCORE", [](Ref *pSender)->void {
 		log("highscore");
 	});
-	auto menu_item_3 = MenuItemFont::create(GStr("setting"),[](Ref *pSender)->void{
+	auto menu_item_3 = MenuItemFont::create(GStr("setting"), [](Ref *pSender)->void {
 		log("settings");
 	});
 
-	float menuX=visibleSize.width*0.2;
-	float menuY=visibleSize.height*0.75;
+	float menuX = visibleSize.width*0.2;
+	float menuY = visibleSize.height*0.75;
 
-	auto *menu = Menu::create(menu_item_1,menu_item_2,menu_item_3,NULL);
+	auto *menu = Menu::create(menu_item_1, menu_item_2, menu_item_3, NULL);
 	menu->alignItemsVerticallyWithPadding(fontSize);
-	menu->setPosition(menuX,menuY);
+	menu->setPosition(menuX, menuY);
 	//menu->setColor(Color3B(0.0f,0.0f,0.0f));
 	this->addChild(menu);
 

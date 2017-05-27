@@ -2,16 +2,16 @@
 #include "MyEvent.h"
 
 
-enum KeyType{
-	YELLOW,BLUE,RED,LAST
+enum KeyType {
+	YELLOW, BLUE, RED, LAST
 };
 
 
-class Key:
+class Key :
 	public MyEvent
 {
 public:
-	Key(int imageIdx,const std::string& desc,enum KeyType keyType);
+	Key(int imageIdx, const std::string& desc, enum KeyType keyType);
 	bool triggerEvent();
 	virtual ~Key();
 	Key* clone();

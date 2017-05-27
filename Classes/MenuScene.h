@@ -2,7 +2,7 @@
 
 #include "cocos2d.h"
 
-class MenuScene: public cocos2d::Layer
+class MenuScene : public cocos2d::Layer
 {
 public:
 	static cocos2d::Scene* createScene();

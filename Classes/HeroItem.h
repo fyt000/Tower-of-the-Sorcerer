@@ -6,12 +6,12 @@
 
 //the items that gets displayed on the left bottom corner
 //position of the item is based on id for now
-class HeroItem{
+class HeroItem {
 
-	
+
 public:
 
-	HeroItem(int id,std::string s,int imageID,std::function<void()> f,int uses=-1);
+	HeroItem(int id, std::string s, int imageID, std::function<void()> f, int uses = -1);
 	void attachTo(cocos2d::Node*);
 	bool isObtained();
 	//all of the effects avaliable 
@@ -27,5 +27,5 @@ private:
 	int imageID;
 	std::function<void()> f;
 	std::string desc;
-	bool obtained=false;
+	bool obtained = false;
 };
