@@ -123,6 +123,7 @@ void GameData::dialogCompleted(int choice)
 
 void GameData::gameover()
 {
+	CCLOG("enabled input on gameover");
 	Director::getInstance()->getEventDispatcher()->setEnabled(true);
 	showDialog(DialogStruct(GStr("gameover"), DIALOGTYPE::NONE), [this](int notUsed)->void {
 		gameData = nullptr;
@@ -316,6 +317,10 @@ cocos2d::Sprite * GameData::getSprite(int x, int y)
 //this method is only being called from FloorScene
 //no one else should call this
 void GameData::moveHero(std::pair<int, int> dest) {
+	if (hero->moving() || hero->getSprite()->getNumberOfRunningActions() != 0) {
+		CCLOG("refused to move due to on action");
+		return;
+	}
 	logLabel->setVisible(false);
 	logLabel->setString(""); //reset log text on movement
 	auto eventPtr = getEvent(dest.first, dest.second);
@@ -357,7 +362,8 @@ void GameData::finalMovementCleanup()
 {
 	showLog();
 	triggerGlobalEvents();
-	//hero->setMoving(false);
+	hero->setMoving(false);
+	CCLOG("enabled input on finalmovementcleanup");
 	Director::getInstance()->getEventDispatcher()->setEnabled(true);
 	//resetKeyMovement();
 }
@@ -428,6 +434,8 @@ void GameData::moveHeroFinalStep(std::pair<int, int> dest) {
 				floorChange = false;
 			}
 			//finalMovementCleanup();
+			hero->setMoving(false);
+			CCLOG("enabled input on no triggerEvent");
 			Director::getInstance()->getEventDispatcher()->setEnabled(true);
 		}
 	}
@@ -515,6 +523,7 @@ void GameData::log(const std::string& message, bool inst)
 	logLabel->setString(message);
 	logLabel->setVisible(inst);
 	if (inst) { //if there are async actions, you may not want to display the log right away
+		CCLOG("log set to be instant");
 		logLabel->setOpacity(0);
 		logLabel->runAction(FadeIn::create(0.75));
 	}
@@ -536,6 +545,7 @@ void GameData::showLog() {
 //1. final hero movement
 //2. used a HeroItem
 void GameData::triggerGlobalEvents() {
+	CCLOG("trying to trigger global events");
 	//check if there are global events on cur floor
 	if (!GLOBALEVENT[floor->V()].empty()) {
 		auto& gList = GLOBALEVENT[floor->V()];
@@ -550,9 +560,12 @@ void GameData::triggerGlobalEvents() {
 			}
 		}
 	}
+	CCLOG("done trying global events");
 }
 
+
 GameData::~GameData() {
+	CCLOG("game data cleaning up");
 	freePendingFreeList();
 	//closing the app will clean up everything.
 	delete hero;

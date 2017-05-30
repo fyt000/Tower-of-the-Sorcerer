@@ -20,6 +20,7 @@ bool Enemy::triggerEvent()
 
 bool Enemy::stepOnEvent()
 {
+	CCLOG("fighting enemy");
 	bool fightR = Fightable::stepOnEvent();
 	//"Beat "+description+". Received "+ToString(gold.V())+" gold."
 	if (fightR) {

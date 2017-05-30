@@ -46,6 +46,7 @@ public:
 	//callback to stop everything
 	void StopAllFinal(cocos2d::Node* node);
 	void setMoving(bool moving);
+	bool moving();
 	~HeroX();
 
 private:

@@ -86,6 +86,7 @@ public:
 
 	void triggerGlobalEvents();
 
+
 private:
 	//now, do I need a lock.... I have no idea how cocos2dx works here
 	//adding a lock for safety concerns

@@ -16,7 +16,6 @@ HeroX::HeroX(int imageIdx, const std::string& desc, int hp, int atk, int def, in
 	for (int i = 0; i < KeyType::LAST; i++) {
 		keys[i] = new LabelBinder<int>(3);
 	}
-
 }
 
 
@@ -48,6 +47,7 @@ Sprite* HeroX::getSprite() {
 int HeroX::fightX(Fightable * target, std::function<void(Fightable&)> hpCallback1, std::function<void(Fightable&)> hpCallback2) {
 	//hpCallBack should really just be null... I don't care
 	//this may change
+	CCLOG("disabled input on fightX");
 	Director::getInstance()->getEventDispatcher()->setEnabled(false);
 	this->isMoving = true;
 	target->setLabelNofity(false);
@@ -100,8 +100,12 @@ int HeroX::fightX(Fightable * target, std::function<void(Fightable&)> hpCallback
 			actions.pushBack(DelayTime::create(0.3));
 		}
 	}
-	actions.pushBack(CallFuncN::create(CC_CALLBACK_1(HeroX::StopAllFinal, this)));
+	actions.pushBack(CallFuncN::create([this](Node* n) {
+		CCLOG("going to run stopAllFinal");
+		this->StopAllFinal(n);
+	}));
 	actions.pushBack(CallFuncN::create(CC_CALLBACK_1(HeroX::cleanUpTarget, this, target)));
+	CCLOG("running fighting sequence");
 	sprite->runAction(Sequence::create(actions));
 	return ret;
 }
@@ -116,14 +120,17 @@ void HeroX::updateBetweenFight(Node* n, Fightable* f, std::vector<FightableSnaps
 	f->hp.setVal(snapshots[hSSIdx].hp);
 	f->atk.setVal(snapshots[hSSIdx].atk);
 	f->def.setVal(snapshots[hSSIdx].def);
+	CCLOG("updating between fight %s",f->getDescription().c_str());
 	//f==this means its hero->..
 	if (isHero&&hp.V() <= 0) {
+		CCLOG("stopped all action on defeat");
 		sprite->stopAllActions();
 		gInst->gameover();
 		return;
 	}
 	auto newFrame = SpriteFrame::create(frameName, Rect(0, 0, 40 / Director::getInstance()->getContentScaleFactor(), 40 / Director::getInstance()->getContentScaleFactor()));
 	sprite->setSpriteFrame(newFrame);
+	CCLOG("updateBetweenFight done");
 }
 
 enum DIR nextNodeDir(std::pair<int, int> cur, std::pair<int, int> next) {
@@ -197,7 +204,8 @@ std::pair<int, int> HeroX::getDirXY(enum DIR direction) {
 }
 
 void HeroX::moveOnestep(PATH& path) {
-	sprite->stopAllActions();
+	//CCLOG("stopped all action on moveonestep");
+	//sprite->stopAllActions();
 	if (path.size() == 0)
 	{
 		return;
@@ -215,6 +223,8 @@ void HeroX::moveOnestep(PATH& path) {
 
 Vector<FiniteTimeAction*> HeroX::createMoveActions(DirectedPath& directedPaths) {
 	Vector<FiniteTimeAction*> actions;
+	if (directedPaths.size() == 0)
+		return actions;
 	//now directedPaths stores all the stuff... 
 	for (auto singPath : directedPaths) {
 		auto changeDirCallBack = CallFuncN::create(CC_CALLBACK_1(HeroX::changeDirAnimate, this, singPath.second, singPath.first.size(), false));
@@ -233,6 +243,8 @@ Vector<FiniteTimeAction*> HeroX::createMoveActions(DirectedPath& directedPaths) 
 
 HeroX::DirectedPath HeroX::getDirectedPath(PATH& path) {
 	DirectedPath directedPaths;
+	if (path.size() == 0)
+		return directedPaths;
 	enum DIR curDir = heroDir;
 	std::pair<int, int> curCoord(x, y); //do I need a lock on x,y or something
 	PATH singleDirPath;
@@ -258,9 +270,17 @@ HeroX::DirectedPath HeroX::getDirectedPath(PATH& path) {
 //and the logic for hitting the wall should be done else where maybe GameData
 void HeroX::move(PATH& path, bool isLastStep) {
 	isMoving = true;
-	sprite->stopAllActions();
-	if (path.size() == 0)
+	//CCLOG("stopped all action by trying to move");
+	//sprite->stopAllActions();
+	if (path.size() == 0) {
+		CCLOG("path length 0");
+		//CCLOG("enabled input because I don't know whats going on");
+		isMoving = false;
+		Director::getInstance()->getEventDispatcher()->setEnabled(true);
 		return;
+	}
+	CCLOG("path length %d", path.size());
+		
 
 	/*
 	if (isLastStep&&path.size()!=1)
@@ -268,6 +288,7 @@ void HeroX::move(PATH& path, bool isLastStep) {
 	std::pair<int, int> lastStep = path.back();
 	if (!isLastStep)
 		path.pop_back();
+
 
 	//break down the path into directions...
 	//because each direction has a different animation
@@ -279,11 +300,20 @@ void HeroX::move(PATH& path, bool isLastStep) {
 	auto actions = createMoveActions(directedPaths);
 	//now directedPaths stores all the stuff... 
 
-	if (isLastStep)
+	CCLOG("movement action length %d", actions.size());
+
+	if (isLastStep){
 		actions.pushBack(DelayTime::create(animateRate));
-	auto stopCallBack =
-		isLastStep ? CallFuncN::create(CC_CALLBACK_1(HeroX::StopAllFinal, this)) : CallFuncN::create(CC_CALLBACK_1(HeroX::StopAll, this, lastStep));
-	actions.pushBack(stopCallBack);
+		CCLOG("action: insert delay");
+	}
+	if (isLastStep) {
+		actions.pushBack(CallFuncN::create(CC_CALLBACK_1(HeroX::StopAllFinal, this)));
+		CCLOG("action: insert StopAllFinal");
+	}
+	else {
+		actions.pushBack(CallFuncN::create(CC_CALLBACK_1(HeroX::StopAll, this, lastStep)));
+		CCLOG("action: insert StopAll");
+	}
 
 	if (isLastStep) {
 		// isLastStep is set to true when an event has triggered... Now trigger StepOn
@@ -292,10 +322,11 @@ void HeroX::move(PATH& path, bool isLastStep) {
 		if (idk) {
 			auto stepOnCallBack = CallFuncN::create(CC_CALLBACK_1(HeroX::triggeredCallback, this, idk));
 			actions.pushBack(stepOnCallBack);
+			CCLOG("action: insert stepOnCallBack");
 		}
 
 	}
-
+	CCLOG("running sequence, length %d", actions.size());
 	auto seq = Sequence::create(actions);
 	sprite->runAction(seq);
 }
@@ -308,18 +339,25 @@ void HeroX::move(std::pair<int, int> dest)
 }
 
 void HeroX::changeDirAnimate(Node* node, enum DIR newDir, int steps, bool stop) {
+	CCLOG("Changing Dir Animate");
 	heroDir = newDir;
 	auto animate = getDirMoveAnimate(newDir, steps, stop);
-	sprite->stopActionByTag(0); //stop cur animation if any
+	auto action = sprite->getActionByTag(0);
+	if (action && !action->isDone()) {
+		CCLOG("stoppping cur animation");
+		//sprite->stopActionByTag(0); //stop cur animation if any
+	}
 	sprite->runAction(animate);
 }
 
 void HeroX::Destined(Node* node, int x, int y) {
 	this->x = x; this->y = y;
+	CCLOG("destined at %d %d", x, y);
 	//TODO check for hidden event, call StopAllFinal if needed
 }
 
 void HeroX::StopAll(Node* node, std::pair<int, int> dest) {
+	CCLOG("disabled input on StopAll");
 	Director::getInstance()->getEventDispatcher()->setEnabled(false);
 	this->isMoving = true;
 	//sprite->stopAllActions();
@@ -330,15 +368,21 @@ void HeroX::StopAll(Node* node, std::pair<int, int> dest) {
 //theres a few lines of copied code... get ride of it maybe
 void HeroX::StopAllFinal(Node * node)
 {
-	sprite->stopAllActions();
-	sprite->setSpriteFrame(stopSprite(heroDir));
-	//isMoving = false;
+	//CCLOG("stopped all action on StopAllFinal");
+	isMoving = false;
 	GameData::getInstance()->finalMovementCleanup();
+	//sprite->stopAllActions();
+	sprite->setSpriteFrame(stopSprite(heroDir));
 }
 
 void HeroX::setMoving(bool moving)
 {
 	isMoving = moving;
+}
+
+bool HeroX::moving()
+{
+	return isMoving;
 }
 
 SpriteFrame* HeroX::stopSprite(DIR dir) {
@@ -354,9 +398,11 @@ SpriteFrame* HeroX::stopSprite(DIR dir) {
 }
 
 void HeroX::triggeredCallback(Node * node, MyEvent* ev) {
+	CCLOG("triggeredCallback");
 	if (ev == nullptr)
 		return;
 	if (!ev->stepOnEvent()) {
+		CCLOG("enabled input on triggeredCallback");
 		Director::getInstance()->getEventDispatcher()->setEnabled(true);
 	}
 }
