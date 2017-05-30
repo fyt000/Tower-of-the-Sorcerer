@@ -324,10 +324,49 @@ void GameData::moveHero(std::pair<int, int> dest) {
 	}
 	else {
 		hero->move(pathFind(dest));
-		//moveHero(pathFind(dest));
 	}
 }
 
+void GameData::moveHero(DIR dir)
+{
+	logLabel->setVisible(false);
+	logLabel->setString(""); //reset log text on movement
+	auto newXY = hero->getDirXY(dir);
+	auto x = newXY.first;
+	auto y = newXY.second;
+	if (x < 0 || x >= 11 || y < 0 || y >= 11)
+	{
+		return;
+	}
+	auto eventPtr = getEvent(newXY.first, newXY.second);
+	if (eventPtr == NULL) {
+		hero->moveOnestep(pathFind(newXY));
+	}
+	else {
+		hero->move(pathFind(newXY));
+	}
+}
+
+void GameData::continousMovement()
+{
+	flScn->continousMovement();
+}
+
+//called after final movement
+void GameData::finalMovementCleanup()
+{
+	showLog();
+	triggerGlobalEvents();
+	//hero->setMoving(false);
+	Director::getInstance()->getEventDispatcher()->setEnabled(true);
+	//resetKeyMovement();
+}
+
+void GameData::resetKeyMovement()
+{
+	flScn->movementActive = false;
+	flScn->canChangeDIR = true;
+}
 
 void GameData::killEvent(std::pair<int, int> place) {
 	auto eventPtr = getEvent(place.first, place.second);
@@ -388,6 +427,7 @@ void GameData::moveHeroFinalStep(std::pair<int, int> dest) {
 			{
 				floorChange = false;
 			}
+			//finalMovementCleanup();
 			Director::getInstance()->getEventDispatcher()->setEnabled(true);
 		}
 	}
@@ -396,7 +436,6 @@ void GameData::moveHeroFinalStep(std::pair<int, int> dest) {
 		//moveHero(pathFind(dest));
 		hero->move(pathFind(dest));
 	}
-
 }
 
 PATH GameData::pathFind(std::pair<int, int> dest) {
@@ -411,7 +450,7 @@ PATH GameData::pathFind(int dx, int dy)
 {
 
 	if (dx == -1 || dy == -1 || hero->getX() == dx&&hero->getY() == dy) {
-		return std::vector<std::pair<int, int>>(); //do nothing
+		return { }; //do nothing
 	}
 
 	//||getEvent(dx,dy)

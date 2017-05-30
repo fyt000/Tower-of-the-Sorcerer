@@ -29,6 +29,7 @@ public:
 	int setFloor(int f);
 	cocos2d::Sprite* getSprite(int x, int y);
 	void moveHero(std::pair<int, int>);
+	void moveHero(DIR dir);
 	void killEvent(std::pair<int, int> place);
 	//f==-1 for cur floor
 	//note that setEvent DO NOT call delete on the current event occupying x,y
@@ -39,6 +40,7 @@ public:
 	void log(const std::string& message, bool instant = true);
 	void showLog();
 	HeroX* hero;
+	//TODO investigate why this was here
 	cocos2d::EventListenerTouchAllAtOnce* floorMouseListener;
 
 	//all the display labels... location set at FloorScene
@@ -58,6 +60,10 @@ public:
 	void showDialog(const DialogStruct& ds, std::function<void(int)> callback);
 	void dialogCompleted(int choice); //used by FloorScene, call callback if any
 
+	void continousMovement();
+	void resetKeyMovement();
+	void finalMovementCleanup();
+
 	void init();
 	void gameover();
 
@@ -65,9 +71,6 @@ public:
 	void freePendingFreeList();
 
 	void attachEnemyInfo(Fightable* enemy);
-
-
-
 
 	//items
 	void obtainItem(int idx);

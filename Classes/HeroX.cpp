@@ -48,8 +48,8 @@ Sprite* HeroX::getSprite() {
 int HeroX::fightX(Fightable * target, std::function<void(Fightable&)> hpCallback1, std::function<void(Fightable&)> hpCallback2) {
 	//hpCallBack should really just be null... I don't care
 	//this may change
-
 	Director::getInstance()->getEventDispatcher()->setEnabled(false);
+	this->isMoving = true;
 	target->setLabelNofity(false);
 	this->setLabelNofity(false);
 	std::vector<FightableSnapshot> heroSnapshots;
@@ -175,7 +175,12 @@ Animate* HeroX::getDirMoveAnimate(enum DIR dir, int steps, bool stop) {
 //this is used for arrow(keyboard) movement if I happen to implement it
 //but again, this does not make any assumption on its surroundings
 //just move
-void HeroX::move(enum DIR direction) {
+std::pair<int, int> HeroX::getDirXY(enum DIR direction) {
+	if (isMoving) 
+	{
+		CCLOG("pls don't spam arrow keys");
+		return { -1,-1 };
+	}
 	int newX = x; int newY = y;
 	switch (direction) {
 	case (DIR::UP):
@@ -188,28 +193,46 @@ void HeroX::move(enum DIR direction) {
 		newY++; break;
 	}
 
-	move(std::pair<int, int>(newX, newY));
+	return { newX,newY };
 }
 
-//THIS WORKS!!
-//there are a lot of stuff that can happen with move
-//for now, just do the animation
-//and the logic for hitting the wall should be done else where maybe GameData
-void HeroX::move(PATH path, bool isLastStep) {
+void HeroX::moveOnestep(PATH& path) {
 	sprite->stopAllActions();
 	if (path.size() == 0)
+	{
 		return;
+	}
+	isMoving = true;
+	auto directedPath = getDirectedPath(path);
+	auto actions = createMoveActions(directedPath);
+	actions.pushBack(CallFuncN::create([this](Node*) {
+		isMoving = false;
+		GameData::getInstance()->continousMovement();
+	}));
+	auto seq = Sequence::create(actions);
+	sprite->runAction(seq);
+}
 
-	/*
-	if (isLastStep&&path.size()!=1)
-		return;*/
-	std::pair<int, int> lastStep = path.back();
-	if (!isLastStep)
-		path.pop_back();
+Vector<FiniteTimeAction*> HeroX::createMoveActions(DirectedPath& directedPaths) {
+	Vector<FiniteTimeAction*> actions;
+	//now directedPaths stores all the stuff... 
+	for (auto singPath : directedPaths) {
+		auto changeDirCallBack = CallFuncN::create(CC_CALLBACK_1(HeroX::changeDirAnimate, this, singPath.second, singPath.first.size(), false));
+		actions.pushBack(changeDirCallBack);
+		for (auto pathNode : singPath.first) {
+			//TOOD: fix this interleaving issue
+			//auto callback1 = CallFuncN::create(CC_CALLBACK_1(HeroX::Destined, this, pathNode.first, pathNode.second));
+			auto destCoord = TransformCoordinate::transformVec2(pathNode.first, pathNode.second);
+			auto callback2 = CallFuncN::create(CC_CALLBACK_1(HeroX::Destined, this, pathNode.first, pathNode.second));
+			actions.pushBack(MoveTo::create(animateRate, destCoord));
+			actions.pushBack(callback2);
+		}
+	}
+	return actions;
+}
 
-	//break down the path into directions...
-	//because each direction has a different animation
-	std::vector< std::pair< PATH, enum DIR> > directedPaths;
+HeroX::DirectedPath HeroX::getDirectedPath(PATH& path) {
+	DirectedPath directedPaths;
 	enum DIR curDir = heroDir;
 	std::pair<int, int> curCoord(x, y); //do I need a lock on x,y or something
 	PATH singleDirPath;
@@ -226,24 +249,36 @@ void HeroX::move(PATH path, bool isLastStep) {
 	}
 	if (singleDirPath.size() != 0)
 		directedPaths.push_back(std::pair<PATH, enum DIR>(singleDirPath, curDir));
+	return directedPaths;
+}
 
+//THIS WORKS!!
+//there are a lot of stuff that can happen with move
+//for now, just do the animation
+//and the logic for hitting the wall should be done else where maybe GameData
+void HeroX::move(PATH& path, bool isLastStep) {
+	isMoving = true;
+	sprite->stopAllActions();
+	if (path.size() == 0)
+		return;
 
+	/*
+	if (isLastStep&&path.size()!=1)
+		return;*/
+	std::pair<int, int> lastStep = path.back();
+	if (!isLastStep)
+		path.pop_back();
+
+	//break down the path into directions...
+	//because each direction has a different animation
+	auto directedPaths = getDirectedPath(path);
 
 	//I could have combined this with the above code
 	//but just in case I decide to do something different
-	Vector<FiniteTimeAction*> actions;
 
+	auto actions = createMoveActions(directedPaths);
 	//now directedPaths stores all the stuff... 
-	for (auto singPath : directedPaths) {
-		auto changeDirCallBack = CallFuncN::create(CC_CALLBACK_1(HeroX::changeDirAnimate, this, singPath.second, singPath.first.size(), false));
-		actions.pushBack(changeDirCallBack);
-		for (auto pathNode : singPath.first) {
-			auto destCoord = TransformCoordinate::transformVec2(pathNode.first, pathNode.second);
-			auto callback = CallFuncN::create(CC_CALLBACK_1(HeroX::Destined, this, pathNode.first, pathNode.second));
-			actions.pushBack(MoveTo::create(animateRate, destCoord));
-			actions.pushBack(callback);
-		}
-	}
+
 	if (isLastStep)
 		actions.pushBack(DelayTime::create(animateRate));
 	auto stopCallBack =
@@ -260,7 +295,6 @@ void HeroX::move(PATH path, bool isLastStep) {
 		}
 
 	}
-
 
 	auto seq = Sequence::create(actions);
 	sprite->runAction(seq);
@@ -287,6 +321,7 @@ void HeroX::Destined(Node* node, int x, int y) {
 
 void HeroX::StopAll(Node* node, std::pair<int, int> dest) {
 	Director::getInstance()->getEventDispatcher()->setEnabled(false);
+	this->isMoving = true;
 	//sprite->stopAllActions();
 	sprite->setSpriteFrame(stopSprite(heroDir));
 	GameData::getInstance()->moveHeroFinalStep(dest);
@@ -297,9 +332,13 @@ void HeroX::StopAllFinal(Node * node)
 {
 	sprite->stopAllActions();
 	sprite->setSpriteFrame(stopSprite(heroDir));
-	GameData::getInstance()->showLog();
-	GameData::getInstance()->triggerGlobalEvents();
-	Director::getInstance()->getEventDispatcher()->setEnabled(true);
+	//isMoving = false;
+	GameData::getInstance()->finalMovementCleanup();
+}
+
+void HeroX::setMoving(bool moving)
+{
+	isMoving = moving;
 }
 
 SpriteFrame* HeroX::stopSprite(DIR dir) {

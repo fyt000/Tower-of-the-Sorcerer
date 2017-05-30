@@ -12,6 +12,9 @@
 class HeroX :
 	public Fightable
 {
+
+	typedef std::vector< std::pair< PATH, enum DIR> > DirectedPath;
+
 public:
 
 	HeroX(int imageIdx, const std::string& desc, int hp, int atk, int def, int gold);
@@ -24,11 +27,12 @@ public:
 	//remove fighting target and other clean up before enabling user input
 	void cleanUpTarget(cocos2d::Node * node, Fightable * target);
 	//not exactly used, may be needed for keyboard
-	void move(enum DIR dir);
+	std::pair<int,int> getDirXY(enum DIR dir);
+	void moveOnestep(PATH& path);
 	//animation to move dir steps, stop=true for extra swagger
 	cocos2d::Animate * getDirMoveAnimate(DIR dir, int steps, bool stop = false);
 	//move the given path, isLastMove means to trigger the event on the last move
-	void move(PATH path, bool isLastMove = false);
+	void move(PATH& path, bool isLastMove = false);
 	void move(std::pair<int, int>);
 
 	//initialized in Hero constructor
@@ -41,17 +45,21 @@ public:
 	virtual HeroX* clone();
 	//callback to stop everything
 	void StopAllFinal(cocos2d::Node* node);
+	void setMoving(bool moving);
 	~HeroX();
 
 private:
 	enum DIR heroDir;
 	float animateRate = 0.1f;
+	bool isMoving = false;
+	DirectedPath getDirectedPath(PATH& path);
+	cocos2d::Vector<cocos2d::FiniteTimeAction*> createMoveActions(DirectedPath& directedPath);
 	void changeDirAnimate(cocos2d::Node * node, DIR newDir, int steps, bool stop = false);
 	void Destined(cocos2d::Node* node, int x, int y);
 	void StopAll(cocos2d::Node * node, std::pair<int, int>);
 	void triggeredCallback(cocos2d::Node* node, MyEvent * ev);
 	void updateBetweenFight(cocos2d::Node * n, Fightable * f, std::vector<FightableSnapshot>& snapshots, int hSSIdx, std::string & frameName, bool isHero);
 	cocos2d::SpriteFrame* stopSprite(DIR dir);
-
+	
 };
 

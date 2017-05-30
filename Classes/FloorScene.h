@@ -12,6 +12,9 @@ class FloorScene : public cocos2d::Layer
 
 
 public:
+	bool movementActive = false;
+	bool canChangeDIR = true;
+
 	static cocos2d::Scene* createScene();
 	virtual bool init();
 
@@ -33,6 +36,8 @@ public:
 	//attach the sprite to floorContent
 	void attachFloorSprite(cocos2d::Sprite* s);
 
+	void continousMovement();
+
 private:
 	cocos2d::Node* floorContent = nullptr; //the 11x11 grid
 	cocos2d::DrawNode* dialogNode;
@@ -45,5 +50,10 @@ private:
 	int eSpriteY = -1;
 	cocos2d::Sprite* enemyInfoSprite = nullptr;
 
+	enum DIR currentMovement;
+
 	void closeDialog(int);
+
+	void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event);
+	void onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event);
 };

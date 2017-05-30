@@ -200,6 +200,11 @@ bool FloorScene::init()
 	gInstance->floorMouseListener = EventListenerTouchAllAtOnce::create();
 	gInstance->floorMouseListener->onTouchesEnded = CC_CALLBACK_2(FloorScene::onTouchesEnded, this);
 
+	auto keyboardListener = EventListenerKeyboard::create();
+	keyboardListener->onKeyPressed = CC_CALLBACK_2(FloorScene::onKeyPressed, this);
+	keyboardListener->onKeyReleased = CC_CALLBACK_2(FloorScene::onKeyReleased, this);
+
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(keyboardListener, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(GameData::getInstance()->floorMouseListener, this);
 
 	return true;
@@ -501,6 +506,44 @@ void FloorScene::closeDialog(int c)
 		dialogNode = nullptr;
 	}
 	GameData::getInstance()->dialogCompleted(c);
+}
+
+void FloorScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)
+{
+	if (dialogOpen) {
+		//or close dialog?
+		return;
+	}
+
+	switch (keyCode) {
+	case cocos2d::EventKeyboard::KeyCode::KEY_UP_ARROW:
+	case cocos2d::EventKeyboard::KeyCode::KEY_W:
+		currentMovement = DIR::UP; movementActive = true; break;
+	case cocos2d::EventKeyboard::KeyCode::KEY_DOWN_ARROW:
+	case cocos2d::EventKeyboard::KeyCode::KEY_S:
+		currentMovement = DIR::DOWN; movementActive = true; break;
+	case cocos2d::EventKeyboard::KeyCode::KEY_LEFT_ARROW:
+	case cocos2d::EventKeyboard::KeyCode::KEY_A:
+		currentMovement = DIR::LEFT; movementActive = true; break;
+	case cocos2d::EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
+	case cocos2d::EventKeyboard::KeyCode::KEY_D:
+		currentMovement = DIR::RIGHT; movementActive = true; break;
+	}
+	
+	continousMovement();
+
+}
+
+void FloorScene::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)
+{
+	movementActive = false;
+}
+
+void FloorScene::continousMovement() {
+	if (movementActive) {
+		//I hoped I used future or something
+		GameData::getInstance()->moveHero(currentMovement); 
+	}
 }
 
 
