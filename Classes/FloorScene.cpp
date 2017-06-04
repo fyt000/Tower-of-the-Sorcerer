@@ -251,15 +251,18 @@ void FloorScene::loadFloor()
 	enemyInfoSprite = nullptr; //?
 
 	floorContent->addChild(gInstance->hero->getSprite(), 10);
-	this->schedule(schedule_selector(FloorScene::stuckBreaker), 2.0f);
+	this->schedule(schedule_selector(FloorScene::stuckBreaker), 0);
 	this->addChild(floorContent, 3);
 }
 
+//the ultimate solution #1
 void FloorScene::stuckBreaker(float dt) {
-	CCLOG("scheduled actions %d", GameData::getInstance()->hero->getSprite()->numberOfRunningActions());
-//	if (GameData::getInstance()->hero->getSprite()->numberOfRunningActions() == 0) {
-//		Director::getInstance()->getEventDispatcher()->setEnabled(true);
-//	}
+	//CCLOG("scheduled actions %d", GameData::getInstance()->hero->getSprite()->numberOfRunningActions());
+	auto hero = GameData::getInstance()->hero;
+	if (hero->getSprite()->numberOfRunningActions() == 0 && !hero->moving()) {
+		Director::getInstance()->getEventDispatcher()->setEnabled(true);
+		GameData::getInstance()->replayHeroAction();
+	}
 }
 
 void FloorScene::attachFloorSprite(cocos2d::Sprite* s) {

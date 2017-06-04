@@ -364,7 +364,7 @@ void GameData::finalMovementCleanup()
 	triggerGlobalEvents();
 	hero->setMoving(false);
 	CCLOG("enabled input on finalmovementcleanup");
-	Director::getInstance()->getEventDispatcher()->setEnabled(true);
+	//Director::getInstance()->getEventDispatcher()->setEnabled(true);
 	//resetKeyMovement();
 }
 
@@ -433,10 +433,10 @@ void GameData::moveHeroFinalStep(std::pair<int, int> dest) {
 			{
 				floorChange = false;
 			}
-			//finalMovementCleanup();
-			hero->setMoving(false);
+			finalMovementCleanup();
+			//hero->setMoving(false);
 			CCLOG("enabled input on no triggerEvent");
-			Director::getInstance()->getEventDispatcher()->setEnabled(true);
+			//Director::getInstance()->getEventDispatcher()->setEnabled(true);
 		}
 	}
 	else {
@@ -541,11 +541,49 @@ void GameData::showLog() {
 
 }
 
+void GameData::attachHeroAction(FiniteTimeAction* act) 
+{
+	actionSaver.push_back(act);
+	act->retain(); //MAGIC
+}
+
+void GameData::dropHeroAction()
+{
+	if (replaySize > 0)
+		replaySize--;
+	if (actionSaver.size() == 0) {
+		CCLOG("something is not right");
+		//TODO investigate whats going on here
+		return;
+	}
+	actionSaver.pop_front();
+}
+
+void GameData::replayHeroAction()
+{
+	if (actionSaver.size() == 0)
+		return;
+	CCLOG("replaying actions");
+	Vector<FiniteTimeAction*> actions;
+	for (auto act : actionSaver) {
+		act->setOriginalTarget(hero->getSprite());
+		act->setTarget(hero->getSprite());
+		actions.pushBack(act);
+	}
+	CCLOG("size of actions to replay %d", actions.size());
+	replaySize += actions.size();
+	hero->getSprite()->runAction(Sequence::create(actions));
+	actionSaver.clear();
+	//TODO check if I need to release the action
+}
+
+
+
 //called after
 //1. final hero movement
 //2. used a HeroItem
 void GameData::triggerGlobalEvents() {
-	CCLOG("trying to trigger global events");
+	//CCLOG("trying to trigger global events");
 	//check if there are global events on cur floor
 	if (!GLOBALEVENT[floor->V()].empty()) {
 		auto& gList = GLOBALEVENT[floor->V()];
@@ -560,7 +598,7 @@ void GameData::triggerGlobalEvents() {
 			}
 		}
 	}
-	CCLOG("done trying global events");
+	//CCLOG("done trying global events");
 }
 
 

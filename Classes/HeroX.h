@@ -44,7 +44,7 @@ public:
 	void setAbsPos(int, int, enum DIR);
 	virtual HeroX* clone();
 	//callback to stop everything
-	void StopAllFinal(cocos2d::Node* node);
+	void StopAllFinal(cocos2d::Node* node, bool reset = true);
 	void setMoving(bool moving);
 	bool moving();
 	~HeroX();

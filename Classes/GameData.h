@@ -13,6 +13,7 @@
 #include "Stairs.h"
 #include "GlobalEvent.h"
 #include <list>
+#include <deque>
 
 //mostly handle the logic
 //Hero class handles the rest
@@ -87,11 +88,21 @@ public:
 	void triggerGlobalEvents();
 
 
+	void attachHeroAction(cocos2d::FiniteTimeAction*);
+	void dropHeroAction();
+	void replayHeroAction();
+
 private:
 	//now, do I need a lock.... I have no idea how cocos2dx works here
 	//adding a lock for safety concerns
 	std::mutex freeListLock;
 	std::vector<MyEvent*> pendingFreeList;
+
+	//no idea whats going on with action getting lost
+	//introduce this to save whatever is going on
+	int replaySize = 0;
+	std::deque<cocos2d::FiniteTimeAction*> actionSaver;
+
 	MyEvent* getEventData(int id);
 	MyEvent* getEventData(int x, int y);
 	MyEvent* EVENTDATA[MAXEVENT + 1] = { 0 };
@@ -114,4 +125,3 @@ private:
 	GameData();
 	~GameData();
 };
-

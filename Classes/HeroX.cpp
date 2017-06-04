@@ -49,7 +49,6 @@ int HeroX::fightX(Fightable * target, std::function<void(Fightable&)> hpCallback
 	//this may change
 	CCLOG("disabled input on fightX");
 	Director::getInstance()->getEventDispatcher()->setEnabled(false);
-	this->isMoving = true;
 	target->setLabelNofity(false);
 	this->setLabelNofity(false);
 	std::vector<FightableSnapshot> heroSnapshots;
@@ -100,10 +99,13 @@ int HeroX::fightX(Fightable * target, std::function<void(Fightable&)> hpCallback
 			actions.pushBack(DelayTime::create(0.3));
 		}
 	}
-	actions.pushBack(CallFuncN::create([this](Node* n) {
+	auto cb1 = CallFuncN::create([this](Node* n) {
 		CCLOG("going to run stopAllFinal");
 		this->StopAllFinal(n);
-	}));
+	});
+	actions.pushBack(cb1);
+	GameData::getInstance()->attachHeroAction(cb1);
+
 	actions.pushBack(CallFuncN::create(CC_CALLBACK_1(HeroX::cleanUpTarget, this, target)));
 	CCLOG("running fighting sequence");
 	sprite->runAction(Sequence::create(actions));
@@ -183,11 +185,7 @@ Animate* HeroX::getDirMoveAnimate(enum DIR dir, int steps, bool stop) {
 //but again, this does not make any assumption on its surroundings
 //just move
 std::pair<int, int> HeroX::getDirXY(enum DIR direction) {
-	if (isMoving) 
-	{
-		CCLOG("pls don't spam arrow keys");
-		return { -1,-1 };
-	}
+
 	int newX = x; int newY = y;
 	switch (direction) {
 	case (DIR::UP):
@@ -210,11 +208,9 @@ void HeroX::moveOnestep(PATH& path) {
 	{
 		return;
 	}
-	isMoving = true;
 	auto directedPath = getDirectedPath(path);
 	auto actions = createMoveActions(directedPath);
 	actions.pushBack(CallFuncN::create([this](Node*) {
-		isMoving = false;
 		GameData::getInstance()->continousMovement();
 	}));
 	auto seq = Sequence::create(actions);
@@ -269,13 +265,11 @@ HeroX::DirectedPath HeroX::getDirectedPath(PATH& path) {
 //for now, just do the animation
 //and the logic for hitting the wall should be done else where maybe GameData
 void HeroX::move(PATH& path, bool isLastStep) {
-	isMoving = true;
 	//CCLOG("stopped all action by trying to move");
 	//sprite->stopAllActions();
 	if (path.size() == 0) {
 		CCLOG("path length 0");
 		//CCLOG("enabled input because I don't know whats going on");
-		isMoving = false;
 		Director::getInstance()->getEventDispatcher()->setEnabled(true);
 		return;
 	}
@@ -306,9 +300,24 @@ void HeroX::move(PATH& path, bool isLastStep) {
 		actions.pushBack(DelayTime::create(animateRate));
 		CCLOG("action: insert delay");
 	}
+
+
+
+	//do not enable input or anything
 	if (isLastStep) {
-		actions.pushBack(CallFuncN::create(CC_CALLBACK_1(HeroX::StopAllFinal, this)));
-		CCLOG("action: insert StopAllFinal");
+		auto stepEvt = GameData::getInstance()->getEvent(lastStep.first, lastStep.second);
+		auto cb1 = CallFuncN::create([this, stepEvt](Node* n) {
+			CCLOG("going to run stopAllFinal");
+			this->StopAllFinal(n, stepEvt == nullptr);
+		});
+		GameData::getInstance()->attachHeroAction(cb1);
+		actions.pushBack(cb1);
+		if (stepEvt) {
+			auto stepOnCallBack = CallFuncN::create(CC_CALLBACK_1(HeroX::triggeredCallback, this, stepEvt));
+			GameData::getInstance()->attachHeroAction(stepOnCallBack);
+			actions.pushBack(stepOnCallBack);
+			CCLOG("action: insert stepOnCallBack");
+		}
 	}
 	else {
 		actions.pushBack(CallFuncN::create(CC_CALLBACK_1(HeroX::StopAll, this, lastStep)));
@@ -318,12 +327,7 @@ void HeroX::move(PATH& path, bool isLastStep) {
 	if (isLastStep) {
 		// isLastStep is set to true when an event has triggered... Now trigger StepOn
 		//this is probably not the right way to do it, but I don't know how aside from cascading it
-		auto idk = GameData::getInstance()->getEvent(lastStep.first, lastStep.second);
-		if (idk) {
-			auto stepOnCallBack = CallFuncN::create(CC_CALLBACK_1(HeroX::triggeredCallback, this, idk));
-			actions.pushBack(stepOnCallBack);
-			CCLOG("action: insert stepOnCallBack");
-		}
+		
 
 	}
 	CCLOG("running sequence, length %d", actions.size());
@@ -343,10 +347,11 @@ void HeroX::changeDirAnimate(Node* node, enum DIR newDir, int steps, bool stop) 
 	heroDir = newDir;
 	auto animate = getDirMoveAnimate(newDir, steps, stop);
 	auto action = sprite->getActionByTag(0);
+	/*
 	if (action && !action->isDone()) {
-		CCLOG("stoppping cur animation");
+		CCLOG("stopping cur animation");
 		//sprite->stopActionByTag(0); //stop cur animation if any
-	}
+	}*/
 	sprite->runAction(animate);
 }
 
@@ -359,18 +364,18 @@ void HeroX::Destined(Node* node, int x, int y) {
 void HeroX::StopAll(Node* node, std::pair<int, int> dest) {
 	CCLOG("disabled input on StopAll");
 	Director::getInstance()->getEventDispatcher()->setEnabled(false);
-	this->isMoving = true;
 	//sprite->stopAllActions();
 	sprite->setSpriteFrame(stopSprite(heroDir));
 	GameData::getInstance()->moveHeroFinalStep(dest);
 }
 
 //theres a few lines of copied code... get ride of it maybe
-void HeroX::StopAllFinal(Node * node)
+void HeroX::StopAllFinal(Node * node, bool reset)
 {
-	//CCLOG("stopped all action on StopAllFinal");
-	isMoving = false;
-	GameData::getInstance()->finalMovementCleanup();
+	CCLOG("final movement cleanup");
+	GameData::getInstance()->dropHeroAction();
+	if (reset)
+		GameData::getInstance()->finalMovementCleanup();
 	//sprite->stopAllActions();
 	sprite->setSpriteFrame(stopSprite(heroDir));
 }
@@ -399,11 +404,13 @@ SpriteFrame* HeroX::stopSprite(DIR dir) {
 
 void HeroX::triggeredCallback(Node * node, MyEvent* ev) {
 	CCLOG("triggeredCallback");
+	GameData::getInstance()->dropHeroAction();
 	if (ev == nullptr)
 		return;
 	if (!ev->stepOnEvent()) {
+		GameData::getInstance()->finalMovementCleanup();
 		CCLOG("enabled input on triggeredCallback");
-		Director::getInstance()->getEventDispatcher()->setEnabled(true);
+		//Director::getInstance()->getEventDispatcher()->setEnabled(true);
 	}
 }
 
