@@ -63,7 +63,7 @@ public:
 
 	void continousMovement();
 	void resetKeyMovement();
-	void finalMovementCleanup();
+	void finalMovementCleanup(bool cont = true);
 
 	void init();
 	void gameover();

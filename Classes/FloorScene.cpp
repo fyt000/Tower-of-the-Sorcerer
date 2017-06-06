@@ -259,8 +259,7 @@ void FloorScene::loadFloor()
 void FloorScene::stuckBreaker(float dt) {
 	//CCLOG("scheduled actions %d", GameData::getInstance()->hero->getSprite()->numberOfRunningActions());
 	auto hero = GameData::getInstance()->hero;
-	if (hero->getSprite()->numberOfRunningActions() == 0 && !hero->moving()) {
-		Director::getInstance()->getEventDispatcher()->setEnabled(true);
+	if (hero->getSprite()->getNumberOfRunningActions() == 0) {
 		GameData::getInstance()->replayHeroAction();
 	}
 }
@@ -364,7 +363,7 @@ void FloorScene::drawDialog(const std::string& text, enum DIALOGTYPE dType, std:
 			}
 			auto* subMenu = Menu::create();
 			for (int j = 0; j < curItems; j++) {
-				auto item = MenuItemFont::create(options[i*itemsPerRow + j], [i, itemsPerRow, j, this](Ref *pSender)->void {
+				auto item = MenuItemFont::create(options[i*itemsPerRow + j], [i, itemsPerRow, j, this](Ref *pSender) {
 					closeDialog(i*itemsPerRow + j);
 				});
 				subMenu->addChild(item);
@@ -546,11 +545,25 @@ void FloorScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::
 
 void FloorScene::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)
 {
-	movementActive = false;
+	switch (keyCode) {
+	case cocos2d::EventKeyboard::KeyCode::KEY_UP_ARROW:
+	case cocos2d::EventKeyboard::KeyCode::KEY_W:
+		if (currentMovement == DIR::UP) movementActive = false; break;
+	case cocos2d::EventKeyboard::KeyCode::KEY_DOWN_ARROW:
+	case cocos2d::EventKeyboard::KeyCode::KEY_S:
+		if (currentMovement == DIR::DOWN) movementActive = false; break;
+	case cocos2d::EventKeyboard::KeyCode::KEY_LEFT_ARROW:
+	case cocos2d::EventKeyboard::KeyCode::KEY_A:
+		if (currentMovement == DIR::LEFT) movementActive = false; break;
+	case cocos2d::EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
+	case cocos2d::EventKeyboard::KeyCode::KEY_D:
+		if (currentMovement == DIR::RIGHT) movementActive = false; break;
+	}
+
 }
 
 void FloorScene::continousMovement() {
-	if (movementActive) {
+	if (movementActive && !GameData::getInstance()->hero->moving()) {
 		//I hoped I used future or something
 		GameData::getInstance()->moveHero(currentMovement); 
 	}
@@ -580,6 +593,9 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches, coc
 	if (touches.size() == 0) {
 		return;
 	}
+
+	if (GameData::getInstance()->hero->moving())
+		return;
 
 	//ignore all touches except the last one
 	for (auto touch : touches) {

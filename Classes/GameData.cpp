@@ -317,12 +317,9 @@ cocos2d::Sprite * GameData::getSprite(int x, int y)
 //this method is only being called from FloorScene
 //no one else should call this
 void GameData::moveHero(std::pair<int, int> dest) {
-	if (hero->moving() || hero->getSprite()->getNumberOfRunningActions() != 0) {
-		CCLOG("refused to move due to on action");
-		return;
-	}
 	logLabel->setVisible(false);
 	logLabel->setString(""); //reset log text on movement
+	hero->setMoving(true);
 	auto eventPtr = getEvent(dest.first, dest.second);
 	if (eventPtr == NULL) {//check if it is an event
 		hero->move(pathFind(dest), true);
@@ -336,11 +333,13 @@ void GameData::moveHero(DIR dir)
 {
 	logLabel->setVisible(false);
 	logLabel->setString(""); //reset log text on movement
+	hero->setMoving(true);
 	auto newXY = hero->getDirXY(dir);
 	auto x = newXY.first;
 	auto y = newXY.second;
 	if (x < 0 || x >= 11 || y < 0 || y >= 11)
 	{
+		hero->setMoving(false);
 		return;
 	}
 	auto eventPtr = getEvent(newXY.first, newXY.second);
@@ -358,13 +357,15 @@ void GameData::continousMovement()
 }
 
 //called after final movement
-void GameData::finalMovementCleanup()
+void GameData::finalMovementCleanup(bool cont)
 {
 	showLog();
 	triggerGlobalEvents();
 	hero->setMoving(false);
 	CCLOG("enabled input on finalmovementcleanup");
-	//Director::getInstance()->getEventDispatcher()->setEnabled(true);
+	if (cont)
+		continousMovement();
+	Director::getInstance()->getEventDispatcher()->setEnabled(true);
 	//resetKeyMovement();
 }
 
@@ -416,16 +417,17 @@ void GameData::moveHeroFinalStep(std::pair<int, int> dest) {
 	if (eventPtr == NULL) {//check if it is an event
 		//do single move if nothing will happen
 		hero->move(dest);
+		hero->setMoving(false);
 		return;
 	}
 
 	//check if distance is 1
 	if ((dest.first == hero->getX() && abs(hero->getY() - dest.second) == 1) ||
 		(dest.second == hero->getY() && abs(hero->getX() - dest.first) == 1)) {
-		if (eventPtr->triggerEvent()) {
+		if (eventPtr->triggerEvent()) { //allowed to move to it
 			hero->move(pathFind(dest), true);
 		}
-		else {
+		else { //not allowed
 			if (!floorChange) {
 				hero->changeFacingDir(dest);
 			}
@@ -433,10 +435,7 @@ void GameData::moveHeroFinalStep(std::pair<int, int> dest) {
 			{
 				floorChange = false;
 			}
-			finalMovementCleanup();
-			//hero->setMoving(false);
-			CCLOG("enabled input on no triggerEvent");
-			//Director::getInstance()->getEventDispatcher()->setEnabled(true);
+			finalMovementCleanup(false);
 		}
 	}
 	else {

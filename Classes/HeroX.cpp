@@ -101,7 +101,7 @@ int HeroX::fightX(Fightable * target, std::function<void(Fightable&)> hpCallback
 	}
 	auto cb1 = CallFuncN::create([this](Node* n) {
 		CCLOG("going to run stopAllFinal");
-		this->StopAllFinal(n);
+		this->StopAllFinal(n,true,false);
 	});
 	actions.pushBack(cb1);
 	GameData::getInstance()->attachHeroAction(cb1);
@@ -206,11 +206,13 @@ void HeroX::moveOnestep(PATH& path) {
 	//sprite->stopAllActions();
 	if (path.size() == 0)
 	{
+		setMoving(false);
 		return;
 	}
 	auto directedPath = getDirectedPath(path);
 	auto actions = createMoveActions(directedPath);
 	actions.pushBack(CallFuncN::create([this](Node*) {
+		setMoving(false);
 		GameData::getInstance()->continousMovement();
 	}));
 	auto seq = Sequence::create(actions);
@@ -269,8 +271,9 @@ void HeroX::move(PATH& path, bool isLastStep) {
 	//sprite->stopAllActions();
 	if (path.size() == 0) {
 		CCLOG("path length 0");
+		setMoving(false);
 		//CCLOG("enabled input because I don't know whats going on");
-		Director::getInstance()->getEventDispatcher()->setEnabled(true);
+		//Director::getInstance()->getEventDispatcher()->setEnabled(true);
 		return;
 	}
 	CCLOG("path length %d", path.size());
@@ -301,8 +304,6 @@ void HeroX::move(PATH& path, bool isLastStep) {
 		CCLOG("action: insert delay");
 	}
 
-
-
 	//do not enable input or anything
 	if (isLastStep) {
 		auto stepEvt = GameData::getInstance()->getEvent(lastStep.first, lastStep.second);
@@ -324,12 +325,6 @@ void HeroX::move(PATH& path, bool isLastStep) {
 		CCLOG("action: insert StopAll");
 	}
 
-	if (isLastStep) {
-		// isLastStep is set to true when an event has triggered... Now trigger StepOn
-		//this is probably not the right way to do it, but I don't know how aside from cascading it
-		
-
-	}
 	CCLOG("running sequence, length %d", actions.size());
 	auto seq = Sequence::create(actions);
 	sprite->runAction(seq);
@@ -363,19 +358,19 @@ void HeroX::Destined(Node* node, int x, int y) {
 
 void HeroX::StopAll(Node* node, std::pair<int, int> dest) {
 	CCLOG("disabled input on StopAll");
-	Director::getInstance()->getEventDispatcher()->setEnabled(false);
+	//Director::getInstance()->getEventDispatcher()->setEnabled(false);
 	//sprite->stopAllActions();
 	sprite->setSpriteFrame(stopSprite(heroDir));
 	GameData::getInstance()->moveHeroFinalStep(dest);
 }
 
 //theres a few lines of copied code... get ride of it maybe
-void HeroX::StopAllFinal(Node * node, bool reset)
+void HeroX::StopAllFinal(Node * node, bool reset, bool cont)
 {
 	CCLOG("final movement cleanup");
 	GameData::getInstance()->dropHeroAction();
 	if (reset)
-		GameData::getInstance()->finalMovementCleanup();
+		GameData::getInstance()->finalMovementCleanup(cont);
 	//sprite->stopAllActions();
 	sprite->setSpriteFrame(stopSprite(heroDir));
 }
@@ -438,8 +433,9 @@ void HeroX::changeFacingDir(enum DIR dir)
 	HeroX::changeDirAnimate(NULL, dir, 1, true);
 }
 
-
+//can't copy atomic - ok...
+/*
 HeroX * HeroX::clone()
 {
 	return new HeroX(*this);
-}
+}*/

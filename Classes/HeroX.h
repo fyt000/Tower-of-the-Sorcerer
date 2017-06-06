@@ -7,6 +7,7 @@
 #include "FightableSnapshot.h"
 #include "Key.h"
 #include "LabelBinder.h"
+#include <atomic>
 
 
 class HeroX :
@@ -42,9 +43,9 @@ public:
 	void changeFacingDir(std::pair<int, int>);
 	//set absolute position and facing dir of hero
 	void setAbsPos(int, int, enum DIR);
-	virtual HeroX* clone();
+	//virtual HeroX* clone();
 	//callback to stop everything
-	void StopAllFinal(cocos2d::Node* node, bool reset = true);
+	void StopAllFinal(cocos2d::Node* node, bool reset = true, bool cont = true);
 	void setMoving(bool moving);
 	bool moving();
 	~HeroX();
@@ -52,7 +53,7 @@ public:
 private:
 	enum DIR heroDir;
 	float animateRate = 0.1f;
-	bool isMoving = false;
+	std::atomic_bool isMoving = false;
 	DirectedPath getDirectedPath(PATH& path);
 	cocos2d::Vector<cocos2d::FiniteTimeAction*> createMoveActions(DirectedPath& directedPath);
 	void changeDirAnimate(cocos2d::Node * node, DIR newDir, int steps, bool stop = false);
