@@ -105,14 +105,19 @@ int HeroX::fightX(Fightable * target, std::function<void(Fightable&)> hpCallback
 	});
 	actions.pushBack(cb1);
 	GameData::getInstance()->attachHeroAction(cb1);
-
-	actions.pushBack(CallFuncN::create(CC_CALLBACK_1(HeroX::cleanUpTarget, this, target)));
+	auto cb2 = CallFuncN::create([this,target](Node* n) {
+		CCLOG("going to cleanup target");
+		cleanUpTarget(n, target);
+	});
+	GameData::getInstance()->attachHeroAction(cb2);
+	actions.pushBack(cb2);
 	CCLOG("running fighting sequence");
 	sprite->runAction(Sequence::create(actions));
 	return ret;
 }
 
 void HeroX::cleanUpTarget(Node* node, Fightable * target) {
+	GameData::getInstance()->dropHeroAction();
 	GameData::getInstance()->killEvent(std::pair<int, int>(target->getX(), target->getY()));
 	GameData::getInstance()->triggerGlobalEvents();
 }
@@ -433,7 +438,7 @@ void HeroX::changeFacingDir(enum DIR dir)
 	HeroX::changeDirAnimate(NULL, dir, 1, true);
 }
 
-//can't copy atomic - ok...
+//can't copy atomic - ok... 
 /*
 HeroX * HeroX::clone()
 {
