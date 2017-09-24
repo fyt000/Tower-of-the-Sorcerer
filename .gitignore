@@ -3,3 +3,4 @@ proj.*/
 bin/
 linux-build/
 .vs/
+.vscode/
