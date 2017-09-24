@@ -29,11 +29,11 @@ public:
 	void cleanUpTarget(cocos2d::Node * node, Fightable * target);
 	//not exactly used, may be needed for keyboard
 	std::pair<int,int> getDirXY(enum DIR dir);
-	void moveOnestep(PATH& path);
+	void moveOnestep(const PATH& path);
 	//animation to move dir steps, stop=true for extra swagger
 	cocos2d::Animate * getDirMoveAnimate(DIR dir, int steps, bool stop = false);
 	//move the given path, isLastMove means to trigger the event on the last move
-	void move(PATH& path, bool isLastMove = false);
+	void move(PATH path, bool isLastMove = false);
 	void move(std::pair<int, int>);
 
 	//initialized in Hero constructor
@@ -53,9 +53,9 @@ public:
 private:
 	enum DIR heroDir;
 	float animateRate = 0.1f;
-	std::atomic_bool isMoving = false;
-	DirectedPath getDirectedPath(PATH& path);
-	cocos2d::Vector<cocos2d::FiniteTimeAction*> createMoveActions(DirectedPath& directedPath);
+	std::atomic_bool isMoving;
+	DirectedPath getDirectedPath(const PATH& path);
+	cocos2d::Vector<cocos2d::FiniteTimeAction*> createMoveActions(const DirectedPath& directedPath);
 	void changeDirAnimate(cocos2d::Node * node, DIR newDir, int steps, bool stop = false);
 	void Destined(cocos2d::Node* node, int x, int y);
 	void StopAll(cocos2d::Node * node, std::pair<int, int>);

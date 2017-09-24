@@ -201,7 +201,7 @@ std::pair<int, int> HeroX::getDirXY(enum DIR direction) {
 	return { newX,newY };
 }
 
-void HeroX::moveOnestep(PATH& path) {
+void HeroX::moveOnestep(const PATH& path) {
 	//CCLOG("stopped all action on moveonestep");
 	//sprite->stopAllActions();
 	if (path.size() == 0)
@@ -219,7 +219,7 @@ void HeroX::moveOnestep(PATH& path) {
 	sprite->runAction(seq);
 }
 
-Vector<FiniteTimeAction*> HeroX::createMoveActions(DirectedPath& directedPaths) {
+Vector<FiniteTimeAction*> HeroX::createMoveActions(const DirectedPath& directedPaths) {
 	Vector<FiniteTimeAction*> actions;
 	if (directedPaths.size() == 0)
 		return actions;
@@ -239,7 +239,7 @@ Vector<FiniteTimeAction*> HeroX::createMoveActions(DirectedPath& directedPaths) 
 	return actions;
 }
 
-HeroX::DirectedPath HeroX::getDirectedPath(PATH& path) {
+HeroX::DirectedPath HeroX::getDirectedPath(const PATH& path) {
 	DirectedPath directedPaths;
 	if (path.size() == 0)
 		return directedPaths;
@@ -266,7 +266,7 @@ HeroX::DirectedPath HeroX::getDirectedPath(PATH& path) {
 //there are a lot of stuff that can happen with move
 //for now, just do the animation
 //and the logic for hitting the wall should be done else where maybe GameData
-void HeroX::move(PATH& path, bool isLastStep) {
+void HeroX::move(PATH path, bool isLastStep) {
 	//CCLOG("stopped all action by trying to move");
 	//sprite->stopAllActions();
 	if (path.size() == 0) {
