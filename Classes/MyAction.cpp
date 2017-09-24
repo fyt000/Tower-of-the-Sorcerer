@@ -157,6 +157,7 @@ int FlatStat::perform(MyEvent *evt)
 	}
 	//remove sword shield images... they are useless
 	GameData::getInstance()->log(stdsprintf(msg, desc, hpStr, atkStr, defStr));
+	MyAction::perform(evt);
 	return 0;
 }
 

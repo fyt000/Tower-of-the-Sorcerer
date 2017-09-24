@@ -384,7 +384,7 @@ void GameData::killEvent(std::pair<int, int> place) {
 	}
 }
 
-//do not destruct the current occupying event
+//do not destroy the current occupying event
 void GameData::setEvent(int id, int x, int y, int f)
 {
 	if (f == -1)
@@ -540,47 +540,10 @@ void GameData::showLog() {
 
 }
 
-void GameData::attachHeroAction(FiniteTimeAction* act) 
-{
-	actionSaver.push_back(act);
-	act->retain(); //MAGIC
-}
-
-void GameData::dropHeroAction()
-{
-	if (replaySize > 0)
-		replaySize--;
-	if (actionSaver.size() == 0) {
-		CCLOG("something is not right");
-		//TODO investigate whats going on here
-		return;
-	}
-	actionSaver.pop_front();
-}
-
-void GameData::replayHeroAction()
-{
-	if (actionSaver.size() == 0)
-		return;
-	CCLOG("replaying actions");
-	Vector<FiniteTimeAction*> actions;
-	for (auto act : actionSaver) {
-		act->setOriginalTarget(hero->getSprite());
-		act->setTarget(hero->getSprite());
-		actions.pushBack(act);
-	}
-	CCLOG("size of actions to replay %d", actions.size());
-	replaySize += actions.size();
-	hero->getSprite()->runAction(Sequence::create(actions));
-	actionSaver.clear();
-	//TODO check if I need to release the action
-}
-
-
-
 //called after
 //1. final hero movement
 //2. used a HeroItem
+// TODO if global event has animations (eg. blocking) then need new mechanism to block
 void GameData::triggerGlobalEvents() {
 	//CCLOG("trying to trigger global events");
 	//check if there are global events on cur floor
@@ -588,6 +551,7 @@ void GameData::triggerGlobalEvents() {
 		auto& gList = GLOBALEVENT[floor->V()];
 		//go through the list and try to trigger it
 		//remove from list on successful event trigger
+		//this means, I will have saving problems...
 		for (auto iter = gList.begin(); iter != gList.end();) {
 			if ((*iter)->tryTrigger()) {
 				iter = gList.erase(iter);

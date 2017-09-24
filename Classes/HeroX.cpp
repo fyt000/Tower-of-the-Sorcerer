@@ -104,12 +104,10 @@ int HeroX::fightX(Fightable * target, std::function<void(Fightable&)> hpCallback
 		this->StopAllFinal(n,true,false);
 	});
 	actions.pushBack(cb1);
-	GameData::getInstance()->attachHeroAction(cb1);
 	auto cb2 = CallFuncN::create([this,target](Node* n) {
 		CCLOG("going to cleanup target");
 		cleanUpTarget(n, target);
 	});
-	GameData::getInstance()->attachHeroAction(cb2);
 	actions.pushBack(cb2);
 	CCLOG("running fighting sequence");
 	sprite->runAction(Sequence::create(actions));
@@ -117,7 +115,6 @@ int HeroX::fightX(Fightable * target, std::function<void(Fightable&)> hpCallback
 }
 
 void HeroX::cleanUpTarget(Node* node, Fightable * target) {
-	GameData::getInstance()->dropHeroAction();
 	GameData::getInstance()->killEvent(std::pair<int, int>(target->getX(), target->getY()));
 	GameData::getInstance()->triggerGlobalEvents();
 }
@@ -207,8 +204,6 @@ std::pair<int, int> HeroX::getDirXY(enum DIR direction) {
 }
 
 void HeroX::moveOnestep(const PATH& path) {
-	//CCLOG("stopped all action on moveonestep");
-	//sprite->stopAllActions();
 	if (path.size() == 0)
 	{
 		setMoving(false);
@@ -234,6 +229,11 @@ Vector<FiniteTimeAction*> HeroX::createMoveActions(const DirectedPath& directedP
 		actions.pushBack(changeDirCallBack);
 		for (auto pathNode : singPath.first) {
 			//TOOD: fix this interleaving issue
+			// cb1: targeting destination
+			// move
+			// cb2: arrived destination
+			// if user click some where else when cb1 is active then stopAll and reissue the current move before proceeding
+			// cb2, clear cb1 state an mark hero as arrived
 			//auto callback1 = CallFuncN::create(CC_CALLBACK_1(HeroX::Destined, this, pathNode.first, pathNode.second));
 			auto destCoord = TransformCoordinate::transformVec2(pathNode.first, pathNode.second);
 			auto callback2 = CallFuncN::create(CC_CALLBACK_1(HeroX::Destined, this, pathNode.first, pathNode.second));
@@ -272,25 +272,21 @@ HeroX::DirectedPath HeroX::getDirectedPath(const PATH& path) {
 //for now, just do the animation
 //and the logic for hitting the wall should be done else where maybe GameData
 void HeroX::move(PATH path, bool isLastStep) {
-	//CCLOG("stopped all action by trying to move");
-	//sprite->stopAllActions();
+	
+	//TODO add a state so it gets reissued to complete the last step
+	CCLOG("stopped all action by trying to move");
+	sprite->stopAllActions();
+	
 	if (path.size() == 0) {
 		CCLOG("path length 0");
 		setMoving(false);
-		//CCLOG("enabled input because I don't know whats going on");
-		//Director::getInstance()->getEventDispatcher()->setEnabled(true);
 		return;
 	}
 	CCLOG("path length %d", path.size());
 		
-
-	/*
-	if (isLastStep&&path.size()!=1)
-		return;*/
 	std::pair<int, int> lastStep = path.back();
 	if (!isLastStep)
 		path.pop_back();
-
 
 	//break down the path into directions...
 	//because each direction has a different animation
@@ -316,11 +312,9 @@ void HeroX::move(PATH path, bool isLastStep) {
 			CCLOG("going to run stopAllFinal");
 			this->StopAllFinal(n, stepEvt == nullptr);
 		});
-		GameData::getInstance()->attachHeroAction(cb1);
 		actions.pushBack(cb1);
 		if (stepEvt) {
 			auto stepOnCallBack = CallFuncN::create(CC_CALLBACK_1(HeroX::triggeredCallback, this, stepEvt));
-			GameData::getInstance()->attachHeroAction(stepOnCallBack);
 			actions.pushBack(stepOnCallBack);
 			CCLOG("action: insert stepOnCallBack");
 		}
@@ -362,9 +356,6 @@ void HeroX::Destined(Node* node, int x, int y) {
 }
 
 void HeroX::StopAll(Node* node, std::pair<int, int> dest) {
-	CCLOG("disabled input on StopAll");
-	//Director::getInstance()->getEventDispatcher()->setEnabled(false);
-	//sprite->stopAllActions();
 	sprite->setSpriteFrame(stopSprite(heroDir));
 	GameData::getInstance()->moveHeroFinalStep(dest);
 }
@@ -373,10 +364,8 @@ void HeroX::StopAll(Node* node, std::pair<int, int> dest) {
 void HeroX::StopAllFinal(Node * node, bool reset, bool cont)
 {
 	CCLOG("final movement cleanup");
-	GameData::getInstance()->dropHeroAction();
 	if (reset)
 		GameData::getInstance()->finalMovementCleanup(cont);
-	//sprite->stopAllActions();
 	sprite->setSpriteFrame(stopSprite(heroDir));
 }
 
@@ -404,13 +393,10 @@ SpriteFrame* HeroX::stopSprite(DIR dir) {
 
 void HeroX::triggeredCallback(Node * node, MyEvent* ev) {
 	CCLOG("triggeredCallback");
-	GameData::getInstance()->dropHeroAction();
 	if (ev == nullptr)
 		return;
 	if (!ev->stepOnEvent()) {
 		GameData::getInstance()->finalMovementCleanup();
-		CCLOG("enabled input on triggeredCallback");
-		//Director::getInstance()->getEventDispatcher()->setEnabled(true);
 	}
 }
 

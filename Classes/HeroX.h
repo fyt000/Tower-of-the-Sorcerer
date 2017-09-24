@@ -53,7 +53,7 @@ public:
 private:
 	enum DIR heroDir;
 	float animateRate = 0.1f;
-	std::atomic_bool isMoving;
+	std::atomic_bool isMoving{ false };
 	DirectedPath getDirectedPath(const PATH& path);
 	cocos2d::Vector<cocos2d::FiniteTimeAction*> createMoveActions(const DirectedPath& directedPath);
 	void changeDirAnimate(cocos2d::Node * node, DIR newDir, int steps, bool stop = false);

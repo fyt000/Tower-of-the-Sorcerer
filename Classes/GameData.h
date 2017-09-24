@@ -87,21 +87,11 @@ public:
 
 	void triggerGlobalEvents();
 
-
-	void attachHeroAction(cocos2d::FiniteTimeAction*);
-	void dropHeroAction();
-	void replayHeroAction();
-
 private:
 	//now, do I need a lock.... I have no idea how cocos2dx works here
 	//adding a lock for safety concerns
 	std::mutex freeListLock;
 	std::vector<MyEvent*> pendingFreeList;
-
-	//no idea whats going on with action getting lost
-	//introduce this to save whatever is going on
-	int replaySize = 0;
-	std::deque<cocos2d::FiniteTimeAction*> actionSaver;
 
 	MyEvent* getEventData(int id);
 	MyEvent* getEventData(int x, int y);
@@ -111,6 +101,15 @@ private:
 	HeroItem* ITEMS[MAXITEMS] = { 0 };
 	std::list<GlobalEvent*> GLOBALEVENT[MAXFLOOR + 1];
 
+	bool newGame = true;
+	//what do I need to save?
+	//if a new game
+	//TODO copy gamedata.json and res_english.json -> so game update won't obsolete old saves
+	//save hero stats: hp, atk, def, gold, x, y
+	//save shop use stats: 
+	//save global event... iterate the list, save the ids, when loading, only load the ones that match the saved id
+	//save Floorevents, just do a dump
+	//save HeroItem, the id and the number of uses
 
 	Stairs* upstair = nullptr;
 	Stairs* downstair = nullptr;

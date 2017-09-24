@@ -24,6 +24,7 @@ void HeroItem::attachTo(cocos2d::Node *parent)
 		case ui::Widget::TouchEventType::ENDED:
 			if (f)
 				f();
+			//TODO if f plays an animation... then triggerGlobalEvents might happen before it
 			GameData::getInstance()->triggerGlobalEvents();
 			break;
 		default:

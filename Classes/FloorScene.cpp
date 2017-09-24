@@ -251,18 +251,9 @@ void FloorScene::loadFloor()
 	enemyInfoSprite = nullptr; //?
 
 	floorContent->addChild(gInstance->hero->getSprite(), 10);
-	this->schedule(schedule_selector(FloorScene::stuckBreaker), 0);
 	this->addChild(floorContent, 3);
 }
 
-//the ultimate solution #1
-void FloorScene::stuckBreaker(float dt) {
-	//CCLOG("scheduled actions %d", GameData::getInstance()->hero->getSprite()->numberOfRunningActions());
-	auto hero = GameData::getInstance()->hero;
-	if (hero->getSprite()->getNumberOfRunningActions() == 0) {
-		GameData::getInstance()->replayHeroAction();
-	}
-}
 
 void FloorScene::attachFloorSprite(cocos2d::Sprite* s) {
 	floorContent->addChild(s, 3);
@@ -564,7 +555,6 @@ void FloorScene::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d:
 
 void FloorScene::continousMovement() {
 	if (movementActive && !GameData::getInstance()->hero->moving()) {
-		//I hoped I used future or something
 		GameData::getInstance()->moveHero(currentMovement); 
 	}
 }
@@ -594,8 +584,8 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches, coc
 		return;
 	}
 
-	if (GameData::getInstance()->hero->moving())
-		return;
+	//if (GameData::getInstance()->hero->moving())
+	//	return;
 
 	//ignore all touches except the last one
 	for (auto touch : touches) {
