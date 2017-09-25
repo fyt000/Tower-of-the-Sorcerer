@@ -11,8 +11,7 @@ Under cocos directory
 ```
 cocos new Tower-of-the-Sorcerer -p com.three0s.TWS -l cpp -d DIRECTORY
 ```
-Then git clone under the created directory
-
+Then git clone somewhere and copy all the files to paste under above DIRECTORY (and overwrite)
 To run on linx
 ```
 sudo env "PATH=$PATH" cocos run . -p linux -m debug
