@@ -8,7 +8,9 @@
 //just defines nothing else
 //I will run into forward decl issues if I put everything in gamedata (eg. Hero class)
 
-const int MAXFLOOR = 5;
+//hard max... for array size and to simplify the code
+//its possible to set it higher
+const int MAXFLOOR = 51;
 const int MAXITEMS = 9;
 
 //no reason to hard code these limits
@@ -17,11 +19,18 @@ const int MAXEVENT = 500;
 //const int MAXGLOBAL=10; //per floor
 
 
-enum DIR {
+
+enum class BLOCKTYPE : int {
+	GLOBALBLOCK,
+	FIGHT,
+	SIZE
+};
+
+enum class DIR : int {
 	UP, DOWN, LEFT, RIGHT
 };
 
-enum DIALOGTYPE {
+enum class DIALOGTYPE : int {
 	NONE, YN, LIST, MATRIX
 };
 

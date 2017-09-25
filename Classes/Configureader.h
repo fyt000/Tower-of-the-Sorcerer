@@ -21,9 +21,17 @@ public:
 	static void ReadFloorEvents(int FloorArr[][11][11]);
 	static void ReadItemData(HeroItem**);
 	static void ReadGlobalEvents(std::list<GlobalEvent* >*);
-	static std::string GetStr(std::string tag);
-	static std::string GetDescription(std::string& desc);
-	static void GetDialog(std::string& tag, std::vector<std::string>& strVec);
+	static std::string GetStr(const std::string& tag);
+	static std::string GetDescription(const std::string& desc);
+	static void GetDialog(const std::string& tag, std::vector<std::string>& strVec);
+
+	// uhm, unclear what my intentions were but keep them here for now
+	//void saveInt(const std::string&, int);
+	//void saveInts(const std::string, std::vector<int>);
+	//void saveFloorEvents(int FloorArr[][11][11]);
+
+	//int readInt(const std::string&);
+	//std::vector<int> readInts(const std::string&);
 
 private:
 	static Condition* getCondition(rapidjson::Value&);

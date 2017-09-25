@@ -1,6 +1,7 @@
 #include "GlobalEvent.h"
 #include <vector>
 
+GlobalEvent::GlobalEvent(int id) : id(id) {}
 
 bool GlobalEvent::tryTrigger() {
 	for (auto cond : conditions) {

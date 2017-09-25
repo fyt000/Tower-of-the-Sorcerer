@@ -137,7 +137,7 @@ void HeroX::updateBetweenFight(Node* n, Fightable* f, std::vector<FightableSnaps
 	CCLOG("updateBetweenFight done");
 }
 
-enum DIR nextNodeDir(std::pair<int, int> cur, std::pair<int, int> next) {
+DIR nextNodeDir(std::pair<int, int> cur, std::pair<int, int> next) {
 	if (next.first - cur.first > 0)
 		return(DIR::DOWN);
 	else if (next.first - cur.first < 0)
@@ -151,7 +151,7 @@ enum DIR nextNodeDir(std::pair<int, int> cur, std::pair<int, int> next) {
 
 
 
-Animate* HeroX::getDirMoveAnimate(enum DIR dir, int steps, bool stop) {
+Animate* HeroX::getDirMoveAnimate(DIR dir, int steps, bool stop) {
 	Vector<SpriteFrame*> animFrames;
 	animFrames.reserve(steps + 2);
 
@@ -186,7 +186,7 @@ Animate* HeroX::getDirMoveAnimate(enum DIR dir, int steps, bool stop) {
 //this is used for arrow(keyboard) movement if I happen to implement it
 //but again, this does not make any assumption on its surroundings
 //just move
-std::pair<int, int> HeroX::getDirXY(enum DIR direction) {
+std::pair<int, int> HeroX::getDirXY(DIR direction) {
 
 	int newX = x; int newY = y;
 	switch (direction) {
@@ -223,20 +223,21 @@ Vector<FiniteTimeAction*> HeroX::createMoveActions(const DirectedPath& directedP
 	Vector<FiniteTimeAction*> actions;
 	if (directedPaths.size() == 0)
 		return actions;
+
+
 	//now directedPaths stores all the stuff... 
 	for (auto singPath : directedPaths) {
 		auto changeDirCallBack = CallFuncN::create(CC_CALLBACK_1(HeroX::changeDirAnimate, this, singPath.second, singPath.first.size(), false));
 		actions.pushBack(changeDirCallBack);
 		for (auto pathNode : singPath.first) {
-			//TOOD: fix this interleaving issue
-			// cb1: targeting destination
-			// move
-			// cb2: arrived destination
-			// if user click some where else when cb1 is active then stopAll and reissue the current move before proceeding
-			// cb2, clear cb1 state an mark hero as arrived
-			//auto callback1 = CallFuncN::create(CC_CALLBACK_1(HeroX::Destined, this, pathNode.first, pathNode.second));
+			auto callback1 = CallFuncN::create([this, pathNode](Node* n) {
+				prevX = pathNode.first;
+				prevY = pathNode.second;
+				prevComplete = false;
+			});
 			auto destCoord = TransformCoordinate::transformVec2(pathNode.first, pathNode.second);
 			auto callback2 = CallFuncN::create(CC_CALLBACK_1(HeroX::Destined, this, pathNode.first, pathNode.second));
+			actions.pushBack(callback1);
 			actions.pushBack(MoveTo::create(animateRate, destCoord));
 			actions.pushBack(callback2);
 		}
@@ -248,14 +249,14 @@ HeroX::DirectedPath HeroX::getDirectedPath(const PATH& path) {
 	DirectedPath directedPaths;
 	if (path.size() == 0)
 		return directedPaths;
-	enum DIR curDir = heroDir;
-	std::pair<int, int> curCoord(x, y); //do I need a lock on x,y or something
+	DIR curDir = heroDir;
+	std::pair<int, int> curCoord(getX(), getY()); //do I need a lock on x,y or something
 	PATH singleDirPath;
 	for (int i = 0; i < path.size(); i++) {
-		enum DIR nextDir = nextNodeDir(curCoord, path[i]);
+		DIR nextDir = nextNodeDir(curCoord, path[i]);
 		if (nextDir != curDir) { //change of direction
 			if (singleDirPath.size() != 0)
-				directedPaths.push_back(std::pair<PATH, enum DIR>(singleDirPath, curDir));
+				directedPaths.push_back(std::pair<PATH, DIR>(singleDirPath, curDir));
 			curDir = nextDir;
 			singleDirPath.clear();
 		}
@@ -263,7 +264,7 @@ HeroX::DirectedPath HeroX::getDirectedPath(const PATH& path) {
 		singleDirPath.push_back(curCoord);
 	}
 	if (singleDirPath.size() != 0)
-		directedPaths.push_back(std::pair<PATH, enum DIR>(singleDirPath, curDir));
+		directedPaths.push_back(std::pair<PATH, DIR>(singleDirPath, curDir));
 	return directedPaths;
 }
 
@@ -272,21 +273,28 @@ HeroX::DirectedPath HeroX::getDirectedPath(const PATH& path) {
 //for now, just do the animation
 //and the logic for hitting the wall should be done else where maybe GameData
 void HeroX::move(PATH path, bool isLastStep) {
-	
-	//TODO add a state so it gets reissued to complete the last step
-	CCLOG("stopped all action by trying to move");
-	sprite->stopAllActions();
+	// refuse to move if in critical action
 	
 	if (path.size() == 0) {
-		CCLOG("path length 0");
 		setMoving(false);
 		return;
 	}
-	CCLOG("path length %d", path.size());
+
+	//TODO add a state so it gets reissued to complete the last step
+	sprite->stopAllActions();
+	CCLOG("stopped all action by trying to move");
 		
 	std::pair<int, int> lastStep = path.back();
-	if (!isLastStep)
+	if (!isLastStep) {
 		path.pop_back();
+	}
+		
+	// check if the prev step got executed
+	if (!prevComplete) {
+		// not the most efficient implementation, fix it later (or not)
+		path.insert(path.begin(), {prevX,prevY});
+		CCLOG("Insert extra step");
+	}
 
 	//break down the path into directions...
 	//because each direction has a different animation
@@ -336,7 +344,7 @@ void HeroX::move(std::pair<int, int> dest)
 	move(p, true);
 }
 
-void HeroX::changeDirAnimate(Node* node, enum DIR newDir, int steps, bool stop) {
+void HeroX::changeDirAnimate(Node* node, DIR newDir, int steps, bool stop) {
 	CCLOG("Changing Dir Animate");
 	heroDir = newDir;
 	auto animate = getDirMoveAnimate(newDir, steps, stop);
@@ -351,12 +359,14 @@ void HeroX::changeDirAnimate(Node* node, enum DIR newDir, int steps, bool stop) 
 
 void HeroX::Destined(Node* node, int x, int y) {
 	this->x = x; this->y = y;
+	prevComplete = true;
 	CCLOG("destined at %d %d", x, y);
 	//TODO check for hidden event, call StopAllFinal if needed
 }
 
 void HeroX::StopAll(Node* node, std::pair<int, int> dest) {
 	sprite->setSpriteFrame(stopSprite(heroDir));
+	Director::getInstance()->getEventDispatcher()->setEnabled(false);
 	GameData::getInstance()->moveHeroFinalStep(dest);
 }
 
@@ -400,6 +410,20 @@ void HeroX::triggeredCallback(Node * node, MyEvent* ev) {
 	}
 }
 
+int HeroX::getX()
+{
+	if (prevComplete)
+		return MyEvent::getX();
+	return prevX;
+}
+
+int HeroX::getY()
+{
+	if (prevComplete)
+		return MyEvent::getY();
+	return prevY;
+}
+
 HeroX::~HeroX() {
 	for (int i = 0; i < KeyType::LAST; i++)
 		delete keys[i];
@@ -410,7 +434,7 @@ void HeroX::changeFacingDir(std::pair<int, int> dest)
 	HeroX::changeDirAnimate(NULL, nextNodeDir(std::pair<int, int>(x, y), dest), 1, true);
 }
 
-void HeroX::setAbsPos(int absx, int absy, enum DIR dir)
+void HeroX::setAbsPos(int absx, int absy, DIR dir)
 {
 	setXY(absx, absy);
 	std::pair<int, int> pxy = TransformCoordinate::transform(absx, absy);
@@ -419,7 +443,7 @@ void HeroX::setAbsPos(int absx, int absy, enum DIR dir)
 	changeFacingDir(dir);
 }
 
-void HeroX::changeFacingDir(enum DIR dir)
+void HeroX::changeFacingDir(DIR dir)
 {
 	HeroX::changeDirAnimate(NULL, dir, 1, true);
 }

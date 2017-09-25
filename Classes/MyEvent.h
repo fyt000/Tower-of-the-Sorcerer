@@ -26,8 +26,8 @@ public:
 	virtual bool triggerEvent();
 	//triggered after stepping on the event
 	virtual bool stepOnEvent();
-	int getX();
-	int getY();
+	virtual int getX();
+	virtual int getY();
 	void attachAction(MyAction*);
 	int performActions();
 	cocos2d::Sprite* sprite = nullptr;

@@ -199,7 +199,8 @@ void Configureader::ReadGlobalEvents(std::list<GlobalEvent* >* globEvtArr) {
 		rapidjson::Value& events = data["events"];
 		for (rapidjson::SizeType j = 0; j < events.Size(); j++) {
 			auto& evtData = events[j];
-			GlobalEvent* gEvt = new GlobalEvent();
+			int id = evtData["id"].GetInt();
+			GlobalEvent* gEvt = new GlobalEvent(id);
 			rapidjson::Value& conditionData = evtData["conditions"];
 			for (rapidjson::SizeType k = 0; k < conditionData.Size(); k++) {
 				gEvt->addCondition(getCondition(conditionData[k]));
@@ -214,21 +215,21 @@ void Configureader::ReadGlobalEvents(std::list<GlobalEvent* >* globEvtArr) {
 }
 
 
-std::string Configureader::GetStr(std::string tag) {
+std::string Configureader::GetStr(const std::string& tag) {
 	if (langStrDoc == nullptr) {
 		initLangDoc();
 	}
 	return ((*langStrDoc)["English"])[tag.c_str()].GetString();
 }
 
-std::string Configureader::GetDescription(std::string& desc) {
+std::string Configureader::GetDescription(const std::string& desc) {
 	if (langStrDoc == nullptr) {
 		initLangDoc();
 	}
 	return ((*langStrDoc)["English"])["description"][desc.c_str()].GetString();
 }
 
-void Configureader::GetDialog(std::string& tag, std::vector<std::string>& strVec)
+void Configureader::GetDialog(const std::string& tag, std::vector<std::string>& strVec)
 {
 	if (langStrDoc == nullptr) {
 		initLangDoc();

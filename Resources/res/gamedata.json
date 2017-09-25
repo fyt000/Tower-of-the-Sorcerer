@@ -341,6 +341,7 @@
 			"events":
 			[
 				{
+					"id":1,
 					"conditions":
 					[{"type":"DNE","params":[2,1,5]},{"type":"DNE","params":[2,1,7]}],
 					"actions":

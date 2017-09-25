@@ -260,7 +260,7 @@ void FloorScene::attachFloorSprite(cocos2d::Sprite* s) {
 }
 
 
-void FloorScene::drawDialog(const std::string& text, enum DIALOGTYPE dType, std::vector<std::string> options)
+void FloorScene::drawDialog(const std::string& text, DIALOGTYPE dType, std::vector<std::string> options)
 {
 	if (dialogOpen)
 		return;

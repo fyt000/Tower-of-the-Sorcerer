@@ -155,7 +155,7 @@ int FlatStat::perform(MyEvent *evt)
 		hpStr = stdsprintf(GStr("def_change"), def);
 		GameData::getInstance()->hero->def.addVal(def);
 	}
-	//remove sword shield images... they are useless
+
 	GameData::getInstance()->log(stdsprintf(msg, desc, hpStr, atkStr, defStr));
 	MyAction::perform(evt);
 	return 0;
@@ -168,6 +168,6 @@ DestructSelf::DestructSelf(MyAction* next) :MyAction(next) {
 int DestructSelf::perform(MyEvent* evt) {
 	GameData::getInstance()->setEvent(0, evt->getX(), evt->getY());
 	MyAction::perform(evt);
-	delete evt;
+	delete evt; //TODO what does this delete do again?
 	return 1;
 }

@@ -9,12 +9,13 @@
 
 class GlobalEvent {
 public:
-	//GlobalEvent(); 
+	GlobalEvent(int id); 
 	bool tryTrigger();
 	void attachAction(MyAction*);
 	void addCondition(Condition*);
 	~GlobalEvent();
 private:
+	int id;
 	std::vector<Condition*> conditions;
 	std::vector<MyAction*> actions;
 };
