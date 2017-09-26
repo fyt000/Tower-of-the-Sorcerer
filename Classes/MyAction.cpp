@@ -4,6 +4,8 @@
 #include "DialogStruct.h"
 #include "GlobalDefs.h"
 
+using namespace twsutil;
+
 MyAction::MyAction()
 {
 }

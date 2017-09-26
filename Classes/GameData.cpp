@@ -9,8 +9,11 @@
 #include <set>
 #include "Stairs.h"
 #include "GlobalEvent.h"
+#include "GlobalDefs.h"
+#include <string>
 
 USING_NS_CC;
+using namespace twsutil;
 
 static GameData* gameData = nullptr;
 
@@ -256,7 +259,7 @@ bool GameData::fastStairs()
 void GameData::replayDialog() {
 	//TODO fix this
 	showDialog(DialogStruct("this is a matrix", DIALOGTYPE::MATRIX, { "1","2","3","4","5","6","7","8","9" }), [this](int choice) {
-		log("you choosed " + ToString(choice));
+		log("you choosed " + std::to_string(choice));
 	});
 }
 
@@ -319,6 +322,18 @@ cocos2d::Sprite * GameData::getSprite(int x, int y)
 void GameData::moveHero(std::pair<int, int> dest) {
 	logLabel->setVisible(false);
 	logLabel->setString(""); //reset log text on movement
+
+	// Next step!
+	// Find if there is a valid path
+	// If we are triggering an event, execute the step in 2 segments
+	// 1. In a interuptible manner, walk to destination - 1
+	// 2. If still not interrupted, execute final event
+	// otherwise just do 1. without the -1
+	// store the path in GameData, and have a callback once each step is done
+	// this way, we should never call any stopAll on the hero sprite
+	// we calculate the direction and movement on a per step basis
+	// Ignore all input when we are at the last step
+
 	hero->setMoving(true);
 	auto eventPtr = getEvent(dest.first, dest.second);
 	if (eventPtr == NULL) {//check if it is an event
@@ -366,7 +381,6 @@ void GameData::finalMovementCleanup(bool cont)
 	if (cont)
 		continousMovement();
 	Director::getInstance()->getEventDispatcher()->setEnabled(true);
-	//resetKeyMovement();
 }
 
 void GameData::resetKeyMovement()
@@ -507,8 +521,6 @@ PATH GameData::pathFind(int dx, int dy)
 			path.push_back(bfsQ[prev]);
 			prev = parent[prev];
 		}
-		//we could do recursion to flip the vector
-		//but I don't want another method just to do this
 		path.pop_back(); //this is just the src loc
 		std::reverse(path.begin(), path.end());
 		path.push_back(std::pair<int, int>(dx, dy)); //push destination to the path.

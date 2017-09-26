@@ -15,6 +15,8 @@
 #include "Shop.h"
 #include "PostEvent.h"
 
+using namespace twsutil;
+
 rapidjson::Document* Configureader::langStrDoc = nullptr;
 rapidjson::Document* Configureader::dataDoc = nullptr;
 std::string Configureader::curLanguageFile = "res/res_english.json";

@@ -14,7 +14,7 @@ void HeroItem::attachTo(cocos2d::Node *parent)
 	if (obtained)
 		return;
 	obtained = true;
-	std::string imagePath = "images/tile (" + ToString(imageID) + ").png";
+	std::string imagePath = "images/tile (" + std::to_string(imageID) + ").png";
 	itemButton = ui::Button::create(imagePath, imagePath);
 	itemButton->setAnchorPoint(Vec2(0, 1));
 	//itemButton->setTitleText(desc);

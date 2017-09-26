@@ -30,14 +30,14 @@ public:
 	int setFloor(int f);
 	cocos2d::Sprite* getSprite(int x, int y);
 	void moveHero(std::pair<int, int>);
-	void moveHero(DIR dir);
+	void moveHero(twsutil::DIR dir);
 	void killEvent(std::pair<int, int> place);
 	//f==-1 for cur floor
 	//note that setEvent DO NOT call delete on the current event occupying x,y
 	void setEvent(int id, int x, int y, int f = -1);
 	void moveHeroFinalStep(std::pair<int, int> dest);
-	PATH pathFind(std::pair<int, int> dest);
-	PATH pathFind(int dx, int dy);
+	twsutil::PATH pathFind(std::pair<int, int> dest);
+	twsutil::PATH pathFind(int dx, int dy);
 	void log(const std::string& message, bool instant = true);
 	void showLog();
 	HeroX* hero;
@@ -95,11 +95,11 @@ private:
 
 	MyEvent* getEventData(int id);
 	MyEvent* getEventData(int x, int y);
-	MyEvent* EVENTDATA[MAXEVENT + 1] = { 0 };
-	int FLOOREVENTS[MAXFLOOR + 1][11][11] = { {{0}} }; //int representation - read from config?
+	MyEvent* EVENTDATA[twsutil::MAXEVENT + 1] = { 0 };
+	int FLOOREVENTS[twsutil::MAXFLOOR + 1][11][11] = { {{0}} }; //int representation - read from config?
 	MyEvent* FloorEvents[11][11] = { {0} }; //the actual objects
-	HeroItem* ITEMS[MAXITEMS] = { 0 };
-	std::list<GlobalEvent*> GLOBALEVENT[MAXFLOOR + 1];
+	HeroItem* ITEMS[twsutil::MAXITEMS] = { 0 };
+	std::list<GlobalEvent*> GLOBALEVENT[twsutil::MAXFLOOR + 1];
 
 	bool newGame = true;
 	//what do I need to save?
@@ -119,6 +119,8 @@ private:
 
 	std::queue<DialogStruct> dialogQ;
 	std::queue<std::function<void(int)> > dialogCallbackQ; //probably need a queue as well
+
+	twsutil::PATH heroMovementPath;
 
 
 	GameData();

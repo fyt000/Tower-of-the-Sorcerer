@@ -36,7 +36,7 @@ public:
 protected:
 	void showDialog(std::function<void(int)>);
 	std::string tag;
-	DIALOGTYPE type;
+	twsutil::DIALOGTYPE type;
 };
 
 //Y N choice dialog

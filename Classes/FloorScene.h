@@ -27,7 +27,7 @@ public:
 
 	//draw a dialog of given type
 	//options are optional, will call GameData dialogComplete on dismiss
-	void drawDialog(const std::string & text, DIALOGTYPE dType, std::vector<std::string>options = {});
+	void drawDialog(const std::string & text, twsutil::DIALOGTYPE dType, std::vector<std::string>options = {});
 
 	void drawEnemyPortrait(cocos2d::Sprite* s);
 
@@ -43,19 +43,18 @@ private:
 	cocos2d::DrawNode* dialogNode;
 	bool dialogOpen = false;
 	int absorbClick = 0;
-	DIALOGTYPE dialogType; //current dialog type
+	twsutil::DIALOGTYPE dialogType; //current dialog type
 
 	//bottom right enemy info
 	int eSpriteX = -1;
 	int eSpriteY = -1;
 	cocos2d::Sprite* enemyInfoSprite = nullptr;
 
-	DIR currentMovement;
+	twsutil::DIR currentMovement;
 
 	void closeDialog(int);
 
 	void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event);
 	void onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event);
 
-	void stuckBreaker(float dt);
 };

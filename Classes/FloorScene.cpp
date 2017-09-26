@@ -8,6 +8,7 @@
 #include <vector>
 
 USING_NS_CC;
+using namespace twsutil;
 
 Scene* FloorScene::createScene()
 {
@@ -528,6 +529,7 @@ void FloorScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::
 	case cocos2d::EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
 	case cocos2d::EventKeyboard::KeyCode::KEY_D:
 		currentMovement = DIR::RIGHT; movementActive = true; break;
+	default: return;
 	}
 	
 	continousMovement();
@@ -549,6 +551,7 @@ void FloorScene::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d:
 	case cocos2d::EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
 	case cocos2d::EventKeyboard::KeyCode::KEY_D:
 		if (currentMovement == DIR::RIGHT) movementActive = false; break;
+	default: return;
 	}
 
 }

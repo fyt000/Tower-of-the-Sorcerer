@@ -5,7 +5,7 @@ class Stairs :
 	public MyEvent
 {
 public:
-	Stairs(int imageIdx, const std::string& desc, int targetFloor, int x, int y, DIR);
+	Stairs(int imageIdx, const std::string& desc, int targetFloor, int x, int y, twsutil::DIR);
 	bool triggerEvent();
 	virtual ~Stairs();
 	Stairs* clone();
@@ -15,5 +15,5 @@ private:
 	int targetFloor;
 	int tx;
 	int ty;
-	DIR heroDir;
+	twsutil::DIR heroDir;
 };

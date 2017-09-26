@@ -14,7 +14,7 @@ class HeroX :
 	public Fightable
 {
 
-	typedef std::vector< std::pair< PATH, DIR> > DirectedPath;
+	typedef std::vector< std::pair< twsutil::PATH, twsutil::DIR> > DirectedPath;
 
 public:
 
@@ -28,21 +28,21 @@ public:
 	//remove fighting target and other clean up before enabling user input
 	void cleanUpTarget(cocos2d::Node * node, Fightable * target);
 	//not exactly used, may be needed for keyboard
-	std::pair<int,int> getDirXY(DIR dir);
-	void moveOnestep(const PATH& path);
+	std::pair<int,int> getDirXY(twsutil::DIR dir);
+	void moveOnestep(const twsutil::PATH& path);
 	//animation to move dir steps, stop=true for extra swagger
-	cocos2d::Animate * getDirMoveAnimate(DIR dir, int steps, bool stop = false);
+	cocos2d::Animate * getDirMoveAnimate(twsutil::DIR dir, int steps, bool stop = false);
 	//move the given path, isLastMove means to trigger the event on the last move
-	void move(PATH path, bool isLastMove = false);
+	void move(twsutil::PATH path, bool isLastMove = false);
 	void move(std::pair<int, int>);
 
 	//initialized in Hero constructor
 	LabelBinder<int>* keys[KeyType::LAST]; //3 types of keys - each key will be the same type
-	void changeFacingDir(DIR);
+	void changeFacingDir(twsutil::DIR);
 	//based to the given xy
 	void changeFacingDir(std::pair<int, int>);
 	//set absolute position and facing dir of hero
-	void setAbsPos(int, int, DIR);
+	void setAbsPos(int, int, twsutil::DIR);
 	//virtual HeroX* clone();
 	//callback to stop everything
 	void StopAllFinal(cocos2d::Node* node, bool reset = true, bool cont = true);
@@ -53,17 +53,17 @@ public:
 	~HeroX();
 
 private:
-	DIR heroDir;
+	twsutil::DIR heroDir;
 	float animateRate = 0.1f;
 	std::atomic_bool isMoving{ false };
-	DirectedPath getDirectedPath(const PATH& path);
+	DirectedPath getDirectedPath(const twsutil::PATH& path);
 	cocos2d::Vector<cocos2d::FiniteTimeAction*> createMoveActions(const DirectedPath& directedPath);
-	void changeDirAnimate(cocos2d::Node * node, DIR newDir, int steps, bool stop = false);
+	void changeDirAnimate(cocos2d::Node * node, twsutil::DIR newDir, int steps, bool stop = false);
 	void Destined(cocos2d::Node* node, int x, int y);
 	void StopAll(cocos2d::Node * node, std::pair<int, int>);
 	void triggeredCallback(cocos2d::Node* node, MyEvent * ev);
 	void updateBetweenFight(cocos2d::Node * n, Fightable * f, std::vector<FightableSnapshot>& snapshots, int hSSIdx, std::string & frameName, bool isHero);
-	cocos2d::SpriteFrame* stopSprite(DIR dir);
+	cocos2d::SpriteFrame* stopSprite(twsutil::DIR dir);
 	
 	// handle interleaving
 	int prevX;

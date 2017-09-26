@@ -1,6 +1,8 @@
 #include "Stairs.h"
 #include "GameData.h"
 
+using namespace twsutil;
+
 Stairs::Stairs(int imageIdx, const std::string& desc, int targetFloor, int x, int y, DIR dir) :
 	MyEvent(imageIdx, desc), targetFloor(targetFloor), tx(x), ty(y), heroDir(dir)
 {

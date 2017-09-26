@@ -2,6 +2,8 @@
 #include "GameData.h"
 #include "GlobalDefs.h"
 
+using namespace twsutil;
+
 int Shop::shopUses = 0;
 
 Shop::Shop(int imageIdx, const std::string& desc, int imageIdx2, int baseHP, int baseAtk, int baseDef) :

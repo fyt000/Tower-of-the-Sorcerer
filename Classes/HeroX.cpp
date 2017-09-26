@@ -5,6 +5,7 @@
 #include "LabelBinder.h"
 
 USING_NS_CC;
+using namespace twsutil;
 
 HeroX::HeroX(int imageIdx, const std::string& desc, int hp, int atk, int def, int gold) :Fightable(imageIdx, desc, -1, hp, atk, def, gold) {
 	//hard coding these for now

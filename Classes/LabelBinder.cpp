@@ -1,4 +1,5 @@
 #include "LabelBinder.h"
+#include <string>
 
 USING_NS_CC;
 
@@ -44,7 +45,7 @@ template<class T>
 void LabelBinder<T>::notify()
 {
 	if (doNotify&&theLabel != NULL)
-		theLabel->setString(ToString(value));
+		theLabel->setString(std::to_string(value));
 }
 
 template<class T>

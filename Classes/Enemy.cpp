@@ -4,6 +4,7 @@
 #include "GameData.h"
 
 USING_NS_CC;
+using namespace twsutil;
 
 Enemy::Enemy(int imageIdx, const std::string& desc, int secondImageID, int hp, int atk, int def, int gold) :
 	Fightable(imageIdx, desc, secondImageID, hp, atk, def, gold) {}
@@ -22,7 +23,6 @@ bool Enemy::stepOnEvent()
 {
 	CCLOG("fighting enemy");
 	bool fightR = Fightable::stepOnEvent();
-	//"Beat "+description+". Received "+ToString(gold.V())+" gold."
 	if (fightR) {
 		GameData::getInstance()->hero->gold.addVal(gold.V());
 		GameData::getInstance()->log(stdsprintf(GStr("beat_enemy"), getDescription(), gold.V()), false);
