@@ -151,11 +151,9 @@ DIR nextNodeDir(std::pair<int, int> cur, std::pair<int, int> next) {
 }
 
 
-
 Animate* HeroX::getDirMoveAnimate(DIR dir, int steps, bool stop) {
 	Vector<SpriteFrame*> animFrames;
 	animFrames.reserve(steps + 2);
-
 
 	std::string stepFrame1;
 	std::string stepFrame2;
@@ -169,7 +167,7 @@ Animate* HeroX::getDirMoveAnimate(DIR dir, int steps, bool stop) {
 	}
 
 	for (int i = 0; i < steps + 1; i++) {
-		if (i % 2 == 0)
+		if ((i % 2 == 0) == isEvenStep)
 			animFrames.pushBack(SpriteFrame::create(stepFrame1, Rect(0, 0, 40 / Director::getInstance()->getContentScaleFactor(), 40 / Director::getInstance()->getContentScaleFactor())));
 		else
 			animFrames.pushBack(SpriteFrame::create(stepFrame2, Rect(0, 0, 40 / Director::getInstance()->getContentScaleFactor(), 40 / Director::getInstance()->getContentScaleFactor())));
@@ -179,7 +177,6 @@ Animate* HeroX::getDirMoveAnimate(DIR dir, int steps, bool stop) {
 	}
 	Animation* animation = Animation::createWithSpriteFrames(animFrames, animateRate);
 	Animate* animate = Animate::create(animation);
-	animate->setTag(0); //all animations are 0
 	return animate;
 }
 
@@ -202,6 +199,31 @@ std::pair<int, int> HeroX::getDirXY(DIR direction) {
 	}
 
 	return { newX,newY };
+}
+
+void HeroX::moveOnestep(std::pair<int,int> dest) {
+	DIR nextDir = nextNodeDir({getX(),getY()}, dest);
+
+	// Swaggering, could play it right away I think
+	auto swagger = getDirMoveAnimate(nextDir,1,false);
+	//actions.pushBack(CallFuncN::create([this,swagger] {
+	this->getSprite()->runAction(swagger);
+	isEvenStep=!isEvenStep;
+	//}));
+	// before we do the animation for move, update the location
+	// any other movement will not happen before the nextStep call
+	this->setXY(dest.first, dest.second);
+	heroDir = nextDir;
+
+	// Gotta chain the next call only after the movement is done
+	Vector<FiniteTimeAction*> actions;
+	actions.pushBack(MoveTo::create(animateRate, 
+		TransformCoordinate::transformVec2(dest.first, dest.second)));
+	actions.pushBack(CallFuncN::create([this](Node*){
+		GameData::getInstance()->nextStep();
+	}));
+	auto seq = Sequence::create(actions);
+	this->getSprite()->runAction(seq);
 }
 
 void HeroX::moveOnestep(const PATH& path) {
@@ -349,8 +371,8 @@ void HeroX::changeDirAnimate(Node* node, DIR newDir, int steps, bool stop) {
 	CCLOG("Changing Dir Animate");
 	heroDir = newDir;
 	auto animate = getDirMoveAnimate(newDir, steps, stop);
-	auto action = sprite->getActionByTag(0);
 	/*
+	auto action = sprite->getActionByTag(0);
 	if (action && !action->isDone()) {
 		CCLOG("stopping cur animation");
 		//sprite->stopActionByTag(0); //stop cur animation if any
@@ -383,6 +405,9 @@ void HeroX::StopAllFinal(Node * node, bool reset, bool cont)
 void HeroX::setMoving(bool moving)
 {
 	isMoving = moving;
+	if (!isMoving) {
+		getSprite()->setSpriteFrame(stopSprite(heroDir));
+	}
 }
 
 bool HeroX::moving()

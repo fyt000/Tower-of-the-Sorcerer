@@ -61,8 +61,11 @@ public:
 	void showDialog(const DialogStruct& ds, std::function<void(int)> callback);
 	void dialogCompleted(int choice); //used by FloorScene, call callback if any
 
+	// this is for keyboard
 	void continousMovement();
-	void resetKeyMovement();
+	// this is for mouse
+	void nextStep();
+
 	void finalMovementCleanup(bool cont = true);
 
 	void init();

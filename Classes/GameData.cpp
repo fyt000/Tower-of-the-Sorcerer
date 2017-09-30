@@ -24,7 +24,7 @@ GameData::GameData() {
 
 void GameData::init()
 {
-	hero = new HeroX(213, "hahaha", 1000, 300, 100, 0);
+	hero = new HeroX(213, "hahaha", 1000, 15, 100, 0);
 	floor = new LabelBinder<int>(1);
 
 	Configureader::ReadEventData(EVENTDATA);
@@ -332,16 +332,50 @@ void GameData::moveHero(std::pair<int, int> dest) {
 	// store the path in GameData, and have a callback once each step is done
 	// this way, we should never call any stopAll on the hero sprite
 	// we calculate the direction and movement on a per step basis
-	// Ignore all input when we are at the last step
+	// When we do a moveHero, we check if our current path is non empty
+	// if not, then we know we will be getting a callback to nextStep soon
+	// so we can just replace the path
+	// If it is empty, we will call nextStep() ourselves.
 
-	hero->setMoving(true);
-	auto eventPtr = getEvent(dest.first, dest.second);
-	if (eventPtr == NULL) {//check if it is an event
-		hero->move(pathFind(dest), true);
+	heroMovementPath = pathFind(dest);
+	// Ignore all input when we are at the last step
+	if (!hero->moving()) {
+		hero->setMoving(true);
+		nextStep();
 	}
-	else {
-		hero->move(pathFind(dest));
+}
+
+void GameData::nextStep() {
+	if (heroMovementPath.empty()) {
+		auto eventPtr = getEvent(hero->getX(), hero->getY());
+		// stepOnEvent should be responsible to do stuff
+		if (eventPtr)
+			eventPtr->stepOnEvent();
+		else
+			finalMovementCleanup(false);
+		return;
 	}
+	// Safely, make a step
+	auto step = heroMovementPath.back();
+	// Non interruptible
+	if (heroMovementPath.size()==1) {
+		// Block input
+		Director::getInstance()->getEventDispatcher()->setEnabled(false);
+		// Must consider event triggers for the last step
+		auto eventPtr = getEvent(step.first, step.second);
+		if (eventPtr) {
+			// Not allowed to move!
+			if (!eventPtr->triggerEvent()) { 
+				heroMovementPath.clear();
+				nextStep(); 
+				return;
+			}
+		}
+	}
+
+	heroMovementPath.pop_back();
+	// Move step must have a callback to nextStep
+	hero->moveOnestep(step);
 }
 
 void GameData::moveHero(DIR dir)
@@ -376,6 +410,7 @@ void GameData::finalMovementCleanup(bool cont)
 {
 	showLog();
 	triggerGlobalEvents();
+	
 	hero->setMoving(false);
 	CCLOG("enabled input on finalmovementcleanup");
 	if (cont)
@@ -383,11 +418,7 @@ void GameData::finalMovementCleanup(bool cont)
 	Director::getInstance()->getEventDispatcher()->setEnabled(true);
 }
 
-void GameData::resetKeyMovement()
-{
-	flScn->movementActive = false;
-	flScn->canChangeDIR = true;
-}
+
 
 void GameData::killEvent(std::pair<int, int> place) {
 	auto eventPtr = getEvent(place.first, place.second);
@@ -465,6 +496,7 @@ PATH GameData::pathFind(std::pair<int, int> dest) {
 
 //find a path from the current location (heroX,heroY) to the specified path
 //use simple bfs will gurantee shortest path, since distance between each block is always 1
+//returns the path in reverse
 //this is called if the destination is not an event
 //change to accept 1 obstacle.
 PATH GameData::pathFind(int dx, int dy)
@@ -517,13 +549,14 @@ PATH GameData::pathFind(int dx, int dy)
 	}
 	if (found) {
 		auto prev = parent.back();  //this is the destination
+		path.push_back(bfsQ.back());
 		while (prev != -1) {
 			path.push_back(bfsQ[prev]);
 			prev = parent[prev];
 		}
 		path.pop_back(); //this is just the src loc
-		std::reverse(path.begin(), path.end());
-		path.push_back(std::pair<int, int>(dx, dy)); //push destination to the path.
+		// std::reverse(path.begin(), path.end());
+		// path.push_back(std::pair<int, int>(dx, dy)); //push destination to the path.
 	}
 	return path;
 }

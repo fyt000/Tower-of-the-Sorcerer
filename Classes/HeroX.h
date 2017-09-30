@@ -7,7 +7,6 @@
 #include "FightableSnapshot.h"
 #include "Key.h"
 #include "LabelBinder.h"
-#include <atomic>
 
 
 class HeroX :
@@ -30,6 +29,7 @@ public:
 	//not exactly used, may be needed for keyboard
 	std::pair<int,int> getDirXY(twsutil::DIR dir);
 	void moveOnestep(const twsutil::PATH& path);
+	void moveOnestep(std::pair<int, int>);
 	//animation to move dir steps, stop=true for extra swagger
 	cocos2d::Animate * getDirMoveAnimate(twsutil::DIR dir, int steps, bool stop = false);
 	//move the given path, isLastMove means to trigger the event on the last move
@@ -50,12 +50,14 @@ public:
 	bool moving();
 	int getX();
 	int getY();
+	
 	~HeroX();
 
 private:
 	twsutil::DIR heroDir;
+	bool isEvenStep = true; 
 	float animateRate = 0.1f;
-	std::atomic_bool isMoving{ false };
+	bool isMoving = false;
 	DirectedPath getDirectedPath(const twsutil::PATH& path);
 	cocos2d::Vector<cocos2d::FiniteTimeAction*> createMoveActions(const DirectedPath& directedPath);
 	void changeDirAnimate(cocos2d::Node * node, twsutil::DIR newDir, int steps, bool stop = false);
@@ -64,7 +66,6 @@ private:
 	void triggeredCallback(cocos2d::Node* node, MyEvent * ev);
 	void updateBetweenFight(cocos2d::Node * n, Fightable * f, std::vector<FightableSnapshot>& snapshots, int hSSIdx, std::string & frameName, bool isHero);
 	cocos2d::SpriteFrame* stopSprite(twsutil::DIR dir);
-	
 	// handle interleaving
 	int prevX;
 	int prevY;
