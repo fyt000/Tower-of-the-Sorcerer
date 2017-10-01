@@ -24,7 +24,7 @@ GameData::GameData() {
 
 void GameData::init()
 {
-	hero = new HeroX(213, "hahaha", 1000, 15, 100, 0);
+	hero = new HeroX(213, "Hero", 1000, 15, 100, 0);
 	floor = new LabelBinder<int>(1);
 
 	Configureader::ReadEventData(EVENTDATA);
@@ -320,8 +320,6 @@ cocos2d::Sprite * GameData::getSprite(int x, int y)
 //this method is only being called from FloorScene
 //no one else should call this
 void GameData::moveHero(std::pair<int, int> dest) {
-	logLabel->setVisible(false);
-	logLabel->setString(""); //reset log text on movement
 
 	// Next step!
 	// Find if there is a valid path
@@ -337,22 +335,32 @@ void GameData::moveHero(std::pair<int, int> dest) {
 	// so we can just replace the path
 	// If it is empty, we will call nextStep() ourselves.
 
-	heroMovementPath = pathFind(dest);
-	// Ignore all input when we are at the last step
+	auto newPath = pathFind(dest);
+	if (newPath.empty())
+		return;
+
+	logLabel->setVisible(false);
+	logLabel->setString(""); //reset log text on movement
+
+	heroMovementPath = newPath;
+	CCLOG("next step updated to %d", heroMovementPath.size());
+
 	if (!hero->moving()) {
+		CCLOG("next step activated");
 		hero->setMoving(true);
 		nextStep();
 	}
 }
 
 void GameData::nextStep() {
+	CCLOG("next step with %d steps left", heroMovementPath.size());
 	if (heroMovementPath.empty()) {
 		auto eventPtr = getEvent(hero->getX(), hero->getY());
 		// stepOnEvent should be responsible to do stuff
 		if (eventPtr)
 			eventPtr->stepOnEvent();
-		else
-			finalMovementCleanup(false);
+		finalMovementCleanup(false);
+		releaseBlock();
 		return;
 	}
 	// Safely, make a step
@@ -360,7 +368,7 @@ void GameData::nextStep() {
 	// Non interruptible
 	if (heroMovementPath.size()==1) {
 		// Block input
-		Director::getInstance()->getEventDispatcher()->setEnabled(false);
+		block();
 		// Must consider event triggers for the last step
 		auto eventPtr = getEvent(step.first, step.second);
 		if (eventPtr) {
@@ -408,14 +416,14 @@ void GameData::continousMovement()
 //called after final movement
 void GameData::finalMovementCleanup(bool cont)
 {
-	showLog();
+	if (blockCounter==0)
+		showLog();
 	triggerGlobalEvents();
 	
 	hero->setMoving(false);
 	CCLOG("enabled input on finalmovementcleanup");
 	if (cont)
 		continousMovement();
-	Director::getInstance()->getEventDispatcher()->setEnabled(true);
 }
 
 
@@ -480,6 +488,7 @@ void GameData::moveHeroFinalStep(std::pair<int, int> dest) {
 			{
 				floorChange = false;
 			}
+			GameData::getInstance()->releaseBlock();
 			finalMovementCleanup(false);
 		}
 	}
@@ -607,6 +616,19 @@ void GameData::triggerGlobalEvents() {
 		}
 	}
 	//CCLOG("done trying global events");
+}
+
+void GameData::block() {
+	blockCounter++;
+	Director::getInstance()->getEventDispatcher()->setEnabled(false);
+}
+
+void GameData::releaseBlock() {
+	blockCounter--;
+	if (blockCounter==0)
+		Director::getInstance()->getEventDispatcher()->setEnabled(true);
+	if (blockCounter < 0)
+		CC_ASSERT(false);
 }
 
 

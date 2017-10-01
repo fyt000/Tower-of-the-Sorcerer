@@ -62,7 +62,6 @@ private:
 	cocos2d::Vector<cocos2d::FiniteTimeAction*> createMoveActions(const DirectedPath& directedPath);
 	void changeDirAnimate(cocos2d::Node * node, twsutil::DIR newDir, int steps, bool stop = false);
 	void Destined(cocos2d::Node* node, int x, int y);
-	void StopAll(cocos2d::Node * node, std::pair<int, int>);
 	void triggeredCallback(cocos2d::Node* node, MyEvent * ev);
 	void updateBetweenFight(cocos2d::Node * n, Fightable * f, std::vector<FightableSnapshot>& snapshots, int hSSIdx, std::string & frameName, bool isHero);
 	cocos2d::SpriteFrame* stopSprite(twsutil::DIR dir);

@@ -49,7 +49,7 @@ int HeroX::fightX(Fightable * target, std::function<void(Fightable&)> hpCallback
 	//hpCallBack should really just be null... I don't care
 	//this may change
 	CCLOG("disabled input on fightX");
-	Director::getInstance()->getEventDispatcher()->setEnabled(false);
+	GameData::getInstance()->block();
 	target->setLabelNofity(false);
 	this->setLabelNofity(false);
 	std::vector<FightableSnapshot> heroSnapshots;
@@ -206,10 +206,8 @@ void HeroX::moveOnestep(std::pair<int,int> dest) {
 
 	// Swaggering, could play it right away I think
 	auto swagger = getDirMoveAnimate(nextDir,1,false);
-	//actions.pushBack(CallFuncN::create([this,swagger] {
 	this->getSprite()->runAction(swagger);
 	isEvenStep=!isEvenStep;
-	//}));
 	// before we do the animation for move, update the location
 	// any other movement will not happen before the nextStep call
 	this->setXY(dest.first, dest.second);
@@ -291,73 +289,8 @@ HeroX::DirectedPath HeroX::getDirectedPath(const PATH& path) {
 	return directedPaths;
 }
 
-//THIS WORKS!!
-//there are a lot of stuff that can happen with move
-//for now, just do the animation
-//and the logic for hitting the wall should be done else where maybe GameData
 void HeroX::move(PATH path, bool isLastStep) {
-	// refuse to move if in critical action
-	
-	if (path.size() == 0) {
-		setMoving(false);
-		return;
-	}
 
-	//TODO add a state so it gets reissued to complete the last step
-	sprite->stopAllActions();
-	CCLOG("stopped all action by trying to move");
-		
-	std::pair<int, int> lastStep = path.back();
-	if (!isLastStep) {
-		path.pop_back();
-	}
-		
-	// check if the prev step got executed
-	if (!prevComplete) {
-		// not the most efficient implementation, fix it later (or not)
-		path.insert(path.begin(), {prevX,prevY});
-		CCLOG("Insert extra step");
-	}
-
-	//break down the path into directions...
-	//because each direction has a different animation
-	auto directedPaths = getDirectedPath(path);
-
-	//I could have combined this with the above code
-	//but just in case I decide to do something different
-
-	auto actions = createMoveActions(directedPaths);
-	//now directedPaths stores all the stuff... 
-
-	CCLOG("movement action length %d", actions.size());
-
-	if (isLastStep){
-		actions.pushBack(DelayTime::create(animateRate));
-		CCLOG("action: insert delay");
-	}
-
-	//do not enable input or anything
-	if (isLastStep) {
-		auto stepEvt = GameData::getInstance()->getEvent(lastStep.first, lastStep.second);
-		auto cb1 = CallFuncN::create([this, stepEvt](Node* n) {
-			CCLOG("going to run stopAllFinal");
-			this->StopAllFinal(n, stepEvt == nullptr);
-		});
-		actions.pushBack(cb1);
-		if (stepEvt) {
-			auto stepOnCallBack = CallFuncN::create(CC_CALLBACK_1(HeroX::triggeredCallback, this, stepEvt));
-			actions.pushBack(stepOnCallBack);
-			CCLOG("action: insert stepOnCallBack");
-		}
-	}
-	else {
-		actions.pushBack(CallFuncN::create(CC_CALLBACK_1(HeroX::StopAll, this, lastStep)));
-		CCLOG("action: insert StopAll");
-	}
-
-	CCLOG("running sequence, length %d", actions.size());
-	auto seq = Sequence::create(actions);
-	sprite->runAction(seq);
 }
 
 void HeroX::move(std::pair<int, int> dest)
@@ -387,18 +320,14 @@ void HeroX::Destined(Node* node, int x, int y) {
 	//TODO check for hidden event, call StopAllFinal if needed
 }
 
-void HeroX::StopAll(Node* node, std::pair<int, int> dest) {
-	sprite->setSpriteFrame(stopSprite(heroDir));
-	Director::getInstance()->getEventDispatcher()->setEnabled(false);
-	GameData::getInstance()->moveHeroFinalStep(dest);
-}
-
 //theres a few lines of copied code... get ride of it maybe
 void HeroX::StopAllFinal(Node * node, bool reset, bool cont)
 {
 	CCLOG("final movement cleanup");
-	if (reset)
+	if (reset) {
+		GameData::getInstance()->releaseBlock();
 		GameData::getInstance()->finalMovementCleanup(cont);
+	}
 	sprite->setSpriteFrame(stopSprite(heroDir));
 }
 
