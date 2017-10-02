@@ -100,15 +100,15 @@ int HeroX::fightX(Fightable * target, std::function<void(Fightable&)> hpCallback
 			actions.pushBack(DelayTime::create(0.3));
 		}
 	}
-	auto cb1 = CallFuncN::create([this](Node* n) {
+	auto cb2 = CallFuncN::create([this](Node* n) {
 		CCLOG("going to run stopAllFinal");
 		this->StopAllFinal(n,true,false);
 	});
-	actions.pushBack(cb1);
-	auto cb2 = CallFuncN::create([this,target](Node* n) {
+	auto cb1 = CallFuncN::create([this,target](Node* n) {
 		CCLOG("going to cleanup target");
 		cleanUpTarget(n, target);
 	});
+	actions.pushBack(cb1);
 	actions.pushBack(cb2);
 	CCLOG("running fighting sequence");
 	sprite->runAction(Sequence::create(actions));
@@ -206,118 +206,25 @@ void HeroX::moveOnestep(std::pair<int,int> dest) {
 
 	// Swaggering, could play it right away I think
 	auto swagger = getDirMoveAnimate(nextDir,1,false);
-	this->getSprite()->runAction(swagger);
+	// this->getSprite()->runAction(swagger);
 	isEvenStep=!isEvenStep;
 	// before we do the animation for move, update the location
 	// any other movement will not happen before the nextStep call
 	this->setXY(dest.first, dest.second);
 	heroDir = nextDir;
 
+	CCLOG("will run MoveTo nextStep sequence");
 	// Gotta chain the next call only after the movement is done
-	Vector<FiniteTimeAction*> actions;
-	actions.pushBack(MoveTo::create(animateRate, 
-		TransformCoordinate::transformVec2(dest.first, dest.second)));
-	actions.pushBack(CallFuncN::create([this](Node*){
-		GameData::getInstance()->nextStep();
-	}));
-	auto seq = Sequence::create(actions);
-	this->getSprite()->runAction(seq);
-}
-
-void HeroX::moveOnestep(const PATH& path) {
-	if (path.size() == 0)
-	{
-		setMoving(false);
-		return;
-	}
-	auto directedPath = getDirectedPath(path);
-	auto actions = createMoveActions(directedPath);
-	actions.pushBack(CallFuncN::create([this](Node*) {
-		setMoving(false);
-		GameData::getInstance()->continousMovement();
-	}));
-	auto seq = Sequence::create(actions);
-	sprite->runAction(seq);
-}
-
-Vector<FiniteTimeAction*> HeroX::createMoveActions(const DirectedPath& directedPaths) {
-	Vector<FiniteTimeAction*> actions;
-	if (directedPaths.size() == 0)
-		return actions;
-
-
-	//now directedPaths stores all the stuff... 
-	for (auto singPath : directedPaths) {
-		auto changeDirCallBack = CallFuncN::create(CC_CALLBACK_1(HeroX::changeDirAnimate, this, singPath.second, singPath.first.size(), false));
-		actions.pushBack(changeDirCallBack);
-		for (auto pathNode : singPath.first) {
-			auto callback1 = CallFuncN::create([this, pathNode](Node* n) {
-				prevX = pathNode.first;
-				prevY = pathNode.second;
-				prevComplete = false;
-			});
-			auto destCoord = TransformCoordinate::transformVec2(pathNode.first, pathNode.second);
-			auto callback2 = CallFuncN::create(CC_CALLBACK_1(HeroX::Destined, this, pathNode.first, pathNode.second));
-			actions.pushBack(callback1);
-			actions.pushBack(MoveTo::create(animateRate, destCoord));
-			actions.pushBack(callback2);
-		}
-	}
-	return actions;
-}
-
-HeroX::DirectedPath HeroX::getDirectedPath(const PATH& path) {
-	DirectedPath directedPaths;
-	if (path.size() == 0)
-		return directedPaths;
-	DIR curDir = heroDir;
-	std::pair<int, int> curCoord(getX(), getY()); //do I need a lock on x,y or something
-	PATH singleDirPath;
-	for (int i = 0; i < path.size(); i++) {
-		DIR nextDir = nextNodeDir(curCoord, path[i]);
-		if (nextDir != curDir) { //change of direction
-			if (singleDirPath.size() != 0)
-				directedPaths.push_back(std::pair<PATH, DIR>(singleDirPath, curDir));
-			curDir = nextDir;
-			singleDirPath.clear();
-		}
-		curCoord = path[i];
-		singleDirPath.push_back(curCoord);
-	}
-	if (singleDirPath.size() != 0)
-		directedPaths.push_back(std::pair<PATH, DIR>(singleDirPath, curDir));
-	return directedPaths;
-}
-
-void HeroX::move(PATH path, bool isLastStep) {
-
-}
-
-void HeroX::move(std::pair<int, int> dest)
-{
-	PATH p;
-	p.push_back(dest);
-	move(p, true);
-}
-
-void HeroX::changeDirAnimate(Node* node, DIR newDir, int steps, bool stop) {
-	CCLOG("Changing Dir Animate");
-	heroDir = newDir;
-	auto animate = getDirMoveAnimate(newDir, steps, stop);
-	/*
-	auto action = sprite->getActionByTag(0);
-	if (action && !action->isDone()) {
-		CCLOG("stopping cur animation");
-		//sprite->stopActionByTag(0); //stop cur animation if any
-	}*/
-	sprite->runAction(animate);
-}
-
-void HeroX::Destined(Node* node, int x, int y) {
-	this->x = x; this->y = y;
-	prevComplete = true;
-	CCLOG("destined at %d %d", x, y);
-	//TODO check for hidden event, call StopAllFinal if needed
+	auto seq = Sequence::create(
+		MoveTo::create(animateRate,
+			TransformCoordinate::transformVec2(dest.first, dest.second)),
+		CallFunc::create([]() {
+			GameData::getInstance()->nextStep();
+		}), 
+		nullptr
+	);
+	auto moveAndAnimate = Spawn::createWithTwoActions(swagger, seq);
+	this->getSprite()->runAction(moveAndAnimate);
 }
 
 //theres a few lines of copied code... get ride of it maybe
@@ -354,15 +261,6 @@ SpriteFrame* HeroX::stopSprite(DIR dir) {
 	default:stopStr = "images/tile (213).png";
 	}
 	return SpriteFrame::create(stopStr, Rect(0, 0, 40 / Director::getInstance()->getContentScaleFactor(), 40 / Director::getInstance()->getContentScaleFactor()));
-}
-
-void HeroX::triggeredCallback(Node * node, MyEvent* ev) {
-	CCLOG("triggeredCallback");
-	if (ev == nullptr)
-		return;
-	if (!ev->stepOnEvent()) {
-		GameData::getInstance()->finalMovementCleanup();
-	}
 }
 
 int HeroX::getX()
@@ -402,10 +300,3 @@ void HeroX::changeFacingDir(DIR dir)
 {
 	HeroX::changeDirAnimate(NULL, dir, 1, true);
 }
-
-//can't copy atomic - ok... 
-/*
-HeroX * HeroX::clone()
-{
-	return new HeroX(*this);
-}*/

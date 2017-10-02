@@ -28,13 +28,10 @@ public:
 	void cleanUpTarget(cocos2d::Node * node, Fightable * target);
 	//not exactly used, may be needed for keyboard
 	std::pair<int,int> getDirXY(twsutil::DIR dir);
-	void moveOnestep(const twsutil::PATH& path);
 	void moveOnestep(std::pair<int, int>);
 	//animation to move dir steps, stop=true for extra swagger
 	cocos2d::Animate * getDirMoveAnimate(twsutil::DIR dir, int steps, bool stop = false);
 	//move the given path, isLastMove means to trigger the event on the last move
-	void move(twsutil::PATH path, bool isLastMove = false);
-	void move(std::pair<int, int>);
 
 	//initialized in Hero constructor
 	LabelBinder<int>* keys[KeyType::LAST]; //3 types of keys - each key will be the same type
@@ -58,11 +55,6 @@ private:
 	bool isEvenStep = true; 
 	float animateRate = 0.1f;
 	bool isMoving = false;
-	DirectedPath getDirectedPath(const twsutil::PATH& path);
-	cocos2d::Vector<cocos2d::FiniteTimeAction*> createMoveActions(const DirectedPath& directedPath);
-	void changeDirAnimate(cocos2d::Node * node, twsutil::DIR newDir, int steps, bool stop = false);
-	void Destined(cocos2d::Node* node, int x, int y);
-	void triggeredCallback(cocos2d::Node* node, MyEvent * ev);
 	void updateBetweenFight(cocos2d::Node * n, Fightable * f, std::vector<FightableSnapshot>& snapshots, int hSSIdx, std::string & frameName, bool isHero);
 	cocos2d::SpriteFrame* stopSprite(twsutil::DIR dir);
 	// handle interleaving

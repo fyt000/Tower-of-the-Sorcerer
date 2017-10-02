@@ -24,7 +24,7 @@ GameData::GameData() {
 
 void GameData::init()
 {
-	hero = new HeroX(213, "Hero", 1000, 15, 100, 0);
+	hero = new HeroX(213, "Hero", 1000, 20, 100, 0);
 	floor = new LabelBinder<int>(1);
 
 	Configureader::ReadEventData(EVENTDATA);
@@ -127,7 +127,8 @@ void GameData::dialogCompleted(int choice)
 void GameData::gameover()
 {
 	CCLOG("enabled input on gameover");
-	Director::getInstance()->getEventDispatcher()->setEnabled(true);
+	blocked = false;
+	// Director::getInstance()->getEventDispatcher()->setEnabled(true);
 	showDialog(DialogStruct(GStr("gameover"), DIALOGTYPE::NONE), [this](int notUsed)->void {
 		gameData = nullptr;
 		delete this;
@@ -321,20 +322,6 @@ cocos2d::Sprite * GameData::getSprite(int x, int y)
 //no one else should call this
 void GameData::moveHero(std::pair<int, int> dest) {
 
-	// Next step!
-	// Find if there is a valid path
-	// If we are triggering an event, execute the step in 2 segments
-	// 1. In a interuptible manner, walk to destination - 1
-	// 2. If still not interrupted, execute final event
-	// otherwise just do 1. without the -1
-	// store the path in GameData, and have a callback once each step is done
-	// this way, we should never call any stopAll on the hero sprite
-	// we calculate the direction and movement on a per step basis
-	// When we do a moveHero, we check if our current path is non empty
-	// if not, then we know we will be getting a callback to nextStep soon
-	// so we can just replace the path
-	// If it is empty, we will call nextStep() ourselves.
-
 	auto newPath = pathFind(dest);
 	if (newPath.empty())
 		return;
@@ -356,7 +343,6 @@ void GameData::nextStep() {
 	CCLOG("next step with %d steps left", heroMovementPath.size());
 	if (heroMovementPath.empty()) {
 		auto eventPtr = getEvent(hero->getX(), hero->getY());
-		// stepOnEvent should be responsible to do stuff
 		if (eventPtr)
 			eventPtr->stepOnEvent();
 		finalMovementCleanup(false);
@@ -374,6 +360,7 @@ void GameData::nextStep() {
 		if (eventPtr) {
 			// Not allowed to move!
 			if (!eventPtr->triggerEvent()) { 
+				flScn->movementActive = false;
 				heroMovementPath.clear();
 				nextStep(); 
 				return;
@@ -386,27 +373,6 @@ void GameData::nextStep() {
 	hero->moveOnestep(step);
 }
 
-void GameData::moveHero(DIR dir)
-{
-	logLabel->setVisible(false);
-	logLabel->setString(""); //reset log text on movement
-	hero->setMoving(true);
-	auto newXY = hero->getDirXY(dir);
-	auto x = newXY.first;
-	auto y = newXY.second;
-	if (x < 0 || x >= 11 || y < 0 || y >= 11)
-	{
-		hero->setMoving(false);
-		return;
-	}
-	auto eventPtr = getEvent(newXY.first, newXY.second);
-	if (eventPtr == NULL) {
-		hero->moveOnestep(pathFind(newXY));
-	}
-	else {
-		hero->move(pathFind(newXY));
-	}
-}
 
 void GameData::continousMovement()
 {
@@ -419,13 +385,10 @@ void GameData::finalMovementCleanup(bool cont)
 	if (blockCounter==0)
 		showLog();
 	triggerGlobalEvents();
-	
-	hero->setMoving(false);
 	CCLOG("enabled input on finalmovementcleanup");
 	if (cont)
 		continousMovement();
 }
-
 
 
 void GameData::killEvent(std::pair<int, int> place) {
@@ -465,39 +428,6 @@ void GameData::setEvent(int id, int x, int y, int f)
 	//flScn->loadFloor();
 }
 
-void GameData::moveHeroFinalStep(std::pair<int, int> dest) {
-	auto eventPtr = getEvent(dest.first, dest.second);
-	if (eventPtr == NULL) {//check if it is an event
-		//do single move if nothing will happen
-		hero->move(dest);
-		hero->setMoving(false);
-		return;
-	}
-
-	//check if distance is 1
-	if ((dest.first == hero->getX() && abs(hero->getY() - dest.second) == 1) ||
-		(dest.second == hero->getY() && abs(hero->getX() - dest.first) == 1)) {
-		if (eventPtr->triggerEvent()) { //allowed to move to it
-			hero->move(pathFind(dest), true);
-		}
-		else { //not allowed
-			if (!floorChange) {
-				hero->changeFacingDir(dest);
-			}
-			else
-			{
-				floorChange = false;
-			}
-			GameData::getInstance()->releaseBlock();
-			finalMovementCleanup(false);
-		}
-	}
-	else {
-		//else do a path find and move to the place
-		//moveHero(pathFind(dest));
-		hero->move(pathFind(dest));
-	}
-}
 
 PATH GameData::pathFind(std::pair<int, int> dest) {
 	return pathFind(dest.first, dest.second);
@@ -620,15 +550,23 @@ void GameData::triggerGlobalEvents() {
 
 void GameData::block() {
 	blockCounter++;
-	Director::getInstance()->getEventDispatcher()->setEnabled(false);
+	blocked = true;
 }
 
 void GameData::releaseBlock() {
 	blockCounter--;
-	if (blockCounter==0)
-		Director::getInstance()->getEventDispatcher()->setEnabled(true);
+	if (blockCounter == 0) {
+		blocked = false;
+		hero->setMoving(false);
+		continousMovement();
+	}
 	if (blockCounter < 0)
 		CC_ASSERT(false);
+}
+
+bool GameData::isBlocked()
+{
+	return blocked;
 }
 
 

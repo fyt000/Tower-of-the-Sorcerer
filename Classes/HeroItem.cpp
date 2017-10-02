@@ -19,6 +19,8 @@ void HeroItem::attachTo(cocos2d::Node *parent)
 	itemButton->setAnchorPoint(Vec2(0, 1));
 	//itemButton->setTitleText(desc);
 	itemButton->addTouchEventListener([&](Ref* sender, ui::Widget::TouchEventType type) {
+		if (GameData::getInstance()->isBlocked())
+			return;
 		switch (type)
 		{
 		case ui::Widget::TouchEventType::ENDED:

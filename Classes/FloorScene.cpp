@@ -557,6 +557,9 @@ void FloorScene::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d:
 }
 
 void FloorScene::continousMovement() {
+	if (GameData::getInstance()->isBlocked())
+		return;
+
 	if (movementActive && !GameData::getInstance()->hero->moving()) {
 		GameData::getInstance()->moveHero(currentMovement); 
 	}
@@ -565,6 +568,9 @@ void FloorScene::continousMovement() {
 
 void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches, cocos2d::Event * event)
 {
+	if (GameData::getInstance()->isBlocked())
+		return;
+
 	//clicking on menuitem will actually trigger onTouchesEnded as well
 	//so we use dialogOpen to ignore the first click after closeDialog
 	if (dialogOpen) {
@@ -587,9 +593,6 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches, coc
 		return;
 	}
 
-	//if (GameData::getInstance()->hero->moving())
-	//	return;
-
 	//ignore all touches except the last one
 	for (auto touch : touches) {
 		auto loc = touch->getLocation();
@@ -599,7 +602,6 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches, coc
 
 		GameData::getInstance()->moveHero(blockDest);
 	}
-	//GameData::getInstance()->freePendingFreeList();
 }
 
 

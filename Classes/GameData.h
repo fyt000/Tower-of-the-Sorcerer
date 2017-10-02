@@ -85,8 +85,12 @@ public:
 	//item 3
 	void replayDialog();
 
+	// block() on event start and releaseBlock() on event end
+	// to potentially unblock
+	// this allows nested events to keep blocking the input
 	void block();
 	void releaseBlock();
+	bool isBlocked();
 
 
 	int getEventID(int floor, int x, int y);
@@ -120,15 +124,8 @@ private:
 	Stairs* upstair = nullptr;
 	Stairs* downstair = nullptr;
 
-	// block user input!
-	// each event can ask to inc/dec
-	// user input is blocked if counter > 0
-	// and unblocked when counter == 0
-	// inc on event start (to block) and dec on event end (to potentially unblock)
-	// since we have async actions, there might be nested events
-	// that can only unlock after some animantion. This prevents any other code
-	// unblocking the input before the animation is done.
 	int blockCounter = 0;
+	bool blocked = false;
 
 	void loadFloor(int);
 	bool floorChange = false;
