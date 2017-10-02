@@ -35,9 +35,6 @@ public:
 
 	//initialized in Hero constructor
 	LabelBinder<int>* keys[KeyType::LAST]; //3 types of keys - each key will be the same type
-	void changeFacingDir(twsutil::DIR);
-	//based to the given xy
-	void changeFacingDir(std::pair<int, int>);
 	//set absolute position and facing dir of hero
 	void setAbsPos(int, int, twsutil::DIR);
 	//virtual HeroX* clone();

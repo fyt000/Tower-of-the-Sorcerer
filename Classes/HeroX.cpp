@@ -282,10 +282,6 @@ HeroX::~HeroX() {
 		delete keys[i];
 }
 
-void HeroX::changeFacingDir(std::pair<int, int> dest)
-{
-	HeroX::changeDirAnimate(NULL, nextNodeDir(std::pair<int, int>(x, y), dest), 1, true);
-}
 
 void HeroX::setAbsPos(int absx, int absy, DIR dir)
 {
@@ -293,10 +289,5 @@ void HeroX::setAbsPos(int absx, int absy, DIR dir)
 	std::pair<int, int> pxy = TransformCoordinate::transform(absx, absy);
 	sprite->setPosition(pxy.first, pxy.second);
 	heroDir = dir;
-	changeFacingDir(dir);
-}
-
-void HeroX::changeFacingDir(DIR dir)
-{
-	HeroX::changeDirAnimate(NULL, dir, 1, true);
+	getSprite()->setSpriteFrame(stopSprite(dir));
 }

@@ -318,6 +318,18 @@ cocos2d::Sprite * GameData::getSprite(int x, int y)
 	return FloorEvents[x][y]->getSprite();
 }
 
+void GameData::moveHero(DIR dir)
+{
+	auto newXY = hero->getDirXY(dir);
+	auto x = newXY.first;
+	auto y = newXY.second;
+	if (x < 0 || x >= 11 || y < 0 || y >= 11)
+	{
+		return;
+	}
+	moveHero(newXY);
+}
+
 //this method is only being called from FloorScene
 //no one else should call this
 void GameData::moveHero(std::pair<int, int> dest) {

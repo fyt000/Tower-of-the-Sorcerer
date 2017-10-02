@@ -35,7 +35,6 @@ public:
 	//f==-1 for cur floor
 	//note that setEvent DO NOT call delete on the current event occupying x,y
 	void setEvent(int id, int x, int y, int f = -1);
-	void moveHeroFinalStep(std::pair<int, int> dest);
 	twsutil::PATH pathFind(std::pair<int, int> dest);
 	twsutil::PATH pathFind(int dx, int dy);
 	void log(const std::string& message, bool instant = true);
