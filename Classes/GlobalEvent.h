@@ -2,6 +2,7 @@
 #include "MyAction.h"
 #include "Condition.h"
 #include <vector>
+#include <memory>
 
 //after every hero action (movement/item usage), check if conditions are met
 //if yes, trigger actions
@@ -11,11 +12,11 @@ class GlobalEvent {
 public:
 	GlobalEvent(int id); 
 	bool tryTrigger();
-	void attachAction(MyAction*);
-	void addCondition(Condition*);
+	void attachAction(std::unique_ptr<MyAction>);
+	void addCondition(std::unique_ptr<Condition>);
 	~GlobalEvent();
 private:
 	int id;
-	std::vector<Condition*> conditions;
-	std::vector<MyAction*> actions;
+	std::vector<std::unique_ptr<Condition>> conditions;
+	std::vector<std::unique_ptr<MyAction>> actions;
 };

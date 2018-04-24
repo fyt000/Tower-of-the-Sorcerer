@@ -14,11 +14,6 @@ MyEvent::MyEvent(int imageIdx, const std::string& decription, int imageIdx2) : i
 {
 }
 
-MyEvent * MyEvent::clone()
-{
-	return new MyEvent(*this);
-}
-
 MyEvent::~MyEvent() {
 	if (sprite != nullptr) {
 		sprite->removeFromParentAndCleanup(true);
@@ -99,28 +94,41 @@ int MyEvent::getY()
 	return y;
 }
 
-void MyEvent::attachAction(MyAction *action)
+void MyEvent::attachAction(std::unique_ptr<MyAction> action)
 {
-	actions.push_back(action);
+	actions.push_back(std::move(action));
 }
 
 int MyEvent::performActions()
 {
-	for (std::size_t i = 0; i < actions.size(); i++)
-		actions[i]->perform(this);
-	//if performActions marked to delete this
-	//sigh... async problems again
-	//introduce some global callback stack and callback chaining mechanism maybe
+	// what happens here is that it passes itself as the same shared ptr
+	// into perform where it's possible for perform to delete this instance
+	// from gamedata
+	// this allows it to hang around a bit until the call is complete I guess
+	// ^ I have no idea what I am talking about
+
+	std::weak_ptr<MyEvent> thisOnStack = shared_from_this();
+	if (auto shared = thisOnStack.lock()) {
+		for (std::size_t i = 0; i < actions.size(); i++)
+			actions[i]->perform(shared);
+	}
+	else {
+		CCLOG("some one deleted the event");
+	}
+
 
 	return 1;
 }
 
+
 void MyEvent::selfDestruct()
 {
-	if (GameData::getInstance()->getEvent(getX(), getY()) == this) //could have been replaced already
-		GameData::getInstance()->killEvent(std::pair<int, int>(getX(), getY()));
-	else //no one else should care, just delete self
+	// attempt to delete if still stored by gamedata
+	if (GameData::getInstance().getEvent(getX(), getY()).get() == this) //could have been replaced already
+		GameData::getInstance().killEvent(std::pair<int, int>(getX(), getY()));
+	else 
 	{
-		delete this;
+		// event is ALWAYS shared_ptr, if gamedata doesn't hold an instance of it
+		// then it should be automatically deleted
 	}
 }

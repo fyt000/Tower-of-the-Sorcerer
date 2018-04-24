@@ -4,26 +4,23 @@
 GlobalEvent::GlobalEvent(int id) : id(id) {}
 
 bool GlobalEvent::tryTrigger() {
-	for (auto cond : conditions) {
+	for (auto& cond : conditions) {
 		if (!cond->check())
 			return false;
 	}
-	for (int i = 0; i < actions.size(); i++)
+	for (size_t i = 0; i < actions.size(); i++)
 		actions[i]->perform(nullptr);
 	return true;
 }
 
-void GlobalEvent::attachAction(MyAction* action) {
-	actions.push_back(action);
+void GlobalEvent::attachAction(std::unique_ptr<MyAction> action) {
+	// probably auto moved
+	actions.push_back(std::move(action));
 }
 
-void GlobalEvent::addCondition(Condition* cond) {
-	conditions.push_back(cond);
+void GlobalEvent::addCondition(std::unique_ptr<Condition> cond) {
+	conditions.push_back(std::move(cond));
 }
 
 GlobalEvent::~GlobalEvent() {
-	for (std::size_t i = 0; i < conditions.size(); i++)
-		delete conditions[i];
-	for (std::size_t i = 0; i < actions.size(); i++)
-		delete actions[i];
 }

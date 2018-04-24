@@ -17,17 +17,22 @@ using namespace twsutil;
 
 static GameData* gameData = nullptr;
 
-
 GameData::GameData() {
 	init();
 }
 
 void GameData::init()
 {
-	hero = new HeroX(213, "Hero", 1000, 20, 100, 0);
-	floor = new LabelBinder<int>(1);
+	newGame = true;
+	floorChange = false;
+	upstair = nullptr;
+	downstair = nullptr;
+	blockCounter = 0;
+	blocked = false;
 
-	Configureader::ReadEventData(EVENTDATA);
+	hero = std::make_unique<HeroX>(213, "Hero", 1000, 20, 100, 0);
+	floor = std::make_unique<LabelBinder<int>>(1);
+
 	Configureader::ReadFloorEvents(FLOOREVENTS);
 	Configureader::ReadItemData(ITEMS);
 	Configureader::ReadGlobalEvents(GLOBALEVENT);
@@ -41,26 +46,26 @@ void GameData::init()
 
 
 //kinda singleton
-GameData* GameData::getInstance() {
+GameData& GameData::getInstance() {
 	if (!gameData) {
 		gameData = new GameData();
 	}
-	return gameData;
+	return *gameData;
 }
 
 
-MyEvent * GameData::getEvent(int x, int y)
+std::shared_ptr<MyEvent> GameData::getEvent(int x, int y)
 {
 	return FloorEvents[x][y];
 }
 
-//get event pointer given the id
-MyEvent * GameData::getEventData(int id)
+//get fresh usable event data given the id
+std::unique_ptr<MyEvent> GameData::getEventData(int id)
 {
 	if (id < 0 || id >= MAXEVENT) {
 		return nullptr;
 	}
-	return EVENTDATA[id];
+	return Configureader::getEvent(id);
 }
 
 int GameData::getEventID(int floorNum, int x, int y) {
@@ -69,7 +74,7 @@ int GameData::getEventID(int floorNum, int x, int y) {
 
 
 //get event based on the location of the current floor
-MyEvent * GameData::getEventData(int x, int y)
+std::unique_ptr<MyEvent> GameData::getEventData(int x, int y)
 {
 	return getEventData(FLOOREVENTS[floor->V()][x][y]);
 }
@@ -121,7 +126,6 @@ void GameData::dialogCompleted(int choice)
 				callback(choice);
 		}
 	}
-	freePendingFreeList();
 }
 
 void GameData::gameover()
@@ -130,28 +134,10 @@ void GameData::gameover()
 	blocked = false;
 	// Director::getInstance()->getEventDispatcher()->setEnabled(true);
 	showDialog(DialogStruct(GStr("gameover"), DIALOGTYPE::NONE), [this](int notUsed)->void {
-		gameData = nullptr;
-		delete this;
+		delete gameData;
 		Director::getInstance()->popScene();
 	});
 
-}
-
-void GameData::addToFree(MyEvent *evt)
-{
-	freeListLock.lock();
-	pendingFreeList.push_back(evt);
-	freeListLock.unlock();
-}
-
-void GameData::freePendingFreeList()
-{
-	freeListLock.lock();
-	for (std::size_t i = 0; i < pendingFreeList.size(); i++) {
-		delete pendingFreeList[i];
-	}
-	pendingFreeList = std::vector<MyEvent*>();
-	freeListLock.unlock();
 }
 
 void GameData::attachEnemyInfo(Fightable * enemy)
@@ -183,13 +169,13 @@ void GameData::showFloorEnemyStats()
 	std::set<MyEvent*> eventSet;
 	for (int i = 0; i < 11; i++)
 		for (int j = 0; j < 11; j++) {
-			MyEvent* evt = getEventData(i, j);
+			// this gets a fresh copy, if the enemy still exists
+			MyEvent* evt = getEventData(i, j).get();
 			if (evt) {
 				eventSet.insert(evt);
 			}
 		}
 
-	//SeemsGood C++11 SeemsGood
 	//sprite, description, hp, atk, def, expectedDmg
 	std::vector<std::tuple<Sprite*, std::string, int, int, int, int>> displayInfo;
 
@@ -216,15 +202,8 @@ bool GameData::fastStairs()
 		int newX = curX + dirX[i];
 		int newY = curY + dirY[i];
 		if (0 <= newX&&newX < 11 && 0 <= newY&&newY < 11) {
-			//must be beside a staircase
 			auto evt = getEvent(newX, newY);
-			/*
-			if (evt!=nullptr&&(evt==upstair||evt==downstair)){
-				isBesideStair=true;
-				break;
-			}*/
-
-			if (dynamic_cast<Stairs *>(evt)) {
+			if (dynamic_cast<Stairs *>(evt.get())) {
 				isBesideStair = true;
 				break;
 			}
@@ -235,14 +214,14 @@ bool GameData::fastStairs()
 		showDialog(DialogStruct("Go up or down stairs?", DIALOGTYPE::LIST, { "UP","DOWN","CANCEL" }), [this](int choice) {
 			CCLOG("made a choice");
 			if (choice == 0) { //up
-				if (upstair != nullptr)
+				if (upstair != nullptr) {
 					upstair->triggerEvent();
-				else
-					log("reached max floor");
+				}
 			}
 			else if (choice == 1) {
-				if (downstair != nullptr)
+				if (downstair != nullptr) {
 					downstair->triggerEvent();
+				}
 			}
 			else { //cancel
 				return;
@@ -267,7 +246,7 @@ void GameData::replayDialog() {
 
 void GameData::loadFloor(int nextFloor) {
 	floor->setVal(nextFloor); //set the text (and the internal value)
-	Stairs* stairs = nullptr;
+	std::shared_ptr<Stairs> stairs = nullptr;
 	downstair = nullptr;
 	upstair = nullptr;
 
@@ -280,18 +259,13 @@ void GameData::loadFloor(int nextFloor) {
 
 	for (int i = 0; i < 11; i++)
 		for (int j = 0; j < 11; j++) {
-			auto toDeleteEvt = FloorEvents[i][j];
-			if (toDeleteEvt) {
-				//CCLOG("deleting %d %d",i,j);
-				delete toDeleteEvt;
-			}
 			FloorEvents[i][j] = nullptr;
-			MyEvent* event = getEventData(i, j);
+			std::unique_ptr<MyEvent> event = getEventData(i, j);
 			if (event) {
 				//CCLOG("processing %d %d",i,j);
-				FloorEvents[i][j] = event->clone();
+				FloorEvents[i][j] = std::move(event);
 				FloorEvents[i][j]->setXY(i, j);
-				if (stairs = dynamic_cast<Stairs*>(event)) {
+				if (stairs = std::dynamic_pointer_cast<Stairs>(FloorEvents[i][j])) {
 					int sf = stairs->getTargetFloor();
 					if (sf < nextFloor)
 						downstair = stairs;
@@ -355,8 +329,9 @@ void GameData::nextStep() {
 	CCLOG("next step with %d steps left", heroMovementPath.size());
 	if (heroMovementPath.empty()) {
 		auto eventPtr = getEvent(hero->getX(), hero->getY());
-		if (eventPtr)
+		if (eventPtr) {
 			eventPtr->stepOnEvent();
+		}
 		finalMovementCleanup(false);
 		releaseBlock();
 		return;
@@ -404,15 +379,10 @@ void GameData::finalMovementCleanup(bool cont)
 
 
 void GameData::killEvent(std::pair<int, int> place) {
-	auto eventPtr = getEvent(place.first, place.second);
-	if (eventPtr) {
-		FLOOREVENTS[floor->V()][place.first][place.second] = 0;
-		FloorEvents[place.first][place.second] = nullptr;
-		delete eventPtr;
-	}
+	FLOOREVENTS[floor->V()][place.first][place.second] = 0;
+	FloorEvents[place.first][place.second] = nullptr;
 }
 
-//do not destroy the current occupying event
 void GameData::setEvent(int id, int x, int y, int f)
 {
 	if (f == -1)
@@ -426,12 +396,11 @@ void GameData::setEvent(int id, int x, int y, int f)
 		}
 		auto newEvt = getEventData(id);
 		if (newEvt) {
-			FloorEvents[x][y] = newEvt->clone();
+			FloorEvents[x][y] = std::move(newEvt);
 			FloorEvents[x][y]->setXY(x, y);
 			if (FloorEvents[x][y])
 				flScn->attachFloorSprite(FloorEvents[x][y]->getSprite());
-		}
-		else {
+		} else {
 			FloorEvents[x][y] = nullptr;
 		}
 	}
@@ -584,24 +553,17 @@ bool GameData::isBlocked()
 
 GameData::~GameData() {
 	CCLOG("game data cleaning up");
-	freePendingFreeList();
-	//closing the app will clean up everything.
-	delete hero;
+
 	hero = nullptr;
-	delete floor;
 	floor = nullptr;
+	/*
 	for (int i = 0; i < 11; i++)
 		for (int j = 0; j < 11; j++) {
-			delete FloorEvents[i][j]; //if I call loadFloor on loading save files
-			FloorEvents[i][j] = NULL;
+			FloorEvents[i][j] = nullptr;
 		}
-	for (int i = 0; i < MAXEVENT; i++) {
-		delete EVENTDATA[i];
-		EVENTDATA[i] = NULL;
-	}
+	*/
 	for (int i = 0; i < MAXITEMS; i++) {
 		delete ITEMS[i];
-		ITEMS[i] = NULL;
+		ITEMS[i] = nullptr;
 	}
-
 }

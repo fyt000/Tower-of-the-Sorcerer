@@ -17,7 +17,6 @@ public:
 	Fightable(int imageIdx, const std::string& desc, int imageIdx2, int hp, int atk, int def, int gold);
 	//virtual cocos2d::Sprite* getSprite(int px,int py);
 	virtual ~Fightable();
-	virtual Fightable* clone() { return nullptr; };
 	virtual int fight(Fightable * target, std::function<void(Fightable&)> hpCallback1, std::function<void(Fightable&)> hpCallback2);
 	const int getHp();
 	const int getAtk();
@@ -42,4 +41,5 @@ protected:
 
 private:
 	int secondImageID;
+
 };

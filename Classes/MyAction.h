@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <functional>
+#include <memory>
 #include "GlobalDefs.h"
 //action carries out an action that is attached to a event
 //aside from very few things, events do not have a state, you `Transform' into another event
@@ -10,19 +11,19 @@ class MyEvent;
 class MyAction {
 public:
 	MyAction();
-	MyAction(MyAction*);
-	virtual int perform(MyEvent*);
+	MyAction(std::unique_ptr<MyAction>);
+	virtual int perform(std::shared_ptr<MyEvent>);
 	virtual ~MyAction();
 protected:
 	//action chaining
-	MyAction* next;
+	std::unique_ptr<MyAction> next;
 };
 
 
 class Obtain :public MyAction {
 public:
-	Obtain(MyAction*, int item);
-	int perform(MyEvent*);
+	Obtain(std::unique_ptr<MyAction>, int item);
+	int perform(std::shared_ptr<MyEvent>);
 private:
 	int item;
 };
@@ -30,8 +31,8 @@ private:
 //NONE type dialog
 class Talk : public MyAction {
 public:
-	Talk(MyAction*, const std::string& tag);
-	virtual int perform(MyEvent*);
+	Talk(std::unique_ptr<MyAction>, const std::string& tag);
+	virtual int perform(std::shared_ptr<MyEvent>);
 	virtual ~Talk();
 protected:
 	void showDialog(std::function<void(int)>);
@@ -42,8 +43,8 @@ protected:
 //Y N choice dialog
 class TalkYN : public Talk {
 public:
-	TalkYN(MyAction*, const std::string& tag);
-	virtual int perform(MyEvent*);
+	TalkYN(std::unique_ptr<MyAction>, const std::string& tag);
+	virtual int perform(std::shared_ptr<MyEvent>);
 };
 
 //TODO TalkY class, so I can place transform etc into the callback
@@ -53,8 +54,8 @@ public:
 //this is no state in an event
 class TransformSelf : public MyAction {
 public:
-	TransformSelf(MyAction*, int id);
-	virtual int perform(MyEvent*);
+	TransformSelf(std::unique_ptr<MyAction>, int id);
+	virtual int perform(std::shared_ptr<MyEvent>);
 private:
 	int id;
 };
@@ -62,8 +63,8 @@ private:
 //TODO add animation type?
 class Transform : public MyAction {
 public:
-	Transform(MyAction*, int floor, int x, int y, int targetID);
-	virtual int perform(MyEvent*);
+	Transform(std::unique_ptr<MyAction>, int floor, int x, int y, int targetID);
+	virtual int perform(std::shared_ptr<MyEvent>);
 private:
 	int floor;
 	int x;
@@ -74,8 +75,8 @@ private:
 //show action log on screen
 class LogText : public MyAction {
 public:
-	LogText(MyAction*, const std::string& tag);
-	virtual int perform(MyEvent*);
+	LogText(std::unique_ptr<MyAction>, const std::string& tag);
+	virtual int perform(std::shared_ptr<MyEvent>);
 private:
 	std::string tag;
 };
@@ -84,8 +85,8 @@ private:
 //TODO PercentStat for percentage increase
 class FlatStat : public MyAction {
 public:
-	FlatStat(MyAction*, const std::string& desc, int hp, int atk, int def, int gold);
-	virtual int perform(MyEvent*);
+	FlatStat(std::unique_ptr<MyAction>, const std::string& desc, int hp, int atk, int def, int gold);
+	virtual int perform(std::shared_ptr<MyEvent>);
 private:
 	std::string desc;
 	int hp;
@@ -97,6 +98,6 @@ private:
 //TransformSelf to 0 without freependinglist
 class DestructSelf : public MyAction {
 public:
-	DestructSelf(MyAction*);
-	virtual int perform(MyEvent*);
+	DestructSelf(std::unique_ptr<MyAction>);
+	virtual int perform(std::shared_ptr<MyEvent>);
 };

@@ -19,7 +19,7 @@ void HeroItem::attachTo(cocos2d::Node *parent)
 	itemButton->setAnchorPoint(Vec2(0, 1));
 	//itemButton->setTitleText(desc);
 	itemButton->addTouchEventListener([&](Ref* sender, ui::Widget::TouchEventType type) {
-		if (GameData::getInstance()->isBlocked())
+		if (GameData::getInstance().isBlocked())
 			return;
 		switch (type)
 		{
@@ -27,7 +27,7 @@ void HeroItem::attachTo(cocos2d::Node *parent)
 			if (f)
 				f();
 			//TODO if f plays an animation... then triggerGlobalEvents might happen before it
-			GameData::getInstance()->triggerGlobalEvents();
+			GameData::getInstance().triggerGlobalEvents();
 			break;
 		default:
 			break;
@@ -47,17 +47,17 @@ std::function<void()> HeroItem::getEffectFunction(const std::string& e)
 {
 	if (e == "showFloorEnemyStats") {
 		return []() {
-			GameData::getInstance()->showFloorEnemyStats();
+			GameData::getInstance().showFloorEnemyStats();
 		};
 	}
 	if (e == "fastStairs") {
 		return []() {
-			GameData::getInstance()->fastStairs();
+			GameData::getInstance().fastStairs();
 		};
 	}
 	if (e == "replayDialog") {
 		return []() {
-			GameData::getInstance()->replayDialog();
+			GameData::getInstance().replayDialog();
 		};
 	}
 	return nullptr;

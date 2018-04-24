@@ -13,7 +13,6 @@ public:
 	virtual bool triggerEvent();
 	virtual bool stepOnEvent();
 	virtual ~Enemy();
-	Enemy* clone();
 
 };
 

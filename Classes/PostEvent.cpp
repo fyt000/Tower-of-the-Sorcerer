@@ -24,8 +24,3 @@ bool PostEvent::stepOnEvent() {
 PostEvent::~PostEvent()
 {
 }
-
-PostEvent * PostEvent::clone()
-{
-	return new PostEvent(*this);
-}

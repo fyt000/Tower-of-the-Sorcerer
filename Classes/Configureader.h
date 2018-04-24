@@ -4,6 +4,8 @@
 #include "json/reader.h"
 #include <vector>
 #include <list>
+#include <memory>
+#include <unordered_map>
 
 class MyEvent;
 class MyAction;
@@ -12,12 +14,11 @@ class GlobalEvent;
 class Condition;
 
 class Configureader {
-	static rapidjson::Document* langStrDoc;
-	static rapidjson::Document* dataDoc;
+
 	~Configureader();
 
 public:
-	static void ReadEventData(MyEvent**);
+	static std::unique_ptr<MyEvent> getEvent(int id);
 	static void ReadFloorEvents(int FloorArr[][11][11]);
 	static void ReadItemData(HeroItem**);
 	static void ReadGlobalEvents(std::list<GlobalEvent* >*);
@@ -34,9 +35,12 @@ public:
 	//std::vector<int> readInts(const std::string&);
 
 private:
-	static Condition* getCondition(rapidjson::Value&);
-	static MyAction* getAction(rapidjson::Value&);
+	static std::unique_ptr<Condition> getCondition(rapidjson::Value&);
+	static std::unique_ptr<MyAction> getAction(rapidjson::Value&);
 	static void initLangDoc();
 	static void initDataDoc();
 	static std::string curLanguageFile;
+	static std::unique_ptr<rapidjson::Document> langStrDoc;
+	static std::unique_ptr<rapidjson::Document> dataDoc;
+	static std::unordered_map<int, int> eventIdxMapping;
 };

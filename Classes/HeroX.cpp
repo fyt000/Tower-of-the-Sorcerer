@@ -15,7 +15,7 @@ HeroX::HeroX(int imageIdx, const std::string& desc, int hp, int atk, int def, in
 	//this->setLabelNofity(true);
 	//key labels
 	for (int i = 0; i < KeyType::LAST; i++) {
-		keys[i] = new LabelBinder<int>(3);
+		keys[i] = std::make_unique<LabelBinder<int>>(3);
 	}
 }
 
@@ -49,7 +49,7 @@ int HeroX::fightX(Fightable * target, std::function<void(Fightable&)> hpCallback
 	//hpCallBack should really just be null... I don't care
 	//this may change
 	CCLOG("disabled input on fightX");
-	GameData::getInstance()->block();
+	GameData::getInstance().block();
 	target->setLabelNofity(false);
 	this->setLabelNofity(false);
 	std::vector<FightableSnapshot> heroSnapshots;
@@ -90,14 +90,14 @@ int HeroX::fightX(Fightable * target, std::function<void(Fightable&)> hpCallback
 			auto enemyCallback = CallFuncN::create(CC_CALLBACK_1(HeroX::updateBetweenFight, this, target, enemySnapshots, eSSIdx, stepFrame2, false));
 			eSSIdx++;
 			actions.pushBack(enemyCallback);
-			actions.pushBack(DelayTime::create(0.3));
+			actions.pushBack(DelayTime::create(0.3f));
 		}
 		else {
 
 			auto heroCallback = CallFuncN::create(CC_CALLBACK_1(HeroX::updateBetweenFight, this, this, heroSnapshots, hSSIdx, stepFrame1, true));
 			hSSIdx++;
 			actions.pushBack(heroCallback);
-			actions.pushBack(DelayTime::create(0.3));
+			actions.pushBack(DelayTime::create(0.3f));
 		}
 	}
 	auto cb2 = CallFuncN::create([this](Node* n) {
@@ -116,12 +116,12 @@ int HeroX::fightX(Fightable * target, std::function<void(Fightable&)> hpCallback
 }
 
 void HeroX::cleanUpTarget(Node* node, Fightable * target) {
-	GameData::getInstance()->killEvent(std::pair<int, int>(target->getX(), target->getY()));
-	GameData::getInstance()->triggerGlobalEvents();
+	GameData::getInstance().killEvent(std::pair<int, int>(target->getX(), target->getY()));
+	GameData::getInstance().triggerGlobalEvents();
 }
 
 void HeroX::updateBetweenFight(Node* n, Fightable* f, std::vector<FightableSnapshot> &snapshots, int hSSIdx, std::string &frameName, bool isHero) {
-	auto gInst = GameData::getInstance();
+	auto& gInst = GameData::getInstance();
 	f->hp.setVal(snapshots[hSSIdx].hp);
 	f->atk.setVal(snapshots[hSSIdx].atk);
 	f->def.setVal(snapshots[hSSIdx].def);
@@ -130,7 +130,7 @@ void HeroX::updateBetweenFight(Node* n, Fightable* f, std::vector<FightableSnaps
 	if (isHero&&hp.V() <= 0) {
 		CCLOG("stopped all action on defeat");
 		sprite->stopAllActions();
-		gInst->gameover();
+		gInst.gameover();
 		return;
 	}
 	auto newFrame = SpriteFrame::create(frameName, Rect(0, 0, 40 / Director::getInstance()->getContentScaleFactor(), 40 / Director::getInstance()->getContentScaleFactor()));
@@ -219,7 +219,7 @@ void HeroX::moveOnestep(std::pair<int,int> dest) {
 		MoveTo::create(animateRate,
 			TransformCoordinate::transformVec2(dest.first, dest.second)),
 		CallFunc::create([]() {
-			GameData::getInstance()->nextStep();
+			GameData::getInstance().nextStep();
 		}), 
 		nullptr
 	);
@@ -232,8 +232,8 @@ void HeroX::StopAllFinal(Node * node, bool reset, bool cont)
 {
 	CCLOG("final movement cleanup");
 	if (reset) {
-		GameData::getInstance()->releaseBlock();
-		GameData::getInstance()->finalMovementCleanup(cont);
+		GameData::getInstance().releaseBlock();
+		GameData::getInstance().finalMovementCleanup(cont);
 	}
 	sprite->setSpriteFrame(stopSprite(heroDir));
 }
@@ -278,8 +278,6 @@ int HeroX::getY()
 }
 
 HeroX::~HeroX() {
-	for (int i = 0; i < KeyType::LAST; i++)
-		delete keys[i];
 }
 
 

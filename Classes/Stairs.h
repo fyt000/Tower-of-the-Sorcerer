@@ -8,7 +8,6 @@ public:
 	Stairs(int imageIdx, const std::string& desc, int targetFloor, int x, int y, twsutil::DIR);
 	bool triggerEvent();
 	virtual ~Stairs();
-	Stairs* clone();
 	int getTargetFloor();
 
 private:
@@ -16,4 +15,5 @@ private:
 	int tx;
 	int ty;
 	twsutil::DIR heroDir;
+
 };

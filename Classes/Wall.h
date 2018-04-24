@@ -7,6 +7,6 @@ class Wall :
 public:
 	Wall(int imageIdx, const std::string& desc);
 	bool triggerEvent();
-	Wall* clone();
 	~Wall();
+
 };

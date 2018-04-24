@@ -1,14 +1,16 @@
 #pragma once
 #include <string>
+#include <memory>
 #include "cocos2d.h"
 #include "MyAction.h"
 
-class MyEvent
+// enable_shared_from_this required to pass the object for performActions
+class MyEvent : std::enable_shared_from_this<MyEvent>
 {
 public:
 	MyEvent(int imageIdx, const std::string& decription);
 	MyEvent(int imageIdx, const std::string& decription, int imageIdx2);
-	virtual MyEvent* clone();
+
 	virtual ~MyEvent();
 	void setXY(int x, int y);
 
@@ -28,8 +30,9 @@ public:
 	virtual bool stepOnEvent();
 	virtual int getX();
 	virtual int getY();
-	void attachAction(MyAction*);
+	void attachAction(std::unique_ptr<MyAction>);
 	int performActions();
+
 	cocos2d::Sprite* sprite = nullptr;
 
 protected:
@@ -40,9 +43,7 @@ protected:
 
 	void selfDestruct();
 
-
 private:
 	std::string description;
-	std::vector<MyAction*> actions;
+	std::vector<std::unique_ptr<MyAction>> actions;
 };
-

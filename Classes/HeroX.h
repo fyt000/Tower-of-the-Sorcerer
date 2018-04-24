@@ -34,10 +34,9 @@ public:
 	//move the given path, isLastMove means to trigger the event on the last move
 
 	//initialized in Hero constructor
-	LabelBinder<int>* keys[KeyType::LAST]; //3 types of keys - each key will be the same type
+	std::unique_ptr<LabelBinder<int>> keys[KeyType::LAST]; //3 types of keys - each key will be the same type
 	//set absolute position and facing dir of hero
 	void setAbsPos(int, int, twsutil::DIR);
-	//virtual HeroX* clone();
 	//callback to stop everything
 	void StopAllFinal(cocos2d::Node* node, bool reset = true, bool cont = true);
 	void setMoving(bool moving);

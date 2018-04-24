@@ -105,8 +105,8 @@ bool Fightable::triggerEvent() {
 //think about extensions later... I don't care right now
 bool Fightable::stepOnEvent() {
 
-	GameData::getInstance()->attachEnemyInfo(this);
-	GameData::getInstance()->hero->fightX(this,
+	GameData::getInstance().attachEnemyInfo(this);
+	GameData::getInstance().hero->fightX(this,
 		[](Fightable &f) { log("hp %d", f.getHp()); },
 		[](Fightable &f) { log("hp %d", f.getHp()); });
 	//GameData::getInstance()->killEvent(std::pair<int,int>(x,y));

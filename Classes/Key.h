@@ -14,7 +14,6 @@ public:
 	Key(int imageIdx, const std::string& desc, enum KeyType keyType);
 	bool triggerEvent();
 	virtual ~Key();
-	Key* clone();
 
 private:
 	enum KeyType keyType;

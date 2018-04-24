@@ -15,21 +15,21 @@ bool Shop::triggerEvent() {
 	for (int i = 1; i <= shopUses; i++)
 		multplier *= 2;
 	int goldCost = multplier * 20;
-	GameData::getInstance()->showDialog(DialogStruct(stdsprintf(GStr("shop"), goldCost), DIALOGTYPE::LIST,
+	GameData::getInstance().showDialog(DialogStruct(stdsprintf(GStr("shop"), goldCost), DIALOGTYPE::LIST,
 	{ stdsprintf(GStr("shop_hp"),baseHP),stdsprintf(GStr("shop_atk"),baseAtk),stdsprintf(GStr("shop_def"),baseDef),GStr("cancel") }),
 		[this, goldCost](int choice) {
 		if (choice == 3) //cancel
 			return;
-		if (GameData::getInstance()->hero->spendGold(goldCost)) {
+		if (GameData::getInstance().hero->spendGold(goldCost)) {
 			if (choice == 0)
-				GameData::getInstance()->hero->hp.addVal(baseHP);
+				GameData::getInstance().hero->hp.addVal(baseHP);
 			else if (choice == 1)
-				GameData::getInstance()->hero->atk.addVal(baseAtk);
+				GameData::getInstance().hero->atk.addVal(baseAtk);
 			else if (choice == 2)
-				GameData::getInstance()->hero->def.addVal(baseDef);
+				GameData::getInstance().hero->def.addVal(baseDef);
 		}
 		else {
-			GameData::getInstance()->log(GStr("not_enough_gold"));
+			GameData::getInstance().log(GStr("not_enough_gold"));
 		}
 		Shop::shopUses++;
 	});
@@ -38,9 +38,4 @@ bool Shop::triggerEvent() {
 
 Shop::~Shop()
 {
-}
-
-Shop * Shop::clone()
-{
-	return new Shop(*this);
 }

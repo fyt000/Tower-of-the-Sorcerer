@@ -14,14 +14,16 @@
 #include "GlobalDefs.h"
 #include "Shop.h"
 #include "PostEvent.h"
+#include <unordered_map>
 
 using namespace twsutil;
 
-rapidjson::Document* Configureader::langStrDoc = nullptr;
-rapidjson::Document* Configureader::dataDoc = nullptr;
+std::unique_ptr<rapidjson::Document> Configureader::langStrDoc = nullptr;
+std::unique_ptr<rapidjson::Document> Configureader::dataDoc = nullptr;
 std::string Configureader::curLanguageFile = "res/res_english.json";
+std::unordered_map<int, int> Configureader::eventIdxMapping;
 
-void Configureader::ReadEventData(MyEvent ** EventArr)
+std::unique_ptr<MyEvent> Configureader::getEvent(int id)
 {
 	int maxEvent = MAXEVENT;
 
@@ -29,109 +31,108 @@ void Configureader::ReadEventData(MyEvent ** EventArr)
 		initDataDoc();
 	}
 
-	rapidjson::Value& eventdata = (*dataDoc)["eventdata"];
-	/*
-	for (auto evt=eventdata.MemberBegin();evt!=eventdata.MemberEnd();evt++){
-	std::string idx=evt->name.GetString();
-	std::string type=evt->value["type"].GetString();
-	}*/
-	for (rapidjson::SizeType i = 0; i < eventdata.Size(); i++) {
-		auto& data = eventdata[i];
-		int idx = data["id"].GetInt();
-		std::string type = data["type"].GetString();
-		rapidjson::Value& p = data["params"];
-		if (idx >= maxEvent)
-			continue;
-		delete EventArr[idx];
-		EventArr[idx] = NULL;
-		if (type == "Door") {
-			EventArr[idx] = new Door(p[0].GetInt(), p[1].GetString(), static_cast<KeyType>(p[2].GetInt()));
-		}
-		else if (type == "Wall") {
-			EventArr[idx] = new Wall(p[0].GetInt(), p[1].GetString());
-		}
-		else if (type == "MyEvent") {
-			if (p.Size() == 2)
-				EventArr[idx] = new MyEvent(p[0].GetInt(), p[1].GetString());
-			else
-				EventArr[idx] = new MyEvent(p[0].GetInt(), p[1].GetString(), p[2].GetInt());
-		}
-		else if (type == "Key") {
-			EventArr[idx] = new Key(p[0].GetInt(), p[1].GetString(), static_cast<KeyType>(p[2].GetInt()));
-		}
-		else if (type == "Consumable") {
-			EventArr[idx] = new Consumable(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), p[5].GetInt());
-		}
-		else if (type == "Enemy") {
-			EventArr[idx] = new Enemy(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), p[5].GetInt(), p[6].GetInt());
-		}
-		else if (type == "Stairs") {
-			EventArr[idx] = new Stairs(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), static_cast<DIR>(p[5].GetInt()));
-		}
-		else if (type == "Shop") {
-			EventArr[idx] = new Shop(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), p[5].GetInt());
-		}
-		else if (type == "PostEvent") {
-			if (p.Size() == 2)
-				EventArr[idx] = new PostEvent(p[0].GetInt(), p[1].GetString());
-			else
-				EventArr[idx] = new PostEvent(p[0].GetInt(), p[1].GetString(), p[2].GetInt());
-		}
-
-		/*
-		else if (type==""){
-
-		}
-		else if (type==""){
-
-		}
-		*/
-		auto actions = data.FindMember("actions");
-		if (actions != data.MemberEnd()) {
-			rapidjson::Value& actionsData = actions->value;
-			for (rapidjson::SizeType j = 0; j < actionsData.Size(); j++) {
-				EventArr[idx]->attachAction(getAction(actionsData[j]));
+	int resultIdx = -1;
+	auto iter = eventIdxMapping.find(id);
+	if (iter == eventIdxMapping.end()) {
+		// linear search
+		rapidjson::Value& eventdata = (*dataDoc)["eventdata"];
+		for (rapidjson::SizeType i = 0; i < eventdata.Size(); i++) {
+			auto& data = eventdata[i];
+			int idx = data["id"].GetInt();
+			std::string type = data["type"].GetString();
+			rapidjson::Value& p = data["params"];
+			if (idx >= maxEvent)
+				continue;
+			if (idx == id) {
+				// cache result
+				resultIdx = i;
+				eventIdxMapping[id] = i;
+				break;
 			}
 		}
 	}
-	return;
+	else {
+		resultIdx = iter->second;
+	}
+
+	if (resultIdx == -1) return nullptr;
+	
+	rapidjson::Value& eventdata = (*dataDoc)["eventdata"];
+	auto& data = eventdata[resultIdx];
+	int idx = data["id"].GetInt();
+	std::string type = data["type"].GetString();
+	rapidjson::Value& p = data["params"];
+
+	if (type == "Door") {
+		return std::make_unique<Door>(p[0].GetInt(), p[1].GetString(), static_cast<KeyType>(p[2].GetInt()));
+	}
+	else if (type == "Wall") {
+		return std::make_unique<Wall>(p[0].GetInt(), p[1].GetString());
+	}
+	else if (type == "MyEvent") {
+		if (p.Size() == 2)
+			return std::make_unique<MyEvent>(p[0].GetInt(), p[1].GetString());
+		else
+			return std::make_unique<MyEvent>(p[0].GetInt(), p[1].GetString(), p[2].GetInt());
+	}
+	else if (type == "Key") {
+		return std::make_unique<Key>(p[0].GetInt(), p[1].GetString(), static_cast<KeyType>(p[2].GetInt()));
+	}
+	else if (type == "Consumable") {
+		return std::make_unique<Consumable>(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), p[5].GetInt());
+	}
+	else if (type == "Enemy") {
+		return std::make_unique<Enemy>(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), p[5].GetInt(), p[6].GetInt());
+	}
+	else if (type == "Stairs") {
+		return std::make_unique<Stairs>(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), static_cast<DIR>(p[5].GetInt()));
+	}
+	else if (type == "Shop") {
+		return std::make_unique<Shop>(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), p[5].GetInt());
+	}
+	else if (type == "PostEvent") {
+		if (p.Size() == 2)
+			return std::make_unique<PostEvent>(p[0].GetInt(), p[1].GetString());
+		else
+			return std::make_unique<PostEvent>(p[0].GetInt(), p[1].GetString(), p[2].GetInt());
+	}
+	return nullptr;
 }
 
-
-MyAction * Configureader::getAction(rapidjson::Value &data)
+std::unique_ptr<MyAction> Configureader::getAction(rapidjson::Value &data)
 {
-	MyAction* action = nullptr;
-	MyAction* next = nullptr;
+
+	std::unique_ptr<MyAction> next = nullptr;
 	auto nextData = data.FindMember("next");
 	if (nextData != data.MemberEnd()) {
 		next = getAction(nextData->value);
 	}
 	std::string type = data["action"].GetString();
 	if (type == "Talk") {
-		action = new Talk(next, data["tag"].GetString());
+		return std::make_unique<Talk>(std::move(next), data["tag"].GetString());
 	}
 	else if (type == "TalkYN") {
-		action = new TalkYN(next, data["tag"].GetString());
+		return std::make_unique<TalkYN>(std::move(next), data["tag"].GetString());
 	}
 	else if (type == "TransformSelf") {
-		action = new TransformSelf(next, data["new"].GetInt());
+		return std::make_unique<TransformSelf>(std::move(next), data["new"].GetInt());
 	}
 	else if (type == "Obtain") {
-		action = new Obtain(next, data["id"].GetInt());
+		return std::make_unique<Obtain>(std::move(next), data["id"].GetInt());
 	}
 	else if (type == "LogText") {
-		action = new LogText(next, data["tag"].GetString());
+		return std::make_unique<LogText>(std::move(next), data["tag"].GetString());
 	}
 	else if (type == "Transform") {
-		action = new Transform(next, data["floor"].GetInt(), data["x"].GetInt(), data["y"].GetInt(), data["id"].GetInt());
+		return std::make_unique<Transform>(std::move(next), data["floor"].GetInt(), data["x"].GetInt(), data["y"].GetInt(), data["id"].GetInt());
 	}
 	else if (type == "FlatStat") {
-		action = new FlatStat(next, GStr(data["description"].GetString()), data["hp"].GetInt(), data["atk"].GetInt(), data["def"].GetInt(), data["gold"].GetInt());
+		return std::make_unique<FlatStat>(std::move(next), GStr(data["description"].GetString()), data["hp"].GetInt(), data["atk"].GetInt(), data["def"].GetInt(), data["gold"].GetInt());
 	}
 	else if (type == "DestructSelf") {
-		action = new DestructSelf(next);
+		return std::make_unique<DestructSelf>(std::move(next));
 	}
-	return action;
+	return nullptr;
 }
 
 
@@ -176,14 +177,14 @@ void Configureader::ReadItemData(HeroItem **itemArr)
 	return;
 }
 
-Condition* Configureader::getCondition(rapidjson::Value& v) {
+std::unique_ptr<Condition> Configureader::getCondition(rapidjson::Value& v) {
 	std::string type = v["type"].GetString();
 	rapidjson::Value& p = v["params"];
 	if (type == "DNE") {
-		return new Condition(p[0].GetInt(), COND::DNE, p[1].GetInt(), p[2].GetInt());
+		return std::make_unique<Condition>(p[0].GetInt(), COND::DNE, p[1].GetInt(), p[2].GetInt());
 	}
 	if (type == "EXISTS") {
-		return new Condition(p[0].GetInt(), COND::EXISTS, p[1].GetInt(), p[2].GetInt());
+		return std::make_unique<Condition>(p[0].GetInt(), COND::EXISTS, p[1].GetInt(), p[2].GetInt());
 	}
 	return nullptr;
 }
@@ -205,11 +206,11 @@ void Configureader::ReadGlobalEvents(std::list<GlobalEvent* >* globEvtArr) {
 			GlobalEvent* gEvt = new GlobalEvent(id);
 			rapidjson::Value& conditionData = evtData["conditions"];
 			for (rapidjson::SizeType k = 0; k < conditionData.Size(); k++) {
-				gEvt->addCondition(getCondition(conditionData[k]));
+				gEvt->addCondition(std::move(getCondition(conditionData[k])));
 			}
 			rapidjson::Value& actionsData = evtData["actions"];
 			for (rapidjson::SizeType k = 0; k < actionsData.Size(); k++) {
-				gEvt->attachAction(getAction(actionsData[k]));
+				gEvt->attachAction(std::move(getAction(actionsData[k])));
 			}
 			globEvtArr[floor].push_back(gEvt);
 		}
@@ -244,7 +245,7 @@ void Configureader::GetDialog(const std::string& tag, std::vector<std::string>& 
 
 
 void Configureader::initDataDoc() {
-	dataDoc = new rapidjson::Document();
+	dataDoc = std::make_unique<rapidjson::Document>();
 	std::string path = cocos2d::FileUtils::getInstance()->fullPathForFilename("res/gamedata.json");
 	auto strdata = cocos2d::FileUtils::getInstance()->getStringFromFile(path);
 	dataDoc->Parse<0>(strdata.c_str());
@@ -252,7 +253,7 @@ void Configureader::initDataDoc() {
 
 void Configureader::initLangDoc()
 {
-	langStrDoc = new rapidjson::Document();
+	langStrDoc = std::make_unique<rapidjson::Document>();
 	std::string path = cocos2d::FileUtils::getInstance()->fullPathForFilename(curLanguageFile);
 	auto strdata = cocos2d::FileUtils::getInstance()->getStringFromFile(path);
 	langStrDoc->Parse<0>(strdata.c_str());
@@ -262,6 +263,4 @@ void Configureader::initLangDoc()
 
 
 Configureader::~Configureader() {
-	delete langStrDoc;
-	delete dataDoc;
 }

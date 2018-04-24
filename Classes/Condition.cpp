@@ -8,9 +8,9 @@ Condition::Condition(int floor, COND cond, int x, int y) :floor(floor), cond(con
 bool Condition::check() {
 	switch (cond) {
 	case COND::EXISTS:
-		return GameData::getInstance()->getEventID(floor, x, y);
+		return GameData::getInstance().getEventID(floor, x, y) != 0;
 	case COND::DNE:
-		return !GameData::getInstance()->getEventID(floor, x, y);
+		return GameData::getInstance().getEventID(floor, x, y) == 0;
 	}
 	return false;
 }

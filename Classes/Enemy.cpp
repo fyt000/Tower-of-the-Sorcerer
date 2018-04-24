@@ -12,8 +12,8 @@ Enemy::Enemy(int imageIdx, const std::string& desc, int secondImageID, int hp, i
 
 bool Enemy::triggerEvent()
 {
-	if (!attackable(GameData::getInstance()->hero)) {
-		GameData::getInstance()->log(stdsprintf(std::string("%s is too strong."), getDescription()));
+	if (!attackable(GameData::getInstance().hero.get())) {
+		GameData::getInstance().log(stdsprintf(std::string("%s is too strong."), getDescription()));
 		return false;
 	}
 	return true;
@@ -24,8 +24,8 @@ bool Enemy::stepOnEvent()
 	CCLOG("fighting enemy");
 	bool fightR = Fightable::stepOnEvent();
 	if (fightR) {
-		GameData::getInstance()->hero->gold.addVal(gold.V());
-		GameData::getInstance()->log(stdsprintf(GStr("beat_enemy"), getDescription(), gold.V()), false);
+		GameData::getInstance().hero->gold.addVal(gold.V());
+		GameData::getInstance().log(stdsprintf(GStr("beat_enemy"), getDescription(), gold.V()), false);
 	}
 
 	return fightR;
@@ -33,9 +33,4 @@ bool Enemy::stepOnEvent()
 
 
 Enemy::~Enemy() {
-}
-
-Enemy * Enemy::clone()
-{
-	return new Enemy(*this);
 }

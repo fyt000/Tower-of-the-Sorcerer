@@ -21,8 +21,3 @@ bool Consumable::triggerEvent()
 Consumable::~Consumable()
 {
 }
-
-Consumable * Consumable::clone()
-{
-	return new Consumable(*this);
-}

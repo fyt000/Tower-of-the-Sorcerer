@@ -13,13 +13,13 @@ bool Stairs::triggerEvent()
 	//auto retainSprite=getSprite();
 	//retainSprite->retain(); //do not delete yet...
 	//CCLOG("walk the stairs");
-	GameData::getInstance()->hero->getSprite()->stopAllActions(); //actually need to stop...
+	GameData::getInstance().hero->getSprite()->stopAllActions(); //actually need to stop...
 	int x = tx; int y = ty; DIR dir = heroDir; //setFloor will destruct this object and these fields will be unaccessible
 	//CCLOG("setting floor");
-	GameData::getInstance()->setFloor(targetFloor);
+	GameData::getInstance().setFloor(targetFloor);
 	//CCLOG("floor set");
 	//use the var saved on stack
-	GameData::getInstance()->hero->setAbsPos(x, y, dir);
+	GameData::getInstance().hero->setAbsPos(x, y, dir);
 	//CCLOG("done changing floor");
 	return false;
 }
@@ -30,9 +30,4 @@ int Stairs::getTargetFloor() {
 
 Stairs::~Stairs()
 {
-}
-
-Stairs * Stairs::clone()
-{
-	return new Stairs(*this);
 }

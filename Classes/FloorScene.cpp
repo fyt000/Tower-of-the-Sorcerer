@@ -66,18 +66,18 @@ bool FloorScene::init()
 	startX = startX + lineRadiusH;
 
 	//this is likely the place where GameData gets instantiated
-	auto gInstance = GameData::getInstance();
+	auto& gInstance = GameData::getInstance();
 
-	gInstance->flScn = this;
+	gInstance.flScn = this;
 
 	//std::string font="fonts/arial.ttf";
 	int fontSize = 15;
-	gInstance->logLabel = Label::createWithSystemFont("", "Arial", 20, Size::ZERO, TextHAlignment::CENTER);
-	gInstance->logLabel->enableGlow(Color4B::BLACK);
-	gInstance->logLabel->enableShadow(Color4B::BLACK); //shadow appears to be white on KDE (perhaps it has to do with my theme?)
-	gInstance->logLabel->setPosition(visibleSize.width / 2, 0);
-	gInstance->logLabel->setAnchorPoint(Vec2(0.5, 0));
-	this->addChild(gInstance->logLabel, 20);
+	gInstance.logLabel = Label::createWithSystemFont("", "Arial", 20, Size::ZERO, TextHAlignment::CENTER);
+	gInstance.logLabel->enableGlow(Color4B::BLACK);
+	gInstance.logLabel->enableShadow(Color4B::BLACK); //shadow appears to be white on KDE (perhaps it has to do with my theme?)
+	gInstance.logLabel->setPosition(visibleSize.width / 2, 0);
+	gInstance.logLabel->setAnchorPoint(Vec2(0.5, 0));
+	this->addChild(gInstance.logLabel, 20);
 
 
 
@@ -89,28 +89,28 @@ bool FloorScene::init()
 	charHpLabel->setPosition(statX, statY);
 	charHpLabel->setAnchorPoint(Vec2(1, 1));
 	this->addChild(charHpLabel, 2);
-	gInstance->hero->hp.attach(charHpLabel);
+	gInstance.hero->hp.attach(charHpLabel);
 	//gInstance->hero->charHpLabel = charHpLabel;
 
 	auto charAtkLabel = Label::createWithSystemFont("", "Arial", fontSize, Size::ZERO, TextHAlignment::RIGHT);
 	charAtkLabel->setPosition(statX, statY - 30);
 	charAtkLabel->setAnchorPoint(Vec2(1, 1));
 	this->addChild(charAtkLabel, 2);
-	gInstance->hero->atk.attach(charAtkLabel);
+	gInstance.hero->atk.attach(charAtkLabel);
 	//gInstance->hero->charAtkLabel = charAtkLabel;
 
 	auto charDefLabel = Label::createWithSystemFont("", "Arial", fontSize, Size::ZERO, TextHAlignment::RIGHT);
 	charDefLabel->setPosition(statX, statY - 60);
 	charDefLabel->setAnchorPoint(Vec2(1, 1));
 	this->addChild(charDefLabel, 2);
-	gInstance->hero->def.attach(charDefLabel);
+	gInstance.hero->def.attach(charDefLabel);
 	//gInstance->hero->charDefLabel = charDefLabel;
 
 	auto charGoldLabel = Label::createWithSystemFont("", "Arial", fontSize, Size::ZERO, TextHAlignment::RIGHT);
 	charGoldLabel->setPosition(statX, statY - 90);
 	charGoldLabel->setAnchorPoint(Vec2(1, 1));
 	this->addChild(charGoldLabel, 2);
-	gInstance->hero->gold.attach(charGoldLabel);
+	gInstance.hero->gold.attach(charGoldLabel);
 	//gInstance->hero->charGoldLabel = charGoldLabel;
 
 	int enemyInfoX = 700;
@@ -128,7 +128,7 @@ bool FloorScene::init()
 	eDescLabel->setPosition(enemyInfoX, enemyInfoY);
 	eDescLabel->setAnchorPoint(Vec2(0.5, 0));
 	this->addChild(eDescLabel, 2);
-	gInstance->eDescLabel = eDescLabel;
+	gInstance.eDescLabel = eDescLabel;
 
 	enemyInfoX = 775;
 	enemyInfoY -= 25;
@@ -137,7 +137,7 @@ bool FloorScene::init()
 	eHpLabel->setPosition(enemyInfoX, enemyInfoY);
 	eHpLabel->setAnchorPoint(Vec2(1, 0));
 	this->addChild(eHpLabel, 2);
-	gInstance->eHpLabel = eHpLabel;
+	gInstance.eHpLabel = eHpLabel;
 
 	enemyInfoY -= 25;
 
@@ -145,7 +145,7 @@ bool FloorScene::init()
 	eAtkLabel->setPosition(enemyInfoX, enemyInfoY);
 	eAtkLabel->setAnchorPoint(Vec2(1, 0));
 	this->addChild(eAtkLabel, 2);
-	gInstance->eAtkLabel = eAtkLabel;
+	gInstance.eAtkLabel = eAtkLabel;
 
 	enemyInfoY -= 25;
 
@@ -153,7 +153,7 @@ bool FloorScene::init()
 	eDefLabel->setPosition(enemyInfoX, enemyInfoY);
 	eDefLabel->setAnchorPoint(Vec2(1, 0));
 	this->addChild(eDefLabel, 2);
-	gInstance->eDefLabel = eDefLabel;
+	gInstance.eDefLabel = eDefLabel;
 
 
 	for (int i = 0; i < KeyType::LAST; i++)
@@ -169,7 +169,7 @@ bool FloorScene::init()
 		keyLabel->setPosition(Vec2(664 + 60, 296 - 24 * i));
 		keyLabel->setAnchorPoint(Vec2(0, 0));
 		this->addChild(keyLabel, 2);
-		gInstance->hero->keys[i]->attach(keyLabel);
+		gInstance.hero->keys[i]->attach(keyLabel);
 	}
 
 
@@ -183,7 +183,7 @@ bool FloorScene::init()
 	floorNumLabel->setPosition(Vec2(130, 430));
 	floorNumLabel->setAnchorPoint(Vec2(0, 0.5));
 	this->addChild(floorNumLabel, 2);
-	gInstance->floor->attach(floorNumLabel);
+	gInstance.floor->attach(floorNumLabel);
 
 
 	startY = height - 40 - lineRadiusV;
@@ -198,22 +198,22 @@ bool FloorScene::init()
 	loadFloor();
 
 
-	gInstance->floorMouseListener = EventListenerTouchAllAtOnce::create();
-	gInstance->floorMouseListener->onTouchesEnded = CC_CALLBACK_2(FloorScene::onTouchesEnded, this);
+	gInstance.floorMouseListener = EventListenerTouchAllAtOnce::create();
+	gInstance.floorMouseListener->onTouchesEnded = CC_CALLBACK_2(FloorScene::onTouchesEnded, this);
 
 	auto keyboardListener = EventListenerKeyboard::create();
 	keyboardListener->onKeyPressed = CC_CALLBACK_2(FloorScene::onKeyPressed, this);
 	keyboardListener->onKeyReleased = CC_CALLBACK_2(FloorScene::onKeyReleased, this);
 
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(keyboardListener, this);
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(GameData::getInstance()->floorMouseListener, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(gInstance.floorMouseListener, this);
 
 	return true;
 }
 
 void FloorScene::loadFloor()
 {
-	auto gInstance = GameData::getInstance();
+	auto& gInstance = GameData::getInstance();
 	if (floorContent != nullptr) {
 		//all children should be removed by now, except hero
 		//floorContent->removeAllChildrenWithCleanup(true);
@@ -236,7 +236,7 @@ void FloorScene::loadFloor()
 			sprite1->setScale(Director::getInstance()->getContentScaleFactor());
 			floorContent->addChild(sprite1, 2);
 
-			auto sprite2 = gInstance->getSprite(i, j);
+			auto sprite2 = gInstance.getSprite(i, j);
 			if (sprite2 != nullptr) {
 				sprite2->setScale(Director::getInstance()->getContentScaleFactor());
 				floorContent->addChild(sprite2, 3);
@@ -244,14 +244,14 @@ void FloorScene::loadFloor()
 		}
 	}
 
-	gInstance->eDescLabel->setString("");
-	gInstance->eHpLabel->setString("");
-	gInstance->eAtkLabel->setString("");
-	gInstance->eDefLabel->setString("");
+	gInstance.eDescLabel->setString("");
+	gInstance.eHpLabel->setString("");
+	gInstance.eAtkLabel->setString("");
+	gInstance.eDefLabel->setString("");
 
 	enemyInfoSprite = nullptr; //?
 
-	floorContent->addChild(gInstance->hero->getSprite(), 10);
+	floorContent->addChild(gInstance.hero->getSprite(), 10);
 	this->addChild(floorContent, 3);
 }
 
@@ -506,7 +506,7 @@ void FloorScene::closeDialog(int c)
 		dialogNode->removeFromParent();
 		dialogNode = nullptr;
 	}
-	GameData::getInstance()->dialogCompleted(c);
+	GameData::getInstance().dialogCompleted(c);
 }
 
 void FloorScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)
@@ -557,18 +557,18 @@ void FloorScene::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d:
 }
 
 void FloorScene::continousMovement() {
-	if (GameData::getInstance()->isBlocked())
+	if (GameData::getInstance().isBlocked())
 		return;
 
-	if (movementActive && !GameData::getInstance()->hero->moving()) {
-		GameData::getInstance()->moveHero(currentMovement); 
+	if (movementActive && !GameData::getInstance().hero->moving()) {
+		GameData::getInstance().moveHero(currentMovement); 
 	}
 }
 
 
 void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches, cocos2d::Event * event)
 {
-	if (GameData::getInstance()->isBlocked())
+	if (GameData::getInstance().isBlocked())
 		return;
 
 	//clicking on menuitem will actually trigger onTouchesEnded as well
@@ -600,7 +600,7 @@ void FloorScene::onTouchesEnded(const std::vector<cocos2d::Touch*>& touches, coc
 		//need to first check if the loc is within the UI region.
 		auto blockDest = TransformCoordinate::computeBlock(loc.x, loc.y);
 
-		GameData::getInstance()->moveHero(blockDest);
+		GameData::getInstance().moveHero(blockDest);
 	}
 }
 

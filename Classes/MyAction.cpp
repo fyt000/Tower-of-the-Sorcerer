@@ -10,11 +10,11 @@ MyAction::MyAction()
 {
 }
 
-MyAction::MyAction(MyAction *next) :next(next)
+MyAction::MyAction(std::unique_ptr<MyAction> next) : next(std::move(next))
 {
 }
 
-int MyAction::perform(MyEvent* evt) {
+int MyAction::perform(std::shared_ptr<MyEvent> evt) {
 	if (next != nullptr)
 		return next->perform(evt);
 	return 0;
@@ -22,15 +22,15 @@ int MyAction::perform(MyEvent* evt) {
 
 MyAction::~MyAction()
 {
-	delete next;
 }
 
 
-Talk::Talk(MyAction *next, const std::string& tag) :MyAction(next), tag(tag), type(DIALOGTYPE::NONE)
+Talk::Talk(std::unique_ptr<MyAction> next, const std::string& tag) : 
+	MyAction(std::move(next)), tag(tag), type(DIALOGTYPE::NONE)
 {
 }
 
-int Talk::perform(MyEvent *evt)
+int Talk::perform(std::shared_ptr<MyEvent> evt)
 {
 	showDialog([this, evt](int notUsed)->void {next->perform(evt); });
 	return 0;
@@ -43,6 +43,8 @@ Talk::~Talk()
 
 void Talk::showDialog(std::function<void(int)> callback)
 {
+	// I feel this is going to be quite dangerous
+	// [this, evt] may not exist.
 	std::vector<std::string> dialogStrs;
 	Configureader::GetDialog(tag, dialogStrs);
 	//there is way too much overhead.... 
@@ -59,87 +61,76 @@ void Talk::showDialog(std::function<void(int)> callback)
 		}
 	}
 	if (next == nullptr)
-		GameData::getInstance()->showDialog(q, nullptr);
+		GameData::getInstance().showDialog(q, nullptr);
 	else
-		GameData::getInstance()->showDialog(q, callback);
+		GameData::getInstance().showDialog(q, callback);
 }
 
-TalkYN::TalkYN(MyAction *action, const std::string& tag) :Talk(action, tag)
+TalkYN::TalkYN(std::unique_ptr<MyAction> action, const std::string& tag) :Talk(std::move(action), tag)
 {
 	type = DIALOGTYPE::YN;
 }
 
-int TalkYN::perform(MyEvent *evt)
+int TalkYN::perform(std::shared_ptr<MyEvent> evt)
 {
 	showDialog([this, evt](int choice)->void {if (choice == 0) next->perform(evt); });
 	return 0;
 }
 
-TransformSelf::TransformSelf(MyAction *next, int id) :MyAction(next), id(id)
+TransformSelf::TransformSelf(std::unique_ptr<MyAction> next, int id) : MyAction(std::move(next)), id(id)
 {
 }
 
-//the event itself has to handle the destruction
-//it will be marked as markedForDeletion
-//why do I not delete myself again?
-//problem with TransformSelf deleting itself
-//1. possible double delete if used on PostEvent (will call selfDestruct)
-//2. using the object after TransformSelf deleted itself (other actions followed after TransformSelf)
-//3. event gets deleted before dialog completion(async dialogs)!!! this is the most important reason
-//	for a NONE type dialog, the person will disappear before mouse click to dismiss dialog
-//keep these in mind!
-//
-int TransformSelf::perform(MyEvent *evt)
+// I am attempting to use shared_ptr to solve all of my deleting shenanigans
+// Transform should work exactly as TransformSelf after the fix
+int TransformSelf::perform(std::shared_ptr<MyEvent> evt)
 {
 	//setEvent doesn't free the current occupying event
-	GameData::getInstance()->setEvent(id, evt->getX(), evt->getY());
+	GameData::getInstance().setEvent(id, evt->getX(), evt->getY());
+	// shared_ptr!
 	//it is unsafe to call this without making sure FloorEvent does not have a pointer to evt
-	GameData::getInstance()->addToFree(evt);
+	// GameData::getInstance()->addToFree(evt);
 	MyAction::perform(evt);
-	return 1;
+	return 1; // ?
 }
 
-Obtain::Obtain(MyAction *next, int item) :MyAction(next), item(item)
+Obtain::Obtain(std::unique_ptr<MyAction> next, int item) : MyAction(std::move(next)), item(item)
 {
 }
 
-int Obtain::perform(MyEvent *evt)
+int Obtain::perform(std::shared_ptr<MyEvent> evt)
 {
-	GameData::getInstance()->obtainItem(item);
-	MyAction::perform(evt);
-	return 0;
-}
-
-Transform::Transform(MyAction* next, int floor, int x, int y, int targetID) :MyAction(next), floor(floor), x(x), y(y), targetID(targetID) {
-}
-
-int Transform::perform(MyEvent* evt) {
-	//if current
-	if (GameData::getInstance()->floor->V() == floor) {
-		//I am not sure what will happen if you are currently interacting with this event
-		//use TransformSelf
-		delete GameData::getInstance()->getEvent(x, y);
-	}
-	GameData::getInstance()->setEvent(targetID, x, y, floor);
+	GameData::getInstance().obtainItem(item);
 	MyAction::perform(evt);
 	return 0;
 }
 
-LogText::LogText(MyAction *next, const std::string& tag) :MyAction(next), tag(tag)
+Transform::Transform(std::unique_ptr<MyAction> next, int floor, int x, int y, int targetID) : 
+	MyAction(std::move(next)), floor(floor), x(x), y(y), targetID(targetID) {
+}
+
+int Transform::perform(std::shared_ptr<MyEvent> evt) {
+	GameData::getInstance().setEvent(targetID, x, y, floor);
+	MyAction::perform(evt);
+	return 0; // ?
+}
+
+LogText::LogText(std::unique_ptr<MyAction> next, const std::string& tag) : MyAction(std::move(next)), tag(tag)
 {
 }
 
-int LogText::perform(MyEvent *evt)
+int LogText::perform(std::shared_ptr<MyEvent> evt)
 {
-	GameData::getInstance()->log(GStr(tag));
+	GameData::getInstance().log(GStr(tag));
 	MyAction::perform(evt);
 	return 0;
 }
 
-FlatStat::FlatStat(MyAction* next, const std::string& desc, int hp, int atk, int def, int gold) :MyAction(next), desc(desc), hp(hp), atk(atk), def(def), gold(gold) {
+FlatStat::FlatStat(std::unique_ptr<MyAction> next, const std::string& desc, int hp, int atk, int def, int gold) :
+	MyAction(std::move(next)), desc(desc), hp(hp), atk(atk), def(def), gold(gold) {
 }
 
-int FlatStat::perform(MyEvent *evt)
+int FlatStat::perform(std::shared_ptr<MyEvent> evt)
 {
 	std::string msg = GStr("consume");
 	std::string hpStr;
@@ -147,29 +138,28 @@ int FlatStat::perform(MyEvent *evt)
 	std::string defStr;
 	if (hp != 0) {
 		hpStr = stdsprintf(GStr("hp_change"), hp);
-		GameData::getInstance()->hero->hp.addVal(hp);
+		GameData::getInstance().hero->hp.addVal(hp);
 	}
 	if (atk != 0) {
 		hpStr = stdsprintf(GStr("atk_change"), atk);
-		GameData::getInstance()->hero->atk.addVal(atk);
+		GameData::getInstance().hero->atk.addVal(atk);
 	}
 	if (def != 0) {
 		hpStr = stdsprintf(GStr("def_change"), def);
-		GameData::getInstance()->hero->def.addVal(def);
+		GameData::getInstance().hero->def.addVal(def);
 	}
 
-	GameData::getInstance()->log(stdsprintf(msg, desc, hpStr, atkStr, defStr));
+	GameData::getInstance().log(stdsprintf(msg, desc, hpStr, atkStr, defStr));
 	MyAction::perform(evt);
 	return 0;
 }
 
 
-DestructSelf::DestructSelf(MyAction* next) :MyAction(next) {
+DestructSelf::DestructSelf(std::unique_ptr<MyAction> next) : MyAction(std::move(next)) {
 }
 
-int DestructSelf::perform(MyEvent* evt) {
-	GameData::getInstance()->setEvent(0, evt->getX(), evt->getY());
+int DestructSelf::perform(std::shared_ptr<MyEvent> evt) {
+	GameData::getInstance().setEvent(0, evt->getX(), evt->getY());
 	MyAction::perform(evt);
-	delete evt; //TODO what does this delete do again?
 	return 1;
 }

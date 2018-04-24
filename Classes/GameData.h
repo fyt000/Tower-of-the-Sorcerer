@@ -14,6 +14,7 @@
 #include "GlobalEvent.h"
 #include <list>
 #include <deque>
+#include <memory>
 
 //mostly handle the logic
 //Hero class handles the rest
@@ -23,9 +24,24 @@
 class GameData
 {
 public:
-	static GameData* getInstance();
-	MyEvent* getEvent(int x, int y);
+	std::unique_ptr<HeroX> hero;
+	//TODO investigate why this was here
+	cocos2d::EventListenerTouchAllAtOnce* floorMouseListener;
 
+	//all the display labels... location set at FloorScene
+	cocos2d::Label* logLabel;
+	std::unique_ptr<LabelBinder<int>> floor;
+	FloorScene* flScn;
+
+	//enemy info display
+	cocos2d::Label* eDescLabel;
+	cocos2d::Label* eHpLabel;
+	cocos2d::Label* eAtkLabel;
+	cocos2d::Label* eDefLabel;
+
+
+	static GameData& getInstance();
+	std::shared_ptr<MyEvent> getEvent(int x, int y);
 
 	int setFloor(int f);
 	cocos2d::Sprite* getSprite(int x, int y);
@@ -39,21 +55,6 @@ public:
 	twsutil::PATH pathFind(int dx, int dy);
 	void log(const std::string& message, bool instant = true);
 	void showLog();
-	HeroX* hero;
-	//TODO investigate why this was here
-	cocos2d::EventListenerTouchAllAtOnce* floorMouseListener;
-
-	//all the display labels... location set at FloorScene
-	cocos2d::Label* logLabel;
-	LabelBinder<int>* floor;
-	FloorScene* flScn;
-
-	//enemy info display
-	cocos2d::Label* eDescLabel;
-	cocos2d::Label* eHpLabel;
-	cocos2d::Label* eAtkLabel;
-	cocos2d::Label* eDefLabel;
-
 
 	//dialog
 	void showDialog(std::queue<DialogStruct>& dq, std::function<void(int)> callback);
@@ -69,9 +70,6 @@ public:
 
 	void init();
 	void gameover();
-
-	void addToFree(MyEvent*);
-	void freePendingFreeList();
 
 	void attachEnemyInfo(Fightable* enemy);
 
@@ -97,20 +95,32 @@ public:
 	void triggerGlobalEvents();
 
 private:
-	//now, do I need a lock.... I have no idea how cocos2dx works here
-	//adding a lock for safety concerns
-	std::mutex freeListLock;
-	std::vector<MyEvent*> pendingFreeList;
 
-	MyEvent* getEventData(int id);
-	MyEvent* getEventData(int x, int y);
-	MyEvent* EVENTDATA[twsutil::MAXEVENT + 1] = { 0 };
-	int FLOOREVENTS[twsutil::MAXFLOOR + 1][11][11] = { {{0}} }; //int representation - read from config?
-	MyEvent* FloorEvents[11][11] = { {0} }; //the actual objects
+	bool newGame = true;
+	bool floorChange = false;
+	std::shared_ptr<Stairs> upstair = nullptr;
+	std::shared_ptr<Stairs> downstair = nullptr;
+	int blockCounter = 0;
+	bool blocked = false;
+
+	std::queue<DialogStruct> dialogQ;
+	std::queue<std::function<void(int)> > dialogCallbackQ; //probably need a queue as well
+
+	twsutil::PATH heroMovementPath;
+
+	// TODO make it unique_ptr
 	HeroItem* ITEMS[twsutil::MAXITEMS] = { 0 };
 	std::list<GlobalEvent*> GLOBALEVENT[twsutil::MAXFLOOR + 1];
 
-	bool newGame = true;
+	int FLOOREVENTS[twsutil::MAXFLOOR + 1][11][11] = { { { 0 } } }; //int representation - read from config?
+	std::shared_ptr<MyEvent> FloorEvents[11][11] = { { 0 } }; //the actual objects
+	
+
+	std::unique_ptr<MyEvent> getEventData(int id);
+	std::unique_ptr<MyEvent> getEventData(int x, int y);
+
+	void loadFloor(int);
+	
 	//what do I need to save?
 	//if a new game
 	//TODO copy gamedata.json and res_english.json -> so game update won't obsolete old saves
@@ -119,21 +129,6 @@ private:
 	//save global event... iterate the list, save the ids, when loading, only load the ones that match the saved id
 	//save Floorevents, just do a dump
 	//save HeroItem, the id and the number of uses
-
-	Stairs* upstair = nullptr;
-	Stairs* downstair = nullptr;
-
-	int blockCounter = 0;
-	bool blocked = false;
-
-	void loadFloor(int);
-	bool floorChange = false;
-
-	std::queue<DialogStruct> dialogQ;
-	std::queue<std::function<void(int)> > dialogCallbackQ; //probably need a queue as well
-
-	twsutil::PATH heroMovementPath;
-
 
 	GameData();
 	~GameData();

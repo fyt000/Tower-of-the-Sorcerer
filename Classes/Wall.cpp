@@ -10,11 +10,6 @@ bool Wall::triggerEvent()
 	return false;
 }
 
-Wall * Wall::clone()
-{
-	return new Wall(*this);
-}
-
 Wall::
 ~Wall()
 {
