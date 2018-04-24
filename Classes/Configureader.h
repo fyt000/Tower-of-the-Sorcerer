@@ -20,8 +20,8 @@ class Configureader {
 public:
 	static std::unique_ptr<MyEvent> getEvent(int id);
 	static void ReadFloorEvents(int FloorArr[][11][11]);
-	static void ReadItemData(HeroItem**);
-	static void ReadGlobalEvents(std::list<GlobalEvent* >*);
+	static void ReadItemData(std::unique_ptr<HeroItem>*);
+	static void ReadGlobalEvents(std::list<std::unique_ptr<GlobalEvent>>*);
 	static std::string GetStr(const std::string& tag);
 	static std::string GetDescription(const std::string& desc);
 	static void GetDialog(const std::string& tag, std::vector<std::string>& strVec);

@@ -172,7 +172,7 @@ void Configureader::ReadFloorEvents(int FloorArr[][11][11])
 	return;
 }
 
-void Configureader::ReadItemData(HeroItem **itemArr)
+void Configureader::ReadItemData(std::unique_ptr<HeroItem>*itemArr)
 {
 	int maxItem = MAXITEMS;
 	if (dataDoc == nullptr) {
@@ -184,8 +184,9 @@ void Configureader::ReadItemData(HeroItem **itemArr)
 		int idx = data["id"].GetInt();
 		if (idx >= maxItem)
 			continue;
-		itemArr[idx] = new HeroItem(idx, data["name"].GetString(), data["image"].GetInt(),
-			HeroItem::getEffectFunction(data["effect"].GetString()), data["uses"].GetInt());
+		itemArr[idx] = std::make_unique<HeroItem>(idx, data["name"].GetString(), data["image"].GetInt(),
+												  HeroItem::getEffectFunction(data["effect"].GetString()), 
+												  data["uses"].GetInt());
 	}
 	return;
 }
@@ -202,7 +203,7 @@ std::unique_ptr<Condition> Configureader::getCondition(rapidjson::Value& v) {
 	return nullptr;
 }
 
-void Configureader::ReadGlobalEvents(std::list<GlobalEvent* >* globEvtArr) {
+void Configureader::ReadGlobalEvents(std::list<std::unique_ptr<GlobalEvent>>* globEvtArr) {
 	if (dataDoc == nullptr) {
 		initDataDoc();
 	}
@@ -216,7 +217,7 @@ void Configureader::ReadGlobalEvents(std::list<GlobalEvent* >* globEvtArr) {
 		for (rapidjson::SizeType j = 0; j < events.Size(); j++) {
 			auto& evtData = events[j];
 			int id = evtData["id"].GetInt();
-			GlobalEvent* gEvt = new GlobalEvent(id);
+			std::unique_ptr<GlobalEvent> gEvt = std::make_unique<GlobalEvent>(id);
 			rapidjson::Value& conditionData = evtData["conditions"];
 			for (rapidjson::SizeType k = 0; k < conditionData.Size(); k++) {
 				gEvt->addCondition(std::move(getCondition(conditionData[k])));
@@ -225,7 +226,7 @@ void Configureader::ReadGlobalEvents(std::list<GlobalEvent* >* globEvtArr) {
 			for (rapidjson::SizeType k = 0; k < actionsData.Size(); k++) {
 				gEvt->attachAction(std::move(getAction(actionsData[k])));
 			}
-			globEvtArr[floor].push_back(gEvt);
+			globEvtArr[floor].push_back(std::move(gEvt));
 		}
 	}
 }

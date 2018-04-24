@@ -109,8 +109,8 @@ private:
 	twsutil::PATH heroMovementPath;
 
 	// TODO make it unique_ptr
-	HeroItem* ITEMS[twsutil::MAXITEMS] = { 0 };
-	std::list<GlobalEvent*> GLOBALEVENT[twsutil::MAXFLOOR + 1];
+	std::unique_ptr<HeroItem> ITEMS[twsutil::MAXITEMS] = { 0 };
+	std::list<std::unique_ptr<GlobalEvent>> GLOBALEVENT[twsutil::MAXFLOOR + 1];
 
 	int FLOOREVENTS[twsutil::MAXFLOOR + 1][11][11] = { { { 0 } } }; //int representation - read from config?
 	std::shared_ptr<MyEvent> FloorEvents[11][11] = { { 0 } }; //the actual objects

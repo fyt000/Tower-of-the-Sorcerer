@@ -559,14 +559,4 @@ GameData::~GameData() {
 
 	hero = nullptr;
 	floor = nullptr;
-	/*
-	for (int i = 0; i < 11; i++)
-		for (int j = 0; j < 11; j++) {
-			FloorEvents[i][j] = nullptr;
-		}
-	*/
-	for (int i = 0; i < MAXITEMS; i++) {
-		delete ITEMS[i];
-		ITEMS[i] = nullptr;
-	}
 }
