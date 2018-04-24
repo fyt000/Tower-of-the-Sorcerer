@@ -5,7 +5,7 @@
 #include "MyAction.h"
 
 // enable_shared_from_this required to pass the object for performActions
-class MyEvent : std::enable_shared_from_this<MyEvent>
+class MyEvent : public std::enable_shared_from_this<MyEvent>
 {
 public:
 	MyEvent(int imageIdx, const std::string& decription);

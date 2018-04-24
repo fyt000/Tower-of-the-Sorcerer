@@ -15,6 +15,7 @@ bool Stairs::triggerEvent()
 	//CCLOG("walk the stairs");
 	GameData::getInstance().hero->getSprite()->stopAllActions(); //actually need to stop...
 	int x = tx; int y = ty; DIR dir = heroDir; //setFloor will destruct this object and these fields will be unaccessible
+	sprite = nullptr; // this will blow up otherwise (double delete)
 	//CCLOG("setting floor");
 	GameData::getInstance().setFloor(targetFloor);
 	//CCLOG("floor set");

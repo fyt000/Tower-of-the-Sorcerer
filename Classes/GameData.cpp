@@ -166,11 +166,11 @@ void GameData::showFloorEnemyStats()
 	hero->StopAllFinal(nullptr);
 	//store the set of unique pointers
 	//then dynamic cast them to enemy
-	std::set<MyEvent*> eventSet;
+	std::set<std::shared_ptr<MyEvent>> eventSet;
 	for (int i = 0; i < 11; i++)
 		for (int j = 0; j < 11; j++) {
 			// this gets a fresh copy, if the enemy still exists
-			MyEvent* evt = getEventData(i, j).get();
+			auto evt = getEvent(i, j);
 			if (evt) {
 				eventSet.insert(evt);
 			}
@@ -179,9 +179,9 @@ void GameData::showFloorEnemyStats()
 	//sprite, description, hp, atk, def, expectedDmg
 	std::vector<std::tuple<Sprite*, std::string, int, int, int, int>> displayInfo;
 
-	for (auto evt : eventSet) {
-		if (Enemy* e = dynamic_cast<Enemy*>(evt)) {
-			int expectedDmg = hero->fight(e, nullptr, nullptr);
+	for (auto& evt : eventSet) {
+		if (auto e = std::dynamic_pointer_cast<Enemy>(evt)) {
+			int expectedDmg = hero->fight(e.get(), nullptr, nullptr);
 			displayInfo.emplace_back(e->getSprite(true), e->getDescription(), e->getHp(), e->getAtk(), e->getDef(), expectedDmg);
 		}
 	}
@@ -343,7 +343,7 @@ void GameData::nextStep() {
 		// Block input
 		block();
 		// Must consider event triggers for the last step
-		auto eventPtr = getEvent(step.first, step.second);
+		std::shared_ptr<MyEvent> eventPtr = getEvent(step.first, step.second);
 		if (eventPtr) {
 			// Not allowed to move!
 			if (!eventPtr->triggerEvent()) { 
@@ -541,8 +541,11 @@ void GameData::releaseBlock() {
 		hero->setMoving(false);
 		continousMovement();
 	}
-	if (blockCounter < 0)
-		CC_ASSERT(false);
+	if (blockCounter < 0) {
+		// CC_ASSERT(false);
+		blockCounter = 0;
+	}
+		
 }
 
 bool GameData::isBlocked()

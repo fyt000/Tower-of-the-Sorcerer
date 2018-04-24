@@ -63,40 +63,53 @@ std::unique_ptr<MyEvent> Configureader::getEvent(int id)
 	std::string type = data["type"].GetString();
 	rapidjson::Value& p = data["params"];
 
+	std::unique_ptr<MyEvent> event = nullptr;
+
 	if (type == "Door") {
-		return std::make_unique<Door>(p[0].GetInt(), p[1].GetString(), static_cast<KeyType>(p[2].GetInt()));
+		event = std::make_unique<Door>(p[0].GetInt(), p[1].GetString(), static_cast<KeyType>(p[2].GetInt()));
 	}
 	else if (type == "Wall") {
-		return std::make_unique<Wall>(p[0].GetInt(), p[1].GetString());
+		event = std::make_unique<Wall>(p[0].GetInt(), p[1].GetString());
 	}
 	else if (type == "MyEvent") {
 		if (p.Size() == 2)
-			return std::make_unique<MyEvent>(p[0].GetInt(), p[1].GetString());
+			event = std::make_unique<MyEvent>(p[0].GetInt(), p[1].GetString());
 		else
-			return std::make_unique<MyEvent>(p[0].GetInt(), p[1].GetString(), p[2].GetInt());
+			event = std::make_unique<MyEvent>(p[0].GetInt(), p[1].GetString(), p[2].GetInt());
 	}
 	else if (type == "Key") {
-		return std::make_unique<Key>(p[0].GetInt(), p[1].GetString(), static_cast<KeyType>(p[2].GetInt()));
+		event = std::make_unique<Key>(p[0].GetInt(), p[1].GetString(), static_cast<KeyType>(p[2].GetInt()));
 	}
 	else if (type == "Consumable") {
-		return std::make_unique<Consumable>(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), p[5].GetInt());
+		event = std::make_unique<Consumable>(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), p[5].GetInt());
 	}
 	else if (type == "Enemy") {
-		return std::make_unique<Enemy>(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), p[5].GetInt(), p[6].GetInt());
+		event = std::make_unique<Enemy>(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), p[5].GetInt(), p[6].GetInt());
 	}
 	else if (type == "Stairs") {
-		return std::make_unique<Stairs>(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), static_cast<DIR>(p[5].GetInt()));
+		event = std::make_unique<Stairs>(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), static_cast<DIR>(p[5].GetInt()));
 	}
 	else if (type == "Shop") {
-		return std::make_unique<Shop>(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), p[5].GetInt());
+		event = std::make_unique<Shop>(p[0].GetInt(), p[1].GetString(), p[2].GetInt(), p[3].GetInt(), p[4].GetInt(), p[5].GetInt());
 	}
 	else if (type == "PostEvent") {
 		if (p.Size() == 2)
-			return std::make_unique<PostEvent>(p[0].GetInt(), p[1].GetString());
+			event = std::make_unique<PostEvent>(p[0].GetInt(), p[1].GetString());
 		else
-			return std::make_unique<PostEvent>(p[0].GetInt(), p[1].GetString(), p[2].GetInt());
+			event = std::make_unique<PostEvent>(p[0].GetInt(), p[1].GetString(), p[2].GetInt());
 	}
-	return nullptr;
+
+	if (event) {
+		auto actions = data.FindMember("actions");
+		if (actions != data.MemberEnd()) {
+			rapidjson::Value& actionsData = actions->value;
+			for (rapidjson::SizeType j = 0; j < actionsData.Size(); j++) {
+				event->attachAction(getAction(actionsData[j]));
+			}
+		}
+	}
+
+	return event;
 }
 
 std::unique_ptr<MyAction> Configureader::getAction(rapidjson::Value &data)

@@ -101,21 +101,11 @@ void MyEvent::attachAction(std::unique_ptr<MyAction> action)
 
 int MyEvent::performActions()
 {
-	// what happens here is that it passes itself as the same shared ptr
-	// into perform where it's possible for perform to delete this instance
-	// from gamedata
-	// this allows it to hang around a bit until the call is complete I guess
-	// ^ I have no idea what I am talking about
+	// why exception, it's impossible to not have a reference alive at this point
+	auto thisOnStack = shared_from_this();
 
-	std::weak_ptr<MyEvent> thisOnStack = shared_from_this();
-	if (auto shared = thisOnStack.lock()) {
-		for (std::size_t i = 0; i < actions.size(); i++)
-			actions[i]->perform(shared);
-	}
-	else {
-		CCLOG("some one deleted the event");
-	}
-
+	for (std::size_t i = 0; i < actions.size(); i++)
+		actions[i]->perform(thisOnStack);
 
 	return 1;
 }
