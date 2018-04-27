@@ -22,5 +22,9 @@ void GlobalEvent::addCondition(std::unique_ptr<Condition> cond) {
 	conditions.push_back(std::move(cond));
 }
 
+int GlobalEvent::getId() {
+	return id;
+}
+
 GlobalEvent::~GlobalEvent() {
 }

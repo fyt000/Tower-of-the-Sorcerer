@@ -201,7 +201,7 @@
 			"params": [37,"special item no2"],
 			"actions":
 			[
-				{"action":"Obtain","id":1}
+				{"action":"Obtain","id":2}
 			]			
 		},		
 		{
@@ -305,7 +305,7 @@
 			"actions":
 			[
 				{"action":"Talk","tag":"1","next":{"action":"Talk","tag":"0"}},
-				{"action":"Obtain","id":0},
+				{"action":"Obtain","id":1},
 				{"action":"TransformSelf","new":25}
 			]
 		}			
@@ -341,7 +341,7 @@
 			"events":
 			[
 				{
-					"id":1,
+					"id":0,
 					"conditions":
 					[{"type":"DNE","params":[2,1,5]},{"type":"DNE","params":[2,1,7]}],
 					"actions":

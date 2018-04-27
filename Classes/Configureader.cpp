@@ -203,7 +203,7 @@ std::unique_ptr<Condition> Configureader::getCondition(rapidjson::Value& v) {
 	return nullptr;
 }
 
-void Configureader::ReadGlobalEvents(std::list<std::unique_ptr<GlobalEvent>>* globEvtArr) {
+void Configureader::ReadGlobalEvents(std::list<std::unique_ptr<GlobalEvent>>* globEvtArr, std::unordered_set<int>* evtSet) {
 	if (dataDoc == nullptr) {
 		initDataDoc();
 	}
@@ -217,6 +217,8 @@ void Configureader::ReadGlobalEvents(std::list<std::unique_ptr<GlobalEvent>>* gl
 		for (rapidjson::SizeType j = 0; j < events.Size(); j++) {
 			auto& evtData = events[j];
 			int id = evtData["id"].GetInt();
+			if (evtSet&&evtSet->find(id) == evtSet->end())
+				continue;
 			std::unique_ptr<GlobalEvent> gEvt = std::make_unique<GlobalEvent>(id);
 			rapidjson::Value& conditionData = evtData["conditions"];
 			for (rapidjson::SizeType k = 0; k < conditionData.Size(); k++) {

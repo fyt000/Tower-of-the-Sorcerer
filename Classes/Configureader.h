@@ -6,6 +6,7 @@
 #include <list>
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
 
 class MyEvent;
 class MyAction;
@@ -21,18 +22,10 @@ public:
 	static std::unique_ptr<MyEvent> getEvent(int id);
 	static void ReadFloorEvents(int FloorArr[][11][11]);
 	static void ReadItemData(std::unique_ptr<HeroItem>*);
-	static void ReadGlobalEvents(std::list<std::unique_ptr<GlobalEvent>>*);
+	static void ReadGlobalEvents(std::list<std::unique_ptr<GlobalEvent>>*, std::unordered_set<int>* evtSet);
 	static std::string GetStr(const std::string& tag);
 	static std::string GetDescription(const std::string& desc);
 	static void GetDialog(const std::string& tag, std::vector<std::string>& strVec);
-
-	// uhm, unclear what my intentions were but keep them here for now
-	//void saveInt(const std::string&, int);
-	//void saveInts(const std::string, std::vector<int>);
-	//void saveFloorEvents(int FloorArr[][11][11]);
-
-	//int readInt(const std::string&);
-	//std::vector<int> readInts(const std::string&);
 
 private:
 	static std::unique_ptr<Condition> getCondition(rapidjson::Value&);

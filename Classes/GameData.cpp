@@ -18,32 +18,46 @@ using namespace twsutil;
 static GameData* gameData = nullptr;
 
 GameData::GameData() {
-	init();
-}
-
-void GameData::init()
-{
-	newGame = true;
-	floorChange = false;
-	upstair = nullptr;
-	downstair = nullptr;
-	blockCounter = 0;
-	blocked = false;
 
 	hero = std::make_unique<HeroX>(213, "Hero", 1000, 20, 100, 0);
 	floor = std::make_unique<LabelBinder<int>>(1);
 
-	Configureader::ReadFloorEvents(FLOOREVENTS);
-	Configureader::ReadItemData(ITEMS);
-	Configureader::ReadGlobalEvents(GLOBALEVENT);
+	Configureader::ReadFloorEvents(state.FLOOREVENTS);
+	Configureader::ReadItemData(items);
+	Configureader::ReadGlobalEvents(GLOBALEVENT, nullptr);
 
 	CCLOG("GameData configuration reading done");
 
-	loadFloor(3);
+	loadFloor(1);
 
 	CCLOG("GameData floor loaded");
 }
 
+GameData::GameData(int saveRec) {
+
+	state.deserializeFrom(saveRec);
+
+	hero = std::make_unique<HeroX>(213, "Hero", state.heroHP, state.heroAtk, 
+										state.heroDef, state.heroGold);
+	floor = std::make_unique<LabelBinder<int>>(state.heroFloor);
+
+	Configureader::ReadItemData(items);
+	Configureader::ReadGlobalEvents(GLOBALEVENT, &state.globalEvt);
+
+	CCLOG("GameData configuration reading done");
+
+	loadFloor(state.heroFloor);
+
+	for (int i = 0; i < MAXITEMS; i++) {
+		// spend time figuring out how to deal with using item
+		// that is consumable
+		if (state.ITEMS[i])
+			obtainItem(i);
+	}
+	
+
+	CCLOG("GameData floor loaded");
+}
 
 //kinda singleton
 GameData& GameData::getInstance() {
@@ -53,6 +67,12 @@ GameData& GameData::getInstance() {
 	return *gameData;
 }
 
+GameData& GameData::getInstance(int saveRec) {
+	if (!gameData) {
+		gameData = new GameData(saveRec);
+	}
+	return *gameData;
+}
 
 std::shared_ptr<MyEvent> GameData::getEvent(int x, int y)
 {
@@ -69,14 +89,14 @@ std::unique_ptr<MyEvent> GameData::getEventData(int id)
 }
 
 int GameData::getEventID(int floorNum, int x, int y) {
-	return FLOOREVENTS[floorNum][x][y];
+	return state.FLOOREVENTS[floorNum][x][y];
 }
 
 
 //get event based on the location of the current floor
 std::unique_ptr<MyEvent> GameData::getEventData(int x, int y)
 {
-	return getEventData(FLOOREVENTS[floor->V()][x][y]);
+	return getEventData(state.FLOOREVENTS[floor->V()][x][y]);
 }
 
 void GameData::showDialog(std::queue<DialogStruct>& dq, std::function<void(int)> callback)
@@ -154,9 +174,11 @@ void GameData::obtainItem(int idx)
 {
 	if (idx < 0 || idx >= MAXITEMS)
 		return;
-	if (!ITEMS[idx])
+	// TODO: this is the # of uses
+	state.ITEMS[idx] = 1;
+	if (!items[idx])
 		return;
-	ITEMS[idx]->attachTo(flScn);
+	items[idx]->attachTo(flScn);
 }
 
 //the other way to do this is do it for each floor load
@@ -169,7 +191,6 @@ void GameData::showFloorEnemyStats()
 	std::set<std::shared_ptr<MyEvent>> eventSet;
 	for (int i = 0; i < 11; i++)
 		for (int j = 0; j < 11; j++) {
-			// this gets a fresh copy, if the enemy still exists
 			auto evt = getEvent(i, j);
 			if (evt) {
 				eventSet.insert(evt);
@@ -246,6 +267,7 @@ void GameData::replayDialog() {
 
 void GameData::loadFloor(int nextFloor) {
 	floor->setVal(nextFloor); //set the text (and the internal value)
+	state.heroFloor = nextFloor;
 	std::shared_ptr<Stairs> stairs = nullptr;
 	downstair = nullptr;
 	upstair = nullptr;
@@ -379,7 +401,7 @@ void GameData::finalMovementCleanup(bool cont)
 
 
 void GameData::killEvent(std::pair<int, int> place) {
-	FLOOREVENTS[floor->V()][place.first][place.second] = 0;
+	state.FLOOREVENTS[floor->V()][place.first][place.second] = 0;
 	FloorEvents[place.first][place.second] = nullptr;
 }
 
@@ -387,7 +409,7 @@ void GameData::setEvent(int id, int x, int y, int f)
 {
 	if (f == -1)
 		f = floor->V();
-	FLOOREVENTS[floor->V()][x][y] = id;
+	state.FLOOREVENTS[floor->V()][x][y] = id;
 	if (f == floor->V()) {
 		auto curEvt = FloorEvents[x][y];
 		if (curEvt&&id != 0) { //if there is a new sprite, then replace it now
@@ -519,6 +541,7 @@ void GameData::triggerGlobalEvents() {
 		//this means, I will have saving problems...
 		for (auto iter = gList.begin(); iter != gList.end();) {
 			if ((*iter)->tryTrigger()) {
+				state.globalEvt.erase((*iter)->getId());
 				iter = gList.erase(iter);
 			}
 			else {

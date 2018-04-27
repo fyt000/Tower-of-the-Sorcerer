@@ -15,6 +15,7 @@
 #include <list>
 #include <deque>
 #include <memory>
+#include "GameState.h"
 
 //mostly handle the logic
 //Hero class handles the rest
@@ -39,7 +40,7 @@ public:
 	cocos2d::Label* eAtkLabel;
 	cocos2d::Label* eDefLabel;
 
-
+	static GameData& getInstance(int saveRec);
 	static GameData& getInstance();
 	std::shared_ptr<MyEvent> getEvent(int x, int y);
 
@@ -68,7 +69,6 @@ public:
 
 	void finalMovementCleanup(bool cont = true);
 
-	void init();
 	void gameover();
 
 	void attachEnemyInfo(Fightable* enemy);
@@ -108,14 +108,14 @@ private:
 
 	twsutil::PATH heroMovementPath;
 
-	// TODO make it unique_ptr
-	std::unique_ptr<HeroItem> ITEMS[twsutil::MAXITEMS] = { 0 };
+	// the actual objects
+	std::unique_ptr<HeroItem> items[twsutil::MAXITEMS] = { 0 };
 	std::list<std::unique_ptr<GlobalEvent>> GLOBALEVENT[twsutil::MAXFLOOR + 1];
-
-	int FLOOREVENTS[twsutil::MAXFLOOR + 1][11][11] = { { { 0 } } }; //int representation - read from config?
 	std::shared_ptr<MyEvent> FloorEvents[11][11] = { { 0 } }; //the actual objects
-	
 
+	GameState state;
+
+	
 	std::unique_ptr<MyEvent> getEventData(int id);
 	std::unique_ptr<MyEvent> getEventData(int x, int y);
 
@@ -131,5 +131,6 @@ private:
 	//save HeroItem, the id and the number of uses
 
 	GameData();
+	GameData(int saveRec);
 	~GameData();
 };

@@ -14,6 +14,7 @@ public:
 	bool tryTrigger();
 	void attachAction(std::unique_ptr<MyAction>);
 	void addCondition(std::unique_ptr<Condition>);
+	int getId();
 	~GlobalEvent();
 private:
 	int id;
