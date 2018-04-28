@@ -19,6 +19,10 @@ HeroX::HeroX(int imageIdx, const std::string& desc, int hp, int atk, int def, in
 	}
 }
 
+int HeroX::getGold() 
+{
+	return gold.V();
+}
 
 bool HeroX::spendGold(int amt) {
 	if (gold.V() >= amt) {

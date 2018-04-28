@@ -20,6 +20,7 @@ public:
 	HeroX(int imageIdx, const std::string& desc, int hp, int atk, int def, int gold);
 
 	//return true if sufficient gold
+	int getGold();
 	bool spendGold(int amt);
 	cocos2d::Sprite* getSprite();
 	//call this for fight

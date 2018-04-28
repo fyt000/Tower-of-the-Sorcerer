@@ -23,42 +23,47 @@ struct GameState {
 
 	void serializeTo(int saveRec) {
 		auto path = persistentPath(saveRec);
-		CCLOG("saving ", path.c_str());
+		CCLOG("saving %s", path.c_str());
 		std::ofstream out(path, std::ofstream::binary);
 		// there might be paddings, so dump each item
-		out.write((char*)ITEMS, sizeof(ITEMS));
-		out.write((char*)heroHP, sizeof(heroHP));
-		out.write((char*)heroAtk, sizeof(heroAtk));
-		out.write((char*)heroDef, sizeof(heroDef));
-		out.write((char*)heroGold, sizeof(heroGold));
-		out.write((char*)heroX, sizeof(heroX));
-		out.write((char*)heroY, sizeof(heroY));
-		out.write((char*)heroFloor, sizeof(heroFloor));
-		out.write((char*)shopUses, sizeof(shopUses));
+		CCLOG("%d", sizeof(ITEMS));
+		out.write((const char*)ITEMS, sizeof(ITEMS));
+		CCLOG("%d", sizeof(FLOOREVENTS));
+		out.write((const char*)FLOOREVENTS, sizeof(FLOOREVENTS));
+		out.write((const char*)&heroHP, sizeof(heroHP));
+		out.write((const char*)&heroAtk, sizeof(heroAtk));
+		out.write((const char*)&heroDef, sizeof(heroDef));
+		out.write((const char*)&heroGold, sizeof(heroGold));
+		out.write((const char*)&heroX, sizeof(heroX));
+		out.write((const char*)&heroY, sizeof(heroY));
+		out.write((const char*)&heroFloor, sizeof(heroFloor));
+		out.write((const char*)&shopUses, sizeof(shopUses));
 		// write length, altho size can be inferred
-		out.write((char*)globalEvt.size(), sizeof(globalEvt.size()));
+		auto size = globalEvt.size();
+		out.write((const char*)&size, sizeof(size));
 		for (auto evtId : globalEvt) {
 			out.write((char*)evtId, sizeof(evtId));
 		}
 	}
 	void deserializeFrom(int saveRec) {
 		auto path = persistentPath(saveRec);
-		CCLOG("loading ", path.c_str());
+		CCLOG("loading %s", path.c_str());
 		std::ifstream input(path, std::ifstream::binary);
 		input.read((char*)ITEMS, sizeof(ITEMS));
-		input.read((char*)heroHP, sizeof(heroHP));
-		input.read((char*)heroAtk, sizeof(heroAtk));
-		input.read((char*)heroDef, sizeof(heroDef));
-		input.read((char*)heroGold, sizeof(heroGold));
-		input.read((char*)heroX, sizeof(heroX));
-		input.read((char*)heroY, sizeof(heroY));
-		input.read((char*)heroFloor, sizeof(heroFloor));
-		input.read((char*)shopUses, sizeof(shopUses));
+		input.read((char*)FLOOREVENTS, sizeof(FLOOREVENTS));
+		input.read((char*)&heroHP, sizeof(heroHP));
+		input.read((char*)&heroAtk, sizeof(heroAtk));
+		input.read((char*)&heroDef, sizeof(heroDef));
+		input.read((char*)&heroGold, sizeof(heroGold));
+		input.read((char*)&heroX, sizeof(heroX));
+		input.read((char*)&heroY, sizeof(heroY));
+		input.read((char*)&heroFloor, sizeof(heroFloor));
+		input.read((char*)&shopUses, sizeof(shopUses));
 		decltype(globalEvt.size()) size = 0;
-		input.read((char*)size, sizeof(size));
+		input.read((char*)&size, sizeof(size));
 		for (size_t i = 0; i < size; i++) {
 			int evt = 0;
-			input.read((char*)evt, sizeof(evt));
+			input.read((char*)&evt, sizeof(evt));
 			globalEvt.insert(evt);
 		}
 	}

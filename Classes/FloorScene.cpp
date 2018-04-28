@@ -195,6 +195,32 @@ bool FloorScene::init()
 	TransformCoordinate::itemX = 20;
 	TransformCoordinate::itemY = 255;
 
+	// save, back to menu
+	fontSize = 18;
+	MenuItemFont::setFontSize(fontSize);
+	MenuItemFont::setFontName("Arial");
+	auto save = MenuItemFont::create(GStr("save"), [this](Ref *pSender)->void {
+		// show a dialog with 3 options, save 1/2/3
+		GameData::getInstance().showDialog(DialogStruct("Save", DIALOGTYPE::LIST, {"1","2","3"}), [](int option) {
+			GameData::getInstance().saveGame(option);
+		});
+	});
+	auto *saveMenu = Menu::create(save, NULL);
+	saveMenu->setPosition(70, 32);
+	this->addChild(saveMenu);
+
+	auto back = MenuItemFont::create(GStr("back"), [this](Ref *pSender)->void {
+		// go back (how)
+		GameData::getInstance().showDialog(DialogStruct("Back to menu?", DIALOGTYPE::YN), [](int option) {
+			if (option == 0) { // yes
+				GameData::getInstance().gameover(false);
+			}
+		});
+	});
+	auto *backMenu = Menu::create(back, NULL);
+	backMenu->setPosition(70, 470);
+	this->addChild(backMenu);
+
 	loadFloor();
 
 

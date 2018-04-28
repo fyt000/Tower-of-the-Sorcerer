@@ -69,7 +69,8 @@ public:
 
 	void finalMovementCleanup(bool cont = true);
 
-	void gameover();
+	void gameover(bool dialog = true);
+	void saveGame(int saveRec);
 
 	void attachEnemyInfo(Fightable* enemy);
 

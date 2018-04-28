@@ -11,6 +11,7 @@
 #include "GlobalEvent.h"
 #include "GlobalDefs.h"
 #include <string>
+#include "Shop.h"
 
 USING_NS_CC;
 using namespace twsutil;
@@ -148,16 +149,35 @@ void GameData::dialogCompleted(int choice)
 	}
 }
 
-void GameData::gameover()
+void GameData::gameover(bool dialog)
 {
 	CCLOG("enabled input on gameover");
 	blocked = false;
 	// Director::getInstance()->getEventDispatcher()->setEnabled(true);
-	showDialog(DialogStruct(GStr("gameover"), DIALOGTYPE::NONE), [this](int notUsed)->void {
+	if (dialog) {
+		showDialog(DialogStruct(GStr("gameover"), DIALOGTYPE::NONE), [this](int notUsed)->void {
+			delete gameData;
+			gameData = nullptr;
+			Director::getInstance()->popScene();
+		});
+	}
+	else {
 		delete gameData;
+		gameData = nullptr;
 		Director::getInstance()->popScene();
-	});
+	}
+}
 
+void GameData::saveGame(int saveRec) 
+{
+	state.heroAtk = hero->getAtk();
+	state.heroDef = hero->getDef();
+	state.heroGold = hero->getGold();
+	state.heroHP = hero->getHp();
+	state.heroX = hero->getX();
+	state.heroY = hero->getY();
+	state.shopUses = Shop::shopUses;
+	state.serializeTo(saveRec);
 }
 
 void GameData::attachEnemyInfo(Fightable * enemy)
