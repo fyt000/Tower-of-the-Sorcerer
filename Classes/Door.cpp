@@ -13,8 +13,8 @@ Door::Door(int imageIdx, const std::string& desc, KeyType doorType) :MyEvent(ima
 
 bool Door::triggerEvent()
 {
-	if (GameData::getInstance().hero->keys[doorType]->V() >= 1) {
-		GameData::getInstance().hero->keys[doorType]->subVal(1);
+	if (GameData::getInstance().keys[doorType]->V() >= 1) {
+		GameData::getInstance().keys[doorType]->subVal(1);
 		GameData::getInstance().log(stdsprintf(GStr("door_open"), GStr("key_" + std::to_string((int)doorType))));
 		selfDestruct();
 		return true;

@@ -26,6 +26,7 @@ class GameData
 {
 public:
 	std::unique_ptr<HeroX> hero;
+	std::unique_ptr<LabelBinder<int>> keys[KeyType::LAST]; //3 types of keys - each key will be the same type
 	//TODO investigate why this was here
 	cocos2d::EventListenerTouchAllAtOnce* floorMouseListener;
 
@@ -122,6 +123,7 @@ private:
 
 	void loadFloor(int);
 	
+	void defaultInit();
 	//what do I need to save?
 	//if a new game
 	//TODO copy gamedata.json and res_english.json -> so game update won't obsolete old saves

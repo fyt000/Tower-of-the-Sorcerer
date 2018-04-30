@@ -35,7 +35,6 @@ public:
 	//move the given path, isLastMove means to trigger the event on the last move
 
 	//initialized in Hero constructor
-	std::unique_ptr<LabelBinder<int>> keys[KeyType::LAST]; //3 types of keys - each key will be the same type
 	//set absolute position and facing dir of hero
 	void setAbsPos(int, int, twsutil::DIR);
 	//callback to stop everything

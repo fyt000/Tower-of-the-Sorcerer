@@ -11,12 +11,6 @@ HeroX::HeroX(int imageIdx, const std::string& desc, int hp, int atk, int def, in
 	//hard coding these for now
 	x = 10; y = 1;
 	heroDir = DIR::UP;
-	//these are fightable labels
-	//this->setLabelNofity(true);
-	//key labels
-	for (int i = 0; i < KeyType::LAST; i++) {
-		keys[i] = std::make_unique<LabelBinder<int>>(3);
-	}
 }
 
 int HeroX::getGold() 

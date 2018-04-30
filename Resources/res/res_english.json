@@ -19,6 +19,7 @@
 		"no":"No",
 		"save":"Save",
 		"back":"Back",
+		"load":"Load",
 		"gameover":"You've been slain. Game over",
 		"expected_damage":"Expected damage: %d",
 		"enemy_stat":"HP %d Attack %d Defence %d",

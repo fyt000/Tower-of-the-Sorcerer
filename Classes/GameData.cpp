@@ -19,9 +19,16 @@ using namespace twsutil;
 static GameData* gameData = nullptr;
 
 GameData::GameData() {
+	defaultInit();
+}
 
+void GameData::defaultInit()
+{
 	hero = std::make_unique<HeroX>(213, "Hero", 1000, 20, 100, 0);
 	floor = std::make_unique<LabelBinder<int>>(1);
+	for (int i = 0; i < KeyType::LAST; i++) {
+		keys[i] = std::make_unique<LabelBinder<int>>(3);
+	}
 
 	Configureader::ReadFloorEvents(state.FLOOREVENTS);
 	Configureader::ReadItemData(items);
@@ -35,29 +42,37 @@ GameData::GameData() {
 }
 
 GameData::GameData(int saveRec) {
+	try {
+		if (state.deserializeFrom(saveRec)) {
+			hero = std::make_unique<HeroX>(213, "Hero", state.heroHP, state.heroAtk,
+				state.heroDef, state.heroGold);
+			hero->setXY(state.heroX, state.heroY);
 
-	state.deserializeFrom(saveRec);
+			for (int i = 0; i < KeyType::LAST; i++) {
+				keys[i] = std::make_unique<LabelBinder<int>>(3);
+			}
+			floor = std::make_unique<LabelBinder<int>>(state.heroFloor);
 
-	hero = std::make_unique<HeroX>(213, "Hero", state.heroHP, state.heroAtk, 
-										state.heroDef, state.heroGold);
-	floor = std::make_unique<LabelBinder<int>>(state.heroFloor);
+			Configureader::ReadItemData(items);
+			Configureader::ReadGlobalEvents(GLOBALEVENT, &state.globalEvt);
 
-	Configureader::ReadItemData(items);
-	Configureader::ReadGlobalEvents(GLOBALEVENT, &state.globalEvt);
+			loadFloor(state.heroFloor);
 
-	CCLOG("GameData configuration reading done");
-
-	loadFloor(state.heroFloor);
-
-	for (int i = 0; i < MAXITEMS; i++) {
-		// spend time figuring out how to deal with using item
-		// that is consumable
-		if (state.ITEMS[i])
-			obtainItem(i);
+			for (int i = 0; i < MAXITEMS; i++) {
+				// spend time figuring out how to deal with using item
+				// that is consumable
+				if (state.ITEMS[i])
+					obtainItem(i);
+			}
+		}
+		else {
+			defaultInit();
+		}
 	}
-	
-
-	CCLOG("GameData floor loaded");
+	// perhaps refactor a bit, remove deserialize from bool return, just catch exception
+	catch (...) {
+		defaultInit();
+	}
 }
 
 //kinda singleton
@@ -177,6 +192,9 @@ void GameData::saveGame(int saveRec)
 	state.heroX = hero->getX();
 	state.heroY = hero->getY();
 	state.shopUses = Shop::shopUses;
+	for (int i = 0; i < 3; i++) {
+		state.keys[i] = keys[i]->V();
+	}
 	state.serializeTo(saveRec);
 }
 

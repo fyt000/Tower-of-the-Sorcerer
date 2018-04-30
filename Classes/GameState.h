@@ -12,6 +12,7 @@ struct GameState {
 	std::unordered_set<int> globalEvt;
 
 	// NOT THE LATEST
+	int keys[3];
 	int heroHP;
 	int heroAtk;
 	int heroDef;
@@ -20,6 +21,8 @@ struct GameState {
 	int heroY;
 	int heroFloor;
 	int shopUses;
+
+	// other stuff like special shield etc.
 
 	void serializeTo(int saveRec) {
 		auto path = persistentPath(saveRec);
@@ -30,6 +33,7 @@ struct GameState {
 		out.write((const char*)ITEMS, sizeof(ITEMS));
 		CCLOG("%d", sizeof(FLOOREVENTS));
 		out.write((const char*)FLOOREVENTS, sizeof(FLOOREVENTS));
+		out.write((const char*)keys, sizeof(keys));
 		out.write((const char*)&heroHP, sizeof(heroHP));
 		out.write((const char*)&heroAtk, sizeof(heroAtk));
 		out.write((const char*)&heroDef, sizeof(heroDef));
@@ -45,12 +49,15 @@ struct GameState {
 			out.write((char*)evtId, sizeof(evtId));
 		}
 	}
-	void deserializeFrom(int saveRec) {
+	bool deserializeFrom(int saveRec) {
 		auto path = persistentPath(saveRec);
 		CCLOG("loading %s", path.c_str());
 		std::ifstream input(path, std::ifstream::binary);
+		if (!input.good()) return false;
+
 		input.read((char*)ITEMS, sizeof(ITEMS));
 		input.read((char*)FLOOREVENTS, sizeof(FLOOREVENTS));
+		input.read((char*)keys, sizeof(keys));
 		input.read((char*)&heroHP, sizeof(heroHP));
 		input.read((char*)&heroAtk, sizeof(heroAtk));
 		input.read((char*)&heroDef, sizeof(heroDef));
@@ -66,6 +73,7 @@ struct GameState {
 			input.read((char*)&evt, sizeof(evt));
 			globalEvt.insert(evt);
 		}
+		return true;
 	}
 private:
 	std::string persistentPath(int saveRec) {

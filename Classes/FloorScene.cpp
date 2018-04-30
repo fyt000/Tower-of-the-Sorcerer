@@ -169,7 +169,7 @@ bool FloorScene::init()
 		keyLabel->setPosition(Vec2(664 + 60, 296 - 24 * i));
 		keyLabel->setAnchorPoint(Vec2(0, 0));
 		this->addChild(keyLabel, 2);
-		gInstance.hero->keys[i]->attach(keyLabel);
+		gInstance.keys[i]->attach(keyLabel);
 	}
 
 
@@ -201,6 +201,7 @@ bool FloorScene::init()
 	MenuItemFont::setFontName("Arial");
 	auto save = MenuItemFont::create(GStr("save"), [this](Ref *pSender)->void {
 		// show a dialog with 3 options, save 1/2/3
+		// TODO: GStr on "Save"
 		GameData::getInstance().showDialog(DialogStruct("Save", DIALOGTYPE::LIST, {"1","2","3"}), [](int option) {
 			GameData::getInstance().saveGame(option);
 		});
@@ -220,6 +221,22 @@ bool FloorScene::init()
 	auto *backMenu = Menu::create(back, NULL);
 	backMenu->setPosition(70, 470);
 	this->addChild(backMenu);
+
+	auto load = MenuItemFont::create(GStr("load"), [this](Ref *pSender)->void {
+		GameData::getInstance().showDialog(DialogStruct("Load", DIALOGTYPE::LIST, { "1","2","3","Cancel" }), [](int option) {
+			if (option == 3) return;
+			// this feels hackish, but it works pretty well
+			GameData::getInstance().gameover(false);
+			GameData::getInstance(option);
+			auto scene = FloorScene::createScene();
+			Director::getInstance()->pushScene(scene);
+		});
+	});
+	auto *loadMenu = Menu::create(load, NULL);
+	loadMenu->setPosition(710, 32);
+	this->addChild(loadMenu);
+
+
 
 	loadFloor();
 
