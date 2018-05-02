@@ -16,3 +16,14 @@ To run on linx
 ```
 sudo env "PATH=$PATH" cocos run . -p linux -m debug
 ```
+
+# Progress so far
+Basic functionality: move, path finding, battle, consumables, keys/doors, merchant
+
+Items: orb of the hero, orb of the flying
+
+Read from json configuration, event trigger and action abstraction
+
+Save/Load
+
+most of whats on the first 5 floors
