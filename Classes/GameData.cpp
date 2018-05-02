@@ -24,46 +24,40 @@ GameData::GameData() {
 
 void GameData::defaultInit()
 {
-	hero = std::make_unique<HeroX>(213, "Hero", 1000, 20, 100, 0);
-	floor = std::make_unique<LabelBinder<int>>(1);
+	// read initial state from config file as well
+	Configureader::ReadInitState(state);
+	initWithState();
+}
+
+void GameData::initWithState()
+{
+	hero = std::make_unique<HeroX>(213, "Hero", state.heroHP, state.heroAtk,
+		state.heroDef, state.heroGold);
+	hero->setXY(state.heroX, state.heroY);
+
 	for (int i = 0; i < KeyType::LAST; i++) {
-		keys[i] = std::make_unique<LabelBinder<int>>(3);
+		keys[i] = std::make_unique<LabelBinder<int>>(state.keys[i]);
 	}
+	floor = std::make_unique<LabelBinder<int>>(state.heroFloor);
 
-	Configureader::ReadFloorEvents(state.FLOOREVENTS);
 	Configureader::ReadItemData(items);
-	Configureader::ReadGlobalEvents(GLOBALEVENT, nullptr);
+	Configureader::ReadGlobalEvents(GLOBALEVENT, &state.globalEvt);
 
-	CCLOG("GameData configuration reading done");
+	loadFloor(state.heroFloor);
 
-	loadFloor(1);
-
-	CCLOG("GameData floor loaded");
+	for (int i = 0; i < MAXITEMS; i++) {
+		// spend time figuring out how to deal with using item
+		// that is consumable
+		if (state.ITEMS[i])
+			obtainItem(i);
+	}
 }
 
 GameData::GameData(int saveRec) {
 	try {
+		// TODO, have somekind of validation
 		if (state.deserializeFrom(saveRec)) {
-			hero = std::make_unique<HeroX>(213, "Hero", state.heroHP, state.heroAtk,
-				state.heroDef, state.heroGold);
-			hero->setXY(state.heroX, state.heroY);
-
-			for (int i = 0; i < KeyType::LAST; i++) {
-				keys[i] = std::make_unique<LabelBinder<int>>(3);
-			}
-			floor = std::make_unique<LabelBinder<int>>(state.heroFloor);
-
-			Configureader::ReadItemData(items);
-			Configureader::ReadGlobalEvents(GLOBALEVENT, &state.globalEvt);
-
-			loadFloor(state.heroFloor);
-
-			for (int i = 0; i < MAXITEMS; i++) {
-				// spend time figuring out how to deal with using item
-				// that is consumable
-				if (state.ITEMS[i])
-					obtainItem(i);
-			}
+			initWithState();
 		}
 		else {
 			defaultInit();
@@ -224,25 +218,23 @@ void GameData::obtainItem(int idx)
 void GameData::showFloorEnemyStats()
 {
 	hero->StopAllFinal(nullptr);
-	//store the set of unique pointers
-	//then dynamic cast them to enemy
-	std::set<std::shared_ptr<MyEvent>> eventSet;
+	std::map<int, std::shared_ptr<Enemy>> enemySet;
 	for (int i = 0; i < 11; i++)
 		for (int j = 0; j < 11; j++) {
 			auto evt = getEvent(i, j);
-			if (evt) {
-				eventSet.insert(evt);
+			if (auto e = std::dynamic_pointer_cast<Enemy>(evt)) {
+				enemySet[getEventID(floor->V(), i, j)] = e;
 			}
 		}
 
 	//sprite, description, hp, atk, def, expectedDmg
 	std::vector<std::tuple<Sprite*, std::string, int, int, int, int>> displayInfo;
 
-	for (auto& evt : eventSet) {
-		if (auto e = std::dynamic_pointer_cast<Enemy>(evt)) {
-			int expectedDmg = hero->fight(e.get(), nullptr, nullptr);
-			displayInfo.emplace_back(e->getSprite(true), e->getDescription(), e->getHp(), e->getAtk(), e->getDef(), expectedDmg);
-		}
+	for (auto& eIter : enemySet) {
+		auto& enemy = eIter.second;
+		int expectedDmg = hero->fight(enemy.get(), nullptr, nullptr);
+		displayInfo.emplace_back(enemy->getSprite(true), enemy->getDescription(), enemy->getHp(), 
+			enemy->getAtk(), enemy->getDef(), expectedDmg);
 	}
 
 	flScn->showFloorEnemyStats(displayInfo);

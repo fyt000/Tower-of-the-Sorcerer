@@ -23,6 +23,7 @@ protected:
 class Obtain :public MyAction {
 public:
 	Obtain(std::unique_ptr<MyAction>, int item);
+	virtual ~Obtain();
 	int perform(std::shared_ptr<MyEvent>);
 private:
 	int item;
@@ -44,6 +45,7 @@ protected:
 class TalkYN : public Talk {
 public:
 	TalkYN(std::unique_ptr<MyAction>, const std::string& tag);
+	virtual ~TalkYN();
 	virtual int perform(std::shared_ptr<MyEvent>);
 };
 
@@ -55,6 +57,7 @@ public:
 class TransformSelf : public MyAction {
 public:
 	TransformSelf(std::unique_ptr<MyAction>, int id);
+	~TransformSelf();
 	virtual int perform(std::shared_ptr<MyEvent>);
 private:
 	int id;
@@ -64,6 +67,7 @@ private:
 class Transform : public MyAction {
 public:
 	Transform(std::unique_ptr<MyAction>, int floor, int x, int y, int targetID);
+	~Transform();
 	virtual int perform(std::shared_ptr<MyEvent>);
 private:
 	int floor;
@@ -76,16 +80,19 @@ private:
 class LogText : public MyAction {
 public:
 	LogText(std::unique_ptr<MyAction>, const std::string& tag);
+	~LogText();
 	virtual int perform(std::shared_ptr<MyEvent>);
 private:
 	std::string tag;
 };
 
-//gain stats...used by weapon consumables
-//TODO PercentStat for percentage increase
+// gain stats...used by weapon consumables
+// TODO PercentStat for percentage increase
+// gold doesn't work yet...
 class FlatStat : public MyAction {
 public:
 	FlatStat(std::unique_ptr<MyAction>, const std::string& desc, int hp, int atk, int def, int gold);
+	~FlatStat();
 	virtual int perform(std::shared_ptr<MyEvent>);
 private:
 	std::string desc;
@@ -99,5 +106,26 @@ private:
 class DestructSelf : public MyAction {
 public:
 	DestructSelf(std::unique_ptr<MyAction>);
+	~DestructSelf();
 	virtual int perform(std::shared_ptr<MyEvent>);
+};
+
+//TransformSelf to 0 without freependinglist
+class TrySpend : public MyAction {
+public:
+	TrySpend(std::unique_ptr<MyAction>, int gold);
+	~TrySpend();
+	virtual int perform(std::shared_ptr<MyEvent>);
+private:
+	int gold;
+};
+
+class GetKey : public MyAction {
+public:
+	GetKey(std::unique_ptr<MyAction>, int key, int amount);
+	~GetKey();
+	virtual int perform(std::shared_ptr<MyEvent>);
+private:
+	int key;
+	int amount;
 };

@@ -14,6 +14,7 @@
 #include "GlobalDefs.h"
 #include "Shop.h"
 #include "PostEvent.h"
+#include "GameState.h"
 #include <unordered_map>
 
 using namespace twsutil;
@@ -145,6 +146,12 @@ std::unique_ptr<MyAction> Configureader::getAction(rapidjson::Value &data)
 	else if (type == "DestructSelf") {
 		return std::make_unique<DestructSelf>(std::move(next));
 	}
+	else if (type == "TrySpend") {
+		return std::make_unique<TrySpend>(std::move(next), data["gold"].GetInt());
+	}
+	else if (type == "GetKey") {
+		return std::make_unique<GetKey>(std::move(next), data["key"].GetInt(), data["amount"].GetInt());
+	}
 	return nullptr;
 }
 
@@ -233,6 +240,26 @@ void Configureader::ReadGlobalEvents(std::list<std::unique_ptr<GlobalEvent>>* gl
 	}
 }
 
+void Configureader::ReadInitState(GameState & gameState)
+{
+	if (dataDoc == nullptr) {
+		initDataDoc();
+	}
+	rapidjson::Value& initState = (*dataDoc)["init"];
+	gameState.heroHP = initState["hp"].GetInt();
+	gameState.heroAtk = initState["atk"].GetInt();
+	gameState.heroDef = initState["def"].GetInt();
+	gameState.heroFloor = initState["floor"].GetInt();
+	gameState.heroGold = initState["gold"].GetInt();
+	gameState.heroX = initState["x"].GetInt();
+	gameState.heroY = initState["y"].GetInt();
+	rapidjson::Value& keys = initState["keys"];
+	for (rapidjson::SizeType k = 0; k < keys.Size(); k++) {
+		gameState.keys[k] = keys[k].GetInt();
+	}
+	Configureader::ReadFloorEvents(gameState.FLOOREVENTS);
+}
+
 
 std::string Configureader::GetStr(const std::string& tag) {
 	if (langStrDoc == nullptr) {
@@ -265,6 +292,11 @@ void Configureader::initDataDoc() {
 	std::string path = cocos2d::FileUtils::getInstance()->fullPathForFilename("res/gamedata.json");
 	auto strdata = cocos2d::FileUtils::getInstance()->getStringFromFile(path);
 	dataDoc->Parse<0>(strdata.c_str());
+	auto err = dataDoc->GetParseError(); //for debugging
+	auto errPos = dataDoc->GetErrorOffset();
+	if (err != rapidjson::kParseErrorNone) {
+		CCLOG("debug here");
+	}
 }
 
 void Configureader::initLangDoc()
@@ -273,8 +305,11 @@ void Configureader::initLangDoc()
 	std::string path = cocos2d::FileUtils::getInstance()->fullPathForFilename(curLanguageFile);
 	auto strdata = cocos2d::FileUtils::getInstance()->getStringFromFile(path);
 	langStrDoc->Parse<0>(strdata.c_str());
-	//auto err=langStrDoc->GetParseError(); //for debugging
-	//auto errPos=langStrDoc->GetErrorOffset();
+	auto err=langStrDoc->GetParseError(); //for debugging
+	auto errPos=langStrDoc->GetErrorOffset();
+	if (err != rapidjson::kParseErrorNone) {
+		CCLOG("debug here");
+	}
 }
 
 

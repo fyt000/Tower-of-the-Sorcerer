@@ -10,9 +10,9 @@ struct GameState {
 	int ITEMS[twsutil::MAXITEMS] = { 0 };
 	int FLOOREVENTS[twsutil::MAXFLOOR + 1][11][11] = { { { 0 } } }; //int representation - read from config?
 	std::unordered_set<int> globalEvt;
+	int keys[3];
 
 	// NOT THE LATEST
-	int keys[3];
 	int heroHP;
 	int heroAtk;
 	int heroDef;

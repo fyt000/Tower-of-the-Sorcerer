@@ -180,8 +180,8 @@ bool FloorScene::init()
 	this->addChild(floorTxtLabel, 2);
 
 	auto floorNumLabel = Label::createWithSystemFont("", "Arial", fontSize, Size::ZERO, TextHAlignment::RIGHT);
-	floorNumLabel->setPosition(Vec2(130, 430));
-	floorNumLabel->setAnchorPoint(Vec2(0, 0.5));
+	floorNumLabel->setPosition(Vec2(130, 420));
+	floorNumLabel->setAnchorPoint(Vec2(1, 0));
 	this->addChild(floorNumLabel, 2);
 	gInstance.floor->attach(floorNumLabel);
 
@@ -555,8 +555,11 @@ void FloorScene::closeDialog(int c)
 void FloorScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)
 {
 	if (dialogOpen) {
-		//or close dialog?
-		return;
+		if (dialogType == DIALOGTYPE::NONE) {
+			closeDialog(0);
+			absorbClick = 0;
+			return;
+		}
 	}
 
 	switch (keyCode) {

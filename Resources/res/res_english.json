@@ -9,11 +9,13 @@
 		"floor":"Floor",
 		"door_open":"You opened a %s door",
 		"door_nokey":"You do not have a %s key to open the door",
-		"consume":"Obtained %s.%s%s%s",
+		"consume":"Obtained %s.%s%s%s%s",
 		"hp_change":" Vitality increased by %d",
 		"atk_change":" Attack increased by %d",
 		"def_change":" Defence increased by %d",
+		"get_gold" : "Received %d gold",
 		"get_key":"Obtained a %s key",
+		"get_keys":"Obtained %d %s keys",
 		"beat_enemy":"Beat %s. Received %d gold",
 		"yes":"Yes",
 		"no":"No",
@@ -31,14 +33,18 @@
 		"cancel":"cancel",
 		"not_enough_gold":"you do not have enough gold",
 		"steel_sword":"Steel Sword",
+		"steel_shield":"Steel Shield",
 		"collapsed_wall":"The wall collapsed!",
 		"description":{
 				"":"",
 				"yellow door":"yellow door",
-				"blue door":"yellow door",
+				"blue door":"blue door",
+				"red door":"red door",
 				"wall":"wall",
 				"upstairs":"upstairs",
 				"yellow key":"yellow key",
+				"blue key":"blue key",
+				"red key":"red key",
 				"red elixir":"red elixir",
 				"blue elixir":"blue elixir",
 				"red crystal":"red crystal",
@@ -51,16 +57,25 @@
 				"Priest":"Priest",
 				"Skeleton C":"Skeleton C",
 				"Skeleton B":"Skeleton B",
+				"Skeleton A":"Skeleton A",
 				"Hero":"Hero",
 				"old man":"old man",
 				"merchant":"merchant",
+				"Gate-Keeper C":"Gate-Keeper C",
 				"Gate-Keeper B":"Gate-Keeper B",
-				"Steel Sword":"Steel Sword"
+				"Steel Sword":"Steel Sword",
+				"Steel Shield":"Steel Shield"
 		},
 		"dialog":{
 			"0":["I have done all I can, good luck!"],
-			"1":["Take this with you"],
-			"3":["Hello","Take this item"]
+			"1":["I will grant you orb of the hero. When you use it, you will be able to forecast the ability of the living monsters on that floor, and how much damage they can do to you. Make good use of it."],
+			"2":["There are doors which cannot be openned with a key; these doors can only open by beating the monsters which guard them."],
+			"3":["If you buy goods from merchants, you will be able to hear important information later."],
+			"4":["I will sell a blue key at very special price (50 gold)! Will you buy it?"],
+			"5":["Here is a magic tower of 50 stories. Every ten stories form one area. The boss who controls each area, are posted in this tower. And if you don't beat them, you cannot ascend from there."],
+			"6":["I will sell five keys for 50 Gold! Will you buy them?"],
+			"7":["When you offer gold at an alter, you may as well have your defensive power risen rather than your offensive power. The enemy whom you cannot beat may appear, provided you won't raise your offensive power."],
+			"200":["Be careful. I have nothing more to say."]
 		}
 	}
 }

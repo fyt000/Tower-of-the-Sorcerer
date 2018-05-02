@@ -11,10 +11,7 @@ Shop::Shop(int imageIdx, const std::string& desc, int imageIdx2, int baseHP, int
 }
 
 bool Shop::triggerEvent() {
-	int multplier = 1; //I think there is a upper limit, but I don't remember the number
-	for (int i = 1; i <= shopUses; i++)
-		multplier *= 2;
-	int goldCost = multplier * 20;
+	int goldCost = shopUses * 20 + 20;
 	GameData::getInstance().showDialog(DialogStruct(stdsprintf(GStr("shop"), goldCost), DIALOGTYPE::LIST,
 	{ stdsprintf(GStr("shop_hp"),baseHP),stdsprintf(GStr("shop_atk"),baseAtk),stdsprintf(GStr("shop_def"),baseDef),GStr("cancel") }),
 		[this, goldCost](int choice) {

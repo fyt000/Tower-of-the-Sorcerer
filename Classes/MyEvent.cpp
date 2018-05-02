@@ -17,6 +17,7 @@ MyEvent::MyEvent(int imageIdx, const std::string& decription, int imageIdx2) : i
 MyEvent::~MyEvent() {
 	if (sprite != nullptr) {
 		sprite->removeFromParentAndCleanup(true);
+		sprite = nullptr;
 	}
 }
 

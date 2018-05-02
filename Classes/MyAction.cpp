@@ -71,6 +71,10 @@ TalkYN::TalkYN(std::unique_ptr<MyAction> action, const std::string& tag) :Talk(s
 	type = DIALOGTYPE::YN;
 }
 
+TalkYN::~TalkYN()
+{
+}
+
 int TalkYN::perform(std::shared_ptr<MyEvent> evt)
 {
 	showDialog([this, evt](int choice)->void {if (choice == 0) next->perform(evt); });
@@ -78,6 +82,10 @@ int TalkYN::perform(std::shared_ptr<MyEvent> evt)
 }
 
 TransformSelf::TransformSelf(std::unique_ptr<MyAction> next, int id) : MyAction(std::move(next)), id(id)
+{
+}
+
+TransformSelf::~TransformSelf()
 {
 }
 
@@ -98,6 +106,10 @@ Obtain::Obtain(std::unique_ptr<MyAction> next, int item) : MyAction(std::move(ne
 {
 }
 
+Obtain::~Obtain()
+{
+}
+
 int Obtain::perform(std::shared_ptr<MyEvent> evt)
 {
 	GameData::getInstance().obtainItem(item);
@@ -109,6 +121,10 @@ Transform::Transform(std::unique_ptr<MyAction> next, int floor, int x, int y, in
 	MyAction(std::move(next)), floor(floor), x(x), y(y), targetID(targetID) {
 }
 
+Transform::~Transform()
+{
+}
+
 int Transform::perform(std::shared_ptr<MyEvent> evt) {
 	GameData::getInstance().setEvent(targetID, x, y, floor);
 	MyAction::perform(evt);
@@ -116,6 +132,10 @@ int Transform::perform(std::shared_ptr<MyEvent> evt) {
 }
 
 LogText::LogText(std::unique_ptr<MyAction> next, const std::string& tag) : MyAction(std::move(next)), tag(tag)
+{
+}
+
+LogText::~LogText()
 {
 }
 
@@ -130,12 +150,17 @@ FlatStat::FlatStat(std::unique_ptr<MyAction> next, const std::string& desc, int 
 	MyAction(std::move(next)), desc(desc), hp(hp), atk(atk), def(def), gold(gold) {
 }
 
+FlatStat::~FlatStat()
+{
+}
+
 int FlatStat::perform(std::shared_ptr<MyEvent> evt)
 {
 	std::string msg = GStr("consume");
 	std::string hpStr;
 	std::string atkStr;
 	std::string defStr;
+	std::string goldStr;
 	if (hp != 0) {
 		hpStr = stdsprintf(GStr("hp_change"), hp);
 		GameData::getInstance().hero->hp.addVal(hp);
@@ -148,8 +173,11 @@ int FlatStat::perform(std::shared_ptr<MyEvent> evt)
 		hpStr = stdsprintf(GStr("def_change"), def);
 		GameData::getInstance().hero->def.addVal(def);
 	}
-
-	GameData::getInstance().log(stdsprintf(msg, desc, hpStr, atkStr, defStr));
+	if (gold != 0) {
+		goldStr = stdsprintf(GStr("get_gold"), gold);
+		GameData::getInstance().hero->gold.addVal(gold);
+	}
+	GameData::getInstance().log(stdsprintf(msg, desc, hpStr, atkStr, defStr, goldStr));
 	MyAction::perform(evt);
 	return 0;
 }
@@ -158,8 +186,49 @@ int FlatStat::perform(std::shared_ptr<MyEvent> evt)
 DestructSelf::DestructSelf(std::unique_ptr<MyAction> next) : MyAction(std::move(next)) {
 }
 
+DestructSelf::~DestructSelf()
+{
+}
+
 int DestructSelf::perform(std::shared_ptr<MyEvent> evt) {
 	GameData::getInstance().setEvent(0, evt->getX(), evt->getY());
 	MyAction::perform(evt);
 	return 1;
 }
+
+TrySpend::TrySpend(std::unique_ptr<MyAction> next, int gold) : MyAction(std::move(next)), gold(gold)
+{
+}
+
+TrySpend::~TrySpend()
+{
+}
+
+int TrySpend::perform(std::shared_ptr<MyEvent> evt)
+{
+	if (GameData::getInstance().hero->spendGold(gold))
+		MyAction::perform(evt);
+	else
+		GameData::getInstance().log(GStr("not_enough_gold"));
+	return 0;
+}
+
+GetKey::GetKey(std::unique_ptr<MyAction> next, int key, int amount) : MyAction(std::move(next)), key(key), amount(amount)
+{
+}
+
+GetKey::~GetKey()
+{
+}
+
+int GetKey::perform(std::shared_ptr<MyEvent> evt)
+{
+	if (amount > 1)
+		GameData::getInstance().log(stdsprintf(GStr("get_keys"), amount, GStr("key_" + std::to_string(key))));
+	else
+		GameData::getInstance().log(stdsprintf(GStr("get_key"), GStr("key_" + std::to_string(key))));
+	GameData::getInstance().keys[key]->addVal(amount);
+	MyAction::perform(evt);
+	return 0;
+}
+

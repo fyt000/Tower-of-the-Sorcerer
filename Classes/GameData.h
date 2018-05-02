@@ -123,6 +123,7 @@ private:
 
 	void loadFloor(int);
 	
+	void initWithState();
 	void defaultInit();
 	//what do I need to save?
 	//if a new game

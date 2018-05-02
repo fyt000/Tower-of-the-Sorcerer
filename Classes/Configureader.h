@@ -13,6 +13,7 @@ class MyAction;
 class HeroItem;
 class GlobalEvent;
 class Condition;
+struct GameState;
 
 class Configureader {
 
@@ -23,9 +24,11 @@ public:
 	static void ReadFloorEvents(int FloorArr[][11][11]);
 	static void ReadItemData(std::unique_ptr<HeroItem>*);
 	static void ReadGlobalEvents(std::list<std::unique_ptr<GlobalEvent>>*, std::unordered_set<int>* evtSet);
+	static void ReadInitState(GameState& gameState);
 	static std::string GetStr(const std::string& tag);
 	static std::string GetDescription(const std::string& desc);
 	static void GetDialog(const std::string& tag, std::vector<std::string>& strVec);
+	
 
 private:
 	static std::unique_ptr<Condition> getCondition(rapidjson::Value&);
