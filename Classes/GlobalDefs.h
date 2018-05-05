@@ -23,7 +23,7 @@ const int MAXEVENT = 500;
 //const int MAXGLOBAL=10; //per floor
 
 enum class DIR : int {
-	UP, DOWN, LEFT, RIGHT
+	UP, DOWN, LEFT, RIGHT, NONE
 };
 
 enum class DIALOGTYPE : int {

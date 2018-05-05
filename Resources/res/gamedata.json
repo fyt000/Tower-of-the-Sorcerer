@@ -8,7 +8,7 @@
 		"1-200 for 1-to-1 image id enemies",
 		"200-300 for hidden events",
 		"rest for movement/state transforms",
-
+		"init x10 y5 floor1, hp400",
 		"global events should have unique ids",
 		"end of coomments"
 	],
@@ -20,7 +20,7 @@
 		"atk":10,
 		"def":10,
 		"keys":[0,0,0],
-		"globalevents":[0,1],
+		"globalevents":[0,1,2,3,4],
 		"gold":4
 	},
 	"floorevents": [
@@ -109,7 +109,7 @@
 		{
 			"floor":6,
 			"data":[
-				[309,8,29,29,8,0,0,0,29,0,0],
+				[309,8,29,29,8,0,69,0,29,61,0],
 				[0,8,29,29,8,0,8,8,8,8,1],
 				[0,8,8,63,8,0,8,32,0,77,0],
 				[0,1,1,0,1,0,8,424,0,0,67],
@@ -119,7 +119,7 @@
 				[69,0,0,423,8,0,1,1,0,1,0],
 				[0,67,0,35,8,0,8,8,63,8,63],
 				[1,8,8,8,8,0,8,0,0,8,0],
-				[0,0,61,0,77,0,8,32,32,8,310]
+				[0,61,0,0,77,0,8,32,32,8,310]
 			]
 		},
 		{
@@ -601,6 +601,89 @@
 				}			
 			
 			]
+		},
+		{
+			"floor":10,
+			"events":
+			[
+				{
+					"id":2,
+					"conditions":[{"type":"AT","params":[10,4,5]},{"type":"EXISTS","params":[10,3,5]},{"type":"DNE","params":[10,6,5]}],
+					"persist":true,
+					"actions":
+					[
+						{"action":"DisableGlobEvt","id":2,"next":
+						{"action":"StopMovement","next":
+						{"action":"Talk","tag":"8","next":
+						{"action":"Transform","floor":10,"x":5,"y":4,"id":0,"next":
+						{"action":"Transform","floor":10,"x":5,"y":6,"id":0,"next":
+						{"action":"Transform","floor":10,"x":6,"y":5,"id":4,"next":
+						{"action":"MoveWithDelay","floor":10,"y":5,"x":3,"ydest":[5,5,5],"xdest":[2,1,0],"next":
+						{"action":"Transform","floor":10,"y":5,"x":2,"id":4,"next":
+						{"action":"Transform","floor":10,"y":3,"x":3,"id":0,"next":
+						{"action":"Transform","floor":10,"y":7,"x":3,"id":0,"next":
+						{"action":"MoveWithDelay","floor":10,"y":1,"x":3,"ydest":[2,3,4,4,4,5],"xdest":[3,3,3,4,5,5],"next":
+						{"action":"MoveWithDelay","floor":10,"y":9,"x":3,"ydest":[8,7,6,5],"xdest":[3,3,3,3],"next":
+						{"action":"MoveWithDelay","floor":10,"y":2,"x":2,"ydest":[2,3,4,4,4],"xdest":[3,3,3,4,5],"next":
+						{"action":"MoveWithDelay","floor":10,"y":8,"x":2,"ydest":[8,7,6,6,6],"xdest":[3,3,3,4,5],"next":
+						{"action":"MoveWithDelay","floor":10,"y":1,"x":2,"ydest":[1,2,3,4,4],"xdest":[3,3,3,3,4],"next":
+						{"action":"MoveWithDelay","floor":10,"y":9,"x":2,"ydest":[9,8,7,6,6],"xdest":[3,3,3,3,4],"next":
+						{"action":"MoveWithDelay","floor":10,"y":0,"x":2,"ydest":[0,1,2,3,4],"xdest":[3,3,3,3,3],"next":
+						{"action":"MoveWithDelay","floor":10,"y":10,"x":2,"ydest":[10,9,8,7,6],"xdest":[3,3,3,3,3],"next":
+						{"action":"Transform","floor":10,"y":3,"x":3,"id":4,"next":
+						{"action":"Transform","floor":10,"y":7,"x":3,"id":4}}}}}}}}}}}}}}}}}}}}
+					]
+				},
+				{
+					"id":3,
+					"conditions":[{"type":"EXISTS","params":[10,6,5]},
+									{"type":"DNE","params":[10,3,4]},
+									{"type":"DNE","params":[10,4,4]},
+									{"type":"DNE","params":[10,5,4]},
+									{"type":"DNE","params":[10,5,5]},
+									{"type":"DNE","params":[10,3,5]},
+									{"type":"DNE","params":[10,3,6]},
+									{"type":"DNE","params":[10,4,6]},
+									{"type":"DNE","params":[10,5,6]},
+									{"type":"EXISTS","params":[10,2,5]}],
+					"persist":true,
+					"actions":
+					[
+						{"action":"DisableGlobEvt","id":3,"next":
+						{"action":"Talk","tag":"9","next":
+						{"action":"Transform","floor":10,"x":2,"y":5,"id":0}}}
+					]
+				},
+				{
+					"id":4,
+					"conditions":[{"type":"EXISTS","params":[10,6,5]},
+									{"type":"DNE","params":[10,0,5]},
+									{"type":"DNE","params":[10,2,5]}],
+					"persist":true,
+					"actions":
+					[
+						{"action":"DisableGlobEvt","id":4,"next":
+						{"action":"Talk","tag":"10","next":
+						{"action":"Transform","floor":10,"y":5,"x":5,"id":0,"next":
+						{"action":"Transform","floor":10,"y":3,"x":3,"id":0,"next":
+						{"action":"Transform","floor":10,"y":7,"x":3,"id":0,"next":
+						{"action":"Transform","floor":10,"y":5,"x":6,"id":0,"next":
+						{"action":"Transform","floor":10,"y":0,"x":2,"id":34,"next":
+						{"action":"Transform","floor":10,"y":1,"x":2,"id":34,"next":
+						{"action":"Transform","floor":10,"y":2,"x":2,"id":34,"next":
+						{"action":"Transform","floor":10,"y":0,"x":3,"id":33,"next":
+						{"action":"Transform","floor":10,"y":1,"x":3,"id":33,"next":
+						{"action":"Transform","floor":10,"y":2,"x":3,"id":33,"next":
+						{"action":"Transform","floor":10,"y":8,"x":2,"id":35,"next":
+						{"action":"Transform","floor":10,"y":9,"x":2,"id":35,"next":
+						{"action":"Transform","floor":10,"y":10,"x":2,"id":35,"next":
+						{"action":"Transform","floor":10,"y":8,"x":3,"id":29,"next":
+						{"action":"Transform","floor":10,"y":9,"x":3,"id":29,"next":
+						{"action":"Transform","floor":10,"y":10,"x":3,"id":29}}}}}}}}}}}}}}}}}}
+					]
+				}
+			]
+		
 		}
 	]
 }

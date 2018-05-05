@@ -8,8 +8,6 @@ USING_NS_CC;
 using namespace twsutil;
 
 HeroX::HeroX(int imageIdx, const std::string& desc, int hp, int atk, int def, int gold) :Fightable(imageIdx, desc, -1, hp, atk, def, gold) {
-	//hard coding these for now
-	x = 10; y = 1;
 	heroDir = DIR::UP;
 }
 
@@ -115,7 +113,7 @@ int HeroX::fightX(Fightable * target, std::function<void(Fightable&)> hpCallback
 
 void HeroX::cleanUpTarget(Node* node, Fightable * target) {
 	GameData::getInstance().killEvent(std::pair<int, int>(target->getX(), target->getY()));
-	GameData::getInstance().triggerGlobalEvents();
+	// GameData::getInstance().triggerGlobalEvents();
 }
 
 void HeroX::updateBetweenFight(Node* n, Fightable* f, std::vector<FightableSnapshot> &snapshots, int hSSIdx, std::string &frameName, bool isHero) {

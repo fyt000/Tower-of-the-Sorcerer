@@ -129,3 +129,46 @@ private:
 	int key;
 	int amount;
 };
+
+// stops the hero from moving (for hidden event)
+class StopMovement : public MyAction {
+public:
+	StopMovement(std::unique_ptr<MyAction> next);
+	virtual int perform(std::shared_ptr<MyEvent> evt);
+};
+
+// move an event
+class MoveWithDelay : public MyAction {
+public:
+	MoveWithDelay(std::unique_ptr<MyAction> next, int floor, int x, int y, 
+		const std::vector<int>& newX, const std::vector<int>& newY, float delay);
+	virtual int perform(std::shared_ptr<MyEvent> evt);
+private:
+	// to locate the event
+	int floor;
+	int x;
+	int y;
+	// move to the following
+	std::vector<int> newX;
+	std::vector<int> newY;
+	// animation rate
+	float delay;
+	const float AniRate = 0.3f;
+	int actionsRan = 0;
+
+	static int ongoingActions;
+	void actionDone(int x, int y);
+};
+
+// disable a persistent global event
+// certain(not all) global events are persistent due to animation/dialog/callbacks
+// I cannot delete it before its done
+// but I only want to trigger them once, so use this action to disable
+// the event once the globalEvent is triggered
+class DisableGlobEvt : public MyAction {
+public:
+	DisableGlobEvt(std::unique_ptr<MyAction> next, int id);
+	virtual int perform(std::shared_ptr<MyEvent> evt);
+private:
+	int id;
+};

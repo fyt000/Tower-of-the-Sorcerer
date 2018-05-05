@@ -2,7 +2,8 @@
 
 enum COND {
 	EXISTS,
-	DNE //does not exists
+	DNE, // does not exists
+	AT	 // check if hero is currently at this location
 };
 
 //extend this class for more conditions...

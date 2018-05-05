@@ -10,8 +10,9 @@
 
 class GlobalEvent {
 public:
-	GlobalEvent(int id); 
+	GlobalEvent(int id, bool persist); 
 	bool tryTrigger();
+	bool persists();
 	void attachAction(std::unique_ptr<MyAction>);
 	void addCondition(std::unique_ptr<Condition>);
 	int getId();
@@ -20,4 +21,5 @@ private:
 	int id;
 	std::vector<std::unique_ptr<Condition>> conditions;
 	std::vector<std::unique_ptr<MyAction>> actions;
+	bool persist = false;
 };

@@ -152,6 +152,24 @@ std::unique_ptr<MyAction> Configureader::getAction(rapidjson::Value &data)
 	else if (type == "GetKey") {
 		return std::make_unique<GetKey>(std::move(next), data["key"].GetInt(), data["amount"].GetInt());
 	}
+	else if (type == "MoveWithDelay") {
+		std::vector<int> xs;
+		std::vector<int> ys;
+		rapidjson::Value& xdata = data["xdest"];
+		rapidjson::Value& ydata = data["ydest"];
+		for (rapidjson::SizeType i = 0; i < xdata.Size(); i++) {
+			xs.push_back(xdata[i].GetInt());
+			ys.push_back(ydata[i].GetInt());
+		}
+		return std::make_unique<MoveWithDelay>(std::move(next), data["floor"].GetInt(), data["x"].GetInt(), data["y"].GetInt(),
+			xs, ys, 0.01f);
+	}
+	else if (type == "StopMovement") {
+		return std::make_unique<StopMovement>(std::move(next));
+	}
+	else if (type == "DisableGlobEvt") {
+		return std::make_unique<DisableGlobEvt>(std::move(next), data["id"].GetInt());
+	}
 	return nullptr;
 }
 
@@ -204,8 +222,11 @@ std::unique_ptr<Condition> Configureader::getCondition(rapidjson::Value& v) {
 	if (type == "DNE") {
 		return std::make_unique<Condition>(p[0].GetInt(), COND::DNE, p[1].GetInt(), p[2].GetInt());
 	}
-	if (type == "EXISTS") {
+	else if (type == "EXISTS") {
 		return std::make_unique<Condition>(p[0].GetInt(), COND::EXISTS, p[1].GetInt(), p[2].GetInt());
+	}
+	else if (type == "AT") {
+		return std::make_unique<Condition>(p[0].GetInt(), COND::AT, p[1].GetInt(), p[2].GetInt());
 	}
 	return nullptr;
 }
@@ -224,9 +245,14 @@ void Configureader::ReadGlobalEvents(std::list<std::unique_ptr<GlobalEvent>>* gl
 		for (rapidjson::SizeType j = 0; j < events.Size(); j++) {
 			auto& evtData = events[j];
 			int id = evtData["id"].GetInt();
+			bool persist = false;
+			auto persistData = evtData.FindMember("persist");
+			if (persistData != evtData.MemberEnd()) {
+				persist = persistData->value.GetBool();
+			}
 			if (evtSet&&evtSet->find(id) == evtSet->end())
 				continue;
-			std::unique_ptr<GlobalEvent> gEvt = std::make_unique<GlobalEvent>(id);
+			std::unique_ptr<GlobalEvent> gEvt = std::make_unique<GlobalEvent>(id, persist);
 			rapidjson::Value& conditionData = evtData["conditions"];
 			for (rapidjson::SizeType k = 0; k < conditionData.Size(); k++) {
 				gEvt->addCondition(std::move(getCondition(conditionData[k])));
@@ -256,6 +282,10 @@ void Configureader::ReadInitState(GameState & gameState)
 	rapidjson::Value& keys = initState["keys"];
 	for (rapidjson::SizeType k = 0; k < keys.Size(); k++) {
 		gameState.keys[k] = keys[k].GetInt();
+	}
+	rapidjson::Value& globs = initState["globalevents"];
+	for (rapidjson::SizeType k = 0; k < globs.Size(); k++) {
+		gameState.globalEvt.insert(globs[k].GetInt());
 	}
 	Configureader::ReadFloorEvents(gameState.FLOOREVENTS);
 }

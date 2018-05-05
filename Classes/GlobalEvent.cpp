@@ -1,7 +1,7 @@
 #include "GlobalEvent.h"
 #include <vector>
 
-GlobalEvent::GlobalEvent(int id) : id(id) {}
+GlobalEvent::GlobalEvent(int id, bool persist) : id(id), persist(persist) {}
 
 bool GlobalEvent::tryTrigger() {
 	for (auto& cond : conditions) {
@@ -11,6 +11,11 @@ bool GlobalEvent::tryTrigger() {
 	for (size_t i = 0; i < actions.size(); i++)
 		actions[i]->perform(nullptr);
 	return true;
+}
+
+bool GlobalEvent::persists()
+{
+	return persist;
 }
 
 void GlobalEvent::attachAction(std::unique_ptr<MyAction> action) {

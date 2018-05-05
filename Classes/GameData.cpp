@@ -16,11 +16,9 @@
 USING_NS_CC;
 using namespace twsutil;
 
-static GameData* gameData = nullptr;
+static GameData* gameData = nullptr; 
+int GameData::saveRec = -1;
 
-GameData::GameData() {
-	defaultInit();
-}
 
 void GameData::defaultInit()
 {
@@ -44,19 +42,12 @@ void GameData::initWithState()
 	Configureader::ReadGlobalEvents(GLOBALEVENT, &state.globalEvt);
 
 	loadFloor(state.heroFloor);
-
-	for (int i = 0; i < MAXITEMS; i++) {
-		// spend time figuring out how to deal with using item
-		// that is consumable
-		if (state.ITEMS[i])
-			obtainItem(i);
-	}
 }
 
 GameData::GameData(int saveRec) {
 	try {
 		// TODO, have somekind of validation
-		if (state.deserializeFrom(saveRec)) {
+		if (saveRec >= 0 && state.deserializeFrom(saveRec)) {
 			initWithState();
 		}
 		else {
@@ -71,13 +62,6 @@ GameData::GameData(int saveRec) {
 
 //kinda singleton
 GameData& GameData::getInstance() {
-	if (!gameData) {
-		gameData = new GameData();
-	}
-	return *gameData;
-}
-
-GameData& GameData::getInstance(int saveRec) {
 	if (!gameData) {
 		gameData = new GameData(saveRec);
 	}
@@ -330,6 +314,18 @@ void GameData::loadFloor(int nextFloor) {
 }
 
 
+void GameData::setScene(FloorScene * flScn)
+{
+	this->flScn = flScn;
+	// attach items
+	for (int i = 0; i < MAXITEMS; i++) {
+		// spend time figuring out how to deal with using item
+		// that is consumable
+		if (state.ITEMS[i])
+			obtainItem(i);
+	}
+}
+
 int GameData::setFloor(int f) {
 	loadFloor(f);
 	flScn->loadFloor();
@@ -356,8 +352,6 @@ void GameData::moveHero(DIR dir)
 	moveHero(newXY);
 }
 
-//this method is only being called from FloorScene
-//no one else should call this
 void GameData::moveHero(std::pair<int, int> dest) {
 
 	auto newPath = pathFind(dest);
@@ -379,6 +373,11 @@ void GameData::moveHero(std::pair<int, int> dest) {
 
 void GameData::nextStep() {
 	CCLOG("next step with %d steps left", heroMovementPath.size());
+	// ok so a hidden event, has to 
+	// 1. clear heroMovementPath
+	// 2. block
+	triggerGlobalEvents();
+	// moving can also be interrupted by triggerGlobalEvents()
 	if (heroMovementPath.empty()) {
 		auto eventPtr = getEvent(hero->getX(), hero->getY());
 		if (eventPtr) {
@@ -412,6 +411,13 @@ void GameData::nextStep() {
 	hero->moveOnestep(step);
 }
 
+void GameData::stopMovement()
+{
+	// it is important that keyboard movement is reset
+	GameData::getInstance().flScn->movementActive = false;
+	heroMovementPath.clear();
+}
+
 
 void GameData::continousMovement()
 {
@@ -424,7 +430,7 @@ void GameData::finalMovementCleanup(bool cont)
 	if (blockCounter==0)
 		showLog();
 	triggerGlobalEvents();
-	CCLOG("enabled input on finalmovementcleanup");
+	CCLOG("finalmovementcleanup");
 	if (cont)
 		continousMovement();
 }
@@ -439,19 +445,21 @@ void GameData::setEvent(int id, int x, int y, int f)
 {
 	if (f == -1)
 		f = floor->V();
-	state.FLOOREVENTS[floor->V()][x][y] = id;
+	state.FLOOREVENTS[f][x][y] = id;
 	if (f == floor->V()) {
+		/*
 		auto curEvt = FloorEvents[x][y];
 		if (curEvt&&id != 0) { //if there is a new sprite, then replace it now
 			curEvt->sprite->removeFromParentAndCleanup(true);
 			curEvt->sprite = nullptr; //remove sprite but do not delete it yet?
-		}
+		}*/
 		auto newEvt = getEventData(id);
 		if (newEvt) {
 			FloorEvents[x][y] = std::move(newEvt);
-			FloorEvents[x][y]->setXY(x, y);
-			if (FloorEvents[x][y])
+			if (FloorEvents[x][y]) {
+				FloorEvents[x][y]->setXY(x, y);
 				flScn->attachFloorSprite(FloorEvents[x][y]->getSprite());
+			}
 		} else {
 			FloorEvents[x][y] = nullptr;
 		}
@@ -461,6 +469,15 @@ void GameData::setEvent(int id, int x, int y, int f)
 	//flScn->loadFloor();
 }
 
+void GameData::moveEvent(int x, int y, int nx, int ny)
+{
+	CCASSERT(FloorEvents[nx][ny]==nullptr, "overwritting non empty event"); // maybe this is ok
+	FloorEvents[nx][ny] = FloorEvents[x][y];
+	state.FLOOREVENTS[floor->V()][nx][ny] = state.FLOOREVENTS[floor->V()][x][y];
+	state.FLOOREVENTS[floor->V()][x][y] = 0;
+	FloorEvents[nx][ny]->setXY(nx, ny);
+	FloorEvents[x][y] = nullptr;
+}
 
 PATH GameData::pathFind(std::pair<int, int> dest) {
 	return pathFind(dest.first, dest.second);
@@ -570,7 +587,9 @@ void GameData::triggerGlobalEvents() {
 		//remove from list on successful event trigger
 		//this means, I will have saving problems...
 		for (auto iter = gList.begin(); iter != gList.end();) {
-			if ((*iter)->tryTrigger()) {
+			// try trigger, then if it succeds, check if it should persist
+			if (state.globalEvt.find((*iter)->getId()) != state.globalEvt.end() &&
+				(*iter)->tryTrigger() && !((*iter)->persists())) {
 				state.globalEvt.erase((*iter)->getId());
 				iter = gList.erase(iter);
 			}
@@ -581,6 +600,11 @@ void GameData::triggerGlobalEvents() {
 	}
 	//CCLOG("done trying global events");
 }
+void GameData::disableGlobalEvent(int id)
+{
+	state.globalEvt.erase(id);
+}
+
 
 void GameData::block() {
 	blockCounter++;

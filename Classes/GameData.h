@@ -25,6 +25,7 @@
 class GameData
 {
 public:
+	static int saveRec;
 	std::unique_ptr<HeroX> hero;
 	std::unique_ptr<LabelBinder<int>> keys[KeyType::LAST]; //3 types of keys - each key will be the same type
 	//TODO investigate why this was here
@@ -33,7 +34,6 @@ public:
 	//all the display labels... location set at FloorScene
 	cocos2d::Label* logLabel;
 	std::unique_ptr<LabelBinder<int>> floor;
-	FloorScene* flScn;
 
 	//enemy info display
 	cocos2d::Label* eDescLabel;
@@ -41,10 +41,10 @@ public:
 	cocos2d::Label* eAtkLabel;
 	cocos2d::Label* eDefLabel;
 
-	static GameData& getInstance(int saveRec);
 	static GameData& getInstance();
 	std::shared_ptr<MyEvent> getEvent(int x, int y);
 
+	void setScene(FloorScene* flScn);
 	int setFloor(int f);
 	cocos2d::Sprite* getSprite(int x, int y);
 	void moveHero(std::pair<int, int>);
@@ -53,6 +53,7 @@ public:
 	//f==-1 for cur floor
 	//note that setEvent DO NOT call delete on the current event occupying x,y
 	void setEvent(int id, int x, int y, int f = -1);
+	void moveEvent(int x, int y, int nx, int ny);
 	twsutil::PATH pathFind(std::pair<int, int> dest);
 	twsutil::PATH pathFind(int dx, int dy);
 	void log(const std::string& message, bool instant = true);
@@ -67,6 +68,7 @@ public:
 	void continousMovement();
 	// this is for mouse
 	void nextStep();
+	void stopMovement();
 
 	void finalMovementCleanup(bool cont = true);
 
@@ -95,9 +97,10 @@ public:
 	int getEventID(int floor, int x, int y);
 
 	void triggerGlobalEvents();
+	void disableGlobalEvent(int id);
 
 private:
-
+	FloorScene* flScn;
 	bool newGame = true;
 	bool floorChange = false;
 	std::shared_ptr<Stairs> upstair = nullptr;
@@ -134,7 +137,6 @@ private:
 	//save Floorevents, just do a dump
 	//save HeroItem, the id and the number of uses
 
-	GameData();
 	GameData(int saveRec);
 	~GameData();
 };

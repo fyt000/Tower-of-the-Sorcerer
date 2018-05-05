@@ -68,7 +68,7 @@ bool FloorScene::init()
 	//this is likely the place where GameData gets instantiated
 	auto& gInstance = GameData::getInstance();
 
-	gInstance.flScn = this;
+	gInstance.setScene(this);
 
 	//std::string font="fonts/arial.ttf";
 	int fontSize = 15;
@@ -214,6 +214,7 @@ bool FloorScene::init()
 		// go back (how)
 		GameData::getInstance().showDialog(DialogStruct("Back to menu?", DIALOGTYPE::YN), [](int option) {
 			if (option == 0) { // yes
+				GameData::saveRec = -1;
 				GameData::getInstance().gameover(false);
 			}
 		});
@@ -223,11 +224,10 @@ bool FloorScene::init()
 	this->addChild(backMenu);
 
 	auto load = MenuItemFont::create(GStr("load"), [this](Ref *pSender)->void {
-		GameData::getInstance().showDialog(DialogStruct("Load", DIALOGTYPE::LIST, { "1","2","3","Cancel" }), [](int option) {
+		GameData::getInstance().showDialog(DialogStruct("Load", DIALOGTYPE::LIST, { "1","2","3","Cancel" }), [this](int option) {
 			if (option == 3) return;
-			// this feels hackish, but it works pretty well
+			GameData::saveRec = option;
 			GameData::getInstance().gameover(false);
-			GameData::getInstance(option);
 			auto scene = FloorScene::createScene();
 			Director::getInstance()->pushScene(scene);
 		});

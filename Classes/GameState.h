@@ -45,8 +45,9 @@ struct GameState {
 		// write length, altho size can be inferred
 		auto size = globalEvt.size();
 		out.write((const char*)&size, sizeof(size));
-		for (auto evtId : globalEvt) {
-			out.write((char*)evtId, sizeof(evtId));
+		for (int evtId : globalEvt) {
+			CCLOG("saving evt id %d", evtId);
+			out.write((const char*)&evtId, sizeof(evtId));
 		}
 	}
 	bool deserializeFrom(int saveRec) {

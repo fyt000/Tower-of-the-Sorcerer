@@ -3,6 +3,7 @@
 #include "Configureader.h"
 #include "DialogStruct.h"
 #include "GlobalDefs.h"
+#include "TransformCoordinate.h"
 
 using namespace twsutil;
 
@@ -232,3 +233,80 @@ int GetKey::perform(std::shared_ptr<MyEvent> evt)
 	return 0;
 }
 
+StopMovement::StopMovement(std::unique_ptr<MyAction> next) : MyAction(std::move(next))
+{
+}
+
+int StopMovement::perform(std::shared_ptr<MyEvent> evt)
+{
+	GameData::getInstance().block();
+	GameData::getInstance().stopMovement();
+	MyAction::perform(evt);
+	GameData::getInstance().releaseBlock();
+	return 0;
+}
+
+int MoveWithDelay::ongoingActions = 0;
+
+MoveWithDelay::MoveWithDelay(std::unique_ptr<MyAction> next, int floor, int x, int y,
+	const std::vector<int>& newX, const std::vector<int>& newY, float delay) :
+	MyAction(std::move(next)), floor(floor), x(x), y(y), newX(newX), newY(newY), delay(delay) 
+{
+}
+
+void MoveWithDelay::actionDone(int x, int y) {
+	ongoingActions -= 1;
+	actionsRan += 1;
+	// if we moveed to the final position, update actual data
+	if (actionsRan == newX.size()) {
+		GameData::getInstance().moveEvent(this->x, this->y, newX.back(), newY.back());
+	}
+}
+
+int MoveWithDelay::perform(std::shared_ptr<MyEvent> evt)
+{
+	GameData::getInstance().block();
+	GameData::getInstance().stopMovement();
+	// floor must match? TODO: look into this
+	// globalevt triggering usually ensures that this is matched
+	if (floor != GameData::getInstance().floor->V())
+		return 0;
+	auto target = GameData::getInstance().getEvent(x, y);
+	if (target) {
+		auto sprite = target->getSprite();
+		// 
+		// double initDelay = (AniRate + 0.01f) * ongoingActions;
+		// float initDelay = 0;
+		ongoingActions += newX.size();
+		cocos2d::Vector<cocos2d::FiniteTimeAction*> actions;
+		// actions.pushBack(cocos2d::DelayTime::create(delay));
+		for (size_t i = 0; i < newX.size(); i++) {
+			int nx = newX[i];
+			int ny = newY[i];
+			actions.pushBack(cocos2d::MoveTo::create(AniRate,
+				TransformCoordinate::transformVec2(nx, ny)));
+			actions.pushBack(cocos2d::CallFunc::create([this,nx,ny]() {
+				actionDone(nx,ny);
+			}));
+			actions.pushBack(cocos2d::DelayTime::create(delay));
+		}
+		// next only happens until all actions are done
+		actions.pushBack(cocos2d::CallFunc::create([this,evt]() {
+			MyAction::perform(evt);
+			GameData::getInstance().releaseBlock();
+		}));
+		sprite->runAction(cocos2d::Sequence::create(actions));
+	}
+	return 0;
+}
+
+DisableGlobEvt::DisableGlobEvt(std::unique_ptr<MyAction> next, int id) : MyAction(std::move(next)), id(id)
+{
+}
+
+int DisableGlobEvt::perform(std::shared_ptr<MyEvent> evt)
+{
+	GameData::getInstance().disableGlobalEvent(id);
+	MyAction::perform(evt);
+	return 0;
+}
