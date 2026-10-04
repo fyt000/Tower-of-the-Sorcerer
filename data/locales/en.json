@@ -26,7 +26,7 @@
     "inspect_hint": "Point at a tile to inspect it.",
     "damage": "Damage",
     "orb_required": "Find the Hero Orb to forecast combat.",
-    "movement_hint": "Arrow keys / WASD to move. Click adjacent tiles or use the direction buttons.",
+    "movement_hint": "Arrow keys / WASD or direction buttons to move. Click a target to follow a clear path, stopping at obstacles.",
     "skip": "Skip animation",
     "hero_hit": "Hero strikes",
     "enemy_hit": "Enemy strikes",

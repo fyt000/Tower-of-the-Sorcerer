@@ -26,7 +26,7 @@
     "inspect_hint": "指向格子以查看详情。",
     "damage": "伤害",
     "orb_required": "获得英雄宝珠后可预测战斗。",
-    "movement_hint": "方向键或WASD移动。也可点击相邻格子或使用方向按钮。",
+    "movement_hint": "用方向键、WASD或方向按钮移动。点击目标可沿畅通路线前进，遇到障碍时停下。",
     "skip": "跳过动画",
     "hero_hit": "勇士攻击",
     "enemy_hit": "敌人攻击",
