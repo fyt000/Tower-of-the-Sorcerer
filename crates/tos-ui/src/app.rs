@@ -443,6 +443,16 @@ impl TowerApp {
                     self.visual["player"]["x"] = e["to"]["x"].clone();
                     self.visual["player"]["y"] = e["to"]["y"].clone();
                 }
+                "battle" => {
+                    let strikes = e["enemy_strikes"]
+                        .as_i64()
+                        .unwrap_or_else(|| e["rounds"].as_i64().unwrap_or(0));
+                    self.visual["player"]["hp"] = json!(
+                        (e["hero_hp"].as_i64().unwrap_or(0)
+                            - strikes * e["enemy_hit"].as_i64().unwrap_or(0))
+                        .max(0)
+                    );
+                }
                 "move_tile" => {
                     if e["floor"] == self.visual["floor"] {
                         let width = self.visual["width"].as_u64().unwrap_or(11) as usize;
@@ -478,6 +488,9 @@ impl TowerApp {
         if self.visual["floor"] != json!(floor) {
             self.music_paused = false;
             self.music_override = None;
+        }
+        if e["player"].is_object() {
+            self.visual["player"] = e["player"].clone();
         }
         self.visual["floor"] = json!(floor);
         self.visual["player"]["floor"] = json!(floor);
