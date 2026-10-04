@@ -1032,6 +1032,10 @@ impl Engine {
                     return self.block(&battle.reason);
                 }
                 let damage = battle.damage.unwrap();
+                if damage < self.state.player.hp {
+                    // Original taisen enters the enemy cell before its combat animation.
+                    self.present_move(&p, x, y, dx, dy);
+                }
                 self.present_battle(&enemy, &battle, floor, x, y, false);
                 if damage >= self.state.player.hp {
                     // Original permits fatal battles; forecasts let the player plan before committing.
@@ -1063,7 +1067,6 @@ impl Engine {
                 }
                 self.state.player.x = x;
                 self.state.player.y = y;
-                self.present_move(&p, x, y, dx, dy);
                 self.log(format!(
                     "Defeated {}: −{} HP, +{} gold.",
                     enemy.name, damage, reward

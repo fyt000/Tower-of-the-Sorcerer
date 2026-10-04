@@ -57,6 +57,16 @@ fn combat_timeline_describes_the_same_calculation_as_headless_state() {
     step(&mut game, "right");
     let snapshot = game.snapshot();
     let timeline = snapshot["last_action"]["presentation"].as_array().unwrap();
+    let moves: Vec<_> = timeline
+        .iter()
+        .enumerate()
+        .filter(|(_, e)| e["type"] == "move")
+        .collect();
+    assert_eq!(moves.len(), 1);
+    let battle_index = timeline.iter().position(|e| e["type"] == "battle").unwrap();
+    assert!(moves[0].0 < battle_index);
+    assert_eq!(moves[0].1["from"], json!({"floor":1,"x":1,"y":0}));
+    assert_eq!(moves[0].1["to"], json!({"floor":1,"x":2,"y":0}));
     let battle = timeline.iter().find(|e| e["type"] == "battle").unwrap();
     assert_eq!(battle["hero_hp"], 100);
     assert_eq!(battle["enemy_hp"], 20);
@@ -70,6 +80,7 @@ fn combat_timeline_describes_the_same_calculation_as_headless_state() {
     assert_eq!(battle["duration_ms"], 2250);
     assert_eq!(game.player().hp, 94);
     assert_eq!(game.player().gold, 9);
+    assert_eq!((game.player().x, game.player().y), (2, 0));
     assert!(
         !timeline
             .iter()
@@ -90,12 +101,10 @@ fn fatal_and_enemy_first_animation_turns_end_at_the_actual_lethal_strike() {
     });
     step(&mut game, "right");
     let state = game.snapshot();
-    let battle = state["last_action"]["presentation"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|e| e["type"] == "battle")
-        .unwrap();
+    let timeline = state["last_action"]["presentation"].as_array().unwrap();
+    assert!(!timeline.iter().any(|e| e["type"] == "move"));
+    assert_eq!((game.player().x, game.player().y), (1, 0));
+    let battle = timeline.iter().find(|e| e["type"] == "battle").unwrap();
     assert_eq!(battle["hero_strikes"], 1);
     assert_eq!(battle["enemy_strikes"], 1);
     assert_eq!(state["status"], "lost");
