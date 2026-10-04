@@ -73,7 +73,7 @@ The original event queue's opcode 10 dialogue operand is **one-based**. Its disp
 
 The hidden NPCs are supported by direct `handan` evidence: tile 10 reveals a merchant at floor 12 `(10,0)`, an old man at floor 16 `(10,10)`, a Cross at floor 19 `(5,2)`, and a Magician A at floor 41 `(9,1)` after the opposite magician is defeated. Floor 12's right-hand merchant offers yellow keys for 1000 gold each repeatedly; its left-hand merchant offers one red key for 800 gold.
 
-The floor-24 time gate and first-cycle completion are separate transitions. The princess-doll branch at `0x445397` unlocks the gate when the floor-25 boss cell is road. The gate queues travel to floor 50, dialogue, and a Zeno at `(5,4)`; it does not finish the game by itself. In `handan` at `0x4463A1`, touching Zeno on floor 50 in the initial cycle enters an ending animation sequence, followed by replay reset `(opcode 11, subcode 6)`, instead of ordinary combat. The Rust campaign records that first-cycle completion as `won`. The original automatic transition into the alternate replay cycle is outside the supported initial campaign; it must not be approximated by requiring an ordinary victory over Zeno's 8000/5000/1000 stat row.
+The floor-24 time gate and first-cycle completion are separate transitions. The princess-doll branch at `0x445397` unlocks the gate when the floor-25 boss cell is road. The gate queues travel to floor 50, dialogue, and a Zeno at `(5,4)`; it does not finish the game by itself. In `handan` at `0x4463A1`, touching Zeno on floor 50 in the initial cycle enters an ending animation sequence, followed by replay reset `(opcode 11, subcode 6)`, instead of ordinary combat. The Rust campaign records a presentation sequence followed by `next_cycle`, carrying hero stats into the ×44 backside tower. A backside Zeno encounter is an ordinary battle against the original second-cycle row. The reset, cycle-dependent capture, and scaling evidence are recorded in `data/original-cycle-evidence.json`; see [mechanics.md](mechanics.md#backside--replay-cycles).
 
 ## Artwork and audio
 
@@ -89,6 +89,19 @@ The original artwork, music, maps, and text remain credited to **Oz & Kenichi / 
 
 The shared Rust engine is tested against both small rule fixtures and the imported original campaign. The original-campaign tests play the opening through actual moves and map-based pathfinding: collect a yellow key, open the floor-1 door, climb through floors 2 and 3, trigger the capture, verify exact `400 HP / 10 ATK / 10 DEF` with stolen equipment removed, acknowledge the thief, and walk through the escape tunnel. Scenario saves then exercise the two-guard prison-bar condition, repeatable key sales, the once-only old-man gift, both hidden NPC reveals and their trades/gifts, stair links that skip floor 44, the floor-39 three-o'clock puzzle, clearing a spawned fairy without granting stats, and removing the dragon's full body before collecting its Snow Crystal reward.
 
-These tests establish their stated transitions, rather than an unassisted solution of all fifty floors. The full original map and enemy data are recovered; the event data is an authored translation of original writes, predicates, and queue instructions. Animation and waits are collapsed into deterministic ordered state changes. Native, browser, and MCP clients use that same engine.
+These tests establish their stated transitions, rather than an unassisted solution of all fifty floors. The full original map and enemy data are recovered; the event data is an authored translation of original writes, predicates, and queue instructions. Tile motion, waits, sound cues and dialogue IDs are preserved as ordered presentation effects alongside deterministic state changes. Native, browser, and MCP clients use that same engine; headless clients do not need to wait for display animations.
 
-Remaining fidelity boundaries include the original fairy score/rank calculations and checkpoint interface, the alternate replay/backside-tower cycle and its scaling, exact presentation/audio timing, and a complete unassisted end-to-end playthrough. Boss/event scenarios and a successful scripted ending test are useful evidence, but they do not prove every original sequence or optimal route. Further confirmed behavior can be added through JSON event rules without rewriting the UI.
+Remaining fidelity boundaries include the original fairy score/rank calculations and checkpoint interface, exact original pixel/timer presentation and MIDI timbre, and a complete unassisted end-to-end playthrough. Boss/event scenarios and a successful scripted ending test are useful evidence, but they do not prove every original sequence or optimal route. Further confirmed behavior can be added through JSON event rules without rewriting the UI.
+
+
+## Deeper event and cycle evidence
+
+```powershell
+python -m pip install pefile capstone unicorn
+python tools/extract_original_cycles.py
+python tools/extract_original_events.py
+```
+
+These tools emulate selected original routines in isolated memory without opening the installed game's UI. All skipped helper calls remain reported; memory writes and queue records are evidence, while rendering durations are authored presentation settings. They are research/regeneration tools rather than runtime dependencies. After deliberate event regeneration, `--regenerate-campaign` merges the independently maintained event/interaction files. Ordinary media extraction preserves the edited campaign.
+
+`original-cycle-evidence.json` includes the reset/capture branches, first/backside initializer snapshots, Hero Orb forecast gating, audio cue mappings, and the full floor-10 guard trap. The event data now contains 100 original-derived events, including both first-cycle and backside endings. Extracted media stays local under `web/assets/` and is excluded from Git; use the one-time setup/extraction script on each fresh checkout.

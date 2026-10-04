@@ -6,11 +6,18 @@ instructions; calls/graphics are not blindly interpreted as gameplay.
 Campaign integration is deliberately a separate regeneration step.
 """
 import json,pathlib
-from original_event_probe import probe, RAW, ROOT
+from original_event_probe import probe as original_probe, RAW, ROOT
+
+def probe(*args, **kwargs):
+    # Presentation is part of the evidence, even though headless play applies
+    # the resulting deterministic state changes without waiting in real time.
+    return original_probe(*args, include_presentation=True, **kwargs)
 
 DIALOGUES={s['id']:s['text'] for s in json.loads((ROOT/'data/original-dialogue.json').read_text(encoding='utf-8'))}
 TILES=list(RAW)
 EVENTS=[]
+SOUNDS={1:'open',2:'get',3:'taisen',4:'zeno',5:'music-start',6:'music-stop',
+        7:'3f',8:'20f',9:'kai',10:'kai2'}
 
 def tile_effect(f,index,tile):
     return {'type':'set_tile','floor':f,'x':index%11,'y':index//11,'tile':tile}
@@ -22,19 +29,31 @@ def convert(p,f,tiles=None):
     for ff,x,y,t in p['changed']:
         tiles[ff*123+2+y*11+x]=t;effects.append(tile_effect(ff,y*11+x,t))
     for opcode,a,b in p['queue']:
-        if opcode==10:
+        if opcode==0:
+            if effects and effects[-1]['type']=='wait':effects[-1]['ms']+=25
+            else:effects.append({'type':'wait','ms':25})
+        elif opcode==1:
+            effects.append({'type':'sound','cue':SOUNDS[a]})
+        elif opcode in [2,8]:pass # Redraw/stats panel instructions, not game changes.
+        elif opcode==9:
+            # Temporary magic graphics (atlas cells 166..182), not map writes.
+            if not effects or effects[-1].get('kind')!='magic':
+                effects.append({'type':'cinematic','kind':'magic','duration_ms':120})
+        elif opcode==10:
             # roujin 0x44A255 decrements the queue ID before TStrings lookup.
             # Fairy records retain the score overlay rather than a string.
             if a not in [16,22,24,40,47]:
                 text=DIALOGUES[a-1]
                 if a in [5,17,55]:text+=' '+DIALOGUES[{5:57,17:58,55:59}[a]]
                 effects.append({'type':'message','text':text,'dialogue_id':a-1,'original_queue_id':a})
+            else:effects.append({'type':'cinematic','kind':'fairy','duration_ms':450})
         elif opcode in [6,13]:
             t=b if opcode==6 else (4 if b==5 else 8 if b==8 else 6)
             tiles[f*123+2+a]=t;effects.append(tile_effect(f,a,t))
         elif opcode==12:
             t=tiles[f*123+2+a];tiles[f*123+2+a]=6;tiles[f*123+2+b]=t
-            effects.extend([tile_effect(f,a,6),tile_effect(f,b,t)])
+            effects.append({'type':'move_tile','floor':f,'from_x':a%11,'from_y':a//11,
+                            'x':b%11,'y':b//11,'tile':t,'duration_ms':130})
         elif opcode==17:
             tiles[f*123+2+a]=b;effects.append(tile_effect(f,a,b))
         elif opcode==11 and a==2:
@@ -48,7 +67,15 @@ def convert(p,f,tiles=None):
         elif opcode==11 and a==11:
             arrival=RAW[b*123];effects.append({'type':'teleport','floor':b,'x':arrival%11,'y':arrival//11})
             f=b
-        elif opcode==11 and a in [4,8,9,12,13,14]:pass # Graphics and title/caption effects.
+        elif opcode==11 and a==6:effects.append({'type':'next_cycle'})
+        elif opcode==11 and a in [1,4,7,8,9,12,13,14,15]:
+            kinds={1:'capture',4:'redraw',7:'fade_out',8:'fade_in',9:'redraw',
+                   12:'fade',13:'victory',14:'credits',15:'credits'}
+            kind=kinds[a]
+            # Collapse raster scan frames; keep the sequence and durations.
+            if effects and effects[-1].get('kind')==kind:
+                effects[-1]['duration_ms']=min(600,effects[-1]['duration_ms']+10)
+            elif kind!='redraw':effects.append({'type':'cinematic','kind':kind,'duration_ms':150})
         else:unknown.append([opcode,a,b])
     return effects,tiles,unknown
 
@@ -63,13 +90,19 @@ def differences(a,b):
 
 # Verified capture and prison escape from opening31 and touzoku.
 add('capture_on_floor_3',{'type':'step','floor':3,'x':4,'y':8},[
-    tile_effect(3,92,6),{'type':'message','text':DIALOGUES[9],'dialogue_id':9},
+    tile_effect(3,92,6),{'type':'sound','cue':'3f'},
+    {'type':'cinematic','kind':'magic','duration_ms':650},
+    {'type':'message','text':DIALOGUES[9],'dialogue_id':9},
     {'type':'message','text':DIALOGUES[10],'dialogue_id':10},
-    {'type':'set_stat','stat':'hp','amount':400},{'type':'set_stat','stat':'attack','amount':10},
-    {'type':'set_stat','stat':'defense','amount':10},
+    {'type':'cinematic','kind':'capture','duration_ms':800},
+    *[{'type':'set_stat','stat':stat,'amount':amount,
+       'conditions':[{'type':'cycle_at_most','amount':1}]}
+      for stat,amount in [('hp',400),('attack',10),('defense',10)]],
     {'type':'remove_item','item':'sword_5'},{'type':'remove_item','item':'sacred_shield'},
+    {'type':'clear_inventory','conditions':[{'type':'cycle_at_least','amount':2}]},
     {'type':'teleport','floor':2,'x':2,'y':7},
-    {'type':'flag','flag':'captured'},{'type':'message','text':DIALOGUES[3],'dialogue_id':3}],
+    {'type':'flag','flag':'captured'},
+    *[{'type':'message','text':DIALOGUES[i],'dialogue_id':i} for i in [0,1,2,3]]],
     source='Original mevent 0x463A2C + opening31 0x4655E0')
 add('thief_opens_prison_tunnel',{'type':'interact','floor':2,'x':2,'y':6},[
     tile_effect(2,67,6),tile_effect(2,68,6),{'type':'message','text':DIALOGUES[4]+' '+DIALOGUES[57],'dialogue_id':4}],
@@ -94,7 +127,7 @@ for f in [10,15,20,25,30,33,38,40,48,49]:
         effects,stage,unknown=convert(p,f)
         stage[f*123+2+i]=6;effects.insert(0,tile_effect(f,i,6))
         add(f'floor_{f}_encounter_{i}',{'type':'step','floor':f,'x':i%11,'y':i//11},effects,
-            source='Original ichicheck 0x46CB1C; animation collapsed to ordered state transitions',unknown=unknown)
+            source='Original ichicheck 0x46CB1C; ordered tile motion, sound and waits retained',unknown=unknown)
         INITIAL_STAGES[f]=stage
 
 if __name__=='__main__':
@@ -110,6 +143,7 @@ if __name__=='__main__':
             p=probe(0x4664e4,f,changes=[(f,i%11,i//11,6) for i in dead])
             effects,_,unknown=convert(p,f)
             for e in effects:
+                if e['type'] in ['wait','sound','cinematic']:continue
                 key=json.dumps(e,sort_keys=True)
                 previous=outcomes.get(key)
                 if previous is None or len(dead)<len(previous[0]):outcomes[key]=(dead,e)
@@ -225,8 +259,19 @@ if __name__=='__main__':
         source='Original ichicheck floor-24 time gate; narrative scene before final Zeno interaction',unknown=unknown)
     for tile in [91,92]:
         add(f'floor_50_first_cycle_completion_{tile}',{'type':'bump','floor':50,'tile':tile},
-            [{'type':'win'}],
-            source='Original handan 0x4463A1..0x446473; first cycle has no battle, queues ending animation and opcode11/sub6 replay reset; remake records completion')
+            [{'type':'cinematic','kind':'victory','duration_ms':800},
+             {'type':'sound','cue':'kai2'},
+             {'type':'cinematic','kind':'credits','duration_ms':600},
+             {'type':'next_cycle'}],[{'type':'cycle_at_most','amount':1}],
+            source='Original handan 0x4463A1..0x446473; first cycle has no battle, ending then opcode11/sub6 replay reset')
+        add(f'floor_50_backside_zeno_stats_{tile}',{'type':'bump','floor':50,'tile':tile},
+            [{'type':'set_enemy','enemy':'zeno','hp':1000,'attack':625,'defense':125,'gold':500}],
+            [{'type':'cycle_at_least','amount':2}],
+            source='Original handan 0x4463B3 sets normalized 1000/625/125 before second-cycle combat; retain stable base on later cycles to correct original double-scaling bug')
+    p=probe(0x4664e4,50,5,4,changes=[(50,5,4,6)],globals=[(0x4b8904,43)])
+    effects,_,unknown=convert(p,50)
+    add('floor_50_backside_completion',{'type':'enemy_defeated','floor':50,'x':5,'y':4},effects,
+        [{'type':'cycle_at_least','amount':2}],source='Original moncheck floor50 0x46BFA8; combat victory ending and opcode11/sub6 replay reset',unknown=unknown)
 
     assert len({e['id'] for e in EVENTS}) == len(EVENTS), 'Duplicate event IDs'
     assert not any(e.get('untranslated_original_instructions') for e in EVENTS), 'Untranslated gameplay instruction'

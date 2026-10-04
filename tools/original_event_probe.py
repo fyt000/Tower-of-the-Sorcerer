@@ -14,7 +14,7 @@ md=capstone.Cs(capstone.CS_ARCH_X86,capstone.CS_MODE_32)
 MAP=0x4b8934
 RAW=(ROOT/'data/original-map-bytes.bin').read_bytes()
 
-def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0):
+def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presentation=False):
     u=unicorn.Uc(unicorn.UC_ARCH_X86,unicorn.UC_MODE_32)
     u.mem_map(0,0x300000); u.mem_map(0x400000,0x300000)
     u.mem_write(0x400000,pe.get_memory_mapped_image())
@@ -27,6 +27,7 @@ def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0):
                 (0x4b8698,floor),(0x4b86a0,x),(0x4b86a4,y),(0x48c584,y*11+x)]:
         u.mem_write(a,struct.pack('<I',v))
     for f,tx,ty,tile in changes:u.mem_write(MAP+f*123+2+ty*11+tx,bytes([tile]))
+    for address,value in globals:u.mem_write(address,struct.pack('<I',value))
     initial=bytes(u.mem_read(MAP,len(RAW)))
     initial_monsters=bytes(u.mem_read(0x489910,528))
     read=set(); skipped=set();cache={}
@@ -46,9 +47,12 @@ def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0):
     if count>10000:raise RuntimeError(count)
     queue=[struct.unpack('<HHH',u.mem_read(0x48c74c+i*6,6)) for i in range(count,0,-1)]
     changed=[(f,(i-2)%11,(i-2)//11,new) for off,(old,new) in enumerate(zip(initial,bytes(u.mem_read(MAP,len(RAW))))) if old!=new for f,i in [divmod(off,123)]]
-    return {'queue':[list(q) for q in queue if q[0] not in [0,1,2,8,9]],'changed':changed,
+    return {'queue':[list(q) for q in queue if include_presentation or q[0] not in [0,1,2,8,9]],'changed':changed,
             'reads':[(f,(i-2)%11,(i-2)//11,int(u.mem_read(MAP+offset,1)[0])) for offset in sorted(read) for f,i in [divmod(offset,123)]],
             'monster_changes':[(i,list(struct.unpack('<4I',u.mem_read(0x489910+i*16,16)))) for i in range(33) if bytes(u.mem_read(0x489910+i*16,16))!=initial_monsters[i*16:i*16+16]],
+            'stat_slots':list(struct.unpack('<32I',u.mem_read(0x4b8688,128))),
+            'cycle_factor_minus_one':struct.unpack('<I',u.mem_read(0x4b8904,4))[0],
+            'later_cycle_flag':struct.unpack('<I',u.mem_read(0x4b8908,4))[0],
             'calls':sorted(skipped)}
 
 if __name__=='__main__':
