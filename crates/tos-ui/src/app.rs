@@ -1816,7 +1816,12 @@ fn install_fonts(ctx: &egui::Context, chinese: Option<Vec<u8>>) {
     if let Some(bytes) = chinese {
         fonts.font_data.insert(
             "chinese".into(),
-            Arc::new(egui::FontData::from_owned(bytes)),
+            // Google's variable Noto Sans SC defaults to weight 100 (Thin).
+            // Resolve a readable Regular face consistently on both renderers.
+            Arc::new(egui::FontData::from_owned(bytes).tweak(egui::FontTweak {
+                coords: egui::epaint::text::VariationCoords::new([(b"wght", 400.0)]),
+                ..Default::default()
+            })),
         );
         for family in fonts.families.values_mut() {
             family.push("chinese".into());
