@@ -180,3 +180,33 @@ where `file` is an extracted MIDI basename without `.mid`.
 Presentation effects can customize `wait.ms`, `cinematic.duration_ms`, and
 `move_tile.duration_ms`. The GUI's animation speed setting scales the timeline;
 the durations approximate the original timer-driven scenes.
+
+`rules.presentation.floor_transition_ms` defaults to 450 ms for stairs and
+wings. Their presentation includes `style: "original_spiral"`, the direction,
+and `sound: "kai"`. Scripted teleport effects can supply `transition` and
+`duration_ms`; capture uses `"capture"`, while the floor-24 time gate uses
+`"time_gate"` with a short span for each intermediate floor.
+`rules.presentation.combat_strike_ms` defaults to 450 ms per actual strike
+(the original High setting). Battle events expose `hit_sound`, `strike_ms`,
+and sound/overlay/damage phases; their durations cover the complete alternating
+turn count instead of compressing every long fight into six seconds.
+
+The original campaign uses these additional cinematic fields:
+
+- `magic`: `floor`, `x`, `y`, `frames` (dither-mask tile IDs), `color_tile`, and
+  `underlying_tile`; an optional `targets` array applies a materialization to
+  multiple original positions.
+- `title`: `asset`, `target_asset`, mask `frames`, and optional `sound_cue` with
+  `sound_offsets_ms`. Capture uses the original title-to-vortex sequence.
+- `scan`: `asset`, `background_asset`, `text`, and `translation_key`. Capture
+  reveals the original incantation over its vortex background.
+- `transformation`: `floor`, center coordinates, `width`, `height`,
+  `from_tiles`, target `tile`, and `original_frames`. Floor 20 retains the
+  Vampire's nine-cell body and original 32 blend records.
+- `tile_reveal`: `floor`, coordinates, `from_tile`, target `tile`, and
+  `original_steps`. A following `set_tile` commits the same deterministic
+  outcome for browser, native, headless, and MCP consumers.
+
+`original_frames` and `original_steps` record extraction evidence; durations
+remain explicit presentation settings. These fields do not change combat,
+event conditions, rewards, or persisted game state.

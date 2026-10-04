@@ -105,3 +105,12 @@ python tools/extract_original_events.py
 These tools emulate selected original routines in isolated memory without opening the installed game's UI. All skipped helper calls remain reported; memory writes and queue records are evidence, while rendering durations are authored presentation settings. They are research/regeneration tools rather than runtime dependencies. After deliberate event regeneration, `--regenerate-campaign` merges the independently maintained event/interaction files. Ordinary media extraction preserves the edited campaign.
 
 `original-cycle-evidence.json` includes the reset/capture branches, first/backside initializer snapshots, Hero Orb forecast gating, audio cue mappings, and the full floor-10 guard trap. The event data now contains 100 original-derived events, including both first-cycle and backside endings. Extracted media stays local under `web/assets/` and is excluded from Git; use the one-time setup/extraction script on each fresh checkout.
+
+After regenerating events, run `python tools/audit_original_events.py` to
+reproduce `data/original-event-audit.json`. It probes all 51 initialized floor
+records and finds 56 special-road sites, each covered by a configured event.
+Separate helper summaries retain capture's 729-record opening queue and its
+title/vortex/text-scan stages, the floor-10 guard march, the floor-20 Vampire
+transformation, and the floor-49 Sorcerer materialization. Every probe records
+its skipped helper calls. Initialized-site coverage, dedicated scenario tests,
+and a complete natural playthrough are distinct forms of evidence.

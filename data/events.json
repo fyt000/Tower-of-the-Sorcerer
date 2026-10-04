@@ -24,22 +24,149 @@
       {
         "type": "cinematic",
         "kind": "magic",
-        "duration_ms": 650
+        "floor": 3,
+        "x": 4,
+        "y": 6,
+        "frames": [
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178,
+          179,
+          180,
+          181,
+          182
+        ],
+        "duration_ms": 650,
+        "color_tile": 91,
+        "underlying_tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 3,
+        "x": 4,
+        "y": 6,
+        "tile": 91
       },
       {
         "type": "message",
         "text": "The Magic Sergeant, Zeno, says \"Welcome to 'The Magic Tower'. You are the hundredth man who dared to enter my tower. You will now face my guards. Should you happen to survive, I will fight with you in person specially. You should accept your fate.\"",
-        "dialogue_id": 9
+        "dialogue_id": 9,
+        "original_queue_id": 10
       },
       {
         "type": "message",
         "text": "What? Oh!",
-        "dialogue_id": 10
+        "dialogue_id": 10,
+        "original_queue_id": 11
+      },
+      {
+        "type": "sound",
+        "cue": "zeno"
+      },
+      {
+        "type": "set_tile",
+        "floor": 3,
+        "x": 4,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "cinematic",
+        "kind": "fade_out",
+        "scene": "capture",
+        "duration_ms": 350
+      },
+      {
+        "type": "cinematic",
+        "kind": "title",
+        "scene": "capture",
+        "asset": "data3-title05",
+        "target_asset": "data3-open1",
+        "frames": [
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178,
+          179,
+          180,
+          181,
+          182
+        ],
+        "original_frames": [
+          232,
+          233,
+          234,
+          235,
+          236,
+          237,
+          238,
+          239,
+          240,
+          241,
+          242,
+          243,
+          244,
+          245,
+          246,
+          247
+        ],
+        "duration_ms": 1600,
+        "sound_cue": "zeno",
+        "sound_offsets_ms": [
+          0,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900,
+          1000,
+          1100,
+          1200,
+          1300,
+          1400,
+          1500
+        ]
+      },
+      {
+        "type": "cinematic",
+        "kind": "scan",
+        "scene": "capture",
+        "asset": "data3-open2",
+        "background_asset": "data3-open1",
+        "original_frames": [
+          100,
+          405
+        ],
+        "translation_key": "capture_incantation",
+        "text": "Now is the time to act. Using omniscient power, I shall break the sacred sword and get great wisdom.",
+        "duration_ms": 1400
       },
       {
         "type": "cinematic",
         "kind": "capture",
-        "duration_ms": 800
+        "duration_ms": 400
       },
       {
         "type": "set_stat",
@@ -95,7 +222,8 @@
         "type": "teleport",
         "floor": 2,
         "x": 2,
-        "y": 7
+        "y": 7,
+        "transition": "capture"
       },
       {
         "type": "flag",
@@ -122,7 +250,7 @@
         "dialogue_id": 3
       }
     ],
-    "source": "Original mevent 0x463A2C + opening31 0x4655E0"
+    "source": "Original mevent 0x463A2C + magic 0x461A0C + opening2 0x464048 title/scan + opening31 0x4653B8; compact original stages with configurable durations"
   },
   {
     "id": "thief_opens_prison_tunnel",
@@ -245,6 +373,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 15,
+        "x": 7,
+        "y": 0,
+        "from_tile": 8,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -434,6 +573,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 10,
+        "x": 5,
+        "y": 2,
+        "from_tile": 6,
+        "tile": 4,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 10,
         "x": 5,
@@ -447,6 +597,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 10,
+        "x": 5,
+        "y": 6,
+        "from_tile": 6,
+        "tile": 4,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -464,6 +625,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 10,
+        "x": 3,
+        "y": 3,
+        "from_tile": 4,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 10,
         "x": 3,
@@ -477,6 +649,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 10,
+        "x": 7,
+        "y": 3,
+        "from_tile": 4,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -1374,6 +1557,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 10,
+        "x": 3,
+        "y": 3,
+        "from_tile": 6,
+        "tile": 4,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 10,
         "x": 3,
@@ -1387,6 +1581,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 10,
+        "x": 7,
+        "y": 3,
+        "from_tile": 6,
+        "tile": 4,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -1429,6 +1634,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 15,
+        "x": 5,
+        "y": 8,
+        "from_tile": 6,
+        "tile": 4,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 15,
         "x": 5,
@@ -1455,6 +1671,100 @@
         "x": 5,
         "y": 7,
         "tile": 6
+      },
+      {
+        "type": "wait",
+        "ms": 50
+      },
+      {
+        "type": "sound",
+        "cue": "open"
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 20,
+        "x": 5,
+        "y": 8,
+        "from_tile": 3,
+        "tile": 4,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 5,
+        "y": 8,
+        "tile": 4
+      },
+      {
+        "type": "sound",
+        "cue": "20f"
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "transformation",
+        "floor": 20,
+        "x": 5,
+        "y": 5,
+        "width": 3,
+        "height": 3,
+        "tile": 95,
+        "from_tiles": [
+          83,
+          83,
+          83,
+          83,
+          6,
+          83,
+          83,
+          83,
+          83
+        ],
+        "original_frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32
+        ],
+        "duration_ms": 800
       },
       {
         "type": "set_tile",
@@ -1520,33 +1830,6 @@
         "tile": 6
       },
       {
-        "type": "wait",
-        "ms": 50
-      },
-      {
-        "type": "sound",
-        "cue": "open"
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "set_tile",
-        "floor": 20,
-        "x": 5,
-        "y": 8,
-        "tile": 4
-      },
-      {
-        "type": "sound",
-        "cue": "20f"
-      },
-      {
-        "type": "wait",
-        "ms": 825
-      },
-      {
         "type": "message",
         "text": "Well, You beat the skeletons and invaded. Never regard me as small like a skeleton. I will show you that I am as immortal as god. Hey, come on!",
         "dialogue_id": 19,
@@ -1588,6 +1871,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 25,
+        "x": 5,
+        "y": 9,
+        "from_tile": 3,
+        "tile": 4,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -1640,6 +1934,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 30,
+        "x": 5,
+        "y": 3,
+        "from_tile": 6,
+        "tile": 4,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 30,
         "x": 5,
@@ -1653,6 +1958,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 30,
+        "x": 5,
+        "y": 6,
+        "from_tile": 6,
+        "tile": 4,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -1695,6 +2011,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 33,
+        "x": 9,
+        "y": 3,
+        "from_tile": 6,
+        "tile": 4,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 33,
         "x": 9,
@@ -1708,6 +2035,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 33,
+        "x": 9,
+        "y": 7,
+        "from_tile": 6,
+        "tile": 4,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -1748,6 +2086,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 33,
+        "x": 7,
+        "y": 9,
+        "from_tile": 6,
+        "tile": 8,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -1794,6 +2143,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 38,
+        "x": 1,
+        "y": 4,
+        "from_tile": 6,
+        "tile": 8,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 38,
         "x": 1,
@@ -1836,6 +2196,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 40,
+        "x": 5,
+        "y": 7,
+        "from_tile": 3,
+        "tile": 4,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -3208,6 +3579,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 40,
+        "x": 5,
+        "y": 7,
+        "from_tile": 4,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 40,
         "x": 5,
@@ -3672,6 +4054,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 49,
+        "x": 5,
+        "y": 6,
+        "from_tile": 4,
+        "tile": 4,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 49,
         "x": 5,
@@ -3684,6 +4077,39 @@
         "x": 5,
         "y": 2,
         "tile": 91
+      },
+      {
+        "type": "sound",
+        "cue": "3f"
+      },
+      {
+        "type": "cinematic",
+        "kind": "magic",
+        "floor": 49,
+        "x": 5,
+        "y": 2,
+        "frames": [
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178,
+          179,
+          180,
+          181,
+          182
+        ],
+        "duration_ms": 650,
+        "color_tile": 91,
+        "underlying_tile": 6
       },
       {
         "type": "wait",
@@ -3754,6 +4180,58 @@
         "x": 6,
         "y": 3,
         "tile": 93
+      },
+      {
+        "type": "cinematic",
+        "kind": "magic",
+        "floor": 49,
+        "x": 5,
+        "y": 2,
+        "frames": [
+          167,
+          169,
+          171,
+          173,
+          175,
+          182
+        ],
+        "duration_ms": 1200,
+        "color_tile": 93,
+        "underlying_tile": 6,
+        "targets": [
+          {
+            "x": 4,
+            "y": 1
+          },
+          {
+            "x": 5,
+            "y": 1
+          },
+          {
+            "x": 6,
+            "y": 1
+          },
+          {
+            "x": 6,
+            "y": 2
+          },
+          {
+            "x": 6,
+            "y": 3
+          },
+          {
+            "x": 5,
+            "y": 3
+          },
+          {
+            "x": 4,
+            "y": 3
+          },
+          {
+            "x": 4,
+            "y": 2
+          }
+        ]
       },
       {
         "type": "wait",
@@ -4501,6 +4979,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 10,
+        "x": 5,
+        "y": 2,
+        "from_tile": 4,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 10,
         "x": 5,
@@ -4559,6 +5048,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 10,
+        "x": 3,
+        "y": 3,
+        "from_tile": 4,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 10,
         "x": 3,
@@ -4574,6 +5074,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 10,
+        "x": 7,
+        "y": 3,
+        "from_tile": 4,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 10,
         "x": 7,
@@ -4587,6 +5098,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 10,
+        "x": 5,
+        "y": 6,
+        "from_tile": 4,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -4919,6 +5441,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 15,
+        "x": 5,
+        "y": 2,
+        "from_tile": 4,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 15,
         "x": 5,
@@ -4932,6 +5465,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 15,
+        "x": 5,
+        "y": 8,
+        "from_tile": 4,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -5062,6 +5606,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 20,
+        "x": 5,
+        "y": 2,
+        "from_tile": 4,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 20,
         "x": 5,
@@ -5075,6 +5630,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 20,
+        "x": 5,
+        "y": 8,
+        "from_tile": 4,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -5399,6 +5965,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 25,
+        "x": 5,
+        "y": 9,
+        "from_tile": 4,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 25,
         "x": 5,
@@ -5601,6 +6178,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 30,
+        "x": 5,
+        "y": 3,
+        "from_tile": 4,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 30,
         "x": 5,
@@ -5614,6 +6202,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 30,
+        "x": 5,
+        "y": 6,
+        "from_tile": 4,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -5702,6 +6301,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 33,
+        "x": 9,
+        "y": 3,
+        "from_tile": 6,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 33,
         "x": 9,
@@ -5715,6 +6325,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 33,
+        "x": 9,
+        "y": 7,
+        "from_tile": 6,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -6136,6 +6757,17 @@
         "ms": 25
       },
       {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 43,
+        "x": 6,
+        "y": 0,
+        "from_tile": 1,
+        "tile": 8,
+        "duration_ms": 400,
+        "original_steps": 16
+      },
+      {
         "type": "set_tile",
         "floor": 43,
         "x": 6,
@@ -6153,6 +6785,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 43,
+        "x": 9,
+        "y": 0,
+        "from_tile": 6,
+        "tile": 8,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -6360,6 +7003,17 @@
       {
         "type": "wait",
         "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "tile_reveal",
+        "floor": 49,
+        "x": 5,
+        "y": 6,
+        "from_tile": 4,
+        "tile": 6,
+        "duration_ms": 400,
+        "original_steps": 16
       },
       {
         "type": "set_tile",
@@ -7711,7 +8365,9 @@
         "type": "teleport",
         "floor": 25,
         "x": 1,
-        "y": 10
+        "y": 10,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7729,7 +8385,9 @@
         "type": "teleport",
         "floor": 26,
         "x": 1,
-        "y": 10
+        "y": 10,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7747,7 +8405,9 @@
         "type": "teleport",
         "floor": 27,
         "x": 1,
-        "y": 10
+        "y": 10,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7765,7 +8425,9 @@
         "type": "teleport",
         "floor": 28,
         "x": 9,
-        "y": 10
+        "y": 10,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7783,7 +8445,9 @@
         "type": "teleport",
         "floor": 29,
         "x": 0,
-        "y": 9
+        "y": 9,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7801,7 +8465,9 @@
         "type": "teleport",
         "floor": 30,
         "x": 5,
-        "y": 9
+        "y": 9,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7819,7 +8485,9 @@
         "type": "teleport",
         "floor": 31,
         "x": 5,
-        "y": 1
+        "y": 1,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7837,7 +8505,9 @@
         "type": "teleport",
         "floor": 32,
         "x": 5,
-        "y": 9
+        "y": 9,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7855,7 +8525,9 @@
         "type": "teleport",
         "floor": 33,
         "x": 9,
-        "y": 0
+        "y": 0,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7873,7 +8545,9 @@
         "type": "teleport",
         "floor": 34,
         "x": 1,
-        "y": 0
+        "y": 0,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7891,7 +8565,9 @@
         "type": "teleport",
         "floor": 35,
         "x": 5,
-        "y": 9
+        "y": 9,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7909,7 +8585,9 @@
         "type": "teleport",
         "floor": 36,
         "x": 10,
-        "y": 1
+        "y": 1,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7927,7 +8605,9 @@
         "type": "teleport",
         "floor": 37,
         "x": 10,
-        "y": 9
+        "y": 9,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7945,7 +8625,9 @@
         "type": "teleport",
         "floor": 38,
         "x": 1,
-        "y": 0
+        "y": 0,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7963,7 +8645,9 @@
         "type": "teleport",
         "floor": 39,
         "x": 10,
-        "y": 1
+        "y": 1,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7981,7 +8665,9 @@
         "type": "teleport",
         "floor": 40,
         "x": 9,
-        "y": 10
+        "y": 10,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -7999,7 +8685,9 @@
         "type": "teleport",
         "floor": 41,
         "x": 5,
-        "y": 1
+        "y": 1,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -8017,7 +8705,9 @@
         "type": "teleport",
         "floor": 42,
         "x": 5,
-        "y": 9
+        "y": 9,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -8035,7 +8725,9 @@
         "type": "teleport",
         "floor": 43,
         "x": 0,
-        "y": 1
+        "y": 1,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -8053,7 +8745,9 @@
         "type": "teleport",
         "floor": 44,
         "x": 0,
-        "y": 0
+        "y": 0,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -8071,7 +8765,9 @@
         "type": "teleport",
         "floor": 45,
         "x": 1,
-        "y": 0
+        "y": 0,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -8089,7 +8785,9 @@
         "type": "teleport",
         "floor": 46,
         "x": 10,
-        "y": 1
+        "y": 1,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -8107,7 +8805,9 @@
         "type": "teleport",
         "floor": 47,
         "x": 9,
-        "y": 10
+        "y": 10,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -8125,7 +8825,9 @@
         "type": "teleport",
         "floor": 48,
         "x": 10,
-        "y": 9
+        "y": 9,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -8143,7 +8845,9 @@
         "type": "teleport",
         "floor": 49,
         "x": 1,
-        "y": 10
+        "y": 10,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -8161,7 +8865,9 @@
         "type": "teleport",
         "floor": 50,
         "x": 5,
-        "y": 6
+        "y": 6,
+        "transition": "time_gate",
+        "duration_ms": 90
       },
       {
         "type": "wait",
@@ -8198,155 +8904,31 @@
       {
         "type": "cinematic",
         "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "magic",
-        "duration_ms": 120
-      },
-      {
-        "type": "wait",
-        "ms": 175
+        "floor": 50,
+        "x": 5,
+        "y": 4,
+        "frames": [
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178,
+          179,
+          180,
+          181,
+          182
+        ],
+        "duration_ms": 575,
+        "color_tile": 91,
+        "underlying_tile": 6
       },
       {
         "type": "set_tile",
@@ -8584,34 +9166,7 @@
       },
       {
         "type": "wait",
-        "ms": 100
-      },
-      {
-        "type": "cinematic",
-        "kind": "victory",
-        "duration_ms": 150
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "credits",
-        "duration_ms": 150
-      },
-      {
-        "type": "wait",
-        "ms": 25
-      },
-      {
-        "type": "cinematic",
-        "kind": "credits",
-        "duration_ms": 150
-      },
-      {
-        "type": "wait",
-        "ms": 25
+        "ms": 175
       },
       {
         "type": "sound",

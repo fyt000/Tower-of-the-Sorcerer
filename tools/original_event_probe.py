@@ -14,13 +14,14 @@ md=capstone.Cs(capstone.CS_ARCH_X86,capstone.CS_MODE_32)
 MAP=0x4b8934
 RAW=(ROOT/'data/original-map-bytes.bin').read_bytes()
 
-def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presentation=False):
+def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presentation=False,registers=()):
     u=unicorn.Uc(unicorn.UC_ARCH_X86,unicorn.UC_MODE_32)
     u.mem_map(0,0x300000); u.mem_map(0x400000,0x300000)
     u.mem_write(0x400000,pe.get_memory_mapped_image())
     u.mem_write(MAP,RAW)
     u.reg_write(UC_X86_REG_EAX,0x200000)
     u.reg_write(UC_X86_REG_ESP,0x6ff000)
+    for register,value in registers:u.reg_write(register,value)
     u.mem_write(0x6ff000,struct.pack('<I',0x6ffff0))
     for a,v in [(0x200254,0x201000),(0x20102c,40),(0x201030,40),
                 (0x4b8688,400),(0x4b868c,10),(0x4b8690,10),

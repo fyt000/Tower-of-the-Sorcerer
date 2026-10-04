@@ -65,10 +65,13 @@ fn combat_timeline_describes_the_same_calculation_as_headless_state() {
     assert_eq!(battle["rounds"], 2);
     assert_eq!(battle["hero_strikes"], 3);
     assert_eq!(battle["enemy_strikes"], 2);
+    assert_eq!(battle["hit_sound"], "taisen");
+    assert_eq!(battle["strike_ms"], 450);
+    assert_eq!(battle["duration_ms"], 2250);
     assert_eq!(game.player().hp, 94);
     assert_eq!(game.player().gold, 9);
     assert!(
-        timeline
+        !timeline
             .iter()
             .any(|e| e["type"] == "audio" && e["name"] == "taisen")
     );
@@ -147,4 +150,34 @@ fn presentation_effects_are_ordered_but_do_not_delay_the_simulation() {
         .map(|e| e["type"].as_str().unwrap())
         .collect();
     assert_eq!(types, vec!["move", "audio", "wait", "dialogue", "tile"]);
+}
+
+#[test]
+fn stairs_expose_the_original_wipe_sound_and_configurable_timing() {
+    let mut campaign = serde_json::to_value(corridor().campaign).unwrap();
+    campaign["rules"]["presentation"] = json!({"floor_transition_ms":600});
+    campaign["tiles"]["11"] = json!({"name":"Up","kind":"stairs_up"});
+    campaign["tiles"]["12"] = json!({"name":"Down","kind":"stairs_down"});
+    campaign["floors"][0]["tiles"][1] = json!(11);
+    campaign["floors"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":2,"tiles":[12,6,6,6,6],"arrival_up":{"x":1,"y":0}}));
+    let mut game = Engine::from_json(&campaign.to_string()).unwrap();
+    step(&mut game, "right");
+    let snapshot = game.snapshot();
+    let floor = snapshot["last_action"]["presentation"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|e| e["type"] == "floor")
+        .unwrap();
+    assert_eq!(floor["style"], "original_spiral");
+    assert_eq!(floor["sound"], "kai");
+    assert_eq!(floor["direction"], "up");
+    assert_eq!(floor["duration_ms"], 600);
+    assert_eq!((game.player().floor, game.player().x), (2, 1));
+    let mut restored = Engine::from_json(&campaign.to_string()).unwrap();
+    restored.load_json(&game.save_json()).unwrap();
+    assert_eq!((restored.player().floor, restored.player().x), (2, 1));
 }

@@ -808,6 +808,16 @@ impl Engine {
         self.present(json!({"type":"move","from":{"floor":from.floor,"x":from.x,"y":from.y},"to":{"floor":from.floor,"x":x,"y":y},"direction":if dx>0{"right"}else if dx<0{"left"}else if dy>0{"down"}else{"up"},"duration_ms":110}));
     }
 
+    fn present_floor(&mut self, from: i32, transition: &str, duration_ms: Option<u64>) {
+        let target = self.state.player.floor;
+        self.present(json!({"type":"floor","from":from,"to":target,
+            "x":self.state.player.x,"y":self.state.player.y,
+            "player":self.state.player,"tiles":self.state.floors.get(&target),
+            "direction":if target>=from{"up"}else{"down"},
+            "style":transition,"sound":if transition=="original_spiral"{"kai"}else{"none"},
+            "duration_ms":duration_ms.or_else(||self.campaign.rules["presentation"]["floor_transition_ms"].as_u64()).unwrap_or(450).clamp(30,10_000)}));
+    }
+
     fn present_battle(
         &mut self,
         enemy: &Enemy,
@@ -849,8 +859,14 @@ impl Engine {
             enemy_strikes = (self.state.player.hp - 1) / enemy_hit + 1;
             hero_strikes = enemy_strikes - i64::from(first);
         }
-        self.present(json!({"type":"audio","name":"taisen"}));
-        self.present(json!({"type":"battle","enemy_name":enemy.name,"enemy_hp":enemy.hp,"hero_hp":self.state.player.hp,"hero_hit":hero_hit,"enemy_hit":enemy_hit,"rounds":battle.rounds,"hero_strikes":hero_strikes,"enemy_strikes":enemy_strikes,"enemy_first":first,"floor":floor,"x":x,"y":y,"duration_ms":((hero_strikes+enemy_strikes)*180).clamp(480,6000)}));
+        let strike_ms = self.campaign.rules["presentation"]["combat_strike_ms"]
+            .as_u64()
+            .unwrap_or(450)
+            .clamp(60, 3_000);
+        let duration_ms =
+            (hero_strikes.saturating_add(enemy_strikes).max(1) as u64).saturating_mul(strike_ms);
+        self.present(json!({"type":"battle","enemy_name":enemy.name,"enemy_hp":enemy.hp,"hero_hp":self.state.player.hp,"hero_hit":hero_hit,"enemy_hit":enemy_hit,"rounds":battle.rounds,"hero_strikes":hero_strikes,"enemy_strikes":enemy_strikes,"enemy_first":first,"floor":floor,"x":x,"y":y,
+            "strike_ms":strike_ms,"hit_sound":"taisen","sound_phase":0.0,"overlay_phase":1.0/3.0,"damage_phase":2.0/3.0,"duration_ms":duration_ms}));
     }
 
     /// Plan through clear road only. An obstacle may be the final action, never an intermediate step.
@@ -1197,7 +1213,7 @@ impl Engine {
         self.state.player.floor = target;
         self.state.player.x = index % self.campaign.width;
         self.state.player.y = index / self.campaign.width;
-        self.present(json!({"type":"floor","from":from,"to":target,"x":self.state.player.x,"y":self.state.player.y,"player":self.state.player,"tiles":tiles,"duration_ms":450}));
+        self.present_floor(from, "original_spiral", None);
         self.state.visited_floors.insert(target);
         self.log(format!("Entered floor {target}."));
         self.run_events(
@@ -1581,6 +1597,7 @@ impl Engine {
                 }
                 self.state.player.floor = target;
                 self.state.visited_floors.insert(target);
+                self.present_floor(floor, "original_spiral", None);
                 self.run_events("enter_floor", target, x, y, None);
                 self.log(format!("The wing carried you to floor {target}."));
             }
@@ -1977,7 +1994,7 @@ impl Engine {
                         self.state.player.floor = floor;
                         self.state.player.x = x;
                         self.state.player.y = y;
-                        self.present(json!({"type":"floor","from":from,"to":floor,"x":x,"y":y,"player":self.state.player,"tiles":self.state.floors.get(&floor),"duration_ms":450}));
+                        self.present_floor(from, effect["transition"].as_str().unwrap_or("original_spiral"), effect["duration_ms"].as_u64());
                         self.state.visited_floors.insert(floor);
                     }
                 }
@@ -2097,7 +2114,7 @@ impl Engine {
         fresh.log = self.state.log.clone();
         fresh.steps = self.state.steps;
         self.state = fresh;
-        self.present(json!({"type":"floor","from":player.floor,"to":self.state.player.floor,"x":self.state.player.x,"y":self.state.player.y,"player":self.state.player,"tiles":self.state.floors.get(&self.state.player.floor),"duration_ms":900}));
+        self.present(json!({"type":"floor","from":player.floor,"to":self.state.player.floor,"x":self.state.player.x,"y":self.state.player.y,"player":self.state.player,"tiles":self.state.floors.get(&self.state.player.floor),"style":"fade","sound":"none","direction":"down","duration_ms":900}));
         self.log(format!(
             "Entered the backside tower, cycle {cycle}. Monster and treasure statistics are ×{}.",
             self.cycle_multiplier()
