@@ -35,6 +35,12 @@ pub fn tr(locale: &str, key: &str) -> String {
 /// Localize known original definitions only. A custom entity whose canonical
 /// English name was changed keeps its own name, even if its numeric ID overlaps.
 pub fn entity_name(locale: &str, category: &str, id: &str, fallback: &str) -> String {
+    let category = match category {
+        "items" => "item",
+        "tiles" => "tile",
+        "enemies" => "enemy",
+        other => other,
+    };
     let baseline = english()["entities"][category][id].as_str();
     let known = baseline.is_some_and(|name| {
         name.eq_ignore_ascii_case(fallback) || fallback.is_empty() || fallback == id
@@ -89,7 +95,9 @@ pub fn translate_text(locale: &str, text: &str) -> String {
         .into_iter()
         .flat_map(|entries| entries.iter())
         .filter_map(|(id, value)| Some((value.as_str()?, chinese()["dialogue"][id].as_str()?)))
-        .filter(|(source, _)| source.len() >= 20 && text.contains(source))
+        .filter(|(source, _)| {
+            source.len() >= 20 && source.contains(['.', '!', '?']) && text.contains(source)
+        })
         .collect();
     matches.sort_by_key(|(source, _)| std::cmp::Reverse(source.len()));
     let mut translated = text.to_owned();
@@ -242,6 +250,22 @@ mod tests {
         assert_eq!(
             translate_text("zh-CN", "+100 hp purchased for 20 gold."),
             "花费20金币购买了+100 生命。"
+        );
+        assert_eq!(
+            entity_name("zh-CN", "items", "sword_5", "Sacred sword"),
+            "圣剑"
+        );
+        assert_eq!(
+            entity_name("zh-CN", "tiles", "61", "Green Slime"),
+            "绿色史莱姆"
+        );
+        assert_eq!(translate_text("zh-CN", "Floor 1"), "第1层");
+        assert_eq!(
+            translate_text(
+                "zh-CN",
+                "Your journey begins. Every battle is deterministic; plan your route carefully."
+            ),
+            "冒险开始了。每场战斗的结果都由属性决定，请仔细规划路线。"
         );
     }
 }

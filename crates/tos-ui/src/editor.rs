@@ -296,8 +296,15 @@ impl CampaignEditor {
         });
         let before = self.campaign.clone();
         let was_stroke = self.stroke_active;
-        egui::ScrollArea::vertical()
+        // eframe's root UI can grow with its contents. Bound the editor body
+        // against the actual viewport and reserve the caller's Back button.
+        let body_height =
+            (ui.ctx().content_rect().bottom() - ui.next_widget_position().y - 64.0).max(40.0);
+        let content = egui::ScrollArea::both()
             .id_salt("campaign_editor_content")
+            .max_height(body_height)
+            .auto_shrink([false, false])
+            .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible)
             .show(ui, |ui| match self.section {
                 Section::Floors => self.floors_ui(ui, locale),
                 Section::Enemies => self.enemies_ui(ui, locale),
@@ -307,6 +314,7 @@ impl CampaignEditor {
                 Section::Events => self.events_ui(ui, locale),
                 Section::Advanced => self.advanced_ui(ui, locale),
             });
+        self.bounds.insert("content".into(), content.inner_rect);
         if self.section != Section::Advanced {
             remove_untouched_additions(&mut self.campaign, &before);
         }
@@ -329,7 +337,7 @@ impl CampaignEditor {
         ui.horizontal_wrapped(|ui| {
             egui::ComboBox::from_id_salt("editor_floor").selected_text(format!("{} {}",tr(locale,"floor"),self.campaign["floors"][self.floor]["id"]))
                 .show_ui(ui, |ui| { for index in 0..count { let floor = &self.campaign["floors"][index];
-                    ui.selectable_value(&mut self.floor,index,format!("{} · {}",floor["id"],floor["title"].as_str().unwrap_or_default())); } });
+                    ui.selectable_value(&mut self.floor,index,format!("{} · {}",floor["id"],crate::locales::translate_text(locale,floor["title"].as_str().unwrap_or_default()))); } });
             if ui.button(tr(locale,"editor.add_floor")).clicked() {
                 let id = self.campaign["floors"].as_array().unwrap().iter().filter_map(|floor|floor["id"].as_i64()).max().unwrap_or(0) + 1;
                 let width = self.campaign["width"].as_u64().unwrap_or(11) as usize;
@@ -393,7 +401,41 @@ impl CampaignEditor {
         }
         self.selected_cell.0 = self.selected_cell.0.min(width - 1);
         self.selected_cell.1 = self.selected_cell.1.min(height - 1);
-        let size = ((ui.available_width() - 12.0) / width as f32).clamp(16.0, 52.0);
+        if ui.available_width() > 820.0 {
+            let available = ui.available_width();
+            let board_width = (available * 0.52).clamp(340.0, 600.0);
+            let palette_width = (available - board_width - 20.0).max(240.0);
+            let board_height =
+                (ui.ctx().content_rect().bottom() - ui.next_widget_position().y - 170.0).max(220.0);
+            ui.horizontal_top(|ui| {
+                ui.vertical(|ui| {
+                    ui.set_width(board_width);
+                    self.floor_canvas_ui(ui, locale, width, height, board_height);
+                });
+                ui.add_space(12.0);
+                ui.vertical(|ui| {
+                    ui.set_width(palette_width);
+                    self.palette_ui(ui, locale, board_height);
+                });
+            });
+        } else {
+            self.floor_canvas_ui(ui, locale, width, height, 540.0);
+            ui.separator();
+            self.palette_ui(ui, locale, 250.0);
+        }
+    }
+
+    fn floor_canvas_ui(
+        &mut self,
+        ui: &mut Ui,
+        locale: &str,
+        width: usize,
+        height: usize,
+        maximum_height: f32,
+    ) {
+        let size = ((ui.available_width() - 12.0) / width as f32)
+            .min(maximum_height / height as f32)
+            .clamp(8.0, 52.0);
         let (rect, response) = ui.allocate_exact_size(
             Vec2::new(width as f32 * size, height as f32 * size),
             Sense::click_and_drag(),
@@ -502,7 +544,9 @@ impl CampaignEditor {
                 self.section = Section::Events;
             }
         });
-        ui.separator();
+    }
+
+    fn palette_ui(&mut self, ui: &mut Ui, locale: &str, maximum_height: f32) {
         ui.label(tr(locale, "editor.palette"));
         let search = ui.add(
             egui::TextEdit::singleline(&mut self.search).hint_text(tr(locale, "editor.search")),
@@ -518,7 +562,9 @@ impl CampaignEditor {
         let query = self.search.to_lowercase();
         egui::ScrollArea::vertical()
             .id_salt("editor_palette")
-            .max_height(250.0)
+            .max_height(maximum_height)
+            .auto_shrink([false, false])
+            .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible)
             .show(ui, |ui| {
                 ui.horizontal_wrapped(|ui| {
                     for (id, definition) in entries {
@@ -1140,6 +1186,7 @@ fn initialize_record(record: &mut Value, effect: bool) {
         "cinematic" => json!({"kind":"magic","duration_ms":650}),
         "move_tile" => json!({"floor":0,"from_x":0,"from_y":0,"x":1,"y":0,"duration_ms":120}),
         "no_enemies" => json!({"floor":0}),
+        "cycle_at_least" | "cycle_at_most" => json!({"amount":1}),
         "any" if !effect => json!({"conditions":[]}),
         _ => json!({}),
     };
@@ -1239,6 +1286,8 @@ fn conditions_ui(ui: &mut Ui, locale: &str, value: &mut Value, depth: usize) {
                                 "no_enemies",
                                 "stat_at_least",
                                 "stat_at_most",
+                                "cycle_at_least",
+                                "cycle_at_most",
                                 "any",
                             ],
                         );
@@ -1266,6 +1315,14 @@ fn conditions_ui(ui: &mut Ui, locale: &str, value: &mut Value, depth: usize) {
                                     &["hp", "attack", "defense", "gold", "yellow", "blue", "red"],
                                 );
                                 number(ui, locale, "amount", &mut condition["amount"], 1);
+                            }
+                            "cycle_at_least" | "cycle_at_most" => {
+                                let key = if condition["cycle"].is_number() {
+                                    "cycle"
+                                } else {
+                                    "amount"
+                                };
+                                number(ui, locale, "cycle", &mut condition[key], 1);
                             }
                             "any" if depth < 4 => {
                                 conditions_ui(ui, locale, &mut condition["conditions"], depth + 1)
@@ -1356,7 +1413,10 @@ fn effects_ui(ui: &mut Ui, locale: &str, value: &mut Value) {
                                     locale,
                                     "kind",
                                     &mut effect["kind"],
-                                    &["magic", "capture", "fade", "victory", "credits"],
+                                    &[
+                                        "magic", "capture", "fade_out", "fade_in", "fade", "fairy",
+                                        "victory", "credits",
+                                    ],
                                 );
                                 number(ui, locale, "duration_ms", &mut effect["duration_ms"], 650);
                             }
@@ -1696,6 +1756,45 @@ mod tests {
                 editor.validate().is_ok(),
                 "Viewing {section:?} invalidated campaign"
             );
+        }
+    }
+    #[test]
+    fn editor_layout_reserves_footer_and_shows_desktop_palette_beside_board() {
+        for width in [1360.0, 390.0] {
+            let mut editor = CampaignEditor::new(campaign());
+            let context = egui::Context::default();
+            context.style_mut(|style| {
+                for font in style.text_styles.values_mut() {
+                    font.size = 20.0;
+                }
+            });
+            let viewport = Rect::from_min_size(Pos2::ZERO, Vec2::new(width, 920.0));
+            let mut footer = Rect::NOTHING;
+            for _ in 0..2 {
+                context
+                    .run_ui(
+                        egui::RawInput {
+                            screen_rect: Some(viewport),
+                            ..Default::default()
+                        },
+                        |ui| {
+                            editor.show(ui, "en");
+                            footer = ui.button("Back to game").rect;
+                        },
+                    )
+                    .drop_without_applying_deltas();
+            }
+            assert!(
+                footer.bottom() <= viewport.bottom(),
+                "Footer inaccessible at width {width}: {footer:?}"
+            );
+            assert!(editor.bounds["content"].bottom() <= viewport.bottom() - 40.0);
+            if width > 820.0 {
+                assert!(editor.bounds["board"].right() < editor.bounds["search"].left());
+                assert!(editor.bounds["board"].bottom() <= editor.bounds["content"].bottom());
+                assert!(editor.bounds["search"].bottom() <= editor.bounds["content"].bottom());
+            }
+            assert!(!editor.is_dirty());
         }
     }
     #[test]

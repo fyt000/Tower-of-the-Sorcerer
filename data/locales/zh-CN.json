@@ -204,6 +204,9 @@
     "no_enemies": "本层没有敌人",
     "stat_at_least": "属性不低于",
     "stat_at_most": "属性不高于",
+    "cycle_at_least": "里魔塔轮次不低于",
+    "cycle_at_most": "里魔塔轮次不高于",
+    "cycle": "里魔塔轮次",
     "any": "满足任意条件",
     "message": "显示消息",
     "set_tile": "设置格子",
@@ -232,6 +235,8 @@
     "magic": "魔法闪光",
     "capture": "勇者被俘",
     "fade": "渐隐",
+    "fade_out": "淡出",
+    "fade_in": "淡入",
     "victory": "胜利场景",
     "credits": "制作名单",
     "": "无",
@@ -785,6 +790,8 @@
     "Victory would be fatal.": "这场战斗将导致死亡。",
     "Safe battle.": "可以安全获胜。",
     "Your attack cannot penetrate this enemy's defense.": "你的攻击无法突破这个敌人的防御。",
+    "Your journey begins. Every battle is deterministic; plan your route carefully.": "冒险开始了。每场战斗的结果都由属性决定，请仔细规划路线。",
+    "Secret floor": "隐藏楼层",
     "This battle would be fatal.": "这场战斗将导致死亡。",
     "hp": "生命",
     "attack": "攻击",
@@ -795,6 +802,10 @@
     "red": "红钥匙"
   },
   "patterns": [
+    {
+      "source": "Floor {number}",
+      "translation": "第{number}层"
+    },
     {
       "source": "Defeated {enemy}: −{damage} HP, +{gold} gold.",
       "translation": "击败{enemy}：生命减少{damage}，获得{gold}金币。"
