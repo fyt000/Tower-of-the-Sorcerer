@@ -76,12 +76,20 @@ pub fn translate_text(locale: &str, text: &str) -> String {
     {
         return tr(locale, key);
     }
+    if let Some(entries) = english()["dialogue"].as_object()
+        && let Some((id, _)) = entries
+            .iter()
+            .find(|(_, value)| value.as_str() == Some(text))
+        && let Some(value) = chinese()["dialogue"][id].as_str()
+    {
+        return value.to_owned();
+    }
     let mut matches: Vec<(&str, &str)> = english()["dialogue"]
         .as_object()
         .into_iter()
         .flat_map(|entries| entries.iter())
         .filter_map(|(id, value)| Some((value.as_str()?, chinese()["dialogue"][id].as_str()?)))
-        .filter(|(source, _)| source.len() >= 12 && text.contains(source))
+        .filter(|(source, _)| source.len() >= 20 && text.contains(source))
         .collect();
     matches.sort_by_key(|(source, _)| std::cmp::Reverse(source.len()));
     let mut translated = text.to_owned();
@@ -148,29 +156,27 @@ fn match_template<'a>(mut template: &'a str, mut text: &'a str) -> Option<Vec<(&
 }
 
 fn translate_names(locale: &str, text: &str) -> String {
-    let mut names = Vec::new();
+    // A captured name must match the full canonical name. Replacing a substring
+    // such as "Knight" would also alter a custom campaign's "Custom Knight".
     if let Some(categories) = english()["entities"].as_object() {
         for (category, entries) in categories {
             if let Some(entries) = entries.as_object() {
                 for (id, value) in entries {
                     if let Some(name) = value.as_str()
-                        && name.len() > 2
+                        && name.eq_ignore_ascii_case(text)
                     {
-                        names.push((name, entity_name(locale, category, id, name)));
+                        return entity_name(locale, category, id, name);
                     }
                 }
             }
         }
     }
-    names.sort_by_key(|(name, _)| std::cmp::Reverse(name.len()));
-    let mut translated = text.to_owned();
-    for (name, target) in names {
-        translated = translated.replace(name, &target);
-    }
-    if let Some(value) = chinese()["text"][&translated].as_str() {
+    if let Some(value) = chinese()["text"][text].as_str() {
         return value.to_owned();
     }
-    translated
+    // Engine fields can themselves contain a generated altar offer label.
+    // Every template consumes literal text, so matching recursively shrinks it.
+    translate_text(locale, text)
 }
 
 #[cfg(test)]
@@ -228,6 +234,14 @@ mod tests {
         assert_eq!(
             translate_text("zh-CN", "Defeated Custom Goblin: −20 HP, +4 gold."),
             "击败Custom Goblin：生命减少20，获得4金币。"
+        );
+        assert_eq!(
+            translate_text("zh-CN", "Defeated Custom Golden Knight: −20 HP, +4 gold."),
+            "击败Custom Golden Knight：生命减少20，获得4金币。"
+        );
+        assert_eq!(
+            translate_text("zh-CN", "+100 hp purchased for 20 gold."),
+            "花费20金币购买了+100 生命。"
         );
     }
 }

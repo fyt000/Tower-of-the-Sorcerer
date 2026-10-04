@@ -820,6 +820,10 @@
       "translation": "花费{cost}金币购买了{offer}。"
     },
     {
+      "source": "+{amount} {stat}",
+      "translation": "+{amount} {stat}"
+    },
+    {
       "source": "Entered the backside tower, cycle {cycle}. Monster and treasure statistics are ×{multiplier}.",
       "translation": "进入里魔塔，第{cycle}轮。怪物与宝物的数值为原来的{multiplier}倍。"
     },
