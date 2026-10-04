@@ -1,10 +1,35 @@
 //! Ordered renderer messages. These JSON payloads describe committed results;
 //! the UI owns timing and never mutates gameplay through an animation callback.
-use crate::{Enemy, EnemySpecial, Engine, Forecast, Player, original::*};
+use crate::{
+    Enemy, EnemySpecial, Engine, Forecast, Player,
+    battle_log::{BattleHeroStats, BattleLogEntry, BattleOutcome},
+    original::*,
+};
 use serde_json::{Value, json};
 
 impl Engine {
     pub(crate) fn present(&mut self, effect: Value) {
+        if self.campaign.rules["wisdom_dialogue_range"].is_array()
+            && effect["type"] == "dialogue"
+            && let Some(text) = effect["text"].as_str()
+        {
+            let player = &self.state.player;
+            let (floor, x, y) =
+                self.state
+                    .pending_tile
+                    .unwrap_or((player.floor, player.x, player.y));
+            let title = self
+                .state
+                .pending_interaction
+                .as_ref()
+                .and_then(|interaction| interaction["title"].as_str())
+                .unwrap_or("Dialogue")
+                .to_string();
+            let dialogue_id = effect["dialogue_id"]
+                .as_u64()
+                .and_then(|id| u32::try_from(id).ok());
+            self.record_journal(floor, x, y, &title, text, dialogue_id);
+        }
         if !self.last_action["presentation"].is_array() {
             self.last_action["presentation"] = json!([]);
         }
@@ -36,12 +61,20 @@ impl Engine {
         x: usize,
         y: usize,
         enemy_first: bool,
-    ) {
+    ) -> BattleLogEntry {
+        let enemy_name = self
+            .state
+            .last_encounter
+            .as_ref()
+            .filter(|entry| (entry.floor, entry.x, entry.y) == (floor, x, y))
+            .map(|entry| entry.enemy_name.clone())
+            .unwrap_or_else(|| enemy.name.clone());
         let multiplier = match enemy.special {
             EnemySpecial::Undead if self.state.player.inventory.iter().any(|i| i == "cross") => {
                 self.campaign.rules["cross_multiplier"]
                     .as_i64()
                     .unwrap_or(CROSS_MULTIPLIER)
+                    .clamp(1, 1000)
             }
             EnemySpecial::Dragon
                 if self
@@ -54,6 +87,7 @@ impl Engine {
                 self.campaign.rules["dragon_slayer_multiplier"]
                     .as_i64()
                     .unwrap_or(DRAGON_SLAYER_MULTIPLIER)
+                    .clamp(1, 1000)
             }
             _ => 1,
         };
@@ -75,7 +109,34 @@ impl Engine {
             .clamp(60, 3_000);
         let duration_ms =
             (hero_strikes.saturating_add(enemy_strikes).max(1) as u64).saturating_mul(strike_ms);
-        self.present(json!({"type":"battle","enemy_name":enemy.name,"enemy_hp":enemy.hp,"hero_hp":self.state.player.hp,"hero_hit":hero_hit,"enemy_hit":enemy_hit,"rounds":battle.rounds,"hero_strikes":hero_strikes,"enemy_strikes":enemy_strikes,"enemy_first":first,"floor":floor,"x":x,"y":y,
+        self.present(json!({"type":"battle","enemy_name":enemy_name,"enemy_hp":enemy.hp,"enemy_attack":enemy.attack,"enemy_defense":enemy.defense,"gold":battle.gold,"hero_hp":self.state.player.hp,"hero_hit":hero_hit,"enemy_hit":enemy_hit,"rounds":battle.rounds,"hero_strikes":hero_strikes,"enemy_strikes":enemy_strikes,"enemy_first":first,"floor":floor,"x":x,"y":y,
             "strike_ms":strike_ms,"hit_sound":"taisen","sound_phase":0.0,"overlay_phase":1.0/3.0,"damage_phase":2.0/3.0,"duration_ms":duration_ms}));
+        BattleLogEntry {
+            log_id: 0,
+            cycle: self.state.cycle,
+            floor,
+            x,
+            y,
+            enemy_name,
+            enemy_hp: enemy.hp,
+            enemy_attack: enemy.attack,
+            enemy_defense: enemy.defense,
+            hero_before: BattleHeroStats {
+                hp: self.state.player.hp,
+                attack: self.state.player.attack,
+                defense: self.state.player.defense,
+                gold: self.state.player.gold,
+            },
+            hero_after_hp: self.state.player.hp,
+            damage: 0,
+            reward: 0,
+            hero_hit,
+            enemy_hit,
+            rounds: enemy_strikes,
+            hero_strikes,
+            enemy_strikes,
+            enemy_first: first,
+            outcome: BattleOutcome::Defeated,
+        }
     }
 }

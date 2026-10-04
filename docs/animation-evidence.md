@@ -124,20 +124,24 @@ durations 450/750/1050 ms under High/Medium/Low settings. The implementation
 can choose configurable durations, but compressing an arbitrarily long fight
 into a fixed total loses the original per-strike rhythm and audio.
 
-The original `taisen` calls `idou` before a winnable fight, so its hero and
-monster overlays alternate at the encounter cell. A renderer that retains the
-hero's approach position until victory has different spatial presentation;
-this distinction should not be confused with the damage formula or strike
-ordering. Dedicated hit textures in `assets.rs` recover the original artwork
-without committing generated bitmap assets.
+The original `taisen` calls `idou` after the base attack-defense guard, before
+the later lethality check. Its hero and monster overlays consequently
+alternate at the encounter cell for both winnable and fatal fights. An attack
+that cannot penetrate defense retains the approach position. This corrects
+the earlier winnable-only interpretation; actual nested probes are recorded
+in [octopus-encounters.md](octopus-encounters.md). A renderer retaining the
+hero's approach position until victory has different spatial presentation.
+Dedicated hit textures in `assets.rs` recover the original artwork without
+committing generated bitmap assets.
 
 The replacement remains visible after the HP calculation. Opcode 9 installs
 road plus the hit image in both ambient buffers (`0x453008`, `0x453145`);
 opcodes 4 and 5 only update the HP labels (`0x452b2a..0x452c95`). The previous
 strike's image therefore remains through the next sound beat until the next
 overlay replaces it. The shared renderer uses this persistent replacement and
-animates entry into a winnable encounter before the first strike; fatal
-encounters retain their source coordinates.
+animates entry into an encounter before the first strike, including fatal
+fights. Both original and remake retain the source only when attack cannot
+penetrate enemy defense.
 
 ## Stairs: spiral cover and reveal
 

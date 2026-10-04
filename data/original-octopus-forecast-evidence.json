@@ -1,0 +1,358 @@
+{
+  "exe_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "scanner_range": "0x481744..0x481823",
+  "row_builder": "0x44f26c",
+  "damage_builder": "0x44ff0c",
+  "limitations": "Only scanner/row builder/arithmetic executed; UI, strings, allocations and drawing skipped.",
+  "string_resources": [
+    {
+      "id": 180,
+      "text": "Looking up the results of battling these monsters.",
+      "file_offset": "0x125fa5"
+    },
+    {
+      "id": 184,
+      "text": "Expected damage:",
+      "file_offset": "0x12600b"
+    },
+    {
+      "id": 185,
+      "text": "Cannot be hit by you!",
+      "file_offset": "0x12601d"
+    },
+    {
+      "id": 214,
+      "text": "Life",
+      "file_offset": "0x12639f"
+    },
+    {
+      "id": 215,
+      "text": "Offense",
+      "file_offset": "0x1263a5"
+    },
+    {
+      "id": 216,
+      "text": "Defense",
+      "file_offset": "0x1263ae"
+    }
+  ],
+  "scans": [
+    {
+      "tiles": [
+        97
+      ],
+      "row_builder_calls": [],
+      "skipped_calls": []
+    },
+    {
+      "tiles": [
+        98
+      ],
+      "row_builder_calls": [],
+      "skipped_calls": []
+    },
+    {
+      "tiles": [
+        99
+      ],
+      "row_builder_calls": [],
+      "skipped_calls": []
+    },
+    {
+      "tiles": [
+        100
+      ],
+      "row_builder_calls": [],
+      "skipped_calls": []
+    },
+    {
+      "tiles": [
+        101
+      ],
+      "row_builder_calls": [],
+      "skipped_calls": []
+    },
+    {
+      "tiles": [
+        102
+      ],
+      "row_builder_calls": [],
+      "skipped_calls": []
+    },
+    {
+      "tiles": [
+        103
+      ],
+      "row_builder_calls": [],
+      "skipped_calls": []
+    },
+    {
+      "tiles": [
+        104
+      ],
+      "row_builder_calls": [
+        {
+          "index": 0,
+          "tile": 104,
+          "row": 18
+        }
+      ],
+      "skipped_calls": [
+        "0x44f26c"
+      ]
+    },
+    {
+      "tiles": [
+        105
+      ],
+      "row_builder_calls": [],
+      "skipped_calls": []
+    },
+    {
+      "tiles": [
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105
+      ],
+      "row_builder_calls": [
+        {
+          "index": 7,
+          "tile": 104,
+          "row": 18
+        }
+      ],
+      "skipped_calls": [
+        "0x44f26c"
+      ]
+    },
+    {
+      "tiles": [
+        104,
+        104
+      ],
+      "row_builder_calls": [
+        {
+          "index": 0,
+          "tile": 104,
+          "row": 18
+        },
+        {
+          "index": 1,
+          "tile": 104,
+          "row": 18
+        }
+      ],
+      "skipped_calls": [
+        "0x44f26c"
+      ]
+    }
+  ],
+  "row_numeric_probes": [
+    {
+      "lucky_gold": 0,
+      "cycle_factor": 0,
+      "hero_attack": 420,
+      "hero_defense": 100,
+      "raw_gold": 100,
+      "numeric_strings": [
+        1200,
+        180,
+        20,
+        160
+      ],
+      "string_resource_ids": [
+        214,
+        215,
+        216,
+        184
+      ],
+      "hero_strikes": 3,
+      "damage": 160,
+      "gold_table_reads": [],
+      "followed_calls": [
+        "0x44ff0c",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403658",
+        "0x403710",
+        "0x405b6c",
+        "0x413500",
+        "0x4135d4",
+        "0x417e44",
+        "0x41c160",
+        "0x41dad8",
+        "0x44b6f4",
+        "dword ptr [ebx + 0xc]",
+        "dword ptr [esi + 0xc]"
+      ]
+    },
+    {
+      "lucky_gold": 0,
+      "cycle_factor": 0,
+      "hero_attack": 420,
+      "hero_defense": 100,
+      "raw_gold": 101,
+      "numeric_strings": [
+        1200,
+        180,
+        20,
+        160
+      ],
+      "string_resource_ids": [
+        214,
+        215,
+        216,
+        184
+      ],
+      "hero_strikes": 3,
+      "damage": 160,
+      "gold_table_reads": [],
+      "followed_calls": [
+        "0x44ff0c",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403658",
+        "0x403710",
+        "0x405b6c",
+        "0x413500",
+        "0x4135d4",
+        "0x417e44",
+        "0x41c160",
+        "0x41dad8",
+        "0x44b6f4",
+        "dword ptr [ebx + 0xc]",
+        "dword ptr [esi + 0xc]"
+      ]
+    },
+    {
+      "lucky_gold": 1,
+      "cycle_factor": 0,
+      "hero_attack": 420,
+      "hero_defense": 100,
+      "raw_gold": 100,
+      "numeric_strings": [
+        1200,
+        180,
+        20,
+        160
+      ],
+      "string_resource_ids": [
+        214,
+        215,
+        216,
+        184
+      ],
+      "hero_strikes": 3,
+      "damage": 160,
+      "gold_table_reads": [],
+      "followed_calls": [
+        "0x44ff0c",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403658",
+        "0x403710",
+        "0x405b6c",
+        "0x413500",
+        "0x4135d4",
+        "0x417e44",
+        "0x41c160",
+        "0x41dad8",
+        "0x44b6f4",
+        "dword ptr [ebx + 0xc]",
+        "dword ptr [esi + 0xc]"
+      ]
+    },
+    {
+      "lucky_gold": 1,
+      "cycle_factor": 0,
+      "hero_attack": 420,
+      "hero_defense": 100,
+      "raw_gold": 101,
+      "numeric_strings": [
+        1200,
+        180,
+        20,
+        160
+      ],
+      "string_resource_ids": [
+        214,
+        215,
+        216,
+        184
+      ],
+      "hero_strikes": 3,
+      "damage": 160,
+      "gold_table_reads": [],
+      "followed_calls": [
+        "0x44ff0c",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403658",
+        "0x403710",
+        "0x405b6c",
+        "0x413500",
+        "0x4135d4",
+        "0x417e44",
+        "0x41c160",
+        "0x41dad8",
+        "0x44b6f4",
+        "dword ptr [ebx + 0xc]",
+        "dword ptr [esi + 0xc]"
+      ]
+    },
+    {
+      "lucky_gold": 0,
+      "cycle_factor": 43,
+      "hero_attack": 18480,
+      "hero_defense": 4400,
+      "raw_gold": 100,
+      "numeric_strings": [
+        52800,
+        7920,
+        880,
+        7040
+      ],
+      "string_resource_ids": [
+        214,
+        215,
+        216,
+        184
+      ],
+      "hero_strikes": 3,
+      "damage": 7040,
+      "gold_table_reads": [],
+      "followed_calls": [
+        "0x44ff0c",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403658",
+        "0x403710",
+        "0x405b6c",
+        "0x413500",
+        "0x4135d4",
+        "0x417e44",
+        "0x41c160",
+        "0x41dad8",
+        "0x44b6f4",
+        "dword ptr [ebx + 0xc]",
+        "dword ptr [esi + 0xc]"
+      ]
+    }
+  ]
+}

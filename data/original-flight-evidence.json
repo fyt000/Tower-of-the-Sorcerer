@@ -1,0 +1,825 @@
+{
+  "original_exe_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "boundary": "Direct Flight-control instructions, isolated normal-stair guards and direct Sword pickup/reset writes; every helper call skipped and listed. Stair probes begin after the floor increment/decrement. No original game launch or installation write.",
+  "probes": [
+    {
+      "name": "upward_preview_34_to_35_completed_tunnel",
+      "entry": "0x44ed94",
+      "initial_selected_floor": 34,
+      "highest_stair_floor": 40,
+      "initial_last_direction": 0,
+      "map_seed": [
+        [
+          35,
+          3,
+          8,
+          6
+        ],
+        [
+          2,
+          10,
+          10,
+          21
+        ]
+      ],
+      "result_selected_floor": 35,
+      "result_position": [
+        5,
+        5
+      ],
+      "map_writes": [
+        [
+          2,
+          10,
+          10,
+          6
+        ]
+      ],
+      "skipped_calls": [
+        "0x41353c",
+        "0x442c38",
+        "0x44cb34"
+      ]
+    },
+    {
+      "name": "upward_preview_34_to_35_incomplete_tunnel",
+      "entry": "0x44ed94",
+      "initial_selected_floor": 34,
+      "highest_stair_floor": 40,
+      "initial_last_direction": 0,
+      "map_seed": [
+        [
+          35,
+          3,
+          8,
+          8
+        ],
+        [
+          2,
+          10,
+          10,
+          21
+        ]
+      ],
+      "result_selected_floor": 35,
+      "result_position": [
+        5,
+        5
+      ],
+      "map_writes": [],
+      "skipped_calls": [
+        "0x41353c",
+        "0x442c38",
+        "0x44cb34"
+      ]
+    },
+    {
+      "name": "downward_preview_36_to_35_has_no_completion_check",
+      "entry": "0x44ed1c",
+      "initial_selected_floor": 36,
+      "highest_stair_floor": 40,
+      "initial_last_direction": 0,
+      "map_seed": [
+        [
+          35,
+          3,
+          8,
+          6
+        ],
+        [
+          2,
+          10,
+          10,
+          21
+        ]
+      ],
+      "result_selected_floor": 35,
+      "result_position": [
+        5,
+        5
+      ],
+      "map_writes": [],
+      "skipped_calls": [
+        "0x41353c",
+        "0x442c38",
+        "0x44cb34"
+      ]
+    },
+    {
+      "name": "confirm_without_arrow_keeps_position_and_fairies",
+      "entry": "0x44eaf4",
+      "initial_selected_floor": 24,
+      "highest_stair_floor": 49,
+      "initial_last_direction": 0,
+      "map_seed": [
+        [
+          25,
+          5,
+          6,
+          23
+        ],
+        [
+          49,
+          5,
+          1,
+          23
+        ]
+      ],
+      "result_selected_floor": 24,
+      "result_position": [
+        5,
+        5
+      ],
+      "map_writes": [],
+      "skipped_calls": [
+        "0x413500",
+        "0x4433a4",
+        "0x44bc0c",
+        "0x44cb34",
+        "0x450880"
+      ]
+    },
+    {
+      "name": "confirm_selected_24_removes_both_existing_fairies",
+      "entry": "0x44eaf4",
+      "initial_selected_floor": 24,
+      "highest_stair_floor": 49,
+      "initial_last_direction": 2,
+      "map_seed": [
+        [
+          25,
+          5,
+          6,
+          23
+        ],
+        [
+          49,
+          5,
+          1,
+          23
+        ]
+      ],
+      "result_selected_floor": 24,
+      "result_position": [
+        1,
+        10
+      ],
+      "map_writes": [
+        [
+          25,
+          5,
+          6,
+          6
+        ],
+        [
+          49,
+          5,
+          1,
+          6
+        ]
+      ],
+      "skipped_calls": [
+        "0x413500",
+        "0x443050",
+        "0x4433a4",
+        "0x44bc0c",
+        "0x44cb34",
+        "0x450880"
+      ]
+    },
+    {
+      "name": "confirm_selected_25_keeps_25_fairy_only",
+      "entry": "0x44eaf4",
+      "initial_selected_floor": 25,
+      "highest_stair_floor": 49,
+      "initial_last_direction": 1,
+      "map_seed": [
+        [
+          25,
+          5,
+          6,
+          23
+        ],
+        [
+          49,
+          5,
+          1,
+          23
+        ]
+      ],
+      "result_selected_floor": 25,
+      "result_position": [
+        1,
+        10
+      ],
+      "map_writes": [
+        [
+          49,
+          5,
+          1,
+          6
+        ]
+      ],
+      "skipped_calls": [
+        "0x413500",
+        "0x442f80",
+        "0x4433a4",
+        "0x44bc0c",
+        "0x44cb34",
+        "0x450880"
+      ]
+    },
+    {
+      "name": "confirm_selected_49_keeps_49_fairy_only",
+      "entry": "0x44eaf4",
+      "initial_selected_floor": 49,
+      "highest_stair_floor": 49,
+      "initial_last_direction": 1,
+      "map_seed": [
+        [
+          25,
+          5,
+          6,
+          23
+        ],
+        [
+          49,
+          5,
+          1,
+          23
+        ]
+      ],
+      "result_selected_floor": 49,
+      "result_position": [
+        1,
+        10
+      ],
+      "map_writes": [
+        [
+          25,
+          5,
+          6,
+          6
+        ]
+      ],
+      "skipped_calls": [
+        "0x413500",
+        "0x442f80",
+        "0x4433a4",
+        "0x44bc0c",
+        "0x44cb34",
+        "0x450880"
+      ]
+    },
+    {
+      "name": "confirm_below_29_when_highest_29_moves_thief",
+      "entry": "0x44eaf4",
+      "initial_selected_floor": 28,
+      "highest_stair_floor": 29,
+      "initial_last_direction": 2,
+      "map_seed": [],
+      "result_selected_floor": 28,
+      "result_position": [
+        1,
+        10
+      ],
+      "map_writes": [
+        [
+          29,
+          6,
+          1,
+          21
+        ],
+        [
+          29,
+          5,
+          2,
+          6
+        ],
+        [
+          29,
+          5,
+          3,
+          6
+        ]
+      ],
+      "skipped_calls": [
+        "0x413500",
+        "0x443050",
+        "0x4433a4",
+        "0x44bc0c",
+        "0x44cb34",
+        "0x450880"
+      ]
+    },
+    {
+      "name": "confirm_29_when_highest_29_keeps_thief",
+      "entry": "0x44eaf4",
+      "initial_selected_floor": 29,
+      "highest_stair_floor": 29,
+      "initial_last_direction": 2,
+      "map_seed": [],
+      "result_selected_floor": 29,
+      "result_position": [
+        0,
+        9
+      ],
+      "map_writes": [],
+      "skipped_calls": [
+        "0x413500",
+        "0x442f80",
+        "0x4433a4",
+        "0x44bc0c",
+        "0x44cb34",
+        "0x450880"
+      ]
+    },
+    {
+      "name": "confirm_below_29_when_highest_30_keeps_thief",
+      "entry": "0x44eaf4",
+      "initial_selected_floor": 28,
+      "highest_stair_floor": 30,
+      "initial_last_direction": 2,
+      "map_seed": [],
+      "result_selected_floor": 28,
+      "result_position": [
+        1,
+        10
+      ],
+      "map_writes": [],
+      "skipped_calls": [
+        "0x413500",
+        "0x443050",
+        "0x4433a4",
+        "0x44bc0c",
+        "0x44cb34",
+        "0x450880"
+      ]
+    },
+    {
+      "name": "up_preview_cannot_reach_35_when_highest_34",
+      "entry": "0x44ed94",
+      "initial_selected_floor": 34,
+      "highest_stair_floor": 34,
+      "initial_last_direction": 0,
+      "map_seed": [
+        [
+          35,
+          3,
+          8,
+          6
+        ],
+        [
+          2,
+          10,
+          10,
+          21
+        ]
+      ],
+      "result_selected_floor": 34,
+      "result_position": [
+        5,
+        5
+      ],
+      "map_writes": [],
+      "skipped_calls": []
+    },
+    {
+      "name": "up_preview_can_revisit_35_when_highest_35",
+      "entry": "0x44ed94",
+      "initial_selected_floor": 34,
+      "highest_stair_floor": 35,
+      "initial_last_direction": 0,
+      "map_seed": [
+        [
+          35,
+          3,
+          8,
+          6
+        ],
+        [
+          2,
+          10,
+          10,
+          21
+        ]
+      ],
+      "result_selected_floor": 35,
+      "result_position": [
+        5,
+        5
+      ],
+      "map_writes": [
+        [
+          2,
+          10,
+          10,
+          6
+        ]
+      ],
+      "skipped_calls": [
+        "0x41353c",
+        "0x442c38",
+        "0x44cb34",
+        "dword ptr [edx + 0x80]"
+      ]
+    }
+  ],
+  "normal_stair_probes": [
+    {
+      "name": "normal_downstairs_to_28_highest_29_moves_thief",
+      "entry": "0x444fbc",
+      "end": "0x444fe3",
+      "resulting_floor": 28,
+      "initial_highest_stair_floor": 29,
+      "initial_holy_sword_collected_flag": 0,
+      "map_seed": [],
+      "result_highest_stair_floor": 29,
+      "map_writes": [
+        [
+          29,
+          6,
+          1,
+          21
+        ],
+        [
+          29,
+          5,
+          2,
+          6
+        ],
+        [
+          29,
+          5,
+          3,
+          6
+        ]
+      ],
+      "skipped_calls": []
+    },
+    {
+      "name": "normal_downstairs_to_28_highest_30_keeps_thief",
+      "entry": "0x444fbc",
+      "end": "0x444fe3",
+      "resulting_floor": 28,
+      "initial_highest_stair_floor": 30,
+      "initial_holy_sword_collected_flag": 0,
+      "map_seed": [],
+      "result_highest_stair_floor": 30,
+      "map_writes": [],
+      "skipped_calls": []
+    },
+    {
+      "name": "normal_downstairs_to_27_highest_29_keeps_thief",
+      "entry": "0x444fbc",
+      "end": "0x444fe3",
+      "resulting_floor": 27,
+      "initial_highest_stair_floor": 29,
+      "initial_holy_sword_collected_flag": 0,
+      "map_seed": [],
+      "result_highest_stair_floor": 29,
+      "map_writes": [],
+      "skipped_calls": []
+    },
+    {
+      "name": "new_highest_35_holy_sword_flag_0_keeps_f2_thief",
+      "entry": "0x444e0f",
+      "end": "0x444e4c",
+      "resulting_floor": 35,
+      "initial_highest_stair_floor": 34,
+      "initial_holy_sword_collected_flag": 0,
+      "map_seed": [
+        [
+          35,
+          3,
+          8,
+          6
+        ],
+        [
+          2,
+          10,
+          10,
+          21
+        ]
+      ],
+      "result_highest_stair_floor": 35,
+      "map_writes": [],
+      "skipped_calls": []
+    },
+    {
+      "name": "new_highest_35_holy_sword_flag_1_keeps_f2_thief",
+      "entry": "0x444e0f",
+      "end": "0x444e4c",
+      "resulting_floor": 35,
+      "initial_highest_stair_floor": 34,
+      "initial_holy_sword_collected_flag": 1,
+      "map_seed": [
+        [
+          35,
+          3,
+          8,
+          6
+        ],
+        [
+          2,
+          10,
+          10,
+          21
+        ]
+      ],
+      "result_highest_stair_floor": 35,
+      "map_writes": [],
+      "skipped_calls": []
+    },
+    {
+      "name": "new_highest_35_synthetic_flag_35_clears_f2_thief",
+      "entry": "0x444e0f",
+      "end": "0x444e4c",
+      "resulting_floor": 35,
+      "initial_highest_stair_floor": 34,
+      "initial_holy_sword_collected_flag": 35,
+      "map_seed": [
+        [
+          35,
+          3,
+          8,
+          6
+        ],
+        [
+          2,
+          10,
+          10,
+          21
+        ]
+      ],
+      "result_highest_stair_floor": 35,
+      "map_writes": [
+        [
+          2,
+          10,
+          10,
+          6
+        ]
+      ],
+      "skipped_calls": []
+    },
+    {
+      "name": "normal_revisit_35_keeps_f2_thief",
+      "entry": "0x444e0f",
+      "end": "0x444e4c",
+      "resulting_floor": 35,
+      "initial_highest_stair_floor": 35,
+      "initial_holy_sword_collected_flag": 1,
+      "map_seed": [
+        [
+          35,
+          3,
+          8,
+          6
+        ],
+        [
+          2,
+          10,
+          10,
+          21
+        ]
+      ],
+      "result_highest_stair_floor": 35,
+      "map_writes": [],
+      "skipped_calls": []
+    }
+  ],
+  "holy_sword_slot_probes": [
+    {
+      "name": "pickup_sets_collected_flag_one",
+      "entry": "0x445e91",
+      "end": "0x445eb4",
+      "initial_holy_sword_collected_flag": 0,
+      "retain_items_flag": 0,
+      "result_holy_sword_collected_flag": 1,
+      "result_attack": 150,
+      "result_displayed_sword_tier": 4,
+      "skipped_calls": []
+    },
+    {
+      "name": "fresh_reset_clears_base_plus_8c",
+      "entry": "0x455cbd",
+      "end": "0x455def",
+      "initial_holy_sword_collected_flag": 1,
+      "retain_items_flag": 0,
+      "result_holy_sword_collected_flag": 0,
+      "result_attack": 100,
+      "result_displayed_sword_tier": 5,
+      "skipped_calls": []
+    },
+    {
+      "name": "retaining_items_reset_keeps_flag_one",
+      "entry": "0x455cbd",
+      "end": "0x455def",
+      "initial_holy_sword_collected_flag": 1,
+      "retain_items_flag": 1,
+      "result_holy_sword_collected_flag": 1,
+      "result_attack": 100,
+      "result_displayed_sword_tier": 5,
+      "skipped_calls": []
+    }
+  ],
+  "disassembly": {
+    "confirm_fairy_cleanup_and_landing": [
+      "0044eb2b cmp dword ptr [esi + 0x278], 0",
+      "0044eb32 je 0x44eb4a",
+      "0044eb34 cmp dword ptr [esi + 0x10], 0x19",
+      "0044eb38 je 0x44eb4a",
+      "0044eb3a cmp byte ptr [0x4b9580], 0x17",
+      "0044eb41 jne 0x44eb4a",
+      "0044eb43 mov byte ptr [0x4b9580], 6",
+      "0044eb4a cmp dword ptr [esi + 0x278], 0",
+      "0044eb51 je 0x44eb69",
+      "0044eb53 cmp dword ptr [esi + 0x10], 0x31",
+      "0044eb57 je 0x44eb69",
+      "0044eb59 cmp byte ptr [0x4ba0d1], 0x17",
+      "0044eb60 jne 0x44eb69",
+      "0044eb62 mov byte ptr [0x4ba0d1], 6",
+      "0044eb69 xor eax, eax",
+      "0044eb6b mov dword ptr [esi + 0x30], eax",
+      "0044eb6e mov eax, dword ptr [esi + 0x278]",
+      "0044eb74 dec eax",
+      "0044eb75 je 0x44eb7c",
+      "0044eb77 dec eax",
+      "0044eb78 je 0x44eb99",
+      "0044eb7a jmp 0x44ebb4",
+      "0044eb7c mov eax, dword ptr [esi + 0x10]",
+      "0044eb7f cmp eax, dword ptr [esi + 0x14]",
+      "0044eb82 jne 0x44ebb4",
+      "0044eb84 cmp dword ptr [esi + 0x298], 1",
+      "0044eb8b jne 0x44ebb4",
+      "0044eb8d mov dword ptr [esi + 0x278], 2",
+      "0044eb97 jmp 0x44ebb4",
+      "0044eb99 mov eax, dword ptr [esi + 0x10]",
+      "0044eb9c cmp eax, dword ptr [esi + 0x14]",
+      "0044eb9f jne 0x44ebb4",
+      "0044eba1 cmp dword ptr [esi + 0x298], 1",
+      "0044eba8 je 0x44ebb4",
+      "0044ebaa mov dword ptr [esi + 0x278], 1",
+      "0044ebb4 mov ecx, dword ptr [esi + 0x278]",
+      "0044ebba mov eax, ecx",
+      "0044ebbc dec eax",
+      "0044ebbd sub eax, 2",
+      "0044ebc0 jae 0x44ebfa",
+      "0044ebc2 imul eax, dword ptr [esi + 0x10], 0x7b",
+      "0044ebc6 add eax, 0x4b8934",
+      "0044ebcb movzx eax, byte ptr [eax + ecx - 1]",
+      "0044ebd0 mov ecx, 0xb",
+      "0044ebd5 cdq ",
+      "0044ebd6 idiv ecx",
+      "0044ebd8 mov dword ptr [esi + 0x18], edx",
+      "0044ebdb imul eax, dword ptr [esi + 0x10], 0x7b",
+      "0044ebdf add eax, 0x4b8934",
+      "0044ebe4 mov edx, dword ptr [esi + 0x278]",
+      "0044ebea movzx eax, byte ptr [eax + edx - 1]",
+      "0044ebef mov ecx, 0xb",
+      "0044ebf4 cdq ",
+      "0044ebf5 idiv ecx",
+      "0044ebf7 mov dword ptr [esi + 0x1c], eax",
+      "0044ebfa mov edi, dword ptr [esi + 0x278]",
+      "0044ec00 test edi, edi",
+      "0044ec02 je 0x44ec25",
+      "0044ec04 cmp dword ptr [esi + 0x14], 0x1d",
+      "0044ec08 jne 0x44ec25",
+      "0044ec0a cmp dword ptr [esi + 0x10], 0x1d",
+      "0044ec0e jge 0x44ec25",
+      "0044ec10 mov byte ptr [0x4b974b], 6",
+      "0044ec17 mov byte ptr [0x4b9740], 6",
+      "0044ec1e mov byte ptr [0x4b9736], 0x15"
+    ],
+    "up_preview_tunnel_cleanup": [
+      "0044edd8 cmp dword ptr [0x4b8698], 0x23",
+      "0044eddf jne 0x44edfe",
+      "0044ede1 xor eax, eax",
+      "0044ede3 mov al, byte ptr [0x4b9a62]",
+      "0044ede8 xor edx, edx",
+      "0044edea mov dl, byte ptr [0x4b8aa4]",
+      "0044edf0 add eax, edx",
+      "0044edf2 cmp eax, 0x1b",
+      "0044edf5 jne 0x44edfe",
+      "0044edf7 mov byte ptr [0x4b8aa4], 6"
+    ],
+    "normal_downstairs_thief_relocation": [
+      "00444fbc cmp dword ptr [0x4b869c], 0x1d",
+      "00444fc3 jne 0x444fe3",
+      "00444fc5 cmp dword ptr [0x4b8698], 0x1c",
+      "00444fcc jne 0x444fe3",
+      "00444fce mov byte ptr [0x4b974b], 6",
+      "00444fd5 mov byte ptr [0x4b9740], 6",
+      "00444fdc mov byte ptr [0x4b9736], 0x15"
+    ],
+    "normal_ascent_holy_sword_flag_35_comparison": [
+      "00444e0f mov eax, dword ptr [0x4b8698]",
+      "00444e14 cmp eax, dword ptr [0x4b869c]",
+      "00444e1a jle 0x444e4c",
+      "00444e1c mov eax, dword ptr [0x4b8698]",
+      "00444e21 mov dword ptr [0x4b869c], eax",
+      "00444e26 cmp dword ptr [0x4b8714], 0x23",
+      "00444e2d jne 0x444e4c",
+      "00444e2f xor eax, eax",
+      "00444e31 mov al, byte ptr [0x4b9a62]",
+      "00444e36 xor edx, edx",
+      "00444e38 mov dl, byte ptr [0x4b8aa4]",
+      "00444e3e add eax, edx",
+      "00444e40 cmp eax, 0x1b",
+      "00444e43 jne 0x444e4c",
+      "00444e45 mov byte ptr [0x4b8aa4], 6"
+    ],
+    "holy_sword_pickup_flag": [
+      "00445e91 mov eax, dword ptr [0x4b8904]",
+      "00445e96 inc eax",
+      "00445e97 imul eax, eax, 0x32",
+      "00445e9a add dword ptr [0x4b868c], eax",
+      "00445ea0 mov dword ptr [0x4b86c4], 4",
+      "00445eaa mov dword ptr [0x4b8714], 1"
+    ],
+    "holy_sword_reset_via_stat_base_alias": [
+      "00455d43 cmp dword ptr [edx + 0x280], 0",
+      "00455d4a jne 0x455def",
+      "00455d50 xor ecx, ecx",
+      "00455d52 mov dword ptr [edx + 0x44], ecx",
+      "00455d55 xor ecx, ecx",
+      "00455d57 mov dword ptr [edx + 0x48], ecx",
+      "00455d5a xor ecx, ecx",
+      "00455d5c mov dword ptr [edx + 0x4c], ecx",
+      "00455d5f xor ecx, ecx",
+      "00455d61 mov dword ptr [edx + 0x50], ecx",
+      "00455d64 xor ecx, ecx",
+      "00455d66 mov dword ptr [edx + 0x54], ecx",
+      "00455d69 xor ecx, ecx",
+      "00455d6b mov dword ptr [edx + 0x58], ecx",
+      "00455d6e xor ecx, ecx",
+      "00455d70 mov dword ptr [edx + 0x5c], ecx",
+      "00455d73 xor ecx, ecx",
+      "00455d75 mov dword ptr [edx + 0x60], ecx",
+      "00455d78 xor ecx, ecx",
+      "00455d7a mov dword ptr [edx + 0x64], ecx",
+      "00455d7d xor ecx, ecx",
+      "00455d7f mov dword ptr [edx + 0x68], ecx",
+      "00455d82 xor ecx, ecx",
+      "00455d84 mov dword ptr [edx + 0x6c], ecx",
+      "00455d87 xor ecx, ecx",
+      "00455d89 mov dword ptr [edx + 0x70], ecx",
+      "00455d8c xor ecx, ecx",
+      "00455d8e mov dword ptr [edx + 0x74], ecx",
+      "00455d91 xor ecx, ecx",
+      "00455d93 mov dword ptr [edx + 0x78], ecx",
+      "00455d96 xor ecx, ecx",
+      "00455d98 mov dword ptr [edx + 0x7c], ecx",
+      "00455d9b xor ecx, ecx",
+      "00455d9d mov dword ptr [edx + 0x80], ecx",
+      "00455da3 xor ecx, ecx",
+      "00455da5 mov dword ptr [edx + 0x84], ecx",
+      "00455dab xor ecx, ecx",
+      "00455dad mov dword ptr [edx + 0x88], ecx",
+      "00455db3 xor ecx, ecx",
+      "00455db5 mov dword ptr [edx + 0x8c], ecx",
+      "00455dbb mov dword ptr [edx + 0x90], 1",
+      "00455dc5 xor ecx, ecx",
+      "00455dc7 mov dword ptr [edx + 0x94], ecx",
+      "00455dcd xor ecx, ecx",
+      "00455dcf mov dword ptr [edx + 0x98], ecx",
+      "00455dd5 xor ecx, ecx",
+      "00455dd7 mov dword ptr [edx + 0x9c], ecx",
+      "00455ddd xor ecx, ecx",
+      "00455ddf mov dword ptr [edx + 0xa0], ecx",
+      "00455de5 mov dword ptr [edx + 0xa4], 1"
+    ],
+    "flight_up_highest_stair_limit": [
+      "0044ed94 push ebx",
+      "0044ed95 mov ebx, eax",
+      "0044ed97 mov eax, dword ptr [0x4b869c]",
+      "0044ed9c cmp eax, dword ptr [0x4b8698]",
+      "0044eda2 jle 0x44ee42",
+      "0044eda8 mov dword ptr [0x4b8900], 1",
+      "0044edb2 cmp dword ptr [0x4b8698], 0x2b",
+      "0044edb9 je 0x44edc3",
+      "0044edbb inc dword ptr [0x4b8698]",
+      "0044edc1 jmp 0x44edca",
+      "0044edc3 add dword ptr [0x4b8698], 2"
+    ],
+    "stat_block_load_including_sword_flag": [
+      "0047e85d push 0",
+      "0047e85f mov edx, 0x4b8688",
+      "0047e864 mov ecx, 0x2ac",
+      "0047e869 mov eax, 0x48c600",
+      "0047e86e call 0x4041f0"
+    ],
+    "escape_only_item_picker": [
+      "00461076 cmp word ptr [0x48c5ce], 1",
+      "0046107e jne 0x4610a3",
+      "00461080 xor edx, edx",
+      "00461082 mov eax, dword ptr [ebx + 0x3f8]",
+      "00461088 call 0x413500",
+      "0046108d mov dl, 1",
+      "0046108f mov eax, dword ptr [ebx + 0x474]",
+      "00461095 call 0x410378",
+      "0046109a mov word ptr [0x48c5ce], 0"
+    ]
+  }
+}

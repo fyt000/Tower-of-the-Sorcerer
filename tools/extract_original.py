@@ -206,10 +206,14 @@ def tile_definitions() -> dict:
             put(tile, MONSTERS[index][1], "enemy", enemy=MONSTERS[index][0])
         else:
             put(tile, "Giant monster decoration", "wall")
-    for tile in range(97, 106):
-        tiles[str(tile)]["footprint"] = {"width": 3, "height": 3,
-                                         "offset_x": (tile - 97) % 3, "offset_y": (tile - 97) // 3,
-                                         "tiles": list(range(97, 115))}
+    # Original taisen treats eight parts as full-stat independent encounters,
+    # but halves their raw gold and clears only the contacted cell. Tile104
+    # alone defeats/clears the entire creature (0x44ab6e and0x44aeea).
+    for tile in (*range(97, 104), 105):
+        tiles[str(tile)]["reward_divisor"] = 2
+    tiles["104"]["footprint"] = {"width": 3, "height": 3,
+                                 "offset_x": 1, "offset_y": 2,
+                                 "tiles": list(range(97, 115)), "clear_all": True}
     tiles["122"]["footprint"] = {"width": 3, "height": 3, "offset_x": 1, "offset_y": 2,
                                   "tiles": list(range(115, 133))}
     put(159, "Combat icon", "floor")
@@ -313,6 +317,29 @@ def original_interactions(map_bytes: bytes, dialogue: list[dict]) -> list[dict]:
     return interactions
 
 
+def original_floor_travel_callbacks() -> list[dict]:
+    """Direct original Flight-control writes; see audit_original_flight.py."""
+    relocate_thief = [
+        {"floor": 29, "x": 5, "y": 3, "tile": 6},
+        {"floor": 29, "x": 5, "y": 2, "tile": 6},
+        {"floor": 29, "x": 6, "y": 1, "tile": 21},
+    ]
+    return [
+        {"when": {"type": "upward_flight_preview", "floor": 35},
+         "tile_sum": {"cells": [{"floor": 35, "x": 3, "y": 8},
+                                {"floor": 2, "x": 10, "y": 10}], "equals": 27},
+         "writes": [{"floor": 2, "x": 10, "y": 10, "tile": 6}]},
+        {"when": {"type": "flight_confirm", "except_floor": 25},
+         "writes": [{"floor": 25, "x": 5, "y": 6, "tile": 6, "if_tile": 23}]},
+        {"when": {"type": "flight_confirm", "except_floor": 49},
+         "writes": [{"floor": 49, "x": 5, "y": 1, "tile": 6, "if_tile": 23}]},
+        {"when": {"type": "flight_confirm", "highest_stair_floor": 29, "below_floor": 29},
+         "writes": relocate_thief},
+        {"when": {"type": "stairs_down", "from_floor": 29, "to_floor": 28,
+                  "highest_stair_floor": 29}, "writes": relocate_thief},
+    ]
+
+
 def build_campaign(map_bytes: bytes, monsters: list[dict], source_hash: str) -> dict:
     floors = []
     for floor_id in range(MAP_COUNT):
@@ -334,6 +361,10 @@ def build_campaign(map_bytes: bytes, monsters: list[dict], source_hash: str) -> 
                   "altar_base_cost": 10, "altar_attack_gain": 2, "altar_defense_gain": 4,
                   "altar_hp_gain": 100, "lava_damage": 0, "cross_multiplier": 2, "dragon_slayer_multiplier": 2,
                   "flying_requires_stairs": True, "save_requires_hero_orb": True,
+                  "flying_original_selection": True,
+                  "floor_travel_callbacks": original_floor_travel_callbacks(),
+                  "wall_break_tile_ranges": [[8, 8]],
+                  "wisdom_dialogue_range": [62, 85],
                   "forecast_requires_item": "hero_orb",
                   "presentation": {"floor_transition_ms": 450, "combat_strike_ms": 450},
                   "backside": {"enabled": True, "multiplier": 44, "carry_stats": True,

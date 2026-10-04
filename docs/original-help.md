@@ -54,8 +54,14 @@ item/status icons reuse the same artwork. No original media is newly committed.
 The player-facing handbook describes the current game directly. Adaptation
 credits and the remake's additions are mentioned only in the footer; chapter
 source references remain in the authored data and this evidence documentation.
-Obsolete Windows setup, the old save gate and fairy score/rank descriptions are
-retained in `original.json`, rather than presented as current instructions.
+Obsolete Windows setup and fairy score/rank descriptions are retained in
+`original.json`, rather than presented as current instructions. The original
+Hero Orb gate now applies to manual checkpoints and portable-save export;
+automatic recovery saves remain available from the start. The Wisdom Orb
+remembers the 24 original old-man and merchant hints only when their first
+hearing occurs while the orb is owned. Earlier hints are not backfilled.
+The handbook describes these current restrictions without revealing new
+hint text or acquisition locations.
 The Warp Staff uses the deterministic mirror rule established in
 [mechanics.md](mechanics.md); its charge is spent even if the destination is
 blocked. The middle key color is normalized to blue from the help's “purple”,

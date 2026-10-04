@@ -61,6 +61,30 @@ Red potions provide 50 HP, blue potions provide 200 HP, and each gem provides 1 
 
 The five swords and shields add **10, 20, 40, 50, and 100** ATK or DEF. Equipment gains are additive; the original routine does not subtract the previous weapon's bonus. In particular, the Holy tier provides 50, rather than the 80 found in some remakes. These values were recovered from the pickup branches of `TTSW10.handan` in the original executable. The Sacred Shield also grants protection against adjacent magic hazards. Backside cycles multiply these pickup gains by the configurable cycle multiplier, originally 44.
 
+The player has separate `weapon` and `shield` display slots, and the GUI shows
+them beside the hero statistics. Every equipment pickup replaces its display
+slot, including a lower tier, while adding its stat bonus to the accumulated
+total. Starting gear and restored slots do not apply bonuses again. Equipment
+does not appear in the special-item inventory. Collected tags remain internal
+for authored conditions and persistent abilities: Sacred Shield's magic
+protection remains active after collecting a lower shield, with an explicit GUI
+caption when its displayed slot has changed. Capture clears both slots; a new
+cycle starts with the authored Sacred gear while carrying total stats.
+
+Save files preserve the current slots, including explicit empty slots. For
+legacy saves lacking these fields, load infers each slot from the last retained
+equipment tag of that type. This recovers ordinary pickup order, but old saves
+did not record repeated collection of an already retained item, so their exact
+most-recent tier cannot always be recovered. Migration does not alter stats.
+
+Before the Hero Orb is acquired, actual enemy contact still records the original
+encounter information: name, HP, ATK and DEF. The GUI's **Last encounter** panel
+keeps that contacted enemy and its location separate from tile hover inspection.
+The record survives save/load and worker replacement, and changes on another
+real encounter, including a blocked attack or a fatal fight. Hovering an unseen
+enemy does not supply these stats; gold, projected damage and survivability
+remain part of Hero Orb forecasting.
+
 The campaign begins at 1000 HP, 100 ATK, and 100 DEF with the Sacred Sword and Sacred Shield. First-cycle capture on floor 3 changes HP/ATK/DEF to 400/10/10 and removes that equipment; backside capture preserves those stats and clears all special inventory. It does not reset keys or gold in the examined original routine. Orb of the Hero is obtained from the floor-3 old man, Orb of Flight from the floor-1 pickup, and Orb of Wisdom from floor 6.
 
 ## Special items verified directly in the executable
@@ -71,15 +95,22 @@ The original holds three orbs and twelve further special items. Item slots at `0
 |---|---|---|
 | Elixir | Add `10*ATK + 5*DEF` HP and consume item. | `0x450D13` to `0x450D96` |
 | Magic Mattock | Remove the four neighboring ordinary walls; consume item. | `0x450DA7` to `0x450F27` |
-| Destruction Ball | Destroy eligible adjacent enemies, award the raw monster-table gold, consume item. | `0x450F31` to `0x451127` |
+| Destruction Ball | Destroy eligible enemies in the four cardinal neighboring cells, award the raw monster-table gold, consume item even if no target is destroyed. | `0x450F31` to `0x451127` |
 | Warp Staff | Mirror coordinates to `(10-x, 10-y)` on the same floor; destination must be ordinary road. A charge is consumed before the destination check. | `0x4511B3` to `0x4513DF` |
 | Ascent Wing | Move one floor upward at the same coordinates if the destination is ordinary road; consume only on success. | `0x4513E4` to `0x45153E` |
 | Descent Wing | Move one floor downward at the same coordinates if the destination is ordinary road; consume only on success. Floor 0 is reachable from floor 1. | `0x451543` to `0x4516A6` |
-| Snow Crystal | Cool neighboring lava regions into road. Remains available after use. | `0x4516AB` to `0x4518E1` |
+| Snow Crystal | Cool only the four cardinal neighboring lava cells into road. Remains available after use. | `0x4516AB` to `0x4518E1`, single-cell helper `0x451D3C` |
 | Magic Key | Open every yellow door on the current floor; consume item. Blue, red, and gate tiles are excluded. | `0x4518E6` to `0x4519F6` |
 | Super Mattock | Remove all ordinary walls on the current floor; consume item. | `0x4519FB` to `0x451B42` |
 
 The bomb classifier at `0x451C20` accepts monster tile ranges `61..90`, `93..96`, `133..144`, and `147..158`. It excludes Dragon, Giant Octopus, Zeno, and Great Magic Master. It does not apply Lucky Gold to the bomb reward in the examined routine. Preserve that distinction from normal combat. Large creatures need their occupied tiles cleared together by their dedicated encounter logic.
+
+The same classifier treats only original tile **8** as ordinary brick. Mattock
+and Super Mattock exclude tile 10's scripted wall and tile 9's hidden wall.
+Mattock, Destruction Ball, Magic Key, and Super Mattock consume on an empty
+confirmed use. See [the original item audit](original-item-audit.md) for the
+Wisdom memory, Hero save gate, Flight selector, and corrections established by
+the later executable audit.
 
 ## Campaign-event reconstruction
 

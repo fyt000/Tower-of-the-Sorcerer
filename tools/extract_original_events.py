@@ -166,6 +166,7 @@ add('capture_on_floor_3',{'type':'step','floor':3,'x':4,'y':8},[
     {'type':'remove_item','item':'sword_5'},{'type':'remove_item','item':'sacred_shield'},
     {'type':'clear_inventory','conditions':[{'type':'cycle_at_least','amount':2}]},
     {'type':'teleport','floor':2,'x':2,'y':7,'transition':'capture'},
+    {'type':'set_highest_stair_floor','floor':2},
     {'type':'flag','flag':'captured'},
     *[{'type':'message','text':DIALOGUES[i],'dialogue_id':i} for i in [0,1,2,3]]],
     source='Original mevent 0x463A2C + magic 0x461A0C + opening2 0x464048 title/scan + opening31 0x4653B8; compact original stages with configurable durations')

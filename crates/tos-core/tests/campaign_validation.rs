@@ -238,8 +238,8 @@ fn typed_campaign_preserves_the_published_save_fingerprint() {
         serde_json::from_str(include_str!("../../../data/campaign.json")).unwrap();
     let engine = Engine::new(campaign).unwrap();
     let saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
-    // Measured through save_game in the published e3460ce release CLI before
-    // rebuilding. Behavior enums must preserve its canonical JSON spellings;
-    // this Rust refactor therefore requires no migration for existing saves.
-    assert_eq!(saved["campaign_fingerprint"], "70293e17a4e914ca");
+    // Behavior enums must preserve their canonical JSON spellings. Explicit
+    // item-fidelity rules revise the bundled campaign. The GUI keeps
+    // known previous revisions recoverable through its tested migration.
+    assert_eq!(saved["campaign_fingerprint"], "ad358ec82db8b9ef");
 }

@@ -1,5 +1,5 @@
 //! Combat forecasting; one calculation shared by inspection and execution.
-use crate::{Enemy, EnemySpecial, Player, original::*};
+use crate::{Enemy, EnemySpecial, Engine, Player, original::*};
 use serde::Serialize;
 use serde_json::Value;
 
@@ -14,6 +14,17 @@ pub struct Forecast {
     pub can_win: bool,
     pub reason: String,
     pub rounds: i64,
+}
+
+impl Engine {
+    /// Resolve this tile's actual encounter before applying Lucky Gold.
+    /// Stats remain the enemy row's full cycle-scaled values for body parts.
+    pub(crate) fn enemy_for_tile(&self, key: &str, tile: u16) -> Option<Enemy> {
+        let mut enemy = self.enemy(key)?;
+        let definition = self.campaign.tiles.get(&tile.to_string())?;
+        enemy.gold /= definition.reward_divisor.unwrap_or(1);
+        Some(enemy)
+    }
 }
 
 /// Hero strikes first; the last strike never receives a counterattack.

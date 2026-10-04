@@ -27,6 +27,56 @@ pub struct Player {
     pub inventory: Vec<String>,
     #[serde(default)]
     pub item_charges: BTreeMap<String, u32>,
+    /// Displayed equipment changes on every pickup. Its stat bonus has already
+    /// been added to attack/defense; replacing a slot never subtracts a bonus.
+    #[serde(default)]
+    pub weapon: Option<String>,
+    #[serde(default)]
+    pub shield: Option<String>,
+}
+
+impl Player {
+    /// Keep collected tags for scripts and persistent abilities, separately
+    /// from the most recently collected weapon and shield displayed to players.
+    pub(crate) fn grant_item(&mut self, item: &str, campaign: &Campaign) {
+        match campaign.equipment_stat(item) {
+            Some(Stat::Attack) => self.weapon = Some(item.to_owned()),
+            Some(Stat::Defense) => self.shield = Some(item.to_owned()),
+            _ => (),
+        }
+        if !self.inventory.iter().any(|owned| owned == item) {
+            self.inventory.push(item.to_owned());
+        }
+    }
+
+    pub(crate) fn remove_item(&mut self, item: &str) {
+        self.inventory.retain(|owned| owned != item);
+        if self.weapon.as_deref() == Some(item) {
+            self.weapon = None;
+        }
+        if self.shield.as_deref() == Some(item) {
+            self.shield = None;
+        }
+    }
+
+    pub(crate) fn clear_inventory(&mut self) {
+        self.inventory.clear();
+        self.item_charges.clear();
+        self.weapon = None;
+        self.shield = None;
+    }
+
+    pub(crate) fn infer_equipment(&mut self, campaign: &Campaign, weapon: bool, shield: bool) {
+        // Old saves stored each equipment ID only once. Their exact last pickup
+        // cannot be recovered after recollection, so use the last retained tag.
+        for item in &self.inventory {
+            match campaign.equipment_stat(item) {
+                Some(Stat::Attack) if weapon => self.weapon = Some(item.clone()),
+                Some(Stat::Defense) if shield => self.shield = Some(item.clone()),
+                _ => (),
+            }
+        }
+    }
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -37,6 +87,13 @@ pub struct TileDef {
     pub description: String,
     #[serde(default)]
     pub enemy: Option<String>,
+    /// Divide raw encounter gold before item multipliers; omitted means 1.
+    #[serde(
+        default,
+        deserialize_with = "deserialize_reward_divisor",
+        skip_serializing_if = "default_reward_divisor"
+    )]
+    pub reward_divisor: Option<i64>,
     #[serde(default)]
     pub key: Option<KeyColor>,
     #[serde(default)]
@@ -59,6 +116,17 @@ pub struct TileDef {
     pub passable: bool,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
+}
+
+fn default_reward_divisor(value: &Option<i64>) -> bool {
+    value.is_none_or(|divisor| divisor == 1)
+}
+
+fn deserialize_reward_divisor<'de, D>(deserializer: D) -> Result<Option<i64>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    i64::deserialize(deserializer).map(Some)
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -122,6 +190,49 @@ const MAX_FLOORS: usize = 256;
 const MAX_MULTIPLIER: i64 = 1000;
 
 impl Campaign {
+    /// Weapon/shield equipment uses dedicated slots. Other custom equipment,
+    /// such as an HP amulet, remains visible in special inventory.
+    pub fn is_equipment(&self, item: &str) -> bool {
+        matches!(
+            self.equipment_stat(item),
+            Some(Stat::Attack | Stat::Defense)
+        )
+    }
+
+    fn equipment_stat(&self, item: &str) -> Option<Stat> {
+        self.tiles
+            .values()
+            .find(|tile| tile.kind == TileKind::Equipment && tile.item.as_deref() == Some(item))
+            .map(|tile| tile.stat.unwrap_or(Stat::Attack))
+            .or(match item {
+                "sword_1" | "sword_2" | "sword_3" | "sword_4" | "sword_5" => Some(Stat::Attack),
+                "shield_1" | "shield_2" | "shield_3" | "shield_4" | "sacred_shield" => {
+                    Some(Stat::Defense)
+                }
+                _ => None,
+            })
+    }
+
+    pub(crate) fn initial_player(&self) -> Player {
+        let mut player = self.start.clone();
+        player.infer_equipment(self, player.weapon.is_none(), player.shield.is_none());
+        player
+    }
+
+    pub(crate) fn validate_equipment(&self, player: &Player) -> Result<(), String> {
+        for (name, item, stat) in [
+            ("weapon", &player.weapon, Stat::Attack),
+            ("shield", &player.shield, Stat::Defense),
+        ] {
+            if let Some(item) = item
+                && self.equipment_stat(item) != Some(stat)
+            {
+                return Err(format!("player.{name}: {item} is not matching equipment"));
+            }
+        }
+        Ok(())
+    }
+
     /// Validate authored behavior before the engine compiles or runs scripts.
     ///
     /// Unknown metadata remains intact. Known optional fields may be absent, but
@@ -171,6 +282,7 @@ impl Campaign {
         }
         self.validate_position(self.start.floor, self.start.x, self.start.y, "start")?;
         validate_player(&self.start)?;
+        self.validate_equipment(&self.start)?;
 
         for (id, enemy) in &self.enemies {
             validate_name(id, &format!("enemies.{id}"))?;
@@ -287,6 +399,14 @@ impl Campaign {
         if matches!(tile.kind, TileKind::Enemy | TileKind::Monster) && tile.enemy.is_none() {
             return Err(format!("{path}.enemy: enemy tiles require an enemy ID"));
         }
+        if let Some(divisor) = tile.reward_divisor
+            && (!(1..=MAX_STAT).contains(&divisor)
+                || !matches!(tile.kind, TileKind::Enemy | TileKind::Monster))
+        {
+            return Err(format!(
+                "{path}.reward_divisor: enemy encounters require an integer between 1 and {MAX_STAT}"
+            ));
+        }
         if let Some(item) = &tile.item {
             // Items can be custom passive inventory tags, not only built-in tools.
             validate_name(item, &format!("{path}.item"))?;
@@ -351,6 +471,7 @@ impl Campaign {
 
     fn validate_footprint(&self, value: &Value, path: &str) -> Result<(), String> {
         let footprint = object(value, path)?;
+        optional::<bool>(footprint, "clear_all", path)?;
         let width: usize = required(footprint, "width", path)?;
         let height: usize = required(footprint, "height", path)?;
         if !(1..=self.width).contains(&width) || !(1..=self.height).contains(&height) {
@@ -395,6 +516,7 @@ impl Campaign {
     }
 
     fn validate_rules(&self) -> Result<(), String> {
+        crate::flight::validate_callbacks(self)?;
         // Serde's omitted Value is null; this represents an absent rules object.
         // Known properties inside an authored object do not accept null.
         let empty_rules = serde_json::Map::new();
@@ -422,6 +544,7 @@ impl Campaign {
             "hero_attacks_first",
             "base_attack_guard",
             "flying_requires_stairs",
+            "flying_original_selection",
             "save_requires_hero_orb",
         ] {
             optional::<bool>(rules, key, "rules")?;
@@ -482,10 +605,19 @@ impl Campaign {
                 }
             }
         }
-        if let Some(value) = rules.get("bomb_tile_ranges") {
-            let ranges: Vec<[u16; 2]> = decode(value, "rules.bomb_tile_ranges")?;
-            if ranges.iter().any(|[minimum, maximum]| minimum > maximum) {
-                return Err("rules.bomb_tile_ranges: each inclusive range must increase".into());
+        for key in ["bomb_tile_ranges", "wall_break_tile_ranges"] {
+            if let Some(value) = rules.get(key) {
+                let path = format!("rules.{key}");
+                let ranges: Vec<[u16; 2]> = decode(value, &path)?;
+                if ranges.iter().any(|[minimum, maximum]| minimum > maximum) {
+                    return Err(format!("{path}: each inclusive range must increase"));
+                }
+            }
+        }
+        if let Some(value) = rules.get("wisdom_dialogue_range") {
+            let [minimum, maximum]: [u32; 2] = decode(value, "rules.wisdom_dialogue_range")?;
+            if minimum > maximum {
+                return Err("rules.wisdom_dialogue_range: inclusive range must increase".into());
             }
         }
         if let Some(value) = rules.get("backside") {
@@ -610,6 +742,9 @@ pub(crate) fn validate_player(player: &Player) -> Result<(), String> {
     }
     for item in &player.inventory {
         validate_name(item, "player.inventory")?;
+    }
+    for item in [&player.weapon, &player.shield].into_iter().flatten() {
+        validate_name(item, "player equipment")?;
     }
     for item in player.item_charges.keys() {
         validate_name(item, "player.item_charges")?;

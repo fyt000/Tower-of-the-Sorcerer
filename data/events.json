@@ -226,6 +226,10 @@
         "transition": "capture"
       },
       {
+        "type": "set_highest_stair_floor",
+        "floor": 2
+      },
+      {
         "type": "flag",
         "flag": "captured"
       },

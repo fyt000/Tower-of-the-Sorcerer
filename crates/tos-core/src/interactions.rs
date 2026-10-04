@@ -98,7 +98,7 @@ impl Engine {
                 let cost = offer.cost_at(visits);
                 json!({"id":offer.id_at(index),"label":format!("{} · {} gold",offer.label,cost),"cost":cost})
             }).chain(std::iter::once(json!({"id":"leave","label":"Continue"}))).collect();
-        let text = def
+        let after_text = def
             .extra
             .get("after_text")
             .filter(|entry| {
@@ -106,12 +106,26 @@ impl Engine {
                     .as_str()
                     .is_some_and(|flag| self.state.flags.contains(flag))
             })
-            .and_then(|entry| entry["text"].as_str())
-            .unwrap_or(if def.text.is_empty() {
-                &def.description
-            } else {
-                &def.text
-            });
+            .and_then(|entry| entry["text"].as_str());
+        let text = after_text.unwrap_or(if def.text.is_empty() {
+            &def.description
+        } else {
+            &def.text
+        });
+        let dialogue_id = def
+            .extra
+            .get("dialogue_ids")
+            .and_then(Value::as_array)
+            .and_then(|ids| {
+                if after_text.is_some() {
+                    ids.last()
+                } else {
+                    ids.first()
+                }
+            })
+            .and_then(Value::as_u64)
+            .and_then(|id| u32::try_from(id).ok());
+        self.record_journal(floor, x, y, &def.name, text, dialogue_id);
         self.state.pending_interaction =
             Some(json!({"title":def.name,"text":text,"choices":choices}));
         self.state.pending_tile = Some((floor, x, y));

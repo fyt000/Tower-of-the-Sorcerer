@@ -1,0 +1,3032 @@
+{
+  "source": "D:\\Program Files (x86)\\Tower of the Sorcerer\\TSW.exe",
+  "sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "method": "Actual handan/taisen and recursive arithmetic helpers in isolated memory; GUI and string routines bypassed. Queue effects independently decoded, not a live Windows run.",
+  "octopus_monster_row": [
+    1200,
+    180,
+    20,
+    100
+  ],
+  "ordinary_encounters": [
+    {
+      "tile": 97,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        4,
+        4
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        50
+      ],
+      "clear_cells": [
+        [
+          4,
+          4
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 50,
+      "applied_tile_changes": [
+        [
+          4,
+          4,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        4,
+        4
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 98,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        5,
+        4
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        50
+      ],
+      "clear_cells": [
+        [
+          5,
+          4
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 50,
+      "applied_tile_changes": [
+        [
+          5,
+          4,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        5,
+        4
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 99,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        6,
+        4
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        50
+      ],
+      "clear_cells": [
+        [
+          6,
+          4
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 50,
+      "applied_tile_changes": [
+        [
+          6,
+          4,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        6,
+        4
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 100,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        4,
+        5
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        50
+      ],
+      "clear_cells": [
+        [
+          4,
+          5
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 50,
+      "applied_tile_changes": [
+        [
+          4,
+          5,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        4,
+        5
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 101,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        5,
+        5
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        50
+      ],
+      "clear_cells": [
+        [
+          5,
+          5
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 50,
+      "applied_tile_changes": [
+        [
+          5,
+          5,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        5,
+        5
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 102,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        6,
+        5
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        50
+      ],
+      "clear_cells": [
+        [
+          6,
+          5
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 50,
+      "applied_tile_changes": [
+        [
+          6,
+          5,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        6,
+        5
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 103,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        4,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        50
+      ],
+      "clear_cells": [
+        [
+          4,
+          6
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 50,
+      "applied_tile_changes": [
+        [
+          4,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        4,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 104,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        5,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        100
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        100
+      ],
+      "clear_cells": [
+        [
+          6,
+          6
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          6,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          4
+        ],
+        [
+          6,
+          4
+        ]
+      ],
+      "queue_records": 44,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 100,
+      "applied_tile_changes": [
+        [
+          4,
+          4,
+          6
+        ],
+        [
+          5,
+          4,
+          6
+        ],
+        [
+          6,
+          4,
+          6
+        ],
+        [
+          4,
+          5,
+          6
+        ],
+        [
+          5,
+          5,
+          6
+        ],
+        [
+          6,
+          5,
+          6
+        ],
+        [
+          4,
+          6,
+          6
+        ],
+        [
+          5,
+          6,
+          6
+        ],
+        [
+          6,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [
+        [
+          14,
+          71,
+          183
+        ]
+      ],
+      "final_hero_position": [
+        5,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 105,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        6,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        50
+      ],
+      "clear_cells": [
+        [
+          6,
+          6
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 50,
+      "applied_tile_changes": [
+        [
+          6,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        6,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 97,
+      "lucky_gold": 1,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        4,
+        4
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        100
+      ],
+      "clear_cells": [
+        [
+          4,
+          4
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 100,
+      "applied_tile_changes": [
+        [
+          4,
+          4,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        4,
+        4
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 98,
+      "lucky_gold": 1,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        5,
+        4
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        100
+      ],
+      "clear_cells": [
+        [
+          5,
+          4
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 100,
+      "applied_tile_changes": [
+        [
+          5,
+          4,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        5,
+        4
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 99,
+      "lucky_gold": 1,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        6,
+        4
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        100
+      ],
+      "clear_cells": [
+        [
+          6,
+          4
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 100,
+      "applied_tile_changes": [
+        [
+          6,
+          4,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        6,
+        4
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 100,
+      "lucky_gold": 1,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        4,
+        5
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        100
+      ],
+      "clear_cells": [
+        [
+          4,
+          5
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 100,
+      "applied_tile_changes": [
+        [
+          4,
+          5,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        4,
+        5
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 101,
+      "lucky_gold": 1,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        5,
+        5
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        100
+      ],
+      "clear_cells": [
+        [
+          5,
+          5
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 100,
+      "applied_tile_changes": [
+        [
+          5,
+          5,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        5,
+        5
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 102,
+      "lucky_gold": 1,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        6,
+        5
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        100
+      ],
+      "clear_cells": [
+        [
+          6,
+          5
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 100,
+      "applied_tile_changes": [
+        [
+          6,
+          5,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        6,
+        5
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 103,
+      "lucky_gold": 1,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        4,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        100
+      ],
+      "clear_cells": [
+        [
+          4,
+          6
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 100,
+      "applied_tile_changes": [
+        [
+          4,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        4,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 104,
+      "lucky_gold": 1,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        5,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        100
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        200
+      ],
+      "clear_cells": [
+        [
+          6,
+          6
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          6,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          4
+        ],
+        [
+          6,
+          4
+        ]
+      ],
+      "queue_records": 44,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 200,
+      "applied_tile_changes": [
+        [
+          4,
+          4,
+          6
+        ],
+        [
+          5,
+          4,
+          6
+        ],
+        [
+          6,
+          4,
+          6
+        ],
+        [
+          4,
+          5,
+          6
+        ],
+        [
+          5,
+          5,
+          6
+        ],
+        [
+          6,
+          5,
+          6
+        ],
+        [
+          4,
+          6,
+          6
+        ],
+        [
+          5,
+          6,
+          6
+        ],
+        [
+          6,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [
+        [
+          14,
+          71,
+          183
+        ]
+      ],
+      "final_hero_position": [
+        5,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 105,
+      "lucky_gold": 1,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        6,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        100
+      ],
+      "clear_cells": [
+        [
+          6,
+          6
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 100,
+      "applied_tile_changes": [
+        [
+          6,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        6,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    }
+  ],
+  "backside_encounters": [
+    {
+      "tile": 103,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 43,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 440000,
+        "attack": 18480,
+        "defense": 4400
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        4,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 52800,
+      "hero_strikes": 3,
+      "expected_damage": 7040,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        50
+      ],
+      "clear_cells": [
+        [
+          4,
+          6
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 432960,
+      "applied_hero_gold": 50,
+      "applied_tile_changes": [
+        [
+          4,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        4,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 104,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 43,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 440000,
+        "attack": 18480,
+        "defense": 4400
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        5,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 52800,
+      "hero_strikes": 3,
+      "expected_damage": 7040,
+      "raw_reward_records": [
+        100
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        100
+      ],
+      "clear_cells": [
+        [
+          6,
+          6
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          6,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          4
+        ],
+        [
+          6,
+          4
+        ]
+      ],
+      "queue_records": 44,
+      "applied_hero_hp": 432960,
+      "applied_hero_gold": 100,
+      "applied_tile_changes": [
+        [
+          4,
+          4,
+          6
+        ],
+        [
+          5,
+          4,
+          6
+        ],
+        [
+          6,
+          4,
+          6
+        ],
+        [
+          4,
+          5,
+          6
+        ],
+        [
+          5,
+          5,
+          6
+        ],
+        [
+          6,
+          5,
+          6
+        ],
+        [
+          4,
+          6,
+          6
+        ],
+        [
+          5,
+          6,
+          6
+        ],
+        [
+          6,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [
+        [
+          14,
+          71,
+          183
+        ]
+      ],
+      "final_hero_position": [
+        5,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 105,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 43,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 440000,
+        "attack": 18480,
+        "defense": 4400
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        6,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 52800,
+      "hero_strikes": 3,
+      "expected_damage": 7040,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        50
+      ],
+      "clear_cells": [
+        [
+          6,
+          6
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 432960,
+      "applied_hero_gold": 50,
+      "applied_tile_changes": [
+        [
+          6,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        6,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 103,
+      "lucky_gold": 1,
+      "cycle_factor_minus_one": 43,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 440000,
+        "attack": 18480,
+        "defense": 4400
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        4,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 52800,
+      "hero_strikes": 3,
+      "expected_damage": 7040,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        100
+      ],
+      "clear_cells": [
+        [
+          4,
+          6
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 432960,
+      "applied_hero_gold": 100,
+      "applied_tile_changes": [
+        [
+          4,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        4,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 104,
+      "lucky_gold": 1,
+      "cycle_factor_minus_one": 43,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 440000,
+        "attack": 18480,
+        "defense": 4400
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        5,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 52800,
+      "hero_strikes": 3,
+      "expected_damage": 7040,
+      "raw_reward_records": [
+        100
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        200
+      ],
+      "clear_cells": [
+        [
+          6,
+          6
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          6,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          4
+        ],
+        [
+          6,
+          4
+        ]
+      ],
+      "queue_records": 44,
+      "applied_hero_hp": 432960,
+      "applied_hero_gold": 200,
+      "applied_tile_changes": [
+        [
+          4,
+          4,
+          6
+        ],
+        [
+          5,
+          4,
+          6
+        ],
+        [
+          6,
+          4,
+          6
+        ],
+        [
+          4,
+          5,
+          6
+        ],
+        [
+          5,
+          5,
+          6
+        ],
+        [
+          6,
+          5,
+          6
+        ],
+        [
+          4,
+          6,
+          6
+        ],
+        [
+          5,
+          6,
+          6
+        ],
+        [
+          6,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [
+        [
+          14,
+          71,
+          183
+        ]
+      ],
+      "final_hero_position": [
+        5,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 105,
+      "lucky_gold": 1,
+      "cycle_factor_minus_one": 43,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 440000,
+        "attack": 18480,
+        "defense": 4400
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        6,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 52800,
+      "hero_strikes": 3,
+      "expected_damage": 7040,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        100
+      ],
+      "clear_cells": [
+        [
+          6,
+          6
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 432960,
+      "applied_hero_gold": 100,
+      "applied_tile_changes": [
+        [
+          6,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        6,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    }
+  ],
+  "after_limb_removed_encounters": [
+    {
+      "tile": 104,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [
+        103
+      ],
+      "encounter": [
+        5,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        100
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        100
+      ],
+      "clear_cells": [
+        [
+          6,
+          6
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          6,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          4
+        ],
+        [
+          6,
+          4
+        ]
+      ],
+      "queue_records": 44,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 100,
+      "applied_tile_changes": [
+        [
+          4,
+          4,
+          6
+        ],
+        [
+          5,
+          4,
+          6
+        ],
+        [
+          6,
+          4,
+          6
+        ],
+        [
+          4,
+          5,
+          6
+        ],
+        [
+          5,
+          5,
+          6
+        ],
+        [
+          6,
+          5,
+          6
+        ],
+        [
+          5,
+          6,
+          6
+        ],
+        [
+          6,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [
+        [
+          14,
+          71,
+          183
+        ]
+      ],
+      "final_hero_position": [
+        5,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 105,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 100,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [
+        103
+      ],
+      "encounter": [
+        6,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        50
+      ],
+      "clear_cells": [
+        [
+          6,
+          6
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 50,
+      "applied_tile_changes": [
+        [
+          6,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        6,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    }
+  ],
+  "edited_odd_reward_encounters": [
+    {
+      "tile": 103,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 101,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        4,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        50
+      ],
+      "clear_cells": [
+        [
+          4,
+          6
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 50,
+      "applied_tile_changes": [
+        [
+          4,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        4,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 104,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 101,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        5,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        101
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        101
+      ],
+      "clear_cells": [
+        [
+          6,
+          6
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          6,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          4
+        ],
+        [
+          6,
+          4
+        ]
+      ],
+      "queue_records": 44,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 101,
+      "applied_tile_changes": [
+        [
+          4,
+          4,
+          6
+        ],
+        [
+          5,
+          4,
+          6
+        ],
+        [
+          6,
+          4,
+          6
+        ],
+        [
+          4,
+          5,
+          6
+        ],
+        [
+          5,
+          5,
+          6
+        ],
+        [
+          6,
+          5,
+          6
+        ],
+        [
+          4,
+          6,
+          6
+        ],
+        [
+          5,
+          6,
+          6
+        ],
+        [
+          6,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [
+        [
+          14,
+          71,
+          183
+        ]
+      ],
+      "final_hero_position": [
+        5,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 105,
+      "lucky_gold": 0,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 101,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        6,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        50
+      ],
+      "clear_cells": [
+        [
+          6,
+          6
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 50,
+      "applied_tile_changes": [
+        [
+          6,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        6,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 103,
+      "lucky_gold": 1,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 101,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        4,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        100
+      ],
+      "clear_cells": [
+        [
+          4,
+          6
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 100,
+      "applied_tile_changes": [
+        [
+          4,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        4,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 104,
+      "lucky_gold": 1,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 101,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        5,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        101
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        202
+      ],
+      "clear_cells": [
+        [
+          6,
+          6
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          6,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          4
+        ],
+        [
+          6,
+          4
+        ]
+      ],
+      "queue_records": 44,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 202,
+      "applied_tile_changes": [
+        [
+          4,
+          4,
+          6
+        ],
+        [
+          5,
+          4,
+          6
+        ],
+        [
+          6,
+          4,
+          6
+        ],
+        [
+          4,
+          5,
+          6
+        ],
+        [
+          5,
+          5,
+          6
+        ],
+        [
+          6,
+          5,
+          6
+        ],
+        [
+          4,
+          6,
+          6
+        ],
+        [
+          5,
+          6,
+          6
+        ],
+        [
+          6,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [
+        [
+          14,
+          71,
+          183
+        ]
+      ],
+      "final_hero_position": [
+        5,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    },
+    {
+      "tile": 105,
+      "lucky_gold": 1,
+      "cycle_factor_minus_one": 0,
+      "input_monster_gold": 101,
+      "input_hero": {
+        "hp": 10000,
+        "attack": 420,
+        "defense": 100
+      },
+      "prior_removed_tiles": [],
+      "encounter": [
+        6,
+        6
+      ],
+      "monster_row": 18,
+      "monster_hp": 1200,
+      "hero_strikes": 3,
+      "expected_damage": 160,
+      "raw_reward_records": [
+        50
+      ],
+      "reward_after_opcode7_lucky_multiplier": [
+        100
+      ],
+      "clear_cells": [
+        [
+          6,
+          6
+        ]
+      ],
+      "queue_records": 36,
+      "applied_hero_hp": 9840,
+      "applied_hero_gold": 100,
+      "applied_tile_changes": [
+        [
+          6,
+          6,
+          6
+        ]
+      ],
+      "hero_strike_records": 3,
+      "enemy_strike_records": 2,
+      "whole_creature_animation_records": [],
+      "final_hero_position": [
+        6,
+        6
+      ],
+      "followed_calls": [
+        "0x44a480",
+        "0x44c04c",
+        "0x450064",
+        "0x45031c"
+      ],
+      "skipped_calls": [
+        "0x4034fc",
+        "0x403710",
+        "0x405b6c",
+        "0x4135d4",
+        "0x44b6f4",
+        "0x44b78c",
+        "0x44cb34",
+        "dword ptr [edi + 0xc]"
+      ],
+      "bypassed_ui_paths": [
+        "0x44aacb->0x44ab6e",
+        "0x44c052->0x44c18a",
+        "0x44c1af->0x44c45c",
+        "0x4501de->0x450252"
+      ]
+    }
+  ],
+  "impossible_encounter": {
+    "tile": 103,
+    "lucky_gold": 0,
+    "cycle_factor_minus_one": 0,
+    "input_monster_gold": 100,
+    "input_hero": {
+      "hp": 10000,
+      "attack": 20,
+      "defense": 100
+    },
+    "prior_removed_tiles": [],
+    "encounter": [
+      4,
+      6
+    ],
+    "raw_reward_records": [],
+    "reward_after_opcode7_lucky_multiplier": [],
+    "clear_cells": [],
+    "queue_records": 0,
+    "applied_hero_hp": 10000,
+    "applied_hero_gold": 0,
+    "applied_tile_changes": [],
+    "hero_strike_records": 0,
+    "enemy_strike_records": 0,
+    "whole_creature_animation_records": [],
+    "final_hero_position": [
+      4,
+      7
+    ],
+    "followed_calls": [
+      "0x44a480"
+    ],
+    "skipped_calls": [
+      "0x40352c",
+      "0x44b78c",
+      "0x44cb34",
+      "dword ptr [ebx + 0xc]"
+    ],
+    "bypassed_ui_paths": []
+  },
+  "fatal_encounter": {
+    "tile": 103,
+    "lucky_gold": 0,
+    "cycle_factor_minus_one": 0,
+    "input_monster_gold": 100,
+    "input_hero": {
+      "hp": 160,
+      "attack": 420,
+      "defense": 100
+    },
+    "prior_removed_tiles": [],
+    "encounter": [
+      4,
+      6
+    ],
+    "raw_reward_records": [],
+    "reward_after_opcode7_lucky_multiplier": [],
+    "clear_cells": [],
+    "queue_records": 31,
+    "applied_hero_hp": 0,
+    "applied_hero_gold": 0,
+    "applied_tile_changes": [],
+    "hero_strike_records": 2,
+    "enemy_strike_records": 2,
+    "whole_creature_animation_records": [],
+    "final_hero_position": [
+      4,
+      6
+    ],
+    "followed_calls": [
+      "0x44a480",
+      "0x44c04c",
+      "0x450064",
+      "0x450288",
+      "0x45031c",
+      "0x4503a8"
+    ],
+    "skipped_calls": [
+      "0x4034fc",
+      "0x405b6c",
+      "0x4135d4",
+      "0x44b78c"
+    ],
+    "bypassed_ui_paths": [
+      "0x44c052->0x44c18a",
+      "0x44c1af->0x44c45c",
+      "0x4501de->0x450252"
+    ]
+  },
+  "atlas_id_dispatch_and_mapping": [
+    {
+      "tile": 97,
+      "dispatches_to_battle": true,
+      "sprite_marker": 216,
+      "monster_row": 18
+    },
+    {
+      "tile": 98,
+      "dispatches_to_battle": true,
+      "sprite_marker": 216,
+      "monster_row": 18
+    },
+    {
+      "tile": 99,
+      "dispatches_to_battle": true,
+      "sprite_marker": 216,
+      "monster_row": 18
+    },
+    {
+      "tile": 100,
+      "dispatches_to_battle": true,
+      "sprite_marker": 216,
+      "monster_row": 18
+    },
+    {
+      "tile": 101,
+      "dispatches_to_battle": true,
+      "sprite_marker": 216,
+      "monster_row": 18
+    },
+    {
+      "tile": 102,
+      "dispatches_to_battle": true,
+      "sprite_marker": 216,
+      "monster_row": 18
+    },
+    {
+      "tile": 103,
+      "dispatches_to_battle": true,
+      "sprite_marker": 216,
+      "monster_row": 18
+    },
+    {
+      "tile": 104,
+      "dispatches_to_battle": true,
+      "sprite_marker": 216,
+      "monster_row": 18
+    },
+    {
+      "tile": 105,
+      "dispatches_to_battle": true,
+      "sprite_marker": 216,
+      "monster_row": 18
+    },
+    {
+      "tile": 106,
+      "dispatches_to_battle": true,
+      "sprite_marker": 0,
+      "monster_row": -198
+    },
+    {
+      "tile": 107,
+      "dispatches_to_battle": true,
+      "sprite_marker": 0,
+      "monster_row": -198
+    },
+    {
+      "tile": 108,
+      "dispatches_to_battle": true,
+      "sprite_marker": 0,
+      "monster_row": -198
+    },
+    {
+      "tile": 109,
+      "dispatches_to_battle": true,
+      "sprite_marker": 0,
+      "monster_row": -198
+    },
+    {
+      "tile": 110,
+      "dispatches_to_battle": true,
+      "sprite_marker": 0,
+      "monster_row": -198
+    },
+    {
+      "tile": 111,
+      "dispatches_to_battle": true,
+      "sprite_marker": 0,
+      "monster_row": -198
+    },
+    {
+      "tile": 112,
+      "dispatches_to_battle": true,
+      "sprite_marker": 0,
+      "monster_row": -198
+    },
+    {
+      "tile": 113,
+      "dispatches_to_battle": true,
+      "sprite_marker": 0,
+      "monster_row": -198
+    },
+    {
+      "tile": 114,
+      "dispatches_to_battle": true,
+      "sprite_marker": 0,
+      "monster_row": -198
+    }
+  ],
+  "verified_addresses": {
+    "dispatcher": "0x4445ad..0x4445b3 -> 0x448fa0 -> 0x44a480",
+    "octopus_row_selection": "0x44a506 writes 0xd8, subtract0xc6 -> row18",
+    "enemy_hp_cycle_scaling": "0x44a5a6..0x44a5be",
+    "battle_forecast": "0x450064 and recursive0x45031c",
+    "limb_reward_halving": "0x44ab6e..0x44aea2, eight cells except104",
+    "main_body_footprint_clear": "0x44aeea..0x44b0e1, tile104 only",
+    "lucky_gold_queue_handler": "0x452deb..0x452e04",
+    "whole_creature_visual_clear": "opcode14 calls takowork1/2 at0x4548a0/0x454a58",
+    "map_tile_write_queue_handler": "opcode17 at0x4541a9..0x4541c5"
+  }
+}

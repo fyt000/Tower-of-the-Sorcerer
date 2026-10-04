@@ -139,17 +139,19 @@ impl Engine {
             }
             TileKind::Enemy | TileKind::Monster => {
                 let enemy = self
-                    .enemy(def.enemy.as_deref().ok_or("Enemy tile has no enemy")?)
+                    .enemy_for_tile(def.enemy.as_deref().ok_or("Enemy tile has no enemy")?, id)
                     .ok_or("Unknown enemy")?;
+                self.record_enemy_encounter(&enemy, floor, x, y, id);
                 let battle = forecast_with_rules(&self.state.player, &enemy, &self.campaign.rules);
                 let Some(damage) = battle.damage else {
                     return self.block(&battle.reason);
                 };
-                if damage < self.state.player.hp {
-                    // Original taisen enters the enemy cell before its combat animation.
-                    self.present_move(&p, x, y, dx, dy);
-                }
-                self.present_battle(&enemy, &battle, floor, x, y, false);
+                // Original taisen enters after the attack guard, before its
+                // lethality check, including a fight that will kill the hero.
+                self.present_move(&p, x, y, dx, dy);
+                self.state.player.x = x;
+                self.state.player.y = y;
+                let battle_record = self.present_battle(&enemy, &battle, floor, x, y, false);
                 if damage >= self.state.player.hp {
                     // Original permits fatal battles; forecasts let the player plan before committing.
                     self.state.player.hp = 0;
@@ -158,32 +160,21 @@ impl Engine {
                         "{} defeated you. Restore a save to try another route.",
                         enemy.name
                     ));
+                    self.record_battle_log(battle_record);
                     return Ok(());
                 }
                 self.state.player.hp -= damage;
-                let reward = enemy.gold
-                    * if self
-                        .state
-                        .player
-                        .inventory
-                        .iter()
-                        .any(|i| i == "lucky_gold")
-                    {
-                        2
-                    } else {
-                        1
-                    };
+                let reward = battle.gold;
                 self.add_stat(Stat::Gold, reward);
                 self.clear(floor, x, y);
                 if def.extra.contains_key("footprint") {
                     self.clear_large_monster(floor, &def, x, y);
                 }
-                self.state.player.x = x;
-                self.state.player.y = y;
                 self.log(format!(
                     "Defeated {}: −{} HP, +{} gold.",
                     enemy.name, damage, reward
                 ));
+                self.record_battle_log(battle_record);
                 self.run_events(TriggerKind::EnemyDefeated, floor, x, y, Some(id));
                 entered = false;
             }
@@ -252,6 +243,7 @@ impl Engine {
                     } else {
                         TileKind::StairsUp
                     },
+                    crate::flight::FloorTravel::Stairs,
                 )?;
                 entered = false;
             }
@@ -333,6 +325,7 @@ impl Engine {
         &mut self,
         target: i32,
         arrival_kind: TileKind,
+        travel: crate::flight::FloorTravel,
     ) -> Result<(), String> {
         let tiles = self.state.floors.get(&target).ok_or("Unknown floor")?;
         let metadata = self
@@ -364,6 +357,10 @@ impl Engine {
             })
             .ok_or("Destination floor has no arrival tile")?;
         let from = self.state.player.floor;
+        if travel == crate::flight::FloorTravel::Stairs && target > from {
+            self.state.highest_stair_floor = Some(self.highest_stair_floor().max(target));
+        }
+        self.apply_floor_travel_callbacks(from, target, travel);
         self.state.player.floor = target;
         self.state.player.x = index % self.campaign.width;
         self.state.player.y = index / self.campaign.width;

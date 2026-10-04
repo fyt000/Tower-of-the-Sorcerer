@@ -220,6 +220,9 @@ pub enum Effect {
     SetVisited {
         floors: Vec<i32>,
     },
+    SetHighestStairFloor {
+        floor: i32,
+    },
     SetEnemy {
         enemy: String,
         hp: Option<i64>,
@@ -267,6 +270,7 @@ impl Effect {
             Self::GiveItem { .. } | Self::RemoveItem { .. } => &["item"],
             Self::SetCharges { .. } => &["item", "charges"],
             Self::SetVisited { .. } => &["floors"],
+            Self::SetHighestStairFloor { .. } => &["floor"],
             Self::SetEnemy { .. } => &["enemy", "hp", "attack", "defense", "gold"],
             Self::BattleAt { .. } => &["floor", "x", "y", "first_strike"],
             Self::Teleport { .. } => &["floor", "x", "y", "transition", "duration_ms"],
@@ -333,6 +337,7 @@ pub(crate) struct CompiledScripts {
     tile_offers: BTreeMap<u16, Vec<Offer>>,
     interactions: Vec<InteractionScript>,
     pub item_effects: BTreeMap<String, Vec<ConditionalEffect>>,
+    pub floor_travel_callbacks: Vec<crate::flight::FloorTravelCallback>,
 }
 
 fn decode<T: serde::de::DeserializeOwned>(value: Value, path: &str) -> Result<T, String> {
@@ -341,7 +346,10 @@ fn decode<T: serde::de::DeserializeOwned>(value: Value, path: &str) -> Result<T,
 
 impl CompiledScripts {
     pub fn compile(campaign: &Campaign) -> Result<Self, String> {
-        let mut result = Self::default();
+        let mut result = Self {
+            floor_travel_callbacks: crate::flight::parse_callbacks(campaign)?,
+            ..Self::default()
+        };
         for (index, value) in campaign.events.iter().enumerate() {
             let path = format!("events[{index}]");
             let event: Event = decode(value.clone(), &path)?;
@@ -753,6 +761,9 @@ fn validate_typed_effects(
                     )?;
                 }
             }
+            Effect::SetHighestStairFloor { floor } => {
+                validate_position(campaign, Some(*floor), None, None, &format!("{path}.floor"))?;
+            }
             Effect::SetEnemy {
                 enemy,
                 hp,
@@ -884,7 +895,7 @@ impl Engine {
                     duration_ms,
                 } => {
                     self.log(text);
-                    self.present(json!({"type":"dialogue","text":text,"dialogue_id":dialogue_id,"duration_ms":duration_ms}));
+                    self.present(json!({"type":"dialogue","text":text,"dialogue_id":dialogue_id,"duration_ms":duration_ms,"log_id":self.latest_log_id(),"activity":text}));
                 }
                 Effect::Wait { ms } => self.present(json!({"type":"wait","duration_ms":ms})),
                 Effect::Sound { cue } => self.present(json!({"type":"audio","name":cue})),
@@ -943,11 +954,8 @@ impl Engine {
                     self.stat_value(*stat).saturating_mul(*numerator) / *denominator,
                 ),
                 Effect::GiveItem { item } => self.give_item(item),
-                Effect::RemoveItem { item } => self.state.player.inventory.retain(|s| s != item),
-                Effect::ClearInventory => {
-                    self.state.player.inventory.clear();
-                    self.state.player.item_charges.clear();
-                }
+                Effect::RemoveItem { item } => self.state.player.remove_item(item),
+                Effect::ClearInventory => self.state.player.clear_inventory(),
                 Effect::SetCharges { item, charges } => {
                     self.state
                         .player
@@ -957,6 +965,9 @@ impl Engine {
                 Effect::SetVisited { floors } => {
                     self.state.visited_floors = floors.iter().copied().collect();
                     self.state.visited_floors.insert(self.state.player.floor);
+                }
+                Effect::SetHighestStairFloor { floor } => {
+                    self.state.highest_stair_floor = Some(*floor);
                 }
                 Effect::SetEnemy {
                     enemy: key,
@@ -1026,10 +1037,11 @@ impl Engine {
             return;
         };
         let enemy = self
-            .enemy(key)
+            .enemy_for_tile(key, id)
             .expect("validated enemy tile references a defined enemy");
+        self.record_enemy_encounter(&enemy, floor, x, y, id);
         let result = forecast_with_rules(&self.state.player, &enemy, &self.campaign.rules);
-        self.present_battle(&enemy, &result, floor, x, y, first_strike);
+        let battle_record = self.present_battle(&enemy, &result, floor, x, y, first_strike);
         let damage = result
             .damage
             .unwrap_or(self.state.player.hp)
@@ -1048,23 +1060,13 @@ impl Engine {
             self.state.player.hp = 0;
             self.state.status = GameStatus::Lost;
             self.log(format!("{} defeated you in the ambush.", enemy.name));
+            self.record_battle_log(battle_record);
             return;
         }
         self.state.player.hp -= damage;
         // Lucky Gold doubles the reward in the original game, independently of
         // the backside monster-stat multiplier.
-        let gold = enemy.gold
-            * if self
-                .state
-                .player
-                .inventory
-                .iter()
-                .any(|i| i == "lucky_gold")
-            {
-                2
-            } else {
-                1
-            };
+        let gold = result.gold;
         self.set_stat(Stat::Gold, self.state.player.gold.saturating_add(gold));
         self.clear(floor, x, y);
         if def.extra.contains_key("footprint") {
@@ -1074,6 +1076,7 @@ impl Engine {
             "Ambush: defeated {} (−{damage} HP, +{gold} gold).",
             enemy.name
         ));
+        self.record_battle_log(battle_record);
         self.run_events(TriggerKind::EnemyDefeated, floor, x, y, Some(id));
     }
 }

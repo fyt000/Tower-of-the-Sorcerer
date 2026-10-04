@@ -102,8 +102,9 @@ fn fatal_and_enemy_first_animation_turns_end_at_the_actual_lethal_strike() {
     step(&mut game, "right");
     let state = game.snapshot();
     let timeline = state["last_action"]["presentation"].as_array().unwrap();
-    assert!(!timeline.iter().any(|e| e["type"] == "move"));
-    assert_eq!((game.player().x, game.player().y), (1, 0));
+    assert_eq!(timeline[0]["type"], "move");
+    assert_eq!(timeline[0]["to"]["x"], 2);
+    assert_eq!((game.player().x, game.player().y), (2, 0));
     let battle = timeline.iter().find(|e| e["type"] == "battle").unwrap();
     assert_eq!(battle["hero_strikes"], 1);
     assert_eq!(battle["enemy_strikes"], 1);

@@ -54,6 +54,17 @@
     "cross_multiplier": 2,
     "dragon_slayer_multiplier": 2,
     "flying_requires_stairs": true,
+    "flying_original_selection": true,
+    "wall_break_tile_ranges": [
+      [
+        8,
+        8
+      ]
+    ],
+    "wisdom_dialogue_range": [
+      62,
+      85
+    ],
     "save_requires_hero_orb": true,
     "stair_links": {
       "43:up": 45,
@@ -128,7 +139,123 @@
     "presentation": {
       "floor_transition_ms": 450,
       "combat_strike_ms": 450
-    }
+    },
+    "floor_travel_callbacks": [
+      {
+        "when": {
+          "type": "upward_flight_preview",
+          "floor": 35
+        },
+        "tile_sum": {
+          "cells": [
+            {
+              "floor": 35,
+              "x": 3,
+              "y": 8
+            },
+            {
+              "floor": 2,
+              "x": 10,
+              "y": 10
+            }
+          ],
+          "equals": 27
+        },
+        "writes": [
+          {
+            "floor": 2,
+            "x": 10,
+            "y": 10,
+            "tile": 6
+          }
+        ]
+      },
+      {
+        "when": {
+          "type": "flight_confirm",
+          "except_floor": 25
+        },
+        "writes": [
+          {
+            "floor": 25,
+            "x": 5,
+            "y": 6,
+            "tile": 6,
+            "if_tile": 23
+          }
+        ]
+      },
+      {
+        "when": {
+          "type": "flight_confirm",
+          "except_floor": 49
+        },
+        "writes": [
+          {
+            "floor": 49,
+            "x": 5,
+            "y": 1,
+            "tile": 6,
+            "if_tile": 23
+          }
+        ]
+      },
+      {
+        "when": {
+          "type": "flight_confirm",
+          "highest_stair_floor": 29,
+          "below_floor": 29
+        },
+        "writes": [
+          {
+            "floor": 29,
+            "x": 5,
+            "y": 3,
+            "tile": 6
+          },
+          {
+            "floor": 29,
+            "x": 5,
+            "y": 2,
+            "tile": 6
+          },
+          {
+            "floor": 29,
+            "x": 6,
+            "y": 1,
+            "tile": 21
+          }
+        ]
+      },
+      {
+        "when": {
+          "type": "stairs_down",
+          "from_floor": 29,
+          "to_floor": 28,
+          "highest_stair_floor": 29
+        },
+        "writes": [
+          {
+            "floor": 29,
+            "x": 5,
+            "y": 3,
+            "tile": 6
+          },
+          {
+            "floor": 29,
+            "x": 5,
+            "y": 2,
+            "tile": 6
+          },
+          {
+            "floor": 29,
+            "x": 6,
+            "y": 1,
+            "tile": 21
+          }
+        ]
+      }
+    ]
   },
   "floors": [
     {
@@ -8105,32 +8232,7 @@
         "h": 40
       },
       "enemy": "giant_octopus",
-      "footprint": {
-        "width": 3,
-        "height": 3,
-        "offset_x": 0,
-        "offset_y": 0,
-        "tiles": [
-          97,
-          98,
-          99,
-          100,
-          101,
-          102,
-          103,
-          104,
-          105,
-          106,
-          107,
-          108,
-          109,
-          110,
-          111,
-          112,
-          113,
-          114
-        ]
-      }
+      "reward_divisor": 2
     },
     "98": {
       "name": "Giant Octopus",
@@ -8142,32 +8244,7 @@
         "h": 40
       },
       "enemy": "giant_octopus",
-      "footprint": {
-        "width": 3,
-        "height": 3,
-        "offset_x": 1,
-        "offset_y": 0,
-        "tiles": [
-          97,
-          98,
-          99,
-          100,
-          101,
-          102,
-          103,
-          104,
-          105,
-          106,
-          107,
-          108,
-          109,
-          110,
-          111,
-          112,
-          113,
-          114
-        ]
-      }
+      "reward_divisor": 2
     },
     "99": {
       "name": "Giant Octopus",
@@ -8179,32 +8256,7 @@
         "h": 40
       },
       "enemy": "giant_octopus",
-      "footprint": {
-        "width": 3,
-        "height": 3,
-        "offset_x": 2,
-        "offset_y": 0,
-        "tiles": [
-          97,
-          98,
-          99,
-          100,
-          101,
-          102,
-          103,
-          104,
-          105,
-          106,
-          107,
-          108,
-          109,
-          110,
-          111,
-          112,
-          113,
-          114
-        ]
-      }
+      "reward_divisor": 2
     },
     "100": {
       "name": "Giant Octopus",
@@ -8216,32 +8268,7 @@
         "h": 40
       },
       "enemy": "giant_octopus",
-      "footprint": {
-        "width": 3,
-        "height": 3,
-        "offset_x": 0,
-        "offset_y": 1,
-        "tiles": [
-          97,
-          98,
-          99,
-          100,
-          101,
-          102,
-          103,
-          104,
-          105,
-          106,
-          107,
-          108,
-          109,
-          110,
-          111,
-          112,
-          113,
-          114
-        ]
-      }
+      "reward_divisor": 2
     },
     "101": {
       "name": "Giant Octopus",
@@ -8253,32 +8280,7 @@
         "h": 40
       },
       "enemy": "giant_octopus",
-      "footprint": {
-        "width": 3,
-        "height": 3,
-        "offset_x": 1,
-        "offset_y": 1,
-        "tiles": [
-          97,
-          98,
-          99,
-          100,
-          101,
-          102,
-          103,
-          104,
-          105,
-          106,
-          107,
-          108,
-          109,
-          110,
-          111,
-          112,
-          113,
-          114
-        ]
-      }
+      "reward_divisor": 2
     },
     "102": {
       "name": "Giant Octopus",
@@ -8290,32 +8292,7 @@
         "h": 40
       },
       "enemy": "giant_octopus",
-      "footprint": {
-        "width": 3,
-        "height": 3,
-        "offset_x": 2,
-        "offset_y": 1,
-        "tiles": [
-          97,
-          98,
-          99,
-          100,
-          101,
-          102,
-          103,
-          104,
-          105,
-          106,
-          107,
-          108,
-          109,
-          110,
-          111,
-          112,
-          113,
-          114
-        ]
-      }
+      "reward_divisor": 2
     },
     "103": {
       "name": "Giant Octopus",
@@ -8327,32 +8304,7 @@
         "h": 40
       },
       "enemy": "giant_octopus",
-      "footprint": {
-        "width": 3,
-        "height": 3,
-        "offset_x": 0,
-        "offset_y": 2,
-        "tiles": [
-          97,
-          98,
-          99,
-          100,
-          101,
-          102,
-          103,
-          104,
-          105,
-          106,
-          107,
-          108,
-          109,
-          110,
-          111,
-          112,
-          113,
-          114
-        ]
-      }
+      "reward_divisor": 2
     },
     "104": {
       "name": "Giant Octopus",
@@ -8388,7 +8340,8 @@
           112,
           113,
           114
-        ]
+        ],
+        "clear_all": true
       }
     },
     "105": {
@@ -8401,32 +8354,7 @@
         "h": 40
       },
       "enemy": "giant_octopus",
-      "footprint": {
-        "width": 3,
-        "height": 3,
-        "offset_x": 2,
-        "offset_y": 2,
-        "tiles": [
-          97,
-          98,
-          99,
-          100,
-          101,
-          102,
-          103,
-          104,
-          105,
-          106,
-          107,
-          108,
-          109,
-          110,
-          111,
-          112,
-          113,
-          114
-        ]
-      }
+      "reward_divisor": 2
     },
     "106": {
       "name": "Giant monster decoration",
@@ -9583,6 +9511,10 @@
           "x": 2,
           "y": 7,
           "transition": "capture"
+        },
+        {
+          "type": "set_highest_stair_floor",
+          "floor": 2
         },
         {
           "type": "flag",

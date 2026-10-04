@@ -57,11 +57,14 @@ Names were verified against `TTSW10.monname`, virtual address `0x44B6F4`, which 
 | Original tile IDs | Enemy table row |
 |---|---|
 | 61–96 | `(tile_id - 61) / 2`, integer division. |
-| 97–105 | Giant Octopus, row 18. |
+| 97–103 and 105 | Giant Octopus parts, row18 with full stats, half raw gold and single-cell removal. |
+| 104 | Giant Octopus whole creature, row18 with full reward and all nine cells removed. |
 | 122 | Dragon, row 19. |
 | 133–158 | `(tile_id - 93) / 2`, integer division. |
 
 The remaining large-creature sprite cells, IDs 106–121 and 123–132, are occupied visual cells rather than separate dragon encounters. Their campaign definitions block walking and the engine clears the associated footprint when the large enemy is defeated. The `footprint` metadata gives its 3×3 bounds, the attacked cell's offset inside those bounds, and the original sprite IDs eligible for removal. This clears the dragon's visual body while keeping separate creatures on the same floor intact. Cross applies to Zombie, Zombie Knight, and Vampire; Dragon Slayer applies to Dragon. Normal combat and bomb eligibility are independently configured to preserve their distinct original behavior.
+
+The Octopus distinction is verified by actual battle and queue-handler probes in [octopus-encounters.md](octopus-encounters.md). Defeating a part does not weaken the remaining parts or whole body. Tile104 alone owns a footprint, using `clear_all: true` to match the original unconditional road writes. The eight parts use `reward_divisor: 2`, applied before Lucky Gold. Original IDs106–114 are drawing-buffer alternate frames; directly placing them in original map bytes does not select a valid normalized Octopus combat row.
 
 ## Dialogue and NPCs
 
