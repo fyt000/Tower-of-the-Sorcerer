@@ -337,6 +337,7 @@ def build_campaign(map_bytes: bytes, monsters: list[dict], source_hash: str) -> 
                   "forecast_requires_item": "hero_orb",
                   "backside": {"enabled": True, "multiplier": 44, "carry_stats": True,
                                "reset_gold": True, "capture_preserves_stats": True},
+                  "audio": {'floor_music': [{'min_floor': 0, 'max_floor': 0, 'file': 'a_027xgw'}, {'min_floor': 1, 'max_floor': 10, 'file': 'b_067xgw'}, {'min_floor': 11, 'max_floor': 20, 'file': 'b_058xgw'}, {'min_floor': 21, 'max_floor': 30, 'file': 'b_110xgw'}, {'min_floor': 31, 'max_floor': 40, 'file': 'a_118xgw'}, {'min_floor': 41, 'max_floor': 49, 'file': 'a_019xgw'}, {'min_floor': 50, 'max_floor': 50, 'file': 'b_018xgw'}], 'music_cues': {'5': 'b_067xgw', '6': 'b_058xgw', '7': 'a_008xgw', '8': 'a_118xgw', '9': 'a_019xgw', '10': 'b_018xgw', '11': 'a_050xgw', '12': 'a_085xgw', '13': 'a_032xgw', '14': 'a_046xgw', '15': 'a_005xgw', '16': 'a_007xgw', '17': 'b_110xgw', '18': 'a_023xgw', '19': 'b_117xgw', '20': 'b_014xgw', '21': 'a_027xgw'}},
                   "stair_links": {"43:up": 45, "45:down": 43}},
         "floors": floors, "tiles": tile_definitions(), "enemies": {row["id"]: {k: v for k, v in row.items() if k != "id"} for row in monsters},
         "events": events,

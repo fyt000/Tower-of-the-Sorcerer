@@ -4,6 +4,7 @@ The installed executable is never launched. Requires pefile/capstone/unicorn;
 TOS_ORIGINAL_EXE can override its location. Run after extract_original.py.
 """
 import json
+import struct
 from original_event_probe import probe, pe, md, ROOT
 
 
@@ -44,6 +45,8 @@ def main():
         'audio_queue_names':{'1':'open.wav','2':'get.wav','3':'taisen.wav','4':'zeno.wav',
                             '5':'music-start','6':'music-stop','7':'3f.wav',
                             '8':'20f.wav','9':'kai.wav','10':'kai2.wav'},
+        'floor_music_dispatch':disassembly(0x47c8f8,0x7e),
+        'music_cue_files':music_files(),
         'floor_10_trap_queue':f10['queue'],
         'floor_10_trap_skipped_calls':f10['calls'],
         'presentation_timing':'Wait records and movement order are recovered. Remake durations are deliberately configurable modern presentation timings, not exact original timer emulation.',
@@ -56,6 +59,22 @@ def main():
     assert evidence['initializers']['third_and_later_cycle']['gold']==789
     assert sum(q[0]==12 for q in f10['queue'])==43
     print('Recorded first/backside reset evidence and 43 skeleton-trap motions')
+
+
+def music_files():
+    """Read soundplay's 17-case table and its Delphi filename constants."""
+    image=pe.get_memory_mapped_image()
+    files={}
+    for cue in range(5,22):
+        offset=0x7c304+(cue-5)*4
+        address=struct.unpack('<I',image[offset:offset+4])[0]
+        for instruction in md.disasm(image[address-0x400000:address-0x400000+55],address):
+            if instruction.mnemonic=='mov' and instruction.op_str.startswith('ecx, 0x'):
+                pointer=int(instruction.op_str.split(', ')[1],16)-0x400000
+                size=struct.unpack('<I',image[pointer-4:pointer])[0]
+                files[str(cue)]=image[pointer:pointer+size].decode('cp1252').split('\\')[-1].lower()
+    assert len(files)==17
+    return files
 
 
 if __name__=='__main__':main()
