@@ -241,35 +241,38 @@ impl CampaignEditor {
                 });
                 ui.add_space(12.0);
                 let dirty = self.is_dirty();
-                egui::Frame::new()
-                    .fill(if dirty {
+                let status = format!(
+                    "●  {}",
+                    tr(
+                        locale,
+                        if dirty {
+                            "editor.unsaved"
+                        } else {
+                            "editor.saved"
+                        }
+                    )
+                );
+                let status_color = if dirty {
+                    EDITOR_GOLD
+                } else {
+                    Color32::from_rgb(120, 214, 178)
+                };
+                let galley =
+                    ui.painter()
+                        .layout_no_wrap(status, FontId::proportional(13.0), status_color);
+                let (rect, _) = ui
+                    .allocate_exact_size(egui::vec2(galley.size().x + 24.0, 28.0), Sense::hover());
+                ui.painter().rect_filled(
+                    rect,
+                    14,
+                    if dirty {
                         Color32::from_rgb(63, 49, 35)
                     } else {
                         Color32::from_rgb(27, 54, 48)
-                    })
-                    .corner_radius(30)
-                    .inner_margin(egui::Margin::symmetric(12, 6))
-                    .show(ui, |ui| {
-                        ui.label(
-                            RichText::new(format!(
-                                "●  {}",
-                                tr(
-                                    locale,
-                                    if dirty {
-                                        "editor.unsaved"
-                                    } else {
-                                        "editor.saved"
-                                    }
-                                )
-                            ))
-                            .size(13.0)
-                            .color(if dirty {
-                                EDITOR_GOLD
-                            } else {
-                                Color32::from_rgb(120, 214, 178)
-                            }),
-                        );
-                    });
+                    },
+                );
+                ui.painter()
+                    .galley(rect.center() - galley.size() * 0.5, galley, status_color);
             });
             ui.label(
                 RichText::new(tr(locale, "editor.intro"))
@@ -407,8 +410,8 @@ impl CampaignEditor {
         let was_stroke = self.stroke_active;
         // eframe's root UI can grow with its contents. Bound the editor body
         // against the actual viewport and reserve the caller's Back button.
-        let body_height =
-            (ui.ctx().content_rect().bottom() - ui.next_widget_position().y - 64.0).max(40.0);
+        let editor_bottom = ui.max_rect().bottom().min(ui.ctx().content_rect().bottom());
+        let body_height = (editor_bottom - ui.next_widget_position().y - 64.0).max(40.0);
         let content = egui::ScrollArea::both()
             .id_salt("campaign_editor_content")
             .max_height(body_height)
@@ -479,7 +482,6 @@ impl CampaignEditor {
             return;
         }
         self.floor = self.floor.min(count - 1);
-        editor_eyebrow(ui, tr(locale, "editor.floors"));
         ui.horizontal_wrapped(|ui| {
             egui::ComboBox::from_id_salt("editor_floor").selected_text(format!("{} {}",tr(locale,"floor"),self.campaign["floors"][self.floor]["id"]))
                 .show_ui(ui, |ui| { for index in 0..count { let floor = &self.campaign["floors"][index];
@@ -567,11 +569,6 @@ impl CampaignEditor {
                 tiles.fill(json!(self.brush));
             }
         });
-        ui.label(
-            RichText::new(tr(locale, "editor.paint_hint"))
-                .size(13.0)
-                .color(EDITOR_MUTED),
-        );
         let width = self.campaign["width"].as_u64().unwrap_or(11) as usize;
         let height = self.campaign["height"].as_u64().unwrap_or(11) as usize;
         if width == 0 || height == 0 || width > 64 || height > 64 {
@@ -581,11 +578,13 @@ impl CampaignEditor {
         self.selected_cell.1 = self.selected_cell.1.min(height - 1);
         if ui.available_width() > 820.0 {
             let available = ui.available_width();
-            let board_width = (available * 0.55).clamp(360.0, 660.0);
-            let palette_width = (available - board_width - 18.0).max(240.0);
             // Remaining layout height is independent of the scroll offset,
             // so the grid does not resize while the user scrolls metadata.
-            let board_height = (ui.available_height() - 148.0).clamp(180.0, 600.0);
+            let board_height = (ui.available_height() - 132.0).clamp(180.0, 600.0);
+            let board_width = (board_height + 42.0)
+                .clamp(340.0, 660.0)
+                .min(available * 0.58);
+            let palette_width = (available - board_width - 18.0).max(240.0);
             ui.horizontal_top(|ui| {
                 editor_card(ui, |ui| {
                     ui.set_width(board_width - 38.0);
@@ -630,10 +629,14 @@ impl CampaignEditor {
         let size = ((ui.available_width() - 12.0) / width as f32)
             .min(maximum_height / height as f32)
             .clamp(8.0, 52.0);
-        let (rect, response) = ui.allocate_exact_size(
-            Vec2::new(width as f32 * size, height as f32 * size),
-            Sense::click_and_drag(),
-        );
+        let board_size = Vec2::new(width as f32 * size, height as f32 * size);
+        let (rect, response) = ui
+            .horizontal(|ui| {
+                ui.add_space(((ui.available_width() - board_size.x) * 0.5).max(0.0));
+                ui.allocate_exact_size(board_size, Sense::click_and_drag())
+            })
+            .inner;
+        let response = response.on_hover_text(tr(locale, "editor.paint_hint"));
         self.bounds.insert("board".into(), rect);
         let tiles = self.campaign["floors"][self.floor]["tiles"]
             .as_array()
