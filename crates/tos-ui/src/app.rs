@@ -328,7 +328,7 @@ impl TowerApp {
             && self.audio.music_enabled
             && !self.music_paused
         {
-            let floor = self.snapshot["floor"].as_i64().unwrap_or(1);
+            let floor = self.visual["floor"].as_i64().unwrap_or(1);
             let name = self.engine.campaign.rules["audio"]["floor_music"]
                 .as_array()
                 .and_then(|entries| {
