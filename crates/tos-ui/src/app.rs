@@ -276,7 +276,7 @@ impl TowerApp {
     }
 
     pub fn debug_json(&self) -> Value {
-        json!({"ready":true,"locale":self.locale,"visual_floor":self.visual["floor"],"visual_player":self.visual["player"],"editor_open":self.editor_open,"editor":self.editor.debug_json(),"bounds":self.bounds,"animation":self.active.as_ref().map(|a|a.effect["type"].clone()),"presentation_remaining":self.queue.len(),"path_remaining":self.route.len(),"animations_seen":self.animation_history,"audio":{"unlocked":self.audio.unlocked,"enabled":self.audio.enabled,"effects_played":self.audio.effects_played,"music":self.audio.music_name,"error":self.audio.error},"sprites_loaded":self.assets.atlas.is_some()})
+        json!({"ready":true,"locale":self.locale,"visual_floor":self.visual["floor"],"visual_player":self.visual["player"],"visual_log":self.visual["log"],"editor_open":self.editor_open,"editor":self.editor.debug_json(),"bounds":self.bounds,"animation":self.active.as_ref().map(|a|a.effect["type"].clone()),"presentation_remaining":self.queue.len(),"path_remaining":self.route.len(),"animations_seen":self.animation_history,"audio":{"unlocked":self.audio.unlocked,"enabled":self.audio.enabled,"effects_played":self.audio.effects_played,"music":self.audio.music_name,"error":self.audio.error},"sprites_loaded":self.assets.atlas.is_some()})
     }
 
     pub fn editor_campaign_json(&self) -> String {
@@ -411,6 +411,17 @@ impl TowerApp {
                 }
                 if let Some(direction) = effect["direction"].as_str() {
                     self.facing = direction.into();
+                }
+                if kind == "dialogue" {
+                    if !self.visual["log"].is_array() {
+                        self.visual["log"] = json!([]);
+                    }
+                    if let Some(log) = self.visual["log"].as_array_mut() {
+                        log.push(effect["text"].clone());
+                        if log.len() > 100 {
+                            log.remove(0);
+                        }
+                    }
                 }
                 let duration = effect["duration_ms"]
                     .as_f64()
@@ -728,10 +739,38 @@ impl TowerApp {
         ui.add_space(14.0);
         ui.label(RichText::new(self.text("inventory")).size(23.0).color(GOLD));
         ui.add_space(10.0);
-        let items = self.snapshot["inventory_items"]
+        let items = self.visual["player"]["inventory"]
             .as_array()
-            .cloned()
-            .unwrap_or_default();
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .map(|item| {
+                let definition = self
+                    .engine
+                    .campaign
+                    .tiles
+                    .values()
+                    .find(|def| def.item.as_deref() == Some(item));
+                let usable = definition.is_none_or(|def| def.kind != "equipment")
+                    && ![
+                        "hero_orb",
+                        "wisdom_orb",
+                        "monster_book",
+                        "cross",
+                        "dragon_slayer",
+                        "lucky_gold",
+                        "sacred_shield",
+                    ]
+                    .contains(&item);
+                json!({
+                    "id": item,
+                    "name": definition.map(|def| def.name.as_str()).unwrap_or(item),
+                    "sprite": definition.map(|def| &def.sprite),
+                    "usable": usable,
+                    "charges": self.visual["player"]["item_charges"][item],
+                })
+            })
+            .collect::<Vec<_>>();
         if items.is_empty() {
             ui.label(RichText::new(self.text("empty_inventory")).color(MUTED));
         }
@@ -790,7 +829,7 @@ impl TowerApp {
             .id_salt("journal")
             .max_height(max_height)
             .show(ui, |ui| {
-                for (i, entry) in self.snapshot["log"]
+                for (i, entry) in self.visual["log"]
                     .as_array()
                     .into_iter()
                     .flatten()
