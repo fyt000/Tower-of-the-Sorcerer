@@ -76,7 +76,12 @@ impl TowerApp {
         root: String,
         editor_open: bool,
     ) -> Self {
-        configure(&cc.egui_ctx);
+        #[cfg(not(target_arch = "wasm32"))]
+        let initial_chinese =
+            std::fs::read(std::path::Path::new(&root).join("fonts/NotoSansSC.ttf")).ok();
+        #[cfg(target_arch = "wasm32")]
+        let initial_chinese = None;
+        configure(&cc.egui_ctx, initial_chinese);
         let source = campaign
             .or_else(|| platform::read(CAMPAIGN))
             .unwrap_or_else(|| include_str!("../../../data/campaign.json").into());
@@ -142,6 +147,7 @@ impl TowerApp {
         app.audio.music_enabled = prefs["music"].as_bool().unwrap_or(true);
         app.audio.volume = prefs["volume"].as_f64().unwrap_or(0.55) as f32;
         app.request("assets/original-atlas.png");
+        #[cfg(target_arch = "wasm32")]
         app.request("fonts/NotoSansSC.ttf");
         for name in ["get", "open", "taisen", "kai", "kai2", "3f", "20f", "zeno"] {
             app.request(&format!("assets/wav/{name}.wav"));
@@ -265,7 +271,7 @@ impl TowerApp {
     }
 
     pub fn debug_json(&self) -> Value {
-        json!({"ready":true,"locale":self.locale,"editor_open":self.editor_open,"editor":self.editor.debug_json(),"bounds":self.bounds,"animation":self.active.as_ref().map(|a|a.effect["type"].clone()),"presentation_remaining":self.queue.len(),"path_remaining":self.route.len(),"animations_seen":self.animation_history,"audio":{"unlocked":self.audio.unlocked,"enabled":self.audio.enabled,"effects_played":self.audio.effects_played,"music":self.audio.music_name,"error":self.audio.error},"sprites_loaded":self.assets.atlas.is_some()})
+        json!({"ready":true,"locale":self.locale,"visual_floor":self.visual["floor"],"visual_player":self.visual["player"],"editor_open":self.editor_open,"editor":self.editor.debug_json(),"bounds":self.bounds,"animation":self.active.as_ref().map(|a|a.effect["type"].clone()),"presentation_remaining":self.queue.len(),"path_remaining":self.route.len(),"animations_seen":self.animation_history,"audio":{"unlocked":self.audio.unlocked,"enabled":self.audio.enabled,"effects_played":self.audio.effects_played,"music":self.audio.music_name,"error":self.audio.error},"sprites_loaded":self.assets.atlas.is_some()})
     }
 
     pub fn editor_campaign_json(&self) -> String {
@@ -569,7 +575,7 @@ impl TowerApp {
             );
             ui.add_space(12.0);
             ui.label(
-                RichText::new(format!("{} {}", self.text("floor"), self.snapshot["floor"]))
+                RichText::new(format!("{} {}", self.text("floor"), self.visual["floor"]))
                     .size(18.0)
                     .color(MUTED),
             );
@@ -1557,7 +1563,10 @@ impl eframe::App for TowerApp {
                                             .campaign
                                             .floors
                                             .iter()
-                                            .find(|f| f.id == self.engine.player().floor)
+                                            .find(|f| {
+                                                Some(i64::from(f.id))
+                                                    == self.visual["floor"].as_i64()
+                                            })
                                             .map(|f| f.title.as_str())
                                             .unwrap_or(""),
                                     ))
@@ -1700,8 +1709,8 @@ fn music_for_floor(floor: i64) -> &'static str {
         _ => "b_018xgw",
     }
 }
-fn configure(ctx: &egui::Context) {
-    install_fonts(ctx, None);
+fn configure(ctx: &egui::Context, chinese: Option<Vec<u8>>) {
+    install_fonts(ctx, chinese);
     let mut style = (*ctx.style_of(egui::Theme::Dark)).clone();
     style.visuals = egui::Visuals::dark();
     style.visuals.override_text_color = Some(TEXT);
