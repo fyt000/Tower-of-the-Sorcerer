@@ -475,6 +475,10 @@ impl TowerApp {
             .as_i64()
             .unwrap_or_else(|| self.snapshot["floor"].as_i64().unwrap_or(1))
             as i32;
+        if self.visual["floor"] != json!(floor) {
+            self.music_paused = false;
+            self.music_override = None;
+        }
         self.visual["floor"] = json!(floor);
         self.visual["player"]["floor"] = json!(floor);
         let tiles = (0..self.engine.campaign.height)
