@@ -201,6 +201,9 @@ fn stage_zeno(game: &mut Engine) {
         save["player"]["gold"] = json!(0);
     });
     place(game, 49, 5, 4);
+    edit_save(game, |save| {
+        save["player"]["inventory"] = json!(["hero_orb"]);
+    });
     step(game, "down");
 }
 
@@ -307,7 +310,16 @@ fn princess_time_gate_runs_the_first_cycle_scene_on_floor_50() {
     step(&mut restored, "up");
     assert_eq!((restored.player().x, restored.player().y), (5, 5));
     step(&mut restored, "up"); // Touch Zeno: original first cycle completes without battle.
-    assert_eq!(restored.snapshot()["status"], "won");
+    assert_eq!(restored.snapshot()["status"], "playing");
+    assert_eq!(restored.snapshot()["cycle"], 2);
+    assert_eq!(
+        (
+            restored.player().floor,
+            restored.player().x,
+            restored.player().y
+        ),
+        (1, 5, 10)
+    );
     assert_eq!(
         (
             restored.player().hp,
@@ -315,7 +327,18 @@ fn princess_time_gate_runs_the_first_cycle_scene_on_floor_50() {
             restored.player().defense,
             restored.player().gold
         ),
-        stats
+        (stats.0, stats.1, stats.2, 0)
     );
-    assert_eq!(restored.tile_at(50, 5, 4), Some(91));
+    assert_eq!(
+        restored.tile_at(50, 5, 4),
+        Some(
+            restored
+                .campaign
+                .floors
+                .iter()
+                .find(|f| f.id == 50)
+                .unwrap()
+                .tiles[49]
+        )
+    );
 }

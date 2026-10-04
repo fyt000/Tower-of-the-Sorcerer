@@ -36,6 +36,10 @@ impl Game {
         self.engine.inspect(x, y).to_string()
     }
 
+    pub fn path_json(&self, x: usize, y: usize) -> String {
+        serde_json::to_string(&self.engine.path_to(x, y)).expect("route serialization")
+    }
+
     pub fn save_json(&self) -> String {
         self.engine.save_json()
     }

@@ -1,9 +1,10 @@
 import { spawn, spawnSync } from 'node:child_process';
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { resolve } from 'node:path';
 import assert from 'node:assert/strict';
 const root=resolve(import.meta.dirname,'..');
+const originalCampaign=JSON.parse(readFileSync(resolve(root,'data/campaign.json'),'utf8'));
 const binary=resolve(root,'target/release',process.platform==='win32'?'tos.exe':'tos');
 const server=spawn(binary,['mcp'],{cwd:root,stdio:['pipe','pipe','pipe']});
 const pending=new Map();let nextId=1;const unexpected=[];
@@ -22,7 +23,9 @@ function route(state,target){
       const next=ny*state.width+nx;if(previous.has(next))continue;
       const def=state.tile_defs[state.tiles[next]];let passable=['floor','empty','key','potion','gem','equipment','item','trigger'].includes(def.kind);
       if(def.kind==='door')passable=state.player.keys[def.key]>0;
-      if(def.kind==='enemy')passable=state.enemies.some(e=>e.x===nx&&e.y===ny&&e.can_win);
+      // Regression-route oracle can read source data; the MCP session must
+      // keep player-facing forecasts locked until the actual Hero Orb gift.
+      if(def.kind==='enemy') { const enemy=originalCampaign.enemies[def.enemy],hit=state.player.attack-enemy.defense; passable=hit>0&&Math.floor((enemy.hp-1)/hit)*Math.max(enemy.attack-state.player.defense,0)<state.player.hp; }
       if(['stairs_up','stairs_down'].includes(def.kind))passable=next===goal;
       if(passable){previous.set(next,[cell,direction]);queue.push(next);}
     }
@@ -35,8 +38,9 @@ try{
   const init=await rpc('initialize',{protocolVersion:'2025-11-25',capabilities:{},clientInfo:{name:'integration-test',version:'1'}});
   assert.equal(init.result.protocolVersion,'2025-11-25');assert.equal(init.result.serverInfo.name,'tower-of-the-sorcerer');
   server.stdin.write(JSON.stringify({jsonrpc:'2.0',method:'notifications/initialized'})+'\n');
-  const list=await rpc('tools/list');assert.equal(list.result.tools.length,7);assert(list.result.tools.every(t=>t.inputSchema.type==='object'));
+  const list=await rpc('tools/list');assert.equal(list.result.tools.length,8);assert(list.result.tools.every(t=>t.inputSchema.type==='object'));
   const initial=await tool('game_state');assert.equal(initial.width,11);assert.equal(initial.floors.length,51);
+  const plan=await tool('plan_path',{x:5,y:9});assert.deepEqual(plan.directions,['up']);assert.equal((await tool('game_state')).steps,initial.steps);
   const tile=await tool('inspect_tile',{x:5,y:9});assert.equal(typeof tile.name,'string');
   const simulated=await tool('simulate_actions',{actions:[{type:'move',direction:'up'}]});const unchanged=await tool('game_state');assert.deepEqual(initial.player,unchanged.player);assert.equal(unchanged.steps,initial.steps);
   const moved=await tool('game_action',{action:{type:'move',direction:'up'}});assert.deepEqual(simulated.player,moved.player);assert.equal(simulated.steps,moved.steps);
@@ -65,5 +69,5 @@ try{
   const headless=spawnSync(binary,['headless'],{cwd:root,input:jsonl,encoding:'utf8',maxBuffer:10*1024*1024});assert.equal(headless.status,0,headless.stderr);
   const transitions=headless.stdout.trim().split(/\r?\n/).map(line=>JSON.parse(line));assert.equal(transitions.length,actions.length);assert.deepEqual(transitions.at(-1).player,state.player);
   assert.equal(unexpected.length,0,'stdout must contain only responses');
-  console.log(`MCP integration passed: 7 tools, simulation isolation, save restore, resources/errors, and ${actions.length} natural opening actions with CLI replay/headless parity.`);
+  console.log(`MCP integration passed: 8 tools, simulation isolation, save restore, resources/errors, and ${actions.length} natural opening actions with CLI replay/headless parity.`);
 } finally {server.stdin.end();server.kill();lines.close();for(const request of pending.values())clearTimeout(request.timeout);}

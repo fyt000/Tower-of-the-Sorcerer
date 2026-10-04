@@ -2,7 +2,7 @@
 //! Campaign geometry, tile behavior, statistics, shops and events come from JSON.
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct Keys {
@@ -277,6 +277,11 @@ impl Campaign {
                 "battle_at",
                 "set_charges",
                 "set_visited",
+                "wait",
+                "sound",
+                "cinematic",
+                "move_tile",
+                "next_cycle",
             ]
             .contains(&kind)
             {
@@ -355,6 +360,12 @@ struct Save {
     pending_tile: Option<(i32, usize, usize)>,
     #[serde(default)]
     enemy_overrides: BTreeMap<String, Enemy>,
+    #[serde(default = "first_cycle")]
+    cycle: u32,
+}
+
+fn first_cycle() -> u32 {
+    1
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -470,6 +481,7 @@ impl Engine {
             pending_interaction: None,
             pending_tile: None,
             enemy_overrides: BTreeMap::new(),
+            cycle: 1,
         };
         Self {
             campaign,
@@ -488,7 +500,9 @@ impl Engine {
 
     pub fn load_json(&mut self, source: &str) -> Result<(), String> {
         let save: Save = serde_json::from_str(source).map_err(|e| format!("Invalid save: {e}"))?;
-        if save.version != 1
+        if save.cycle == 0
+            || save.cycle > 1000
+            || save.version != 1
             || save.campaign_id != self.campaign.id
             || save.campaign_fingerprint != self.state.campaign_fingerprint
         {
@@ -571,9 +585,12 @@ impl Engine {
                     return None;
                 }
                 let def = self.campaign.tiles.get(&id.to_string())?;
+                if !self.forecasts_unlocked() {
+                    return None;
+                }
                 let enemy = self.enemy(def.enemy.as_ref()?)?;
                 let mut value =
-                    serde_json::to_value(forecast_with_rules(p, enemy, &self.campaign.rules))
+                    serde_json::to_value(forecast_with_rules(p, &enemy, &self.campaign.rules))
                         .ok()?;
                 value["x"] = json!(i % self.campaign.width);
                 value["y"] = json!(i / self.campaign.width);
@@ -594,6 +611,8 @@ impl Engine {
             }).collect::<Vec<_>>(),
             "log": self.state.log, "status": self.state.status, "steps": self.state.steps,
             "flags": self.state.flags, "last_action": self.last_action,
+            "cycle": self.state.cycle, "backside_multiplier": self.cycle_multiplier(),
+            "forecasts_unlocked": self.forecasts_unlocked(),
         })
     }
 
@@ -607,10 +626,10 @@ impl Engine {
             .enemy
             .as_ref()
             .and_then(|key| self.enemy(key))
-            .filter(|_| !noncombat)
-            .map(|e| forecast_with_rules(&self.state.player, e, &self.campaign.rules));
+            .filter(|_| !noncombat && self.forecasts_unlocked())
+            .map(|e| forecast_with_rules(&self.state.player, &e, &self.campaign.rules));
         let concealed = def.kind == "hidden_wall";
-        json!({"id":id,"x":x,"y":y,"name":if concealed{"Brick wall"}else{&def.name},"description":if concealed{"A solid wall."}else if noncombat{"Approach this character to complete the adventure."}else{&def.description},"kind":if concealed{"wall"}else if noncombat{"npc"}else{&def.kind},"enemy":enemy})
+        json!({"id":id,"x":x,"y":y,"name":if concealed{"Brick wall"}else{&def.name},"description":if concealed{"A solid wall."}else if noncombat{"Approach this character to complete the adventure."}else{&def.description},"kind":if concealed{"wall"}else if noncombat{"npc"}else{&def.kind},"enemy":enemy,"details_locked":def.enemy.is_some() && !noncombat && !self.forecasts_unlocked()})
     }
 
     fn noncombat_encounter(&self, floor: i32, x: usize, y: usize, tile: u16) -> bool {
@@ -626,9 +645,9 @@ impl Engine {
                     .as_u64()
                     .is_none_or(|v| v == u64::from(tile))
                 && event["effects"].as_array().is_some_and(|effects| {
-                    effects
-                        .iter()
-                        .any(|effect| effect["type"].as_str() == Some("win"))
+                    effects.iter().any(|effect| {
+                        ["win", "next_cycle"].contains(&effect["type"].as_str().unwrap_or(""))
+                    })
                 })
                 && self.conditions_pass(&event["conditions"])
         })
@@ -638,7 +657,7 @@ impl Engine {
         let kind = command["type"]
             .as_str()
             .ok_or("Command needs a string type")?;
-        self.last_action = json!({"ok":true,"type":kind});
+        self.last_action = json!({"ok":true,"type":kind,"presentation":[]});
         if kind == "new_game" {
             *self = Self::new(self.campaign.clone());
             return Ok(());
@@ -675,15 +694,155 @@ impl Engine {
     }
 
     fn block(&mut self, message: &str) -> Result<(), String> {
-        self.last_action = json!({"ok":false,"message":message});
+        self.last_action["ok"] = json!(false);
+        self.last_action["message"] = json!(message);
         Ok(())
     }
 
-    fn enemy(&self, key: &str) -> Option<&Enemy> {
-        self.state
+    fn enemy(&self, key: &str) -> Option<Enemy> {
+        let mut enemy = self
+            .state
             .enemy_overrides
             .get(key)
             .or_else(|| self.campaign.enemies.get(key))
+            .cloned()?;
+        let factor = self.cycle_multiplier();
+        enemy.hp = enemy.hp.saturating_mul(factor).min(1_000_000_000);
+        enemy.attack = enemy.attack.saturating_mul(factor).min(1_000_000_000);
+        enemy.defense = enemy.defense.saturating_mul(factor).min(1_000_000_000);
+        Some(enemy)
+    }
+
+    pub fn forecasts_unlocked(&self) -> bool {
+        self.campaign.rules["forecast_requires_item"]
+            .as_str()
+            .is_none_or(|item| {
+                self.state
+                    .player
+                    .inventory
+                    .iter()
+                    .any(|owned| owned == item)
+            })
+    }
+
+    pub fn cycle_multiplier(&self) -> i64 {
+        if self.state.cycle > 1 {
+            self.campaign.rules["backside"]["multiplier"]
+                .as_i64()
+                .unwrap_or(44)
+                .clamp(1, 1000)
+        } else {
+            1
+        }
+    }
+
+    fn present(&mut self, effect: Value) {
+        if !self.last_action["presentation"].is_array() {
+            self.last_action["presentation"] = json!([]);
+        }
+        self.last_action["presentation"]
+            .as_array_mut()
+            .unwrap()
+            .push(effect);
+    }
+
+    fn present_move(&mut self, from: &Player, x: usize, y: usize, dx: isize, dy: isize) {
+        self.present(json!({"type":"move","from":{"floor":from.floor,"x":from.x,"y":from.y},"to":{"floor":from.floor,"x":x,"y":y},"direction":if dx>0{"right"}else if dx<0{"left"}else if dy>0{"down"}else{"up"},"duration_ms":110}));
+    }
+
+    fn present_battle(
+        &mut self,
+        enemy: &Enemy,
+        battle: &Forecast,
+        floor: i32,
+        x: usize,
+        y: usize,
+        enemy_first: bool,
+    ) {
+        let multiplier = match enemy.special.as_str() {
+            "undead" if self.state.player.inventory.iter().any(|i| i == "cross") => {
+                self.campaign.rules["cross_multiplier"]
+                    .as_i64()
+                    .unwrap_or(2)
+            }
+            "dragon"
+                if self
+                    .state
+                    .player
+                    .inventory
+                    .iter()
+                    .any(|i| i == "dragon_slayer") =>
+            {
+                self.campaign.rules["dragon_slayer_multiplier"]
+                    .as_i64()
+                    .unwrap_or(2)
+            }
+            _ => 1,
+        };
+        self.present(json!({"type":"audio","name":"taisen"}));
+        self.present(json!({"type":"battle","enemy_name":enemy.name,"enemy_hp":enemy.hp,"hero_hp":self.state.player.hp,"hero_hit":self.state.player.attack.saturating_mul(multiplier)-enemy.defense,"enemy_hit":(enemy.attack-self.state.player.defense).max(0),"rounds":battle.rounds,"enemy_first":enemy_first,"floor":floor,"x":x,"y":y,"duration_ms":((battle.rounds+1)*180).clamp(480,6000)}));
+    }
+
+    /// Plan through clear road only. An obstacle may be the final action, never an intermediate step.
+    /// Unreachable destinations return the reachable road prefix closest to the requested square.
+    pub fn path_to(&self, x: usize, y: usize) -> Vec<String> {
+        if x >= self.campaign.width
+            || y >= self.campaign.height
+            || self.state.pending_interaction.is_some()
+            || self.state.status != "playing"
+        {
+            return vec![];
+        }
+        let width = self.campaign.width;
+        let start = self.state.player.y * width + self.state.player.x;
+        let target = y * width + x;
+        let mut previous = BTreeMap::from([(start, (start, ""))]);
+        let mut queue = VecDeque::from([start]);
+        let mut best = start;
+        while let Some(index) = queue.pop_front() {
+            let distance = |i: usize| (i % width).abs_diff(x) + (i / width).abs_diff(y);
+            if distance(index) < distance(best) {
+                best = index;
+            }
+            if index == target {
+                best = index;
+                break;
+            }
+            for (dx, dy, direction) in [
+                (0isize, -1isize, "up"),
+                (-1, 0, "left"),
+                (1, 0, "right"),
+                (0, 1, "down"),
+            ] {
+                let (Some(nx), Some(ny)) = (
+                    (index % width).checked_add_signed(dx),
+                    (index / width).checked_add_signed(dy),
+                ) else {
+                    continue;
+                };
+                let Some(id) = self.tile_at(self.state.player.floor, nx, ny) else {
+                    continue;
+                };
+                let next = ny * width + nx;
+                if previous.contains_key(&next) {
+                    continue;
+                }
+                let def = &self.campaign.tiles[&id.to_string()];
+                if next != target && !["empty", "floor", "trigger"].contains(&def.kind.as_str()) {
+                    continue;
+                }
+                previous.insert(next, (index, direction));
+                queue.push_back(next);
+            }
+        }
+        let mut route = vec![];
+        while best != start {
+            let (prev, direction) = previous[&best];
+            route.push(direction.to_owned());
+            best = prev;
+        }
+        route.reverse();
+        route
     }
 
     fn log(&mut self, text: impl Into<String>) {
@@ -718,6 +877,9 @@ impl Engine {
             && let Some(tiles) = self.state.floors.get_mut(&floor)
         {
             tiles[y * self.campaign.width + x] = tile;
+            self.present(
+                json!({"type":"tile","floor":floor,"x":x,"y":y,"tile":tile,"duration_ms":60}),
+            );
         }
     }
 
@@ -778,13 +940,13 @@ impl Engine {
             "enemy" | "monster" => {
                 let enemy = self
                     .enemy(def.enemy.as_deref().ok_or("Enemy tile has no enemy")?)
-                    .ok_or("Unknown enemy")?
-                    .clone();
+                    .ok_or("Unknown enemy")?;
                 let battle = forecast_with_rules(&self.state.player, &enemy, &self.campaign.rules);
                 if battle.damage.is_none() {
                     return self.block(&battle.reason);
                 }
                 let damage = battle.damage.unwrap();
+                self.present_battle(&enemy, &battle, floor, x, y, false);
                 if damage >= self.state.player.hp {
                     // Original permits fatal battles; forecasts let the player plan before committing.
                     self.state.player.hp = 0;
@@ -815,6 +977,7 @@ impl Engine {
                 }
                 self.state.player.x = x;
                 self.state.player.y = y;
+                self.present_move(&p, x, y, dx, dy);
                 self.log(format!(
                     "Defeated {}: −{} HP, +{} gold.",
                     enemy.name, damage, reward
@@ -838,6 +1001,9 @@ impl Engine {
                     .unwrap_or(false)
                 {
                     amount = amount.saturating_mul(self.area_multiplier(floor));
+                }
+                if stat != "gold" {
+                    amount = amount.saturating_mul(self.cycle_multiplier());
                 }
                 self.add_stat(stat, amount)?;
                 if let Some(item) = &def.item {
@@ -897,6 +1063,14 @@ impl Engine {
         if entered {
             self.state.player.x = x;
             self.state.player.y = y;
+            self.present_move(&p, x, y, dx, dy);
+        }
+        if ["key", "potion", "gem", "stat", "equipment", "gold", "item"]
+            .contains(&def.kind.as_str())
+        {
+            self.present(json!({"type":"audio","name":"get"}));
+        } else if def.kind == "door" {
+            self.present(json!({"type":"audio","name":"open"}));
         }
         self.run_events(
             "step",
@@ -949,6 +1123,8 @@ impl Engine {
                 })
             })
             .ok_or("Destination floor has no arrival tile")?;
+        let from = self.state.player.floor;
+        self.present(json!({"type":"floor","from":from,"to":target,"duration_ms":450}));
         self.state.player.floor = target;
         self.state.player.x = index % self.campaign.width;
         self.state.player.y = index / self.campaign.width;
@@ -1050,15 +1226,19 @@ impl Engine {
             .max(0)
             .saturating_mul(n * n + n + 2);
         let area = self.area_multiplier(floor);
-        let hp = self.campaign.rules["altar_hp_gain"].as_i64().unwrap_or(100) * (n + 1);
+        let hp = self.campaign.rules["altar_hp_gain"].as_i64().unwrap_or(100)
+            * (n + 1)
+            * self.cycle_multiplier();
         let attack = self.campaign.rules["altar_attack_gain"]
             .as_i64()
             .unwrap_or(2)
-            * area;
+            * area
+            * self.cycle_multiplier();
         let defense = self.campaign.rules["altar_defense_gain"]
             .as_i64()
             .unwrap_or(4)
-            * area;
+            * area
+            * self.cycle_multiplier();
         [("hp",hp),("attack",attack),("defense",defense)].iter().map(|(stat,amount)|json!({"id":stat,"label":format!("+{amount} {stat}"),"cost":cost,"effects":[{"type":"add_stat","stat":stat,"amount":amount}]})).collect()
     }
 
@@ -1424,8 +1604,8 @@ impl Engine {
             self.tile_at(p.floor, x, y)
                 .and_then(|id| self.campaign.tiles[&id.to_string()].enemy.as_ref())
                 .and_then(|id| self.enemy(id))
-                .map(|e| e.special.as_str())
-                .unwrap_or("")
+                .map(|e| e.special)
+                .unwrap_or_default()
         };
         let mut damage = 0;
         for (x, y) in [
@@ -1434,15 +1614,21 @@ impl Engine {
             (p.x, p.y.wrapping_sub(1)),
             (p.x, p.y + 1),
         ] {
-            damage += match special_at(x, y) {
-                "magician_a" => self.campaign.rules["magician_a_damage"]
-                    .as_i64()
-                    .unwrap_or(200)
-                    .max(0),
-                "magician_b" => self.campaign.rules["magician_b_damage"]
-                    .as_i64()
-                    .unwrap_or(100)
-                    .max(0),
+            damage += match special_at(x, y).as_str() {
+                "magician_a" => {
+                    self.campaign.rules["magician_a_damage"]
+                        .as_i64()
+                        .unwrap_or(200)
+                        .max(0)
+                        * self.cycle_multiplier()
+                }
+                "magician_b" => {
+                    self.campaign.rules["magician_b_damage"]
+                        .as_i64()
+                        .unwrap_or(100)
+                        .max(0)
+                        * self.cycle_multiplier()
+                }
                 _ => 0,
             };
         }
@@ -1463,6 +1649,7 @@ impl Engine {
     }
 
     fn run_events(&mut self, kind: &str, floor: i32, x: usize, y: usize, tile: Option<u16>) {
+        let cycle = self.state.cycle;
         let events = self.campaign.events.clone();
         for (index, event) in events.iter().enumerate() {
             let trigger = &event["trigger"];
@@ -1496,6 +1683,9 @@ impl Engine {
                     .map(Vec::as_slice)
                     .unwrap_or(&[]),
             );
+            if self.state.cycle != cycle {
+                break;
+            }
         }
     }
 
@@ -1542,6 +1732,20 @@ impl Engine {
                 "stat_at_most" => self
                     .stat_value(c["stat"].as_str().unwrap_or(""))
                     .is_some_and(|value| value <= c["amount"].as_i64().unwrap_or(i64::MIN)),
+                "cycle_at_least" => {
+                    u64::from(self.state.cycle)
+                        >= c["cycle"]
+                            .as_u64()
+                            .or_else(|| c["amount"].as_u64())
+                            .unwrap_or(1)
+                }
+                "cycle_at_most" => {
+                    u64::from(self.state.cycle)
+                        <= c["cycle"]
+                            .as_u64()
+                            .or_else(|| c["amount"].as_u64())
+                            .unwrap_or(1)
+                }
                 "any" => c["conditions"].as_array().is_some_and(|conditions| {
                     conditions
                         .iter()
@@ -1571,8 +1775,29 @@ impl Engine {
             if self.state.status == "lost" {
                 break;
             }
+            if !self.conditions_pass(&effect["conditions"]) {
+                continue;
+            }
             match effect["type"].as_str().unwrap_or("") {
-                "message" => self.log(effect["text"].as_str().unwrap_or("")),
+                "message" => {
+                    self.log(effect["text"].as_str().unwrap_or(""));
+                    self.present(json!({"type":"dialogue","text":effect["text"],"dialogue_id":effect["dialogue_id"],"duration_ms":effect["duration_ms"].as_u64().unwrap_or(0)}));
+                },
+                "wait" => self.present(json!({"type":"wait","duration_ms":effect["ms"].as_u64().unwrap_or(120).min(30_000)})),
+                "sound" => self.present(json!({"type":"audio","name":effect["cue"]})),
+                "cinematic" => self.present(effect.clone()),
+                "move_tile" => {
+                    let floor = effect["floor"].as_i64().unwrap_or(i64::from(self.state.player.floor)) as i32;
+                    let from_x = effect["from_x"].as_u64().unwrap_or(0) as usize;
+                    let from_y = effect["from_y"].as_u64().unwrap_or(0) as usize;
+                    let x = effect["x"].as_u64().unwrap_or(0) as usize;
+                    let y = effect["y"].as_u64().unwrap_or(0) as usize;
+                    if let Some(tile) = self.tile_at(floor, from_x, from_y) {
+                        self.clear(floor, from_x, from_y);
+                        self.set_tile(floor, x, y, tile);
+                    }
+                },
+                "next_cycle" => self.next_cycle(),
                 "flag" => {
                     let key = effect["flag"].as_str().unwrap_or("").to_string();
                     if effect["value"].as_bool().unwrap_or(true) {
@@ -1651,7 +1876,7 @@ impl Engine {
                 }
                 "set_enemy" => {
                     let key = effect["enemy"].as_str().unwrap_or("");
-                    if let Some(mut enemy) = self.enemy(key).cloned() {
+                    if let Some(mut enemy) = self.state.enemy_overrides.get(key).or_else(||self.campaign.enemies.get(key)).cloned() {
                         for stat in ["hp", "attack", "defense", "gold"] {
                             if let Some(value) = effect[stat].as_i64() {
                                 match stat {
@@ -1674,6 +1899,7 @@ impl Engine {
                     let x = effect["x"].as_u64().unwrap_or(0) as usize;
                     let y = effect["y"].as_u64().unwrap_or(0) as usize;
                     if self.tile_at(floor, x, y).is_some() {
+                        self.present(json!({"type":"floor","from":self.state.player.floor,"to":floor,"duration_ms":450}));
                         self.state.player.floor = floor;
                         self.state.player.x = x;
                         self.state.player.y = y;
@@ -1699,10 +1925,18 @@ impl Engine {
             return;
         };
         let def = self.campaign.tiles[&id.to_string()].clone();
-        let Some(enemy) = def.enemy.as_ref().and_then(|key| self.enemy(key)).cloned() else {
+        let Some(enemy) = def.enemy.as_ref().and_then(|key| self.enemy(key)) else {
             return;
         };
         let result = forecast_with_rules(&self.state.player, &enemy, &self.campaign.rules);
+        self.present_battle(
+            &enemy,
+            &result,
+            floor,
+            x,
+            y,
+            effect["first_strike"].as_bool().unwrap_or(false),
+        );
         let damage = result
             .damage
             .unwrap_or(self.state.player.hp)
@@ -1746,6 +1980,53 @@ impl Engine {
             enemy.name
         ));
         self.run_events("enemy_defeated", floor, x, y, Some(id));
+    }
+
+    fn next_cycle(&mut self) {
+        if !self.campaign.rules["backside"]["enabled"]
+            .as_bool()
+            .unwrap_or(false)
+        {
+            self.state.status = "won".into();
+            self.log("You conquered the Tower of the Sorcerer.");
+            return;
+        }
+        let player = self.state.player.clone();
+        let cycle = self.state.cycle.saturating_add(1).min(1000);
+        let mut fresh = Self::new(self.campaign.clone()).state;
+        fresh.cycle = cycle;
+        if self.campaign.rules["backside"]["carry_stats"]
+            .as_bool()
+            .unwrap_or(true)
+        {
+            fresh.player.hp = player.hp;
+            fresh.player.attack = player.attack;
+            fresh.player.defense = player.defense;
+        }
+        if cycle > 2
+            || !self.campaign.rules["backside"]["reset_gold"]
+                .as_bool()
+                .unwrap_or(true)
+        {
+            fresh.player.gold = player.gold;
+        }
+        if cycle > 2 {
+            for item in player.inventory {
+                if !fresh.player.inventory.contains(&item) {
+                    fresh.player.inventory.push(item);
+                }
+            }
+            fresh.player.item_charges = player.item_charges;
+        }
+        fresh.flags.insert("backside".into());
+        fresh.log = self.state.log.clone();
+        fresh.steps = self.state.steps;
+        self.state = fresh;
+        self.present(json!({"type":"floor","from":player.floor,"to":self.state.player.floor,"duration_ms":900}));
+        self.log(format!(
+            "Entered the backside tower, cycle {cycle}. Monster and treasure statistics are ×{}.",
+            self.cycle_multiplier()
+        ));
     }
 }
 

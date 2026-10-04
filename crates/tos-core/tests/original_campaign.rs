@@ -62,7 +62,13 @@ fn walk_to(engine: &mut Engine, target: (usize, usize)) {
                 "floor" | "empty" | "key" | "potion" | "gem" | "item" | "equipment" | "trigger" => {
                     true
                 }
-                "enemy" => engine.inspect(nx, ny)["enemy"]["can_win"] == true,
+                // The test route oracle uses source data. Player-facing inspection is
+                // intentionally unavailable before the old man's Hero Orb reward.
+                "enemy" => definition
+                    .enemy
+                    .as_ref()
+                    .and_then(|id| engine.campaign.enemies.get(id))
+                    .is_some_and(|enemy| tos_core::forecast(engine.player(), enemy).can_win),
                 "door" => match definition.key.as_deref() {
                     Some("yellow") => engine.player().keys.yellow > 0,
                     Some("blue") => engine.player().keys.blue > 0,

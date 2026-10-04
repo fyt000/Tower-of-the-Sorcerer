@@ -217,7 +217,7 @@ fn serve(root: &Path, port: u16) -> Result<(), String> {
     let root = root
         .canonicalize()
         .map_err(|e| format!("Browser build missing: {e}; run npm run build"))?;
-    if !root.join("pkg/tos_wasm_bg.wasm").exists() {
+    if !root.join("pkg/tos_ui_bg.wasm").exists() {
         return Err("WebAssembly build missing; run npm run build first".into());
     }
     let server = tiny_http::Server::http(("127.0.0.1", port)).map_err(|e| e.to_string())?;
@@ -270,6 +270,7 @@ fn tool_definitions() -> Value {
     json!([
         {"name":"game_state","description":"Read complete deterministic game state, map, inventory and combat forecasts.","inputSchema":{"type":"object","properties":{},"additionalProperties":false},"annotations":{"readOnlyHint":true}},
         {"name":"inspect_tile","description":"Inspect a tile and predict exact combat damage without taking an action.","inputSchema":{"type":"object","properties":{"x":{"type":"integer","minimum":0},"y":{"type":"integer","minimum":0}},"required":["x","y"],"additionalProperties":false},"annotations":{"readOnlyHint":true}},
+        {"name":"plan_path","description":"Plan a click route through clear road. An obstacle can be the final action, never an intermediate step. Unreachable targets return the closest reachable road prefix.","inputSchema":{"type":"object","properties":{"x":{"type":"integer","minimum":0},"y":{"type":"integer","minimum":0}},"required":["x","y"],"additionalProperties":false},"annotations":{"readOnlyHint":true}},
         {"name":"game_action","description":"Commit one game action. Move, choose a shop/dialogue response, cancel, or use an item.","inputSchema":{"type":"object","properties":{"action":{"type":"object","properties":{"type":{"enum":["move","choose","cancel","use_item"]},"direction":{"enum":["up","down","left","right"]},"choice":{"type":"string"},"item":{"type":"string"},"floor":{"type":"integer"}},"required":["type"]}},"required":["action"]}},
         {"name":"simulate_actions","description":"Simulate up to 1000 actions on a copy and return the resulting state. Does not modify the session.","inputSchema":{"type":"object","properties":{"actions":{"type":"array","maxItems":1000,"items":{"type":"object"}}},"required":["actions"]},"annotations":{"readOnlyHint":true}},
         {"name":"save_game","description":"Export a portable JSON save including flags and changed floors.","inputSchema":{"type":"object","properties":{},"additionalProperties":false},"annotations":{"readOnlyHint":true}},
@@ -281,6 +282,15 @@ fn tool_definitions() -> Value {
 fn call_tool(engine: &mut Engine, name: &str, args: &Value) -> Result<Value, String> {
     match name {
         "game_state" => Ok(engine.snapshot()),
+        "plan_path" => {
+            let x = args["x"]
+                .as_u64()
+                .ok_or("x must be a nonnegative integer")? as usize;
+            let y = args["y"]
+                .as_u64()
+                .ok_or("y must be a nonnegative integer")? as usize;
+            Ok(json!({"directions":engine.path_to(x,y),"floor":engine.player().floor}))
+        }
         "inspect_tile" => Ok(engine.inspect(
             args["x"]
                 .as_u64()
