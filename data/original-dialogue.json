@@ -1,0 +1,1342 @@
+[
+  {
+    "id": 0,
+    "text": "------",
+    "file_offset": "0x122b3e"
+  },
+  {
+    "id": 1,
+    "text": "------ Hey!",
+    "file_offset": "0x122b46"
+  },
+  {
+    "id": 2,
+    "text": "------ Hey! Wake up!",
+    "file_offset": "0x122b53"
+  },
+  {
+    "id": 3,
+    "text": "What a relief you're okay! You were caught and thrown into this prison by the Magic Sergeant. You were unconscious when you got here. Nevertheless, you are so lucky that you just woke up. I've finished the escape tunnel. Let's break out.",
+    "file_offset": "0x122b69"
+  },
+  {
+    "id": 4,
+    "text": "O.K. Well, excuse my going first. Your weapon and shield were stolen by the guards. It's not wise to wander about without them.",
+    "file_offset": "0x122c58"
+  },
+  {
+    "id": 5,
+    "text": "Ah, we meet again! Thank you. You beat the Gate-Keeper of this area. I was defeated and imprisoned again. Such a small prison this time. I'm making a secret tunnel in front of the Dragon. Go up to 35th floor and wait for me, while I complete the tunnel.",
+    "file_offset": "0x122cd9"
+  },
+  {
+    "id": 6,
+    "text": "Don't worry, I'll be there.",
+    "file_offset": "0x122dd8"
+  },
+  {
+    "id": 7,
+    "text": "Oh, thank you for your help. I will raise your offensive and defensive power by 3%. [You feel your strength rise]",
+    "file_offset": "0x122df5"
+  },
+  {
+    "id": 8,
+    "text": "Hi, thank you for your help. Please accept a little reward. (Received 1000 Gold.)",
+    "file_offset": "0x122e68"
+  },
+  {
+    "id": 9,
+    "text": "The Magic Sergeant, Zeno, says \"Welcome to 'The Magic Tower'. You are the hundredth man who dared to enter my tower. You will now face my guards. Should you happen to survive, I will fight with you in person specially. You should accept your fate.\"",
+    "file_offset": "0x122ebb"
+  },
+  {
+    "id": 10,
+    "text": "What? Oh!",
+    "file_offset": "0x122fb5"
+  },
+  {
+    "id": 11,
+    "text": "I will grant you orb of the hero. When you use it, you will be able to forecast the ability of the living monsters on that floor, and how much damage they can do to you. Make good use of it.",
+    "file_offset": "0x122fc0"
+  },
+  {
+    "id": 12,
+    "text": "Ha ha ha, You are lucky to have gotten so far. Since it has come to this, I shall fight with you personally, but first I must test your strength. Go and fight! Skeleton Soldiers!",
+    "file_offset": "0x123080"
+  },
+  {
+    "id": 13,
+    "text": "How considerably you do. But I will never let you pass. Here, you will die. Fight me!",
+    "file_offset": "0x123134"
+  },
+  {
+    "id": 14,
+    "text": "No, It's not possible! You may have defeated me, but beyond this point you must meet some enemies and snares that are powerful beyond anything you've seen. If careless, you will die!",
+    "file_offset": "0x12318b"
+  },
+  {
+    "id": 15,
+    "text": "",
+    "file_offset": "0x123243"
+  },
+  {
+    "id": 16,
+    "text": "Hey! We meet again! How greatly you beat the boss of this area. It troubled me that I couldn't go upstairs any more.",
+    "file_offset": "0x123245"
+  },
+  {
+    "id": 17,
+    "text": "Ah! Are you all right? The Big Octopus which lives in here was blocking my progress. Now a loophole has completed at last. You had better put off beating him. See ya later!",
+    "file_offset": "0x1232bb"
+  },
+  {
+    "id": 18,
+    "text": "Well, you found me. I will give you an elixir. Using this medicine, you will gain life according to the offensive and defensive power. It works great if you use it later.",
+    "file_offset": "0x123369"
+  },
+  {
+    "id": 19,
+    "text": "Well, You beat the skeletons and invaded. Never regard me as small like a skeleton. I will show you that I am as immortal as god. Hey, come on!",
+    "file_offset": "0x123415"
+  },
+  {
+    "id": 20,
+    "text": "Good god! I've never dreamed I'd be defeated. There is no doubt of your strength. But you will never win against the Great Magic Master as weak as you are. You shall only celebrate fleeting victory at most.",
+    "file_offset": "0x1234a6"
+  },
+  {
+    "id": 21,
+    "text": "",
+    "file_offset": "0x123576"
+  },
+  {
+    "id": 22,
+    "text": "-K-I-L-L- -A-N- -I-N-V-A-D-E-R-",
+    "file_offset": "0x123578"
+  },
+  {
+    "id": 23,
+    "text": "",
+    "file_offset": "0x123599"
+  },
+  {
+    "id": 24,
+    "text": "Now is the time. You were chosen. If you aren't afraid of Death, you should go through the gate of Time and Space, and come to me.",
+    "file_offset": "0x12359b"
+  },
+  {
+    "id": 25,
+    "text": "Oh! What? This is a doll!",
+    "file_offset": "0x12361f"
+  },
+  {
+    "id": 26,
+    "text": "The tunnel has not been completed yet. You should have waited a little longer, and you should not have used items. I had a bug in the program. There! Don't worry!",
+    "file_offset": "0x12363a"
+  },
+  {
+    "id": 27,
+    "text": "Oh, I have finished the tunnel. Wha? It's you again. You came at a good time. I have openned a tunnel, and you may use it freely.",
+    "file_offset": "0x1236de"
+  },
+  {
+    "id": 28,
+    "text": "The last boss and the captured princess must be in this area. Hmm, I wonder if we should wait before fighting him.",
+    "file_offset": "0x123761"
+  },
+  {
+    "id": 29,
+    "text": "You are a brave man beating the bosses of the first and second areas, and ascending the tower. But the game is over now. Here and Now, I will beat you for myself! Give up!",
+    "file_offset": "0x1237d5"
+  },
+  {
+    "id": 30,
+    "text": "You think you're pretty strong, huh? If you can make it to the 40th floor, I shall fight with you again. There, you will die!",
+    "file_offset": "0x123882"
+  },
+  {
+    "id": 31,
+    "text": "There you are. I have just finished the tunnel. As you go through it, you will get to the Dragon. And then you should go up.",
+    "file_offset": "0x123901"
+  },
+  {
+    "id": 32,
+    "text": "The Golden Knight (who is the boss of this area) has a strong attitude in spite of being weak. It is for this reason that he is disliked by the Magic Sergeant, Zeno, who is the sub commander of this tower.",
+    "file_offset": "0x12397f"
+  },
+  {
+    "id": 33,
+    "text": "I wonder how you were able to come so far. I will make sure you go no further. I will humiliate you 10 times as much as you've disgraced this tower. Ghost Soldiers, charge!",
+    "file_offset": "0x123a4e"
+  },
+  {
+    "id": 34,
+    "text": "Humph, that was nothing! Soldiers, charge!",
+    "file_offset": "0x123afc"
+  },
+  {
+    "id": 35,
+    "text": "We are only beginning. Let's fight from now on. Swordsmen, charge!",
+    "file_offset": "0x123b28"
+  },
+  {
+    "id": 36,
+    "text": "Heck! How about this attack? Knights, charge!",
+    "file_offset": "0x123b6c"
+  },
+  {
+    "id": 37,
+    "text": "How dare you defeat my followers? Never shall I forgive you! Now I won't use discretion. Give up!",
+    "file_offset": "0x123b9b"
+  },
+  {
+    "id": 38,
+    "text": "I will unwillingly forgive you this time. But we shall quarrel seriously when we meet again. You had better give up!",
+    "file_offset": "0x123bfe"
+  },
+  {
+    "id": 39,
+    "text": "",
+    "file_offset": "0x123c74"
+  },
+  {
+    "id": 40,
+    "text": "The Golden Knight says \"Oh! Sir Zeno. I was not able to catch the brave man. Please forgive me.\"",
+    "file_offset": "0x123c76"
+  },
+  {
+    "id": 41,
+    "text": "The Magic Sergeant, Zeno replies \"You weren't? I dare you to say that again. You come running up here like a coward and tell me you couldn't do your job. What shame! This tower has no need for the likes of you! You've failed me for the last time. You shall now die.\"",
+    "file_offset": "0x123cd8"
+  },
+  {
+    "id": 42,
+    "text": "The Golden Knight says \"Oh God, please forgive me! Ah!\"",
+    "file_offset": "0x123de7"
+  },
+  {
+    "id": 43,
+    "text": "The Magic Sergeant, Zeno says \"I behaved unbecomingly. But don't worry. I quite different from such a fellow. If you should come up to me, I would fight with you directly. I'm waiting for you.\"",
+    "file_offset": "0x123e20"
+  },
+  {
+    "id": 44,
+    "text": "The Magic Sergeant, Zeno \"It's amazing that you found your way here at last. I compliment you. Now, as promised, I'll fight with you, man to man!\"",
+    "file_offset": "0x123ee3"
+  },
+  {
+    "id": 45,
+    "text": "The Magic Sergeant, Zeno \"Alas...\"",
+    "file_offset": "0x123f77"
+  },
+  {
+    "id": 46,
+    "text": "",
+    "file_offset": "0x123f9b"
+  },
+  {
+    "id": 47,
+    "text": "The brave man says \"Who? It's you! Why are you in such a place?\"",
+    "file_offset": "0x123f9d"
+  },
+  {
+    "id": 48,
+    "text": "The thief replied \"Humph. There is only one reason why I'm here. And this is it!\"",
+    "file_offset": "0x123fdf"
+  },
+  {
+    "id": 49,
+    "text": "The brave man says \"Huh? Hey! You're Zeno! Are you still alive?\"",
+    "file_offset": "0x124032"
+  },
+  {
+    "id": 50,
+    "text": "The Magic Sergeant, Zeno says \"I will never die. I merely tested your intelligence as a soldier.\"",
+    "file_offset": "0x124074"
+  },
+  {
+    "id": 51,
+    "text": "The brave-man says \"Huh? What do you mean? Why did you do such a thing?\"",
+    "file_offset": "0x1240d7"
+  },
+  {
+    "id": 52,
+    "text": "The Magic Sergeant, Zeno: \"The Sacred Sword 'Weaponer' which you have and The Omniscient Staff 'Intellion' which I have, Legend says that whoever unites the two will recieve great wisdom. But to this end, it must be assured that the soldier who does so can handle the the power of that sword.\"",
+    "file_offset": "0x124121"
+  },
+  {
+    "id": 53,
+    "text": "The brave man says \"Are you saying... Am I this soldier?\"",
+    "file_offset": "0x12424b"
+  },
+  {
+    "id": 54,
+    "text": "The Magic Sergeant, Zeno: \"Yes, you are correct. But when you came here, your ability wasn't sufficient to master the sacred sword 'Weaponer'.",
+    "file_offset": "0x124286"
+  },
+  {
+    "id": 55,
+    "text": "The brave-man replies \"Well, this means that the rumour that a princess was trapped here... was actually a lie in order to get me here, wasn't it?\"",
+    "file_offset": "0x124316"
+  },
+  {
+    "id": 56,
+    "text": "The Magic Sergeant, Zeno says \"Yes, that right. And now, if we can work together, this farce will end. Now is the time to act. Using omniscient power, We shall break the sacred sword and recieve great enlightenment. Soldier of the Sacred Sword! Let's finish this!\"",
+    "file_offset": "0x1243ab"
+  },
+  {
+    "id": 57,
+    "text": "I believe there is a sword on the 5th floor and a shield on the 9th, you had better get them first of all. See you later!",
+    "file_offset": "0x1244b8"
+  },
+  {
+    "id": 58,
+    "text": "I heard that there is a shield on the 11th floor and a sword on the 17th. I would get them if I were you. Please excuse my going first!",
+    "file_offset": "0x124533"
+  },
+  {
+    "id": 59,
+    "text": "For that reason, I gave false information, set various traps in this tower, and waited for you to come. You came to here master the power enough to using the sacred sword as arranged beforehand.\"",
+    "file_offset": "0x1245bc"
+  },
+  {
+    "id": 60,
+    "text": "I have nothing to say. A certain message may be hidden in this room.",
+    "file_offset": "0x124681"
+  },
+  {
+    "id": 61,
+    "text": "The Magic Sergeant, Zeno says \"You villain. Little did I expect to be beaten. But I would never die in such a way. I'll be looking forward to fighting with you again.\"",
+    "file_offset": "0x1246c7"
+  },
+  {
+    "id": 62,
+    "text": "There are doors which cannot be openned with a key; these doors can only open by beating the monsters which guard them.",
+    "file_offset": "0x124770"
+  },
+  {
+    "id": 63,
+    "text": "If you buy goods from merchants, you will be able to hear important information later.",
+    "file_offset": "0x1247e9"
+  },
+  {
+    "id": 64,
+    "text": "Here is a magic tower of 50 stories. Every ten stories form one area. The boss who controls each area, are posted in this tower. And if you don't beat them, you cannot ascend from there.",
+    "file_offset": "0x124841"
+  },
+  {
+    "id": 65,
+    "text": "When you offer gold at an alter, you may as well have your defensive power risen rather than your offensive power. The enemy whom you cannot beat may appear, provided you won't raise your offensive power.",
+    "file_offset": "0x1248fd"
+  },
+  {
+    "id": 66,
+    "text": "Did you notice the secret passages on the 9th, 16th, and 18th floors?",
+    "file_offset": "0x1249cb"
+  },
+  {
+    "id": 67,
+    "text": "If you carry a cross, the strength of Zombies and Vampires will be cut in half. It is near impossible to defeat them without a cross, especially Vampires. A cross is on a floor higher than this one.",
+    "file_offset": "0x124a12"
+  },
+  {
+    "id": 68,
+    "text": "I heard that you can find a red key at two places in this area.",
+    "file_offset": "0x124ada"
+  },
+  {
+    "id": 69,
+    "text": "In this area, if you don't raise your offensive power at an altar a few times, you may not be able to destroy 'Rock' monsters. Be careful!",
+    "file_offset": "0x124b1b"
+  },
+  {
+    "id": 70,
+    "text": "The Great Magic Master is in this area. He is a proprietor of this magic tower. At your strenght, to attack him means death. It stands to reason that you should not face him, but rather, get items on higher levels first.",
+    "file_offset": "0x124ba7"
+  },
+  {
+    "id": 71,
+    "text": "In the stage of this floor, if your strength is 1500, offensive power is 80, defensive power is 98, you have five keys, and one blue key, you are almost ideal.",
+    "file_offset": "0x124c85"
+  },
+  {
+    "id": 72,
+    "text": "The offensive power of the swordsman who uses two swords is too high. He can use two swords at the same time. You will lose much strength if you fight him normally. You should never fight him before your attacks are stronger than his.",
+    "file_offset": "0x124d26"
+  },
+  {
+    "id": 73,
+    "text": "This tower is 50 stories high, but in reality it seems that you cannot go up to the 50th floor.",
+    "file_offset": "0x124e12"
+  },
+  {
+    "id": 74,
+    "text": "More haste, less speed.",
+    "file_offset": "0x124e73"
+  },
+  {
+    "id": 75,
+    "text": "You may be able to go upstairs without fighting strong enemies, if you could use four tunnels skillfully in this floor.",
+    "file_offset": "0x124e8c"
+  },
+  {
+    "id": 76,
+    "text": "You need the mattock in order to get the treasure which is in the item warehouse on this floor.",
+    "file_offset": "0x124f05"
+  },
+  {
+    "id": 77,
+    "text": "There is never a gate without a Gate-Keeper. Conversely there are always enemies who keep the gate on floors that have gates. So,",
+    "file_offset": "0x124f66"
+  },
+  {
+    "id": 78,
+    "text": "At three o'clock, the secret treasure that lets one travel in space will appear.",
+    "file_offset": "0x124fe9"
+  },
+  {
+    "id": 79,
+    "text": "There is a Lucky Gold somewhere in this tower. If you have it, you can get twice as much money when you beat an enemy.",
+    "file_offset": "0x12503b"
+  },
+  {
+    "id": 80,
+    "text": "A Magician will attack using magic when he is next to you. The Magic Sergeant will attack and divide the vital power in half when he is caught between two. As for an attack on both sides from the Magic Sergeant, the stronger you are, the more damage you take. So, please be careful.",
+    "file_offset": "0x1250b3"
+  },
+  {
+    "id": 81,
+    "text": "The 44th floor in this tower is an illusion. It seems that we cannot go to there even if we use the stairs. I think that it is impossible to get there without teleporting.",
+    "file_offset": "0x1251d2"
+  },
+  {
+    "id": 82,
+    "text": "The sacred shield can defend you against magic attacks. But I heard this shield is hidden on a floor that doesn't exist.",
+    "file_offset": "0x12527f"
+  },
+  {
+    "id": 83,
+    "text": "The 41st floor is perfectly symmetrical, and therefore,",
+    "file_offset": "0x1252f9"
+  },
+  {
+    "id": 84,
+    "text": "If you want to beat the Dragon, you must have a holy sword, a holy shield, and a Dragon slayer, and also you must be high level.",
+    "file_offset": "0x125332"
+  },
+  {
+    "id": 85,
+    "text": "It is said that the symbol of 5 on a pair of dice has the force of sealing magic. You had better memorize it till you fight the boss of this area.",
+    "file_offset": "0x1253b4"
+  },
+  {
+    "id": 86,
+    "text": "I have done what I can. Good luck!",
+    "file_offset": "0x125448"
+  },
+  {
+    "id": 87,
+    "text": "Oh, thank you for your help. I will raise your offensive and defensive power 3 percent as a token of my gratitude. [You begin feeling stronger]",
+    "file_offset": "0x12546c"
+  },
+  {
+    "id": 88,
+    "text": "I will grant you the orb of the hero. You will now be able to save your game, and to forecast the results of fighting monsters on the current floor. Use it often.",
+    "file_offset": "0x1254fd"
+  },
+  {
+    "id": 89,
+    "text": "Thank goodness, you found me. I will give you an elixir as a symbol of my gratitude. Using this medicine will cause you to gain life according to your offensive and defensive power. So naturally, the later you use, the more it will have an effect on you.",
+    "file_offset": "0x1255a1"
+  },
+  {
+    "id": 90,
+    "text": "Be careful. I have nothing more to say.",
+    "file_offset": "0x1256a1"
+  },
+  {
+    "id": 91,
+    "text": "Please, use it wisely.",
+    "file_offset": "0x1256ca"
+  },
+  {
+    "id": 92,
+    "text": "You have perished in the Sorceror's Tower. Please try again!",
+    "file_offset": "0x1256e2"
+  },
+  {
+    "id": 93,
+    "text": "The Name",
+    "file_offset": "0x125720"
+  },
+  {
+    "id": 94,
+    "text": "Green Slime",
+    "file_offset": "0x12572a"
+  },
+  {
+    "id": 95,
+    "text": "Red Slime",
+    "file_offset": "0x125737"
+  },
+  {
+    "id": 96,
+    "text": "Big Slime",
+    "file_offset": "0x125742"
+  },
+  {
+    "id": 97,
+    "text": "Bat",
+    "file_offset": "0x12574d"
+  },
+  {
+    "id": 98,
+    "text": "Priest",
+    "file_offset": "0x125752"
+  },
+  {
+    "id": 99,
+    "text": "Superion Priest",
+    "file_offset": "0x12575a"
+  },
+  {
+    "id": 100,
+    "text": "Gate-Keeper C",
+    "file_offset": "0x12576b"
+  },
+  {
+    "id": 101,
+    "text": "Gate-Keeper B",
+    "file_offset": "0x12577a"
+  },
+  {
+    "id": 102,
+    "text": "Skeleton C",
+    "file_offset": "0x125789"
+  },
+  {
+    "id": 103,
+    "text": "Skeleton B",
+    "file_offset": "0x125795"
+  },
+  {
+    "id": 104,
+    "text": "Skeleton A",
+    "file_offset": "0x1257a1"
+  },
+  {
+    "id": 105,
+    "text": "Big Bat",
+    "file_offset": "0x1257ad"
+  },
+  {
+    "id": 106,
+    "text": "Zombie",
+    "file_offset": "0x1257b6"
+  },
+  {
+    "id": 107,
+    "text": "Zombie Knight",
+    "file_offset": "0x1257be"
+  },
+  {
+    "id": 108,
+    "text": "Rock",
+    "file_offset": "0x1257cd"
+  },
+  {
+    "id": 109,
+    "text": "The Magic Sergeant, Zeno",
+    "file_offset": "0x1257d3"
+  },
+  {
+    "id": 110,
+    "text": "The Magic Sergeant",
+    "file_offset": "0x1257ed"
+  },
+  {
+    "id": 111,
+    "text": "Vampire",
+    "file_offset": "0x125801"
+  },
+  {
+    "id": 112,
+    "text": "Giant Octopus",
+    "file_offset": "0x12580a"
+  },
+  {
+    "id": 113,
+    "text": "Dragon",
+    "file_offset": "0x125819"
+  },
+  {
+    "id": 114,
+    "text": "Golden Knight",
+    "file_offset": "0x125821"
+  },
+  {
+    "id": 115,
+    "text": "Knight",
+    "file_offset": "0x125830"
+  },
+  {
+    "id": 116,
+    "text": "Swordsman",
+    "file_offset": "0x125838"
+  },
+  {
+    "id": 117,
+    "text": "Soldier",
+    "file_offset": "0x125843"
+  },
+  {
+    "id": 118,
+    "text": "Ghost Soldier",
+    "file_offset": "0x12584c"
+  },
+  {
+    "id": 119,
+    "text": "Slime Man",
+    "file_offset": "0x12585b"
+  },
+  {
+    "id": 120,
+    "text": "Great Magic Master",
+    "file_offset": "0x125866"
+  },
+  {
+    "id": 121,
+    "text": "Vampire Bat",
+    "file_offset": "0x12587a"
+  },
+  {
+    "id": 122,
+    "text": "SlimeLord",
+    "file_offset": "0x125887"
+  },
+  {
+    "id": 123,
+    "text": "Magician A",
+    "file_offset": "0x125892"
+  },
+  {
+    "id": 124,
+    "text": "Magician B",
+    "file_offset": "0x12589e"
+  },
+  {
+    "id": 125,
+    "text": "Dark Knight",
+    "file_offset": "0x1258aa"
+  },
+  {
+    "id": 126,
+    "text": "Gate-Keeper A",
+    "file_offset": "0x1258b7"
+  },
+  {
+    "id": 127,
+    "text": "",
+    "file_offset": "0x1258c6"
+  },
+  {
+    "id": 128,
+    "text": "You've found a key.",
+    "file_offset": "0x1258c8"
+  },
+  {
+    "id": 129,
+    "text": "You've found a blue key.",
+    "file_offset": "0x1258dd"
+  },
+  {
+    "id": 130,
+    "text": "You've found a red key.",
+    "file_offset": "0x1258f7"
+  },
+  {
+    "id": 131,
+    "text": "The door has opened.",
+    "file_offset": "0x125910"
+  },
+  {
+    "id": 132,
+    "text": "The blue door has opened.",
+    "file_offset": "0x125926"
+  },
+  {
+    "id": 133,
+    "text": "The red door has opened.",
+    "file_offset": "0x125941"
+  },
+  {
+    "id": 134,
+    "text": "Went up the stairs.",
+    "file_offset": "0x12595b"
+  },
+  {
+    "id": 135,
+    "text": "Went down the stairs.",
+    "file_offset": "0x125970"
+  },
+  {
+    "id": 136,
+    "text": "",
+    "file_offset": "0x125987"
+  },
+  {
+    "id": 137,
+    "text": "The wall collapsed!",
+    "file_offset": "0x125989"
+  },
+  {
+    "id": 138,
+    "text": "You've found the orb of the hero.",
+    "file_offset": "0x12599e"
+  },
+  {
+    "id": 139,
+    "text": "You see an old man.",
+    "file_offset": "0x1259c1"
+  },
+  {
+    "id": 140,
+    "text": "You see a merchant.",
+    "file_offset": "0x1259d6"
+  },
+  {
+    "id": 141,
+    "text": "You see a fairy.",
+    "file_offset": "0x1259eb"
+  },
+  {
+    "id": 142,
+    "text": "You see a thief.",
+    "file_offset": "0x1259fd"
+  },
+  {
+    "id": 143,
+    "text": "You don't have the key.",
+    "file_offset": "0x125a0f"
+  },
+  {
+    "id": 144,
+    "text": "You don't have the blue key.",
+    "file_offset": "0x125a28"
+  },
+  {
+    "id": 145,
+    "text": "You don't have the red key.",
+    "file_offset": "0x125a46"
+  },
+  {
+    "id": 146,
+    "text": "You see stairs.",
+    "file_offset": "0x125a63"
+  },
+  {
+    "id": 147,
+    "text": "You must be near the stairs to fly!",
+    "file_offset": "0x125a74"
+  },
+  {
+    "id": 148,
+    "text": "You've found the orb of flying.",
+    "file_offset": "0x125a99"
+  },
+  {
+    "id": 149,
+    "text": "You've found the orb of wisdom.",
+    "file_offset": "0x125aba"
+  },
+  {
+    "id": 150,
+    "text": "You were flew by the orb of flying!",
+    "file_offset": "0x125adb"
+  },
+  {
+    "id": 151,
+    "text": "You see an altar.",
+    "file_offset": "0x125b00"
+  },
+  {
+    "id": 152,
+    "text": "Got an Iron Sword! Your offensive power was",
+    "file_offset": "0x125b13"
+  },
+  {
+    "id": 153,
+    "text": "Got a Silver Sword! Your offensive power was",
+    "file_offset": "0x125b40"
+  },
+  {
+    "id": 154,
+    "text": "Got a Sword of Knight! Your offensive power was",
+    "file_offset": "0x125b6e"
+  },
+  {
+    "id": 155,
+    "text": "Got a Holy Sword! Your offensive power was",
+    "file_offset": "0x125b9f"
+  },
+  {
+    "id": 156,
+    "text": "Got a Sacred Sword! Your offensive power was",
+    "file_offset": "0x125bcb"
+  },
+  {
+    "id": 157,
+    "text": "Got an Iron Shield! Your defensive power was",
+    "file_offset": "0x125bf9"
+  },
+  {
+    "id": 158,
+    "text": "Got a Silver Shield! Your defensive power was",
+    "file_offset": "0x125c27"
+  },
+  {
+    "id": 159,
+    "text": "Got a Shield of Knight! Your defensive power was",
+    "file_offset": "0x125c56"
+  },
+  {
+    "id": 160,
+    "text": "Got a Holy Shield! Your defensive power was",
+    "file_offset": "0x125c88"
+  },
+  {
+    "id": 161,
+    "text": "Got a Sacred Shield! Your defensive power was",
+    "file_offset": "0x125cb5"
+  },
+  {
+    "id": 162,
+    "text": "Got a red elixir. Your vital power was",
+    "file_offset": "0x125ce4"
+  },
+  {
+    "id": 163,
+    "text": "Got a blue elixir. Your vital power was",
+    "file_offset": "0x125d0c"
+  },
+  {
+    "id": 164,
+    "text": "Got a red crystal. Your offensive power was",
+    "file_offset": "0x125d35"
+  },
+  {
+    "id": 165,
+    "text": "Got a blue crystal. Your defensive power was",
+    "file_offset": "0x125d62"
+  },
+  {
+    "id": 166,
+    "text": " points up!",
+    "file_offset": "0x125d90"
+  },
+  {
+    "id": 167,
+    "text": "Got a cross! Your offensive power against Vampires and Zombies has doubled.",
+    "file_offset": "0x125d9d"
+  },
+  {
+    "id": 168,
+    "text": "You recieved The Magic Elixir.",
+    "file_offset": "0x125dea"
+  },
+  {
+    "id": 169,
+    "text": "You recieved The Magic Mattock.",
+    "file_offset": "0x125e0a"
+  },
+  {
+    "id": 170,
+    "text": "You recieved The destructible Ball!",
+    "file_offset": "0x125e2b"
+  },
+  {
+    "id": 171,
+    "text": "You recieved The Warp Staff!",
+    "file_offset": "0x125e50"
+  },
+  {
+    "id": 172,
+    "text": "You recieved wings to fly up!",
+    "file_offset": "0x125e6e"
+  },
+  {
+    "id": 173,
+    "text": "You recieved wings to fly down!",
+    "file_offset": "0x125e8d"
+  },
+  {
+    "id": 174,
+    "text": "You recieved The Dragon Slayer! Your attack power against the Dragon has doubled!",
+    "file_offset": "0x125eae"
+  },
+  {
+    "id": 175,
+    "text": "Got the snow crystal!",
+    "file_offset": "0x125f01"
+  },
+  {
+    "id": 176,
+    "text": "Got the magic key!",
+    "file_offset": "0x125f18"
+  },
+  {
+    "id": 177,
+    "text": "Got The Super Magic Mattock!",
+    "file_offset": "0x125f2c"
+  },
+  {
+    "id": 178,
+    "text": "Got the Lucky Gold! You now get twice the normal amount of gold.",
+    "file_offset": "0x125f4a"
+  },
+  {
+    "id": 179,
+    "text": "The lava is really hot.",
+    "file_offset": "0x125f8c"
+  },
+  {
+    "id": 180,
+    "text": "Looking up the results of battling these monsters.",
+    "file_offset": "0x125fa5"
+  },
+  {
+    "id": 181,
+    "text": "Vital power:",
+    "file_offset": "0x125fd9"
+  },
+  {
+    "id": 182,
+    "text": "Offensive power:",
+    "file_offset": "0x125fe7"
+  },
+  {
+    "id": 183,
+    "text": "Defensive power:",
+    "file_offset": "0x125ff9"
+  },
+  {
+    "id": 184,
+    "text": "Expected damage:",
+    "file_offset": "0x12600b"
+  },
+  {
+    "id": 185,
+    "text": "Cannot be hit by you!",
+    "file_offset": "0x12601d"
+  },
+  {
+    "id": 186,
+    "text": "You used the Magic Elixir. Your vital power is now",
+    "file_offset": "0x126034"
+  },
+  {
+    "id": 187,
+    "text": "You used the Magic Mattock! The walls fell down!",
+    "file_offset": "0x126068"
+  },
+  {
+    "id": 188,
+    "text": "You used The destructible Ball! Enemies on all sides died!",
+    "file_offset": "0x12609a"
+  },
+  {
+    "id": 189,
+    "text": "You've warped!",
+    "file_offset": "0x1260d6"
+  },
+  {
+    "id": 190,
+    "text": "You've used the wing to fly up!",
+    "file_offset": "0x1260e6"
+  },
+  {
+    "id": 191,
+    "text": "You've used the wing to fly down!",
+    "file_offset": "0x126107"
+  },
+  {
+    "id": 192,
+    "text": "You've used the snow crystal!",
+    "file_offset": "0x12612a"
+  },
+  {
+    "id": 193,
+    "text": "You've used the magic key! All these doors opened on this floor.",
+    "file_offset": "0x126149"
+  },
+  {
+    "id": 194,
+    "text": "You've used a Super Magic Mattock! All the walls fell down on this floor!",
+    "file_offset": "0x12618b"
+  },
+  {
+    "id": 195,
+    "text": "You cannot warp (There's an object in the way).",
+    "file_offset": "0x1261d6"
+  },
+  {
+    "id": 196,
+    "text": "Can't go upstairs (it's blocked)!",
+    "file_offset": "0x126207"
+  },
+  {
+    "id": 197,
+    "text": "Can't go downstairs (it's blocked)!",
+    "file_offset": "0x12622a"
+  },
+  {
+    "id": 198,
+    "text": "The lava cooled and turned to stone.",
+    "file_offset": "0x12624f"
+  },
+  {
+    "id": 199,
+    "text": "You've beat",
+    "file_offset": "0x126275"
+  },
+  {
+    "id": 200,
+    "text": "Recieved",
+    "file_offset": "0x126282"
+  },
+  {
+    "id": 201,
+    "text": " Gold.",
+    "file_offset": "0x12628c"
+  },
+  {
+    "id": 202,
+    "text": "If you offer me",
+    "file_offset": "0x126294"
+  },
+  {
+    "id": 203,
+    "text": "Gold, I will grant your request. Will you?",
+    "file_offset": "0x1262a5"
+  },
+  {
+    "id": 204,
+    "text": "What option shall you choose?",
+    "file_offset": "0x1262d1"
+  },
+  {
+    "id": 205,
+    "text": "Your life recovers by",
+    "file_offset": "0x1262f0"
+  },
+  {
+    "id": 206,
+    "text": "points.",
+    "file_offset": "0x126307"
+  },
+  {
+    "id": 207,
+    "text": "The offensive power is raised",
+    "file_offset": "0x126310"
+  },
+  {
+    "id": 208,
+    "text": "points.",
+    "file_offset": "0x12632f"
+  },
+  {
+    "id": 209,
+    "text": "The defensive power is raised",
+    "file_offset": "0x126338"
+  },
+  {
+    "id": 210,
+    "text": "Then I won't do it after all.",
+    "file_offset": "0x126357"
+  },
+  {
+    "id": 211,
+    "text": "You don't have enough money!",
+    "file_offset": "0x126376"
+  },
+  {
+    "id": 212,
+    "text": "Tower",
+    "file_offset": "0x126394"
+  },
+  {
+    "id": 213,
+    "text": " F",
+    "file_offset": "0x12639b"
+  },
+  {
+    "id": 214,
+    "text": "Life",
+    "file_offset": "0x12639f"
+  },
+  {
+    "id": 215,
+    "text": "Offense",
+    "file_offset": "0x1263a5"
+  },
+  {
+    "id": 216,
+    "text": "Defense",
+    "file_offset": "0x1263ae"
+  },
+  {
+    "id": 217,
+    "text": "You can't hurt it, it's defensive power is too high!",
+    "file_offset": "0x1263b7"
+  },
+  {
+    "id": 218,
+    "text": "What?",
+    "file_offset": "0x1263ed"
+  },
+  {
+    "id": 219,
+    "text": "Hey!",
+    "file_offset": "0x1263f4"
+  },
+  {
+    "id": 220,
+    "text": "Judging by your vital power, offensive power, defensive power, and number of keys, you have",
+    "file_offset": "0x1263fa"
+  },
+  {
+    "id": 221,
+    "text": " points.",
+    "file_offset": "0x126457"
+  },
+  {
+    "id": 222,
+    "text": "If you have that many points, you might want to reconsider going higher... =)",
+    "file_offset": "0x126461"
+  },
+  {
+    "id": 223,
+    "text": "A bit below average. Maybe you should try harder.",
+    "file_offset": "0x1264b0"
+  },
+  {
+    "id": 224,
+    "text": "You are ordinary. You might get by okay!",
+    "file_offset": "0x1264e3"
+  },
+  {
+    "id": 225,
+    "text": "Doing fine! If you wish to continue, I will give you a special rank...",
+    "file_offset": "0x12650d"
+  },
+  {
+    "id": 226,
+    "text": "Congratulations! Your score is GREAT!",
+    "file_offset": "0x126555"
+  },
+  {
+    "id": 227,
+    "text": "Do you wish to go on?",
+    "file_offset": "0x12657c"
+  },
+  {
+    "id": 228,
+    "text": "I give you the special rank of",
+    "file_offset": "0x126593"
+  },
+  {
+    "id": 229,
+    "text": "FIGHTER",
+    "file_offset": "0x1265b3"
+  },
+  {
+    "id": 230,
+    "text": "BRAVE MAN",
+    "file_offset": "0x1265bc"
+  },
+  {
+    "id": 231,
+    "text": "HERO",
+    "file_offset": "0x1265c7"
+  },
+  {
+    "id": 232,
+    "text": "SWORD EMPEROR",
+    "file_offset": "0x1265cd"
+  },
+  {
+    "id": 233,
+    "text": "FIGHTER GOD",
+    "file_offset": "0x1265dc"
+  },
+  {
+    "id": 234,
+    "text": ".",
+    "file_offset": "0x1265e9"
+  },
+  {
+    "id": 235,
+    "text": "You may as well play as good as you have from this point on.",
+    "file_offset": "0x1265ec"
+  },
+  {
+    "id": 236,
+    "text": "It was nice fight so far.",
+    "file_offset": "0x12662a"
+  },
+  {
+    "id": 237,
+    "text": "Your vital power decreased 200 points by magic attack of Magician A!",
+    "file_offset": "0x126645"
+  },
+  {
+    "id": 238,
+    "text": "Your vital power decreased 100 points by magic attack of Magician B!",
+    "file_offset": "0x12668b"
+  },
+  {
+    "id": 239,
+    "text": "Your vital power decreased in half by the magic attack of Magic Master!",
+    "file_offset": "0x1266d1"
+  },
+  {
+    "id": 240,
+    "text": "You've beat some of",
+    "file_offset": "0x12671a"
+  },
+  {
+    "id": 241,
+    "text": "The road changed to the wall!",
+    "file_offset": "0x12672f"
+  },
+  {
+    "id": 242,
+    "text": "Nobody saved that game yet.",
+    "file_offset": "0x12674e"
+  },
+  {
+    "id": 243,
+    "text": "You're using the stairs.",
+    "file_offset": "0x12676b"
+  },
+  {
+    "id": 244,
+    "text": "Congratulations! You win the",
+    "file_offset": "0x126785"
+  },
+  {
+    "id": 245,
+    "text": " place with the points which you got. I'm going to register your score.",
+    "file_offset": "0x1267a3"
+  },
+  {
+    "id": 246,
+    "text": "Thank you for your help. Please accept money as a small token of my gratitude. (Got 1000 Gold.)",
+    "file_offset": "0x1267ec"
+  },
+  {
+    "id": 247,
+    "text": "I will sell a blue key at very special price (50 gold)! Will you buy it?",
+    "file_offset": "0x12684d"
+  },
+  {
+    "id": 248,
+    "text": "I will sell five keys for 50 Gold! Will you buy them?",
+    "file_offset": "0x126897"
+  },
+  {
+    "id": 249,
+    "text": "I will sell the rare red key for 800 Gold! Will you buy it?",
+    "file_offset": "0x1268ce"
+  },
+  {
+    "id": 250,
+    "text": "My store will sell as many keys as you need. They are 1000 Gold each. Will you buy them?",
+    "file_offset": "0x12690b"
+  },
+  {
+    "id": 251,
+    "text": "I will sell a blue key for 200 Gold! Will you buy it?",
+    "file_offset": "0x126965"
+  },
+  {
+    "id": 252,
+    "text": "I will buy your keys at 100 Gold a piece. Will you sell me keys?",
+    "file_offset": "0x12699c"
+  },
+  {
+    "id": 253,
+    "text": "I will sell four keys and a blue key for 1000 Gold! Will you buy them?",
+    "file_offset": "0x1269de"
+  },
+  {
+    "id": 254,
+    "text": "I will sell three keys at special price (200 gold). First come, first served.",
+    "file_offset": "0x126a26"
+  },
+  {
+    "id": 255,
+    "text": "2000 Golds for three blue keys. Deal?",
+    "file_offset": "0x126a75"
+  },
+  {
+    "id": 256,
+    "text": "I will increase your life 2000 points at 1000 Gold.",
+    "file_offset": "0x126a9c"
+  },
+  {
+    "id": 257,
+    "text": "Would you like to buy a super mattock (it's very rare) for 4000 Gold?",
+    "file_offset": "0x126ad1"
+  },
+  {
+    "id": 258,
+    "text": "You don't have enough money.",
+    "file_offset": "0x126b18"
+  },
+  {
+    "id": 259,
+    "text": "Thank you very much.",
+    "file_offset": "0x126b36"
+  },
+  {
+    "id": 260,
+    "text": "Loaded the Game.",
+    "file_offset": "0x126b4c"
+  },
+  {
+    "id": 261,
+    "text": "Saved the Game.",
+    "file_offset": "0x126b5e"
+  },
+  {
+    "id": 262,
+    "text": "You don't have a key!",
+    "file_offset": "0x126b6f"
+  },
+  {
+    "id": 263,
+    "text": "Ah!, we meet again! Thank goodness you're alive!",
+    "file_offset": "0x126b86"
+  },
+  {
+    "id": 264,
+    "text": "I heard that if you beat the boss of 25th floor, 'the gate of time and space' will appear somewhere.",
+    "file_offset": "0x126bb8"
+  },
+  {
+    "id": 265,
+    "text": "This Game can't load.",
+    "file_offset": "0x126c1e"
+  },
+  {
+    "id": 266,
+    "text": "Your vital power decreased 8800 points by Magician A's magic attack!",
+    "file_offset": "0x126c35"
+  },
+  {
+    "id": 267,
+    "text": "Your vital power decreased 4400 points by Magician B's magic attack!",
+    "file_offset": "0x126c7b"
+  }
+]

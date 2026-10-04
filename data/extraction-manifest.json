@@ -1,0 +1,445 @@
+{
+  "source_directory": "D:\\Program Files (x86)\\Tower of the Sorcerer",
+  "executable_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "map_count": 51,
+  "map_record_bytes": 123,
+  "monster_count": 33,
+  "dialogue_count": 268,
+  "assets": [
+    {
+      "source": "Data3/CENTER.BMP",
+      "output": "web/assets/data3-center.png",
+      "size": [
+        488,
+        500
+      ],
+      "source_sha256": "e481946d62496979f8ad0c0bac254c4377870db69dfc72554acc0b6e37d064ea"
+    },
+    {
+      "source": "Data3/Chtable.oz",
+      "output": "web/assets/original-atlas.png",
+      "size": [
+        440,
+        800
+      ],
+      "source_sha256": "7487f2ba1c296ea9f9be006cb1aa714eadc3a66a242e57c6067b16e4efbe175f"
+    },
+    {
+      "source": "Data3/Chtableb.oz",
+      "output": "web/assets/original-background-atlas.png",
+      "size": [
+        440,
+        600
+      ],
+      "source_sha256": "a31d976849d74128b42240c918a3c5a9220f21ee3200f8dd428e1076e232d51d"
+    },
+    {
+      "source": "Data3/Key.oz",
+      "output": "web/assets/data3-key.png",
+      "size": [
+        40,
+        40
+      ],
+      "source_sha256": "81cef0e75da9fce831c1bd9bb532cccbae906f844bf546178f69595ae556d954"
+    },
+    {
+      "source": "Data3/Left.bmp",
+      "output": "web/assets/data3-left.png",
+      "size": [
+        156,
+        500
+      ],
+      "source_sha256": "75a431576f504012722365192736d77381a1f6c5e86346cb3535d14bdab5d6d1"
+    },
+    {
+      "source": "Data3/LeftR.bmp",
+      "output": "web/assets/data3-leftr.png",
+      "size": [
+        156,
+        500
+      ],
+      "source_sha256": "22c326bbd07e343b02607f976d4549952647bc4366b33f3c5784e79cceec60f0"
+    },
+    {
+      "source": "Data3/open0.bmp",
+      "output": "web/assets/data3-open0.png",
+      "size": [
+        800,
+        500
+      ],
+      "source_sha256": "b171ecad04a53b036f5a30515daf1b602edf889ad475d72af651cd18064d28df"
+    },
+    {
+      "source": "Data3/open1.bmp",
+      "output": "web/assets/data3-open1.png",
+      "size": [
+        800,
+        500
+      ],
+      "source_sha256": "71485b9ab1f4a224fe0991a97eb30612b864c804e2e8bb22799eeab51dbce591"
+    },
+    {
+      "source": "Data3/open2.bmp",
+      "output": "web/assets/data3-open2.png",
+      "size": [
+        800,
+        500
+      ],
+      "source_sha256": "e3c199789ce168ad77b04091678361106202e2a15b2009646bea53d7f61e06c1"
+    },
+    {
+      "source": "Data3/Right.bmp",
+      "output": "web/assets/data3-right.png",
+      "size": [
+        156,
+        500
+      ],
+      "source_sha256": "0e6eca143529a24e028d63a6cfa60c21032c9d295b69a919deef0ba37ed2aefd"
+    },
+    {
+      "source": "Data3/RightR.bmp",
+      "output": "web/assets/data3-rightr.png",
+      "size": [
+        156,
+        500
+      ],
+      "source_sha256": "1039afa0389c355fa6775d4221f0d6ad0b6959775740e7bcda803faf1589b326"
+    },
+    {
+      "source": "Data3/title05.bmp",
+      "output": "web/assets/data3-title05.png",
+      "size": [
+        488,
+        500
+      ],
+      "source_sha256": "6f705576d16fca56ad87fee5f9e7ebacb877a351efb503ef38ab9ce339dc25b1"
+    },
+    {
+      "source": "Data3/title05R.bmp",
+      "output": "web/assets/data3-title05r.png",
+      "size": [
+        488,
+        500
+      ],
+      "source_sha256": "8082e805716698ba8438ca162857d5103ea6e13143576dc5d54d881de327745a"
+    },
+    {
+      "source": "Data2/End05.bmp",
+      "output": "web/assets/data2-end05.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "114c0c96446851e42dcf8585d4585d69158f66f168b1eb62f6c228fc9de49d12"
+    },
+    {
+      "source": "Data2/End06.bmp",
+      "output": "web/assets/data2-end06.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "f238e46365a27cd348aafcef98f2f22c0d694c42698de0531528114341aa5008"
+    },
+    {
+      "source": "Data2/End07.bmp",
+      "output": "web/assets/data2-end07.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "f0a0eafc3d1b084df040b26e60866f045c949ea8e82f6513cbf48f95a12e9870"
+    },
+    {
+      "source": "Data2/End08.bmp",
+      "output": "web/assets/data2-end08.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "673bc40ace617a12521cbd40d0324786ef5202ce84eba8b76d8e0b2701350532"
+    },
+    {
+      "source": "Data2/End09.bmp",
+      "output": "web/assets/data2-end09.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "101b500ebfb9a000a56a1d30595c5636339661aa4546b3658f720e7db8716939"
+    },
+    {
+      "source": "Data2/End10.bmp",
+      "output": "web/assets/data2-end10.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "8d0832d4ed02e636dc8cdc0679833ce05734dd721c3854d2e67d3998fd8b2647"
+    },
+    {
+      "source": "Data2/End11.bmp",
+      "output": "web/assets/data2-end11.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "427f2c0028c917cf78b470474a6b9db801d79ed8d31f314a42709bd67d0cb635"
+    },
+    {
+      "source": "Data2/End12.bmp",
+      "output": "web/assets/data2-end12.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "e9c194870856ba0bdb2eaf3f30dec7cc7a6627d809e7f5a4cb593a675bf06959"
+    },
+    {
+      "source": "Data2/End13.bmp",
+      "output": "web/assets/data2-end13.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "b2ed452b84bde67ec4f03dae8b48c7653a5924d8cdb606e92465b9f443b3a037"
+    },
+    {
+      "source": "Data2/End14.bmp",
+      "output": "web/assets/data2-end14.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "72e21d078b63c56b9dc0a8f75bc121a899639147972e67369d0867e62ca24006"
+    },
+    {
+      "source": "Data2/End15.bmp",
+      "output": "web/assets/data2-end15.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "7f032bdec1aab4981dee397ee54b7adad1c7296c3d6f40e0421b79d8d79d77e4"
+    },
+    {
+      "source": "Data2/End16.bmp",
+      "output": "web/assets/data2-end16.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "6d9b1d307c32444ceefca9b3ee9507b830f23fbf425e8828ed9366022d8e4141"
+    },
+    {
+      "source": "Data2/End17.bmp",
+      "output": "web/assets/data2-end17.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "c6b91b98568f3f6707ad768befe14229c39cb709458719556067493fab604c22"
+    },
+    {
+      "source": "Data2/End18.bmp",
+      "output": "web/assets/data2-end18.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "dd08959538cd12bfe4c24bb6cd1f2ed68e4eb64380dfa2087b685545b00a1b94"
+    },
+    {
+      "source": "Data2/End19.bmp",
+      "output": "web/assets/data2-end19.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "e355f7297d8c491af3b89bf9edbddfd4152ffe7b2057e1c15b394eb05c19fe75"
+    },
+    {
+      "source": "Data2/End20.bmp",
+      "output": "web/assets/data2-end20.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "8d47d6bcab49293ba43ec6da93eaf2dceb26de0dd0fb2cd06c3fdcbe1d9a94c8"
+    },
+    {
+      "source": "Data2/End26.bmp",
+      "output": "web/assets/data2-end26.png",
+      "size": [
+        640,
+        400
+      ],
+      "source_sha256": "996e857226446e92cf819f8405373cc5c92f64f7681b67c8f1cf4432a1ed5b82"
+    },
+    {
+      "source": "Wav/20f.wav",
+      "output": "web/assets/wav/20f.wav",
+      "source_sha256": "40daa2df7e27bc2b457fc366bea05bdfb657f7c2823ff4064cc006367bbdfdd6"
+    },
+    {
+      "source": "Wav/3f.wav",
+      "output": "web/assets/wav/3f.wav",
+      "source_sha256": "d5be8966a1af910ee3a9e45d5f023969c2ee6477a886893a27e949e564b80110"
+    },
+    {
+      "source": "Wav/get.wav",
+      "output": "web/assets/wav/get.wav",
+      "source_sha256": "e790b003e6e532946e44b7336944b60077f6298ab4297621df9d5f04738d9f58"
+    },
+    {
+      "source": "Wav/kai.wav",
+      "output": "web/assets/wav/kai.wav",
+      "source_sha256": "f7793bbaedfd4ddec9258e53b22a5733c56a49c912cd1694d19f467d8a236853"
+    },
+    {
+      "source": "Wav/kai2.wav",
+      "output": "web/assets/wav/kai2.wav",
+      "source_sha256": "7fc176bbf97299ddff84486eaeee392e35feaf6fcebf1b9e2ff5448af06104ed"
+    },
+    {
+      "source": "Wav/open.wav",
+      "output": "web/assets/wav/open.wav",
+      "source_sha256": "c8d6f5640e41f521dfc585d6d0554a24d0a29a972fc5e571962fa77ec70ccd9f"
+    },
+    {
+      "source": "Wav/taisen.wav",
+      "output": "web/assets/wav/taisen.wav",
+      "source_sha256": "9320a95e328d6b7f9e387f4c5c225deb13d90673eb9281f7052fd0d2fd841406"
+    },
+    {
+      "source": "Wav/zeno.wav",
+      "output": "web/assets/wav/zeno.wav",
+      "source_sha256": "03f56559d6a5b26aaa3f98fdb5bbbcbfc04d48c102489c6decff145a9954462d"
+    },
+    {
+      "source": "Midi/A_005XGW.MID",
+      "output": "web/assets/midi/a_005xgw.mid",
+      "source_sha256": "02e3015372ecc655e61c7871b13703db9a4fd57124e6aced7e5f906d2bfc9dd1"
+    },
+    {
+      "source": "Midi/A_007XGW.MID",
+      "output": "web/assets/midi/a_007xgw.mid",
+      "source_sha256": "4309384b6f489c793ea853e05e5ba346bd3234096d374c230b210164d33068e4"
+    },
+    {
+      "source": "Midi/A_008XGW.MID",
+      "output": "web/assets/midi/a_008xgw.mid",
+      "source_sha256": "7e4ca314c51b777dfdb7336bd6cce7491f75444dffab2e59bad84429bb0a841d"
+    },
+    {
+      "source": "Midi/A_019XGW.MID",
+      "output": "web/assets/midi/a_019xgw.mid",
+      "source_sha256": "75dc2092a4939b7bedc6ed4fb011e83a0d319d86d33cff1351c9262a4bde1c0d"
+    },
+    {
+      "source": "Midi/A_023XGW.MID",
+      "output": "web/assets/midi/a_023xgw.mid",
+      "source_sha256": "dda19620e7dab0dfdc745a7976e8e7eaf41eafe380e77fe5b7873feb69da033e"
+    },
+    {
+      "source": "Midi/A_027XGW.MID",
+      "output": "web/assets/midi/a_027xgw.mid",
+      "source_sha256": "ce4666f6d0ba05adc24c32470f2fadd918a0785667477f9df97aed197313e28d"
+    },
+    {
+      "source": "Midi/A_032XGW.MID",
+      "output": "web/assets/midi/a_032xgw.mid",
+      "source_sha256": "0b045feb2988e23a8272a69192215f230afb1b3b8d926316c0cb9793cecc2c73"
+    },
+    {
+      "source": "Midi/A_046XGW.MID",
+      "output": "web/assets/midi/a_046xgw.mid",
+      "source_sha256": "bdaecbbc9a8010041ad0bcae8a783d7367e0fca867749f166ae28962137b0d6b"
+    },
+    {
+      "source": "Midi/A_050XGW.MID",
+      "output": "web/assets/midi/a_050xgw.mid",
+      "source_sha256": "84f07ca95691ddf07ea660ce2aad099403cdffcb04849313d52bb940187e60a1"
+    },
+    {
+      "source": "Midi/A_085XGW.MID",
+      "output": "web/assets/midi/a_085xgw.mid",
+      "source_sha256": "a7e078bd67c994f0f6512d246f2b51ca25414412026517768b36479397bde96c"
+    },
+    {
+      "source": "Midi/A_118XGW.MID",
+      "output": "web/assets/midi/a_118xgw.mid",
+      "source_sha256": "d47fdd9f466c7367261a0c56c866d99734a4ee68ee02c3cdc66bf034b3fc3b49"
+    },
+    {
+      "source": "Midi/B_014XGW.MID",
+      "output": "web/assets/midi/b_014xgw.mid",
+      "source_sha256": "4038349cf7063d86968ff456a5662167b3d70391f1c94694c91991da3d0b92f4"
+    },
+    {
+      "source": "Midi/B_018XGW.MID",
+      "output": "web/assets/midi/b_018xgw.mid",
+      "source_sha256": "988a06cb06c894f34a84253b115f63feaf958079bdd8ad41e4773d88b0f59de5"
+    },
+    {
+      "source": "Midi/B_058XGW.MID",
+      "output": "web/assets/midi/b_058xgw.mid",
+      "source_sha256": "ad1c45522d41c595acbd39182f4a61dafd62d3357968f664803e658f69bb1f76"
+    },
+    {
+      "source": "Midi/B_067XGW.MID",
+      "output": "web/assets/midi/b_067xgw.mid",
+      "source_sha256": "075d10dbc3dd9cc6e534b0752285fdd45174018bf3f55efabf9d17fe4caaeaa3"
+    },
+    {
+      "source": "Midi/B_110XGW.MID",
+      "output": "web/assets/midi/b_110xgw.mid",
+      "source_sha256": "2eb1a0eead3e1c3bed652ade4653f1a5b48b4d2160c2221974fe7d6c1a0a76c4"
+    },
+    {
+      "source": "Midi/B_117XGW.MID",
+      "output": "web/assets/midi/b_117xgw.mid",
+      "source_sha256": "53aacf790369ea7e47028ceec0a47077c442a5c3bb592b681c0e925b5c2cbd3f"
+    },
+    {
+      "source": "Data3/Chtable.oz",
+      "output": "web/assets/hero-down.png",
+      "color_tile": 185,
+      "mask_tile": 186,
+      "size": [
+        40,
+        40
+      ]
+    },
+    {
+      "source": "Data3/Chtable.oz",
+      "output": "web/assets/hero-left.png",
+      "color_tile": 193,
+      "mask_tile": 194,
+      "size": [
+        40,
+        40
+      ]
+    },
+    {
+      "source": "Data3/Chtable.oz",
+      "output": "web/assets/hero-right.png",
+      "color_tile": 201,
+      "mask_tile": 202,
+      "size": [
+        40,
+        40
+      ]
+    },
+    {
+      "source": "Data3/Chtable.oz",
+      "output": "web/assets/hero-up.png",
+      "color_tile": 209,
+      "mask_tile": 210,
+      "size": [
+        40,
+        40
+      ]
+    }
+  ]
+}

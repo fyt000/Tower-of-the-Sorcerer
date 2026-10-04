@@ -1,0 +1,15 @@
+{
+  "name": "tower-of-the-sorcerer-rust",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "start": "node tools/start.mjs",
+    "test:browser": "node tests/browser.mjs",
+    "test:mcp": "node tests/mcp.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  }
+}

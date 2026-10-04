@@ -1,0 +1,17 @@
+/target/
+/node_modules/
+/tools/*.exe
+/tools/wasm-bindgen*/
+/tools/*.zip
+/tools/*.tar.gz
+/tools/research/
+**/__pycache__/
+/web/pkg/
+/web/campaign.json
+/test-results/
+*.save.json
+*.log
+/web/assets/
+/data/atlas-index.png
+/web/fonts/NotoSansSC*.ttf
+/tools/audio-renderer/

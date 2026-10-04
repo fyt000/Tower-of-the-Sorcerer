@@ -1,0 +1,6160 @@
+[
+  {
+    "id": "capture_on_floor_3",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 3,
+      "x": 4,
+      "y": 8
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 3,
+        "x": 4,
+        "y": 8,
+        "tile": 6
+      },
+      {
+        "type": "message",
+        "text": "The Magic Sergeant, Zeno, says \"Welcome to 'The Magic Tower'. You are the hundredth man who dared to enter my tower. You will now face my guards. Should you happen to survive, I will fight with you in person specially. You should accept your fate.\"",
+        "dialogue_id": 9
+      },
+      {
+        "type": "message",
+        "text": "What? Oh!",
+        "dialogue_id": 10
+      },
+      {
+        "type": "set_stat",
+        "stat": "hp",
+        "amount": 400
+      },
+      {
+        "type": "set_stat",
+        "stat": "attack",
+        "amount": 10
+      },
+      {
+        "type": "set_stat",
+        "stat": "defense",
+        "amount": 10
+      },
+      {
+        "type": "remove_item",
+        "item": "sword_5"
+      },
+      {
+        "type": "remove_item",
+        "item": "sacred_shield"
+      },
+      {
+        "type": "teleport",
+        "floor": 2,
+        "x": 2,
+        "y": 7
+      },
+      {
+        "type": "flag",
+        "flag": "captured"
+      },
+      {
+        "type": "message",
+        "text": "What a relief you're okay! You were caught and thrown into this prison by the Magic Sergeant. You were unconscious when you got here. Nevertheless, you are so lucky that you just woke up. I've finished the escape tunnel. Let's break out.",
+        "dialogue_id": 3
+      }
+    ],
+    "source": "Original mevent 0x463A2C + opening31 0x4655E0"
+  },
+  {
+    "id": "thief_opens_prison_tunnel",
+    "once": true,
+    "trigger": {
+      "type": "interact",
+      "floor": 2,
+      "x": 2,
+      "y": 6
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 2,
+        "x": 1,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 2,
+        "x": 2,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "message",
+        "text": "O.K. Well, excuse my going first. Your weapon and shield were stolen by the guards. It's not wise to wander about without them. I believe there is a sword on the 5th floor and a shield on the 9th, you had better get them first of all. See you later!",
+        "dialogue_id": 4
+      }
+    ],
+    "source": "Original touzoku 0x465900: door record (13,67,7)"
+  },
+  {
+    "id": "floor_12_scripted_wall_reveal",
+    "once": true,
+    "trigger": {
+      "type": "bump",
+      "floor": 12,
+      "x": 10,
+      "y": 0,
+      "tile": 10
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 12,
+        "x": 10,
+        "y": 0,
+        "tile": 19
+      }
+    ],
+    "source": "Original handan scripted-wall cases 0x4448CE..0x444BE0"
+  },
+  {
+    "id": "floor_16_scripted_wall_reveal",
+    "once": true,
+    "trigger": {
+      "type": "bump",
+      "floor": 16,
+      "x": 10,
+      "y": 10,
+      "tile": 10
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 16,
+        "x": 10,
+        "y": 10,
+        "tile": 25
+      }
+    ],
+    "source": "Original handan scripted-wall cases 0x4448CE..0x444BE0"
+  },
+  {
+    "id": "floor_19_scripted_wall_reveal",
+    "once": true,
+    "trigger": {
+      "type": "bump",
+      "floor": 19,
+      "x": 5,
+      "y": 2,
+      "tile": 10
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 19,
+        "x": 5,
+        "y": 2,
+        "tile": 39
+      }
+    ],
+    "source": "Original handan scripted-wall cases 0x4448CE..0x444BE0"
+  },
+  {
+    "id": "thief_opens_floor_15_tunnel",
+    "once": true,
+    "trigger": {
+      "type": "interact",
+      "floor": 15,
+      "x": 8,
+      "y": 0
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 15,
+        "x": 7,
+        "y": 0,
+        "tile": 6
+      },
+      {
+        "type": "message",
+        "text": "Ah! Are you all right? The Big Octopus which lives in here was blocking my progress. Now a loophole has completed at last. You had better put off beating him. See ya later!",
+        "dialogue_id": 17,
+        "original_queue_id": 18
+      },
+      {
+        "type": "set_tile",
+        "floor": 15,
+        "x": 8,
+        "y": 0,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 15,
+        "x": 7,
+        "y": 0,
+        "tile": 21
+      },
+      {
+        "type": "set_tile",
+        "floor": 15,
+        "x": 7,
+        "y": 0,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 15,
+        "x": 6,
+        "y": 0,
+        "tile": 21
+      },
+      {
+        "type": "set_tile",
+        "floor": 15,
+        "x": 6,
+        "y": 0,
+        "tile": 6
+      }
+    ],
+    "source": "Original touzoku floor-15 branch 0x465C23"
+  },
+  {
+    "id": "floor_10_encounter_49",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 10,
+      "x": 5,
+      "y": 4
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "message",
+        "text": "Ha ha ha, You are lucky to have gotten so far. Since it has come to this, I shall fight with you personally, but first I must test your strength. Go and fight! Skeleton Soldiers!",
+        "dialogue_id": 12,
+        "original_queue_id": 13
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 6,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 2,
+        "tile": 81
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 1,
+        "tile": 81
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 0,
+        "tile": 81
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 2,
+        "tile": 4
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 6,
+        "tile": 4
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 3,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 7,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 1,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 2,
+        "y": 3,
+        "tile": 79
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 2,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 3,
+        "y": 3,
+        "tile": 79
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 3,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 3,
+        "tile": 79
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 4,
+        "tile": 79
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 5,
+        "tile": 79
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 5,
+        "tile": 79
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 9,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 8,
+        "y": 3,
+        "tile": 79
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 8,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 7,
+        "y": 3,
+        "tile": 79
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 7,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 6,
+        "y": 3,
+        "tile": 79
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 6,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 3,
+        "tile": 79
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 2,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 2,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 2,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 3,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 3,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 4,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 5,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 8,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 8,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 8,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 7,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 7,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 6,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 6,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 6,
+        "y": 4,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 6,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 6,
+        "y": 5,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 1,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 1,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 1,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 2,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 2,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 3,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 3,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 4,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 9,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 9,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 9,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 8,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 8,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 7,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 7,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 6,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 6,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 6,
+        "y": 4,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 0,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 0,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 0,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 1,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 1,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 2,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 2,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 3,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 3,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 4,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 10,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 10,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 10,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 9,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 9,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 8,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 8,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 7,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 7,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 6,
+        "y": 3,
+        "tile": 77
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 3,
+        "y": 3,
+        "tile": 4
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 7,
+        "y": 3,
+        "tile": 4
+      }
+    ],
+    "source": "Original ichicheck 0x46CB1C; animation collapsed to ordered state transitions"
+  },
+  {
+    "id": "floor_15_encounter_82",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 15,
+      "x": 5,
+      "y": 7
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 15,
+        "x": 5,
+        "y": 7,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 15,
+        "x": 5,
+        "y": 8,
+        "tile": 4
+      }
+    ],
+    "source": "Original ichicheck 0x46CB1C; animation collapsed to ordered state transitions"
+  },
+  {
+    "id": "floor_20_encounter_82",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 20,
+      "x": 5,
+      "y": 7
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 5,
+        "y": 7,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 4,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 6,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 4,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 5,
+        "y": 5,
+        "tile": 95
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 6,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 4,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 5,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 6,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 5,
+        "y": 8,
+        "tile": 4
+      },
+      {
+        "type": "message",
+        "text": "Well, You beat the skeletons and invaded. Never regard me as small like a skeleton. I will show you that I am as immortal as god. Hey, come on!",
+        "dialogue_id": 19,
+        "original_queue_id": 20
+      }
+    ],
+    "source": "Original ichicheck 0x46CB1C; animation collapsed to ordered state transitions"
+  },
+  {
+    "id": "floor_25_encounter_93",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 25,
+      "x": 5,
+      "y": 8
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 25,
+        "x": 5,
+        "y": 8,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 25,
+        "x": 5,
+        "y": 9,
+        "tile": 4
+      },
+      {
+        "type": "message",
+        "text": "-K-I-L-L- -A-N- -I-N-V-A-D-E-R-",
+        "dialogue_id": 22,
+        "original_queue_id": 23
+      }
+    ],
+    "source": "Original ichicheck 0x46CB1C; animation collapsed to ordered state transitions"
+  },
+  {
+    "id": "floor_30_encounter_60",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 30,
+      "x": 5,
+      "y": 5
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 30,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 30,
+        "x": 5,
+        "y": 3,
+        "tile": 4
+      },
+      {
+        "type": "set_tile",
+        "floor": 30,
+        "x": 5,
+        "y": 6,
+        "tile": 4
+      }
+    ],
+    "source": "Original ichicheck 0x46CB1C; animation collapsed to ordered state transitions"
+  },
+  {
+    "id": "floor_33_encounter_53",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 33,
+      "x": 9,
+      "y": 4
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 33,
+        "x": 9,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 33,
+        "x": 9,
+        "y": 3,
+        "tile": 4
+      },
+      {
+        "type": "set_tile",
+        "floor": 33,
+        "x": 9,
+        "y": 7,
+        "tile": 4
+      }
+    ],
+    "source": "Original ichicheck 0x46CB1C; animation collapsed to ordered state transitions"
+  },
+  {
+    "id": "floor_33_encounter_107",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 33,
+      "x": 8,
+      "y": 9
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 33,
+        "x": 8,
+        "y": 9,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 33,
+        "x": 7,
+        "y": 9,
+        "tile": 8
+      }
+    ],
+    "source": "Original ichicheck 0x46CB1C; animation collapsed to ordered state transitions"
+  },
+  {
+    "id": "floor_38_encounter_56",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 38,
+      "x": 1,
+      "y": 5
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 38,
+        "x": 1,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 38,
+        "x": 1,
+        "y": 4,
+        "tile": 8
+      }
+    ],
+    "source": "Original ichicheck 0x46CB1C; animation collapsed to ordered state transitions"
+  },
+  {
+    "id": "floor_40_encounter_71",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 40,
+      "x": 5,
+      "y": 6
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 7,
+        "tile": 4
+      },
+      {
+        "type": "message",
+        "text": "I wonder how you were able to come so far. I will make sure you go no further. I will humiliate you 10 times as much as you've disgraced this tower. Ghost Soldiers, charge!",
+        "dialogue_id": 33,
+        "original_queue_id": 34
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 4,
+        "tile": 141
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 141
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 141
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 141
+      },
+      {
+        "type": "battle_at",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "first_strike": true
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 3,
+        "tile": 141
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 4,
+        "tile": 141
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 141
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 141
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 141
+      },
+      {
+        "type": "battle_at",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "first_strike": true
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 2,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 3,
+        "tile": 141
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 3,
+        "tile": 141
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 4,
+        "tile": 141
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 141
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 141
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 141
+      },
+      {
+        "type": "battle_at",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "first_strike": true
+      },
+      {
+        "type": "message",
+        "text": "Humph, that was nothing! Soldiers, charge!",
+        "dialogue_id": 34,
+        "original_queue_id": 35
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 4,
+        "tile": 139
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 139
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 139
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 139
+      },
+      {
+        "type": "battle_at",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "first_strike": true
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 3,
+        "tile": 139
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 4,
+        "tile": 139
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 139
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 139
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 139
+      },
+      {
+        "type": "battle_at",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "first_strike": true
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 8,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 3,
+        "tile": 139
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 3,
+        "tile": 139
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 4,
+        "tile": 139
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 139
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 139
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 139
+      },
+      {
+        "type": "battle_at",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "first_strike": true
+      },
+      {
+        "type": "message",
+        "text": "We are only beginning. Let's fight from now on. Swordsmen, charge!",
+        "dialogue_id": 35,
+        "original_queue_id": 36
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 2,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 2,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 3,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 137
+      },
+      {
+        "type": "battle_at",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "first_strike": true
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 2,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 1,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 2,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 2,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 3,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 137
+      },
+      {
+        "type": "battle_at",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "first_strike": true
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 1,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 2,
+        "y": 1,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 2,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 1,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 2,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 2,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 3,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 137
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 137
+      },
+      {
+        "type": "battle_at",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "first_strike": true
+      },
+      {
+        "type": "message",
+        "text": "Heck! How about this attack? Knights, charge!",
+        "dialogue_id": 36,
+        "original_queue_id": 37
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 2,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 2,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 3,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 135
+      },
+      {
+        "type": "battle_at",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "first_strike": true
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 8,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 1,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 2,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 2,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 3,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 135
+      },
+      {
+        "type": "battle_at",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "first_strike": true
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 9,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 8,
+        "y": 1,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 8,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 1,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 2,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 2,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 3,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 135
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 135
+      },
+      {
+        "type": "battle_at",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "first_strike": true
+      },
+      {
+        "type": "message",
+        "text": "How dare you defeat my followers? Never shall I forgive you! Now I won't use discretion. Give up!",
+        "dialogue_id": 37,
+        "original_queue_id": 38
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 2,
+        "tile": 133
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 133
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 133
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 133
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 133
+      },
+      {
+        "type": "battle_at",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "first_strike": true
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 7,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 0,
+        "tile": 11
+      },
+      {
+        "type": "message",
+        "text": "I will unwillingly forgive you this time. But we shall quarrel seriously when we meet again. You had better give up!",
+        "dialogue_id": 38,
+        "original_queue_id": 39
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 133
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 133
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 133
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 133
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 2,
+        "tile": 133
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 1,
+        "tile": 133
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 5,
+        "y": 5,
+        "tile": 23
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 1,
+        "y": 1,
+        "tile": 34
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 2,
+        "y": 1,
+        "tile": 34
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 1,
+        "tile": 34
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 1,
+        "tile": 35
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 8,
+        "y": 1,
+        "tile": 35
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 9,
+        "y": 1,
+        "tile": 35
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 2,
+        "y": 3,
+        "tile": 33
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 3,
+        "tile": 33
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 3,
+        "tile": 33
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 3,
+        "tile": 29
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 3,
+        "tile": 29
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 8,
+        "y": 3,
+        "tile": 29
+      }
+    ],
+    "source": "Original ichicheck 0x46CB1C; animation collapsed to ordered state transitions"
+  },
+  {
+    "id": "floor_48_encounter_0",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 48,
+      "x": 0,
+      "y": 0
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 48,
+        "x": 0,
+        "y": 0,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 48,
+        "x": 0,
+        "y": 0,
+        "tile": 93
+      }
+    ],
+    "source": "Original ichicheck 0x46CB1C; animation collapsed to ordered state transitions"
+  },
+  {
+    "id": "floor_49_encounter_60",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 49,
+      "x": 5,
+      "y": 5
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 5,
+        "y": 6,
+        "tile": 4
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 5,
+        "y": 2,
+        "tile": 91
+      },
+      {
+        "type": "message",
+        "text": "The Magic Sergeant, Zeno \"It's amazing that you found your way here at last. I compliment you. Now, as promised, I'll fight with you, man to man!\"",
+        "dialogue_id": 44,
+        "original_queue_id": 45
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 4,
+        "y": 1,
+        "tile": 93
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 5,
+        "y": 1,
+        "tile": 93
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 6,
+        "y": 1,
+        "tile": 93
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 4,
+        "y": 2,
+        "tile": 93
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 6,
+        "y": 2,
+        "tile": 93
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 4,
+        "y": 3,
+        "tile": 93
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 5,
+        "y": 3,
+        "tile": 93
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 6,
+        "y": 3,
+        "tile": 93
+      }
+    ],
+    "source": "Original ichicheck 0x46CB1C; animation collapsed to ordered state transitions"
+  },
+  {
+    "id": "floor_2_guards_0",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 2
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 2,
+        "x": 5,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 2,
+        "x": 7,
+        "y": 1,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 2,
+        "x": 4,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 2,
+        "x": 8,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 2,
+        "x": 4,
+        "y": 7,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 2,
+        "x": 8,
+        "y": 7,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 2,
+        "x": 4,
+        "y": 10,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 2,
+        "x": 8,
+        "y": 10,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+  },
+  {
+    "id": "floor_8_guards_0",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 8
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 8,
+        "x": 8,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 8,
+        "x": 10,
+        "y": 4,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 8,
+        "x": 9,
+        "y": 3,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+  },
+  {
+    "id": "floor_11_guards_0",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 11
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 11,
+        "x": 0,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 11,
+        "x": 2,
+        "y": 4,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 11,
+        "x": 1,
+        "y": 3,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+  },
+  {
+    "id": "floor_14_guards_0",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 14
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 14,
+        "x": 0,
+        "y": 0,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 14,
+        "x": 2,
+        "y": 0,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 14,
+        "x": 1,
+        "y": 1,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 14,
+        "x": 0,
+        "y": 2,
+        "tile": 30
+      }
+    ],
+    "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+  },
+  {
+    "id": "floor_17_guards_0",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 17
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 17,
+        "x": 0,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 17,
+        "x": 2,
+        "y": 4,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 17,
+        "x": 1,
+        "y": 3,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+  },
+  {
+    "id": "floor_17_guards_1",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 17
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 17,
+        "x": 8,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 17,
+        "x": 10,
+        "y": 4,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 17,
+        "x": 9,
+        "y": 3,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+  },
+  {
+    "id": "floor_17_guards_2",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 17
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 17,
+        "x": 0,
+        "y": 7,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 17,
+        "x": 2,
+        "y": 7,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 17,
+        "x": 1,
+        "y": 6,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+  },
+  {
+    "id": "floor_17_guards_3",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 17
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 17,
+        "x": 8,
+        "y": 7,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 17,
+        "x": 10,
+        "y": 7,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 17,
+        "x": 9,
+        "y": 6,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+  },
+  {
+    "id": "floor_32_guards_0",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 32
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 32,
+        "x": 0,
+        "y": 9,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 32,
+        "x": 2,
+        "y": 9,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 32,
+        "x": 1,
+        "y": 8,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+  },
+  {
+    "id": "floor_34_guards_0",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 34
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 34,
+        "x": 4,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 34,
+        "x": 6,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 34,
+        "x": 8,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 34,
+        "x": 10,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 34,
+        "x": 4,
+        "y": 7,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 34,
+        "x": 6,
+        "y": 7,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 34,
+        "x": 8,
+        "y": 7,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 34,
+        "x": 10,
+        "y": 7,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 34,
+        "x": 1,
+        "y": 5,
+        "tile": 30
+      },
+      {
+        "type": "set_tile",
+        "floor": 34,
+        "x": 0,
+        "y": 4,
+        "tile": 29
+      },
+      {
+        "type": "set_tile",
+        "floor": 34,
+        "x": 2,
+        "y": 4,
+        "tile": 29
+      },
+      {
+        "type": "set_tile",
+        "floor": 34,
+        "x": 0,
+        "y": 6,
+        "tile": 29
+      },
+      {
+        "type": "set_tile",
+        "floor": 34,
+        "x": 2,
+        "y": 6,
+        "tile": 29
+      }
+    ],
+    "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+  },
+  {
+    "id": "floor_35_guards_0",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 35
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 35,
+        "x": 5,
+        "y": 6,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 35,
+        "x": 5,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 35,
+        "x": 5,
+        "y": 5,
+        "tile": 47
+      },
+      {
+        "type": "set_tile",
+        "floor": 35,
+        "x": 4,
+        "y": 4,
+        "tile": 33
+      },
+      {
+        "type": "set_tile",
+        "floor": 35,
+        "x": 5,
+        "y": 4,
+        "tile": 33
+      },
+      {
+        "type": "set_tile",
+        "floor": 35,
+        "x": 6,
+        "y": 4,
+        "tile": 33
+      }
+    ],
+    "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+  },
+  {
+    "id": "floor_38_guards_0",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 38
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 38,
+        "x": 0,
+        "y": 9,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 38,
+        "x": 2,
+        "y": 9,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 38,
+        "x": 1,
+        "y": 8,
+        "tile": 9
+      }
+    ],
+    "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+  },
+  {
+    "id": "floor_44_guards_0",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 44
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 44,
+        "x": 4,
+        "y": 8,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 44,
+        "x": 6,
+        "y": 8,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 44,
+        "x": 5,
+        "y": 7,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+  },
+  {
+    "id": "floor_45_guards_0",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 45
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 45,
+        "x": 4,
+        "y": 8,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 45,
+        "x": 4,
+        "y": 10,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 45,
+        "x": 3,
+        "y": 9,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+  },
+  {
+    "id": "floor_45_guards_1",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 45
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 45,
+        "x": 7,
+        "y": 8,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 45,
+        "x": 7,
+        "y": 10,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 45,
+        "x": 6,
+        "y": 9,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+  },
+  {
+    "id": "floor_10_guards_defeated",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 10
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 10,
+        "x": 4,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 10,
+        "x": 5,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 10,
+        "x": 6,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 10,
+        "x": 4,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 10,
+        "x": 6,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 10,
+        "x": 4,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 10,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 10,
+        "x": 6,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 10,
+        "x": 5,
+        "y": 2,
+        "tile": 4
+      }
+    ],
+    "effects": [
+      {
+        "type": "message",
+        "text": "How considerably you do. But I will never let you pass. Here, you will die. Fight me!",
+        "dialogue_id": 13,
+        "original_queue_id": 14
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 2,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck floor-10 first stage"
+  },
+  {
+    "id": "floor_10_skeleton_boss_defeated",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 10,
+      "x": 5,
+      "y": 0
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 10,
+        "x": 5,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 10,
+        "x": 5,
+        "y": 6,
+        "tile": 4
+      }
+    ],
+    "effects": [
+      {
+        "type": "message",
+        "text": "No, It's not possible! You may have defeated me, but beyond this point you must meet some enemies and snares that are powerful beyond anything you've seen. If careless, you will die!",
+        "dialogue_id": 14,
+        "original_queue_id": 15
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 3,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 7,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 2,
+        "tile": 23
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 0,
+        "y": 2,
+        "tile": 34
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 1,
+        "y": 2,
+        "tile": 34
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 2,
+        "y": 2,
+        "tile": 34
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 8,
+        "y": 2,
+        "tile": 35
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 9,
+        "y": 2,
+        "tile": 35
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 10,
+        "y": 2,
+        "tile": 35
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 0,
+        "y": 3,
+        "tile": 33
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 1,
+        "y": 3,
+        "tile": 33
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 2,
+        "y": 3,
+        "tile": 33
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 8,
+        "y": 3,
+        "tile": 29
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 9,
+        "y": 3,
+        "tile": 29
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 10,
+        "y": 3,
+        "tile": 29
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 10,
+        "tile": 11
+      },
+      {
+        "type": "set_tile",
+        "floor": 10,
+        "x": 5,
+        "y": 8,
+        "tile": 7
+      }
+    ],
+    "source": "Original moncheck floor-10 final stage"
+  },
+  {
+    "id": "floor_15_boss_defeated",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 15
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 15,
+        "x": 5,
+        "y": 2,
+        "tile": 4
+      },
+      {
+        "type": "tile",
+        "floor": 15,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 15,
+        "x": 5,
+        "y": 8,
+        "tile": 4
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 15,
+        "x": 5,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 15,
+        "x": 5,
+        "y": 8,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 15,
+        "x": 5,
+        "y": 4,
+        "tile": 41
+      }
+    ],
+    "source": "Original moncheck 0x4664E4"
+  },
+  {
+    "id": "floor_20_boss_defeated",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 20
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 20,
+        "x": 5,
+        "y": 2,
+        "tile": 4
+      },
+      {
+        "type": "tile",
+        "floor": 20,
+        "x": 4,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 20,
+        "x": 5,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 20,
+        "x": 6,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 20,
+        "x": 4,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 20,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 20,
+        "x": 6,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 20,
+        "x": 4,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 20,
+        "x": 5,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 20,
+        "x": 6,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 20,
+        "x": 5,
+        "y": 8,
+        "tile": 4
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 5,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 5,
+        "y": 8,
+        "tile": 6
+      },
+      {
+        "type": "message",
+        "text": "Good god! I've never dreamed I'd be defeated. There is no doubt of your strength. But you will never win against the Great Magic Master as weak as you are. You shall only celebrate fleeting victory at most.",
+        "dialogue_id": 20,
+        "original_queue_id": 21
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 5,
+        "y": 4,
+        "tile": 23
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 3,
+        "y": 4,
+        "tile": 34
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 3,
+        "y": 5,
+        "tile": 34
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 3,
+        "y": 6,
+        "tile": 34
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 7,
+        "y": 4,
+        "tile": 35
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 7,
+        "y": 5,
+        "tile": 35
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 7,
+        "y": 6,
+        "tile": 35
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 4,
+        "y": 7,
+        "tile": 33
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 5,
+        "y": 7,
+        "tile": 33
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 6,
+        "y": 7,
+        "tile": 33
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 4,
+        "y": 3,
+        "tile": 29
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 5,
+        "y": 3,
+        "tile": 29
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 6,
+        "y": 3,
+        "tile": 29
+      },
+      {
+        "type": "set_tile",
+        "floor": 20,
+        "x": 5,
+        "y": 0,
+        "tile": 11
+      }
+    ],
+    "source": "Original moncheck 0x4664E4"
+  },
+  {
+    "id": "floor_25_boss_defeated",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 25
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 25,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 25,
+        "x": 5,
+        "y": 9,
+        "tile": 4
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 25,
+        "x": 5,
+        "y": 9,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 25,
+        "x": 5,
+        "y": 6,
+        "tile": 23
+      },
+      {
+        "type": "set_tile",
+        "floor": 25,
+        "x": 3,
+        "y": 7,
+        "tile": 30
+      },
+      {
+        "type": "set_tile",
+        "floor": 25,
+        "x": 4,
+        "y": 7,
+        "tile": 30
+      },
+      {
+        "type": "set_tile",
+        "floor": 25,
+        "x": 5,
+        "y": 7,
+        "tile": 30
+      },
+      {
+        "type": "set_tile",
+        "floor": 25,
+        "x": 6,
+        "y": 7,
+        "tile": 30
+      },
+      {
+        "type": "set_tile",
+        "floor": 25,
+        "x": 7,
+        "y": 7,
+        "tile": 30
+      }
+    ],
+    "source": "Original moncheck 0x4664E4"
+  },
+  {
+    "id": "floor_30_boss_defeated",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 30
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 30,
+        "x": 5,
+        "y": 3,
+        "tile": 4
+      },
+      {
+        "type": "tile",
+        "floor": 30,
+        "x": 2,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 30,
+        "x": 3,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 30,
+        "x": 4,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 30,
+        "x": 6,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 30,
+        "x": 7,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 30,
+        "x": 8,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 30,
+        "x": 5,
+        "y": 6,
+        "tile": 4
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 30,
+        "x": 5,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 30,
+        "x": 5,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 30,
+        "x": 5,
+        "y": 0,
+        "tile": 11
+      }
+    ],
+    "source": "Original moncheck 0x4664E4"
+  },
+  {
+    "id": "floor_33_four_guards_defeated",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 33
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 33,
+        "x": 8,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 33,
+        "x": 10,
+        "y": 4,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 33,
+        "x": 8,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 33,
+        "x": 10,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 33,
+        "x": 9,
+        "y": 3,
+        "tile": 4
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 33,
+        "x": 9,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 33,
+        "x": 9,
+        "y": 7,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck floor-33 trap"
+  },
+  {
+    "id": "floor_39_clock_door_14",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 39,
+      "x": 3,
+      "y": 1,
+      "tile": 1
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 1,
+        "y": 1,
+        "tile": 1
+      },
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 5,
+        "y": 1,
+        "tile": 1
+      },
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 1,
+        "y": 3,
+        "tile": 1
+      },
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 3,
+        "y": 3,
+        "tile": 1
+      },
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 1,
+        "y": 5,
+        "tile": 1
+      },
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 3,
+        "y": 5,
+        "tile": 1
+      },
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 5,
+        "y": 5,
+        "tile": 1
+      },
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 5,
+        "y": 3,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 39,
+        "x": 3,
+        "y": 3,
+        "tile": 43
+      }
+    ],
+    "source": "Original doorcheck 0x47BEAC"
+  },
+  {
+    "id": "floor_39_clock_door_38",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 39,
+      "x": 5,
+      "y": 3,
+      "tile": 1
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 1,
+        "y": 1,
+        "tile": 1
+      },
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 5,
+        "y": 1,
+        "tile": 1
+      },
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 1,
+        "y": 3,
+        "tile": 1
+      },
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 3,
+        "y": 3,
+        "tile": 1
+      },
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 1,
+        "y": 5,
+        "tile": 1
+      },
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 3,
+        "y": 5,
+        "tile": 1
+      },
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 5,
+        "y": 5,
+        "tile": 1
+      },
+      {
+        "type": "tile",
+        "floor": 39,
+        "x": 3,
+        "y": 1,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 39,
+        "x": 3,
+        "y": 3,
+        "tile": 43
+      }
+    ],
+    "source": "Original doorcheck 0x47BEAC"
+  },
+  {
+    "id": "floor_41_reveal_hidden_magician",
+    "once": true,
+    "trigger": {
+      "type": "bump",
+      "floor": 41,
+      "x": 9,
+      "y": 1,
+      "tile": 10
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 41,
+        "x": 1,
+        "y": 1,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 41,
+        "x": 9,
+        "y": 1,
+        "tile": 151
+      }
+    ],
+    "source": "Original handan secret-wall branch"
+  },
+  {
+    "id": "floor_41_two_magicians_defeated",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 41
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 41,
+        "x": 1,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 41,
+        "x": 9,
+        "y": 1,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 41,
+        "x": 4,
+        "y": 5,
+        "tile": 8
+      },
+      {
+        "type": "set_tile",
+        "floor": 41,
+        "x": 5,
+        "y": 5,
+        "tile": 8
+      },
+      {
+        "type": "set_tile",
+        "floor": 41,
+        "x": 6,
+        "y": 5,
+        "tile": 8
+      },
+      {
+        "type": "set_tile",
+        "floor": 41,
+        "x": 4,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 41,
+        "x": 6,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 41,
+        "x": 5,
+        "y": 4,
+        "tile": 45
+      }
+    ],
+    "source": "Original moncheck floor-41 branch"
+  },
+  {
+    "id": "floor_43_magician_trap",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 43,
+      "x": 7,
+      "y": 0,
+      "tile": 1
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 43,
+        "x": 8,
+        "y": 0,
+        "tile": 93
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 43,
+        "x": 8,
+        "y": 0,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 43,
+        "x": 9,
+        "y": 0,
+        "tile": 93
+      },
+      {
+        "type": "set_tile",
+        "floor": 43,
+        "x": 9,
+        "y": 0,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 43,
+        "x": 10,
+        "y": 0,
+        "tile": 93
+      },
+      {
+        "type": "set_tile",
+        "floor": 43,
+        "x": 6,
+        "y": 0,
+        "tile": 8
+      },
+      {
+        "type": "set_tile",
+        "floor": 43,
+        "x": 9,
+        "y": 0,
+        "tile": 8
+      }
+    ],
+    "source": "Original doorcheck + ichicheck floor-43 branch"
+  },
+  {
+    "id": "floor_48_caster_defeated",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 48,
+      "x": 0,
+      "y": 0
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 48,
+        "x": 0,
+        "y": 0,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 48,
+        "x": 7,
+        "y": 7,
+        "tile": 4
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 48,
+        "x": 7,
+        "y": 7,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck floor-48 branch: tile[0] + tile[84] == 10"
+  },
+  {
+    "id": "floor_49_dice_seal",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 49
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 5,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 4,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 6,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 5,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 4,
+        "y": 1,
+        "tile": 93
+      },
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 6,
+        "y": 1,
+        "tile": 93
+      },
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 4,
+        "y": 3,
+        "tile": 93
+      },
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 6,
+        "y": 3,
+        "tile": 93
+      },
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 5,
+        "y": 2,
+        "tile": 91
+      }
+    ],
+    "effects": [
+      {
+        "type": "message",
+        "text": "The Magic Sergeant, Zeno \"Alas...\"",
+        "dialogue_id": 45,
+        "original_queue_id": 46
+      },
+      {
+        "type": "set_enemy",
+        "enemy": "zeno",
+        "hp": 800,
+        "attack": 500,
+        "defense": 100,
+        "gold": 500
+      }
+    ],
+    "source": "Original moncheck floor-49 branch; directly observed table mutation 8000/5000/1000 -> 800/500/100"
+  },
+  {
+    "id": "floor_49_decoy_zeno_defeated",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 49,
+      "x": 5,
+      "y": 2
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 5,
+        "y": 6,
+        "tile": 4
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 4,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 6,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 4,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 6,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 5,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 5,
+        "y": 1,
+        "tile": 23
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 4,
+        "y": 4,
+        "tile": 33
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 5,
+        "y": 4,
+        "tile": 33
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 6,
+        "y": 4,
+        "tile": 33
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 1,
+        "y": 3,
+        "tile": 34
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 2,
+        "y": 3,
+        "tile": 34
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 3,
+        "y": 3,
+        "tile": 34
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 7,
+        "y": 3,
+        "tile": 35
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 8,
+        "y": 3,
+        "tile": 35
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 9,
+        "y": 3,
+        "tile": 35
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 4,
+        "y": 1,
+        "tile": 30
+      },
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 6,
+        "y": 1,
+        "tile": 46
+      },
+      {
+        "type": "flag",
+        "flag": "decoy_zeno_defeated"
+      }
+    ],
+    "source": "Original moncheck floor-49 Zeno victory branch"
+  },
+  {
+    "id": "floor_49_guard_gate_0",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 49
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 4,
+        "y": 7,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 6,
+        "y": 7,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 5,
+        "y": 6,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck floor-49 guard predicates"
+  },
+  {
+    "id": "floor_49_guard_gate_1",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 49
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 4,
+        "y": 9,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 6,
+        "y": 9,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 49,
+        "x": 5,
+        "y": 8,
+        "tile": 6
+      }
+    ],
+    "source": "Original moncheck floor-49 guard predicates"
+  },
+  {
+    "id": "floor_23_wall_1",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 1,
+      "y": 0
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 1,
+        "y": 0,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_2",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 2,
+      "y": 0
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 2,
+        "y": 0,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_3",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 3,
+      "y": 0
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 3,
+        "y": 0,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_4",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 4,
+      "y": 0
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 4,
+        "y": 0,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_12",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 1,
+      "y": 1
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 1,
+        "y": 1,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_23",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 1,
+      "y": 2
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 1,
+        "y": 2,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_25",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 3,
+      "y": 2
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 3,
+        "y": 2,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_26",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 4,
+      "y": 2
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 4,
+        "y": 2,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_29",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 7,
+      "y": 2
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 7,
+        "y": 2,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_30",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 8,
+      "y": 2
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 8,
+        "y": 2,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_31",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 9,
+      "y": 2
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 9,
+        "y": 2,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_34",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 1,
+      "y": 3
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 1,
+        "y": 3,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_37",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 4,
+      "y": 3
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 4,
+        "y": 3,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_40",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 7,
+      "y": 3
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 7,
+        "y": 3,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_42",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 9,
+      "y": 3
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 9,
+        "y": 3,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_45",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 1,
+      "y": 4
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 1,
+        "y": 4,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_46",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 2,
+      "y": 4
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 2,
+        "y": 4,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_47",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 3,
+      "y": 4
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 3,
+        "y": 4,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_48",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 4,
+      "y": 4
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 4,
+        "y": 4,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_51",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 7,
+      "y": 4
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 7,
+        "y": 4,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_52",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 8,
+      "y": 4
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 8,
+        "y": 4,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_53",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 9,
+      "y": 4
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 9,
+        "y": 4,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_67",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 1,
+      "y": 6
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 1,
+        "y": 6,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_68",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 2,
+      "y": 6
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 2,
+        "y": 6,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_69",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 3,
+      "y": 6
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 3,
+        "y": 6,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_70",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 4,
+      "y": 6
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 4,
+        "y": 6,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_72",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 6,
+      "y": 6
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 6,
+        "y": 6,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_73",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 7,
+      "y": 6
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 7,
+        "y": 6,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_74",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 8,
+      "y": 6
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 8,
+        "y": 6,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_75",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 9,
+      "y": 6
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 9,
+        "y": 6,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_78",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 1,
+      "y": 7
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 1,
+        "y": 7,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_81",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 4,
+      "y": 7
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 4,
+        "y": 7,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_83",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 6,
+      "y": 7
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 6,
+        "y": 7,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_89",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 1,
+      "y": 8
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 1,
+        "y": 8,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_92",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 4,
+      "y": 8
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 4,
+        "y": 8,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_94",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 6,
+      "y": 8
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 6,
+        "y": 8,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_95",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 7,
+      "y": 8
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 7,
+        "y": 8,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_96",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 8,
+      "y": 8
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 8,
+        "y": 8,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_100",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 1,
+      "y": 9
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 1,
+        "y": 9,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_101",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 2,
+      "y": 9
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 2,
+        "y": 9,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_102",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 3,
+      "y": 9
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 3,
+        "y": 9,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_103",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 4,
+      "y": 9
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 4,
+        "y": 9,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_105",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 6,
+      "y": 9
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 6,
+        "y": 9,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "floor_23_wall_116",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 23,
+      "x": 6,
+      "y": 10
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 23,
+        "x": 6,
+        "y": 10,
+        "tile": 8
+      }
+    ],
+    "source": "Original mevent 0x463C9B"
+  },
+  {
+    "id": "princess_doll_unlocks_time_gate",
+    "once": true,
+    "trigger": {
+      "type": "interact",
+      "floor": 26,
+      "x": 5,
+      "y": 5
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 25,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      }
+    ],
+    "effects": [
+      {
+        "type": "message",
+        "text": "Oh! What? This is a doll!",
+        "dialogue_id": 25
+      },
+      {
+        "type": "message",
+        "text": "Now is the time. You were chosen. If you aren't afraid of Death, you should go through the gate of Time and Space, and come to me.",
+        "dialogue_id": 24
+      },
+      {
+        "type": "set_tile",
+        "floor": 24,
+        "x": 4,
+        "y": 0,
+        "tile": 8
+      },
+      {
+        "type": "set_tile",
+        "floor": 24,
+        "x": 6,
+        "y": 0,
+        "tile": 8
+      },
+      {
+        "type": "set_tile",
+        "floor": 24,
+        "x": 5,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 24,
+        "x": 5,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 24,
+        "x": 5,
+        "y": 3,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 24,
+        "x": 5,
+        "y": 0,
+        "tile": 7
+      },
+      {
+        "type": "set_tile",
+        "floor": 50,
+        "x": 4,
+        "y": 8,
+        "tile": 21
+      }
+    ],
+    "source": "Original handan princess branch 0x445397"
+  },
+  {
+    "id": "time_gate_to_floor_50",
+    "once": true,
+    "trigger": {
+      "type": "step",
+      "floor": 24,
+      "x": 5,
+      "y": 0,
+      "tile": 7
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 24,
+        "x": 5,
+        "y": 0,
+        "tile": 6
+      },
+      {
+        "type": "teleport",
+        "floor": 25,
+        "x": 1,
+        "y": 10
+      },
+      {
+        "type": "teleport",
+        "floor": 26,
+        "x": 1,
+        "y": 10
+      },
+      {
+        "type": "teleport",
+        "floor": 27,
+        "x": 1,
+        "y": 10
+      },
+      {
+        "type": "teleport",
+        "floor": 28,
+        "x": 9,
+        "y": 10
+      },
+      {
+        "type": "teleport",
+        "floor": 29,
+        "x": 0,
+        "y": 9
+      },
+      {
+        "type": "teleport",
+        "floor": 30,
+        "x": 5,
+        "y": 9
+      },
+      {
+        "type": "teleport",
+        "floor": 31,
+        "x": 5,
+        "y": 1
+      },
+      {
+        "type": "teleport",
+        "floor": 32,
+        "x": 5,
+        "y": 9
+      },
+      {
+        "type": "teleport",
+        "floor": 33,
+        "x": 9,
+        "y": 0
+      },
+      {
+        "type": "teleport",
+        "floor": 34,
+        "x": 1,
+        "y": 0
+      },
+      {
+        "type": "teleport",
+        "floor": 35,
+        "x": 5,
+        "y": 9
+      },
+      {
+        "type": "teleport",
+        "floor": 36,
+        "x": 10,
+        "y": 1
+      },
+      {
+        "type": "teleport",
+        "floor": 37,
+        "x": 10,
+        "y": 9
+      },
+      {
+        "type": "teleport",
+        "floor": 38,
+        "x": 1,
+        "y": 0
+      },
+      {
+        "type": "teleport",
+        "floor": 39,
+        "x": 10,
+        "y": 1
+      },
+      {
+        "type": "teleport",
+        "floor": 40,
+        "x": 9,
+        "y": 10
+      },
+      {
+        "type": "teleport",
+        "floor": 41,
+        "x": 5,
+        "y": 1
+      },
+      {
+        "type": "teleport",
+        "floor": 42,
+        "x": 5,
+        "y": 9
+      },
+      {
+        "type": "teleport",
+        "floor": 43,
+        "x": 0,
+        "y": 1
+      },
+      {
+        "type": "teleport",
+        "floor": 44,
+        "x": 0,
+        "y": 0
+      },
+      {
+        "type": "teleport",
+        "floor": 45,
+        "x": 1,
+        "y": 0
+      },
+      {
+        "type": "teleport",
+        "floor": 46,
+        "x": 10,
+        "y": 1
+      },
+      {
+        "type": "teleport",
+        "floor": 47,
+        "x": 9,
+        "y": 10
+      },
+      {
+        "type": "teleport",
+        "floor": 48,
+        "x": 10,
+        "y": 9
+      },
+      {
+        "type": "teleport",
+        "floor": 49,
+        "x": 1,
+        "y": 10
+      },
+      {
+        "type": "teleport",
+        "floor": 50,
+        "x": 5,
+        "y": 6
+      },
+      {
+        "type": "message",
+        "text": "The brave man says \"Who? It's you! Why are you in such a place?\"",
+        "dialogue_id": 47,
+        "original_queue_id": 48
+      },
+      {
+        "type": "message",
+        "text": "The thief replied \"Humph. There is only one reason why I'm here. And this is it!\"",
+        "dialogue_id": 48,
+        "original_queue_id": 49
+      },
+      {
+        "type": "set_tile",
+        "floor": 50,
+        "x": 5,
+        "y": 4,
+        "tile": 91
+      },
+      {
+        "type": "message",
+        "text": "The brave man says \"Huh? Hey! You're Zeno! Are you still alive?\"",
+        "dialogue_id": 49,
+        "original_queue_id": 50
+      },
+      {
+        "type": "message",
+        "text": "The Magic Sergeant, Zeno says \"I will never die. I merely tested your intelligence as a soldier.\"",
+        "dialogue_id": 50,
+        "original_queue_id": 51
+      },
+      {
+        "type": "message",
+        "text": "The brave-man says \"Huh? What do you mean? Why did you do such a thing?\"",
+        "dialogue_id": 51,
+        "original_queue_id": 52
+      },
+      {
+        "type": "message",
+        "text": "The Magic Sergeant, Zeno: \"The Sacred Sword 'Weaponer' which you have and The Omniscient Staff 'Intellion' which I have, Legend says that whoever unites the two will recieve great wisdom. But to this end, it must be assured that the soldier who does so can handle the the power of that sword.\"",
+        "dialogue_id": 52,
+        "original_queue_id": 53
+      },
+      {
+        "type": "message",
+        "text": "The brave man says \"Are you saying... Am I this soldier?\"",
+        "dialogue_id": 53,
+        "original_queue_id": 54
+      },
+      {
+        "type": "message",
+        "text": "The Magic Sergeant, Zeno: \"Yes, you are correct. But when you came here, your ability wasn't sufficient to master the sacred sword 'Weaponer'. For that reason, I gave false information, set various traps in this tower, and waited for you to come. You came to here master the power enough to using the sacred sword as arranged beforehand.\"",
+        "dialogue_id": 54,
+        "original_queue_id": 55
+      },
+      {
+        "type": "message",
+        "text": "The brave-man replies \"Well, this means that the rumour that a princess was trapped here... was actually a lie in order to get me here, wasn't it?\"",
+        "dialogue_id": 55,
+        "original_queue_id": 56
+      },
+      {
+        "type": "message",
+        "text": "The Magic Sergeant, Zeno says \"Yes, that right. And now, if we can work together, this farce will end. Now is the time to act. Using omniscient power, We shall break the sacred sword and recieve great enlightenment. Soldier of the Sacred Sword! Let's finish this!\"",
+        "dialogue_id": 56,
+        "original_queue_id": 57
+      }
+    ],
+    "source": "Original ichicheck floor-24 time gate; narrative scene before final Zeno interaction"
+  },
+  {
+    "id": "floor_50_first_cycle_completion_91",
+    "once": true,
+    "trigger": {
+      "type": "bump",
+      "floor": 50,
+      "tile": 91
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "win"
+      }
+    ],
+    "source": "Original handan 0x4463A1..0x446473; first cycle has no battle, queues ending animation and opcode11/sub6 replay reset; remake records completion"
+  },
+  {
+    "id": "floor_50_first_cycle_completion_92",
+    "once": true,
+    "trigger": {
+      "type": "bump",
+      "floor": 50,
+      "tile": 92
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "win"
+      }
+    ],
+    "source": "Original handan 0x4463A1..0x446473; first cycle has no battle, queues ending animation and opcode11/sub6 replay reset; remake records completion"
+  }
+]

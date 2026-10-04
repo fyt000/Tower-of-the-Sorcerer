@@ -1,0 +1,228 @@
+Original first-cycle portal and completion evidence
+Source: installed TSW.exe; v1.2; addresses are original virtual addresses.
+The first-cycle portal is narrative. Touching Zeno on floor50 queues a noncombat ending and replay reset.
+
+Selected tile dispatch; no highest-floor or equipment gate
+004444B7 imul eax, dword ptr [0x4b8698], 0x7b
+004444BE add eax, 0x4b8934
+004444C3 mov edx, dword ptr [0x48c584]
+004444C9 movzx eax, byte ptr [eax + edx + 2]
+004444CE cmp eax, 0x19
+004444D1 jge 0x444547
+004444D3 cmp eax, 0x18
+004444D6 ja 0x448fbc
+004444DC jmp dword ptr [eax*4 + 0x4444e3]
+
+Princess tile27/28 dispatch
+00444547 cmp eax, 0x3d
+0044454A jge 0x44458e
+0044454C cmp eax, 0x1d
+0044454F jge 0x44456b
+00444551 add eax, -0x19
+00444554 sub eax, 2
+00444557 jb 0x44538a
+0044455D sub eax, 2
+00444560 jb 0x445397
+00444566 jmp 0x448fbc
+
+Princess: F25 boss cell6 -> F24 corridor/portal writes
+00445397 cmp dword ptr [0x4b87f0], 0
+0044539E je 0x4453c9
+004453A0 cmp dword ptr [0x4b87f0], 0xd
+004453A7 je 0x4453c9
+004453A9 mov eax, dword ptr [ebp - 4]
+004453AC mov eax, dword ptr [eax + 0x2d8]
+004453B2 call 0x431188
+004453B7 mov dword ptr [0x4b87f0], 0xd
+004453C1 mov eax, dword ptr [ebp - 4]
+004453C4 call 0x47c2bc
+004453C9 cmp byte ptr [0x4b9575], 6
+004453D0 jne 0x4453fc
+004453D2 mov byte ptr [0x4b94c2], 8
+004453D9 mov byte ptr [0x4b94c4], 8
+004453E0 mov byte ptr [0x4b94ce], 6
+004453E7 mov byte ptr [0x4b94d9], 6
+004453EE mov byte ptr [0x4b94e4], 6
+004453F5 mov byte ptr [0x4b94c3], 7
+004453FC mov byte ptr [0x4ba16d], 0x15
+00445403 inc dword ptr [ebx]
+00445405 mov eax, dword ptr [ebx]
+00445407 lea eax, [eax + eax*2]
+0044540A mov word ptr [esi + eax*2], 0
+00445410 mov word ptr [esi + eax*2 + 2], 0
+00445417 mov word ptr [esi + eax*2 + 4], 0
+0044541E inc dword ptr [ebx]
+00445420 mov eax, dword ptr [ebx]
+00445422 lea eax, [eax + eax*2]
+00445425 mov word ptr [esi + eax*2], 6
+0044542B mov word ptr [esi + eax*2 + 2], 0x3c
+00445432 mov word ptr [esi + eax*2 + 4], 0x1b
+00445439 inc dword ptr [ebx]
+0044543B mov eax, dword ptr [ebx]
+0044543D lea eax, [eax + eax*2]
+00445440 mov word ptr [esi + eax*2], 0
+00445446 mov word ptr [esi + eax*2 + 2], 0
+0044544D mov word ptr [esi + eax*2 + 4], 0
+00445454 inc dword ptr [ebx]
+00445456 mov eax, dword ptr [ebx]
+00445458 lea eax, [eax + eax*2]
+0044545B mov word ptr [esi + eax*2], 0xa
+00445461 mov word ptr [esi + eax*2 + 2], 0x1a
+00445468 mov word ptr [esi + eax*2 + 4], 0
+0044546F inc dword ptr [ebx]
+00445471 mov eax, dword ptr [ebx]
+00445473 lea eax, [eax + eax*2]
+00445476 mov word ptr [esi + eax*2], 0
+0044547C mov word ptr [esi + eax*2 + 2], 0
+00445483 mov word ptr [esi + eax*2 + 4], 0
+0044548A inc dword ptr [ebx]
+0044548C mov eax, dword ptr [ebx]
+0044548E lea eax, [eax + eax*2]
+00445491 mov word ptr [esi + eax*2], 0xa
+00445497 mov word ptr [esi + eax*2 + 2], 0x19
+0044549E mov word ptr [esi + eax*2 + 4], 0
+004454A5 inc dword ptr [ebx]
+004454A7 mov eax, dword ptr [ebx]
+004454A9 lea eax, [eax + eax*2]
+004454AC mov word ptr [esi + eax*2], 0
+004454B2 mov word ptr [esi + eax*2 + 2], 0
+004454B9 mov word ptr [esi + eax*2 + 4], 0
+004454C0 inc dword ptr [ebx]
+004454C2 mov eax, dword ptr [ebx]
+004454C4 lea eax, [eax + eax*2]
+004454C7 mov word ptr [esi + eax*2], 0
+004454CD mov word ptr [esi + eax*2 + 2], 0
+004454D4 mov word ptr [esi + eax*2 + 4], 0
+004454DB mov eax, dword ptr [ebp - 4]
+004454DE call 0x44bc0c
+004454E3 mov edx, 0x448ffc
+004454E8 mov eax, dword ptr [ebp - 4]
+004454EB mov eax, dword ptr [eax + 0x1d0]
+004454F1 call 0x4135d4
+004454F6 jmp 0x448fbc
+
+F24: seal restoration and cycle flags, no first-cycle item/decoy gate
+004704EB mov eax, dword ptr [ebp - 4]
+004704EE call 0x44bc0c
+004704F3 mov edx, 0x4770dc
+004704F8 mov eax, dword ptr [ebp - 4]
+004704FB mov eax, dword ptr [eax + 0x1d0]
+00470501 call 0x4135d4
+00470506 cmp dword ptr [0x4b88f8], 1
+0047050D jne 0x470543
+0047050F xor eax, eax
+00470511 mov dword ptr [0x4b88f8], eax
+00470516 mov eax, dword ptr [0x489a00]
+0047051B add eax, eax
+0047051D lea eax, [eax + eax*4]
+00470520 mov dword ptr [0x489a00], eax
+00470525 mov eax, dword ptr [0x489a04]
+0047052A add eax, eax
+0047052C lea eax, [eax + eax*4]
+0047052F mov dword ptr [0x489a04], eax
+00470534 mov eax, dword ptr [0x489a08]
+00470539 add eax, eax
+0047053B lea eax, [eax + eax*4]
+0047053E mov dword ptr [0x489a08], eax
+00470543 cmp dword ptr [0x4b8904], 0
+0047054A je 0x470781
+00470550 cmp dword ptr [0x4b8908], 0
+00470557 jne 0x470781
+0047055D mov dword ptr [0x489a00], 0x3e8
+00470567 mov dword ptr [0x489a04], 0x271
+00470571 mov dword ptr [0x489a08], 0x7d
+
+Continue callback state67 follows generic branch
+0044DB33 cmp eax, 0x47
+0044DB36 jg 0x44db5f
+0044DB38 je 0x44e0c7
+0044DB3E add eax, -0x33
+0044DB41 sub eax, 6
+0044DB44 jb 0x44e08e
+0044DB4A je 0x44e107
+0044DB50 dec eax
+0044DB51 sub eax, 0xa
+0044DB54 jb 0x44e08e
+0044DB5A jmp 0x44e18d
+
+Generic continue callback: UI changes and timer enable
+0044E08E xor edx, edx
+0044E090 mov eax, dword ptr [ebx + 0x1d0]
+0044E096 call 0x413500
+0044E09B xor edx, edx
+0044E09D mov eax, dword ptr [ebx + 0x1cc]
+0044E0A3 call 0x413500
+0044E0A8 xor edx, edx
+0044E0AA mov eax, dword ptr [ebx + 0x1cc]
+0044E0B0 call 0x4135d4
+0044E0B5 mov dl, 1
+0044E0B7 mov eax, dword ptr [ebx + 0x2ec]
+0044E0BD call 0x42c454
+0044E0C2 jmp 0x44e18d
+
+Zeno dispatch: first cycle onF50 has noncombat ending/reset
+00446382 mov eax, dword ptr [0x4b8698]
+00446387 sub eax, 0x31
+0044638A je 0x446394
+0044638C dec eax
+0044638D je 0x4463a1
+0044638F jmp 0x448fbc
+00446394 mov eax, dword ptr [ebp - 4]
+00446397 call 0x44a480
+0044639C jmp 0x448fbc
+004463A1 cmp dword ptr [0x4b8904], 0
+004463A8 je 0x4463de
+004463AA cmp dword ptr [0x4b8908], 0
+004463B1 jne 0x4463d1
+004463B3 mov dword ptr [0x489a00], 0x3e8
+004463BD mov dword ptr [0x489a04], 0x271
+004463C7 mov dword ptr [0x489a08], 0x7d
+004463D1 mov eax, dword ptr [ebp - 4]
+004463D4 call 0x44a480
+004463D9 jmp 0x448fbc
+004463DE cmp dword ptr [0x4b87f0], 0
+004463E5 je 0x446405
+004463E7 xor edx, edx
+004463E9 mov eax, dword ptr [ebp - 4]
+004463EC mov eax, dword ptr [eax + 0x1b4]
+004463F2 call 0x42c454
+004463F7 mov eax, dword ptr [ebp - 4]
+004463FA mov eax, dword ptr [eax + 0x2d8]
+00446400 call 0x431188
+00446405 xor edx, edx
+00446407 mov eax, dword ptr [ebp - 4]
+0044640A mov eax, dword ptr [eax + 0x1b4]
+00446410 call 0x42c454
+00446415 mov eax, dword ptr [ebp - 4]
+00446418 call 0x44bc0c
+0044641D mov edx, 0x448ffc
+00446422 mov eax, dword ptr [ebp - 4]
+00446425 mov eax, dword ptr [eax + 0x1d0]
+0044642B call 0x4135d4
+00446430 inc dword ptr [ebx]
+00446432 mov eax, dword ptr [ebx]
+00446434 lea eax, [eax + eax*2]
+00446437 mov word ptr [esi + eax*2], 0
+0044643D mov eax, dword ptr [ebx]
+0044643F lea eax, [eax + eax*2]
+00446442 mov word ptr [esi + eax*2 + 2], 0
+00446449 mov eax, dword ptr [ebx]
+0044644B lea eax, [eax + eax*2]
+0044644E mov word ptr [esi + eax*2 + 4], 0
+00446455 inc dword ptr [ebx]
+00446457 mov eax, dword ptr [ebx]
+00446459 lea eax, [eax + eax*2]
+0044645C mov word ptr [esi + eax*2], 0xb
+00446462 mov eax, dword ptr [ebx]
+00446464 lea eax, [eax + eax*2]
+00446467 mov word ptr [esi + eax*2 + 2], 6
+0044646E mov eax, dword ptr [ebx]
+00446470 lea eax, [eax + eax*2]
+00446473 mov word ptr [esi + eax*2 + 4], 0
+0044647A inc dword ptr [ebx]
+0044647C mov eax, dword ptr [ebx]
+
+F50 moncheck only runs special victory when cycle !=0
+0046BFA8 cmp dword ptr [ebp + 0x27c], 0
+0046BFAF je 0x46cb09
+

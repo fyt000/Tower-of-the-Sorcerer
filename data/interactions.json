@@ -1,0 +1,1054 @@
+[
+  {
+    "floor": 2,
+    "x": 10,
+    "y": 3,
+    "name": "Merchant",
+    "text": "Thank you for your help. Please accept money as a small token of my gratitude. (Got 1000 Gold.)",
+    "offers": [
+      {
+        "id": "trade",
+        "label": "Accept 1000 gold",
+        "cost": 0,
+        "once": true,
+        "conditions": [
+          {
+            "type": "flag",
+            "flag": "merchant_2_10_3_bought",
+            "value": false
+          }
+        ],
+        "effects": [
+          {
+            "type": "add_stat",
+            "stat": "gold",
+            "amount": 1000
+          },
+          {
+            "type": "flag",
+            "flag": "merchant_2_10_3_bought"
+          },
+          {
+            "type": "message",
+            "text": "Please, use it wisely.",
+            "dialogue_id": 91
+          }
+        ]
+      }
+    ],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      246,
+      91
+    ],
+    "source": "Original TTSW10.syounin 0x449014; literal prices and original offer dialogue",
+    "after_text": {
+      "flag": "merchant_2_10_3_bought",
+      "text": "Please, use it wisely."
+    }
+  },
+  {
+    "floor": 2,
+    "x": 2,
+    "y": 6,
+    "name": "Thief",
+    "text": "Talk to the thief to continue.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      3,
+      4,
+      57
+    ],
+    "source": "Original TTSW10.touzoku 0x465900; map effects live in events.json"
+  },
+  {
+    "floor": 2,
+    "x": 10,
+    "y": 6,
+    "name": "Old man",
+    "text": "Oh, thank you for your help. I will raise your offensive and defensive power 3 percent as a token of my gratitude. [You begin feeling stronger]",
+    "offers": [
+      {
+        "id": "accept",
+        "label": "Accept the gift",
+        "cost": 0,
+        "once": true,
+        "conditions": [
+          {
+            "type": "flag",
+            "flag": "npc_2_10_6_gift",
+            "value": false
+          }
+        ],
+        "effects": [
+          {
+            "type": "flag",
+            "flag": "npc_2_10_6_gift"
+          },
+          {
+            "type": "multiply_stat",
+            "stat": "attack",
+            "numerator": 103,
+            "denominator": 100
+          },
+          {
+            "type": "multiply_stat",
+            "stat": "defense",
+            "numerator": 103,
+            "denominator": 100
+          }
+        ]
+      }
+    ],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      87
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 3,
+    "x": 10,
+    "y": 3,
+    "name": "Old man",
+    "text": "I will grant you the orb of the hero. You will now be able to save your game, and to forecast the results of fighting monsters on the current floor. Use it often.",
+    "offers": [
+      {
+        "id": "accept",
+        "label": "Accept the gift",
+        "cost": 0,
+        "once": true,
+        "conditions": [
+          {
+            "type": "flag",
+            "flag": "npc_3_10_3_gift",
+            "value": false
+          }
+        ],
+        "effects": [
+          {
+            "type": "flag",
+            "flag": "npc_3_10_3_gift"
+          },
+          {
+            "type": "give_item",
+            "item": "hero_orb"
+          }
+        ]
+      }
+    ],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      88
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 4,
+    "x": 9,
+    "y": 0,
+    "name": "Old man",
+    "text": "There are doors which cannot be openned with a key; these doors can only open by beating the monsters which guard them.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      62
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 6,
+    "x": 7,
+    "y": 3,
+    "name": "Merchant",
+    "text": "I will sell a blue key at very special price (50 gold)! Will you buy it?",
+    "offers": [
+      {
+        "id": "trade",
+        "label": "I will sell a blue key at very special price (50 gold)! Will you buy it?",
+        "cost": 50,
+        "once": true,
+        "conditions": [
+          {
+            "type": "flag",
+            "flag": "merchant_6_7_3_bought",
+            "value": false
+          }
+        ],
+        "effects": [
+          {
+            "type": "add_stat",
+            "stat": "blue",
+            "amount": 1
+          },
+          {
+            "type": "flag",
+            "flag": "merchant_6_7_3_bought"
+          },
+          {
+            "type": "message",
+            "text": "Here is a magic tower of 50 stories. Every ten stories form one area. The boss who controls each area, are posted in this tower. And if you don't beat them, you cannot ascend from there.",
+            "dialogue_id": 64
+          }
+        ]
+      }
+    ],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      247,
+      64
+    ],
+    "source": "Original TTSW10.syounin 0x449014; literal prices and original offer dialogue",
+    "after_text": {
+      "flag": "merchant_6_7_3_bought",
+      "text": "Here is a magic tower of 50 stories. Every ten stories form one area. The boss who controls each area, are posted in this tower. And if you don't beat them, you cannot ascend from there."
+    }
+  },
+  {
+    "floor": 6,
+    "x": 3,
+    "y": 7,
+    "name": "Old man",
+    "text": "If you buy goods from merchants, you will be able to hear important information later.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      63
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 7,
+    "x": 5,
+    "y": 0,
+    "name": "Merchant",
+    "text": "I will sell five keys for 50 Gold! Will you buy them?",
+    "offers": [
+      {
+        "id": "trade",
+        "label": "I will sell five keys for 50 Gold! Will you buy them?",
+        "cost": 50,
+        "once": true,
+        "conditions": [
+          {
+            "type": "flag",
+            "flag": "merchant_7_5_0_bought",
+            "value": false
+          }
+        ],
+        "effects": [
+          {
+            "type": "add_stat",
+            "stat": "yellow",
+            "amount": 5
+          },
+          {
+            "type": "flag",
+            "flag": "merchant_7_5_0_bought"
+          },
+          {
+            "type": "message",
+            "text": "When you offer gold at an alter, you may as well have your defensive power risen rather than your offensive power. The enemy whom you cannot beat may appear, provided you won't raise your offensive power.",
+            "dialogue_id": 65
+          }
+        ]
+      }
+    ],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      248,
+      65
+    ],
+    "source": "Original TTSW10.syounin 0x449014; literal prices and original offer dialogue",
+    "after_text": {
+      "flag": "merchant_7_5_0_bought",
+      "text": "When you offer gold at an alter, you may as well have your defensive power risen rather than your offensive power. The enemy whom you cannot beat may appear, provided you won't raise your offensive power."
+    }
+  },
+  {
+    "floor": 12,
+    "x": 0,
+    "y": 0,
+    "name": "Merchant",
+    "text": "I will sell the rare red key for 800 Gold! Will you buy it?",
+    "offers": [
+      {
+        "id": "trade",
+        "label": "I will sell the rare red key for 800 Gold! Will you buy it?",
+        "cost": 800,
+        "once": true,
+        "conditions": [
+          {
+            "type": "flag",
+            "flag": "merchant_12_0_0_bought",
+            "value": false
+          }
+        ],
+        "effects": [
+          {
+            "type": "add_stat",
+            "stat": "red",
+            "amount": 1
+          },
+          {
+            "type": "flag",
+            "flag": "merchant_12_0_0_bought"
+          },
+          {
+            "type": "message",
+            "text": "Did you notice the secret passages on the 9th, 16th, and 18th floors?",
+            "dialogue_id": 66
+          }
+        ]
+      }
+    ],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      249,
+      66
+    ],
+    "source": "Original TTSW10.syounin 0x449014; literal prices and original offer dialogue",
+    "after_text": {
+      "flag": "merchant_12_0_0_bought",
+      "text": "Did you notice the secret passages on the 9th, 16th, and 18th floors?"
+    }
+  },
+  {
+    "floor": 15,
+    "x": 8,
+    "y": 0,
+    "name": "Thief",
+    "text": "Talk to the thief to continue.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      17
+    ],
+    "source": "Original TTSW10.touzoku 0x465900; map effects live in events.json"
+  },
+  {
+    "floor": 15,
+    "x": 10,
+    "y": 10,
+    "name": "Merchant",
+    "text": "I will sell a blue key for 200 Gold! Will you buy it?",
+    "offers": [
+      {
+        "id": "trade",
+        "label": "I will sell a blue key for 200 Gold! Will you buy it?",
+        "cost": 200,
+        "once": true,
+        "conditions": [
+          {
+            "type": "flag",
+            "flag": "merchant_15_10_10_bought",
+            "value": false
+          }
+        ],
+        "effects": [
+          {
+            "type": "add_stat",
+            "stat": "blue",
+            "amount": 1
+          },
+          {
+            "type": "flag",
+            "flag": "merchant_15_10_10_bought"
+          },
+          {
+            "type": "message",
+            "text": "If you carry a cross, the strength of Zombies and Vampires will be cut in half. It is near impossible to defeat them without a cross, especially Vampires. A cross is on a floor higher than this one.",
+            "dialogue_id": 67
+          }
+        ]
+      }
+    ],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      251,
+      67
+    ],
+    "source": "Original TTSW10.syounin 0x449014; literal prices and original offer dialogue",
+    "after_text": {
+      "flag": "merchant_15_10_10_bought",
+      "text": "If you carry a cross, the strength of Zombies and Vampires will be cut in half. It is near impossible to defeat them without a cross, especially Vampires. A cross is on a floor higher than this one."
+    }
+  },
+  {
+    "floor": 16,
+    "x": 0,
+    "y": 10,
+    "name": "Old man",
+    "text": "I heard that you can find a red key at two places in this area.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      68
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 18,
+    "x": 2,
+    "y": 1,
+    "name": "Old man",
+    "text": "In this area, if you don't raise your offensive power at an altar a few times, you may not be able to destroy 'Rock' monsters. Be careful!",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      69
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 21,
+    "x": 5,
+    "y": 5,
+    "name": "Old man",
+    "text": "The Great Magic Master is in this area. He is a proprietor of this magic tower. At your strenght, to attack him means death. It stands to reason that you should not face him, but rather, get items on higher levels first.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      70
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 23,
+    "x": 10,
+    "y": 10,
+    "name": "Old man",
+    "text": "The Magic Sergeant, Zeno says \"You villain. Little did I expect to be beaten. But I would never die in such a way. I'll be looking forward to fighting with you again.\"",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      61
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 26,
+    "x": 5,
+    "y": 5,
+    "name": "Princess",
+    "text": "Speak to the princess.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      25
+    ],
+    "source": "Original princess case TTSW10.handan 0x445397; dialogue/map effects live in events.json"
+  },
+  {
+    "floor": 27,
+    "x": 5,
+    "y": 0,
+    "name": "Old man",
+    "text": "In the stage of this floor, if your strength is 1500, offensive power is 80, defensive power is 98, you have five keys, and one blue key, you are almost ideal.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      71
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 28,
+    "x": 7,
+    "y": 3,
+    "name": "Merchant",
+    "text": "I will buy your keys at 100 Gold a piece. Will you sell me keys?",
+    "offers": [
+      {
+        "id": "trade",
+        "label": "Sell one yellow key for 100 gold",
+        "cost": 0,
+        "once": false,
+        "conditions": [
+          {
+            "type": "stat_at_least",
+            "stat": "yellow",
+            "amount": 1
+          }
+        ],
+        "effects": [
+          {
+            "type": "add_stat",
+            "stat": "yellow",
+            "amount": -1
+          },
+          {
+            "type": "add_stat",
+            "stat": "gold",
+            "amount": 100
+          }
+        ]
+      }
+    ],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      252
+    ],
+    "source": "Original TTSW10.syounin 0x449014; literal prices and original offer dialogue"
+  },
+  {
+    "floor": 29,
+    "x": 5,
+    "y": 3,
+    "name": "Thief",
+    "text": "Talk to the thief to continue.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      26,
+      27,
+      28
+    ],
+    "source": "Original TTSW10.touzoku 0x465900; map effects live in events.json"
+  },
+  {
+    "floor": 31,
+    "x": 10,
+    "y": 0,
+    "name": "Old man",
+    "text": "The offensive power of the swordsman who uses two swords is too high. He can use two swords at the same time. You will lose much strength if you fight him normally. You should never fight him before your attacks are stronger than his.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      72
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 31,
+    "x": 0,
+    "y": 10,
+    "name": "Merchant",
+    "text": "I will sell four keys and a blue key for 1000 Gold! Will you buy them?",
+    "offers": [
+      {
+        "id": "trade",
+        "label": "I will sell four keys and a blue key for 1000 Gold! Will you buy them?",
+        "cost": 1000,
+        "once": true,
+        "conditions": [
+          {
+            "type": "flag",
+            "flag": "merchant_31_0_10_bought",
+            "value": false
+          }
+        ],
+        "effects": [
+          {
+            "type": "add_stat",
+            "stat": "yellow",
+            "amount": 4
+          },
+          {
+            "type": "add_stat",
+            "stat": "blue",
+            "amount": 1
+          },
+          {
+            "type": "flag",
+            "flag": "merchant_31_0_10_bought"
+          },
+          {
+            "type": "message",
+            "text": "This tower is 50 stories high, but in reality it seems that you cannot go up to the 50th floor.",
+            "dialogue_id": 73
+          }
+        ]
+      }
+    ],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      253,
+      73
+    ],
+    "source": "Original TTSW10.syounin 0x449014; literal prices and original offer dialogue",
+    "after_text": {
+      "flag": "merchant_31_0_10_bought",
+      "text": "This tower is 50 stories high, but in reality it seems that you cannot go up to the 50th floor."
+    }
+  },
+  {
+    "floor": 33,
+    "x": 3,
+    "y": 2,
+    "name": "Old man",
+    "text": "More haste, less speed.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      74
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 36,
+    "x": 0,
+    "y": 0,
+    "name": "Old man",
+    "text": "You may be able to go upstairs without fighting strong enemies, if you could use four tunnels skillfully in this floor.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      75
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 37,
+    "x": 0,
+    "y": 10,
+    "name": "Old man",
+    "text": "You need the mattock in order to get the treasure which is in the item warehouse on this floor.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      76
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 38,
+    "x": 4,
+    "y": 1,
+    "name": "Merchant",
+    "text": "I will sell three keys at special price (200 gold). First come, first served.",
+    "offers": [
+      {
+        "id": "trade",
+        "label": "I will sell three keys at special price (200 gold). First come, first served.",
+        "cost": 200,
+        "once": true,
+        "conditions": [
+          {
+            "type": "flag",
+            "flag": "merchant_38_4_1_bought",
+            "value": false
+          }
+        ],
+        "effects": [
+          {
+            "type": "add_stat",
+            "stat": "yellow",
+            "amount": 3
+          },
+          {
+            "type": "flag",
+            "flag": "merchant_38_4_1_bought"
+          },
+          {
+            "type": "message",
+            "text": "There is never a gate without a Gate-Keeper. Conversely there are always enemies who keep the gate on floors that have gates. So,",
+            "dialogue_id": 77
+          }
+        ]
+      }
+    ],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      254,
+      77
+    ],
+    "source": "Original TTSW10.syounin 0x449014; literal prices and original offer dialogue",
+    "after_text": {
+      "flag": "merchant_38_4_1_bought",
+      "text": "There is never a gate without a Gate-Keeper. Conversely there are always enemies who keep the gate on floors that have gates. So,"
+    }
+  },
+  {
+    "floor": 39,
+    "x": 8,
+    "y": 1,
+    "name": "Merchant",
+    "text": "2000 Golds for three blue keys. Deal?",
+    "offers": [
+      {
+        "id": "trade",
+        "label": "2000 Golds for three blue keys. Deal?",
+        "cost": 2000,
+        "once": true,
+        "conditions": [
+          {
+            "type": "flag",
+            "flag": "merchant_39_8_1_bought",
+            "value": false
+          }
+        ],
+        "effects": [
+          {
+            "type": "add_stat",
+            "stat": "blue",
+            "amount": 3
+          },
+          {
+            "type": "flag",
+            "flag": "merchant_39_8_1_bought"
+          },
+          {
+            "type": "message",
+            "text": "There is a Lucky Gold somewhere in this tower. If you have it, you can get twice as much money when you beat an enemy.",
+            "dialogue_id": 79
+          }
+        ]
+      }
+    ],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      255,
+      79
+    ],
+    "source": "Original TTSW10.syounin 0x449014; literal prices and original offer dialogue",
+    "after_text": {
+      "flag": "merchant_39_8_1_bought",
+      "text": "There is a Lucky Gold somewhere in this tower. If you have it, you can get twice as much money when you beat an enemy."
+    }
+  },
+  {
+    "floor": 39,
+    "x": 0,
+    "y": 10,
+    "name": "Old man",
+    "text": "At three o'clock, the secret treasure that lets one travel in space will appear.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      78
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 42,
+    "x": 0,
+    "y": 3,
+    "name": "Old man",
+    "text": "A Magician will attack using magic when he is next to you. The Magic Sergeant will attack and divide the vital power in half when he is caught between two. As for an attack on both sides from the Magic Sergeant, the stronger you are, the more damage you take. So, please be careful.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      80
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 45,
+    "x": 8,
+    "y": 2,
+    "name": "Merchant",
+    "text": "I will increase your life 2000 points at 1000 Gold.",
+    "offers": [
+      {
+        "id": "trade",
+        "label": "I will increase your life 2000 points at 1000 Gold.",
+        "cost": 1000,
+        "once": true,
+        "conditions": [
+          {
+            "type": "flag",
+            "flag": "merchant_45_8_2_bought",
+            "value": false
+          }
+        ],
+        "effects": [
+          {
+            "type": "add_stat",
+            "stat": "hp",
+            "amount": 2000
+          },
+          {
+            "type": "flag",
+            "flag": "merchant_45_8_2_bought"
+          },
+          {
+            "type": "message",
+            "text": "The sacred shield can defend you against magic attacks. But I heard this shield is hidden on a floor that doesn't exist.",
+            "dialogue_id": 82
+          }
+        ]
+      }
+    ],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      256,
+      82
+    ],
+    "source": "Original TTSW10.syounin 0x449014; literal prices and original offer dialogue",
+    "after_text": {
+      "flag": "merchant_45_8_2_bought",
+      "text": "The sacred shield can defend you against magic attacks. But I heard this shield is hidden on a floor that doesn't exist."
+    }
+  },
+  {
+    "floor": 45,
+    "x": 8,
+    "y": 5,
+    "name": "Old man",
+    "text": "The 44th floor in this tower is an illusion. It seems that we cannot go to there even if we use the stairs. I think that it is impossible to get there without teleporting.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      81
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 46,
+    "x": 7,
+    "y": 8,
+    "name": "Old man",
+    "text": "The 41st floor is perfectly symmetrical, and therefore,",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      83
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 47,
+    "x": 4,
+    "y": 1,
+    "name": "Merchant",
+    "text": "Would you like to buy a super mattock (it's very rare) for 4000 Gold?",
+    "offers": [
+      {
+        "id": "trade",
+        "label": "Would you like to buy a super mattock (it's very rare) for 4000 Gold?",
+        "cost": 4000,
+        "once": true,
+        "conditions": [
+          {
+            "type": "flag",
+            "flag": "merchant_47_4_1_bought",
+            "value": false
+          }
+        ],
+        "effects": [
+          {
+            "type": "give_item",
+            "item": "super_mattock"
+          },
+          {
+            "type": "flag",
+            "flag": "merchant_47_4_1_bought"
+          },
+          {
+            "type": "message",
+            "text": "If you want to beat the Dragon, you must have a holy sword, a holy shield, and a Dragon slayer, and also you must be high level.",
+            "dialogue_id": 84
+          }
+        ]
+      }
+    ],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      257,
+      84
+    ],
+    "source": "Original TTSW10.syounin 0x449014; literal prices and original offer dialogue",
+    "after_text": {
+      "flag": "merchant_47_4_1_bought",
+      "text": "If you want to beat the Dragon, you must have a holy sword, a holy shield, and a Dragon slayer, and also you must be high level."
+    }
+  },
+  {
+    "floor": 48,
+    "x": 2,
+    "y": 1,
+    "name": "Old man",
+    "text": "It is said that the symbol of 5 on a pair of dice has the force of sealing magic. You had better memorize it till you fight the boss of this area.",
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "dialogue_ids": [
+      85
+    ],
+    "source": "Original TTSW10.roujin 0x449708 / 0x449E18"
+  },
+  {
+    "floor": 12,
+    "x": 10,
+    "y": 0,
+    "name": "Key merchant",
+    "text": "My store will sell as many keys as you need. They are 1000 Gold each. Will you buy them?",
+    "dialogue_ids": [
+      250
+    ],
+    "effects": [],
+    "disappear": false,
+    "offers": [
+      {
+        "id": "trade",
+        "label": "Buy one yellow key",
+        "cost": 1000,
+        "once": false,
+        "effects": [
+          {
+            "type": "add_stat",
+            "stat": "yellow",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "source": "Original handan 0x4448F8 reveals merchant; syounin 0x449014 floor-12 right branch"
+  },
+  {
+    "floor": 16,
+    "x": 10,
+    "y": 10,
+    "name": "Hidden old man",
+    "text": "Thank goodness, you found me. I will give you an elixir as a symbol of my gratitude. Using this medicine will cause you to gain life according to your offensive and defensive power. So naturally, the later you use, the more it will have an effect on you.",
+    "dialogue_ids": [
+      89
+    ],
+    "effects": [],
+    "disappear": false,
+    "offers": [
+      {
+        "id": "accept",
+        "label": "Accept the Elixir",
+        "cost": 0,
+        "once": true,
+        "conditions": [
+          {
+            "type": "flag",
+            "flag": "npc_16_10_10_gift",
+            "value": false
+          }
+        ],
+        "effects": [
+          {
+            "type": "give_item",
+            "item": "elixir"
+          },
+          {
+            "type": "flag",
+            "flag": "npc_16_10_10_gift"
+          }
+        ]
+      }
+    ],
+    "source": "Original handan 0x4449F0 reveals old man; roujin floor-16 right branch gives Elixir"
+  },
+  {
+    "floor": 10,
+    "x": 5,
+    "y": 2,
+    "name": "Fairy",
+    "text": "Do you wish to go on?",
+    "dialogue_ids": [
+      227
+    ],
+    "offers": [],
+    "effects": [],
+    "disappear": true,
+    "source": "Original fairy 0x478F0C clears fairy on continue; score/rank overlay replaced by modern acknowledgement"
+  },
+  {
+    "floor": 20,
+    "x": 5,
+    "y": 4,
+    "name": "Fairy",
+    "text": "Do you wish to go on?",
+    "dialogue_ids": [
+      227
+    ],
+    "offers": [],
+    "effects": [],
+    "disappear": true,
+    "source": "Original fairy 0x478F0C clears fairy on continue; score/rank overlay replaced by modern acknowledgement"
+  },
+  {
+    "floor": 25,
+    "x": 5,
+    "y": 6,
+    "name": "Fairy",
+    "text": "Do you wish to go on?",
+    "dialogue_ids": [
+      227
+    ],
+    "offers": [],
+    "effects": [],
+    "disappear": true,
+    "source": "Original fairy 0x478F0C clears fairy on continue; score/rank overlay replaced by modern acknowledgement"
+  },
+  {
+    "floor": 40,
+    "x": 5,
+    "y": 5,
+    "name": "Fairy",
+    "text": "Do you wish to go on?",
+    "dialogue_ids": [
+      227
+    ],
+    "offers": [],
+    "effects": [],
+    "disappear": true,
+    "source": "Original fairy 0x478F0C clears fairy on continue; score/rank overlay replaced by modern acknowledgement"
+  },
+  {
+    "floor": 49,
+    "x": 5,
+    "y": 1,
+    "name": "Fairy",
+    "text": "Do you wish to go on?",
+    "dialogue_ids": [
+      227
+    ],
+    "offers": [],
+    "effects": [],
+    "disappear": true,
+    "source": "Original fairy 0x478F0C clears fairy on continue; score/rank overlay replaced by modern acknowledgement"
+  },
+  {
+    "floor": 50,
+    "x": 4,
+    "y": 8,
+    "name": "Thief",
+    "text": "Talk to the thief to continue.",
+    "dialogue_ids": [
+      263
+    ],
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "source": "Original touzoku floor-50 branch; dialogue/map effects live in events.json"
+  }
+]

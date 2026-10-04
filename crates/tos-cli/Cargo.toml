@@ -1,0 +1,14 @@
+[package]
+name = "tos-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "tos"
+path = "src/main.rs"
+
+[dependencies]
+tos-core.workspace = true
+serde_json.workspace = true
+tiny_http = "0.12"
