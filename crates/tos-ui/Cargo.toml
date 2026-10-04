@@ -1,0 +1,32 @@
+[package]
+name = "tos-ui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "tos-ui"
+path = "src/main.rs"
+
+[dependencies]
+tos-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+eframe = { version = "0.36.2", default-features = false, features = ["glow", "default_fonts", "persistence", "__screenshot", "accesskit"] }
+image = { version = "0.25", default-features = false, features = ["png"] }
+hound = "3.5"
+midly = { version = "0.5", default-features = false, features = ["std"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+rodio = { version = "0.21", default-features = false, features = ["playback"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+ehttp = "0.6"
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+console_error_panic_hook = "0.1"
+web-sys = { version = "0.3", features = ["Window", "Document", "HtmlCanvasElement", "Storage", "AudioContext", "AudioContextState", "AudioBuffer", "AudioBufferSourceNode", "AudioDestinationNode", "AudioNode", "AudioScheduledSourceNode", "AudioParam", "GainNode", "Blob", "BlobPropertyBag", "Url", "HtmlAnchorElement", "HtmlElement", "Element", "Location"] }
