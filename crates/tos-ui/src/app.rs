@@ -1628,10 +1628,6 @@ impl eframe::App for TowerApp {
             },
         ));
     }
-    fn save(&mut self, _storage: &mut dyn eframe::Storage) {
-        self.persist();
-        self.preferences();
-    }
     fn clear_color(&self, _visuals: &egui::Visuals) -> [f32; 4] {
         NAVY.to_normalized_gamma_f32()
     }
