@@ -10,12 +10,12 @@ use crate::theme::{
     SURFACE as EDITOR_SURFACE, SURFACE_RAISED as EDITOR_RAISED, TEXT as EDITOR_TEXT,
 };
 
-fn editor_surface() -> egui::Frame {
-    crate::theme::frame().inner_margin(18)
+fn editor_surface(ctx: &egui::Context) -> egui::Frame {
+    crate::theme::frame(ctx).inner_margin(18)
 }
 
 fn editor_card<R>(ui: &mut Ui, contents: impl FnOnce(&mut Ui) -> R) -> egui::InnerResponse<R> {
-    editor_surface().show(ui, |ui| {
+    editor_surface(ui.ctx()).show(ui, |ui| {
         ui.with_layout(egui::Layout::top_down(egui::Align::Min), contents)
             .inner
     })
@@ -1283,7 +1283,7 @@ impl CampaignEditor {
         let event = &mut list[self.selected_event];
         text(ui, locale, "id", &mut event["id"], false);
         boolean(ui, locale, "once", &mut event["once"], true);
-        editor_surface()
+        editor_surface(ui.ctx())
             .fill(EDITOR_RAISED)
             .inner_margin(14)
             .corner_radius(12)
@@ -1724,7 +1724,7 @@ fn conditions_ui(ui: &mut Ui, locale: &str, value: &mut Value, depth: usize) {
         |ui| {
             for (index, condition) in list.iter_mut().enumerate() {
                 ui.push_id(("condition", depth, index), |ui| {
-                    editor_surface()
+                    editor_surface(ui.ctx())
                         .fill(EDITOR_RAISED)
                         .inner_margin(14)
                         .corner_radius(12)
@@ -1822,7 +1822,7 @@ fn effects_ui(ui: &mut Ui, locale: &str, value: &mut Value) {
             let count = list.len();
             for (index, effect) in list.iter_mut().enumerate() {
                 ui.push_id(("effect", index), |ui| {
-                    editor_surface()
+                    editor_surface(ui.ctx())
                         .fill(EDITOR_RAISED)
                         .inner_margin(14)
                         .corner_radius(12)
@@ -2011,7 +2011,7 @@ fn offers_ui(ui: &mut Ui, locale: &str, value: &mut Value) {
     let list = value.as_array_mut().unwrap();
     let mut remove = None;
     ui.collapsing(format!("{} ({})",tr(locale,"offers"),list.len()),|ui|{
-        for(index,offer)in list.iter_mut().enumerate(){ui.push_id(("offer",index),|ui|{editor_surface().fill(EDITOR_RAISED).inner_margin(14).corner_radius(12).show(ui, |ui|{
+        for(index,offer)in list.iter_mut().enumerate(){ui.push_id(("offer",index),|ui|{editor_surface(ui.ctx()).fill(EDITOR_RAISED).inner_margin(14).corner_radius(12).show(ui, |ui|{
             text(ui,locale,"id",&mut offer["id"],false);text(ui,locale,"label",&mut offer["label"],false);
             number(ui,locale,"cost",&mut offer["cost"],0);number(ui,locale,"cost_increment",&mut offer["cost_increment"],0);boolean(ui,locale,"once",&mut offer["once"],false);
             conditions_ui(ui,locale,&mut offer["conditions"],0);effects_ui(ui,locale,&mut offer["effects"]);

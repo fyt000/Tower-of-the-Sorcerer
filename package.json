@@ -5,14 +5,17 @@
   "type": "module",
   "scripts": {
     "build": "node tools/build.mjs",
+    "build:mcp": "node tools/build-mcp.mjs",
+    "start:mcp": "node tools/mcp-server.mjs",
     "check": "node tools/check.mjs",
     "start": "node tools/start.mjs",
     "start:native": "node tools/start-native.mjs",
     "editor": "node tools/start-native.mjs --editor",
     "package:native": "node tools/package-native.mjs",
     "test:native": "node tests/native.mjs",
-    "test:browser": "node tests/browser.mjs",
-    "test:mcp": "node tests/mcp.mjs"
+    "test:browser": "node tests/browser.mjs && node tests/inventory-layout.mjs && node tests/journal-layout.mjs && node tests/battle-journal.mjs && node tests/desktop-modal-scale.mjs && node tests/inspection.mjs && node tests/enemy-list.mjs && node tests/landscape-theme.mjs && node tests/desktop-layout.mjs",
+    "test:desktop": "node tests/desktop-layout.mjs",
+    "test:mcp": "node tests/mcp.mjs && node tests/mcp-reload.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0"

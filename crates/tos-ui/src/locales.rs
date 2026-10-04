@@ -275,4 +275,43 @@ mod tests {
             "冒险开始了。每场战斗的结果都由属性决定，请仔细规划路线。"
         );
     }
+    #[test]
+    fn item_help_translates_known_mechanics_and_keeps_custom_prose() {
+        assert_eq!(
+            translate_text("zh-CN", "Reviewed the Orb of Wisdom's recorded hints."),
+            "回顾了智慧宝珠记录的线索。"
+        );
+        assert_eq!(
+            translate_text(
+                "zh-CN",
+                "The Orb of Flying leaves you on the current floor."
+            ),
+            "飞行宝珠让你留在当前楼层。"
+        );
+        assert_eq!(
+            translate_text(
+                "zh-CN",
+                "That floor is unavailable in the Orb of Flying's selector."
+            ),
+            "飞行宝珠的可选楼层列表中没有该楼层。"
+        );
+        assert_eq!(
+            translate_text(
+                "zh-CN",
+                "Multiplies attack by 3 against undead during combat."
+            ),
+            "与不死系敌人战斗时，攻击为原来的3倍。"
+        );
+        assert_eq!(
+            translate_text("zh-CN", "Adds attack × 10 + defense × 5 HP."),
+            "增加攻击×10＋防御×5点生命。"
+        );
+        assert_eq!(
+            translate_text(
+                "zh-CN",
+                "A custom item doubles attack in an author's own way."
+            ),
+            "A custom item doubles attack in an author's own way."
+        );
+    }
 }

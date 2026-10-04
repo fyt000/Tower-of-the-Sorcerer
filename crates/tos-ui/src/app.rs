@@ -4,7 +4,7 @@ use crate::{
     editor::{CampaignEditor, EditorAction},
     locales::{entity_name, tr, translate_text},
     platform,
-    theme::{self, BG as NAVY, GOLD, Icon, MUTED, SURFACE as CARD, TEXT},
+    theme::{self, BG as NAVY, GOLD, Icon, SURFACE as CARD, TEXT},
 };
 use eframe::egui::{self, Align2, Color32, FontId, Rect, RichText, Stroke, Vec2};
 use serde_json::{Value, json};
@@ -13,7 +13,7 @@ use std::{
     sync::mpsc,
     time::Duration,
 };
-use tos_core::{Command, Direction, Engine};
+use tos_core::{Campaign, Command, Direction, Engine};
 
 const SAVE: &str = "tos-rust:save:v1";
 const CAMPAIGN: &str = "tos-rust:campaign:v1";
@@ -34,6 +34,41 @@ struct BattleProgress {
     completed: i64,
     strike: i64,
     phase: f32,
+}
+
+struct FloorEnemyGroup {
+    name: String,
+    inspection: Value,
+    count: usize,
+}
+
+/// Group only the already revealed encounter facts. Tile IDs and positions are
+/// deliberately absent: equivalent Octopus parts collapse, but reward variants
+/// and current runtime/forecast changes remain separate rows.
+fn group_floor_enemies(entries: Vec<Value>, locale: &str) -> Vec<FloorEnemyGroup> {
+    let mut groups: Vec<FloorEnemyGroup> = Vec::new();
+    let mut keys: BTreeMap<String, usize> = BTreeMap::new();
+    for inspection in entries {
+        let id = inspection["id"].as_u64().unwrap_or(6).to_string();
+        let name = entity_name(
+            locale,
+            "tiles",
+            &id,
+            inspection["name"].as_str().unwrap_or(""),
+        );
+        let key = json!([name, inspection["enemy"]]).to_string();
+        if let Some(index) = keys.get(&key) {
+            groups[*index].count += 1;
+        } else {
+            keys.insert(key, groups.len());
+            groups.push(FloorEnemyGroup {
+                name,
+                inspection,
+                count: 1,
+            });
+        }
+    }
+    groups
 }
 
 pub struct TowerApp {
@@ -57,6 +92,10 @@ pub struct TowerApp {
     hero_idle_at: f64,
     selected: Option<(usize, usize)>,
     settings: bool,
+    journal_open: bool,
+    enemy_list_open: bool,
+    landscape: bool,
+    classic_layout: bool,
     import_text: String,
     toast: Option<(String, f64)>,
     bounds: BTreeMap<String, Value>,
@@ -164,6 +203,10 @@ impl TowerApp {
             hero_idle_at: 0.0,
             selected: None,
             settings: false,
+            journal_open: false,
+            enemy_list_open: false,
+            landscape: false,
+            classic_layout: false,
             import_text: String::new(),
             toast: None,
             bounds: BTreeMap::new(),
@@ -241,6 +284,8 @@ impl TowerApp {
         self.hero_idle_at = 0.0;
         self.route.clear();
         self.selected = None;
+        self.journal_open = false;
+        self.enemy_list_open = false;
         self.music_paused = false;
         self.music_override = None;
         self.editor.replace_campaign(campaign);
@@ -261,6 +306,8 @@ impl TowerApp {
         self.hero_idle_at = 0.0;
         self.route.clear();
         self.selected = None;
+        self.journal_open = false;
+        self.enemy_list_open = false;
         self.music_paused = false;
         self.music_override = None;
         self.persist();
@@ -288,6 +335,13 @@ impl TowerApp {
             self.hero_idle_at = self.now() + self.ambient_interval();
         }
         self.snapshot = self.engine.snapshot();
+        if self.visual["last_encounter"] != self.snapshot["last_encounter"]
+            || self.visual["floor"] != self.snapshot["floor"]
+        {
+            // A new contact or floor takes over from an older inspection.
+            // Hovering or tapping a tile can select a new target immediately.
+            self.selected = None;
+        }
         self.queue = self.snapshot["last_action"]["presentation"]
             .as_array()
             .cloned()
@@ -332,7 +386,7 @@ impl TowerApp {
     }
 
     pub fn debug_json(&self) -> Value {
-        json!({"ready":true,"notice":self.toast.as_ref().map(|(message,_)|message),"locale":self.locale,"visual_floor":self.visual["floor"],"visual_player":self.visual["player"],"visual_log":self.visual["log"],"editor_open":self.editor_open,"editor":self.editor.debug_json(),"bounds":self.bounds,"animation":self.active.as_ref().map(|a|a.effect["type"].clone()),"presentation_remaining":self.queue.len(),"path_remaining":self.route.len(),"animations_seen":self.animation_history,"animation_details":self.animation_details,"hero_pose":if self.active.as_ref().is_some_and(|a|a.effect["type"]=="move")||self.now()<self.hero_idle_at{"walking"}else{"idle"},"facing":self.facing,"battle":self.battle_progress(self.now()).map(|b|json!({"hero_hp":b.hero_hp,"enemy_hp":b.enemy_hp,"hero_turn":b.hero_turn,"completed":b.completed,"phase":b.phase})),"audio":{"unlocked":self.audio.unlocked,"enabled":self.audio.enabled,"effects_played":self.audio.effects_played,"music":self.audio.music_name,"error":self.audio.error},"sprites_loaded":self.assets.atlas.is_some()})
+        json!({"ready":true,"landscape":self.landscape,"ui_scale":theme::scale(&self.context),"palette":{"bg":theme::colors(&self.context).bg.to_array(),"surface":theme::colors(&self.context).surface.to_array(),"accent":theme::colors(&self.context).accent.to_array(),"metal":theme::colors(&self.context).metal.to_array(),"reverse":self.visual["cycle"].as_u64().unwrap_or(1)>1},"notice":self.toast.as_ref().map(|(message,_)|message),"locale":self.locale,"visual_floor":self.visual["floor"],"visual_player":self.visual["player"],"visual_log":self.visual["log"],"editor_open":self.editor_open,"editor":self.editor.debug_json(),"bounds":self.bounds,"animation":self.active.as_ref().map(|a|a.effect["type"].clone()),"presentation_remaining":self.queue.len(),"path_remaining":self.route.len(),"animations_seen":self.animation_history,"animation_details":self.animation_details,"hero_pose":if self.active.as_ref().is_some_and(|a|a.effect["type"]=="move")||self.now()<self.hero_idle_at{"walking"}else{"idle"},"facing":self.facing,"battle":self.battle_progress(self.now()).map(|b|json!({"hero_hp":b.hero_hp,"enemy_hp":b.enemy_hp,"hero_turn":b.hero_turn,"completed":b.completed,"phase":b.phase})),"audio":{"unlocked":self.audio.unlocked,"enabled":self.audio.enabled,"effects_played":self.audio.effects_played,"music":self.audio.music_name,"error":self.audio.error},"sprites_loaded":self.assets.atlas.is_some()})
     }
 
     pub fn editor_campaign_json(&self) -> String {
@@ -465,10 +519,11 @@ impl TowerApp {
                 active.sounds_played += 1;
             }
         }
-        let expired = self
-            .active
-            .as_ref()
-            .is_some_and(|a| a.effect["type"] != "dialogue" && now - a.start >= a.duration);
+        let expired = self.active.as_ref().is_some_and(|a| {
+            a.effect["type"] != "dialogue"
+                && a.effect["type"] != "journal"
+                && now - a.start >= a.duration
+        });
         if expired {
             self.finish_effect();
         }
@@ -517,15 +572,7 @@ impl TowerApp {
                     self.facing = direction.into();
                 }
                 if kind == "dialogue" {
-                    if !self.visual["log"].is_array() {
-                        self.visual["log"] = json!([]);
-                    }
-                    if let Some(log) = self.visual["log"].as_array_mut() {
-                        log.push(effect["text"].clone());
-                        if log.len() > 100 {
-                            log.remove(0);
-                        }
-                    }
+                    self.append_visual_activity(effect["text"].clone(), effect["log_id"].as_u64());
                 }
                 if kind == "floor" {
                     let cue = effect["sound"].as_str().unwrap_or("none");
@@ -591,6 +638,33 @@ impl TowerApp {
                             - strikes * e["enemy_hit"].as_i64().unwrap_or(0))
                         .max(0)
                     );
+                    if e["battle_log"].is_object() {
+                        let battle = e["battle_log"].clone();
+                        self.visual["player"]["hp"] = battle["hero_after_hp"].clone();
+                        if let (Some(before), Some(reward)) = (
+                            battle["hero_before"]["gold"].as_i64(),
+                            battle["reward"].as_i64(),
+                        ) {
+                            self.visual["player"]["gold"] = json!(before.saturating_add(reward));
+                        }
+                        if self.append_visual_activity(
+                            e["activity"].clone(),
+                            battle["log_id"].as_u64(),
+                        ) {
+                            if !self.visual["battle_log"].is_array() {
+                                self.visual["battle_log"] = json!([]);
+                            }
+                            let records = self.visual["battle_log"]
+                                .as_array_mut()
+                                .expect("history is an array");
+                            if !records
+                                .iter()
+                                .any(|record| record["log_id"] == battle["log_id"])
+                            {
+                                records.push(battle);
+                            }
+                        }
+                    }
                 }
                 "move_tile" => {
                     if e["floor"] == self.visual["floor"] {
@@ -716,45 +790,29 @@ impl TowerApp {
         })
     }
     fn record(&mut self, id: &str, response: &egui::Response) {
-        self.bounds.insert(id.into(),json!({"x":response.rect.min.x,"y":response.rect.min.y,"w":response.rect.width(),"h":response.rect.height()}));
+        self.bounds.insert(id.into(),json!({"x":response.rect.min.x,"y":response.rect.min.y,"w":response.rect.width(),"h":response.rect.height(),"enabled":response.enabled()}));
     }
 
     fn header(&mut self, ui: &mut egui::Ui) {
-        let narrow = ui.available_width() < 1060.0;
-        ui.horizontal(|ui| {
-            let (mark, _) = ui.allocate_exact_size(
-                Vec2::splat(if narrow { 36.0 } else { 48.0 }),
-                egui::Sense::hover(),
-            );
-            theme::icon(ui.painter(), mark.shrink(5.0), Icon::Tower, GOLD);
-            ui.add_space(if narrow { 2.0 } else { 8.0 });
-            ui.vertical(|ui| {
-                if !narrow {
-                    theme::caption(ui, &self.text("classic_adventure"));
-                }
-                ui.label(
-                    RichText::new(translate_text(&self.locale, &self.engine.campaign().title))
-                        .font(FontId::new(
-                            if narrow { 29.0 } else { 40.0 },
-                            egui::FontFamily::Name("serif".into()),
-                        ))
-                        .color(TEXT),
-                );
-            });
-            if !narrow {
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    self.header_controls(ui, false)
-                });
-            }
-        });
-        if narrow {
-            ui.add_space(8.0);
-            ui.horizontal(|ui| self.header_controls(ui, true));
+        if self.classic_layout {
+            return;
         }
-        ui.add_space(if narrow { 6.0 } else { 24.0 });
+        ui.horizontal(|ui| self.header_controls(ui, true));
+        ui.add_space(4.0);
     }
 
     fn header_controls(&mut self, ui: &mut egui::Ui, narrow: bool) {
+        self.enemy_list_button(ui);
+        let journal = ui
+            .add_enabled_ui(
+                !self.busy() && self.snapshot["pending_interaction"].is_null(),
+                |ui| theme::action(ui, String::new(), Icon::Book, false),
+            )
+            .inner;
+        self.record("journal_header", &journal);
+        if journal.on_hover_text(self.text("journal_expand")).clicked() {
+            self.open_journal_history();
+        }
         let settings = theme::action(
             ui,
             if narrow {
@@ -774,7 +832,12 @@ impl TowerApp {
         if edit.clicked() {
             self.editor_open = true;
         }
-        let save = theme::action(ui, self.text("save_short"), Icon::Save, true);
+        let save = ui
+            .add_enabled_ui(self.engine.save_unlocked(), |ui| {
+                theme::action(ui, self.text("save_short"), Icon::Save, true)
+            })
+            .inner
+            .on_disabled_hover_text(self.text("save_orb_required"));
         self.record("save", &save);
         if save.clicked() {
             self.checkpoint();
@@ -796,6 +859,10 @@ impl TowerApp {
     }
 
     fn checkpoint(&mut self) {
+        if self.engine.ensure_player_save_allowed().is_err() {
+            self.notify(self.text("save_orb_required"));
+            return;
+        }
         let value = json!({"campaign":self.engine.campaign(),"save":serde_json::from_str::<Value>(&self.engine.save_json()).expect("engine-generated save is valid JSON")});
         match platform::write(CHECKPOINT, &value.to_string()) {
             Ok(()) => self.notify(self.text("saved")),
@@ -839,7 +906,12 @@ impl TowerApp {
         }
         let metrics = [
             ("health", "hp", theme::RED, Icon::Heart),
-            ("attack", "attack", GOLD, Icon::Sword),
+            (
+                "attack",
+                "attack",
+                theme::colors(ui.ctx()).metal,
+                Icon::Sword,
+            ),
             ("defense", "defense", theme::BLUE, Icon::Shield),
             ("gold", "gold", theme::GREEN, Icon::Coin),
         ];
@@ -860,16 +932,18 @@ impl TowerApp {
             });
             ui.add_space(4.0);
             self.keys(ui, true);
+            ui.add_space(8.0);
+            self.equipment(ui, true);
             return;
         }
         ui.horizontal(|ui| {
             let (portrait, _) = ui.allocate_exact_size(Vec2::splat(62.0), egui::Sense::hover());
             ui.painter()
-                .rect_filled(portrait, 14.0, theme::SURFACE_RAISED);
+                .rect_filled(portrait, 14.0, theme::colors(ui.ctx()).raised);
             ui.painter().rect_stroke(
                 portrait,
                 14.0,
-                Stroke::new(1.0, theme::BORDER),
+                Stroke::new(1.0, theme::colors(ui.ctx()).border),
                 egui::StrokeKind::Inside,
             );
             if let Some(hero) = self.assets.heroes.get("down") {
@@ -886,12 +960,12 @@ impl TowerApp {
                     RichText::new(self.text("adventurer"))
                         .size(23.0)
                         .strong()
-                        .color(TEXT),
+                        .color(theme::colors(ui.ctx()).text),
                 );
                 ui.label(
                     RichText::new(format!("{} {}", self.text("floor"), self.visual["floor"]))
                         .size(15.0)
-                        .color(MUTED),
+                        .color(theme::colors(ui.ctx()).muted),
                 );
             });
         });
@@ -922,29 +996,346 @@ impl TowerApp {
                     self.visual["backside_multiplier"]
                 ))
                 .size(15.0)
-                .color(GOLD),
+                .color(theme::colors(ui.ctx()).metal),
+            );
+        }
+        ui.add_space(12.0);
+        self.equipment(ui, false);
+    }
+
+    fn tower_stats(&mut self, ui: &mut egui::Ui) {
+        let scale = theme::scale(ui.ctx());
+        ui.label(
+            RichText::new(format!("{} {}", self.text("floor"), self.visual["floor"]))
+                .size(if self.landscape { 14.0 } else { 18.0 * scale })
+                .strong(),
+        );
+        ui.add_space(3.0 * scale);
+        let mut player = self.visual["player"].clone();
+        if let Some(battle) = self.battle_progress(self.now()) {
+            player["hp"] = json!(battle.hero_hp);
+        }
+        if self.landscape {
+            let metrics = [
+                ("health", "hp", Icon::Heart, theme::RED),
+                (
+                    "attack",
+                    "attack",
+                    Icon::Sword,
+                    theme::colors(ui.ctx()).metal,
+                ),
+                ("defense", "defense", Icon::Shield, theme::BLUE),
+                ("gold", "gold", Icon::Coin, theme::GREEN),
+            ];
+            let width = (ui.available_width() - 5.0) * 0.5;
+            let stats = ui.scope(|ui| {
+                for row in metrics.chunks(2) {
+                    ui.horizontal(|ui| {
+                        for (label, key, icon, color) in row {
+                            let (rect, response) = ui
+                                .allocate_exact_size(Vec2::new(width, 28.0), egui::Sense::hover());
+                            ui.painter()
+                                .rect_filled(rect, 5.0, theme::colors(ui.ctx()).raised);
+                            theme::icon(
+                                ui.painter(),
+                                Rect::from_center_size(
+                                    egui::pos2(rect.left() + 12.0, rect.center().y),
+                                    Vec2::splat(15.0),
+                                ),
+                                *icon,
+                                *color,
+                            );
+                            let value = number(&player[*key]);
+                            fitted_value(
+                                ui,
+                                Rect::from_min_max(
+                                    egui::pos2(rect.left() + 25.0, rect.top() + 2.0),
+                                    rect.max - Vec2::new(5.0, 2.0),
+                                ),
+                                &value,
+                                17.0,
+                                true,
+                            );
+                            self.record(&format!("stat:{key}"), &response);
+                            response.on_hover_text(format!("{}: {value}", self.text(label)));
+                        }
+                    });
+                }
+            });
+            self.record("stats", &stats.response);
+            return;
+        }
+        let stats = ui.scope(|ui| {
+            for (label, key, icon, color) in [
+                ("health", "hp", Icon::Heart, theme::RED),
+                (
+                    "attack",
+                    "attack",
+                    Icon::Sword,
+                    theme::colors(ui.ctx()).metal,
+                ),
+                ("defense", "defense", Icon::Shield, theme::BLUE),
+                ("gold", "gold", Icon::Coin, theme::GREEN),
+            ] {
+                let (rect, response) = ui.allocate_exact_size(
+                    Vec2::new(ui.available_width(), 30.0 * scale),
+                    egui::Sense::hover(),
+                );
+                ui.painter()
+                    .rect_filled(rect, 5.0 * scale, theme::colors(ui.ctx()).raised);
+                theme::icon(
+                    ui.painter(),
+                    Rect::from_center_size(
+                        egui::pos2(rect.left() + 14.0 * scale, rect.center().y),
+                        Vec2::splat(19.0 * scale),
+                    ),
+                    icon,
+                    color,
+                );
+                let label_galley = ui.painter().layout_no_wrap(
+                    self.text(label),
+                    FontId::proportional(17.0 * scale),
+                    theme::colors(ui.ctx()).text,
+                );
+                let label_left = rect.left() + 32.0 * scale;
+                let value_left = label_left + label_galley.size().x + 12.0 * scale;
+                ui.painter().galley(
+                    egui::pos2(label_left, rect.center().y - label_galley.size().y * 0.5),
+                    label_galley,
+                    theme::colors(ui.ctx()).text,
+                );
+                let value = number(&player[key]);
+                let value_rect = Rect::from_min_max(
+                    egui::pos2(value_left, rect.top() + 2.0 * scale),
+                    rect.max - Vec2::new(5.0 * scale, 2.0 * scale),
+                );
+                fitted_value(ui, value_rect, &value, 21.0 * scale, true);
+                self.record(&format!("stat:{key}"), &response);
+                response.on_hover_text(format!("{}: {value}", self.text(label)));
+            }
+        });
+        self.record("stats", &stats.response);
+    }
+
+    fn tower_controls(&mut self, ui: &mut egui::Ui) {
+        let available = !self.busy() && self.snapshot["pending_interaction"].is_null();
+        let gap = 5.0 * theme::scale(ui.ctx());
+        let skip_visible = self.busy() && !self.travel_only();
+        let columns = if skip_visible { 4.0 } else { 3.0 };
+        let width = (ui.available_width() - gap * (columns - 1.0)) / columns;
+        ui.horizontal(|ui| {
+            ui.spacing_mut().item_spacing.x = gap;
+            self.enemy_list_button_sized(ui, Some(width));
+            let journal = ui
+                .add_enabled_ui(available, |ui| {
+                    theme::action_sized(ui, String::new(), Icon::Book, false, Some(width))
+                })
+                .inner;
+            self.record("journal_header", &journal);
+            if journal.on_hover_text(self.text("journal_expand")).clicked() {
+                self.open_journal_history();
+            }
+            let save = ui
+                .add_enabled_ui(available && self.engine.save_unlocked(), |ui| {
+                    theme::action_sized(ui, String::new(), Icon::Save, true, Some(width))
+                })
+                .inner;
+            self.record("save", &save);
+            if save.on_hover_text(self.text("save")).clicked() {
+                self.checkpoint();
+            }
+            if skip_visible {
+                let skip =
+                    theme::action_sized(ui, String::new(), Icon::ArrowRight, false, Some(width));
+                self.record("skip", &skip);
+                if skip.on_hover_text(self.text("skip")).clicked() {
+                    self.skip_presentation();
+                }
+            }
+        });
+        let width = (ui.available_width() - 2.0 * gap) / 3.0;
+        ui.horizontal(|ui| {
+            ui.spacing_mut().item_spacing.x = gap;
+            let restore = theme::action_sized(ui, String::new(), Icon::Restore, false, Some(width));
+            self.record("restore", &restore);
+            if restore.on_hover_text(self.text("restore")).clicked() {
+                self.restore_checkpoint();
+            }
+            let settings =
+                theme::action_sized(ui, String::new(), Icon::Settings, false, Some(width));
+            self.record("settings", &settings);
+            if settings.on_hover_text(self.text("settings")).clicked() {
+                self.settings = !self.settings;
+            }
+            let edit = theme::action_sized(ui, String::new(), Icon::Edit, false, Some(width));
+            self.record("editor", &edit);
+            if edit.on_hover_text(self.text("editor")).clicked() {
+                self.editor_open = true;
+            }
+        });
+    }
+
+    fn equipment(&mut self, ui: &mut egui::Ui, compact: bool) {
+        let scale = theme::scale(ui.ctx());
+        let compact = compact || self.classic_layout;
+        let width = if self.classic_layout {
+            ui.available_width()
+        } else {
+            (ui.available_width() - 8.0 * scale) / 2.0
+        };
+        ui.with_layout(
+            if self.classic_layout {
+                egui::Layout::top_down(egui::Align::Min)
+            } else {
+                egui::Layout::left_to_right(egui::Align::TOP)
+            },
+            |ui| {
+                for (slot, icon) in [("weapon", Icon::Sword), ("shield", Icon::Shield)] {
+                    let item = visible_equipment_item(
+                        &self.visual,
+                        &self.snapshot,
+                        self.engine.campaign(),
+                        slot,
+                    );
+                    let (rect, response) = ui.allocate_exact_size(
+                        Vec2::new(
+                            width,
+                            (if self.classic_layout {
+                                if self.landscape { 30.0 } else { 38.0 }
+                            } else if compact {
+                                46.0
+                            } else {
+                                84.0
+                            }) * scale,
+                        ),
+                        egui::Sense::hover(),
+                    );
+                    ui.painter()
+                        .rect_filled(rect, 5.0 * scale, theme::colors(ui.ctx()).raised);
+                    ui.painter().rect_stroke(
+                        rect,
+                        5.0 * scale,
+                        Stroke::new(1.0, theme::colors(ui.ctx()).border),
+                        egui::StrokeKind::Inside,
+                    );
+                    let icon_size = (if self.classic_layout {
+                        if self.landscape { 22.0 } else { 30.0 }
+                    } else if compact {
+                        27.0
+                    } else {
+                        34.0
+                    }) * scale;
+                    let icon_rect = Rect::from_center_size(
+                        if compact {
+                            egui::pos2(rect.left() + icon_size / 2.0 + 8.0 * scale, rect.center().y)
+                        } else {
+                            egui::pos2(rect.center().x, rect.top() + 43.0 * scale)
+                        },
+                        Vec2::splat(icon_size),
+                    );
+                    let name = item
+                        .as_ref()
+                        .map(|item| {
+                            entity_name(
+                                &self.locale,
+                                "items",
+                                item["id"].as_str().unwrap_or(""),
+                                item["name"].as_str().unwrap_or(""),
+                            )
+                        })
+                        .unwrap_or_else(|| self.text("equipment_empty"));
+                    if item.as_ref().is_none_or(|item| {
+                        !self.assets.foreground(
+                            ui.painter(),
+                            icon_rect,
+                            &item["sprite"],
+                            Color32::WHITE,
+                        )
+                    }) {
+                        theme::icon(ui.painter(), icon_rect, icon, theme::colors(ui.ctx()).muted);
+                    }
+                    let text_x = if compact {
+                        icon_rect.right() + 7.0 * scale
+                    } else {
+                        rect.left() + 6.0 * scale
+                    };
+                    let font = FontId::proportional(13.0 * scale);
+                    let mut job = egui::text::LayoutJob::simple(
+                        name.clone(),
+                        font,
+                        if item.is_some() {
+                            theme::colors(ui.ctx()).text
+                        } else {
+                            theme::colors(ui.ctx()).muted
+                        },
+                        (rect.right() - text_x - 7.0 * scale).max(0.0),
+                    );
+                    job.wrap.max_rows = 1;
+                    let galley = ui.painter().layout_job(job);
+                    let name_position = if compact {
+                        egui::pos2(text_x, rect.center().y - galley.size().y * 0.5)
+                    } else {
+                        egui::pos2(
+                            rect.center().x - galley.size().x / 2.0,
+                            rect.bottom() - 21.0 * scale,
+                        )
+                    };
+                    ui.painter()
+                        .galley(name_position, galley, theme::colors(ui.ctx()).text);
+                    self.record(&format!("equipment:{slot}"), &response);
+                    response.on_hover_text(
+                        item.as_ref()
+                            .map(|item| item_tooltip(&self.locale, item, &name))
+                            .unwrap_or_else(|| format!("{}: {}", self.text(slot), name)),
+                    );
+                }
+            },
+        );
+        let protected = self.visual["player"]["inventory"]
+            .as_array()
+            .map(|items| items.iter().any(|item| item == "sacred_shield"))
+            .unwrap_or_else(|| {
+                self.visual["abilities"]["field_magic_protection"]
+                    .as_bool()
+                    .unwrap_or(false)
+            });
+        if protected && self.visual["player"]["shield"] != "sacred_shield" {
+            ui.add_space(4.0 * scale);
+            ui.label(
+                RichText::new(self.text("magic_protection_active"))
+                    .size(12.0 * scale)
+                    .color(theme::BLUE),
             );
         }
     }
 
-    fn keys(&self, ui: &mut egui::Ui, compact: bool) {
+    fn keys(&mut self, ui: &mut egui::Ui, compact: bool) {
+        let scale = theme::scale(ui.ctx());
         if !compact {
             section(ui, &self.text("keyring"), Icon::Key);
-            ui.add_space(14.0);
+            ui.add_space(14.0 * scale);
         }
-        let width = (ui.available_width() - 16.0) / 3.0;
+        let width = (ui.available_width() - 16.0 * scale) / 3.0;
         ui.horizontal(|ui| {
-            for (key, color) in [("yellow", GOLD), ("blue", theme::BLUE), ("red", theme::RED)] {
+            for (key, color) in [
+                ("yellow", theme::YELLOW),
+                ("blue", theme::BLUE),
+                ("red", theme::RED),
+            ] {
                 let (rect, response) = ui.allocate_exact_size(
-                    Vec2::new(width, if compact { 22.0 } else { 38.0 }),
+                    Vec2::new(width, if compact { 22.0 } else { 38.0 } * scale),
                     egui::Sense::hover(),
                 );
                 if !compact {
-                    ui.painter().rect_filled(rect, 8.0, theme::SURFACE_RAISED);
+                    ui.painter()
+                        .rect_filled(rect, 8.0 * scale, theme::colors(ui.ctx()).raised);
                 }
                 let icon_rect = Rect::from_center_size(
-                    egui::pos2(rect.min.x + 20.0, rect.center().y),
-                    Vec2::splat(if compact { 22.0 } else { 28.0 }),
+                    egui::pos2(
+                        rect.min.x + if compact { 12.0 } else { 20.0 } * scale,
+                        rect.center().y,
+                    ),
+                    Vec2::splat(if compact { 22.0 } else { 28.0 } * scale),
                 );
                 let sprite = self
                     .engine
@@ -962,16 +1353,19 @@ impl TowerApp {
                     });
                 if !self
                     .assets
-                    .tile(ui.painter(), icon_rect, &sprite, Color32::WHITE)
+                    .foreground(ui.painter(), icon_rect, &sprite, Color32::WHITE)
                 {
                     theme::icon(ui.painter(), icon_rect, Icon::Key, color);
                 }
                 ui.painter().text(
-                    egui::pos2(rect.min.x + 39.0, rect.center().y),
+                    egui::pos2(
+                        rect.min.x + if compact { 27.0 } else { 39.0 } * scale,
+                        rect.center().y,
+                    ),
                     Align2::LEFT_CENTER,
                     number(&self.visual["player"]["keys"][key]),
-                    FontId::proportional(19.0),
-                    TEXT,
+                    FontId::proportional(19.0 * scale),
+                    theme::colors(ui.ctx()).text,
                 );
                 response.on_hover_text(self.text(key));
             }
@@ -979,272 +1373,928 @@ impl TowerApp {
     }
 
     fn inventory(&mut self, ui: &mut egui::Ui) {
+        let scale = theme::scale(ui.ctx());
         section(ui, &self.text("inventory"), Icon::Compass);
-        ui.add_space(14.0);
-        let items = self.visual["player"]["inventory"]
-            .as_array()
-            .into_iter()
-            .flatten()
-            .filter_map(Value::as_str)
-            .map(|item| {
-                let definition = self
-                    .engine
-                    .campaign()
-                    .tiles
-                    .values()
-                    .find(|def| def.item.as_deref() == Some(item));
-                let usable = definition.is_none_or(|def| def.kind != "equipment")
-                    && ![
-                        "hero_orb",
-                        "wisdom_orb",
-                        "monster_book",
-                        "cross",
-                        "dragon_slayer",
-                        "lucky_gold",
-                        "sacred_shield",
-                    ]
-                    .contains(&item);
-                json!({
-                    "id": item,
-                    "name": definition.map(|def| def.name.as_str()).unwrap_or(item),
-                    "sprite": definition.map(|def| &def.sprite),
-                    "usable": usable,
-                    "charges": self.visual["player"]["item_charges"][item],
-                })
-            })
-            .collect::<Vec<_>>();
-        if items.is_empty() {
-            ui.label(RichText::new(self.text("empty_inventory")).color(MUTED));
+        ui.add_space(if self.landscape { 5.0 } else { 10.0 } * scale);
+        let slots = inventory_slots(&self.visual, &self.snapshot, self.engine.campaign());
+        if slots.is_empty() {
+            ui.label(
+                RichText::new(self.text("empty_inventory")).color(theme::colors(ui.ctx()).muted),
+            );
         }
         let mut command = None;
-        egui::ScrollArea::vertical()
-            .id_salt("inventory")
-            .max_height(250.0)
-            .show(ui, |ui| {
-                ui.horizontal_wrapped(|ui| {
-                    for item in items {
-                        let id = item["id"].as_str().unwrap_or("");
-                        let name = entity_name(
-                            &self.locale,
-                            "items",
-                            id,
-                            item["name"].as_str().unwrap_or(id),
-                        );
-                        let usable = item["usable"].as_bool().unwrap_or(false);
-                        let enabled = usable
-                            && !self.busy()
-                            && self.snapshot["pending_interaction"].is_null();
-                        let (rect, response) = ui.allocate_exact_size(
-                            Vec2::splat(54.0),
-                            if enabled {
-                                egui::Sense::click()
-                            } else {
-                                egui::Sense::hover()
-                            },
-                        );
-                        ui.painter().rect_filled(
-                            rect,
-                            10.0,
-                            if response.hovered() {
-                                Color32::from_rgb(34, 45, 61)
-                            } else {
-                                theme::SURFACE_RAISED
-                            },
-                        );
-                        ui.painter().rect_stroke(
-                            rect,
-                            10.0,
-                            Stroke::new(
-                                1.0,
-                                if response.hovered() {
-                                    GOLD
-                                } else {
-                                    theme::BORDER
-                                },
-                            ),
-                            egui::StrokeKind::Inside,
-                        );
-                        self.assets.tile(
-                            ui.painter(),
-                            rect.shrink(10.0),
-                            &item["sprite"],
-                            Color32::WHITE,
-                        );
-                        if let Some(n) = item["charges"].as_u64() {
-                            let badge = Rect::from_min_size(
-                                rect.right_bottom() - Vec2::new(24.0, 18.0),
-                                Vec2::new(24.0, 18.0),
-                            );
-                            ui.painter().rect_filled(badge, 5.0, CARD);
-                            ui.painter().text(
-                                badge.center(),
-                                Align2::CENTER_CENTER,
-                                n.to_string(),
-                                FontId::proportional(13.0),
-                                GOLD,
-                            );
-                        }
-                        self.record(&format!("item:{id}"), &response);
-                        if response.on_hover_text(name).clicked() && enabled {
-                            if id == "flying_orb" {
-                                self.settings = true;
-                                self.notify(self.text("flying_hint"));
-                            } else {
-                                command = Some(Command::UseItem {
-                                    item: id.into(),
-                                    floor: None,
-                                });
-                            }
-                        }
+        let slot_count = slots.len();
+        let cell_size = if self.landscape {
+            40.0
+        } else if self.classic_layout {
+            let columns = if ui.available_width() >= 298.0 {
+                5.0
+            } else {
+                3.0
+            };
+            // egui rounds each cell and gap separately. Leave a small allowance
+            // so fractional desktop scaling cannot wrap the final column.
+            (ui.available_width() - (columns - 1.0) * ui.spacing().item_spacing.x) / columns - 0.25
+        } else {
+            54.0
+        };
+        let grid = ui.horizontal_wrapped(|ui| {
+            for (index, item) in slots.into_iter().enumerate() {
+                let occupied = item.is_some();
+                let usable = item
+                    .as_ref()
+                    .is_some_and(|item| item["usable"] == true || item["id"] == "hero_orb");
+                let enabled = usable
+                    && !self.busy()
+                    && !self.enemy_list_open
+                    && self.snapshot["pending_interaction"].is_null();
+                let (rect, response) = ui.allocate_exact_size(
+                    Vec2::splat(cell_size),
+                    if enabled {
+                        egui::Sense::click()
+                    } else {
+                        egui::Sense::hover()
+                    },
+                );
+                let slot_id = format!("inventory_slot:{index}");
+                self.record(&slot_id, &response);
+                self.bounds.get_mut(&slot_id).expect("slot was recorded")["occupied"] =
+                    json!(occupied);
+                ui.painter().rect_filled(
+                    rect,
+                    10.0 * scale,
+                    if occupied && response.hovered() {
+                        theme::colors(ui.ctx())
+                            .raised
+                            .lerp_to_gamma(theme::colors(ui.ctx()).accent, 0.20)
+                    } else {
+                        theme::colors(ui.ctx()).raised
+                    },
+                );
+                ui.painter().rect_stroke(
+                    rect,
+                    10.0 * scale,
+                    Stroke::new(
+                        1.0,
+                        if occupied && response.hovered() {
+                            theme::colors(ui.ctx()).metal
+                        } else {
+                            theme::colors(ui.ctx()).border
+                        },
+                    ),
+                    egui::StrokeKind::Inside,
+                );
+                let Some(item) = item else { continue };
+                let id = item["id"].as_str().unwrap_or("");
+                let name = entity_name(
+                    &self.locale,
+                    "items",
+                    id,
+                    item["name"].as_str().unwrap_or(id),
+                );
+                self.assets.foreground(
+                    ui.painter(),
+                    rect.shrink(if self.landscape { 5.0 } else { 10.0 } * scale),
+                    &item["sprite"],
+                    Color32::WHITE,
+                );
+                if let Some(n) = item["charges"].as_u64() {
+                    let badge = Rect::from_min_size(
+                        rect.right_bottom() - Vec2::new(24.0, 18.0) * scale,
+                        Vec2::new(24.0, 18.0) * scale,
+                    );
+                    ui.painter()
+                        .rect_filled(badge, 5.0 * scale, theme::colors(ui.ctx()).surface);
+                    ui.painter().text(
+                        badge.center(),
+                        Align2::CENTER_CENTER,
+                        n.to_string(),
+                        FontId::proportional(13.0 * scale),
+                        theme::colors(ui.ctx()).metal,
+                    );
+                }
+                self.record(&format!("item:{id}"), &response);
+                if response
+                    .on_hover_text(item_tooltip(&self.locale, &item, &name))
+                    .clicked()
+                    && enabled
+                {
+                    if id == "hero_orb" {
+                        self.open_enemy_list();
+                    } else if item["usage"]["target_floor"].is_string() {
+                        self.settings = true;
+                        self.notify(self.text("flying_hint"));
+                    } else {
+                        command = Some(Command::UseItem {
+                            item: id.into(),
+                            floor: None,
+                        });
                     }
-                });
-            });
+                }
+            }
+        });
+        let viewport = grid.response.rect.intersect(ui.clip_rect());
+        self.bounds.insert(
+            "inventory_grid".into(),
+            json!({"x":grid.response.rect.min.x,"y":grid.response.rect.min.y,
+                "w":grid.response.rect.width(),"h":grid.response.rect.height(),"slots":slot_count,
+                "visible":{"x":viewport.min.x,"y":viewport.min.y,"w":viewport.width(),"h":viewport.height()}}),
+        );
         if let Some(c) = command {
             self.apply_command(c);
         }
     }
 
-    fn journal(&self, ui: &mut egui::Ui, max_height: f32) {
-        section(ui, &self.text("journal"), Icon::Book);
-        ui.add_space(6.0);
-        ui.label(
-            RichText::new(self.text("journal_subtitle"))
-                .size(14.0)
-                .color(MUTED),
-        );
-        ui.add_space(16.0);
-        egui::ScrollArea::vertical()
-            .id_salt("journal")
-            .max_height(max_height)
-            .show(ui, |ui| {
-                for (i, entry) in self.visual["log"]
-                    .as_array()
-                    .into_iter()
-                    .flatten()
-                    .rev()
-                    .take(50)
-                    .enumerate()
-                {
-                    ui.horizontal_top(|ui| {
-                        let (dot, _) =
-                            ui.allocate_exact_size(Vec2::new(14.0, 24.0), egui::Sense::hover());
-                        ui.painter().circle_filled(
-                            dot.center(),
-                            if i == 0 { 3.5 } else { 2.5 },
-                            if i == 0 { GOLD } else { theme::BORDER },
-                        );
-                        ui.add(
-                            egui::Label::new(
-                                RichText::new(translate_text(
-                                    &self.locale,
-                                    entry.as_str().unwrap_or(""),
-                                ))
-                                .size(17.0)
-                                .color(if i == 0 {
-                                    TEXT
-                                } else {
-                                    MUTED
-                                }),
-                            )
-                            .wrap(),
-                        );
-                    });
-                    ui.add_space(11.0);
-                }
-            });
+    fn append_visual_activity(&mut self, text: Value, log_id: Option<u64>) -> bool {
+        append_visible_activity(&mut self.visual, &self.snapshot, text, log_id)
     }
 
-    fn inspection(&self, ui: &mut egui::Ui) {
-        section(ui, &self.text("inspect"), Icon::Compass);
-        ui.add_space(16.0);
-        if let Some(active) = self
-            .active
-            .as_ref()
-            .filter(|a| a.effect["type"] == "battle")
-            && let Some(progress) = self.battle_progress(self.now())
-        {
-            let e = &active.effect;
-            let name = translate_text(&self.locale, e["enemy_name"].as_str().unwrap_or(""));
-            ui.label(RichText::new(name).size(22.0).strong());
-            ui.add_space(6.0);
-            ui.label(
-                RichText::new(self.text(if progress.hero_turn {
-                    "hero_turn"
+    fn activity_battle(&self, index: usize) -> Option<Value> {
+        self.visual["log"].as_array()?.get(index)?;
+        let id = self.visual["log_start"]
+            .as_u64()
+            .unwrap_or(0)
+            .saturating_add(index as u64);
+        self.visual["battle_log"]
+            .as_array()?
+            .iter()
+            .find(|record| record["log_id"].as_u64() == Some(id))
+            .cloned()
+    }
+
+    fn activity_expansion_id(&self, log_id: u64) -> egui::Id {
+        egui::Id::new((
+            "activity_battle",
+            self.visual["campaign_id"].as_str().unwrap_or(""),
+            log_id,
+        ))
+    }
+
+    fn open_recent_activity(&mut self, index: usize) {
+        if let Some(battle) = self.activity_battle(index) {
+            let id = self.activity_expansion_id(battle["log_id"].as_u64().unwrap_or(0));
+            self.context.data_mut(|data| data.insert_temp(id, true));
+        }
+        self.open_journal_history();
+    }
+
+    fn compact_activity_preview(&mut self, ui: &mut egui::Ui) {
+        let scale = theme::scale(ui.ctx());
+        let available = !self.busy() && self.snapshot["pending_interaction"].is_null();
+        let preview = ui.scope(|ui| {
+            ui.spacing_mut().item_spacing.y = 0.0;
+            let (rect, header) = ui.allocate_exact_size(
+                Vec2::new(ui.available_width(), 18.0 * scale),
+                if available {
+                    egui::Sense::click()
                 } else {
-                    "enemy_turn"
-                }))
-                .size(17.0)
-                .color(GOLD),
+                    egui::Sense::hover()
+                },
             );
-            ui.add_space(10.0);
-            for (label, hp, maximum, color) in [
-                (
-                    self.text("adventurer"),
-                    progress.hero_hp,
-                    e["hero_hp"].as_i64().unwrap_or(1),
-                    theme::GREEN,
+            theme::icon(
+                ui.painter(),
+                Rect::from_center_size(
+                    egui::pos2(rect.left() + 7.0 * scale, rect.center().y),
+                    Vec2::splat(14.0 * scale),
                 ),
-                (
-                    self.text("combat_enemy"),
-                    progress.enemy_hp,
-                    e["enemy_hp"].as_i64().unwrap_or(1),
-                    theme::RED,
+                Icon::Book,
+                theme::colors(ui.ctx()).muted,
+            );
+            ui.painter().text(
+                egui::pos2(rect.left() + 20.0 * scale, rect.center().y),
+                Align2::LEFT_CENTER,
+                self.text("journal_recent_short"),
+                FontId::proportional(11.0 * scale),
+                theme::colors(ui.ctx()).muted,
+            );
+            theme::icon(
+                ui.painter(),
+                Rect::from_center_size(
+                    egui::pos2(rect.right() - 7.0 * scale, rect.center().y),
+                    Vec2::splat(14.0 * scale),
                 ),
-            ] {
-                ui.horizontal(|ui| {
-                    ui.label(RichText::new(label).size(15.0).color(MUTED));
-                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        ui.label(RichText::new(number(&json!(hp))).size(18.0).strong());
-                    });
-                });
-                ui.add(
-                    egui::ProgressBar::new(hp as f32 / maximum.max(1) as f32)
-                        .fill(color)
-                        .desired_height(5.0),
+                Icon::ArrowRight,
+                theme::colors(ui.ctx()).text,
+            );
+            self.record("journal_preview_open", &header);
+            if header.on_hover_text(self.text("journal_expand")).clicked() {
+                self.open_journal_history();
+            }
+            ui.add_space(2.0 * scale);
+            let entries = self.visual["log"].as_array().cloned().unwrap_or_default();
+            for (order, (index, entry)) in entries.iter().enumerate().rev().take(2).enumerate() {
+                if order > 0 {
+                    ui.add_space(3.0 * scale);
+                }
+                let text = translate_text(&self.locale, entry.as_str().unwrap_or(""));
+                let (rect, row) = ui.allocate_exact_size(
+                    Vec2::new(ui.available_width(), 18.0 * scale),
+                    if available {
+                        egui::Sense::click()
+                    } else {
+                        egui::Sense::hover()
+                    },
                 );
-                ui.add_space(10.0);
+                ui.painter()
+                    .rect_filled(rect, 4.0 * scale, theme::colors(ui.ctx()).raised);
+                let mut job = egui::text::LayoutJob::simple(
+                    text.clone(),
+                    FontId::proportional(13.0 * scale),
+                    theme::colors(ui.ctx()).text,
+                    (rect.width() - 10.0 * scale).max(1.0),
+                );
+                job.wrap.max_rows = 1;
+                let galley = ui.painter().layout_job(job);
+                ui.painter().galley(
+                    egui::pos2(
+                        rect.left() + 5.0 * scale,
+                        rect.center().y - galley.size().y / 2.0,
+                    ),
+                    galley,
+                    theme::colors(ui.ctx()).text,
+                );
+                self.record(&format!("journal_preview_entry:{index}"), &row);
+                if let Some(battle) = self.activity_battle(index) {
+                    self.bounds
+                        .get_mut(&format!("journal_preview_entry:{index}"))
+                        .expect("row was recorded")["battle_log_id"] = battle["log_id"].clone();
+                }
+                if row.on_hover_text(text).clicked() {
+                    self.open_recent_activity(index);
+                }
             }
-            ui.separator();
+        });
+        self.record("journal_preview", &preview.response);
+    }
+
+    fn journal(&mut self, ui: &mut egui::Ui) {
+        section(ui, &self.text("journal"), Icon::Book);
+        ui.add_space(10.0);
+        let heading = theme::caption(ui, &self.text("journal_recent_actions"));
+        self.record("journal_log", &heading);
+        ui.add_space(6.0);
+        let entries = self.visual["log"].as_array().cloned().unwrap_or_default();
+        if entries.is_empty() {
+            ui.label(
+                RichText::new(self.text("journal_log_empty"))
+                    .size(14.0)
+                    .color(theme::colors(ui.ctx()).muted),
+            );
+        }
+        for (index, entry) in entries.iter().enumerate().rev().take(3) {
+            let text = translate_text(&self.locale, entry.as_str().unwrap_or(""));
+            let width = ui.available_width();
+            let row = egui::Frame::new()
+                .fill(theme::colors(ui.ctx()).raised)
+                .corner_radius(5)
+                .inner_margin(egui::Margin::symmetric(8, 3))
+                .show(ui, |ui| {
+                    ui.set_width((width - 16.0).max(1.0));
+                    ui.add(
+                        egui::Label::new(
+                            RichText::new(&text)
+                                .size(14.0)
+                                .color(theme::colors(ui.ctx()).muted),
+                        )
+                        .truncate(),
+                    )
+                });
+            self.record(&format!("journal_preview_entry:{index}"), &row.response);
+            if let Some(battle) = self.activity_battle(index) {
+                self.bounds
+                    .get_mut(&format!("journal_preview_entry:{index}"))
+                    .expect("row was recorded")["battle_log_id"] = battle["log_id"].clone();
+            }
+            let click = ui.interact(
+                row.response.rect,
+                row.response.id.with("open"),
+                if !self.busy() && self.snapshot["pending_interaction"].is_null() {
+                    egui::Sense::click()
+                } else {
+                    egui::Sense::hover()
+                },
+            );
+            if click.on_hover_text(text).clicked() {
+                self.open_recent_activity(index);
+            }
+            ui.add_space(3.0);
+        }
+        ui.add_space(10.0);
+        let available = !self.busy() && self.snapshot["pending_interaction"].is_null();
+        let expand = ui
+            .add_enabled_ui(available, |ui| {
+                theme::action(ui, self.text("journal_expand"), Icon::Book, false)
+            })
+            .inner;
+        self.record("journal_expand", &expand);
+        if expand.clicked() {
+            self.open_journal_history();
+        }
+        if visual_has_wisdom_orb(&self.visual) {
             ui.add_space(6.0);
-            for (key, label) in [("hero_hit", "hero_hit"), ("enemy_hit", "enemy_hit")] {
-                ui.horizontal(|ui| {
-                    ui.label(RichText::new(self.text(label)).size(15.0).color(MUTED));
-                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        ui.label(
-                            RichText::new(format!("−{}", number(&e[key])))
-                                .size(18.0)
-                                .color(TEXT),
-                        );
-                    });
+            let wisdom = ui
+                .add_enabled_ui(available, |ui| {
+                    theme::action(ui, self.text("journal_wisdom"), Icon::Compass, false)
+                })
+                .inner;
+            self.record("journal_wisdom", &wisdom);
+            self.record("journal_clues", &wisdom);
+            if wisdom.clicked() {
+                self.apply_command(Command::UseItem {
+                    item: "wisdom_orb".into(),
+                    floor: None,
                 });
             }
-            let strikes =
-                e["hero_strikes"].as_i64().unwrap_or(0) + e["enemy_strikes"].as_i64().unwrap_or(0);
-            ui.add_space(8.0);
-            ui.label(
-                RichText::new(format!(
-                    "{} {}/{}",
-                    self.text("strikes_resolved"),
-                    progress.completed,
-                    strikes
-                ))
-                .size(14.0)
-                .color(MUTED),
-            );
+        }
+    }
+
+    fn open_journal_history(&mut self) {
+        self.route.clear();
+        self.settings = false;
+        self.enemy_list_open = false;
+        self.journal_open = true;
+    }
+
+    fn open_enemy_list(&mut self) {
+        if !visual_has_hero_orb(&self.visual)
+            || self.busy()
+            || !self.snapshot["pending_interaction"].is_null()
+        {
             return;
         }
-        let Some((x, y)) = self.selected.filter(|_| !self.busy() || self.travel_only()) else {
+        self.route.clear();
+        self.settings = false;
+        self.journal_open = false;
+        self.enemy_list_open = true;
+    }
+
+    fn enemy_list_button(&mut self, ui: &mut egui::Ui) {
+        self.enemy_list_button_sized(ui, None);
+    }
+
+    fn enemy_list_button_sized(&mut self, ui: &mut egui::Ui, width: Option<f32>) {
+        let owned = visual_has_hero_orb(&self.visual);
+        let available = owned && !self.busy() && self.snapshot["pending_interaction"].is_null();
+        let response = ui
+            .add_enabled_ui(available, |ui| {
+                theme::action_sized(ui, "", Icon::Compass, false, width)
+            })
+            .inner;
+        self.record("enemy_list_open", &response);
+        self.bounds
+            .get_mut("enemy_list_open")
+            .expect("button was recorded")["enabled"] = json!(available);
+        if response
+            .on_hover_text(if owned {
+                self.text("enemy_list")
+            } else {
+                self.text("orb_required")
+            })
+            .clicked()
+        {
+            self.open_enemy_list();
+        }
+    }
+
+    fn enemy_list_dialog(&mut self) {
+        if !self.enemy_list_open {
+            return;
+        }
+        if !visual_has_hero_orb(&self.visual) {
+            self.enemy_list_open = false;
+            return;
+        }
+        // Inspect only this floor using the board's player-visible boundary,
+        // then group identical revealed profiles rather than listing coordinates.
+        let width = self.visual["width"].as_u64().unwrap_or(11) as usize;
+        let height = self.visual["height"].as_u64().unwrap_or(11) as usize;
+        let mut entries = vec![];
+        for y in 0..height {
+            for x in 0..width {
+                let inspection = self.engine.inspect_player_tile(x, y);
+                if inspection["enemy"].is_object() {
+                    entries.push(inspection);
+                }
+            }
+        }
+        let encounter_count = entries.len();
+        let entries = group_floor_enemies(entries, &self.locale);
+        let viewport = self.context.input(|i| i.viewport_rect());
+        let scale = theme::scale(&self.context);
+        let title = self
+            .text("enemy_list_title")
+            .replace("{floor}", &self.visual["floor"].to_string());
+        let mut close = false;
+        let response = egui::Modal::new(egui::Id::new("floor_enemy_list"))
+            .backdrop_color(Color32::from_black_alpha(160))
+            .frame(theme::frame(&self.context).inner_margin((12.0 * scale) as i8))
+            .show(&self.context.clone(), |ui| {
+                ui.set_width((viewport.width() - 56.0 * scale).clamp(240.0, 860.0 * scale));
+                let heading = ui.scope(|ui| section(ui, &title, Icon::Compass));
+                self.record("enemy_list_heading", &heading.response);
+                ui.add_space(4.0 * scale);
+                ui.label(RichText::new(self.text("enemy_list_count")
+                    .replace("{count}", &encounter_count.to_string())
+                    .replace("{groups}", &entries.len().to_string()))
+                    .size(13.0 * scale).color(theme::colors(ui.ctx()).muted));
+                ui.add_space(10.0 * scale);
+                let table = ui.available_width() >= 620.0 * scale;
+                let metrics = [
+                    ("hp", "health_short", Icon::Heart, theme::RED),
+                    ("attack", "attack_short", Icon::Sword, theme::colors(ui.ctx()).metal),
+                    ("defense", "defense_short", Icon::Shield, theme::BLUE),
+                    ("gold", "gold", Icon::Coin, theme::GOLD),
+                    ("damage", "journal_battle_damage", Icon::Heart, theme::GREEN),
+                ];
+                // Shared column widths keep numeric values aligned across all
+                // rows. Leave the name column the remaining table width.
+                let metric_widths: Vec<f32> = metrics.iter().map(|(key, label, _, _)| {
+                    let label_width = ui.painter().layout_no_wrap(self.text(label),
+                        FontId::proportional(12.0 * scale), theme::colors(ui.ctx()).muted).size().x;
+                    let value_width = entries.iter().map(|group| ui.painter().layout_no_wrap(
+                        number(&group.inspection["enemy"][key]), FontId::proportional(18.0 * scale),
+                        theme::colors(ui.ctx()).text).size().x).fold(0.0_f32, f32::max);
+                    (label_width + 26.0 * scale).max(value_width + 22.0 * scale).max(66.0 * scale)
+                }).collect();
+                let metrics_width: f32 = metric_widths.iter().sum();
+                let table = table && ui.available_width() - metrics_width >= 160.0 * scale;
+                let name_width = ui.available_width() - metrics_width;
+                if table {
+                    let (header, response) = ui.allocate_exact_size(Vec2::new(ui.available_width(), 28.0 * scale), egui::Sense::hover());
+                    self.record("enemy_list_columns", &response);
+                    ui.painter().text(egui::pos2(header.left() + 10.0 * scale, header.center().y), Align2::LEFT_CENTER,
+                        self.text("enemy_list_enemy"), FontId::proportional(13.0 * scale), theme::colors(ui.ctx()).muted);
+                    let mut x = header.left() + name_width;
+                    for ((_, label, icon, color), width) in metrics.iter().zip(&metric_widths) {
+                        let column = Rect::from_min_size(egui::pos2(x, header.top()), Vec2::new(*width, header.height()));
+                        enemy_overview_header(ui, column, &self.text(label), *icon, *color, scale);
+                        x += width;
+                    }
+                    ui.add_space(3.0 * scale);
+                }
+                let scroll = egui::ScrollArea::vertical()
+                    .id_salt("floor_enemy_list_entries")
+                    .max_height((viewport.height() - 172.0 * scale - if table { 31.0 * scale } else { 0.0 }).max(70.0))
+                    .show(ui, |ui| {
+                        if entries.is_empty() {
+                            ui.label(self.text("enemy_list_empty"));
+                        }
+                        for (index, group) in entries.iter().enumerate() {
+                            let entry = &group.inspection;
+                            let enemy = &entry["enemy"];
+                            let row_height = if table { 56.0 } else { 134.0 } * scale;
+                            let (rect, response) = ui.allocate_exact_size(Vec2::new(ui.available_width(), row_height), egui::Sense::hover());
+                            let colors = theme::colors(ui.ctx());
+                            ui.painter().rect_filled(rect, 6.0, if index % 2 == 0 { colors.raised } else { colors.surface.lerp_to_gamma(colors.raised, 0.42) });
+                            let heading_rect = if table { Rect::from_min_size(rect.min, Vec2::new(name_width, row_height)) }
+                                else { Rect::from_min_size(rect.min, Vec2::new(rect.width(), 42.0 * scale)) };
+                            let portrait = Rect::from_center_size(egui::pos2(heading_rect.left() + 27.0 * scale, heading_rect.center().y), Vec2::splat(34.0 * scale));
+                            self.assets.foreground(ui.painter(), portrait, &entry["sprite"], Color32::WHITE);
+                            let quantity = format!("×{}", group.count);
+                            let quantity_galley = ui.painter().layout_no_wrap(quantity, FontId::proportional(13.0 * scale), colors.muted);
+                            let quantity_x = heading_rect.right() - 10.0 * scale - quantity_galley.size().x;
+                            let name_x = portrait.right() + 10.0 * scale;
+                            let mut job = egui::text::LayoutJob::simple(group.name.clone(), FontId::proportional(16.0 * scale), colors.text,
+                                (quantity_x - name_x - 8.0 * scale).max(1.0));
+                            job.wrap.max_rows = if table { 2 } else { 1 };
+                            let galley = ui.painter().layout_job(job);
+                            ui.painter().galley(egui::pos2(name_x, heading_rect.center().y - galley.size().y / 2.0), galley, colors.text);
+                            ui.painter().galley(egui::pos2(quantity_x, heading_rect.center().y - quantity_galley.size().y / 2.0), quantity_galley, colors.muted);
+                            let mut metric_rects = BTreeMap::new();
+                            let mut metric_x = rect.left() + name_width;
+                            for (metric_index, (key, label, icon, color)) in metrics.iter().enumerate() {
+                                let metric_rect = if table {
+                                    let result = Rect::from_min_size(egui::pos2(metric_x, rect.top()), Vec2::new(metric_widths[metric_index], rect.height()));
+                                    metric_x += metric_widths[metric_index];
+                                    result
+                                } else {
+                                    let column = metric_index % 3;
+                                    let row = metric_index / 3;
+                                    let cell_width = rect.width() / 3.0;
+                                    Rect::from_min_size(egui::pos2(rect.left() + column as f32 * cell_width,
+                                        rect.top() + (44.0 + row as f32 * 44.0) * scale), Vec2::new(cell_width, 42.0 * scale))
+                                };
+                                let color = if *key == "damage" && enemy["can_win"] != true { theme::RED } else { *color };
+                                let info = enemy_overview_value(ui, metric_rect, &self.text(label), &number(&enemy[key]), *icon, color, scale, !table, *key == "damage");
+                                metric_rects.insert(*key, info);
+                            }
+                            if !table {
+                                let status = Rect::from_min_size(egui::pos2(rect.left() + 2.0 * rect.width() / 3.0, rect.top() + 88.0 * scale), Vec2::new(rect.width() / 3.0, 42.0 * scale));
+                                ui.painter().text(status.center(), Align2::CENTER_CENTER, self.text(if enemy["can_win"] == true { "enemy_list_safe" } else { "enemy_list_unsafe" }),
+                                    FontId::proportional(12.0 * scale), if enemy["can_win"] == true { theme::GREEN } else { theme::RED });
+                            }
+                            let key = format!("enemy_list_entry:{index}");
+                            self.record(&key, &response);
+                            let recorded = self.bounds.get_mut(&key).expect("entry was recorded");
+                            for field in ["hp", "attack", "defense", "damage", "gold", "can_win"] {
+                                recorded[field] = enemy[field].clone();
+                            }
+                            recorded["name"] = json!(group.name);
+                            recorded["count"] = json!(group.count);
+                            recorded["metrics"] = json!(metric_rects);
+                            let reason = enemy["reason"].as_str().unwrap_or("");
+                            response.on_hover_text(if reason.is_empty() { group.name.clone() } else { format!("{}\n{}", group.name, translate_text(&self.locale, reason)) });
+                            ui.add_space(5.0 * scale);
+                        }
+                    });
+                let rect = scroll.inner_rect.intersect(ui.clip_rect());
+                self.bounds.insert("enemy_list_viewport".into(), json!({
+                    "x":rect.min.x,"y":rect.min.y,"w":rect.width(),"h":rect.height(),
+                    "offset_y":scroll.state.offset.y,"content_h":scroll.content_size.y,"entries":entries.len(),"encounters":encounter_count,"table":table
+                }));
+                ui.add_space(7.0 * scale);
+                ui.label(RichText::new(self.text("enemy_list_damage_help")).size(12.0 * scale).color(theme::colors(ui.ctx()).muted));
+                ui.add_space(5.0 * scale);
+                let button = theme::action(ui, self.text("close"), Icon::ArrowLeft, true);
+                self.record("enemy_list_close", &button);
+                close = button.clicked();
+            });
+        self.record("enemy_list_dialog", &response.response);
+        if close || response.should_close() {
+            self.enemy_list_open = false;
+        }
+    }
+
+    fn journal_history_dialog(&mut self) {
+        if !self.journal_open {
+            return;
+        }
+        let entries = self.visual["log"].as_array().cloned().unwrap_or_default();
+        let viewport = self.context.input(|i| i.viewport_rect());
+        let scale = theme::scale(&self.context);
+        let mut close = false;
+        let response = egui::Modal::new(egui::Id::new("journal_history"))
+            .backdrop_color(Color32::from_black_alpha(160))
+            .frame(theme::frame(&self.context).inner_margin((20.0 * scale).round() as i8))
+            .show(&self.context.clone(), |ui| {
+                ui.set_width((viewport.width() - 72.0 * scale).clamp(240.0 * scale, 620.0 * scale));
+                let heading = ui.scope(|ui| section(ui, &self.text("journal_history"), Icon::Book));
+                self.record("journal_history_heading", &heading.response);
+                ui.add_space(8.0 * scale);
+                ui.label(
+                    RichText::new(
+                        self.text("journal_history_count")
+                            .replace("{count}", &entries.len().to_string()),
+                    )
+                    .size(14.0 * scale)
+                    .color(theme::colors(ui.ctx()).muted),
+                );
+                ui.add_space(12.0 * scale);
+                let scroll = egui::ScrollArea::vertical()
+                    .id_salt("journal_history_entries")
+                    .max_height((viewport.height() - 230.0 * scale).max(100.0 * scale))
+                    .show(ui, |ui| {
+                        if entries.is_empty() {
+                            ui.label(self.text("journal_log_empty"));
+                        }
+                        for (index, entry) in entries.iter().enumerate().rev() {
+                            let width = ui.available_width();
+                            let battle = self.activity_battle(index);
+                            let horizontal_padding = (10.0 * scale).round() as i8;
+                            let row = egui::Frame::new()
+                                .fill(theme::colors(ui.ctx()).raised)
+                                .corner_radius((6.0 * scale).round() as u8)
+                                .inner_margin(egui::Margin::symmetric(
+                                    horizontal_padding,
+                                    (7.0 * scale).round() as i8,
+                                ))
+                                .show(ui, |ui| {
+                                    ui.set_width(
+                                        (width - 2.0 * f32::from(horizontal_padding)).max(1.0),
+                                    );
+                                    ui.add(
+                                        egui::Label::new(
+                                            RichText::new(translate_text(
+                                                &self.locale,
+                                                entry.as_str().unwrap_or(""),
+                                            ))
+                                            .size(17.0 * scale)
+                                            .color(theme::colors(ui.ctx()).text),
+                                        )
+                                        .wrap(),
+                                    );
+                                    if let Some(battle) = &battle {
+                                        let log_id = battle["log_id"].as_u64().unwrap_or(0);
+                                        let expansion_id = self.activity_expansion_id(log_id);
+                                        let mut expanded = ui
+                                            .ctx()
+                                            .data(|data| data.get_temp::<bool>(expansion_id))
+                                            .unwrap_or(false);
+                                        ui.add_space(3.0 * scale);
+                                        let (rect, toggle) = ui.allocate_exact_size(
+                                            Vec2::new(ui.available_width(), 20.0 * scale),
+                                            egui::Sense::click(),
+                                        );
+                                        let center =
+                                            egui::pos2(rect.left() + 5.0 * scale, rect.center().y);
+                                        let points = if expanded {
+                                            vec![
+                                                center + Vec2::new(-4.0, -2.0) * scale,
+                                                center + Vec2::new(4.0, -2.0) * scale,
+                                                center + Vec2::new(0.0, 3.0) * scale,
+                                            ]
+                                        } else {
+                                            vec![
+                                                center + Vec2::new(-2.0, -4.0) * scale,
+                                                center + Vec2::new(-2.0, 4.0) * scale,
+                                                center + Vec2::new(3.0, 0.0) * scale,
+                                            ]
+                                        };
+                                        ui.painter().add(egui::Shape::convex_polygon(
+                                            points,
+                                            theme::colors(ui.ctx()).metal,
+                                            Stroke::NONE,
+                                        ));
+                                        ui.painter().text(
+                                            egui::pos2(rect.left() + 16.0 * scale, rect.center().y),
+                                            Align2::LEFT_CENTER,
+                                            self.text("journal_battle_details"),
+                                            FontId::proportional(14.0 * scale),
+                                            theme::colors(ui.ctx()).metal,
+                                        );
+                                        self.record(
+                                            &format!("journal_battle_toggle:{log_id}"),
+                                            &toggle,
+                                        );
+                                        if toggle.clicked() {
+                                            expanded = !expanded;
+                                            ui.ctx().data_mut(|data| {
+                                                data.insert_temp(expansion_id, expanded)
+                                            });
+                                        }
+                                        if expanded {
+                                            ui.add_space(7.0 * scale);
+                                            self.journal_battle_details(ui, battle);
+                                        }
+                                    }
+                                });
+                            self.record(&format!("journal_history_entry:{index}"), &row.response);
+                            ui.add_space(6.0 * scale);
+                        }
+                    });
+                let rect = scroll.inner_rect.intersect(ui.clip_rect());
+                self.bounds.insert(
+                    "journal_history_viewport".into(),
+                    json!({
+                        "x": rect.min.x, "y": rect.min.y, "w": rect.width(), "h": rect.height(),
+                        "offset_y": scroll.state.offset.y, "content_h": scroll.content_size.y,
+                        "entries": entries.len()
+                    }),
+                );
+                ui.add_space(14.0 * scale);
+                let button = theme::action(ui, self.text("close"), Icon::ArrowLeft, true);
+                self.record("journal_history_close", &button);
+                close = button.clicked();
+            });
+        self.record("journal_history", &response.response);
+        if close || response.should_close() {
+            self.journal_open = false;
+        }
+    }
+
+    fn journal_battle_details(&mut self, ui: &mut egui::Ui, battle: &Value) {
+        let scale = theme::scale(ui.ctx());
+        let details = ui.scope(|ui| {
+            let won = battle["outcome"] == "defeated";
+            ui.label(
+                RichText::new(format!(
+                    "{} · {}",
+                    translate_text(&self.locale, battle["enemy_name"].as_str().unwrap_or("")),
+                    self.text(if won {
+                        "journal_battle_defeated"
+                    } else {
+                        "journal_battle_lost"
+                    }),
+                ))
+                .size(15.0 * scale)
+                .strong()
+                .color(if won { theme::GREEN } else { theme::RED }),
+            );
+            let mut location = self.text("journal_location");
+            for key in ["cycle", "floor", "x", "y"] {
+                location = location.replace(&format!("{{{key}}}"), &battle[key].to_string());
+            }
+            ui.label(
+                RichText::new(location)
+                    .size(12.0 * scale)
+                    .color(theme::colors(ui.ctx()).muted),
+            );
+            ui.horizontal_wrapped(|ui| {
+                for (key, label) in [
+                    ("enemy_hp", "health_short"),
+                    ("enemy_attack", "attack_short"),
+                    ("enemy_defense", "defense_short"),
+                ] {
+                    ui.label(
+                        RichText::new(format!("{} {}", self.text(label), number(&battle[key])))
+                            .size(14.0 * scale),
+                    );
+                }
+            });
+            ui.horizontal_wrapped(|ui| {
+                ui.label(
+                    RichText::new(format!(
+                        "{} {}",
+                        self.text("journal_battle_damage"),
+                        number(&battle["damage"])
+                    ))
+                    .size(14.0 * scale)
+                    .color(theme::RED),
+                );
+                ui.label(
+                    RichText::new(format!(
+                        "{} {}",
+                        self.text("journal_battle_reward"),
+                        number(&battle["reward"])
+                    ))
+                    .size(14.0 * scale)
+                    .color(theme::GOLD),
+                );
+            });
+            ui.add_space(3.0 * scale);
+            ui.label(
+                RichText::new(self.text("journal_battle_hero_stats"))
+                    .size(12.0 * scale)
+                    .color(theme::colors(ui.ctx()).muted),
+            );
+            ui.horizontal_wrapped(|ui| {
+                for (key, label) in [
+                    ("hp", "health_short"),
+                    ("attack", "attack_short"),
+                    ("defense", "defense_short"),
+                ] {
+                    ui.label(
+                        RichText::new(format!(
+                            "{} {}",
+                            self.text(label),
+                            number(&battle["hero_before"][key])
+                        ))
+                        .size(14.0 * scale),
+                    );
+                }
+            });
+            ui.label(
+                RichText::new(
+                    self.text("journal_battle_hero_hp")
+                        .replace("{before}", &number(&battle["hero_before"]["hp"]))
+                        .replace("{after}", &number(&battle["hero_after_hp"])),
+                )
+                .size(14.0 * scale),
+            );
+            ui.label(
+                RichText::new(
+                    self.text("journal_battle_strikes")
+                        .replace("{hero}", &number(&battle["hero_strikes"]))
+                        .replace("{enemy}", &number(&battle["enemy_strikes"])),
+                )
+                .size(12.0 * scale)
+                .color(theme::colors(ui.ctx()).muted),
+            );
+        });
+        let key = format!(
+            "journal_battle_details:{}",
+            battle["log_id"].as_u64().unwrap_or(0)
+        );
+        self.record(&key, &details.response);
+        let bound = self.bounds.get_mut(&key).expect("details were recorded");
+        for field in [
+            "log_id",
+            "enemy_hp",
+            "enemy_attack",
+            "enemy_defense",
+            "damage",
+            "reward",
+            "hero_after_hp",
+            "hero_before",
+            "outcome",
+        ] {
+            bound[field] = battle[field].clone();
+        }
+    }
+
+    fn journal_clues(&mut self, ui: &mut egui::Ui, entries: &[Value]) {
+        let scale = theme::scale(ui.ctx());
+        if entries.is_empty() {
+            ui.label(
+                RichText::new(self.text("journal_empty"))
+                    .size(15.0 * scale)
+                    .color(theme::colors(ui.ctx()).muted),
+            );
+        }
+        // The original item presents the 24 clue slots in their fixed source
+        // order, rather than encounter recency.
+        for (index, entry) in entries.iter().enumerate() {
+            let title = translate_text(&self.locale, entry["title"].as_str().unwrap_or(""));
+            if !title.is_empty() {
+                ui.label(
+                    RichText::new(title)
+                        .size(17.0 * scale)
+                        .strong()
+                        .color(theme::colors(ui.ctx()).metal),
+                );
+            }
+            let location = self
+                .text("journal_location")
+                .replace("{cycle}", &entry["cycle"].to_string())
+                .replace("{floor}", &entry["floor"].to_string())
+                .replace("{x}", &entry["x"].to_string())
+                .replace("{y}", &entry["y"].to_string());
+            ui.label(
+                RichText::new(location)
+                    .size(13.0 * scale)
+                    .color(theme::colors(ui.ctx()).muted),
+            );
+            ui.add_space(4.0 * scale);
+            let clue = ui.add(
+                egui::Label::new(
+                    RichText::new(translate_text(
+                        &self.locale,
+                        entry["text"].as_str().unwrap_or(""),
+                    ))
+                    .size(17.0 * scale)
+                    .color(theme::colors(ui.ctx()).text),
+                )
+                .wrap(),
+            );
+            self.record(&format!("journal_clue:{index}"), &clue);
+            ui.add_space(16.0 * scale);
+        }
+    }
+
+    fn journal_dialog(&mut self) {
+        let entries = if visual_has_wisdom_orb(&self.visual) {
+            self.active
+                .as_ref()
+                .and_then(|active| active.effect["entries"].as_array())
+                .cloned()
+                .unwrap_or_default()
+        } else {
+            vec![]
+        };
+        let viewport = self.context.input(|i| i.viewport_rect());
+        let scale = theme::scale(&self.context);
+        let mut close = false;
+        let response = egui::Modal::new(egui::Id::new("wisdom_journal"))
+            .backdrop_color(Color32::from_black_alpha(160))
+            .frame(theme::frame(&self.context).inner_margin((24.0 * scale).round() as i8))
+            .show(&self.context.clone(), |ui| {
+                ui.set_width((viewport.width() - 96.0 * scale).clamp(260.0 * scale, 580.0 * scale));
+                section(ui, &self.text("journal"), Icon::Book);
+                ui.add_space(8.0 * scale);
+                ui.label(
+                    RichText::new(self.text("journal_subtitle"))
+                        .size(14.0 * scale)
+                        .color(theme::colors(ui.ctx()).muted),
+                );
+                ui.add_space(16.0 * scale);
+                let scroll = egui::ScrollArea::vertical()
+                    .id_salt("wisdom_journal_entries")
+                    .max_height((viewport.height() - 300.0 * scale).max(100.0 * scale))
+                    .show(ui, |ui| self.journal_clues(ui, &entries));
+                let rect = scroll.inner_rect.intersect(ui.clip_rect());
+                self.bounds.insert(
+                    "wisdom_journal_viewport".into(),
+                    json!({
+                        "x": rect.min.x, "y": rect.min.y, "w": rect.width(), "h": rect.height(),
+                        "offset_y": scroll.state.offset.y, "content_h": scroll.content_size.y,
+                        "entries": entries.len()
+                    }),
+                );
+                ui.add_space(16.0 * scale);
+                let button = theme::action(ui, self.text("close"), Icon::ArrowLeft, true);
+                self.record("journal_close", &button);
+                close = button.clicked();
+            });
+        self.record("journal_dialog", &response.response);
+        if close || response.should_close() {
+            self.finish_effect();
+        }
+    }
+
+    fn inspection(&mut self, ui: &mut egui::Ui) {
+        if self.landscape {
+            self.compact_inspection(ui);
+            return;
+        }
+        let scale = theme::scale(ui.ctx());
+        section(ui, &self.text("inspect"), Icon::Compass);
+        ui.add_space(16.0 * scale);
+        let target = self.selected.filter(|_| !self.busy() || self.travel_only());
+        let Some((x, y)) = target else {
             ui.label(
                 RichText::new(self.text("inspect_hint"))
-                    .size(17.0)
-                    .color(MUTED),
+                    .size(17.0 * scale)
+                    .color(theme::colors(ui.ctx()).muted),
             );
-            ui.add_space(10.0);
-            ui.label(
-                RichText::new(self.text("orb_required"))
-                    .size(15.0)
-                    .color(MUTED),
-            );
+            if self.visual["forecasts_unlocked"] != true {
+                ui.add_space(10.0 * scale);
+                let hint = ui.label(
+                    RichText::new(self.text("orb_required"))
+                        .size(15.0 * scale)
+                        .color(theme::colors(ui.ctx()).muted),
+                );
+                self.record("inspection_locked_hint", &hint);
+            }
             return;
         };
         let info = self.engine.inspect(x, y);
@@ -1255,29 +2305,58 @@ impl TowerApp {
             &id,
             info["name"].as_str().unwrap_or(""),
         );
-        ui.horizontal(|ui| {
-            let (sprite, _) = ui.allocate_exact_size(Vec2::splat(54.0), egui::Sense::hover());
+        let target_panel = ui.horizontal(|ui| {
+            let (sprite, _) =
+                ui.allocate_exact_size(Vec2::splat(54.0 * scale), egui::Sense::hover());
             ui.painter()
-                .rect_filled(sprite, 10.0, theme::SURFACE_RAISED);
-            self.assets.tile(
-                ui.painter(),
-                sprite.shrink(7.0),
-                &self.visual["tile_defs"][&id]["sprite"],
-                Color32::WHITE,
-            );
+                .rect_filled(sprite, 10.0 * scale, theme::colors(ui.ctx()).raised);
+            let portrait = &self.visual["tile_defs"][&id]["sprite"];
+            if ["key", "item", "equipment", "enemy", "npc", "shop"]
+                .contains(&info["kind"].as_str().unwrap_or(""))
+            {
+                self.assets.foreground(
+                    ui.painter(),
+                    sprite.shrink(7.0 * scale),
+                    portrait,
+                    Color32::WHITE,
+                );
+            } else {
+                self.assets.tile(
+                    ui.painter(),
+                    sprite.shrink(7.0 * scale),
+                    portrait,
+                    Color32::WHITE,
+                );
+            }
             ui.vertical(|ui| {
-                ui.label(RichText::new(name).size(21.0).strong());
-                ui.label(RichText::new(format!("{x}, {y}")).size(14.0).color(MUTED));
+                ui.label(RichText::new(name).size(21.0 * scale).strong());
+                ui.label(
+                    RichText::new(format!("{x}, {y}"))
+                        .size(14.0 * scale)
+                        .color(theme::colors(ui.ctx()).muted),
+                );
             });
         });
+        self.record("inspection_target", &target_panel.response);
+        self.record("tile_inspection", &target_panel.response);
+        if let Some(target) = self.bounds.get_mut("inspection_target") {
+            target["tile_x"] = json!(x);
+            target["tile_y"] = json!(y);
+            target["kind"] = info["kind"].clone();
+        }
         let enemy = &info["enemy"];
         if enemy.is_object() {
-            ui.add_space(16.0);
-            let width = (ui.available_width() - 8.0) / 2.0;
+            ui.add_space(16.0 * scale);
+            let width = (ui.available_width() - 8.0 * scale) / 2.0;
             for row in [
                 [
                     ("hp", "health", theme::RED, Icon::Heart),
-                    ("attack", "attack", GOLD, Icon::Sword),
+                    (
+                        "attack",
+                        "attack",
+                        theme::colors(ui.ctx()).metal,
+                        Icon::Sword,
+                    ),
                 ],
                 [
                     ("defense", "defense", theme::BLUE, Icon::Shield),
@@ -1297,18 +2376,23 @@ impl TowerApp {
                         );
                     }
                 });
-                ui.add_space(4.0);
+                ui.add_space(4.0 * scale);
             }
-            ui.add_space(10.0);
-            theme::caption(ui, &self.text("combat_forecast"));
+            ui.add_space(10.0 * scale);
+            let forecast = theme::caption(ui, &self.text("combat_forecast"));
+            self.record("inspection_forecast", &forecast);
             let survives = enemy["can_win"].as_bool().unwrap_or(false);
             let color = if survives { theme::GREEN } else { theme::RED };
             ui.horizontal(|ui| {
-                ui.label(RichText::new(self.text("damage")).size(16.0).color(MUTED));
+                ui.label(
+                    RichText::new(self.text("damage"))
+                        .size(16.0 * scale)
+                        .color(theme::colors(ui.ctx()).muted),
+                );
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     ui.label(
                         RichText::new(number(&enemy["damage"]))
-                            .size(26.0)
+                            .size(26.0 * scale)
                             .strong()
                             .color(color),
                     );
@@ -1320,33 +2404,208 @@ impl TowerApp {
                 } else {
                     "forecast_unsafe"
                 }))
-                .size(15.0)
+                .size(15.0 * scale)
                 .color(color),
             );
             if let Some(reason) = enemy["reason"].as_str().filter(|s| !s.is_empty()) {
                 ui.label(
                     RichText::new(translate_text(&self.locale, reason))
-                        .size(15.0)
+                        .size(15.0 * scale)
                         .color(theme::RED),
                 );
             }
+        } else if let Some(encounter) = info["encountered_enemy"].as_object() {
+            ui.add_space(16.0 * scale);
+            let contact = ui.scope(|ui| {
+                let width = (ui.available_width() - 8.0 * scale) / 2.0;
+                metric(
+                    ui,
+                    ui.available_width(),
+                    &self.text("health"),
+                    &number(&encounter["hp"]),
+                    theme::RED,
+                    Icon::Heart,
+                    true,
+                );
+                ui.add_space(4.0 * scale);
+                ui.horizontal_top(|ui| {
+                    for (key, label, color, icon) in [
+                        (
+                            "attack",
+                            "attack",
+                            theme::colors(ui.ctx()).metal,
+                            Icon::Sword,
+                        ),
+                        ("defense", "defense", theme::BLUE, Icon::Shield),
+                    ] {
+                        metric(
+                            ui,
+                            width,
+                            &self.text(label),
+                            &number(&encounter[key]),
+                            color,
+                            icon,
+                            true,
+                        );
+                    }
+                });
+                ui.add_space(8.0 * scale);
+                ui.label(
+                    RichText::new(self.text("encounter_forecast_locked"))
+                        .size(13.0 * scale)
+                        .color(theme::colors(ui.ctx()).muted),
+                );
+            });
+            self.record("inspection_contact", &contact.response);
         } else {
-            ui.add_space(12.0);
+            ui.add_space(12.0 * scale);
             ui.label(translate_text(
                 &self.locale,
                 info["description"].as_str().unwrap_or(""),
             ));
             if info["details_locked"] == true {
-                ui.add_space(8.0);
-                ui.label(RichText::new(self.text("orb_required")).color(MUTED));
+                ui.add_space(8.0 * scale);
+                ui.label(
+                    RichText::new(self.text("orb_required")).color(theme::colors(ui.ctx()).muted),
+                );
             }
+        }
+    }
+
+    fn compact_inspection(&mut self, ui: &mut egui::Ui) {
+        if let Some((x, y)) = self.selected.filter(|_| !self.busy() || self.travel_only()) {
+            let info = self.engine.inspect(x, y);
+            let id = info["id"].as_u64().unwrap_or(6).to_string();
+            let name = entity_name(
+                &self.locale,
+                "tiles",
+                &id,
+                info["name"].as_str().unwrap_or(""),
+            );
+            let portrait = self.visual["tile_defs"][&id]["sprite"].clone();
+            let heading = self.compact_inspection_heading(
+                ui,
+                &name,
+                &portrait,
+                ["key", "item", "equipment", "enemy", "npc", "shop"]
+                    .contains(&info["kind"].as_str().unwrap_or("")),
+            );
+            self.record("inspection_target", &heading);
+            self.record("tile_inspection", &heading);
+            if let Some(target) = self.bounds.get_mut("inspection_target") {
+                target["tile_x"] = json!(x);
+                target["tile_y"] = json!(y);
+                target["kind"] = info["kind"].clone();
+            }
+            ui.add_space(4.0);
+            if info["enemy"].is_object() {
+                self.compact_enemy_stats(ui, &info["enemy"]);
+                let safe = info["enemy"]["can_win"].as_bool().unwrap_or(false);
+                let forecast = ui.scope(|ui| {
+                    let gold = enemy_stat_cell(
+                        ui,
+                        &self.text("gold"),
+                        &number(&info["enemy"]["gold"]),
+                        Icon::Coin,
+                        theme::GOLD,
+                        17.0,
+                    );
+                    self.record("inspection_stat:gold", &gold);
+                    let damage = enemy_stat_cell(
+                        ui,
+                        &self.text("damage"),
+                        &format!(
+                            "{} {}",
+                            if safe { "✓" } else { "×" },
+                            number(&info["enemy"]["damage"])
+                        ),
+                        Icon::Heart,
+                        if safe { theme::GREEN } else { theme::RED },
+                        17.0,
+                    );
+                    self.record("inspection_stat:damage", &damage);
+                });
+                self.record("inspection_forecast", &forecast.response);
+            } else if info["encountered_enemy"].is_object() {
+                let raw = ui.scope(|ui| self.compact_enemy_stats(ui, &info["encountered_enemy"]));
+                self.record("inspection_contact", &raw.response);
+            } else if info["details_locked"] == true {
+                ui.label(
+                    RichText::new(self.text("orb_required"))
+                        .size(13.0)
+                        .color(theme::colors(ui.ctx()).muted),
+                );
+            } else {
+                ui.add(
+                    egui::Label::new(
+                        RichText::new(translate_text(
+                            &self.locale,
+                            info["description"].as_str().unwrap_or(""),
+                        ))
+                        .size(13.0)
+                        .color(theme::colors(ui.ctx()).muted),
+                    )
+                    .truncate(),
+                );
+            }
+            return;
+        }
+        ui.label(
+            RichText::new(self.text("inspect_hint"))
+                .size(13.0)
+                .color(theme::colors(ui.ctx()).muted),
+        );
+    }
+
+    fn compact_inspection_heading(
+        &mut self,
+        ui: &mut egui::Ui,
+        name: &str,
+        sprite: &Value,
+        foreground: bool,
+    ) -> egui::Response {
+        ui.horizontal(|ui| {
+            let (portrait, _) = ui.allocate_exact_size(Vec2::splat(32.0), egui::Sense::hover());
+            if foreground {
+                self.assets
+                    .foreground(ui.painter(), portrait, sprite, Color32::WHITE);
+            } else {
+                self.assets
+                    .tile(ui.painter(), portrait, sprite, Color32::WHITE);
+            }
+            ui.add(egui::Label::new(RichText::new(name).size(16.0).strong()).truncate())
+                .on_hover_text(name);
+        })
+        .response
+    }
+
+    fn compact_enemy_stats(&mut self, ui: &mut egui::Ui, enemy: &Value) {
+        for (key, label, icon, color) in [
+            ("hp", "health", Icon::Heart, theme::RED),
+            (
+                "attack",
+                "attack",
+                Icon::Sword,
+                theme::colors(ui.ctx()).metal,
+            ),
+            ("defense", "defense", Icon::Shield, theme::BLUE),
+        ] {
+            let response = enemy_stat_cell(
+                ui,
+                &self.text(label),
+                &number(&enemy[key]),
+                icon,
+                color,
+                17.0,
+            );
+            self.record(&format!("inspection_stat:{key}"), &response);
         }
     }
 
     fn board(&mut self, ui: &mut egui::Ui, size: f32, now: f64) {
         let width = self.visual["width"].as_u64().unwrap_or(11) as usize;
         let height = self.visual["height"].as_u64().unwrap_or(11) as usize;
-        let cell = (size / width.max(height) as f32).floor().max(20.0);
+        let cell = (size / width.max(height) as f32).floor().max(1.0);
         let board_size = Vec2::new(cell * width as f32, cell * height as f32);
         let (rect, response) = ui.allocate_exact_size(board_size, egui::Sense::click());
         self.bounds.insert("board".into(),json!({"x":rect.min.x,"y":rect.min.y,"w":rect.width(),"h":rect.height(),"cell":cell,"width":width,"height":height}));
@@ -1357,12 +2616,28 @@ impl TowerApp {
             .as_ref()
             .filter(|a| a.effect["type"] == "battle");
         let mut hover = None;
-        if let Some(pos) = response.hover_pos() {
+        let touch_input = ui.input(|input| {
+            input.any_touches()
+                || input
+                    .events
+                    .iter()
+                    .any(|event| matches!(event, egui::Event::Touch { .. }))
+        });
+        let pointer = if response.clicked() {
+            response.interact_pointer_pos()
+        } else {
+            response.hover_pos()
+        };
+        if let Some(pos) = pointer {
             let x = ((pos.x - rect.min.x) / cell) as usize;
             let y = ((pos.y - rect.min.y) / cell) as usize;
             if x < width && y < height {
                 hover = Some((x, y));
-                self.selected = hover;
+                // Touch drags scroll the workspace; only a completed tap selects.
+                // Mouse hover stays selected after leaving, so its details remain readable.
+                if !touch_input || response.clicked() {
+                    self.selected = hover;
+                }
             }
         }
         for y in 0..height {
@@ -1393,7 +2668,7 @@ impl TowerApp {
                         "enemy" | "monster" => Color32::from_rgb(164, 65, 83),
                         "door" => Color32::from_rgb(167, 127, 60),
                         "npc" | "shop" => Color32::from_rgb(84, 133, 180),
-                        "key" | "item" | "equipment" => GOLD,
+                        "key" | "item" | "equipment" => theme::colors(ui.ctx()).metal,
                         "stairs_up" | "stairs_down" => Color32::from_rgb(90, 163, 137),
                         _ => Color32::from_rgb(44, 51, 64),
                     };
@@ -1408,11 +2683,11 @@ impl TowerApp {
                         );
                     }
                 }
-                if hover == Some((x, y)) {
+                if hover == Some((x, y)) || (hover.is_none() && self.selected == Some((x, y))) {
                     painter.rect_stroke(
                         tile_rect.shrink(1.0),
                         1.0,
-                        Stroke::new(2.0, GOLD),
+                        Stroke::new(2.0, theme::colors(ui.ctx()).metal),
                         egui::StrokeKind::Inside,
                     );
                 }
@@ -1472,7 +2747,11 @@ impl TowerApp {
                 hero_tint,
             );
         } else if !replace_hero {
-            painter.circle_filled(hero_rect.center(), cell * 0.28, GOLD);
+            painter.circle_filled(
+                hero_rect.center(),
+                cell * 0.28,
+                theme::colors(ui.ctx()).metal,
+            );
         }
         if let Some(b) = battle
             && let Some(hero_turn) = battle_overlay
@@ -1771,7 +3050,7 @@ impl TowerApp {
                             "game_title"
                         }),
                         FontId::proportional(28.0),
-                        GOLD,
+                        theme::colors(ui.ctx()).metal,
                     );
                     if kind == "credits" {
                         painter.text(
@@ -1779,7 +3058,7 @@ impl TowerApp {
                             Align2::CENTER_CENTER,
                             "Oz & Kenichi / Shigemasa Ozawa",
                             FontId::proportional(18.0),
-                            TEXT,
+                            theme::colors(ui.ctx()).text,
                         );
                     }
                 }
@@ -1818,7 +3097,10 @@ impl TowerApp {
                 painter.rect_filled(rect, 0.0, Color32::from_black_alpha(opacity as u8));
             }
         }
+        self.battle_overlay(&painter, rect, now);
         if response.clicked()
+            && !self.journal_open
+            && !self.enemy_list_open
             && self.travel_only()
             && self.snapshot["pending_interaction"].is_null()
             && let Some((x, y)) = hover
@@ -1835,7 +3117,7 @@ impl TowerApp {
                 Err(error) => self.notify(format!("Invalid engine route: {error}")),
             }
         }
-        if self.busy() && !self.travel_only() {
+        if !self.classic_layout && self.busy() && !self.travel_only() {
             ui.add_space(10.0);
             let skip = theme::action(ui, self.text("skip"), Icon::ArrowRight, false);
             self.record("skip", &skip);
@@ -1843,6 +3125,154 @@ impl TowerApp {
                 self.skip_presentation();
             }
         }
+    }
+
+    fn battle_overlay(&mut self, painter: &egui::Painter, board: Rect, now: f64) {
+        let Some(effect) = self
+            .active
+            .as_ref()
+            .filter(|active| active.effect["type"] == "battle")
+            .map(|active| active.effect.clone())
+        else {
+            return;
+        };
+        let Some(progress) = self.battle_progress(now) else {
+            return;
+        };
+        let palette = theme::colors(&self.context);
+        let scale = theme::scale(&self.context);
+        let size = Vec2::new(
+            (board.width() - 16.0 * scale).min(248.0 * scale),
+            (board.height() - 16.0 * scale).min(116.0 * scale),
+        );
+        let y = if effect["y"].as_u64().unwrap_or(0) * 2
+            < self.visual["height"].as_u64().unwrap_or(11)
+        {
+            board.bottom() - size.y - 8.0 * scale
+        } else {
+            board.top() + 8.0 * scale
+        };
+        let rect = Rect::from_min_size(egui::pos2(board.right() - size.x - 8.0 * scale, y), size);
+        painter.rect_filled(
+            rect,
+            8.0,
+            Color32::from_rgba_unmultiplied(
+                palette.surface.r(),
+                palette.surface.g(),
+                palette.surface.b(),
+                155,
+            ),
+        );
+        painter.rect_stroke(
+            rect,
+            8.0,
+            Stroke::new(1.0, palette.metal.linear_multiply(0.45)),
+            egui::StrokeKind::Inside,
+        );
+        let name = translate_text(&self.locale, effect["enemy_name"].as_str().unwrap_or(""));
+        let mut title = egui::text::LayoutJob::simple(
+            name,
+            FontId::proportional(15.0 * scale),
+            palette.text,
+            rect.width() - 16.0 * scale,
+        );
+        title.wrap.max_rows = 1;
+        painter.galley(
+            rect.min + Vec2::new(8.0, 6.0) * scale,
+            painter.layout_job(title),
+            palette.text,
+        );
+        let encountered = visible_last_encounter(&self.visual);
+        let attack = effect["enemy_attack"]
+            .as_i64()
+            .or_else(|| encountered.and_then(|e| e["attack"].as_i64()))
+            .unwrap_or(0);
+        let defense = effect["enemy_defense"]
+            .as_i64()
+            .or_else(|| encountered.and_then(|e| e["defense"].as_i64()))
+            .unwrap_or(0);
+        let values = [
+            (
+                Icon::Heart,
+                theme::RED,
+                format!(
+                    "{} / {}",
+                    number(&json!(progress.enemy_hp)),
+                    number(&effect["enemy_hp"])
+                ),
+            ),
+            (Icon::Sword, palette.metal, number(&json!(attack))),
+            (Icon::Shield, theme::BLUE, number(&json!(defense))),
+            (Icon::Coin, theme::GOLD, number(&effect["gold"])),
+        ];
+        let show_gold = visual_has_hero_orb(&self.visual);
+        for (index, (icon, color, value)) in values.iter().enumerate() {
+            if index == 3 && !show_gold {
+                continue;
+            }
+            let x = rect.left()
+                + 8.0 * scale
+                + (index % 2) as f32 * (rect.width() - 16.0 * scale) * 0.5;
+            let y = rect.top() + (31.0 + (index / 2) as f32 * 23.0) * scale;
+            theme::icon(
+                painter,
+                Rect::from_center_size(
+                    egui::pos2(x + 7.0 * scale, y + 10.0 * scale),
+                    Vec2::splat(14.0 * scale),
+                ),
+                *icon,
+                *color,
+            );
+            let width = (rect.width() - 16.0 * scale) * 0.5 - 22.0 * scale;
+            let mut font_size = 15.0 * scale;
+            let mut galley = painter.layout_no_wrap(
+                value.clone(),
+                FontId::proportional(font_size),
+                palette.text,
+            );
+            if galley.size().x > width {
+                font_size *= width / galley.size().x;
+                galley = painter.layout_no_wrap(
+                    value.clone(),
+                    FontId::proportional(font_size),
+                    palette.text,
+                );
+            }
+            painter.galley(
+                egui::pos2(x + 20.0 * scale, y + 10.0 * scale - galley.size().y * 0.5),
+                galley,
+                palette.text,
+            );
+        }
+        if rect.height() >= 108.0 * scale {
+            painter.text(
+                egui::pos2(rect.left() + 8.0 * scale, rect.top() + 83.0 * scale),
+                Align2::LEFT_TOP,
+                format!(
+                    "{} · {}",
+                    self.text("adventurer"),
+                    number(&json!(progress.hero_hp))
+                ),
+                FontId::proportional(12.0 * scale),
+                palette.text,
+            );
+            let bar = Rect::from_min_size(
+                egui::pos2(rect.left() + 8.0 * scale, rect.bottom() - 10.0 * scale),
+                Vec2::new(rect.width() - 16.0 * scale, 3.0 * scale),
+            );
+            painter.rect_filled(bar, 2.0, Color32::from_black_alpha(80));
+            let hp = (progress.hero_hp as f32
+                / effect["hero_hp"].as_i64().unwrap_or(1).max(1) as f32)
+                .clamp(0.0, 1.0);
+            painter.rect_filled(
+                Rect::from_min_size(bar.min, Vec2::new(bar.width() * hp, bar.height())),
+                2.0,
+                theme::GREEN,
+            );
+        }
+        self.bounds.insert("battle_overlay".into(), json!({"x":rect.left(),"y":rect.top(),"w":rect.width(),"h":rect.height(),
+            "enemy_hp":progress.enemy_hp,"enemy_max_hp":effect["enemy_hp"],"attack":attack,"defense":defense,
+            "gold":if show_gold { effect["gold"].clone() } else { Value::Null },"hero_hp":progress.hero_hp}));
     }
 
     fn skip_presentation(&mut self) {
@@ -1856,24 +3286,45 @@ impl TowerApp {
     }
 
     fn board_card(&mut self, ui: &mut egui::Ui, width: f32, now: f64, compact: bool) {
-        theme::frame()
-            .inner_margin(if compact { 10 } else { 16 })
-            .show(ui, |ui| {
-                ui.vertical(|ui| {
-                    ui.set_width(width - if compact { 20.0 } else { 32.0 });
+        let padding = if self.landscape {
+            6
+        } else if compact {
+            8
+        } else {
+            10
+        };
+        let panel = theme::frame(ui.ctx()).inner_margin(padding).show(ui, |ui| {
+            ui.vertical(|ui| {
+                ui.set_width(width - 2.0 * f32::from(padding));
+                if self.classic_layout && !self.landscape {
+                    ui.set_min_height(width - 2.0 * f32::from(padding));
+                }
+                if !self.classic_layout {
                     ui.horizontal(|ui| {
                         let (badge, _) = ui.allocate_exact_size(
-                            Vec2::splat(if compact { 32.0 } else { 42.0 }),
+                            Vec2::splat(if self.landscape {
+                                24.0
+                            } else if compact {
+                                28.0
+                            } else {
+                                36.0
+                            }),
                             egui::Sense::hover(),
                         );
                         ui.painter()
-                            .rect_filled(badge, 10.0, Color32::from_rgb(43, 40, 35));
+                            .rect_filled(badge, 10.0, theme::colors(ui.ctx()).raised);
                         ui.painter().text(
                             badge.center(),
                             Align2::CENTER_CENTER,
                             format!("{:02}", self.visual["floor"].as_i64().unwrap_or(1)),
-                            FontId::proportional(if compact { 19.0 } else { 23.0 }),
-                            GOLD,
+                            FontId::proportional(if self.landscape {
+                                15.0
+                            } else if compact {
+                                18.0
+                            } else {
+                                21.0
+                            }),
+                            theme::colors(ui.ctx()).metal,
                         );
                         ui.add_space(4.0);
                         ui.vertical(|ui| {
@@ -1891,7 +3342,13 @@ impl TowerApp {
                                 .unwrap_or("");
                             ui.label(
                                 RichText::new(translate_text(&self.locale, title))
-                                    .size(if compact { 18.0 } else { 22.0 })
+                                    .size(if self.landscape {
+                                        14.0
+                                    } else if compact {
+                                        18.0
+                                    } else {
+                                        20.0
+                                    })
                                     .strong(),
                             );
                         });
@@ -1906,96 +3363,106 @@ impl TowerApp {
                                             self.text("turns")
                                         ))
                                         .size(14.0)
-                                        .color(MUTED),
+                                        .color(theme::colors(ui.ctx()).muted),
                                     );
                                 },
                             );
                         }
                     });
-                    ui.add_space(if compact { 8.0 } else { 16.0 });
-                    let available = ui.available_width();
-                    let board_size = if compact {
-                        available
+                    ui.add_space(8.0);
+                }
+                let available = ui.available_width();
+                let viewport_height = self.context.input(|i| i.viewport_rect().height());
+                let board_size = if self.classic_layout {
+                    available.min(
+                        (viewport_height - ui.cursor().min.y - f32::from(padding) - 6.0).max(96.0),
+                    )
+                } else {
+                    available
+                };
+                let board_inset = (available - board_size) * 0.5;
+                let board_start = ui.cursor().min + Vec2::new(board_inset, 0.0);
+                let width_cells = self.visual["width"]
+                    .as_u64()
+                    .unwrap_or(11)
+                    .max(self.visual["height"].as_u64().unwrap_or(11))
+                    as f32;
+                let cell = (board_size / width_cells).floor().max(1.0);
+                let extent = Vec2::new(
+                    self.visual["width"].as_u64().unwrap_or(11) as f32 * cell,
+                    self.visual["height"].as_u64().unwrap_or(11) as f32 * cell,
+                );
+                let surround =
+                    Rect::from_min_size(board_start - Vec2::splat(4.0), extent + Vec2::splat(8.0));
+                ui.painter().rect_stroke(
+                    surround,
+                    4.0,
+                    Stroke::new(1.0, theme::colors(ui.ctx()).border),
+                    egui::StrokeKind::Outside,
+                );
+                for corner in [
+                    surround.left_top(),
+                    surround.right_top(),
+                    surround.left_bottom(),
+                    surround.right_bottom(),
+                ] {
+                    let dx = if corner.x < surround.center().x {
+                        1.0
                     } else {
-                        // Keep the footer visible in the default native window and
-                        // on smaller desktop viewports, including high-DPI displays.
-                        let viewport_height = self.context.input(|i| i.viewport_rect().height());
-                        available.min((viewport_height - ui.cursor().min.y - 140.0).max(240.0))
+                        -1.0
                     };
-                    let board_inset = (available - board_size) * 0.5;
-                    let board_start = ui.cursor().min + Vec2::new(board_inset, 0.0);
-                    let width_cells = self.visual["width"]
-                        .as_u64()
-                        .unwrap_or(11)
-                        .max(self.visual["height"].as_u64().unwrap_or(11))
-                        as f32;
-                    let cell = (board_size / width_cells).floor().max(20.0);
-                    let extent = Vec2::new(
-                        self.visual["width"].as_u64().unwrap_or(11) as f32 * cell,
-                        self.visual["height"].as_u64().unwrap_or(11) as f32 * cell,
+                    let dy = if corner.y < surround.center().y {
+                        1.0
+                    } else {
+                        -1.0
+                    };
+                    ui.painter().line_segment(
+                        [corner, corner + Vec2::new(dx * 14.0, 0.0)],
+                        Stroke::new(2.0, theme::colors(ui.ctx()).metal),
                     );
-                    let surround = Rect::from_min_size(
-                        board_start - Vec2::splat(4.0),
-                        extent + Vec2::splat(8.0),
+                    ui.painter().line_segment(
+                        [corner, corner + Vec2::new(0.0, dy * 14.0)],
+                        Stroke::new(2.0, theme::colors(ui.ctx()).metal),
                     );
-                    ui.painter().rect_stroke(
-                        surround,
-                        4.0,
-                        Stroke::new(1.0, theme::BORDER),
-                        egui::StrokeKind::Outside,
-                    );
-                    for corner in [
-                        surround.left_top(),
-                        surround.right_top(),
-                        surround.left_bottom(),
-                        surround.right_bottom(),
-                    ] {
-                        let dx = if corner.x < surround.center().x {
-                            1.0
-                        } else {
-                            -1.0
-                        };
-                        let dy = if corner.y < surround.center().y {
-                            1.0
-                        } else {
-                            -1.0
-                        };
-                        ui.painter().line_segment(
-                            [corner, corner + Vec2::new(dx * 14.0, 0.0)],
-                            Stroke::new(2.0, GOLD),
-                        );
-                        ui.painter().line_segment(
-                            [corner, corner + Vec2::new(0.0, dy * 14.0)],
-                            Stroke::new(2.0, GOLD),
-                        );
-                    }
-                    ui.horizontal_top(|ui| {
-                        ui.spacing_mut().item_spacing.x = 0.0;
-                        ui.add_space(board_inset);
-                        ui.vertical(|ui| {
-                            ui.set_width(board_size);
-                            self.board(ui, board_size, now);
-                        });
+                }
+                ui.horizontal_top(|ui| {
+                    ui.spacing_mut().item_spacing.x = 0.0;
+                    ui.add_space(board_inset);
+                    ui.vertical(|ui| {
+                        ui.set_width(board_size);
+                        self.board(ui, board_size, now);
                     });
+                });
+                if !self.classic_layout {
                     ui.add_space(4.0);
                     if !compact {
                         ui.label(
                             RichText::new(self.text("keyboard_hint"))
                                 .size(14.0)
-                                .color(MUTED),
+                                .color(theme::colors(ui.ctx()).muted),
                         );
                     }
                     ui.add_space(4.0);
                     ui.label(
                         RichText::new(self.text("controls_hint"))
                             .size(if compact { 14.0 } else { 15.0 })
-                            .color(MUTED),
+                            .color(theme::colors(ui.ctx()).muted),
                     );
-                });
+                }
             });
+        });
+        self.record("floor_panel", &panel.response);
     }
 
     fn dialogs(&mut self, now: f64) {
+        if self
+            .active
+            .as_ref()
+            .is_some_and(|active| active.effect["type"] == "journal")
+        {
+            self.journal_dialog();
+            return;
+        }
         let scripted = self
             .active
             .as_ref()
@@ -2061,7 +3528,7 @@ impl TowerApp {
                     .anchor(Align2::CENTER_CENTER, board.center() - viewport.center()),
             )
             .backdrop_color(Color32::TRANSPARENT)
-            .frame(theme::frame().inner_margin(inset))
+            .frame(theme::frame(&self.context).inner_margin(inset))
             .show(&self.context.clone(), |ui| {
                 ui.set_width(dialog_width);
                 theme::caption(ui, &self.text("dialogue"));
@@ -2070,7 +3537,7 @@ impl TowerApp {
                     ui.label(
                         RichText::new(translate_text(&self.locale, name))
                             .size(if board.width() < 380.0 { 24.0 } else { 27.0 })
-                            .color(TEXT),
+                            .color(theme::colors(ui.ctx()).text),
                     );
                     ui.add_space(10.0);
                 }
@@ -2108,7 +3575,7 @@ impl TowerApp {
                         let full = ui.painter().layout(
                             text.clone(),
                             FontId::proportional(font_size),
-                            TEXT,
+                            theme::colors(ui.ctx()).text,
                             ui.available_width(),
                         );
                         // Reserve the complete speech so typing cannot move the choice buttons.
@@ -2134,6 +3601,9 @@ impl TowerApp {
                     egui::ScrollArea::vertical()
                         .id_salt("conversation_choices")
                         .max_height(action_height)
+                        // A prior shorter conversation must not constrain this
+                        // area's cached viewport and clip newly added choices.
+                        .min_scrolled_height(action_height)
                         .auto_shrink([false, true])
                         .show(ui, |ui| {
                             ui.spacing_mut().item_spacing.y = 6.0;
@@ -2148,8 +3618,8 @@ impl TowerApp {
                                         RichText::new(translate_text(&self.locale, label))
                                             .size(17.0),
                                     )
-                                    .fill(theme::SURFACE_RAISED)
-                                    .stroke(Stroke::new(1.0, theme::BORDER))
+                                    .fill(theme::colors(ui.ctx()).raised)
+                                    .stroke(Stroke::new(1.0, theme::colors(ui.ctx()).border))
                                     .corner_radius(9)
                                     .min_size(Vec2::new(ui.available_width(), 44.0)),
                                 );
@@ -2202,25 +3672,43 @@ impl TowerApp {
         }
         let mut opened = self.settings;
         let viewport = self.context.input(|i| i.viewport_rect());
-        let width = (viewport.width() - 96.0).clamp(260.0, 490.0);
+        let scale = theme::scale(&self.context);
+        let width = (viewport.width() - 96.0 * scale).clamp(260.0, 490.0 * scale);
         let mut new_game = false;
         let mut import = false;
         let mut export = false;
         let mut language = self.locale.clone();
         let mut changed = false;
         let mut flying = None;
+        let flying_record =
+            visible_inventory_items(&self.visual, &self.snapshot, self.engine.campaign())
+                .into_iter()
+                .find(|item| item["usage"]["target_floor"].is_string());
+        let flying_item = flying_record
+            .as_ref()
+            .and_then(|item| item["id"].as_str().map(str::to_owned));
+        let flying_floors = flying_record
+            .as_ref()
+            .and_then(|item| item["usage"]["allowed_floors"].as_array())
+            .or_else(|| self.visual["visited_floors"].as_array())
+            .cloned()
+            .unwrap_or_default();
         let response = egui::Modal::new(egui::Id::new("settings_modal"))
             .backdrop_color(Color32::from_black_alpha(150))
-            .frame(theme::frame().inner_margin(24))
+            .frame(theme::frame(&self.context).inner_margin((24.0 * scale) as i8))
             .show(&self.context.clone(), |ui| {
                 ui.set_width(width);
-                ui.set_max_height((viewport.height() - 140.0).min(780.0));
+                ui.set_max_height((viewport.height() - 140.0 * scale).min(780.0 * scale));
                 egui::ScrollArea::vertical()
                     .id_salt("settings_content")
-                    .max_height(viewport.height() - 100.0)
+                    .max_height(viewport.height() - 100.0 * scale)
                     .show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            ui.label(RichText::new(self.text("settings")).size(28.0).strong());
+                            ui.label(
+                                RichText::new(self.text("settings"))
+                                    .size(28.0 * scale)
+                                    .strong(),
+                            );
                             ui.with_layout(
                                 egui::Layout::right_to_left(egui::Align::Center),
                                 |ui| {
@@ -2271,7 +3759,7 @@ impl TowerApp {
                             )
                             .changed();
                         if let Some(error) = &self.audio.error {
-                            ui.label(RichText::new(error).color(MUTED));
+                            ui.label(RichText::new(error).color(theme::colors(ui.ctx()).muted));
                         }
                         ui.separator();
                         ui.add_space(12.0);
@@ -2280,7 +3768,12 @@ impl TowerApp {
                         if new.clicked() {
                             new_game = true;
                         }
-                        let save = theme::action(ui, self.text("export_save"), Icon::Save, false);
+                        let save = ui
+                            .add_enabled_ui(self.engine.save_unlocked(), |ui| {
+                                theme::action(ui, self.text("export_save"), Icon::Save, false)
+                            })
+                            .inner
+                            .on_disabled_hover_text(self.text("save_orb_required"));
                         if save.clicked() {
                             export = true;
                         }
@@ -2295,21 +3788,11 @@ impl TowerApp {
                         if ui.button(self.text("import")).clicked() {
                             import = true;
                         }
-                        if self
-                            .engine
-                            .player()
-                            .inventory
-                            .iter()
-                            .any(|i| i == "flying_orb")
-                        {
+                        if flying_item.is_some() {
                             ui.separator();
                             ui.label(self.text("flying_hint"));
                             ui.horizontal_wrapped(|ui| {
-                                for f in self.snapshot["visited_floors"]
-                                    .as_array()
-                                    .into_iter()
-                                    .flatten()
-                                {
+                                for f in &flying_floors {
                                     if let Some(floor) = f.as_i64()
                                         && ui.button(floor.to_string()).clicked()
                                     {
@@ -2332,9 +3815,13 @@ impl TowerApp {
             self.settings = false;
         }
         if export {
-            match platform::export("tower.save.json", &self.engine.save_json()) {
-                Ok(path) => self.notify(path),
-                Err(e) => self.notify(e),
+            if self.engine.ensure_player_save_allowed().is_err() {
+                self.notify(self.text("save_orb_required"));
+            } else {
+                match platform::export("tower.save.json", &self.engine.save_json()) {
+                    Ok(path) => self.notify(path),
+                    Err(e) => self.notify(e),
+                }
             }
         }
         if import {
@@ -2358,7 +3845,7 @@ impl TowerApp {
         if let Some(floor) = flying {
             self.settings = false;
             self.apply_command(Command::UseItem {
-                item: "flying_orb".into(),
+                item: flying_item.expect("a destination is selectable only with a flying item"),
                 floor: Some(i32::try_from(floor).expect("floor ID came from a validated campaign")),
             });
         }
@@ -2366,6 +3853,8 @@ impl TowerApp {
 
     fn keyboard(&mut self) {
         if self.settings
+            || self.journal_open
+            || self.enemy_list_open
             || self.editor_open
             || !self.travel_only()
             || !self.snapshot["pending_interaction"].is_null()
@@ -2411,6 +3900,26 @@ impl eframe::App for TowerApp {
         let now = ui.input(|i| i.time);
         self.import_drops();
         self.advance(now);
+        let viewport = self.context.input(|i| i.viewport_rect());
+        self.landscape = !self.editor_open
+            && viewport.width() >= 700.0
+            && viewport.height() <= 720.0
+            && viewport.width() > viewport.height() * 1.25;
+        self.classic_layout = !self.editor_open && (self.landscape || viewport.width() >= 1060.0);
+        let desktop_scale = if self.classic_layout && !self.landscape {
+            let shell = viewport.width() - 24.0;
+            let center = (shell - 464.0).min(viewport.height() - 24.0);
+            let sidebar = (shell - center - 16.0) * 0.5;
+            (sidebar / 224.0).sqrt().clamp(1.0, 2.0)
+        } else {
+            1.0
+        };
+        theme::apply(
+            &self.context,
+            self.visual["cycle"].as_u64().unwrap_or(1) > 1,
+            self.landscape || viewport.width() < 700.0,
+            desktop_scale,
+        );
         self.bounds.clear();
         if self.editor_open {
             let margin = if ui.available_width() < 700.0 { 14 } else { 24 };
@@ -2444,18 +3953,17 @@ impl eframe::App for TowerApp {
         } else {
             let narrow = ui.available_width() < 1060.0;
             let bg = ui.max_rect();
-            let mut mesh = egui::Mesh::default();
-            mesh.colored_vertex(bg.left_top(), Color32::from_rgb(18, 25, 39));
-            mesh.colored_vertex(bg.right_top(), Color32::from_rgb(14, 20, 32));
-            mesh.colored_vertex(bg.right_bottom(), NAVY);
-            mesh.colored_vertex(bg.left_bottom(), NAVY);
-            mesh.add_triangle(0, 1, 2);
-            mesh.add_triangle(0, 2, 3);
-            ui.painter().add(mesh);
+            theme::paint_tower_backdrop(ui, bg);
             egui::Frame::new()
-                .inner_margin(if narrow { 12 } else { 28 })
+                .inner_margin(if self.landscape {
+                    6
+                } else if narrow {
+                    10
+                } else {
+                    12
+                })
                 .show(ui, |ui| {
-                    let shell_width = ui.available_width().min(1232.0);
+                    let shell_width = ui.available_width();
                     let inset = ((ui.available_width() - shell_width) * 0.5).max(0.0);
                     egui::ScrollArea::vertical()
                         .id_salt("game_workspace")
@@ -2469,55 +3977,141 @@ impl eframe::App for TowerApp {
                                         ui.spacing_mut().item_spacing.y = 4.0;
                                     }
                                     self.header(ui);
-                                    if !narrow {
-                                        let left = (shell_width * 0.198).clamp(216.0, 244.0);
-                                        let right = (shell_width * 0.25).clamp(252.0, 308.0);
-                                        let center = shell_width - left - right - 48.0;
+                                    if self.classic_layout {
+                                        let scale = theme::scale(ui.ctx());
+                                        let minimum_side =
+                                            if self.landscape { 196.0 } else { 224.0 };
+                                        let center = (shell_width - 2.0 * minimum_side - 16.0).min(
+                                            viewport.height()
+                                                - if self.landscape { 12.0 } else { 24.0 },
+                                        );
+                                        let side = (shell_width - center - 16.0) * 0.5;
                                         ui.horizontal_top(|ui| {
+                                            ui.spacing_mut().item_spacing.x = 0.0;
                                             ui.vertical(|ui| {
-                                                ui.set_width(left);
-                                                theme::card(ui, left, |ui| self.stats(ui, false));
-                                                ui.add_space(12.0);
-                                                theme::card(ui, left, |ui| self.keys(ui, false));
-                                                ui.add_space(12.0);
-                                                theme::card(ui, left, |ui| self.inventory(ui));
-                                                ui.add_space(14.0);
-                                                ui.label(
-                                                    RichText::new(self.text("checkpoint_hint"))
-                                                        .size(14.0)
-                                                        .color(MUTED),
-                                                );
+                                                ui.set_width(side);
+                                                ui.spacing_mut().item_spacing.x =
+                                                    if self.landscape { 5.0 } else { 7.0 * scale };
+                                                let sidebar = theme::card(ui, side, |ui| {
+                                                    let bottom = ui.cursor().min.y + center
+                                                        - 2.0 * theme::card_padding(ui.ctx());
+                                                    if !self.landscape {
+                                                        ui.set_min_height(
+                                                            center
+                                                                - 2.0
+                                                                    * theme::card_padding(ui.ctx()),
+                                                        );
+                                                    }
+                                                    self.tower_stats(ui);
+                                                    if !self.landscape {
+                                                        ui.add_space(14.0 * scale);
+                                                    }
+                                                    self.inventory(ui);
+                                                    if !self.landscape {
+                                                        ui.add_space(
+                                                            (bottom
+                                                                - ui.cursor().min.y
+                                                                - 77.0 * scale)
+                                                                .max(0.0),
+                                                        );
+                                                    }
+                                                    ui.add_space(if self.landscape {
+                                                        2.0
+                                                    } else {
+                                                        12.0 * scale
+                                                    });
+                                                    self.compact_activity_preview(ui);
+                                                });
+                                                self.record("left_sidebar", &sidebar.response);
                                             });
-                                            ui.add_space(16.0);
+                                            ui.add_space(8.0);
                                             ui.vertical(|ui| {
                                                 ui.set_width(center);
-                                                self.board_card(ui, center, now, false);
+                                                self.board_card(ui, center, now, self.landscape);
                                             });
-                                            ui.add_space(16.0);
-                                            ui.vertical(|ui| {
-                                                ui.set_width(right);
-                                                theme::card(ui, right, |ui| self.inspection(ui));
-                                                ui.add_space(12.0);
-                                                theme::card(ui, right, |ui| {
-                                                    self.journal(ui, 420.0)
-                                                });
+                                            ui.add_space(8.0);
+                                            let right = ui.vertical(|ui| {
+                                                ui.set_width(side);
+                                                ui.spacing_mut().item_spacing.x =
+                                                    if self.landscape { 5.0 } else { 7.0 * scale };
+                                                if self.landscape {
+                                                    theme::card(ui, side, |ui| {
+                                                        self.equipment(ui, true);
+                                                        ui.add_space(4.0 * scale);
+                                                        let keys =
+                                                            ui.scope(|ui| self.keys(ui, true));
+                                                        self.record("keyring", &keys.response);
+                                                    });
+                                                    let inspector = theme::card(ui, side, |ui| {
+                                                        ui.set_min_height(168.0);
+                                                        self.inspection(ui);
+                                                    });
+                                                    self.record(
+                                                        "inspection_panel",
+                                                        &inspector.response,
+                                                    );
+                                                    let toolbar = theme::card(ui, side, |ui| {
+                                                        self.tower_controls(ui)
+                                                    });
+                                                    self.record("tower_toolbar", &toolbar.response);
+                                                } else {
+                                                    theme::card(ui, side, |ui| {
+                                                        let bottom = ui.cursor().min.y + center
+                                                            - 2.0 * theme::card_padding(ui.ctx());
+                                                        ui.set_min_height(
+                                                            center
+                                                                - 2.0
+                                                                    * theme::card_padding(ui.ctx()),
+                                                        );
+                                                        self.equipment(ui, true);
+                                                        ui.add_space(4.0 * scale);
+                                                        let keys =
+                                                            ui.scope(|ui| self.keys(ui, true));
+                                                        self.record("keyring", &keys.response);
+                                                        ui.add_space(10.0 * scale);
+                                                        ui.separator();
+                                                        ui.add_space(6.0 * scale);
+                                                        let inspector =
+                                                            ui.scope(|ui| self.inspection(ui));
+                                                        self.record(
+                                                            "inspection_panel",
+                                                            &inspector.response,
+                                                        );
+                                                        ui.add_space(
+                                                            (bottom
+                                                                - ui.cursor().min.y
+                                                                - 82.0 * scale)
+                                                                .max(0.0),
+                                                        );
+                                                        let toolbar =
+                                                            ui.scope(|ui| self.tower_controls(ui));
+                                                        self.record(
+                                                            "tower_toolbar",
+                                                            &toolbar.response,
+                                                        );
+                                                    });
+                                                }
                                             });
+                                            self.record("right_sidebar", &right.response);
                                         });
                                     } else {
-                                        theme::frame().inner_margin(8).show(ui, |ui| {
-                                            ui.vertical(|ui| {
-                                                ui.set_width(shell_width - 16.0);
-                                                self.stats(ui, true);
+                                        let stats =
+                                            theme::frame(ui.ctx()).inner_margin(8).show(ui, |ui| {
+                                                ui.vertical(|ui| {
+                                                    ui.set_width(shell_width - 16.0);
+                                                    self.stats(ui, true);
+                                                });
                                             });
-                                        });
+                                        self.record("stats", &stats.response);
+                                        self.record("keyring", &stats.response);
                                         ui.add_space(10.0);
-                                        self.board_card(ui, shell_width, now, true);
-                                        ui.add_space(12.0);
                                         theme::card(ui, shell_width, |ui| self.inventory(ui));
+                                        ui.add_space(12.0);
+                                        self.board_card(ui, shell_width, now, true);
                                         ui.add_space(12.0);
                                         theme::card(ui, shell_width, |ui| self.inspection(ui));
                                         ui.add_space(12.0);
-                                        theme::card(ui, shell_width, |ui| self.journal(ui, 300.0));
+                                        theme::card(ui, shell_width, |ui| self.journal(ui));
                                     }
                                 });
                             });
@@ -2526,6 +4120,8 @@ impl eframe::App for TowerApp {
             self.keyboard();
             self.dialogs(now);
             self.settings_window();
+            self.journal_history_dialog();
+            self.enemy_list_dialog();
         }
         if let Some((message, until)) = &self.toast
             && now < *until
@@ -2534,8 +4130,8 @@ impl eframe::App for TowerApp {
                 .anchor(Align2::CENTER_BOTTOM, Vec2::new(0.0, -22.0))
                 .show(&self.context, |ui| {
                     egui::Frame::new()
-                        .fill(CARD)
-                        .stroke(Stroke::new(1.0, GOLD))
+                        .fill(theme::colors(ui.ctx()).surface)
+                        .stroke(Stroke::new(1.0, theme::colors(ui.ctx()).metal))
                         .corner_radius(8)
                         .inner_margin(16)
                         .show(ui, |ui| {
@@ -2554,17 +4150,407 @@ impl eframe::App for TowerApp {
         ));
     }
     fn clear_color(&self, _visuals: &egui::Visuals) -> [f32; 4] {
-        NAVY.to_normalized_gamma_f32()
+        theme::colors(&self.context).bg.to_normalized_gamma_f32()
     }
 }
 
-/// Only the known first-release original campaign is eligible for migration.
-/// Custom campaigns and unknown revisions keep the core's strict fingerprint check.
+/// Append only activities completed by presentation, preserving stable log IDs.
+/// Intermediate snapshot text may be copied only before the current effect;
+/// battle records are committed by their own completed animation.
+fn append_visible_activity(
+    visual: &mut Value,
+    snapshot: &Value,
+    text: Value,
+    log_id: Option<u64>,
+) -> bool {
+    if !text.is_string() {
+        return false;
+    }
+    if !visual["log"].is_array() {
+        visual["log"] = json!([]);
+    }
+    let start = visual["log_start"].as_u64().unwrap_or(0);
+    let next = start.saturating_add(visual["log"].as_array().map_or(0, |log| log.len()) as u64);
+    let snapshot_start = snapshot["log_start"].as_u64().unwrap_or(0);
+    let id = log_id
+        .or_else(|| {
+            snapshot["log"].as_array().and_then(|log| {
+                log.iter().enumerate().find_map(|(index, candidate)| {
+                    let id = snapshot_start.saturating_add(index as u64);
+                    (id >= next && candidate == &text).then_some(id)
+                })
+            })
+        })
+        .unwrap_or(next);
+    if id < next {
+        return id >= start && visual["log"][(id - start) as usize] == text;
+    }
+    let mut prefix = vec![];
+    for candidate_id in next..id {
+        // Intermediate completed activity may have no animation. A battle
+        // record is copied only by finish_effect, never from future state.
+        if snapshot["battle_log"].as_array().is_some_and(|records| {
+            records
+                .iter()
+                .any(|record| record["log_id"].as_u64() == Some(candidate_id))
+        }) {
+            return false;
+        }
+        let Some(candidate) = candidate_id
+            .checked_sub(snapshot_start)
+            .and_then(|offset| snapshot["log"].get(offset as usize))
+            .filter(|entry| entry.is_string())
+        else {
+            return false;
+        };
+        prefix.push(candidate.clone());
+    }
+    let log = visual["log"].as_array_mut().expect("log is an array");
+    log.extend(prefix);
+    log.push(text);
+    let dropped = log.len().saturating_sub(100);
+    log.drain(..dropped);
+    let start = start.saturating_add(dropped as u64);
+    let end = start.saturating_add(log.len() as u64);
+    visual["log_start"] = json!(start);
+    if let Some(records) = visual["battle_log"].as_array_mut() {
+        records.retain(|record| {
+            record["log_id"]
+                .as_u64()
+                .is_some_and(|id| id >= start && id < end)
+        });
+    }
+    true
+}
+
+fn visual_has_wisdom_orb(visual: &Value) -> bool {
+    visual["player"]["inventory"]
+        .as_array()
+        .is_some_and(|items| items.iter().any(|item| item == "wisdom_orb"))
+}
+
+fn visual_has_hero_orb(visual: &Value) -> bool {
+    visual["player"]["inventory"]
+        .as_array()
+        .is_some_and(|items| items.iter().any(|item| item == "hero_orb"))
+}
+
+fn enemy_overview_header(
+    ui: &egui::Ui,
+    rect: Rect,
+    label: &str,
+    icon: Icon,
+    color: Color32,
+    scale: f32,
+) {
+    let galley = ui.painter().layout_no_wrap(
+        label.into(),
+        FontId::proportional(12.0 * scale),
+        theme::colors(ui.ctx()).muted,
+    );
+    let text_x = rect.right() - 10.0 * scale - galley.size().x;
+    theme::icon(
+        ui.painter(),
+        Rect::from_center_size(
+            egui::pos2(text_x - 12.0 * scale, rect.center().y),
+            Vec2::splat(13.0 * scale),
+        ),
+        icon,
+        color,
+    );
+    ui.painter().galley(
+        egui::pos2(text_x, rect.center().y - galley.size().y / 2.0),
+        galley,
+        theme::colors(ui.ctx()).muted,
+    );
+}
+
+#[allow(clippy::too_many_arguments)]
+fn enemy_overview_value(
+    ui: &egui::Ui,
+    rect: Rect,
+    label: &str,
+    value: &str,
+    icon: Icon,
+    color: Color32,
+    scale: f32,
+    label_visible: bool,
+    damage: bool,
+) -> Value {
+    let value_rect = if label_visible {
+        let header = Rect::from_min_size(rect.min, Vec2::new(rect.width(), 17.0 * scale));
+        enemy_overview_header(ui, header, label, icon, color, scale);
+        Rect::from_min_max(
+            egui::pos2(rect.left() + 10.0 * scale, header.bottom()),
+            egui::pos2(rect.right() - 10.0 * scale, rect.bottom()),
+        )
+    } else {
+        rect.shrink2(Vec2::new(10.0 * scale, 4.0 * scale))
+    };
+    let font_size = 18.0 * scale;
+    let value_color = if damage {
+        color
+    } else {
+        theme::colors(ui.ctx()).text
+    };
+    let mut galley =
+        ui.painter()
+            .layout_no_wrap(value.into(), FontId::proportional(font_size), value_color);
+    let fit = (value_rect.width() / galley.size().x.max(1.0)).min(1.0);
+    let font_size = font_size * fit;
+    if fit < 1.0 {
+        galley =
+            ui.painter()
+                .layout_no_wrap(value.into(), FontId::proportional(font_size), value_color);
+    }
+    ui.painter().galley(
+        egui::pos2(
+            value_rect.right() - galley.size().x,
+            value_rect.center().y - galley.size().y / 2.0,
+        ),
+        galley.clone(),
+        value_color,
+    );
+    json!({"x":value_rect.left(),"y":value_rect.top(),"w":value_rect.width(),"h":value_rect.height(),
+        "font_size":font_size,"text":value,"text_w":galley.size().x})
+}
+
+fn enemy_stat_cell(
+    ui: &mut egui::Ui,
+    label: &str,
+    value: &str,
+    icon: Icon,
+    color: Color32,
+    size: f32,
+) -> egui::Response {
+    let (rect, response) =
+        ui.allocate_exact_size(Vec2::new(ui.available_width(), 22.0), egui::Sense::hover());
+    let colors = theme::colors(ui.ctx());
+    ui.painter()
+        .rect_filled(rect, 4.0, colors.raised.linear_multiply(0.45));
+    ui.painter().hline(
+        rect.left() + 6.0..=rect.right() - 6.0,
+        rect.bottom(),
+        egui::Stroke::new(0.5, colors.border.linear_multiply(0.24)),
+    );
+    theme::icon(
+        ui.painter(),
+        Rect::from_center_size(
+            egui::pos2(rect.left() + 12.0, rect.center().y),
+            Vec2::splat(16.0),
+        ),
+        icon,
+        color,
+    );
+    let value_rect = Rect::from_min_max(
+        egui::pos2(rect.left() + 30.0, rect.top() + 1.0),
+        rect.max - Vec2::new(8.0, 1.0),
+    );
+    fitted_value(ui, value_rect, value, size, true);
+    response.on_hover_text(format!("{label}: {value}"))
+}
+
+fn fitted_value(ui: &egui::Ui, rect: Rect, value: &str, size: f32, right: bool) {
+    let mut size = size;
+    let mut galley = ui.painter().layout_no_wrap(
+        value.into(),
+        FontId::proportional(size),
+        theme::colors(ui.ctx()).text,
+    );
+    for _ in 0..4 {
+        let scale = (rect.width() / galley.size().x.max(1.0))
+            .min(rect.height() / galley.size().y.max(1.0))
+            .min(1.0);
+        if scale >= 1.0 {
+            break;
+        }
+        size = (size * scale - 0.1).max(1.0);
+        galley = ui.painter().layout_no_wrap(
+            value.into(),
+            FontId::proportional(size),
+            theme::colors(ui.ctx()).text,
+        );
+    }
+    let x = if right {
+        rect.right() - galley.size().x
+    } else {
+        rect.left()
+    };
+    ui.painter().galley(
+        egui::pos2(x, rect.center().y - galley.size().y / 2.0),
+        galley,
+        theme::colors(ui.ctx()).text,
+    );
+}
+
+/// Presentation may expose a floor-effect player before the final snapshot.
+/// Match metadata only after filtering to that visually owned inventory.
+fn visible_inventory_items(visual: &Value, snapshot: &Value, campaign: &Campaign) -> Vec<Value> {
+    visual["player"]["inventory"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .filter(|item| !campaign.is_equipment(item))
+        .map(|item| {
+            let metadata = visual["inventory_items"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .chain(snapshot["inventory_items"].as_array().into_iter().flatten())
+                .find(|entry| entry["id"] == item);
+            let mut entry = metadata.cloned().unwrap_or_else(|| {
+                let definition = campaign
+                    .tiles
+                    .values()
+                    .find(|def| def.item.as_deref() == Some(item));
+                json!({
+                    "id": item,
+                    "name": definition.map(|def| def.name.as_str()).unwrap_or(item),
+                    "sprite": definition.map(|def| &def.sprite),
+                    "usable": false,
+                })
+            });
+            // A cached record can predate a visible floor-effect player update.
+            if let Some(charges) = visual["player"]["item_charges"][item].as_u64() {
+                entry["charges"] = json!(charges);
+            }
+            entry
+        })
+        .collect()
+}
+
+const ORIGINAL_SPECIAL_ITEMS: [&str; 15] = [
+    "hero_orb",
+    "wisdom_orb",
+    "flying_orb",
+    "cross",
+    "elixir",
+    "mattock",
+    "bomb",
+    "warp_staff",
+    "up_wing",
+    "down_wing",
+    "dragon_slayer",
+    "snow_crystal",
+    "magic_key",
+    "super_mattock",
+    "lucky_gold",
+];
+
+/// Reserve the original inventory positions without exposing any unowned item.
+/// A partial/custom campaign keeps only its actual items instead of gaining
+/// empty original slots merely because it uses the original Flight rule.
+fn inventory_slots(visual: &Value, snapshot: &Value, campaign: &Campaign) -> Vec<Option<Value>> {
+    let items = visible_inventory_items(visual, snapshot, campaign);
+    let original_slots = campaign.rules["flying_original_selection"] == true
+        && ORIGINAL_SPECIAL_ITEMS.iter().all(|id| {
+            campaign.tiles.values().any(|tile| {
+                tile.kind == tos_core::TileKind::Item && tile.item.as_deref() == Some(*id)
+            })
+        });
+    if !original_slots {
+        return items.into_iter().map(Some).collect();
+    }
+    let mut slots: Vec<_> = ORIGINAL_SPECIAL_ITEMS
+        .iter()
+        .map(|id| items.iter().find(|item| item["id"] == *id).cloned())
+        .collect();
+    slots.extend(
+        items
+            .into_iter()
+            .filter(|item| !ORIGINAL_SPECIAL_ITEMS.contains(&item["id"].as_str().unwrap_or("")))
+            .map(Some),
+    );
+    slots
+}
+
+/// Render the slot in the visible presentation state, never a later pickup.
+fn visible_equipment_item(
+    visual: &Value,
+    snapshot: &Value,
+    campaign: &Campaign,
+    slot: &str,
+) -> Option<Value> {
+    let id = visual["player"][slot].as_str()?;
+    visual["equipment"][slot]
+        .as_object()
+        .filter(|item| item.get("id").is_some_and(|value| value == id))
+        .or_else(|| {
+            snapshot["equipment"][slot]
+                .as_object()
+                .filter(|item| item.get("id").is_some_and(|value| value == id))
+        })
+        .map(|item| json!(item))
+        .or_else(|| {
+            let definition = campaign
+                .tiles
+                .values()
+                .find(|tile| tile.item.as_deref() == Some(id));
+            Some(json!({
+                "id": id,
+                "name": definition.map(|tile| tile.name.as_str()).unwrap_or(id),
+                "sprite": definition.map(|tile| &tile.sprite),
+                "usable": false,
+            }))
+        })
+}
+
+/// Only the engine's persisted actual contact enters the unforecasted panel.
+fn visible_last_encounter(visual: &Value) -> Option<&Value> {
+    visual["last_encounter"].as_object()?;
+    Some(&visual["last_encounter"])
+}
+
+fn item_tooltip(locale: &str, item: &Value, name: &str) -> String {
+    let mut lines = vec![name.to_owned()];
+    if item["id"] == "hero_orb" {
+        lines.push(tr(locale, "item_hero_open"));
+    }
+    let usage = &item["usage"];
+    if let Some(description) = usage["description"].as_str() {
+        lines.push(translate_text(locale, description));
+    }
+    if let Some(charges) = item["charges"].as_u64() {
+        lines.push(tr(locale, "item_charges").replace("{charges}", &charges.to_string()));
+    }
+    let status = match usage["activation"].as_str() {
+        Some("passive") => Some("item_passive"),
+        Some("none") => Some("item_no_action"),
+        Some("use_item") if usage["consumable"] == true => {
+            Some(if usage["remaining_charges"].is_number() {
+                "item_charged_consumption"
+            } else {
+                "item_consumable"
+            })
+        }
+        Some("use_item") => Some("item_reusable"),
+        _ => None,
+    };
+    if let Some(status) = status {
+        lines.push(tr(locale, status));
+    }
+    lines.extend(
+        usage["restrictions"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .map(|text| translate_text(locale, text)),
+    );
+    lines.join("\n\n")
+}
+
 fn original_campaign_upgrade(source: &str) -> Option<&'static str> {
     if let Ok(engine) = Engine::from_json(source) {
         let saved: Value = serde_json::from_str(&engine.save_json()).unwrap_or_default();
-        if ["56277325ec91e254", "800993184d7842ca"]
-            .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
+        if [
+            "56277325ec91e254",
+            "800993184d7842ca",
+            "70293e17a4e914ca",
+            "0ababefe999bbdfb",
+        ]
+        .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
         {
             return Some(include_str!("../../../data/campaign.json"));
         }
@@ -2587,8 +4573,13 @@ fn restore_journey(engine: &mut Engine, source: &str) -> Result<Option<String>, 
         Err(error) => error,
     };
     let mut saved: Value = serde_json::from_str(source).map_err(|_| original_error.clone())?;
-    if !["56277325ec91e254", "800993184d7842ca"]
-        .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
+    if ![
+        "56277325ec91e254",
+        "800993184d7842ca",
+        "70293e17a4e914ca",
+        "0ababefe999bbdfb",
+    ]
+    .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
     {
         return Err(original_error);
     }
@@ -2611,10 +4602,22 @@ fn restore_journey(engine: &mut Engine, source: &str) -> Result<Option<String>, 
 }
 
 fn section(ui: &mut egui::Ui, title: &str, icon: Icon) {
+    let scale = theme::scale(ui.ctx());
     ui.horizontal(|ui| {
-        let (rect, _) = ui.allocate_exact_size(Vec2::splat(19.0), egui::Sense::hover());
-        theme::icon(ui.painter(), rect, icon, GOLD);
-        ui.label(RichText::new(title).size(20.0).strong().color(TEXT));
+        let (rect, _) = ui.allocate_exact_size(Vec2::splat(19.0 * scale), egui::Sense::hover());
+        theme::icon(ui.painter(), rect, icon, theme::colors(ui.ctx()).metal);
+        ui.label(
+            RichText::new(title)
+                .size(
+                    if theme::card_padding(ui.ctx()) < 10.0 {
+                        16.0
+                    } else {
+                        18.0
+                    } * scale,
+                )
+                .strong()
+                .color(theme::colors(ui.ctx()).text),
+        );
     });
 }
 
@@ -2627,34 +4630,68 @@ fn metric(
     icon: Icon,
     compact: bool,
 ) {
+    let scale = theme::scale(ui.ctx());
     let (rect, response) = ui.allocate_exact_size(
-        Vec2::new(width, if compact { 54.0 } else { 85.0 }),
+        Vec2::new(width, if compact { 54.0 } else { 85.0 } * scale),
         egui::Sense::hover(),
     );
-    ui.painter().rect_filled(rect, 10.0, theme::SURFACE_RAISED);
-    let inset = if compact { 9.0 } else { 12.0 };
-    let icon_rect = Rect::from_min_size(rect.min + Vec2::new(inset, 12.0), Vec2::splat(15.0));
-    theme::icon(ui.painter(), icon_rect, icon, color);
-    ui.painter().text(
-        rect.min + Vec2::new(inset + 22.0, 19.5),
-        Align2::LEFT_CENTER,
-        label,
-        FontId::proportional(if compact { 12.0 } else { 14.0 }),
-        MUTED,
+    ui.painter()
+        .rect_filled(rect, 10.0 * scale, theme::colors(ui.ctx()).raised);
+    let inset = if compact { 9.0 } else { 12.0 } * scale;
+    let icon_rect = Rect::from_min_size(
+        rect.min + Vec2::new(inset, 12.0 * scale),
+        Vec2::splat(15.0 * scale),
     );
-    let size = if value.chars().count() > 7 {
-        21.0
-    } else if compact {
-        24.0
-    } else {
-        28.0
-    };
-    ui.painter().text(
-        rect.min + Vec2::new(inset, if compact { 37.0 } else { 54.0 }),
-        Align2::LEFT_CENTER,
-        value,
-        FontId::proportional(size),
-        TEXT,
+    theme::icon(ui.painter(), icon_rect, icon, color);
+    let mut label_job = egui::text::LayoutJob::simple(
+        label.into(),
+        FontId::proportional(if compact { 12.0 } else { 14.0 } * scale),
+        theme::colors(ui.ctx()).muted,
+        (rect.width() - inset * 2.0 - 22.0 * scale).max(1.0),
+    );
+    label_job.wrap.max_rows = 1;
+    ui.painter().galley(
+        rect.min
+            + Vec2::new(
+                inset + 22.0 * scale,
+                if compact { 9.0 } else { 12.0 } * scale,
+            ),
+        ui.painter().layout_job(label_job),
+        theme::colors(ui.ctx()).muted,
+    );
+    let value_rect = Rect::from_min_max(
+        rect.min + Vec2::new(inset, if compact { 25.0 } else { 32.0 } * scale),
+        rect.max - Vec2::new(inset, if compact { 3.0 } else { 9.0 } * scale),
+    );
+    let mut font_size = if compact { 24.0 } else { 28.0 } * scale;
+    let mut galley = ui.painter().layout_no_wrap(
+        value.into(),
+        FontId::proportional(font_size),
+        theme::colors(ui.ctx()).text,
+    );
+    // Measure the actual glyphs, including grouping commas, rather than
+    // estimating from character count. Never abbreviate or drop stat digits.
+    for _ in 0..4 {
+        let scale = (value_rect.width() / galley.size().x.max(1.0))
+            .min(value_rect.height() / galley.size().y.max(1.0))
+            .min(1.0);
+        if scale >= 1.0 {
+            break;
+        }
+        font_size = (font_size * scale - 0.1).max(1.0);
+        galley = ui.painter().layout_no_wrap(
+            value.into(),
+            FontId::proportional(font_size),
+            theme::colors(ui.ctx()).text,
+        );
+    }
+    ui.painter().galley(
+        egui::pos2(
+            value_rect.left(),
+            value_rect.center().y - galley.size().y / 2.0,
+        ),
+        galley,
+        theme::colors(ui.ctx()).text,
     );
     response.on_hover_text(format!("{label}: {value}"));
 }
@@ -2687,6 +4724,15 @@ fn music_for_floor(floor: i64) -> &'static str {
 }
 fn configure(ctx: &egui::Context, chinese: Option<Vec<u8>>) {
     install_fonts(ctx, chinese);
+    let configured = ctx.data_mut(|data| {
+        let id = egui::Id::new("tower_style_configured");
+        let configured = data.get_temp::<bool>(id).unwrap_or(false);
+        data.insert_temp(id, true);
+        configured
+    });
+    if configured {
+        return;
+    }
     let mut style = (*ctx.style_of(egui::Theme::Dark)).clone();
     style.visuals = egui::Visuals::dark();
     style.visuals.override_text_color = Some(TEXT);
@@ -2780,6 +4826,275 @@ fn install_fonts(ctx: &egui::Context, chinese: Option<Vec<u8>>) {
 mod migration_tests {
     use super::*;
     #[test]
+    fn floor_enemy_groups_merge_positions_and_sprites_but_preserve_visible_variants() {
+        let enemy = json!({"name":"Octopus","hp":1200,"attack":180,"defense":20,"gold":50,"damage":160,"can_win":true,"reason":"","rounds":2});
+        let part = json!({"id":97,"name":"Custom octopus","sprite":97,"x":2,"y":3,"enemy":enemy});
+        let mut second = part.clone();
+        second["id"] = json!(98);
+        second["sprite"] = json!(98);
+        second["x"] = json!(4);
+        let mut body = part.clone();
+        body["enemy"]["gold"] = json!(100);
+        let mut override_stats = part.clone();
+        override_stats["enemy"]["hp"] = json!(1500);
+        let mut forecast = part.clone();
+        forecast["enemy"]["damage"] = json!(240);
+        let mut reason = part.clone();
+        reason["enemy"]["reason"] = json!("A revealed restriction");
+        let groups = group_floor_enemies(
+            vec![part, second, body, override_stats, forecast, reason],
+            "en",
+        );
+        assert_eq!(groups.len(), 5);
+        assert_eq!(groups[0].count, 2);
+        assert_eq!(groups[1].inspection["enemy"]["gold"], 100);
+        assert!(groups.iter().skip(1).all(|group| group.count == 1));
+    }
+
+    #[test]
+    fn activity_presentation_keeps_retained_ids_and_defers_future_battle_facts() {
+        let mut visual = json!({"log_start":400,"log":(0..100).map(|i|format!("old {i}")).collect::<Vec<_>>(),"battle_log":[{"log_id":400},{"log_id":450}]});
+        let snapshot = json!({"log_start":403,"log":(403..500).map(|i|format!("old {}",i-400)).chain(["before battle".into(),"battle".into(),"after battle".into()]).collect::<Vec<_>>(),"battle_log":[{"log_id":501}]});
+        assert!(append_visible_activity(
+            &mut visual,
+            &snapshot,
+            json!("battle"),
+            Some(501)
+        ));
+        assert_eq!(visual["log_start"], 402);
+        assert_eq!(visual["log"].as_array().unwrap().len(), 100);
+        assert_eq!(visual["log"][98], "before battle");
+        assert_eq!(visual["log"][99], "battle");
+        assert_eq!(visual["battle_log"], json!([{"log_id":450}]));
+        assert!(
+            !visual["log"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("after battle"))
+        );
+        let unchanged = visual.clone();
+        assert!(append_visible_activity(
+            &mut visual,
+            &snapshot,
+            json!("battle"),
+            Some(501)
+        ));
+        assert_eq!(
+            visual, unchanged,
+            "repeated effects do not append duplicate activity"
+        );
+    }
+
+    #[test]
+    fn activity_gaps_never_copy_a_future_battle_and_repeated_dialogue_uses_exact_ids() {
+        let mut visual = json!({"log_start":10,"log":["old"],"battle_log":[]});
+        let snapshot = json!({"log_start":10,"log":["old","repeat","battle","repeat"],"battle_log":[{"log_id":12}]});
+        assert!(append_visible_activity(
+            &mut visual,
+            &snapshot,
+            json!("repeat"),
+            Some(11)
+        ));
+        let unchanged = visual.clone();
+        assert!(!append_visible_activity(
+            &mut visual,
+            &snapshot,
+            json!("repeat"),
+            Some(13)
+        ));
+        assert_eq!(
+            visual, unchanged,
+            "an unresolved intermediate battle stays hidden"
+        );
+        assert!(append_visible_activity(
+            &mut visual,
+            &snapshot,
+            json!("battle"),
+            Some(12)
+        ));
+        assert!(append_visible_activity(
+            &mut visual,
+            &snapshot,
+            json!("repeat"),
+            Some(13)
+        ));
+        assert_eq!(visual["log"], snapshot["log"]);
+    }
+
+    #[test]
+    fn activity_gap_outside_the_retained_snapshot_waits_for_final_sync() {
+        let mut visual = json!({"log_start":10,"log":["old"],"battle_log":[]});
+        let unchanged = visual.clone();
+        let snapshot = json!({"log_start":100,"log":["retained","battle","future"],"battle_log":[{"log_id":101}]});
+        assert!(!append_visible_activity(
+            &mut visual,
+            &snapshot,
+            json!("battle"),
+            Some(101)
+        ));
+        assert_eq!(
+            visual, unchanged,
+            "missing prefix facts cannot attach a future record to older strings"
+        );
+    }
+
+    #[test]
+    fn compact_metrics_keep_large_values_complete_inside_their_cells() {
+        for value in ["396,000", "1,000,000,000"] {
+            let context = egui::Context::default();
+            configure(&context, None);
+            let mut frame = context.run_ui(egui::RawInput::default(), |ui| {
+                metric(ui, 78.0, "Health", value, theme::RED, Icon::Heart, true);
+            });
+            frame.textures_delta.clear();
+            let cell = frame
+                .shapes
+                .iter()
+                .find_map(|shape| match &shape.shape {
+                    egui::Shape::Rect(shape) if shape.rect.size() == Vec2::new(78.0, 54.0) => {
+                        Some(shape.rect)
+                    }
+                    _ => None,
+                })
+                .expect("metric cell was painted");
+            let number = frame
+                .shapes
+                .iter()
+                .find_map(|shape| match &shape.shape {
+                    egui::Shape::Text(shape) if shape.galley.job.text == value => Some(shape),
+                    _ => None,
+                })
+                .expect("all numeric characters remain in the rendered galley");
+            let bounds = number.galley.rect.translate(number.pos.to_vec2());
+            assert!(
+                cell.shrink(2.0).contains_rect(bounds),
+                "{value}: {bounds:?} outside {cell:?}"
+            );
+            assert_eq!(number.galley.rows.len(), 1);
+        }
+    }
+
+    #[test]
+    fn original_inventory_reserves_neutral_slots_without_snapshot_ownership_leaks() {
+        let engine = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
+        let visual = json!({"player":{"inventory":[]}});
+        let snapshot = json!({"player":{"inventory":["bomb"]},
+            "inventory_items":[{"id":"bomb","name":"Hidden name","sprite":42,"usable":true}]});
+        let slots = inventory_slots(&visual, &snapshot, engine.campaign());
+        assert_eq!(slots.len(), 15);
+        assert!(slots.iter().all(Option::is_none));
+    }
+
+    #[test]
+    fn original_inventory_positions_stay_fixed_after_consumption_and_append_custom_items() {
+        let engine = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
+        let mut visual = json!({"player":{"inventory":["super_mattock","wisdom_orb","custom_trinket"]},
+            "inventory_items":[{"id":"super_mattock","usable":true},{"id":"wisdom_orb","usable":true},
+                {"id":"custom_trinket","usable":false}]});
+        let slots = inventory_slots(&visual, &Value::Null, engine.campaign());
+        assert_eq!(slots.len(), 16);
+        assert_eq!(slots[1].as_ref().unwrap()["id"], "wisdom_orb");
+        assert_eq!(slots[13].as_ref().unwrap()["id"], "super_mattock");
+        assert_eq!(slots[15].as_ref().unwrap()["id"], "custom_trinket");
+        visual["player"]["inventory"] = json!(["wisdom_orb", "custom_trinket"]);
+        let after = inventory_slots(&visual, &Value::Null, engine.campaign());
+        assert_eq!(after.len(), 16);
+        assert!(after[13].is_none());
+        assert_eq!(after[1], slots[1]);
+        assert_eq!(after[15], slots[15]);
+    }
+
+    #[test]
+    fn partial_custom_campaign_does_not_gain_unconfigured_original_slots() {
+        let engine = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
+        let mut campaign = engine.campaign().clone();
+        let visual = json!({"player":{"inventory":["wisdom_orb"]}});
+        campaign.tiles.remove("36");
+        let slots = inventory_slots(&visual, &Value::Null, &campaign);
+        assert_eq!(slots.len(), 1);
+        assert_eq!(slots[0].as_ref().unwrap()["id"], "wisdom_orb");
+    }
+
+    #[test]
+    fn equipment_slots_follow_visible_presentation_and_stay_out_of_special_inventory() {
+        let engine = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
+        let visual = json!({
+            "player":{"weapon":"sword_1","shield":null,"inventory":["sword_5","sword_1","sacred_shield","wisdom_orb"]},
+            "equipment":{"weapon":{"id":"sword_1","name":"Iron Sword","usage":{"description":"Visible pickup"}}},
+        });
+        let snapshot = json!({
+            "player":{"weapon":"sword_5","shield":"sacred_shield"},
+            "equipment":{"weapon":{"id":"sword_5","name":"Sacred Sword"},"shield":{"id":"sacred_shield","name":"Sacred Shield"}},
+            "inventory_items":[{"id":"wisdom_orb","usable":true}],
+        });
+        let weapon =
+            visible_equipment_item(&visual, &snapshot, engine.campaign(), "weapon").unwrap();
+        assert_eq!(weapon["id"], "sword_1");
+        assert_eq!(weapon["usage"]["description"], "Visible pickup");
+        assert!(visible_equipment_item(&visual, &snapshot, engine.campaign(), "shield").is_none());
+        let items = visible_inventory_items(&visual, &snapshot, engine.campaign());
+        assert_eq!(items.len(), 1);
+        assert_eq!(items[0]["id"], "wisdom_orb");
+        assert_eq!(tr("zh-CN", "weapon"), "武器");
+        assert_eq!(tr("zh-CN", "shield"), "盾牌");
+    }
+    #[test]
+    fn encountered_stats_panel_uses_actual_contact_instead_of_hovered_enemy() {
+        let mut visual = json!({
+            "last_encounter":null,
+            "enemies":[{"hp":999,"attack":999,"defense":999}],
+        });
+        assert!(visible_last_encounter(&visual).is_none());
+        visual["last_encounter"] =
+            json!({"floor":1,"x":2,"y":1,"enemy_name":"Slime","hp":20,"attack":8,"defense":1});
+        let encounter = visible_last_encounter(&visual).unwrap();
+        assert_eq!(encounter["hp"], 20);
+        assert!(encounter.get("damage").is_none());
+        assert!(encounter.get("gold").is_none());
+        assert_eq!(tr("zh-CN", "last_encounter"), "最近遭遇");
+    }
+    #[test]
+    fn inventory_help_follows_visible_ownership_and_charge_updates() {
+        let engine = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
+        let visual = json!({
+            "player":{"inventory":["warp_staff","mattock"],"item_charges":{"warp_staff":2}},
+            "inventory_items":[{"id":"warp_staff","charges":3,"usable":true,
+                "usage":{"description":"Visible staff","remaining_charges":3}}],
+        });
+        let snapshot = json!({"inventory_items":[
+            {"id":"warp_staff","charges":1,"usage":{"description":"Future staff"}},
+            {"id":"mattock","usable":true,"usage":{"description":"Newly visible mattock"}},
+            {"id":"bomb","usable":true,"usage":{"description":"Not yet acquired"}},
+        ]});
+        let items = visible_inventory_items(&visual, &snapshot, engine.campaign());
+        assert_eq!(items.len(), 2);
+        assert_eq!(items[0]["id"], "warp_staff");
+        assert_eq!(items[0]["charges"], 2);
+        assert_eq!(items[0]["usage"]["description"], "Visible staff");
+        assert_eq!(items[1]["id"], "mattock");
+        assert_eq!(items[1]["usage"]["description"], "Newly visible mattock");
+    }
+    #[test]
+    fn item_help_distinguishes_charge_consumption_and_keeps_custom_prose() {
+        let item = json!({"charges":3,"usage":{
+            "activation":"use_item","consumable":true,"remaining_charges":3,
+            "description":"Warp to the point mirrored through the center of the current floor.",
+            "restrictions":["Close any open conversation before use."]
+        }});
+        let tooltip = item_tooltip("zh-CN", &item, "传送法杖");
+        assert!(tooltip.contains("本层以中心点"));
+        assert!(tooltip.contains("剩余使用次数：3"));
+        assert!(tooltip.contains("最后一次使用次数耗尽后消耗"));
+        assert!(tooltip.contains("使用前请先关闭对话"));
+        let custom = json!({"usage":{
+            "activation":"use_item","consumable":false,
+            "description":"Custom author's unlisted item instruction.","restrictions":[]
+        }});
+        let tooltip = item_tooltip("zh-CN", &custom, "Custom item");
+        assert!(tooltip.contains("Custom author's unlisted item instruction."));
+        assert!(tooltip.contains("可重复使用，不会消耗"));
+    }
+    #[test]
     fn known_original_save_migrates_with_player_progress() {
         let mut engine = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
         let mut saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
@@ -2815,6 +5130,37 @@ mod migration_tests {
         assert_eq!(restored["floors"], floors);
         assert_eq!(engine.player().hp, 7500);
         assert_eq!(engine.player().gold, 128);
+    }
+    #[test]
+    fn last_published_save_migrates_all_progress_without_inventing_clues() {
+        let mut engine = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
+        let mut saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
+        let new_fingerprint = saved["campaign_fingerprint"].clone();
+        saved["campaign_fingerprint"] = json!("70293e17a4e914ca");
+        saved["cycle"] = json!(2);
+        saved["player"]["hp"] = json!(1500);
+        saved["player"]["gold"] = json!(314);
+        saved["player"]["inventory"] = json!(["hero_orb", "wisdom_orb", "warp_staff"]);
+        saved["player"]["item_charges"] = json!({"warp_staff":2});
+        saved["steps"] = json!(314);
+        saved["flags"] = json!(["backside", "npc_16_10_10_gift"]);
+        saved["shop_visits"] = json!({"altar":2});
+        saved["event_counts"] = json!({"opening_capture":1});
+        saved["floors"]["1"][0] = json!(6);
+        saved.as_object_mut().unwrap().remove("journal");
+        assert!(
+            restore_journey(&mut engine, &saved.to_string())
+                .unwrap()
+                .is_some()
+        );
+        saved["campaign_fingerprint"] = new_fingerprint;
+        saved["journal"] = json!([]);
+        let restored: Value = serde_json::from_str(&engine.save_json()).unwrap();
+        assert_eq!(
+            restored, saved,
+            "every old progress field survives migration"
+        );
+        assert_eq!(engine.snapshot()["journal"], json!([]));
     }
     #[test]
     fn custom_campaign_and_unknown_save_are_not_migrated() {

@@ -5,6 +5,43 @@ combat, shops, items, event predicates, tower cycles, inspection gates and save
 validation. It has no graphics, audio, browser, filesystem or wall-clock dependency.
 The CLI, JSONL headless runner and stdio MCP server all use this engine directly.
 
+Resolved battles retain factual records alongside their activity text. A stable
+`log_start` offset associates each `battle_log` record with its retained activity
+ID; trimming the 100-entry log prunes matching records. Saves preserve these
+facts and default to an empty battle history for older files. Records contain
+encountered enemy stats, actual damage/rewards and resolved strikes, with no
+authored quest or acquisition data. Presentation effects carry the matching ID
+and record so the UI publishes them when that battle finishes, while later
+events remain outside the visible activity history.
+
+The hot-reload MCP entry point is `tools/mcp-server.mjs`: a persistent Node
+stdio bridge supervising the native Rust MCP worker. `tools/build-mcp.mjs`
+builds only the CLI, and `tools/mcp-deployment.mjs` smoke-tests and publishes an
+immutable executable before atomically replacing `dist/mcp/current.json`.
+The full build publishes through the same deployment function. Workers run
+versioned copies, avoiding Windows locks on Cargo's output.
+
+Before forwarding a request after activation, the bridge asks the active
+worker to write a private file checkpoint containing the complete engine,
+latest action timeline, opaque player checkpoints and their ID counter. The
+candidate worker validates its campaign and restores that file before the old
+worker is stopped. Failed restoration keeps the existing process untouched;
+that activation is skipped until a different activation is published. The
+bridge never reads the checkpoint payload. Migration methods are unavailable
+on the public bridge and require the private worker startup flag natively.
+Requests share one ordered queue, and a failed or timed-out action is never
+automatically retried. Connection shutdown closes workers and removes the
+temporary session checkpoint; this is hot reload, not durable crash recovery.
+
+Player MCP uses `Engine::player_observation` / `inspect_player_tile` from
+`observation.rs`, separate from diagnostic `snapshot` / `inspect`. This
+projection exposes current appearances, played consequences and dialogue
+choices without secret behavior IDs, future maps or script bookkeeping.
+Explicit `--developer` access exposes diagnostic snapshots, simulations and
+the campaign resource for offline research. Both use the same simulation.
+The later [original item audit](original-item-audit.md) describes corrected
+item rules and GUI migrations for known earlier bundled campaign revisions.
+
 `tos-ui` implements the game interface and campaign editor in Rust using
 [eframe/egui](https://docs.rs/eframe/0.36.2/eframe/). Desktop runs a native window
 with OpenGL; WebAssembly uses WebGL in a single canvas. The same Rust code handles
@@ -57,6 +94,7 @@ The source files follow these responsibilities:
 | `tos-core/src/lib.rs` | Engine construction, command orchestration, inspection and tower cycles |
 | `campaign.rs` / `domain.rs` | Authored content, validation and closed gameplay vocabularies |
 | `command.rs` | Command decoding, validation, error type and MCP schema |
+| `observation.rs` | Player observations that preserve hidden-passage and puzzle discovery |
 | `events.rs` | Typed script representation, compilation, validation and execution |
 | `navigation.rs` / `combat.rs` | Paths, movement, hazards, stairs and shared combat calculation |
 | `interactions.rs` / `items.rs` | Conversations, purchases, original tools and custom item effects |
@@ -87,8 +125,10 @@ Original mechanics such as the backside ×44 multiplier, ten-floor scaling,
 elixir attack ×10 + defense ×5, three Warp Staff charges and bomb tile families
 are named in `original.rs`. Import limits (map sides 64, floors 256, stats one
 billion), save limits and standard FNV hash constants are documented separately.
-The fingerprint and save wire format remain compatible with existing saves;
-the shipped original campaign's canonical fingerprint is regression-tested.
+The save wire version stays at 1 and added state fields have legacy defaults.
+Changed campaign rules intentionally change its fingerprint; the GUI migrates
+known bundled revisions with recovery copies, while unknown/custom revisions
+remain strictly checked. The current canonical fingerprint is regression-tested.
 
 ## Simulation and presentation
 
@@ -128,6 +168,14 @@ the user's application-data directory under `tos-rust`; `TOS_STORAGE_DIR` can
 redirect that location for tests or portable deployments. Browser saves use
 `localStorage`. Checkpoints and autosaves are separate. A campaign fingerprint
 rejects an incompatible save before any state is mutated.
+
+The shared state also stores Wisdom's recorded hints and first-hearing flags.
+Original clue IDs remain private persistence metadata; the renderer and player
+observation receive encountered text/location records only while Wisdom is
+owned. Original clues follow source order and reset on a new tower cycle.
+`save_unlocked` enforces the Hero Orb rule for manual player saves; recovery
+autosave and private MCP runtime serialization remain available throughout.
+Flight's original stair upper bound is persisted separately from visited maps.
 
 The small `platform` module handles byte loading, persistence and JSON export.
 The audio module decodes the extracted WAV files and synthesizes MIDI to PCM in

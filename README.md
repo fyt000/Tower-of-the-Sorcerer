@@ -36,6 +36,46 @@ audio, settings and editor as the browser. `--assets-root PATH` overrides the
 folder containing `assets/` and `fonts/`; `--save PATH` imports a portable save.
 The default campaign is embedded, so native play does not need a web server.
 
+The original campaign reserves fifteen special-item slots. Owned items remain
+visible together, with weapon and shield in their own slots; empty item spaces
+reveal no undiscovered names or help. Inventory, equipment and key icons show
+only their foreground artwork, without a floor tile behind them. Owned-item
+help explains activation, restrictions and consumption without revealing where
+to find an item.
+
+Landscape phones and wide desktop windows use side panels: hero stats and
+inventory on the left, equipment, keys, the active inspector and a small toolbar
+on the right. The floor starts near the top edge and uses the available height,
+without a title or a floor header taking space above it. Modern panels use a
+dark blue/purple palette; the reverse tower changes to warm crimson and red. Original
+UI background bitmaps are not used.
+Desktop sidebars extend to the floor panel's full height, with recent activity
+and controls anchored near the bottom. The original inventory keeps all 15 empty
+or occupied positions visible; desktop cells fill three or five complete columns
+according to the available sidebar width. Equipment displays the icon and item
+name, and compact inspector values align to the right of their metric rows.
+Larger desktop windows proportionally increase text, icons, controls, metric rows
+and journal windows as the sidebars widen; resizing back restores the compact
+desktop sizes.
+Portrait remains usable through workspace scrolling, with inventory above a
+width-sized floor. Custom inventories can expand beyond the original slots and
+remain reachable through that same workspace scroll.
+
+Recent activity remains visible below the inventory. The book toolbar button
+opens all retained activity entries in a scrollable popup with separated rows;
+the close control remains outside the scrolling area. Completed battles have
+expandable records of encountered enemy stats, hero stats, damage, rewards and
+strikes. Those records survive saving/loading while their activity entries remain
+within the retained 100-entry log. Older saves can still load; past battles from
+before this feature do not acquire invented details.
+**Wisdom hints**, or clicking the owned Orb of Wisdom, recalls that item's
+recorded clues. The Hero Orb opens a separate current-floor enemy overview with
+aligned stat and forecast columns. Equivalent encountered profiles share a row
+and quantity; distinct stats, rewards or forecasts keep separate rows. Coordinates
+are omitted. The inspector focuses on the selected
+tile. During combat a faint information overlay appears on the floor, then its
+resolved details remain available through the battle's activity entry.
+
 The standalone handbook is available in [English](web/help.html) and
 [Simplified Chinese](web/help.zh-CN.html), or at `/help.html` and
 `/help.zh-CN.html` on the local server. It adapts the original text and Windows
@@ -66,9 +106,10 @@ the sacred-sword incantation, and the prison wake-up. The floor-10 guard march,
 Vampire transformation and later scripted scenes use the same ordered engine
 timeline in browser and native builds.
 
-Detailed enemy stats and forecasts require the **Orb of the Hero**, received
-from the floor-3 old man. Orb of Wisdom is a different item. This gate also
-applies to CLI/MCP inspection and state snapshots.
+Enemy forecasts and the current-floor enemy list require the **Orb of the Hero**.
+Before acquisition, actual enemy contact reveals that enemy's raw HP/ATK/DEF.
+Uncontacted enemies keep their stats hidden. Orb of Wisdom is a different item.
+These information gates also apply to CLI/MCP inspection and state snapshots.
 
 Completing the first cycle automatically enters the backside tower. Hero
 HP/ATK/DEF carry over unchanged. Applicable enemy and treasure combat stats,
@@ -130,10 +171,15 @@ creates a separate checkpoint; **Restore checkpoint** returns to it even after
 later autosaves or a fatal fight. Native saves use the user's application-data
 folder under `tos-rust`; `TOS_STORAGE_DIR` overrides it.
 
+The original campaign requires the **Hero Orb** for manual checkpoints and
+portable save exports. Autosave remains available from the start. Internal
+runtime checkpoints preserve MCP sessions during rebuilds regardless of the
+player's inventory.
+
 Settings can export a portable JSON save and import pasted JSON. Both graphical
 targets also accept dropped save/campaign JSON files. Save validation is atomic:
 bad imports leave the current game intact. A campaign fingerprint rejects
-incompatible revisions. The two known previous bundled original revisions are
+incompatible revisions. Known previous bundled original revisions are
 migrated conservatively, including cached campaigns and checkpoints, while
 preserving the backside cycle and player progress. Original save and campaign
 copies remain under `tos-rust:save:recovery` and `tos-rust:campaign:recovery`;
@@ -185,20 +231,67 @@ play accepts WASD, `inspect X Y`, `choose ID`, `use ITEM [FLOOR]`, `save PATH` a
 {"type":"use_item","item":"flying_orb","floor":1}
 ```
 
-The MCP server uses newline-delimited JSON-RPC over stdio. Its eight tools are:
+The MCP server uses newline-delimited JSON-RPC over stdio. For development, build
+and publish the native worker, then run the persistent Node bridge:
+
+```powershell
+npm run build:mcp
+npm run start:mcp
+# Later, with the MCP connection still running:
+npm run build:mcp
+```
+
+`npm run build` also publishes the MCP worker. Deployment smoke-tests an
+immutable binary under `dist/mcp/versions/` and atomically replaces
+`dist/mcp/current.json`. The bridge checks this manifest before each request,
+asks the old Rust worker to write a private checkpoint, starts the new worker,
+and restores the complete session before switching. The bridge and its stdio
+connection remain running; workers never execute Cargo's build output, so an
+active MCP session does not lock the next rebuild on Windows. An incompatible
+campaign revision or broken executable leaves the old worker and game intact.
+The rejected request is not executed; deploy a corrected build to retry.
+
+The default **player profile** preserves puzzle discovery. Its tools are:
 
 | Tool | Purpose |
 | --- | --- |
-| `game_state` | Map, player, dialogue, flags and unlocked enemy forecasts |
+| `game_state` | Current visible map, player, owned-item help, dialogue, Wisdom hints and unlocked enemy forecasts |
 | `inspect_tile` | Inspect a square without acting; respects the Hero Orb gate |
 | `plan_path` | Read-only click-route planner, shared with the GUI |
 | `game_action` | Commit a move, choice, cancellation or item action |
-| `simulate_actions` | Try actions on a copy without changing the session |
-| `save_game` | Export a portable save |
-| `load_game` | Restore a matching validated save |
+| `save_game` | Create an opaque session checkpoint when `save_unlocked` is true |
+| `load_game` | Restore a checkpoint by its returned `checkpoint` ID |
 | `new_game` | Reset the session |
+| `mcp_runtime` | Bridge/worker IDs, active deployment and reload diagnostics (bridge only) |
 
-Resources `tos://state` and `tos://campaign` expose state and configuration.
+The player resource `tos://state` exposes the same visible observation.
+Ordinary, concealed and scripted bricks share their visible identity. Source
+scripts, event flags, future-floor maps and NPC answers are excluded. Movement
+still discovers concealed passages, and interacting with NPCs still exposes
+their authored clues and choices. Hero Orb forecast gating is unchanged.
+Read `last_action.ok` for blocked outcomes; tool-level `isError` identifies
+invalid requests. The recent action log holds 100 entries. The **Wisdom Orb**
+separately persists the original 24 hints first heard while owning it, including
+earned merchant information. `journal_unlocked` reports access and `journal`
+returns recorded hints; the orb's `use_item` command opens the same review.
+Earlier conversations are not backfilled. Keep those conversations in agent
+notes if they may matter later. Owned inventory entries include executable
+usage commands, restrictions, consumption rules, and charge information.
+
+The [original item audit](docs/original-item-audit.md) records direct executable
+evidence, corrections, and remaining presentation differences.
+
+`save_game` returns, for example, `{"checkpoint":"checkpoint-1"}`; pass that
+object to `load_game`. Named checkpoints and the current game survive worker
+reloads, but expire when the bridge connection closes. To resume a portable
+save at startup, pass `--save PATH` to the bridge.
+
+Explicit **developer access**, `node tools/mcp-server.mjs --developer` or
+`tos mcp --developer`, retains full diagnostic snapshots, portable JSON
+save export/import, `simulate_actions` and `tos://campaign`. These expose
+puzzle solutions and are intended for tests and offline solver work. Direct
+`tos mcp` works too, but does not support replacing its own executable.
+
 Stdout contains only protocol messages. Each server owns an independent session.
 A client configuration for this checkout is:
 
@@ -206,12 +299,31 @@ A client configuration for this checkout is:
 {
   "mcpServers": {
     "tower-of-the-sorcerer": {
-      "command": "D:\\projects\\tos-rust\\target\\release\\tos.exe",
-      "args": ["mcp"]
+      "command": "node",
+      "args": ["D:\\projects\\tos-rust\\tools\\mcp-server.mjs"]
     }
   }
 }
 ```
+
+If Node is not on the client's PATH, use the absolute path to `node.exe`.
+`--manifest PATH` or `TOS_MCP_CURRENT` selects another deployment manifest;
+`--campaign PATH` selects a custom campaign. Changing the bridge itself requires
+starting a new connection once; subsequent Rust rebuilds reload automatically.
+Old version folders are retained because other sessions may still use them.
+Reload metadata appears at `result._meta.runtime_reload`; `mcp_runtime` retains
+the last outcome. An unreadable manifest keeps the current worker usable and
+reports `unchanged` diagnostics.
+`mcp_runtime` also reports whether the worker is running and any transport
+failure. Hot replacement preserves a live session; unexpected crashes require
+reconnecting and loading a durable startup save, without guessing whether to
+repeat the last action.
+
+See [mcp-agent-play.md](docs/mcp-agent-play.md) for the agent interface review,
+and [route-search-feasibility.md](docs/route-search-feasibility.md) for exact
+search, safe pruning and the distinction between source-informed optimization
+and puzzle discovery. No full-tower natural playthrough or global optimum has
+yet been established.
 
 ## Evidence and verification
 

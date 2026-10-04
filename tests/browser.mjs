@@ -20,13 +20,22 @@ async function idle(){await page.waitForFunction(()=>{const s=JSON.parse(window.
 async function button(id,editor=false){
   await page.waitForFunction(({id,editor})=>{const u=JSON.parse(window.tower.ui_json());return !!(editor?u.editor.bounds:u.bounds)[id];},{id,editor},{timeout:10000});
   const u=await ui(),r=(editor?u.editor.bounds:u.bounds)[id];
+  const beforePresentation=JSON.stringify([u.animation,u.animations_seen,u.visual_log,u.visual_floor]);
   await page.mouse.click(r.cx??r.x+(r.width??r.w)/2,r.cy??r.y+(r.height??r.h)/2);
+  if(id==='dialogue_continue') await page.waitForFunction(before=>{
+    const current=JSON.parse(window.tower.ui_json());
+    return JSON.stringify([current.animation,current.animations_seen,current.visual_log,current.visual_floor])!==before;
+  },beforePresentation,{timeout:5000});
   await page.waitForTimeout(150);
 }
 async function cell(x,y,editor=false){const u=await ui(),r=editor?u.editor.bounds.board:u.bounds.board;
   const w=editor?u.editor.width:r.width,h=editor?u.editor.height:r.height;
   await page.mouse.click(r.x+(x+.5)*(r.w??r.width)/w,r.y+(y+.5)*(r.h??r.height)/h);
   await page.waitForTimeout(150);
+}
+async function hoverCell(x,y){const r=(await ui()).bounds.board;
+  await page.mouse.move(r.x+(x+.5)*r.w/r.width,r.y+(y+.5)*r.h/r.height);
+  await page.waitForTimeout(200);
 }
 async function command(action){return page.evaluate(action=>JSON.parse(window.tower.command_json(JSON.stringify(action))),action);}
 async function load(change){const save=JSON.parse(await page.evaluate(()=>window.tower.save_json()));change(save);await page.evaluate(source=>window.tower.load_save(source),JSON.stringify(save));await page.waitForTimeout(100);}
@@ -36,10 +45,18 @@ async function sceneUntil(type){await page.waitForFunction(type=>JSON.parse(wind
 async function cinematicUntil(kind){await page.waitForFunction(kind=>{const u=JSON.parse(window.tower.ui_json());return u.animation==='cinematic'&&u.animation_details.at(-1)?.kind===kind;},kind,{timeout:20000});}
 async function heroIdle(){await page.waitForFunction(()=>JSON.parse(window.tower.ui_json()).hero_pose==='idle',undefined,{timeout:5000});}
 async function dialogueInsideBoard(){
-  await page.waitForFunction(()=>!!JSON.parse(window.tower.ui_json()).bounds.dialogue,undefined,{timeout:5000});
-  const {board:b,dialogue:d}=(await ui()).bounds;
+  // egui reuses the conversation area across speakers. Its initial rectangle
+  // can be the previous conversation's size before the next frame lays it out.
+  await page.waitForFunction(()=>{
+    const bounds=JSON.parse(window.tower.ui_json()).bounds,b=bounds.board,d=bounds.dialogue;
+    if(!b||!d)return false;
+    const actions=Object.entries(bounds).filter(([id])=>id.startsWith('choice:')||id==='dialogue_continue');
+    return d.x>=b.x-1&&d.y>=b.y-1&&d.x+d.w<=b.x+b.w+1&&d.y+d.h<=b.y+b.h+1
+      &&actions.every(([,r])=>r.y>=d.y&&r.y+r.h<=d.y+d.h);
+  },undefined,{timeout:5000});
+  const bounds=(await ui()).bounds,{board:b,dialogue:d}=bounds;
   assert(d.x>=b.x-1&&d.y>=b.y-1&&d.x+d.w<=b.x+b.w+1&&d.y+d.h<=b.y+b.h+1,`Dialogue must remain inside the board: ${JSON.stringify({board:b,dialogue:d})}`);
-  for(const [id,r] of Object.entries((await ui()).bounds).filter(([id])=>id.startsWith('choice:')||id==='dialogue_continue')) {
+  for(const [id,r] of Object.entries(bounds).filter(([id])=>id.startsWith('choice:')||id==='dialogue_continue')) {
     assert(r.y>=d.y&&r.y+r.h<=d.y+d.h,`Dialogue action ${id} must remain visible inside its panel`);
   }
 }
@@ -50,6 +67,27 @@ const corridor=JSON.stringify({id:'browser-regression',title:'Browser test',widt
   floors:[{id:1,title:'Corridor',tiles:[8,8,8,8,8,6,6,61,6,29,8,8,8,8,8]}],
   tiles:{6:{name:'Road',kind:'floor',sprite:6},8:{name:'Wall',kind:'wall',sprite:8},61:{name:'Slime',kind:'enemy',enemy:'slime',sprite:61},29:{name:'Yellow key',kind:'key',key:'yellow',amount:1,sprite:29}},
   enemies:{slime:{name:'Slime',hp:20,attack:8,defense:1,gold:2}},events:[]});
+
+const originalData=JSON.parse(original);
+const originalDialogue=JSON.parse(readFileSync(resolve(root,'data/locales/en.json'),'utf8')).dialogue;
+const wisdomFixture=JSON.stringify({id:'wisdom-browser-regression',title:'Wisdom journal test',width:5,height:3,
+  start:{floor:1,x:0,y:1,hp:100,attack:10,defense:5,gold:0,inventory:[]},
+  rules:{empty_tile:6,forecast_requires_item:'hero_orb',save_requires_hero_orb:true},
+  floors:[{id:1,title:'Journal room',tiles:[100,8,8,101,8,6,36,37,6,43,8,8,8,8,8]}],
+  tiles:{6:originalData.tiles['6'],8:originalData.tiles['8'],36:originalData.tiles['36'],
+    37:originalData.tiles['37'],43:originalData.tiles['43'],
+    100:{...originalData.tiles['25'],text:originalDialogue['62']},
+    101:{...originalData.tiles['25'],text:originalDialogue['78']}},
+  enemies:{},events:[]});
+
+const equipmentContactFixture=JSON.stringify({id:'equipment-contact-browser',title:'Equipment and encounter test',width:5,height:3,
+  start:{floor:1,x:0,y:1,hp:100,attack:10,defense:5,gold:0,inventory:['sword_5','sacred_shield']},
+  rules:{empty_tile:6,forecast_requires_item:'hero_orb'},
+  floors:[{id:1,tiles:[8,8,8,8,8,6,51,56,61,6,6,6,6,6,6]}],
+  tiles:{6:originalData.tiles['6'],8:originalData.tiles['8'],51:originalData.tiles['51'],
+    55:originalData.tiles['55'],56:originalData.tiles['56'],60:originalData.tiles['60'],
+    61:{name:'Guard',kind:'enemy',enemy:'guard',sprite:61}},
+  enemies:{guard:{name:'Guard',hp:1200,attack:180,defense:30,gold:100}},events:[]});
 
 try {
   await page.goto(process.env.TOS_URL||'http://127.0.0.1:8080');await ready();await page.waitForTimeout(500);
@@ -125,11 +163,95 @@ try {
     assert.equal((await ui()).audio.error,null);assert.match((await ui()).audio.music,/b_067xgw/);
   });
   await test('Independent browser checkpoint survives further autosaves',async()=>{
+    await load(s=>{if(!s.player.inventory.includes('hero_orb'))s.player.inventory.push('hero_orb');});
     await button('save');const saved=(await state()).player;await page.keyboard.press('ArrowRight');await page.waitForTimeout(150);await idle();assert.notDeepEqual((await state()).player,saved);
     await button('restore');await idle();assert.deepEqual((await state()).player,saved);
   });
   await test('Browser autosave resumes after reload',async()=>{
     const saved=(await state()).player;await page.reload();await ready();assert.deepEqual((await state()).player,saved);
+  });
+  await test('Actual Hero and Wisdom item collection gates save and Journal, with reusable translated item-click recall',async()=>{
+    await page.evaluate(()=>window.tower.set_language('en'));await importCampaign(wisdomFixture);
+    const locked=await ui();assert(locked.bounds.journal_preview_open,'Recent activity remains visible before the Wisdom Orb');
+    assert(locked.bounds.journal_header,'The complete activity log is available independently of Wisdom');
+    assert.equal(locked.bounds['item:wisdom_orb'],undefined,'Hints are unavailable without the owned Wisdom Orb');
+    assert.equal(locked.bounds.save.enabled,false,'Manual save is disabled without the Hero Orb');
+    const checkpointBefore=await page.evaluate(()=>localStorage.getItem('tos-rust:checkpoint:v1'));
+    await button('save');assert.equal(await page.evaluate(()=>localStorage.getItem('tos-rust:checkpoint:v1')),checkpointBefore,'A disabled save click cannot replace the checkpoint');
+    await cell(0,0);await page.waitForFunction(()=>JSON.parse(window.tower.state_json()).pending_interaction);
+    await button('choice:leave');await idle();assert.deepEqual((await state()).journal,[]);
+
+    await cell(1,1);await idle();assert((await state()).player.inventory.includes('hero_orb'));
+    assert.equal((await ui()).bounds.save.enabled,true,'Collecting Hero enables the actual save control');
+    await button('save');const savedCheckpoint=JSON.parse(await page.evaluate(()=>localStorage.getItem('tos-rust:checkpoint:v1')));
+    assert.equal(savedCheckpoint.save.campaign_id,'wisdom-browser-regression');
+    assert.deepEqual([savedCheckpoint.save.player.x,savedCheckpoint.save.player.y],[1,1]);
+
+    await cell(2,1);await idle();assert.equal((await state()).journal_unlocked,true);
+    assert((await ui()).bounds['item:wisdom_orb'],'Collecting Wisdom makes its hint reader available through the actual item');
+    assert.deepEqual((await state()).journal,[],'Acquisition does not backfill the already heard clue');
+    await cell(0,0);await page.waitForFunction(()=>JSON.parse(window.tower.state_json()).pending_interaction);
+    await button('choice:leave');await idle();assert.deepEqual((await state()).journal,[],'Rereading a pre-orb clue still cannot backfill it');
+    await cell(3,0);await page.waitForFunction(()=>JSON.parse(window.tower.state_json()).pending_interaction);
+    await button('choice:leave');await idle();
+    const entries=(await state()).journal;assert.equal(entries.length,1);assert.equal(entries[0].text,originalDialogue['78']);
+    assert(!JSON.stringify(entries).includes(originalDialogue['62']),'The earlier clue remains excluded');
+    await cell(4,1);await idle();assert.equal((await state()).inventory_items.find(item=>item.id==='warp_staff').charges,3);
+
+    for(const locale of ['en','zh-CN']) {
+      await page.evaluate(locale=>window.tower.set_language(locale),locale);await page.waitForTimeout(locale==='zh-CN'?1200:150);
+      const staff=(await ui()).bounds['item:warp_staff'];
+      await page.mouse.move(staff.x+staff.w/2,staff.y+staff.h/2);await page.waitForTimeout(800);
+      await page.screenshot({path:resolve(output,`wisdom-item-help-${locale}.png`)});
+      await button('item:wisdom_orb');await sceneUntil('journal');
+      await page.waitForFunction(()=>!!JSON.parse(window.tower.ui_json()).bounds.journal_dialog);
+      const modal=(await ui()).bounds.journal_dialog,close=(await ui()).bounds.journal_close;
+      assert(modal.x>=0&&modal.y>=0&&modal.x+modal.w<=1440&&modal.y+modal.h<=1000,JSON.stringify(modal));
+      assert(close.y>=modal.y&&close.y+close.h<=modal.y+modal.h,'Journal Close remains inside the visible modal');
+      assert.deepEqual((await state()).last_action.presentation,[{type:'journal',entries}]);
+      await page.waitForTimeout(250);assert.equal((await ui()).animation,'journal','Journal remains open until player dismissal');
+      await page.screenshot({path:resolve(output,`wisdom-journal-${locale}.png`)});
+      await button('journal_close');await idle();assert((await state()).player.inventory.includes('wisdom_orb'),'Reading the Journal does not consume Wisdom');
+      assert.equal((await ui()).bounds.journal_dialog,undefined);assert.deepEqual((await state()).journal,entries);
+    }
+    await page.evaluate(()=>window.tower.set_language('en'));await importCampaign(original);
+  });
+  await test('Dedicated equipment slots and raw contact stats remain visible before Hero and after reload',async()=>{
+    await importCampaign(equipmentContactFixture);
+    assert.equal((await state()).equipment.weapon.id,'sword_5');
+    assert.equal((await state()).equipment.shield.id,'sacred_shield');
+    assert((await ui()).bounds['equipment:weapon']);assert((await ui()).bounds['equipment:shield']);
+    assert.equal((await ui()).bounds.last_encounter,undefined);
+    const unseen=await page.evaluate(()=>JSON.parse(window.tower.inspect_json(3,1)));
+    assert.equal(unseen.enemy,null);assert.equal(unseen.encountered_enemy,null);
+    await cell(1,1);await idle();await cell(2,1);await idle();
+    const equipped=await state();assert.equal(equipped.equipment.weapon.id,'sword_1');
+    assert.equal(equipped.equipment.shield.id,'shield_1');assert.equal(equipped.abilities.field_magic_protection,true);
+    assert.deepEqual(equipped.inventory_items,[],'Equipment has its own slots');
+    assert.deepEqual([equipped.player.attack,equipped.player.defense],[20,15]);
+    await page.mouse.move(5,5); // Actual contact replaces the older tile selection when the pointer is off the board.
+    await page.keyboard.press('ArrowRight');await page.waitForTimeout(150);await idle();
+    const contact=(await state()).last_encounter;
+    assert.deepEqual([contact.hp,contact.attack,contact.defense],[1200,180,30]);
+    assert.equal((await state()).last_action.ok,false);assert.deepEqual((await state()).enemies,[]);
+    await hoverCell(3,1);assert((await ui()).bounds.inspection_contact);
+    for(const locale of ['en','zh-CN']) {
+      await page.evaluate(locale=>window.tower.set_language(locale),locale);await page.waitForTimeout(locale==='zh-CN'?1200:150);
+      const bounds=(await ui()).bounds;
+      for(const id of ['equipment:weapon','equipment:shield','inspection_contact']) {
+        const r=bounds[id];assert(r.x>=0&&r.y>=0&&r.x+r.w<=1441&&r.y+r.h<=1001,`${id}: ${JSON.stringify(r)}`);
+      }
+      await page.screenshot({path:resolve(output,`equipment-encounter-${locale}.png`)});
+    }
+    await page.reload();await ready();assert.deepEqual((await state()).last_encounter,contact);
+    assert.equal((await state()).equipment.shield.id,'shield_1');
+    await hoverCell(3,1);assert((await ui()).bounds.inspection_contact);
+    await load(save=>{save.cycle=2;save.last_encounter=null;});
+    await page.keyboard.press('ArrowRight');await page.waitForTimeout(150);await idle();
+    assert.deepEqual([(await state()).last_encounter.hp,(await state()).last_encounter.attack,
+      (await state()).last_encounter.defense],[52800,7920,1320]);
+    await page.screenshot({path:resolve(output,'equipment-encounter-backside-zh-CN.png')});
+    await page.evaluate(()=>window.tower.set_language('en'));
   });
   await test('Mouse route cannot cross an intermediate enemy',async()=>{
     await importCampaign(corridor);await cell(4,1);await idle();const s=await state();assert.equal(s.player.x,1);assert.equal(s.player.hp,100);assert.equal(s.tiles[7],61);
@@ -275,6 +397,12 @@ try {
   await test('Responsive Chinese mobile canvas and touch controls remain usable',async()=>{
     await importCampaign(original);await page.evaluate(()=>window.tower.set_language('zh-CN'));await page.setViewportSize({width:390,height:844});await page.waitForTimeout(400);
     const b=(await ui()).bounds.board;assert(b.x>=0&&b.x+b.w<=390,JSON.stringify(b));await page.waitForTimeout(6200);await page.screenshot({path:resolve(output,'mobile.png')});
+    // Inventory now stays above the board on narrow screens. Reveal the board
+    // through the workspace scroll before clicking a tile in its lower rows.
+    await page.mouse.move(b.x+b.w/2,Math.min(760,b.y+20));
+    await page.mouse.wheel(0,Math.max(0,b.y+b.h+24-844));await page.waitForTimeout(400);
+    const visibleBoard=(await ui()).bounds.board;
+    assert(visibleBoard.y>=0&&visibleBoard.y+visibleBoard.h<=844,JSON.stringify(visibleBoard));
     await cell(4,9);await idle();await heroIdle();assert.deepEqual([(await state()).player.x,(await state()).player.y,(await state()).player.keys.yellow],[4,9,1]);
   });
   await test('Chinese mobile conversations stay inside the game board',async()=>{

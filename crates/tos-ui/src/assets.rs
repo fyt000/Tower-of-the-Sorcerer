@@ -16,8 +16,8 @@ pub struct Art {
     scene_masks: BTreeMap<(String, u32), TextureHandle>,
     original_image: Option<image::RgbaImage>,
     masked: BTreeMap<(u32, u32), TextureHandle>,
-    creature_masks: Option<image::RgbaImage>,
-    creatures: BTreeMap<(u32, u32, u32, u32), TextureHandle>,
+    foreground_masks: Option<image::RgbaImage>,
+    foregrounds: BTreeMap<(u32, u32, u32, u32), TextureHandle>,
 }
 
 impl Art {
@@ -97,7 +97,7 @@ impl Art {
         self.size = [image.width() as usize, image.height() as usize];
         self.original_image = Some(image.clone());
         self.masked.clear();
-        self.creatures.clear();
+        self.foregrounds.clear();
         self.heroes.clear();
         self.hero_hits.clear();
         self.impact = None;
@@ -161,26 +161,26 @@ impl Art {
         true
     }
 
-    /// Install Chtableb's creature silhouettes. The color atlas and this mask
-    /// atlas use the same cell coordinates; Chtableb is not background artwork.
+    /// Install Chtableb's foreground silhouettes, including items, equipment,
+    /// keys, NPCs and enemies. Both atlases use the same cell coordinates.
     pub fn install_background(&mut self, _ctx: &egui::Context, bytes: &[u8]) -> Result<(), String> {
         let masks = image::load_from_memory(bytes)
             .map_err(|error| error.to_string())?
             .to_rgba8();
         if masks.width() < 440 || masks.height() < 40 {
             return Err(
-                "Original creature mask atlas must contain 11 columns of 40px cells".into(),
+                "Original foreground mask atlas must contain 11 columns of 40px cells".into(),
             );
         }
-        self.creature_masks = Some(masks);
-        self.creatures.clear();
+        self.foreground_masks = Some(masks);
+        self.foregrounds.clear();
         Ok(())
     }
 
-    /// Paint a transparent original creature while it moves between cells.
-    /// Numeric atlas cells and grid-aligned atlas rectangles share the same
-    /// mask coordinates. Custom artwork or unavailable masks use normal tiles.
-    pub fn creature(
+    /// Paint the original foreground using its exact Chtableb silhouette. This
+    /// removes the atlas's composited floor without treating any artwork color
+    /// as transparent. Custom rectangles or unavailable masks use normal tiles.
+    pub fn foreground(
         &mut self,
         painter: &egui::Painter,
         rect: egui::Rect,
@@ -209,7 +209,7 @@ impl Art {
         let Some((x, y, w, h)) = source else {
             return self.tile(painter, rect, sprite, tint);
         };
-        let (Some(colors), Some(masks)) = (&self.original_image, &self.creature_masks) else {
+        let (Some(colors), Some(masks)) = (&self.original_image, &self.foreground_masks) else {
             return self.tile(painter, rect, sprite, tint);
         };
         let valid = w > 0
@@ -223,18 +223,11 @@ impl Art {
         if !valid {
             return self.tile(painter, rect, sprite, tint);
         }
-        let texture = self.creatures.entry((x, y, w, h)).or_insert_with(|| {
-            let mut pixels = Vec::with_capacity(w as usize * h as usize * 4);
-            for dy in 0..h {
-                for dx in 0..w {
-                    let mut rgba = colors.get_pixel(x + dx, y + dy).0;
-                    let alpha = 255 - masks.get_pixel(x + dx, y + dy).0[0];
-                    rgba[3] = (u16::from(rgba[3]) * u16::from(alpha) / 255) as u8;
-                    pixels.extend_from_slice(&rgba);
-                }
-            }
+        let texture = self.foregrounds.entry((x, y, w, h)).or_insert_with(|| {
+            let pixels = foreground_pixels(colors, masks, (x, y, w, h))
+                .expect("foreground atlas bounds were checked");
             painter.ctx().load_texture(
-                format!("original creature {x}:{y}:{w}:{h}"),
+                format!("original foreground {x}:{y}:{w}:{h}"),
                 ColorImage::from_rgba_unmultiplied([w as usize, h as usize], &pixels),
                 TextureOptions::NEAREST,
             )
@@ -246,6 +239,17 @@ impl Art {
             tint,
         );
         true
+    }
+
+    /// Paint a transparent original creature while it moves between cells.
+    pub fn creature(
+        &mut self,
+        painter: &egui::Painter,
+        rect: egui::Rect,
+        sprite: &serde_json::Value,
+        tint: egui::Color32,
+    ) -> bool {
+        self.foreground(painter, rect, sprite, tint)
     }
 
     /// Select an original stationary animation frame without moving its cell.
@@ -394,10 +398,63 @@ fn masked_texture(
     )
 }
 
+fn foreground_pixels(
+    colors: &image::RgbaImage,
+    masks: &image::RgbaImage,
+    (x, y, w, h): (u32, u32, u32, u32),
+) -> Option<Vec<u8>> {
+    if w == 0
+        || h == 0
+        || x.checked_add(w)
+            .is_none_or(|right| right > colors.width() || right > masks.width())
+        || y.checked_add(h)
+            .is_none_or(|bottom| bottom > colors.height() || bottom > masks.height())
+    {
+        return None;
+    }
+    let mut pixels = Vec::with_capacity(w as usize * h as usize * 4);
+    for dy in 0..h {
+        for dx in 0..w {
+            let mut rgba = colors.get_pixel(x + dx, y + dy).0;
+            let alpha = 255 - masks.get_pixel(x + dx, y + dy).0[0];
+            rgba[3] = (u16::from(rgba[3]) * u16::from(alpha) / 255) as u8;
+            pixels.extend_from_slice(&rgba);
+        }
+    }
+    Some(pixels)
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{Art, stair_wipe_order};
+    use super::{Art, foreground_pixels, stair_wipe_order};
     use serde_json::json;
+
+    #[test]
+    fn foreground_mask_removes_floor_without_removing_matching_artwork_colors() {
+        let colors = image::RgbaImage::from_raw(
+            2,
+            2,
+            vec![
+                70, 70, 70, 255, 255, 255, 255, 255, 0, 0, 0, 200, 201, 11, 12, 255,
+            ],
+        )
+        .unwrap();
+        let masks = image::RgbaImage::from_raw(
+            2,
+            2,
+            vec![
+                255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 128, 128, 128, 255,
+            ],
+        )
+        .unwrap();
+        assert_eq!(
+            foreground_pixels(&colors, &masks, (0, 0, 2, 2)).unwrap(),
+            vec![
+                70, 70, 70, 0, 255, 255, 255, 255, 0, 0, 0, 200, 201, 11, 12, 127,
+            ]
+        );
+        assert!(foreground_pixels(&colors, &masks, (0, 0, 3, 2)).is_none());
+    }
 
     #[test]
     fn stair_spiral_matches_original_executable_table() {

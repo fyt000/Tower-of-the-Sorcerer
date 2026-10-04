@@ -86,8 +86,8 @@
             "zh-CN": "自动存档与检查点"
           },
           "text": {
-            "en": "Accepted game actions autosave. “Save game” keeps a separate checkpoint, and “Restore checkpoint” returns to it. You can save from the start of your journey. Detailed enemy information and battle forecasts require the Hero Orb.",
-            "zh-CN": "游戏会在接受行动后自动保存。“保存游戏”保留独立检查点，“读取检查点”回到该进度。从冒险开始就可以保存；查看详细敌人信息和战斗预测则需要英雄宝珠。"
+            "en": "Accepted game actions autosave. After acquiring the Hero Orb, \"Save game\" keeps a separate checkpoint and Settings can export a portable save. \"Restore checkpoint\" returns to your saved checkpoint. Detailed enemy information and battle forecasts also require the Hero Orb.",
+            "zh-CN": "游戏会在接受行动后自动保存。获得英雄宝珠后，“保存游戏”可保留独立检查点，也可在设置中导出便携存档。“读取检查点”可返回已保存的检查点。查看详细敌人信息和战斗预测也需要英雄宝珠。"
           }
         }
       ]
@@ -615,8 +615,8 @@
             {
               "type": "p",
               "text": {
-                "en": "Compares your strength with an enemy’s and forecasts the battle result. Remember that the Cross and similar items help only against the creatures they affect.",
-                "zh-CN": "比较勇士与敌人的能力，预测战斗结果。注意十字架等道具只对相应种类的敌人生效。"
+                "en": "Compares your strength with an enemy’s and forecasts the battle result. It also enables manual save checkpoints and portable-save export. Remember that the Cross and similar items help only against the creatures they affect.",
+                "zh-CN": "比较勇士与敌人的能力，预测战斗结果。它还会解锁手动保存检查点与便携存档导出。注意十字架等道具只对相应种类的敌人生效。"
               }
             },
             {
@@ -649,8 +649,8 @@
             {
               "type": "p",
               "text": {
-                "en": "Remembers the important information you have heard. Reviewing it later can make a previously puzzling clue understandable. It is a different item from the Hero Orb.",
-                "zh-CN": "记住你听到的重要信息。以后再回顾，之前令人困惑的线索也许就有了新的含义。它与英雄宝珠是不同的道具。"
+                "en": "Records the old-man and merchant hints that you first hear while owning the orb. The journal has 24 possible hints, and reviewing them can make a puzzling clue clearer. Earlier conversations are not added retroactively, even if you return to the speaker. Click the orb or open the journal to review recorded hints; the orb is reusable. It is a different item from the Hero Orb.",
+                "zh-CN": "记录你持有宝珠期间首次听到的老人和商人提示。记录共有 24 条可收集提示，反复查看也许能帮助你理解谜题。获得宝珠之前已经听过的对话不会补录，即使再次找同一人物交谈也不会。点击宝珠或打开记录即可回顾已记录的提示；宝珠可反复使用。它与英雄宝珠是不同的道具。"
               }
             },
             {
@@ -845,8 +845,8 @@
             "zh-CN": "保留检查点"
           },
           "text": {
-            "en": "Use “Save game” when you want to keep a checkpoint to return to. A fairy conversation does not create a separate checkpoint for you.",
-            "zh-CN": "需要保留可返回的进度时，请使用“保存游戏”。与仙子交谈不会为你建立独立检查点。"
+            "en": "Once you have the Hero Orb, use \"Save game\" when you want to keep a checkpoint to return to. A fairy conversation does not create a separate checkpoint for you.",
+            "zh-CN": "获得英雄宝珠后，需要保留可返回的进度时，请使用“保存游戏”。与仙子交谈不会为你建立独立检查点。"
           }
         }
       ]
