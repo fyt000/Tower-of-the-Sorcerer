@@ -1,38 +1,151 @@
 # Tower of the Sorcerer · Rust
 
-A browser and terminal remake of the installed English **Tower of the Sorcerer 1.2** by Oz & Kenichi. A deterministic Rust engine powers the WebAssembly browser build, interactive CLI, JSON headless mode, and a stdio MCP server. The browser combines the original pixel art with a responsive modern interface.
+A Rust remake of the installed English **Tower of the Sorcerer 1.2** by Oz &
+Kenichi. A deterministic engine powers the browser, native desktop GUI,
+terminal, JSON headless mode and stdio MCP server. The game interface and visual
+campaign editor are shared Rust code, using Eframe/Egui with WebGL in the browser
+and OpenGL in the desktop window. Handwritten browser JavaScript is only a
+startup loader.
 
-The original installation is read only. The user's Cocos2d-x implementation is a reference and has not been copied into this project.
+The original installation is read only. The user's Cocos2d-x project has not
+been copied into this implementation. The private development remote is
+[fyt000/tos-rust](https://github.com/fyt000/tos-rust).
 
-## Run the browser version
+## Run
 
-The Rust toolchain, `wasm32-unknown-unknown` target, Node dependencies, and Chromium test browser were installed on this machine. From this directory:
+The toolchain, local assets and test browser are already installed on this
+machine. From the checkout:
 
 ```powershell
 npm run build
 npm start
 ```
 
-Open **http://127.0.0.1:8080**. Move with arrow keys or WASD; hover or tap a monster for its Rust-calculated damage forecast. The directional controls also work on touch devices. Progress automatically saves to browser storage. The game menu imports/exports portable saves and loads custom JSON campaigns.
-
-**Save game** creates a separate checkpoint; **Restore saved checkpoint** in the game menu returns to it. Autosave preserves the current session independently, so reloading the page does not erase that checkpoint after a fatal battle.
-
-The build produces `target/release/tos.exe` and `web/pkg/tos_wasm_bg.wasm`. The complete `web/` directory can also be hosted on any static web server with the `.wasm` MIME type `application/wasm`. No backend is required for browser play. Do not open `index.html` through `file://`; WebAssembly and campaign fetching require HTTP.
-
-For another port: `npm start -- --port 8090`. Keep the server stopped while rebuilding its native executable on Windows.
-
-On a fresh development machine install [Rust](https://rust-lang.org/tools/install/) and Node.js, then:
+Open **http://127.0.0.1:8080/**. To launch the graphical desktop game or editor:
 
 ```powershell
+npm run start:native
+npm run editor
+# Direct executable, including explicit language/content options:
+.\target\release\tos-ui.exe --language zh-CN
+.\target\release\tos-ui.exe --editor --campaign .\data\campaign.json
+```
+
+The native game includes the same map, inventory, journal, dialogue, animations,
+audio, settings and editor as the browser. `--assets-root PATH` overrides the
+folder containing `assets/` and `fonts/`; `--save PATH` imports a portable save.
+The default campaign is embedded, so native play does not need a web server.
+
+Use arrow keys or WASD, the direction buttons, or click a destination on the
+map. Click routes traverse clear road and stop at intervening obstacles. A
+directly selected enemy, door, pickup, NPC or stair can be the final action;
+the route never silently fights or opens obstacles on the way. Conversations
+and floor changes interrupt the route. Enter/Space advances scripted dialogue;
+**Skip animation** skips presentation while preserving the engine's result.
+
+**Settings** switches English/Simplified Chinese, sound/music, volume and
+animation speed. Browser audio starts after the first input. Original WAV
+effects play directly; extracted MIDI is synthesized in Rust, with approximate
+instrument timbres. Hero walking, enemy animation, battle turns/calculations,
+typewriter dialogue, stairs, magic/capture, the floor-10 Skeleton trap and ending
+scenes use an ordered presentation timeline from the engine.
+
+Detailed enemy stats and forecasts require the **Orb of the Hero**, received
+from the floor-3 old man. Orb of Wisdom is a different item. This gate also
+applies to CLI/MCP inspection and state snapshots.
+
+Completing the first cycle automatically enters the backside tower. Hero
+HP/ATK/DEF carry over unchanged. Applicable enemy and treasure combat stats,
+altar gains and flat magic damage become **×44**; gold rewards and prices do
+not. Cycle/reset/capture rules are configurable and backed by executable evidence.
+
+For another server port, use `npm start -- --port 8090`. Stop a release server
+before rebuilding `tos.exe` on Windows. To host elsewhere, deploy the complete
+generated `web/` directory over HTTP, serving `.wasm` as `application/wasm`.
+Browser play has no backend requirement. The generated GUI module is
+`web/pkg/tos_ui_bg.wasm`.
+
+## One-time setup from a fresh clone
+
+Install stable Rust, Node.js and Python 3. Rust edition 2024 and Eframe's MSRV
+must be supported by the selected toolchain. On Windows, either use the MSVC
+toolchain with Visual Studio C++ Build Tools or a GNU toolchain with its native
+binutils. This machine uses GNU Rust and WinLibs:
+
+```powershell
+# GNU Windows toolchain support, if needed:
+winget install --id BrechtSanders.WinLibs.POSIX.UCRT --exact
 rustup target add wasm32-unknown-unknown
 rustup component add rustfmt clippy
 npm ci
+python -m pip install -r tools/requirements.txt
+python tools/setup_assets.py --source "D:\Program Files (x86)\Tower of the Sorcerer"
 npm run build
 ```
 
-The build script resolves the Rust binaries in the standard Cargo directory and installs the `wasm-bindgen-cli` version matching `Cargo.lock` if necessary. The local prebuilt binding generator speeds up builds on this machine.
+The setup script extracts sprites/WAV/MIDI from your installation and downloads
+the OFL-licensed Noto Sans SC font from Google's official font repository. It
+preserves an existing edited campaign and event/NPC configuration. Run it once
+per clone; it is not a runtime dependency. Use `--font-only` for just the font or
+`--skip-font` for just extraction.
 
-## Native and AI interfaces
+**Extracted images and audio are ignored by Git**, as are the downloaded Chinese
+font, binaries, WebAssembly output, test screenshots and local packages. The
+repository tracks extraction tools, editable data, evidence and attribution.
+The build script resolves Cargo/WinLibs and installs a `wasm-bindgen-cli` version
+matching `Cargo.lock` when necessary.
+
+For a local portable desktop folder:
+
+```powershell
+npm run package:native
+.\dist\native\tos-ui.exe
+```
+
+The ignored `dist/native/` folder contains the GUI executable and adjacent local
+assets/fonts. It can run from another working directory. Original media retain
+their authors' rights; packaging locally does not grant redistribution rights.
+
+## Saves
+
+Every accepted game command autosaves. Browser saves, selected custom campaign
+and settings use `localStorage`, scoped to the site's origin. **Save game**
+creates a separate checkpoint; **Restore checkpoint** returns to it even after
+later autosaves or a fatal fight. Native saves use the user's application-data
+folder under `tos-rust`; `TOS_STORAGE_DIR` overrides it.
+
+Settings can export a portable JSON save and import pasted JSON. Both graphical
+targets also accept dropped save/campaign JSON files. Save validation is atomic:
+bad imports leave the current game intact. A campaign fingerprint rejects
+incompatible revisions. The known first-version bundled original save is
+migrated conservatively and backed up under `tos-rust:save:recovery`; unknown or
+custom revisions remain strictly checked.
+
+## Visual campaign editor
+
+Open **Campaign editor** in either game or run `npm run editor`. It edits a
+separate draft and offers:
+
+- Floor painting, a searchable tile palette, floor duplication, titles and
+  stair landings, with undo/redo.
+- Enemy HP/ATK/DEF/gold and special properties.
+- Tile/item definitions, starting player stats, combat/backside rules, NPCs,
+  shop offers, event triggers, conditions and ordered effects.
+- Validation, play-testing the draft and JSON export. An advanced JSON panel
+  preserves access to custom fields; ordinary map and enemy editing uses forms.
+
+Exported `campaign.json` can be imported into either graphical target or supplied
+to CLI/MCP. To change the checkout's default, save it as `data/campaign.json` and
+rebuild. Merely opening editor panels leaves the campaign unchanged. Refer to
+[configuration.md](docs/configuration.md) for the complete data contract and
+[architecture.md](docs/architecture.md) for the shared UI and future Android work.
+
+English and Simplified Chinese dictionaries are in `data/locales/`, including
+all 268 extracted original dialogue entries, UI labels, entity names and generated
+journal messages. Unknown custom prose retains its authored language. The Chinese
+font remains a separate local runtime asset.
+
+## CLI, headless and MCP
 
 ```powershell
 .\target\release\tos.exe play
@@ -43,30 +156,33 @@ The build script resolves the Rust binaries in the standard Cargo directory and 
 .\target\release\tos.exe mcp
 ```
 
-Native modes embed the campaign, so the executable can run outside the checkout. Use `--campaign PATH` to override it and `--save PATH` to restore a save. `tos --help` lists options. Interactive terminal play accepts WASD, `inspect X Y`, `choose ID`, `use ITEM [FLOOR]`, `save PATH`, and `quit`.
-
-Headless mode reads one JSON command per line and emits the complete state after every command. For example:
+These modes embed the campaign and need no art, audio or GUI. Use `--campaign PATH`
+for custom data and `--save PATH` to resume; `tos --help` lists options. Terminal
+play accepts WASD, `inspect X Y`, `choose ID`, `use ITEM [FLOOR]`, `save PATH` and
+`quit`. Headless mode reads one JSON command per line and emits state after each:
 
 ```json
 {"type":"move","direction":"up"}
-{"type":"move","direction":"left"}
 {"type":"choose","choice":"leave"}
 {"type":"use_item","item":"flying_orb","floor":1}
 ```
 
-The MCP server uses [standard newline-delimited JSON-RPC over stdio](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports). Stdout contains only protocol messages. Its seven tools are:
+The MCP server uses newline-delimited JSON-RPC over stdio. Its eight tools are:
 
 | Tool | Purpose |
 | --- | --- |
-| `game_state` | Read map, stats, items, dialog, flags, and enemy forecasts |
-| `inspect_tile` | Inspect coordinates and forecast combat without acting |
-| `game_action` | Commit one move, response, cancellation, or item action |
-| `simulate_actions` | Try a route on a copy; preserve the live session |
-| `save_game` | Export a portable JSON save |
-| `load_game` | Restore a matching save |
+| `game_state` | Map, player, dialogue, flags and unlocked enemy forecasts |
+| `inspect_tile` | Inspect a square without acting; respects the Hero Orb gate |
+| `plan_path` | Read-only click-route planner, shared with the GUI |
+| `game_action` | Commit a move, choice, cancellation or item action |
+| `simulate_actions` | Try actions on a copy without changing the session |
+| `save_game` | Export a portable save |
+| `load_game` | Restore a matching validated save |
 | `new_game` | Reset the session |
 
-Resources `tos://state` and `tos://campaign` expose the session and configuration. Each server process owns one independent session. A typical MCP client entry is:
+Resources `tos://state` and `tos://campaign` expose state and configuration.
+Stdout contains only protocol messages. Each server owns an independent session.
+A client configuration for this checkout is:
 
 ```json
 {
@@ -79,52 +195,56 @@ Resources `tos://state` and `tos://campaign` expose the session and configuratio
 }
 ```
 
-## Configure the game
+## Evidence and verification
 
-Edit `data/campaign.json`, then rebuild. The browser can also import another campaign without rebuilding. Floors, tile IDs, enemies, pickups, stat gains, altar rules, position-specific NPC offers, stair links, and event triggers/effects are data. See [docs/configuration.md](docs/configuration.md) for examples and the event model.
+The original campaign contains 51 original 11×11 maps (floors 0–50), 33 monster
+rows, 268 original dialogue strings, 100 progression events and 41 positioned
+NPC interactions. Extraction/probe tools recover executable tables and scripted
+queues without modifying the installation. Addresses, checksums and confidence
+notes are retained in `data/` and [original-data.md](docs/original-data.md).
 
-Saves preserve changed maps, event flags and counters, global altar purchases, pending interactions, visited floors, item charges, and staged enemy statistics. A stable campaign fingerprint rejects saves made for a different ruleset, avoiding silent corruption after configuration changes.
+[mechanics.md](docs/mechanics.md) documents combat/item formulas, traps, gate and
+backside evidence, including exactly 43 moving-tile records in the floor-10
+Skeleton scene. Animation timing and raster effects are modern approximations.
+The MIDI synth does not reproduce the old sound bank or all controllers/pitch
+bend. Original fairy score/rank tables and its automatic checkpoint interface
+remain unimplemented. Later-cycle Zeno's original double-scaling bug is deliberately
+normalized; the original floor-45 merchant's unscaled HP reward is retained.
 
-## Original data and fidelity
-
-The repository includes 51 original 11×11 maps (floor 0 through 50), all 33 original monster stat rows, 268 original dialogue strings, 97 configured progression events, 41 position-specific NPC interactions, and extracted artwork. The extraction recognizes constant byte assignments in the Delphi executable without launching the original game. Source checksums, addresses, and confidence notes are retained in `data/extraction-manifest.json`, [docs/original-data.md](docs/original-data.md), and [docs/mechanics.md](docs/mechanics.md).
-
-Ordinary combat preserves hero-first damage, the fatal equality boundary, Cross/Dragon Slayer multipliers and the original base-attack guard. Items use verified original behavior, including Elixir's `10×ATK + 5×DEF`, Warp Staff charges, same-coordinate wings, Lucky Gold, and the distinct bomb reward. Original progression is translated into persistent data-driven events; event evidence and remaining fidelity boundaries are recorded with the data. See the final verification notes in `docs/mechanics.md` before treating this as a proven byte-for-byte recreation of every original sequence or a verified full optimal playthrough.
-
-To repeat asset/map/stat extraction from your installation:
-
-```powershell
-python -m pip install -r tools/requirements.txt
-python tools/extract_original.py --source "D:\Program Files (x86)\Tower of the Sorcerer"
-```
-
-The extractor preserves an existing edited campaign. Its explicit `--regenerate-campaign` flag resets the campaign to extracted defaults. Event and NPC configuration files are maintained separately and merged by the extractor where supported.
-
-## Verify
+Run the checks with:
 
 ```powershell
-cargo test --workspace
-cargo clippy --workspace --all-targets -- -D warnings
+npm run check
 npm run build
 npm run test:mcp
-# With npm start running in another terminal:
+npm run test:native
+# With npm start running:
 npm run test:browser
 ```
 
-Browser tests use headless Playwright Chromium, with no desktop/computer-use automation. They exercise real WebAssembly, keyboard and touch inputs, damage forecasts, NPC choices, keys, persistence, save files, custom campaigns, and invalid imports. Screenshots are written to `test-results/`.
+`check` runs the Rust workspace tests and native/wasm Clippy with warnings denied.
+Browser checks use headless Playwright and actual canvas pointer/keyboard input;
+native screenshots use Eframe's renderer hook. No computer-use testing is needed.
+Screenshots and reports are written to ignored `test-results/`.
 
-The MCP integration test also drives 46 actual opening actions through the protocol, verifies the original capture and escape, and records `examples/opening.jsonl`. It replays those same actions through CLI replay and JSON headless modes and compares the resulting player state. Native late-game tests isolate boss and ending transitions with scenario saves; they are separate evidence from a complete unassisted tower solution.
+The MCP test drives 46 natural opening actions through capture and escape and
+compares CLI replay/headless results. Late-game, traps and cycle branches also
+have explicit scenario tests. Those are separate evidence from a complete
+unassisted fifty-floor playthrough, which has not been validated.
 
-## Layout
+## Source layout and licenses
 
 | Directory | Responsibility |
 | --- | --- |
-| `crates/tos-core` | Platform-independent deterministic game rules and save validation |
-| `crates/tos-wasm` | Small WebAssembly binding around the same engine |
-| `crates/tos-cli` | Terminal, JSONL, replay, MCP, and local web server |
-| `web` | HTML/CSS and canvas presentation; no duplicated game rules |
-| `data` | Editable campaign and extracted original evidence |
-| `tools` | Repeatable extraction and build helpers |
-| `tests` | Browser and MCP integration checks |
+| `crates/tos-core` | Deterministic rules, path planner, saves and presentation events |
+| `crates/tos-ui` | Shared Rust game/editor, graphics, audio and platform adapters |
+| `crates/tos-cli` | Terminal, JSONL, replay, MCP and local web server |
+| `crates/tos-wasm` | Lightweight engine binding for external browser clients |
+| `web` | Startup shell, generated wasm and ignored local runtime media |
+| `data` | Editable campaign, bilingual dictionaries and original evidence |
+| `tools` | Extraction, toolchain-aware build and packaging helpers |
+| `tests` | Browser/native/MCP integration checks |
 
-Rust/JavaScript code written for this remake is MIT licensed. Original game assets, dialogue, and map data remain the work of Oz & Kenichi and are excluded from that license. Bundled fonts use the SIL Open Font License; their licenses are in `web/fonts/`. See [THIRD_PARTY.md](THIRD_PARTY.md).
+Remake code is MIT licensed. Original game media, dialogue and maps remain the
+work of Oz & Kenichi and are excluded from that license. Fonts use the SIL Open
+Font License. See [THIRD_PARTY.md](THIRD_PARTY.md).

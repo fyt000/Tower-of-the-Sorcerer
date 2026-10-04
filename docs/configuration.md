@@ -97,13 +97,13 @@ An event includes `id`, `trigger`, optional `conditions`, ordered `effects`, and
 
 Triggers: `step`, `bump`, `door_opened`, `enter_floor`, `enemy_defeated`, and `interact`. Optional `floor`, `x`, `y`, and `tile` restrict the trigger. `bump` runs at the intended destination before collision handling, enabling scripted walls and concealed encounters. `door_opened` runs after a colored door consumes its key. `interact` occurs when the player acknowledges an NPC conversation. Events run in file order; an event is marked as executed before its effects, preventing recursive forced battles from repeating it.
 
-Conditions are ANDed. Supported conditions are `flag` (with optional Boolean `value`, default true), `has_item`, `tile`, `no_enemies`, `stat_at_least` and `stat_at_most` (with `stat` and `amount`), and `any` (with an array of alternative `conditions`). A condition must match before the event's counter changes. Offers whose conditions fail are omitted; direct attempts to purchase them also fail. Purchased merchants can provide a different clue through `after_text: {flag, text}`.
+Conditions are ANDed. Supported conditions are `flag` (with optional Boolean `value`, default true), `has_item`, `tile`, `no_enemies`, `stat_at_least` and `stat_at_most` (with `stat` and `amount`), `cycle_at_least` and `cycle_at_most` (with `amount`), and `any` (with an array of alternative `conditions`). A condition must match before the event's counter changes. Individual effects can also have a `conditions` array; this is used to preserve combat stats during the backside capture. Offers whose conditions fail are omitted; direct attempts to purchase them also fail. Purchased merchants can provide a different clue through `after_text: {flag, text}`.
 
 Effects:
 
 | Type | Properties |
 | --- | --- |
-| `message` | `text` |
+| `message` | `text`, optional zero-based `dialogue_id` for original dialogue evidence |
 | `flag` | `flag`, optional Boolean `value` |
 | `set_tile` | `floor`, `x`, `y`, `tile` |
 | `add_stat` / `set_stat` | `stat`, `amount` |
@@ -116,7 +116,67 @@ Effects:
 | `set_enemy` | `enemy`, any of `hp`, `attack`, `defense`, `gold` |
 | `battle_at` | `floor`, `x`, `y`, optional Boolean `first_strike` |
 | `win` | No extra properties |
+| `next_cycle` | Reset maps, flags, shops and keys using `rules.backside`; preserve combat stats when configured |
+| `wait` | `ms`, presentation only |
+| `sound` | `cue`, extracted WAV basename, `music-start` / `music-stop`, or `music:ID` mapped by `rules.audio.music_cues` |
+| `cinematic` | `kind`, `duration_ms`, optional original instruction metadata |
+| `move_tile` | `floor`, `from_x`, `from_y`, `x`, `y`, optional `tile`, `duration_ms`: move one original sprite cell |
 
 Statistics are `hp`, `attack`, `defense`, `gold`, `yellow`, `blue`, and `red`. Forced battles can give the enemy an initial attack, matching original ambush sequences. Runtime enemy changes are session state and survive save/load. Any failed campaign validation reports an error before replacing a running browser session.
 
 `source`, executable addresses, and untranslated instruction metadata are evidence fields, not commands. Review them when modifying original progression. After editing, run `tos validate --campaign data/campaign.json`, the Rust tests, then rebuild the browser package.
+
+## Visual editing and localization
+
+Open **Campaign editor** in the browser/native interface, or launch the native
+executable with `--editor` (`npm run editor`). The editor works on a draft; play
+and export validate the entire campaign before replacing a session or creating
+JSON. It includes a floor canvas and tile palette, floor metadata/arrivals,
+enemy statistics, starting player settings, tile/item definitions, shops,
+interactions and event forms. Undo restores prior edits. Advanced fields remain
+available for custom rules without requiring raw JSON for ordinary map/enemy work.
+
+The browser imports a campaign into browser storage. **Export campaign** downloads
+a JSON file; to make it the project's default, save it as `data/campaign.json`
+and rebuild. Native export writes the selected campaign JSON to the working
+directory. Each campaign revision has a different save fingerprint.
+
+English and Simplified Chinese dictionaries live under `data/locales/` and are
+compiled into the shared UI. They translate UI labels, original entity names and
+original dialogue. Unknown custom-campaign prose falls back to its authored text.
+Add dictionary keys/translations to support another locale. The Chinese font is
+installed locally by `python tools/setup_assets.py --font-only`.
+
+`rules.forecast_requires_item` is `hero_orb` for the original campaign. Omit it
+to provide unrestricted forecasts in a custom campaign. The engine applies this
+gate to both `inspect` and the snapshot enemy list; the detailed view is unlocked
+by accepting the floor-3 old man's gift.
+
+The original backside configuration is:
+
+```json
+"backside": {
+  "enabled": true,
+  "multiplier": 44,
+  "carry_stats": true,
+  "reset_gold": true,
+  "capture_preserves_stats": true
+}
+```
+
+Monster HP/ATK/DEF, treasure combat-stat gains, altar gains and flat magic-field
+damage scale; enemy gold and altar prices do not. Maps and event/altar counters
+reset on completion. The first replay resets gold; later replays preserve gold
+and carried special items until the next capture. The multiplier stays 44 for
+later cycles. The original campaign's conditional capture effects enforce its
+stat-preservation rule; custom capture effects should use the same cycle guards.
+`capture_preserves_stats` records the original intent as metadata; changing that
+key alone does not alter capture. Edit the per-effect cycle conditions to create
+a different capture rule.
+
+`rules.audio.floor_music` is an ordered list of `{min_floor, max_floor, file}`
+where `file` is an extracted MIDI basename without `.mid`.
+`rules.audio.music_cues` maps original scene music IDs to those basenames.
+Presentation effects can customize `wait.ms`, `cinematic.duration_ms`, and
+`move_tile.duration_ms`. The GUI's animation speed setting scales the timeline;
+the durations approximate the original timer-driven scenes.

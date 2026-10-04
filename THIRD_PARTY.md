@@ -6,4 +6,6 @@
 
 **DM Sans** and **Cormorant Garamond** fonts are bundled for offline presentation under the SIL Open Font License. See the font license files in `web/fonts/`.
 
+**Noto Sans SC**, from Google's official fonts repository, supplies Simplified Chinese glyphs under the SIL Open Font License. `tools/setup_assets.py` downloads it once to the ignored local `web/fonts/NotoSansSC.ttf`; its license is retained in `web/fonts/Noto-Sans-SC-LICENSE.txt`. Extracted image and audio files are also ignored and reproduced from the user's original installation.
+
 Rust and Node dependencies are resolved by `Cargo.lock` and `package-lock.json` and retain their upstream licenses. `wasm-bindgen` is MIT/Apache-2.0; Playwright is Apache-2.0. The binding generator and test browser are development tools.
