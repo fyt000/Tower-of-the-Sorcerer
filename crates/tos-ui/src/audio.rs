@@ -112,7 +112,7 @@ pub fn synthesize_midi(bytes: &[u8]) -> Result<Pcm, String> {
                 // deterministic percussion, no global RNG
                 let noise = ((i
                     .wrapping_mul(1664525)
-                    .wrapping_add(key as usize * 1013904223))
+                    .wrapping_add((key as usize).wrapping_mul(1013904223)))
                     % 65536) as f64
                     / 32768.0
                     - 1.0;
