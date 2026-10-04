@@ -196,8 +196,52 @@ image = pe.get_memory_mapped_image()
 print(list(image[0x89b20:0x89b20 + 121]))
 ```
 
+## Floor-3 apparition and capture cutscene
+
+The floor-3 summon helper `zenolivework` at `0x461a0c` emits sound record
+`[1,7,0]` (`3f.wav`), followed by 17 overlay records with mask cells 166
+through 182. Each is followed by `[0,6,91]`: underlying road cell 6 and
+Zeno's color cell 91. Cell 166 is white and cell 182 is black; inverse-mask
+alpha progressively reveals Zeno. Painting these cells directly would show
+opaque noise squares, and replacing the sequence with rings changes its
+visual meaning. `Art::masked_tile` retains the atlas pixels and caches the
+requested color/mask combination on demand, so later original transformations
+can use the same compositor without another list of extracted images.
+
+The capture then includes a distinct cutscene:
+
+1. Opcode 11/subcode 7 at `0x45345c` loads `Data3/title05.bmp`, via the
+   literal filename at `0x454878`.
+2. Opcode 11/subcode 12 calls `openning9` at `0x482e60`. Its mode comes
+   from the following wait record's A operand. Mode 0 and frame operands
+   232–247 select dither cells 167–182 after subtracting 66 from the source
+   image-list value. The routine tiles those masks over 20 columns and 13
+   rows (`0x483152..0x4831a8`), replacing the cached screen/title with the
+   dark vortex in `Data3/open1.bmp` (filename constant `0x484758`).
+3. Mode 1 initializes with frame operand 0, loading `open1.bmp` as the
+   background and `Data3/open2.bmp` as the text-bearing source. The filename
+   constant for `open2.bmp` is `0x484780`. The original queue then visits
+   frame operands 100–405. At `0x48354f..0x4835be`, the bottom of the copy
+   rectangle is that operand: the text-bearing image is revealed from top
+   to bottom.
+4. Final operand 500 exits the scan and restores the normal window/title;
+   `opening31` then resets the hero's equipment and first-cycle stats before
+   the prison wake-up conversation.
+
+The baked English text in `open2.bmp` reads: “Now is the time to act. Using
+omniscient power, I shall break the sacred sword and get great wisdom.” A
+localized shared UI can use the original vortex image with translated text
+drawn over it, retaining the reveal direction while supporting Chinese. It
+should not show only a title card followed by a generic fade: that would omit
+the original narrative shot. Original image filenames already convert to
+ignored `web/assets/data3-*.png` through `tools/extract_original.py`.
+
+The mode-1 scan sets its timer to 30/50/70 ms for the original speed presets
+at `0x48351b..0x48354a`. Modern cutscene duration can remain configurable;
+these constants are distinct from ordinary movement and battle timing.
+
 No timing measurement from a live old-game window is claimed here. Confirmed
 frame sources, masks, timer constants, queue order, and sound records are
 separate evidence from the shared UI's final rendering and headless regression
-checks. Floor-3 capture and later scripted-event coverage are audited separately
-in `docs/mechanics.md` and their preserved event queue metadata.
+checks. Later scripted-event coverage is audited separately in
+`docs/mechanics.md` and its preserved event queue metadata.

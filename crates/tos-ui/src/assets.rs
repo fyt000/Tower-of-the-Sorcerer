@@ -11,6 +11,8 @@ pub struct Art {
     /// Enemy impact color cell 184, with alpha recovered from mask cell 183.
     pub impact: Option<TextureHandle>,
     pub size: [usize; 2],
+    original_image: Option<image::RgbaImage>,
+    masked: BTreeMap<(u32, u32), TextureHandle>,
 }
 
 impl Art {
@@ -19,6 +21,11 @@ impl Art {
             .map_err(|e| e.to_string())?
             .to_rgba8();
         self.size = [image.width() as usize, image.height() as usize];
+        self.original_image = Some(image.clone());
+        self.masked.clear();
+        self.heroes.clear();
+        self.hero_hits.clear();
+        self.impact = None;
         self.atlas = Some(ctx.load_texture(
             "original sprites",
             ColorImage::from_rgba_unmultiplied(self.size, image.as_raw()),
@@ -39,6 +46,39 @@ impl Art {
         // This pair is reversed compared with the hero pairs: mask, then color.
         self.impact = Some(masked_texture(ctx, &image, 184, 183));
         Ok(())
+    }
+
+    /// Composite a scripted color cell using the original separate alpha mask.
+    ///
+    /// Magic apparition cells 166..182 are dither masks, not artwork to display
+    /// directly. This cache also supports later transformations without a fixed
+    /// list of creature/mask combinations or additional extracted PNG assets.
+    pub fn masked_tile(
+        &mut self,
+        painter: &egui::Painter,
+        rect: egui::Rect,
+        color_tile: u32,
+        mask_tile: u32,
+        tint: egui::Color32,
+    ) -> bool {
+        let Some(image) = &self.original_image else {
+            return false;
+        };
+        let cells = 11 * (image.height() / 40);
+        if image.width() < 440 || color_tile == 0 || mask_tile == 0 || color_tile > cells || mask_tile > cells {
+            return false;
+        }
+        let texture = self
+            .masked
+            .entry((color_tile, mask_tile))
+            .or_insert_with(|| masked_texture(painter.ctx(), image, color_tile, mask_tile));
+        painter.image(
+            texture.id(),
+            rect,
+            egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
+            tint,
+        );
+        true
     }
 
     /// Select an original stationary animation frame without moving its cell.
