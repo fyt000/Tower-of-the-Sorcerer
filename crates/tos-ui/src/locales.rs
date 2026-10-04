@@ -214,6 +214,9 @@ mod tests {
             translate_text("zh-CN", "A custom author's unlisted sentence."),
             "A custom author's unlisted sentence."
         );
+        assert_eq!(translate_text("zh-CN", "Old man"), "老人");
+        assert_eq!(translate_text("zh-CN", "Key merchant"), "钥匙商人");
+        assert_eq!(translate_text("zh-CN", "Custom Old man"), "Custom Old man");
         let combined = format!("{} {}", dialogue("en", 4), dialogue("en", 57));
         let translated = translate_text("zh-CN", &combined);
         assert!(translated.contains("武器"));
