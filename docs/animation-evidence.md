@@ -78,9 +78,11 @@ The Delphi form initializes its ambient timer to 500 ms, but the speed settings
 replace that interval. `speedhigh`, `speedmiddle`, and `speedlow` at
 `0x47f47c`, `0x47f4e0`, and `0x47f544` assign 150, 250, and 350 ms
 respectively to the ambient, event, and repeat-input timers. The executable's
-initial option byte at `0x489b9f` is 1, selecting High. A 250 ms renderer
-default corresponds to the original Medium preset, rather than the initial
-500 ms form value. Display speed may be scaled without changing engine turns.
+initial option byte at `0x489b9f` is 1, selecting High. The shared renderer
+defaults to High's 150 ms ambient interval, adjustable through
+`rules.presentation.ambient_frame_ms` and the animation-speed setting. A
+250 ms interval corresponds to Medium. Display speed does not change engine
+turns or the damage formula.
 
 The ordinary battle queue builder, `taisen` at `0x44a480..0x44b6aa`, queues
 audio opcode 1, operand 3, for **every** hero and enemy strike. For example,
@@ -245,3 +247,34 @@ frame sources, masks, timer constants, queue order, and sound records are
 separate evidence from the shared UI's final rendering and headless regression
 checks. Later scripted-event coverage is audited separately in
 `docs/mechanics.md` and its preserved event queue metadata.
+
+## Shared presentation and ending boundary
+
+The browser and native interface use these same Rust sprite/frame selections,
+strike cues and spiral ordering. Conversations and NPC choices are anchored
+inside the board. Ordinary movement accepts further keyboard or pointer input
+without a walking overlay or direction-button panel; conversations, combat and
+scripted scenes retain the ordered presentation required by their game state.
+
+The first-cycle ending branch at `0x4463a1..0x448fbc` has been probed with the
+original queue registers initialized. It emits **1,098 records**: 550 waits,
+515 opcode-11 scene operations and 33 sounds, consisting of 17 `open.wav` and
+16 `kai2.wav` cues. The subcode-12 renderer modes occur in this order:
+
+| Mode | Frames | First/last parameter |
+| --- | --- | --- |
+| 2 | 16 | 232–247 |
+| 6 | 17 | 1–17 |
+| 4 | 77 | 1–400, using variable increments |
+| 5 | 400 | 1–400 |
+| 7 | 1 | 0 |
+| 8 | 1 | 0 |
+
+The final opcode 11/subcode 6 performs the replay reset. These stage counts and
+the skipped calls are preserved in `data/original-event-audit.json`; run
+`python tools/audit_original_events.py` to regenerate the report. The current
+first-cycle ending deliberately uses a compact modern victory/credits scene
+before the verified reset. Its complete original raster artwork composition
+has not been reproduced. Exact ending artwork, fairy score/rank calculation,
+Windows timer granularity and a natural full-tower playthrough remain distinct
+validation work.

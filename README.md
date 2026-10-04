@@ -36,19 +36,28 @@ audio, settings and editor as the browser. `--assets-root PATH` overrides the
 folder containing `assets/` and `fonts/`; `--save PATH` imports a portable save.
 The default campaign is embedded, so native play does not need a web server.
 
-Use arrow keys or WASD, the direction buttons, or click a destination on the
+Use arrow keys or WASD, or click a destination on the
 map. Click routes traverse clear road and stop at intervening obstacles. A
 directly selected enemy, door, pickup, NPC or stair can be the final action;
 the route never silently fights or opens obstacles on the way. Conversations
-and floor changes interrupt the route. Enter/Space advances scripted dialogue;
+and floor changes interrupt the route. Walking accepts subsequent input without
+an overlay or a direction-button panel. Conversations and choices appear inside
+the game board. Enter/Space advances scripted dialogue;
 **Skip animation** skips presentation while preserving the engine's result.
 
 **Settings** switches English/Simplified Chinese, sound/music, volume and
 animation speed. Browser audio starts after the first input. Original WAV
 effects play directly; extracted MIDI is synthesized in Rust, with approximate
-instrument timbres. Hero walking, enemy animation, battle turns/calculations,
-typewriter dialogue, stairs, magic/capture, the floor-10 Skeleton trap and ending
-scenes use an ordered presentation timeline from the engine.
+instrument timbres. Battles play `taisen.wav` on each actual hero or enemy strike,
+with the impact pose and displayed HP calculation following that strike's phases.
+The hero alternates the original walking poses while moving and returns to the
+distinct standing pose after the next ambient tick. Monsters and NPCs alternate
+their original sprite poses in the same cell. Stairs cover the outgoing floor
+with crossed swords in the original spiral order, then reveal the incoming floor.
+The floor-3 capture includes Zeno's apparition, the title-to-vortex transition,
+the sacred-sword incantation, and the prison wake-up. The floor-10 guard march,
+Vampire transformation and later scripted scenes use the same ordered engine
+timeline in browser and native builds.
 
 Detailed enemy stats and forecasts require the **Orb of the Hero**, received
 from the floor-3 old man. Orb of Wisdom is a different item. This gate also
@@ -205,7 +214,17 @@ notes are retained in `data/` and [original-data.md](docs/original-data.md).
 
 [mechanics.md](docs/mechanics.md) documents combat/item formulas, traps, gate and
 backside evidence, including exactly 43 moving-tile records in the floor-10
-Skeleton scene. Animation timing and raster effects are modern approximations.
+Skeleton scene. [animation-evidence.md](docs/animation-evidence.md) records the
+walking/standing/damage artwork, per-strike audio, mask composition and stair
+ordering. Presentation duration is configurable; original Windows timer
+granularity is not emulated. The executable audit covers all 51 initialized
+floor records and all 56 initialized special-road sites.
+
+The first-cycle ending still uses a compact modern victory/credits presentation
+followed by the verified backside reset. Its original 1,098-record raster sequence
+has been audited, but its complete artwork composition has not been reproduced.
+This boundary concerns ending presentation; the noncombat first-cycle completion,
+carried stats and subsequent cycle reset are implemented and scenario-tested.
 The MIDI synth does not reproduce the old sound bank or all controllers/pitch
 bend. Original fairy score/rank tables and its automatic checkpoint interface
 remain unimplemented. Later-cycle Zeno's original double-scaling bug is deliberately

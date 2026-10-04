@@ -79,9 +79,32 @@ The floor-24 time gate and first-cycle completion are separate transitions. The 
 
 `Data3/Chtable.oz` is a Windows bitmap despite its extension. It supplies the higher-resolution 40-pixel sprite atlas: **440 × 800 pixels**, 11 columns, 220 cells. Atlas IDs are one-based; tile `n` has pixel origin `(((n-1) % 11) * 40, ((n-1) / 11) * 40)`. `Data3/Chtableb.oz` supplies the associated mask/background atlas. The extractor also converts the other `Data3` bitmaps and `Data2` ending images, and copies the installation's WAV and MIDI files.
 
-The standing hero comes from atlas cells **185 down, 193 left, 201 right, and 209 up**, each followed by its silhouette mask. The generated `hero-*.png` images use the inverse mask as alpha, giving the browser a transparent hero. Cell 159 is a crossed-swords combat symbol and is not a hero sprite.
+The hero has two walking poses, a separate standing pose and a damaged pose in
+each direction. These one-based color-cell IDs each have their silhouette mask
+in the following cell:
 
-`web/assets/manifest.json` specifies the atlas, tile size, column count, tile rectangles, floor background rectangle, directional hero sources, animation frame coordinates, and credits. `data/extraction-manifest.json` lists every generated asset, its original source path, and source checksum where applicable. Audio assets are preserved for further presentation work; retaining them does not establish reproduction of the original sound or MIDI timing.
+| Direction | Walking poses | Standing pose | Damaged pose |
+| --- | --- | --- | --- |
+| Down | 185, 187 | 189 | 191 |
+| Left | 193, 195 | 197 | 199 |
+| Right | 201, 203 | 205 | 207 |
+| Up | 209, 211 | 213 | 215 |
+
+Inverse mask alpha makes these poses transparent in browser and native builds.
+The hero returns to the standing pose after the next ambient tick; stationary
+enemy/NPC animation alternates its paired artwork at the same coordinates.
+Cell 159 is the crossed-swords stair-cover artwork, not a hero pose. Enemy hit
+color cell 184 uses the preceding mask 183. Detailed executable addresses and
+timer evidence are in [animation-evidence.md](animation-evidence.md).
+
+`web/assets/manifest.json` specifies the atlas, tile size, column count, tile rectangles, floor background rectangle, directional hero sources, animation frame coordinates, and credits. `data/extraction-manifest.json` lists every generated asset, its original source path, and source checksum where applicable. Battle presentation plays the original `taisen.wav` once per actual hero or enemy strike, then displays the impact artwork and HP calculation at their queued phases. Ambient MIDI is synthesized in Rust; the original instrument timbre and exact Windows timer scheduling are not reproduced.
+
+The shared Rust interface anchors conversations and choices inside the game
+board. Floor transitions retain the original crossed-swords spiral cover and
+reveal. Floor-3 capture materializes Zeno above the hero with the original
+masks, transitions the title into `open1.bmp`, reveals the incantation from
+`open2.bmp`, and then runs the prison reset and wake-up. The English shot uses
+the extracted artwork; Chinese uses translated text over the original vortex.
 
 The original artwork, music, maps, and text remain credited to **Oz & Kenichi / Shigemasa Ozawa**. Their installed readme describes the game as freeware and sets conditions on distribution of the original archive. That is not a general open-source or permissive asset license. The Rust implementation and the extracted original content have separate provenance; retain the attribution and review the original terms before publishing a redistribution.
 
@@ -91,7 +114,15 @@ The shared Rust engine is tested against both small rule fixtures and the import
 
 These tests establish their stated transitions, rather than an unassisted solution of all fifty floors. The full original map and enemy data are recovered; the event data is an authored translation of original writes, predicates, and queue instructions. Tile motion, waits, sound cues and dialogue IDs are preserved as ordered presentation effects alongside deterministic state changes. Native, browser, and MCP clients use that same engine; headless clients do not need to wait for display animations.
 
-Remaining fidelity boundaries include the original fairy score/rank calculations and checkpoint interface, exact original pixel/timer presentation and MIDI timbre, and a complete unassisted end-to-end playthrough. Boss/event scenarios and a successful scripted ending test are useful evidence, but they do not prove every original sequence or optimal route. Further confirmed behavior can be added through JSON event rules without rewriting the UI.
+The original first-cycle ending has **1,098 queued records**: 550 waits, 515
+scene instructions and 33 sound cues (17 `open.wav`, 16 `kai2.wav`). Its stage
+counts are preserved in `data/original-event-audit.json`. The current ending
+uses a compact modern victory/credits presentation and the verified automatic
+backside reset; its complete original raster artwork composition remains to be
+implemented. The first-cycle noncombat completion and carried-stat/reset rules
+are supported by executable evidence and scenario tests.
+
+Other remaining fidelity boundaries include the original fairy score/rank calculations and checkpoint interface, exact Windows timer scheduling and MIDI timbre, and a complete unassisted end-to-end playthrough. Boss/event scenarios and a successful scripted ending test are useful evidence, but they do not prove every original sequence or optimal route. Further confirmed behavior can be added through JSON event rules without rewriting the UI.
 
 
 ## Deeper event and cycle evidence
