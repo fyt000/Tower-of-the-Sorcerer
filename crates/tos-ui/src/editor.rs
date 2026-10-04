@@ -405,8 +405,9 @@ impl CampaignEditor {
             let available = ui.available_width();
             let board_width = (available * 0.52).clamp(340.0, 600.0);
             let palette_width = (available - board_width - 20.0).max(240.0);
-            let board_height =
-                (ui.ctx().content_rect().bottom() - ui.next_widget_position().y - 170.0).max(220.0);
+            // Remaining layout height is independent of the scroll offset,
+            // so the grid does not resize while the user scrolls metadata.
+            let board_height = (ui.available_height() - 106.0).clamp(220.0, 620.0);
             ui.horizontal_top(|ui| {
                 ui.vertical(|ui| {
                     ui.set_width(board_width);
