@@ -1,0 +1,12 @@
+# Keep source diffs consistent between Windows and browser/native build hosts.
+*.rs text eol=lf
+*.json text eol=lf
+*.mjs text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.png binary
+*.wav binary
+*.mid binary
+*.ttf binary
