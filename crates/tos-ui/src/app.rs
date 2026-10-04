@@ -202,6 +202,8 @@ impl TowerApp {
         self.active = None;
         self.route.clear();
         self.selected = None;
+        self.music_paused = false;
+        self.music_override = None;
         self.editor.replace_campaign(campaign);
         let _ = platform::write(CAMPAIGN, source);
         self.persist();
@@ -218,6 +220,9 @@ impl TowerApp {
         self.queue.clear();
         self.active = None;
         self.route.clear();
+        self.selected = None;
+        self.music_paused = false;
+        self.music_override = None;
         self.persist();
         self.context.request_repaint();
         Ok(())
@@ -809,7 +814,7 @@ impl TowerApp {
     fn inspection(&self, ui: &mut egui::Ui) {
         ui.label(RichText::new(self.text("inspect")).size(23.0).color(GOLD));
         ui.add_space(10.0);
-        let Some((x, y)) = self.selected else {
+        let Some((x, y)) = self.selected.filter(|_| !self.busy()) else {
             ui.label(RichText::new(self.text("inspect_hint")).color(MUTED));
             return;
         };
@@ -1159,6 +1164,8 @@ impl TowerApp {
                     self.active = None;
                     self.visual = self.snapshot.clone();
                     self.route.clear();
+                    self.music_paused = false;
+                    self.music_override = None;
                 }
             }
         });
