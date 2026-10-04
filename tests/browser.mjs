@@ -1,11 +1,13 @@
 import { chromium } from '@playwright/test';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 
 const root=resolve(import.meta.dirname,'..'), output=resolve(root,'test-results');
 mkdirSync(output,{recursive:true});
 const original=readFileSync(resolve(root,'data/campaign.json'),'utf8');
+const previousOriginal=execFileSync('git',['show','840a7a5:data/campaign.json'],{cwd:root,encoding:'utf8',maxBuffer:4*1024*1024});
 const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader-webgl','--autoplay-policy=no-user-gesture-required']});
 const context=await browser.newContext({viewport:{width:1440,height:1000},acceptDownloads:true});
 const page=await context.newPage(), errors=[], report=[];
@@ -31,6 +33,13 @@ async function load(change){const save=JSON.parse(await page.evaluate(()=>window
 async function importCampaign(source){await page.evaluate(source=>window.tower.import_campaign(source),source);await idle();await page.waitForTimeout(100);}
 async function skip(){if((await ui()).animation||(await ui()).presentation_remaining)await button('skip');await idle();}
 async function sceneUntil(type){await page.waitForFunction(type=>JSON.parse(window.tower.ui_json()).animation===type,type,{timeout:20000});}
+async function cinematicUntil(kind){await page.waitForFunction(kind=>{const u=JSON.parse(window.tower.ui_json());return u.animation==='cinematic'&&u.animation_details.at(-1)?.kind===kind;},kind,{timeout:20000});}
+async function heroIdle(){await page.waitForFunction(()=>JSON.parse(window.tower.ui_json()).hero_pose==='idle',undefined,{timeout:5000});}
+async function dialogueInsideBoard(){
+  await page.waitForFunction(()=>!!JSON.parse(window.tower.ui_json()).bounds.dialogue,undefined,{timeout:5000});
+  const {board:b,dialogue:d}=(await ui()).bounds;
+  assert(d.x>=b.x-1&&d.y>=b.y-1&&d.x+d.w<=b.x+b.w+1&&d.y+d.h<=b.y+b.h+1,`Dialogue must remain inside the board: ${JSON.stringify({board:b,dialogue:d})}`);
+}
 
 const corridor=JSON.stringify({id:'browser-regression',title:'Browser test',width:5,height:3,
   start:{floor:1,x:0,y:1,hp:100,attack:10,defense:5,gold:0,keys:{yellow:0,blue:0,red:0},inventory:[]},
@@ -48,7 +57,7 @@ try {
     await page.setViewportSize({width:1360,height:920});await page.waitForTimeout(150);
     const compact=(await ui()).bounds;
     assert(compact.board.y+compact.board.h<920);
-    assert(compact.right.y+compact.right.h<=892,'Movement controls must fit the default native-sized viewport');
+    assert.equal(compact.right,undefined,'Direction controls are replaced by board pathing and keyboard movement');
     await page.screenshot({path:resolve(output,'compact-desktop.png')});
     await page.setViewportSize({width:1440,height:1000});await page.waitForTimeout(150);
   });
@@ -67,8 +76,28 @@ try {
     assert(await page.evaluate(()=>localStorage.getItem('tos-rust:save:recovery')));
     await importCampaign(original);
   });
+  await test('Cached previous campaign, autosave and checkpoint migrate without resetting backside progress',async()=>{
+    const legacy=JSON.parse(await page.evaluate(()=>window.tower.save_json()));
+    legacy.campaign_fingerprint='800993184d7842ca';legacy.cycle=2;legacy.player.hp=777;legacy.player.gold=41;legacy.steps=17;
+    const checkpoint=structuredClone(legacy);checkpoint.player.hp=666;checkpoint.steps=16;
+    await page.addInitScript(({campaign,save,checkpoint})=>{
+      if(!sessionStorage.getItem('cached-campaign-migration-fixture')){
+        localStorage.setItem('tos-rust:campaign:v1',campaign);
+        localStorage.setItem('tos-rust:save:v1',JSON.stringify(save));
+        localStorage.setItem('tos-rust:checkpoint:v1',JSON.stringify(checkpoint));
+        sessionStorage.setItem('cached-campaign-migration-fixture','installed');
+      }
+    },{campaign:previousOriginal,save:legacy,checkpoint});
+    await page.reload();await ready();const migrated=await state();
+    assert.deepEqual([migrated.cycle,migrated.player.hp,migrated.player.gold,migrated.steps],[2,777,41,17]);
+    assert.equal(await page.evaluate(()=>localStorage.getItem('tos-rust:campaign:recovery')),previousOriginal);
+    assert.equal(JSON.parse(await page.evaluate(()=>localStorage.getItem('tos-rust:save:recovery'))).campaign_fingerprint,'800993184d7842ca');
+    await button('restore');await idle();assert.deepEqual([(await state()).cycle,(await state()).player.hp,(await state()).steps],[2,666,16]);
+    await importCampaign(original);
+  });
   await test('Actual mouse click follows road and collects the selected key',async()=>{
-    await cell(4,9);await idle();const s=await state();assert.deepEqual([s.player.x,s.player.y,s.player.keys.yellow],[4,9,1]);
+    await cell(4,9);assert.equal((await ui()).bounds.skip,undefined,'Ordinary travel must not show a skip-scene control');
+    await idle();await heroIdle();const s=await state();assert.deepEqual([s.player.x,s.player.y,s.player.keys.yellow],[4,9,1]);
   });
   await test('Original WAV effects and configured MIDI music play through WebAudio',async()=>{
     await page.waitForFunction(()=>{const a=JSON.parse(window.tower.ui_json()).audio;return a.unlocked&&a.effects_played>0&&a.music;},undefined,{timeout:20000});
@@ -87,10 +116,24 @@ try {
   await test('Enemy hover/inspection numerical details stay gated',async()=>{
     const locked=await page.evaluate(()=>JSON.parse(window.tower.inspect_json(2,1)));assert.equal(locked.details_locked,true);assert.equal(locked.enemy,null);assert.deepEqual((await state()).enemies,[]);
   });
-  await test('Real enemy click animates alternating combat and commits exact damage',async()=>{
-    await cell(2,1);await sceneUntil('battle');await page.screenshot({path:resolve(output,'battle.png')});
+  await test('Keyboard travel remains responsive and blocked movement preserves position and facing',async()=>{
+    await page.keyboard.press('ArrowLeft');await page.keyboard.press('ArrowRight');assert.equal((await ui()).bounds.skip,undefined);
+    await idle();await heroIdle();assert.deepEqual([(await state()).player.x,(await state()).player.y],[1,1]);
+    await page.keyboard.press('ArrowUp');await idle();await heroIdle();const blocked=await state();
+    assert.deepEqual([blocked.player.x,blocked.player.y],[1,1]);assert.equal((await ui()).facing,'up');assert.equal((await ui()).hero_pose,'idle');
+  });
+  await test('Real enemy click animates every strike, its sound and progressive damage',async()=>{
+    await page.waitForFunction(()=>{const a=JSON.parse(window.tower.ui_json()).audio;return a.unlocked&&a.enabled&&a.effects_played>0;});
+    const effectsBefore=(await ui()).audio.effects_played;
+    await cell(2,1);await sceneUntil('battle');
     const battle=(await state()).last_action.presentation.find(e=>e.type==='battle');assert.equal(battle.hero_strikes,3);assert.equal(battle.enemy_strikes,2);
+    await page.waitForFunction(()=>{const b=JSON.parse(window.tower.ui_json()).battle;return b?.completed===1&&!b.hero_turn;});
+    assert.deepEqual([(await ui()).battle.hero_hp,(await ui()).battle.enemy_hp],[100,11]);
+    await page.waitForFunction(()=>{const b=JSON.parse(window.tower.ui_json()).battle;return b?.completed===2&&b.hero_turn;});
+    assert.deepEqual([(await ui()).battle.hero_hp,(await ui()).battle.enemy_hp],[97,11]);
+    await page.screenshot({path:resolve(output,'battle.png')});
     await idle();assert.equal((await state()).player.hp,94);assert.equal((await state()).player.gold,2);assert.equal((await state()).player.x,2);
+    assert.equal((await ui()).audio.effects_played-effectsBefore,5,'Three hero strikes and two enemy strikes each play the original attack sound');
   });
   await test('Invalid campaign/save import preserves the live session',async()=>{
     const before=(await state()).player;
@@ -100,6 +143,7 @@ try {
   await test('Actual old-man conversation rewards the Hero Orb and unlocks forecasts',async()=>{
     await importCampaign(original);await load(s=>{s.player.floor=3;s.player.x=9;s.player.y=3;});
     await page.keyboard.press('ArrowRight');await page.waitForFunction(()=>JSON.parse(window.tower.state_json()).pending_interaction);
+    await dialogueInsideBoard();
     await button('choice:accept');await idle();assert((await state()).player.inventory.includes('hero_orb'));assert.equal((await state()).forecasts_unlocked,true);
     await button('choice:leave');await idle();
   });
@@ -112,10 +156,15 @@ try {
     await page.evaluate(()=>window.tower.set_language('en'));await importCampaign(original);await load(s=>{s.player.floor=3;s.player.x=4;s.player.y=9;});
     await command({type:'move',direction:'up'});const s=await state();assert.deepEqual([s.floor,s.player.hp,s.player.attack,s.player.defense],[2,400,10,10]);
     assert(s.last_action.presentation.some(e=>e.type==='cinematic'&&e.kind==='magic'));
-    await sceneUntil('cinematic');await page.waitForTimeout(150);await page.screenshot({path:resolve(output,'capture-magic.png')});
+    assert.deepEqual(s.last_action.presentation.filter(e=>e.type==='cinematic').map(e=>e.kind),['magic','fade_out','title','scan','capture']);
+    await cinematicUntil('magic');await page.waitForTimeout(150);await page.screenshot({path:resolve(output,'capture-magic.png')});
     await sceneUntil('dialogue');await page.waitForTimeout(700);const early=await ui();assert.equal(early.visual_floor,3);assert.equal(early.visual_player.hp,1000);assert(early.visual_player.inventory.includes('sword_5'));assert(!early.visual_log.some(t=>t.includes('escape tunnel')));
+    await dialogueInsideBoard();
     await page.screenshot({path:resolve(output,'capture-dialogue.png')});await button('dialogue_continue');
-    await sceneUntil('dialogue');await button('dialogue_continue');await sceneUntil('cinematic');await sceneUntil('floor');
+    await sceneUntil('dialogue');await button('dialogue_continue');
+    await cinematicUntil('title');assert.equal((await ui()).animation_details.at(-1).asset,'data3-title05');assert.equal((await ui()).visual_floor,3);await page.screenshot({path:resolve(output,'capture-title.png')});
+    await cinematicUntil('scan');assert.equal((await ui()).animation_details.at(-1).asset,'data3-open2');assert.equal((await ui()).visual_floor,3);await page.screenshot({path:resolve(output,'capture-scan.png')});
+    await sceneUntil('floor');
     await sceneUntil('dialogue');assert.equal((await ui()).visual_floor,2);assert.equal((await ui()).visual_player.hp,400);assert(!(await ui()).visual_player.inventory.includes('sword_5'));
     for(let n=0;n<3;n++){await button('dialogue_continue');await sceneUntil('dialogue');}
     await page.waitForTimeout(700);await page.screenshot({path:resolve(output,'capture-prison.png')});await button('dialogue_continue');await idle();
@@ -125,9 +174,28 @@ try {
     assert.equal((await state()).last_action.presentation.filter(e=>e.type==='move_tile').length,43);
     await sceneUntil('dialogue');await button('dialogue_continue');await sceneUntil('move_tile');await page.screenshot({path:resolve(output,'skeleton-trap.png')});await skip();
   });
-  await test('Stair transitions animate before the landing state becomes visible',async()=>{
+  await test('Stairs in both directions use the original spiral wipe and sound',async()=>{
     await importCampaign(original);await load(s=>{s.player.x=1;s.player.y=0;});await command({type:'move',direction:'left'});
-    await sceneUntil('floor');assert.equal((await state()).floor,2);await idle();
+    await sceneUntil('floor');assert.equal((await state()).floor,2);
+    const up=(await state()).last_action.presentation.find(e=>e.type==='floor');assert.deepEqual([up.direction,up.style,up.sound],['up','original_spiral','kai']);
+    assert.equal((await ui()).animation_details.at(-1).style,'original_spiral');await page.screenshot({path:resolve(output,'stairs-up.png')});await idle();
+    await command({type:'move',direction:'up'});await sceneUntil('floor');assert.equal((await state()).floor,1);
+    const down=(await state()).last_action.presentation.find(e=>e.type==='floor');assert.deepEqual([down.direction,down.style,down.sound],['down','original_spiral','kai']);
+    assert.equal((await ui()).animation_details.at(-1).style,'original_spiral');await page.screenshot({path:resolve(output,'stairs-down.png')});await idle();
+  });
+  await test('Floor-20 Vampire transformation preserves its original raster sequence',async()=>{
+    await importCampaign(original);await load(s=>{s.player.floor=20;s.player.x=5;s.player.y=8;});await command({type:'move',direction:'up'});
+    const transformation=(await state()).last_action.presentation.find(e=>e.type==='cinematic'&&e.kind==='transformation');
+    assert.equal(transformation.tile,95);assert.equal(transformation.original_frames.length,32);
+    await cinematicUntil('transformation');assert.equal((await ui()).visual_floor,20);await page.waitForTimeout(200);await page.screenshot({path:resolve(output,'vampire-transformation.png')});
+    await sceneUntil('dialogue');await dialogueInsideBoard();await skip();
+  });
+  await test('Floor-49 Zeno and eight guards appear through their original magic masks',async()=>{
+    await importCampaign(original);await load(s=>{s.player.floor=49;s.player.x=5;s.player.y=6;});await command({type:'move',direction:'up'});
+    const magic=(await state()).last_action.presentation.filter(e=>e.type==='cinematic'&&e.kind==='magic');
+    assert.equal(magic.length,2);assert.equal(magic[0].frames[0],166);assert.equal(magic[1].targets.length,8);
+    await cinematicUntil('magic');assert.equal((await ui()).visual_floor,49);await page.waitForTimeout(150);await page.screenshot({path:resolve(output,'zeno-magic.png')});
+    await sceneUntil('dialogue');await dialogueInsideBoard();await button('dialogue_continue');await cinematicUntil('magic');await page.waitForTimeout(300);await page.screenshot({path:resolve(output,'zeno-guard-magic.png')});await skip();
   });
   await test('First completion enters the backside tower and persists its cycle',async()=>{
     await importCampaign(original);await load(s=>{s.player.floor=50;s.player.x=5;s.player.y=5;s.floors['50'][49]=91;s.player.gold=123;});
@@ -153,7 +221,12 @@ try {
   await test('Responsive Chinese mobile canvas and touch controls remain usable',async()=>{
     await importCampaign(original);await page.evaluate(()=>window.tower.set_language('zh-CN'));await page.setViewportSize({width:390,height:844});await page.waitForTimeout(400);
     const b=(await ui()).bounds.board;assert(b.x>=0&&b.x+b.w<=390,JSON.stringify(b));await page.waitForTimeout(6200);await page.screenshot({path:resolve(output,'mobile.png')});
-    await button('up');await idle();assert.equal((await state()).player.y,9);
+    await cell(4,9);await idle();await heroIdle();assert.deepEqual([(await state()).player.x,(await state()).player.y,(await state()).player.keys.yellow],[4,9,1]);
+  });
+  await test('Chinese mobile conversations stay inside the game board',async()=>{
+    await load(s=>{s.player.floor=3;s.player.x=9;s.player.y=3;});await cell(10,3);
+    await page.waitForFunction(()=>JSON.parse(window.tower.state_json()).pending_interaction);await page.waitForTimeout(650);await dialogueInsideBoard();
+    await page.screenshot({path:resolve(output,'mobile-dialogue.png')});await command({type:'cancel'});await idle();
   });
   assert.deepEqual(errors,[],'Browser should not raise JavaScript/Rust runtime errors');
   writeFileSync(resolve(output,'browser-report.json'),JSON.stringify({checks:report,errors},null,2));
