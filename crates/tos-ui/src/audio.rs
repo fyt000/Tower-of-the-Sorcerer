@@ -152,6 +152,8 @@ pub struct Audio {
     stream: Option<rodio::OutputStream>,
     #[cfg(not(target_arch = "wasm32"))]
     music: Option<rodio::Sink>,
+    #[cfg(not(target_arch = "wasm32"))]
+    effects: Vec<rodio::Sink>,
     #[cfg(target_arch = "wasm32")]
     context: Option<web_sys::AudioContext>,
     #[cfg(target_arch = "wasm32")]
@@ -175,6 +177,8 @@ impl Default for Audio {
             stream: None,
             #[cfg(not(target_arch = "wasm32"))]
             music: None,
+            #[cfg(not(target_arch = "wasm32"))]
+            effects: Vec::new(),
             #[cfg(target_arch = "wasm32")]
             context: None,
             #[cfg(target_arch = "wasm32")]
@@ -224,6 +228,13 @@ impl Audio {
     }
     pub fn refresh_volume(&mut self) {
         #[cfg(not(target_arch = "wasm32"))]
+        {
+            self.effects.retain(|sink| !sink.empty());
+            for sink in &self.effects {
+                sink.set_volume(if self.enabled { self.volume } else { 0.0 });
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
         if let Some(m) = &self.music {
             m.set_volume(if self.enabled && self.music_enabled {
                 self.volume * 0.6
@@ -268,7 +279,8 @@ impl Audio {
                 self.music = Some(sink);
             } else {
                 sink.append(source);
-                sink.detach();
+                self.effects.retain(|sink| !sink.empty());
+                self.effects.push(sink);
             }
         }
         #[cfg(target_arch = "wasm32")]
