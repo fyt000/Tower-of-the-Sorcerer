@@ -296,6 +296,21 @@ impl Campaign {
             {
                 return Err(format!("{kind} effect targets an invalid position"));
             }
+            if kind == "move_tile"
+                && (effect["floor"]
+                    .as_i64()
+                    .is_some_and(|floor| !self.floors.iter().any(|f| i64::from(f.id) == floor))
+                    || ["x", "from_x"]
+                        .iter()
+                        .any(|key| effect[*key].as_u64().is_none_or(|x| x >= self.width as u64))
+                    || ["y", "from_y"].iter().any(|key| {
+                        effect[*key]
+                            .as_u64()
+                            .is_none_or(|y| y >= self.height as u64)
+                    }))
+            {
+                return Err("move_tile effect targets an invalid position".into());
+            }
             if kind == "set_tile"
                 && !self.tiles.contains_key(
                     &effect["tile"]
@@ -588,7 +603,13 @@ impl Engine {
                 if !self.forecasts_unlocked() {
                     return None;
                 }
-                let enemy = self.enemy(def.enemy.as_ref()?)?;
+                let enemy = self.encounter_enemy(
+                    def.enemy.as_ref()?,
+                    p.floor,
+                    i % self.campaign.width,
+                    i / self.campaign.width,
+                    *id,
+                )?;
                 let mut value =
                     serde_json::to_value(forecast_with_rules(p, &enemy, &self.campaign.rules))
                         .ok()?;
@@ -625,7 +646,7 @@ impl Engine {
         let enemy = def
             .enemy
             .as_ref()
-            .and_then(|key| self.enemy(key))
+            .and_then(|key| self.encounter_enemy(key, self.state.player.floor, x, y, id))
             .filter(|_| !noncombat && self.forecasts_unlocked())
             .map(|e| forecast_with_rules(&self.state.player, &e, &self.campaign.rules));
         let concealed = def.kind == "hidden_wall";
@@ -713,6 +734,43 @@ impl Engine {
         Some(enemy)
     }
 
+    /// Preview stat changes performed by the encounter's bump handler on a copy.
+    /// This keeps location-specific bosses consistent with their actual battle.
+    fn encounter_enemy(
+        &self,
+        key: &str,
+        floor: i32,
+        x: usize,
+        y: usize,
+        tile: u16,
+    ) -> Option<Enemy> {
+        let changes_stats = self.campaign.events.iter().any(|event| {
+            let trigger = &event["trigger"];
+            trigger["type"] == "bump"
+                && trigger["floor"]
+                    .as_i64()
+                    .is_none_or(|f| f == i64::from(floor))
+                && trigger["x"].as_u64().is_none_or(|v| v == x as u64)
+                && trigger["y"].as_u64().is_none_or(|v| v == y as u64)
+                && trigger["tile"]
+                    .as_u64()
+                    .is_none_or(|v| v == u64::from(tile))
+                && self.conditions_pass(&event["conditions"])
+                && event["effects"].as_array().is_some_and(|effects| {
+                    effects
+                        .iter()
+                        .any(|effect| effect["type"] == "set_enemy" && effect["enemy"] == key)
+                })
+        });
+        if changes_stats {
+            let mut preview = self.clone();
+            preview.run_events("bump", floor, x, y, Some(tile));
+            preview.enemy(key)
+        } else {
+            self.enemy(key)
+        }
+    }
+
     pub fn forecasts_unlocked(&self) -> bool {
         self.campaign.rules["forecast_requires_item"]
             .as_str()
@@ -779,8 +837,20 @@ impl Engine {
             }
             _ => 1,
         };
+        let hero_hit = (self.state.player.attack.saturating_mul(multiplier) - enemy.defense).max(1);
+        let enemy_hit = (enemy.attack - self.state.player.defense).max(0);
+        let base_hero_first = self.campaign.rules["hero_attacks_first"]
+            .as_bool()
+            .unwrap_or(true);
+        let first = enemy_first || !base_hero_first;
+        let mut hero_strikes = (enemy.hp - 1) / hero_hit + 1;
+        let mut enemy_strikes = battle.rounds + i64::from(enemy_first && base_hero_first);
+        if enemy_hit > 0 && enemy_strikes.saturating_mul(enemy_hit) >= self.state.player.hp {
+            enemy_strikes = (self.state.player.hp - 1) / enemy_hit + 1;
+            hero_strikes = enemy_strikes - i64::from(first);
+        }
         self.present(json!({"type":"audio","name":"taisen"}));
-        self.present(json!({"type":"battle","enemy_name":enemy.name,"enemy_hp":enemy.hp,"hero_hp":self.state.player.hp,"hero_hit":self.state.player.attack.saturating_mul(multiplier)-enemy.defense,"enemy_hit":(enemy.attack-self.state.player.defense).max(0),"rounds":battle.rounds,"enemy_first":enemy_first,"floor":floor,"x":x,"y":y,"duration_ms":((battle.rounds+1)*180).clamp(480,6000)}));
+        self.present(json!({"type":"battle","enemy_name":enemy.name,"enemy_hp":enemy.hp,"hero_hp":self.state.player.hp,"hero_hit":hero_hit,"enemy_hit":enemy_hit,"rounds":battle.rounds,"hero_strikes":hero_strikes,"enemy_strikes":enemy_strikes,"enemy_first":first,"floor":floor,"x":x,"y":y,"duration_ms":((hero_strikes+enemy_strikes)*180).clamp(480,6000)}));
     }
 
     /// Plan through clear road only. An obstacle may be the final action, never an intermediate step.
@@ -1124,10 +1194,10 @@ impl Engine {
             })
             .ok_or("Destination floor has no arrival tile")?;
         let from = self.state.player.floor;
-        self.present(json!({"type":"floor","from":from,"to":target,"duration_ms":450}));
         self.state.player.floor = target;
         self.state.player.x = index % self.campaign.width;
         self.state.player.y = index / self.campaign.width;
+        self.present(json!({"type":"floor","from":from,"to":target,"x":self.state.player.x,"y":self.state.player.y,"player":self.state.player,"tiles":tiles,"duration_ms":450}));
         self.state.visited_floors.insert(target);
         self.log(format!("Entered floor {target}."));
         self.run_events(
@@ -1792,9 +1862,13 @@ impl Engine {
                     let from_y = effect["from_y"].as_u64().unwrap_or(0) as usize;
                     let x = effect["x"].as_u64().unwrap_or(0) as usize;
                     let y = effect["y"].as_u64().unwrap_or(0) as usize;
-                    if let Some(tile) = self.tile_at(floor, from_x, from_y) {
-                        self.clear(floor, from_x, from_y);
-                        self.set_tile(floor, x, y, tile);
+                    if let Some(tile) = self.tile_at(floor, from_x, from_y)
+                        && x < self.campaign.width && y < self.campaign.height {
+                            if let Some(tiles) = self.state.floors.get_mut(&floor) {
+                                tiles[from_y * self.campaign.width + from_x] = self.campaign.rules["empty_tile"].as_u64().unwrap_or(0) as u16;
+                                tiles[y * self.campaign.width + x] = tile;
+                            }
+                            self.present(json!({"type":"move_tile","floor":floor,"from_x":from_x,"from_y":from_y,"x":x,"y":y,"tile":tile,"duration_ms":effect["duration_ms"].as_u64().unwrap_or(120)}));
                     }
                 },
                 "next_cycle" => self.next_cycle(),
@@ -1899,10 +1973,11 @@ impl Engine {
                     let x = effect["x"].as_u64().unwrap_or(0) as usize;
                     let y = effect["y"].as_u64().unwrap_or(0) as usize;
                     if self.tile_at(floor, x, y).is_some() {
-                        self.present(json!({"type":"floor","from":self.state.player.floor,"to":floor,"duration_ms":450}));
+                        let from = self.state.player.floor;
                         self.state.player.floor = floor;
                         self.state.player.x = x;
                         self.state.player.y = y;
+                        self.present(json!({"type":"floor","from":from,"to":floor,"x":x,"y":y,"player":self.state.player,"tiles":self.state.floors.get(&floor),"duration_ms":450}));
                         self.state.visited_floors.insert(floor);
                     }
                 }
@@ -2022,7 +2097,7 @@ impl Engine {
         fresh.log = self.state.log.clone();
         fresh.steps = self.state.steps;
         self.state = fresh;
-        self.present(json!({"type":"floor","from":player.floor,"to":self.state.player.floor,"duration_ms":900}));
+        self.present(json!({"type":"floor","from":player.floor,"to":self.state.player.floor,"x":self.state.player.x,"y":self.state.player.y,"player":self.state.player,"tiles":self.state.floors.get(&self.state.player.floor),"duration_ms":900}));
         self.log(format!(
             "Entered the backside tower, cycle {cycle}. Monster and treasure statistics are ×{}.",
             self.cycle_multiplier()

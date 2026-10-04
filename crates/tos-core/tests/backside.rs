@@ -370,3 +370,53 @@ fn backside_enemy_gold_and_three_percent_old_man_gift_are_not_scaled() {
     choose(&mut game, "accept");
     assert_eq!((game.player().attack, game.player().defense), (1030, 2060));
 }
+
+#[test]
+fn backside_zeno_inspection_previews_encounter_stats_without_mutation() {
+    let mut game = original();
+    edit(&mut game, |save| {
+        save["cycle"] = json!(2);
+        place(save, 50, 5, 5);
+        save["floors"]["50"][49] = json!(91);
+        save["player"]["hp"] = json!(100_000);
+        save["player"]["attack"] = json!(10_000);
+        save["player"]["defense"] = json!(20_000);
+        save["player"]["inventory"] = json!(["hero_orb"]);
+        save["enemy_overrides"]["zeno"] =
+            json!({"name":"Zeno", "hp":800, "attack":500, "defense":100, "gold":500});
+    });
+    let before = game.save_json();
+    let preview = game.inspect(5, 4)["enemy"].clone();
+    assert_eq!(
+        (
+            preview["hp"].as_i64(),
+            preview["attack"].as_i64(),
+            preview["defense"].as_i64()
+        ),
+        (Some(44_000), Some(27_500), Some(5_500))
+    );
+    let snapshot = game.snapshot();
+    let listed = snapshot["enemies"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|e| e["x"] == 5 && e["y"] == 4)
+        .unwrap();
+    assert_eq!(listed["damage"], preview["damage"]);
+    assert_eq!(game.save_json(), before);
+    step(&mut game, "up");
+    let action = game.snapshot();
+    let battle = action["last_action"]["presentation"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|e| e["type"] == "battle")
+        .unwrap();
+    assert_eq!(battle["enemy_hp"], preview["hp"]);
+    assert_eq!(battle["enemy_hit"], json!(7_500));
+    // The post-victory replay carries the exact HP left by the forecasted fight.
+    assert_eq!(
+        game.player().hp,
+        100_000 - preview["damage"].as_i64().unwrap()
+    );
+}

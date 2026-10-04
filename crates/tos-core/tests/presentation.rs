@@ -63,6 +63,8 @@ fn combat_timeline_describes_the_same_calculation_as_headless_state() {
     assert_eq!(battle["hero_hit"], 9);
     assert_eq!(battle["enemy_hit"], 3);
     assert_eq!(battle["rounds"], 2);
+    assert_eq!(battle["hero_strikes"], 3);
+    assert_eq!(battle["enemy_strikes"], 2);
     assert_eq!(game.player().hp, 94);
     assert_eq!(game.player().gold, 9);
     assert!(
@@ -74,6 +76,41 @@ fn combat_timeline_describes_the_same_calculation_as_headless_state() {
     let mut restored = corridor();
     restored.load_json(&saved).unwrap();
     assert_eq!(restored.player().hp, 94);
+}
+
+#[test]
+fn fatal_and_enemy_first_animation_turns_end_at_the_actual_lethal_strike() {
+    let mut game = corridor();
+    edit(&mut game, |s| {
+        s["player"]["hp"] = json!(3);
+        s["player"]["x"] = json!(1);
+    });
+    step(&mut game, "right");
+    let state = game.snapshot();
+    let battle = state["last_action"]["presentation"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|e| e["type"] == "battle")
+        .unwrap();
+    assert_eq!(battle["hero_strikes"], 1);
+    assert_eq!(battle["enemy_strikes"], 1);
+    assert_eq!(state["status"], "lost");
+    let mut campaign = serde_json::to_value(corridor().campaign).unwrap();
+    campaign["events"] = json!([{"id":"ambush","trigger":{"type":"step","floor":1,"x":1,"y":0},"effects":[{"type":"battle_at","floor":1,"x":2,"y":0,"first_strike":true}]}]);
+    let mut game = Engine::from_json(&campaign.to_string()).unwrap();
+    step(&mut game, "right");
+    let state = game.snapshot();
+    let battle = state["last_action"]["presentation"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|e| e["type"] == "battle")
+        .unwrap();
+    assert_eq!(battle["enemy_first"], true);
+    assert_eq!(battle["hero_strikes"], 3);
+    assert_eq!(battle["enemy_strikes"], 3);
+    assert_eq!(game.player().hp, 91);
 }
 
 #[test]
