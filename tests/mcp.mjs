@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 const root=resolve(import.meta.dirname,'..');
 const originalCampaign=JSON.parse(readFileSync(resolve(root,'data/campaign.json'),'utf8'));
 const binary=resolve(root,'target/release',process.platform==='win32'?'tos.exe':'tos');
-const server=spawn(binary,['mcp'],{cwd:root,stdio:['pipe','pipe','pipe']});
+const server=spawn(binary,['mcp','--developer'],{cwd:root,stdio:['pipe','pipe','pipe']});
 const pending=new Map();let nextId=1;const unexpected=[];
 const lines=createInterface({input:server.stdout});
 lines.on('line',line=>{try{const msg=JSON.parse(line);const request=pending.get(msg.id);if(request){pending.delete(msg.id);clearTimeout(request.timeout);request.resolve(msg);}else unexpected.push(msg);}catch{unexpected.push(line);}});

@@ -2,6 +2,7 @@ import { existsSync, readFileSync, mkdirSync, copyFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { cargoBin, cargo, rustEnv } from './rust-env.mjs';
+import { deployMcp } from './mcp-deployment.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const env = rustEnv;
@@ -26,4 +27,5 @@ mkdirSync(join(root, 'web', 'pkg'), { recursive: true });
 run(bindgen, ['--target', 'web', '--out-dir', 'web/pkg', '--out-name', 'tos_ui', 'target/wasm32-unknown-unknown/release/tos_ui.wasm']);
 copyFileSync(join(root, 'data', 'campaign.json'), join(root, 'web', 'campaign.json'));
 run(cargo, ['build', '--release', '-p', 'tos-cli', '-p', 'tos-ui']);
+deployMcp(join(root, 'target/release', process.platform === 'win32' ? 'tos.exe' : 'tos'));
 console.log('Built shared Rust browser UI, native desktop GUI, CLI, and MCP. Run npm start or target/release/tos-ui.exe.');

@@ -1,6 +1,7 @@
 use serde::{Deserialize, de::DeserializeOwned};
 use serde_json::{Value, json};
 use std::{
+    collections::BTreeMap,
     env, fs,
     io::{self, BufRead, Write},
     path::{Path, PathBuf},
@@ -22,6 +23,9 @@ fn run() -> Result<(), String> {
     if mode == "help" || mode == "--help" || mode == "-h" {
         println!(
             "Tower of the Sorcerer — deterministic Rust engine\n\nUSAGE: tos <MODE> [OPTIONS]\n\n  serve           Serve the browser build on http://127.0.0.1:8080\n  play            Interactive terminal game (WASD, inspect X Y, save PATH)\n  state           Print complete initial state as JSON\n  headless        Read JSON commands from stdin; output state after each\n  replay PATH     Execute newline-delimited JSON actions and print final state\n  mcp             MCP server over stdio (JSON-RPC, no stdout logging)\n  validate        Validate campaign data\n\nOPTIONS:\n  --campaign PATH Load a custom campaign JSON instead of the embedded original\n  --save PATH     Restore a saved state before running\n  --port NUMBER   Browser server port (default 8080)\n  --web PATH      Browser assets directory (default ./web)\n\nMove command: {{\"type\":\"move\",\"direction\":\"up\"}}\nChoose command: {{\"type\":\"choose\",\"choice\":\"leave\"}}\nItem command: {{\"type\":\"use_item\",\"item\":\"orb_of_flying\",\"floor\":1}}"
+        );
+        println!(
+            "\nMCP: --developer enables raw campaign/saves and simulation for research.\nFor rebuilds without disconnecting, run node tools/mcp-server.mjs and publish with npm run build:mcp."
         );
         return Ok(());
     }
@@ -92,7 +96,11 @@ fn run() -> Result<(), String> {
             Ok(())
         }
         "play" => play(&mut engine),
-        "mcp" => mcp(&mut engine),
+        "mcp" => mcp(
+            &mut engine,
+            args.iter().any(|arg| arg == "--developer"),
+            args.iter().any(|arg| arg == "--runtime-bridge"),
+        ),
         _ => Err(format!("Unknown mode {mode}; use tos --help")),
     }
 }
@@ -207,6 +215,10 @@ fn play(engine: &mut Engine) -> Result<(), String> {
             }
             "save" => {
                 if let Some(path) = words.get(1) {
+                    if let Err(error) = engine.ensure_player_save_allowed() {
+                        println!("{error}");
+                        continue;
+                    }
                     fs::write(path, engine.save_json()).map_err(|e| e.to_string())?;
                     println!("Saved {path}");
                 }
@@ -293,9 +305,9 @@ fn serve(root: &Path, port: u16) -> Result<(), String> {
     Ok(())
 }
 
-fn tool_definitions() -> Value {
+fn tool_definitions(developer: bool) -> Value {
     let action_schema = Command::json_schema();
-    json!([
+    let mut tools = json!([
         {"name":"game_state","description":"Read complete deterministic game state, map, inventory and combat forecasts.","inputSchema":{"type":"object","properties":{},"additionalProperties":false},"annotations":{"readOnlyHint":true}},
         {"name":"inspect_tile","description":"Inspect a tile and predict exact combat damage without taking an action.","inputSchema":{"type":"object","properties":{"x":{"type":"integer","minimum":0},"y":{"type":"integer","minimum":0}},"required":["x","y"],"additionalProperties":false},"annotations":{"readOnlyHint":true}},
         {"name":"plan_path","description":"Plan a click route through clear road. An obstacle can be the final action, never an intermediate step. Unreachable targets return the closest reachable road prefix.","inputSchema":{"type":"object","properties":{"x":{"type":"integer","minimum":0},"y":{"type":"integer","minimum":0}},"required":["x","y"],"additionalProperties":false},"annotations":{"readOnlyHint":true}},
@@ -304,7 +316,103 @@ fn tool_definitions() -> Value {
         {"name":"save_game","description":"Export a portable JSON save including flags and changed floors.","inputSchema":{"type":"object","properties":{},"additionalProperties":false},"annotations":{"readOnlyHint":true}},
         {"name":"load_game","description":"Restore an exported save for this campaign revision.","inputSchema":{"type":"object","properties":{"save":{"type":"string"}},"required":["save"],"additionalProperties":false}},
         {"name":"new_game","description":"Reset the current session to the campaign's initial state.","inputSchema":{"type":"object","properties":{},"additionalProperties":false}}
-    ])
+    ]);
+    if !developer {
+        let definitions = tools.as_array_mut().unwrap();
+        definitions.retain(|tool| tool["name"] != "simulate_actions");
+        for tool in definitions {
+            match tool["name"].as_str().unwrap() {
+                "game_state" => {
+                    tool["description"] = json!(
+                        "Read the current visible floor, player, owned-item usage help, dialogue, Wisdom Orb hints and Hero Orb forecasts. Concealed passages and puzzle solutions remain undisclosed."
+                    )
+                }
+                "inspect_tile" => {
+                    tool["description"] = json!(
+                        "Inspect a visible square without acting. Enemy statistics require the Hero Orb. Walls must be investigated through movement and dialogue clues."
+                    )
+                }
+                "save_game" => {
+                    tool["description"] = json!(
+                        "Create an opaque session checkpoint when save_unlocked is true (the original campaign requires the Hero Orb). Checkpoints survive worker hot reloads and expire when this MCP connection closes."
+                    )
+                }
+                "load_game" => {
+                    tool["description"] =
+                        json!("Restore a checkpoint created by save_game in this session.");
+                    tool["inputSchema"] = json!({"type":"object","properties":{"checkpoint":{"type":"string"}},"required":["checkpoint"],"additionalProperties":false});
+                }
+                _ => {}
+            }
+        }
+    }
+    tools
+}
+
+#[derive(Default)]
+struct McpContext {
+    developer: bool,
+    checkpoints: BTreeMap<String, String>,
+    next_checkpoint: u64,
+}
+
+#[derive(serde::Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct WorkerCheckpoint {
+    engine: String,
+    checkpoints: BTreeMap<String, String>,
+    next_checkpoint: u64,
+}
+
+fn observation(engine: &Engine, developer: bool) -> Value {
+    if developer {
+        engine.snapshot()
+    } else {
+        engine.player_observation()
+    }
+}
+
+fn runtime_checkpoint(
+    engine: &mut Engine,
+    context: &mut McpContext,
+    method: &str,
+    params: &Value,
+) -> Result<Value, String> {
+    #[derive(Deserialize)]
+    #[serde(deny_unknown_fields)]
+    struct FileArguments {
+        path: PathBuf,
+    }
+    let FileArguments { path } = arguments(params)?;
+    match method {
+        "runtime/checkpoint" => {
+            let checkpoint = WorkerCheckpoint {
+                engine: engine.runtime_checkpoint_json(),
+                checkpoints: context.checkpoints.clone(),
+                next_checkpoint: context.next_checkpoint,
+            };
+            fs::write(
+                path,
+                serde_json::to_vec(&checkpoint).map_err(|error| error.to_string())?,
+            )
+            .map_err(|error| error.to_string())?;
+        }
+        "runtime/restore" => {
+            let checkpoint: WorkerCheckpoint =
+                serde_json::from_slice(&fs::read(path).map_err(|error| error.to_string())?)
+                    .map_err(|error| error.to_string())?;
+            let mut restored = engine.clone();
+            for saved in checkpoint.checkpoints.values() {
+                restored.restore_runtime_checkpoint_json(saved)?;
+            }
+            restored.restore_runtime_checkpoint_json(&checkpoint.engine)?;
+            *engine = restored;
+            context.checkpoints = checkpoint.checkpoints;
+            context.next_checkpoint = checkpoint.next_checkpoint;
+        }
+        _ => return Err("Unknown runtime method".into()),
+    }
+    Ok(json!({}))
 }
 
 // MCP envelopes are transport data. Reject unknown or mistyped arguments here;
@@ -336,6 +444,12 @@ struct SaveArguments {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
+struct CheckpointArguments {
+    checkpoint: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 struct EmptyArguments {}
 
 fn arguments<T: DeserializeOwned>(value: &Value) -> Result<T, String> {
@@ -343,11 +457,16 @@ fn arguments<T: DeserializeOwned>(value: &Value) -> Result<T, String> {
         .map_err(|error| format!("Invalid tool arguments: {error}"))
 }
 
-fn call_tool(engine: &mut Engine, name: &str, args: &Value) -> Result<Value, String> {
+fn call_tool(
+    engine: &mut Engine,
+    context: &mut McpContext,
+    name: &str,
+    args: &Value,
+) -> Result<Value, String> {
     match name {
         "game_state" => {
             arguments::<EmptyArguments>(args)?;
-            Ok(engine.snapshot())
+            Ok(observation(engine, context.developer))
         }
         "plan_path" => {
             let TileArguments { x, y } = arguments(args)?;
@@ -355,14 +474,18 @@ fn call_tool(engine: &mut Engine, name: &str, args: &Value) -> Result<Value, Str
         }
         "inspect_tile" => {
             let TileArguments { x, y } = arguments(args)?;
-            Ok(engine.inspect(x, y))
+            Ok(if context.developer {
+                engine.inspect(x, y)
+            } else {
+                engine.inspect_player_tile(x, y)
+            })
         }
         "game_action" => {
             let ActionArguments { action } = arguments(args)?;
             engine.execute(action)?;
-            Ok(engine.snapshot())
+            Ok(observation(engine, context.developer))
         }
-        "simulate_actions" => {
+        "simulate_actions" if context.developer => {
             let SimulationArguments { actions } = arguments(args)?;
             if actions.len() > 1000 {
                 return Err("Maximum 1000 simulated actions".into());
@@ -375,23 +498,46 @@ fn call_tool(engine: &mut Engine, name: &str, args: &Value) -> Result<Value, Str
         }
         "save_game" => {
             arguments::<EmptyArguments>(args)?;
-            Ok(json!({"save":engine.save_json()}))
+            if context.developer {
+                Ok(json!({"save":engine.save_json()}))
+            } else {
+                engine.ensure_player_save_allowed()?;
+                context.next_checkpoint += 1;
+                let id = format!("checkpoint-{}", context.next_checkpoint);
+                context
+                    .checkpoints
+                    .insert(id.clone(), engine.runtime_checkpoint_json());
+                Ok(json!({"checkpoint":id}))
+            }
         }
         "load_game" => {
-            let SaveArguments { save } = arguments(args)?;
-            engine.load_json(&save)?;
-            Ok(engine.snapshot())
+            if context.developer {
+                let SaveArguments { save } = arguments(args)?;
+                engine.load_json(&save)?;
+            } else {
+                let CheckpointArguments { checkpoint } = arguments(args)?;
+                let saved = context
+                    .checkpoints
+                    .get(&checkpoint)
+                    .ok_or("Unknown session checkpoint")?;
+                engine.restore_runtime_checkpoint_json(saved)?;
+            }
+            Ok(observation(engine, context.developer))
         }
         "new_game" => {
             arguments::<EmptyArguments>(args)?;
             engine.execute(Command::NewGame)?;
-            Ok(engine.snapshot())
+            Ok(observation(engine, context.developer))
         }
         _ => Err(format!("Unknown tool {name}")),
     }
 }
 
-fn mcp(engine: &mut Engine) -> Result<(), String> {
+fn mcp(engine: &mut Engine, developer: bool, runtime_bridge: bool) -> Result<(), String> {
+    let mut context = McpContext {
+        developer,
+        ..McpContext::default()
+    };
     for line in io::stdin().lock().lines() {
         let line = line.map_err(|e| e.to_string())?;
         if line.trim().is_empty() {
@@ -422,17 +568,22 @@ fn mcp(engine: &mut Engine) -> Result<(), String> {
                     "2025-11-25"
                 };
                 Ok(
-                    json!({"protocolVersion":version,"capabilities":{"tools":{},"resources":{}},"serverInfo":{"name":"tower-of-the-sorcerer","version":env!("CARGO_PKG_VERSION")},"instructions":"Read game_state and inspect_tile before acting. All interfaces share the Rust rules engine. simulate_actions supports reversible route planning; saves include persistent events."}),
+                    json!({"protocolVersion":version,"capabilities":{"tools":{},"resources":{}},"serverInfo":{"name":"tower-of-the-sorcerer","version":env!("CARGO_PKG_VERSION")},"instructions":if developer { "Developer access includes raw campaign scripts, full saves and simulations. These reveal puzzle solutions." } else { "Read game_state and inspect_tile before acting. Coordinates start at the top left; x increases right and y increases down. Bump NPCs to hear clues; use pending_interaction choice IDs to reply. Investigate suspected walls with move actions. plan_path traverses apparent clear road; events can interrupt it. All actions return last_action including blocked outcomes. Forecasts require the Hero Orb. Save checkpoints before risky choices; preserve discovered dialogue clues in your own notes." }}),
                 )
             }
             "ping" => Ok(json!({})),
-            "tools/list" => Ok(json!({"tools":tool_definitions()})),
+            "tools/list" => Ok(json!({"tools":tool_definitions(developer)})),
             "tools/call" => {
                 let args = params
                     .get("arguments")
                     .cloned()
                     .unwrap_or_else(|| json!({}));
-                match call_tool(engine, params["name"].as_str().unwrap_or(""), &args) {
+                match call_tool(
+                    engine,
+                    &mut context,
+                    params["name"].as_str().unwrap_or(""),
+                    &args,
+                ) {
                     Ok(value) => Ok(
                         json!({"content":[{"type":"text","text":value.to_string()}],"structuredContent":value,"isError":false}),
                     ),
@@ -441,19 +592,28 @@ fn mcp(engine: &mut Engine) -> Result<(), String> {
                     }
                 }
             }
-            "resources/list" => Ok(
-                json!({"resources":[{"uri":"tos://state","name":"Current game state","mimeType":"application/json"},{"uri":"tos://campaign","name":"Campaign configuration","mimeType":"application/json"}]}),
-            ),
+            "resources/list" => {
+                let mut resources = vec![
+                    json!({"uri":"tos://state","name":"Current game state","mimeType":"application/json"}),
+                ];
+                if developer {
+                    resources.push(json!({"uri":"tos://campaign","name":"Campaign configuration","mimeType":"application/json"}));
+                }
+                Ok(json!({"resources":resources}))
+            }
             "resources/read" => {
                 let uri = params["uri"].as_str().unwrap_or("");
                 let value = match uri {
-                    "tos://state" => Ok(engine.snapshot()),
-                    "tos://campaign" => {
+                    "tos://state" => Ok(observation(engine, developer)),
+                    "tos://campaign" if developer => {
                         serde_json::to_value(engine.campaign()).map_err(|e| e.to_string())
                     }
                     _ => Err("Unknown resource".into()),
                 };
                 value.map(|v|json!({"contents":[{"uri":uri,"mimeType":"application/json","text":v.to_string()}]}))
+            }
+            method @ ("runtime/checkpoint" | "runtime/restore") if runtime_bridge => {
+                runtime_checkpoint(engine, &mut context, method, params)
             }
             _ => Err("Method not found".into()),
         };
@@ -475,7 +635,7 @@ mod tests {
 
     #[test]
     fn mcp_action_schema_and_runtime_share_the_command_contract() {
-        let definitions = tool_definitions();
+        let definitions = tool_definitions(true);
         let action = definitions
             .as_array()
             .unwrap()
@@ -489,6 +649,10 @@ mod tests {
         assert_eq!(action["inputSchema"]["additionalProperties"], false);
 
         let mut engine = Engine::from_json(DEFAULT_CAMPAIGN).unwrap();
+        let mut context = McpContext {
+            developer: true,
+            ..McpContext::default()
+        };
         for args in [
             json!({"action":{"type":"move"}}),
             json!({"action":{"type":"move","direction":"up","typo":true}}),
@@ -502,7 +666,7 @@ mod tests {
             let before = engine.snapshot();
             let save = engine.save_json();
             assert!(
-                call_tool(&mut engine, "game_action", &args).is_err(),
+                call_tool(&mut engine, &mut context, "game_action", &args).is_err(),
                 "accepted {args}"
             );
             assert_eq!(engine.snapshot(), before);
@@ -513,10 +677,15 @@ mod tests {
     #[test]
     fn invalid_simulation_cannot_modify_the_live_session() {
         let mut engine = Engine::from_json(DEFAULT_CAMPAIGN).unwrap();
+        let mut context = McpContext {
+            developer: true,
+            ..McpContext::default()
+        };
         let before = engine.snapshot();
         assert!(
             call_tool(
                 &mut engine,
+                &mut context,
                 "simulate_actions",
                 &json!({"actions":[
                     {"type":"move","direction":"up"},
@@ -526,5 +695,77 @@ mod tests {
             .is_err()
         );
         assert_eq!(engine.snapshot(), before);
+    }
+
+    #[test]
+    fn player_checkpoints_are_opaque_and_preserve_the_latest_action() {
+        let mut engine = Engine::from_json(DEFAULT_CAMPAIGN).unwrap();
+        let mut context = McpContext::default();
+        let initial = engine.snapshot();
+        assert!(call_tool(&mut engine, &mut context, "save_game", &json!({})).is_err());
+        assert_eq!(engine.snapshot(), initial);
+        assert!(context.checkpoints.is_empty());
+        assert_eq!(context.next_checkpoint, 0);
+        let mut setup: Value = serde_json::from_str(&engine.save_json()).unwrap();
+        setup["player"]["inventory"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!("hero_orb"));
+        engine.load_json(&setup.to_string()).unwrap();
+        let before = engine.snapshot();
+        let saved = call_tool(&mut engine, &mut context, "save_game", &json!({})).unwrap();
+        assert_eq!(saved, json!({"checkpoint":"checkpoint-1"}));
+        call_tool(
+            &mut engine,
+            &mut context,
+            "game_action",
+            &json!({"action":{"type":"move","direction":"up"}}),
+        )
+        .unwrap();
+        call_tool(&mut engine, &mut context, "load_game", &saved).unwrap();
+        assert_eq!(engine.snapshot(), before);
+        let raw_save = engine.save_json();
+        assert!(
+            call_tool(
+                &mut engine,
+                &mut context,
+                "load_game",
+                &json!({"save":raw_save})
+            )
+            .is_err()
+        );
+        assert!(
+            call_tool(
+                &mut engine,
+                &mut context,
+                "simulate_actions",
+                &json!({"actions":[]})
+            )
+            .is_err()
+        );
+        assert!(
+            !tool_definitions(false)
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|tool| tool["name"] == "simulate_actions")
+        );
+    }
+
+    #[test]
+    fn runtime_restore_rejects_invalid_checkpoint_without_partial_state_changes() {
+        let mut engine = Engine::from_json(DEFAULT_CAMPAIGN).unwrap();
+        let original = engine.snapshot();
+        let valid = engine.runtime_checkpoint_json();
+        engine
+            .execute(Command::Move {
+                direction: Direction::Up,
+            })
+            .unwrap();
+        let changed = engine.snapshot();
+        assert!(engine.restore_runtime_checkpoint_json("{}").is_err());
+        assert_eq!(engine.snapshot(), changed);
+        engine.restore_runtime_checkpoint_json(&valid).unwrap();
+        assert_eq!(engine.snapshot(), original);
     }
 }
