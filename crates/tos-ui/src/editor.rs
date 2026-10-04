@@ -22,7 +22,7 @@ fn editor_card<R>(ui: &mut Ui, contents: impl FnOnce(&mut Ui) -> R) -> egui::Inn
 }
 
 fn editor_eyebrow(ui: &mut Ui, text: impl Into<String>) {
-    ui.label(RichText::new(text).size(12.0).strong().color(EDITOR_MUTED));
+    ui.label(RichText::new(text).size(13.0).strong().color(EDITOR_MUTED));
 }
 
 fn editor_button(text: impl Into<String>, primary: bool) -> egui::Button<'static> {
@@ -1376,12 +1376,14 @@ fn enemy_summary(
     ui.label(RichText::new(name).size(23.0).strong().color(EDITOR_TEXT));
     ui.label(RichText::new(id).monospace().size(12.0).color(EDITOR_MUTED));
     ui.add_space(14.0);
+    let stat_width = ((ui.available_width() - 18.0) * 0.5).max(72.0);
     egui::Grid::new("enemy-summary-stats")
         .num_columns(2)
         .spacing(egui::vec2(18.0, 16.0))
         .show(ui, |ui| {
             for (index, field) in ["hp", "attack", "defense", "gold"].iter().enumerate() {
                 ui.vertical(|ui| {
+                    ui.set_width(stat_width);
                     editor_eyebrow(ui, tr(locale, field));
                     ui.label(
                         RichText::new(enemy[*field].as_i64().unwrap_or_default().to_string())
