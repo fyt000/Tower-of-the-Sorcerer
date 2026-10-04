@@ -91,8 +91,8 @@ def convert(p,f,tiles=None):
         elif opcode==11 and a==3:
             for i in [15,16,17,26,28,37,38,39]:
                 tiles[f*123+2+i]=93;effects.append(tile_effect(f,i,93))
-            # 462560 reveals the eight surrounding sorcerers in this order.
-            effects.append(overlay(f,27,[167,169,171,173,175,182],1200,
+            # 462560 sweeps all eight targets clockwise for each mask round.
+            effects.append(overlay(f,27,[167,169,171,173,175,177,179,182],1200,
                 color_tile=93,underlying_tile=6,
                 targets=[{'x':i%11,'y':i//11} for i in [15,16,17,28,39,38,37,26]]))
         elif opcode==11 and a==4:

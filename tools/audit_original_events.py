@@ -59,7 +59,10 @@ def main():
     assert [q[2] for q in materialization['queue'] if q[0]==9]==list(range(166,183))
     assert sum(q[0]==12 for q in skeleton['queue'])==43
     assert [q[2] for q in vampire['queue'] if q[:2]==[11,4]]==list(range(1,33))
-    assert len({q[1] for q in sorcerers['queue'] if q[0]==9})==8
+    sorcerer_targets=[15,16,17,28,39,38,37,26]
+    sorcerer_masks=[167,169,171,173,175,177,179,182]
+    assert [(q[1],q[2]) for q in sorcerers['queue'] if q[0]==9]==[
+        (target,mask) for mask in sorcerer_masks for target in sorcerer_targets]
     report={
         'source':'Installed English Tower of the Sorcerer Windows v1.2; isolated executable emulation',
         'executable_sha256':hashlib.sha256(pe.__data__).hexdigest(),
@@ -75,8 +78,8 @@ def main():
         'skeleton_march':{'builder':'0x46cb1c','floor':10,'tile_movements':43,**summary(skeleton)},
         'vampire_transformation':{'builder':'0x46cb1c','floor':20,'original_frames':list(range(1,33)),**summary(vampire)},
         'decoy_sorcerer_materialization':{'builder':'0x462560','floor':49,
-            'targets':[15,16,17,28,39,38,37,26],'color_tile':93,
-            'mask_tiles':[167,169,171,173,175,182],**summary(sorcerers)},
+            'targets':sorcerer_targets,'color_tile':93,
+            'mask_tiles':sorcerer_masks,**summary(sorcerers)},
         'first_cycle_ending':{'builder':'0x4463a1..0x448fbc',**summary(ending),
             'scene_stages':{stage:{'frames':len(values),'first':values[0],'last':values[-1]} for stage,values in ending_stages.items()},
             'sound_counts':dict(Counter(str(q[1]) for q in ending['queue'] if q[0]==1)),

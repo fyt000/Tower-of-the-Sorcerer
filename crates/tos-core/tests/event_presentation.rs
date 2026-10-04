@@ -111,7 +111,17 @@ fn decoy_zeno_and_eight_sorcerers_retain_their_materialization_masks() {
         (Some(5), Some(2))
     );
     assert_eq!(magic[1]["color_tile"], 93);
-    assert_eq!(magic[1]["targets"].as_array().unwrap().len(), 8);
+    assert_eq!(
+        magic[1]["frames"],
+        json!([167, 169, 171, 173, 175, 177, 179, 182])
+    );
+    assert_eq!(
+        magic[1]["targets"],
+        json!([
+            {"x":4,"y":1}, {"x":5,"y":1}, {"x":6,"y":1}, {"x":6,"y":2},
+            {"x":6,"y":3}, {"x":5,"y":3}, {"x":4,"y":3}, {"x":4,"y":2}
+        ])
+    );
     assert_eq!(game.tile_at(49, 5, 2), Some(91));
     for (x, y) in [
         (4, 1),
