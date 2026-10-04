@@ -117,7 +117,7 @@ try {
     const locked=await page.evaluate(()=>JSON.parse(window.tower.inspect_json(2,1)));assert.equal(locked.details_locked,true);assert.equal(locked.enemy,null);assert.deepEqual((await state()).enemies,[]);
   });
   await test('Keyboard travel remains responsive and blocked movement preserves position and facing',async()=>{
-    await page.keyboard.press('ArrowLeft');await page.keyboard.press('ArrowRight');assert.equal((await ui()).bounds.skip,undefined);
+    await page.keyboard.press('ArrowLeft');await page.waitForTimeout(35);await page.keyboard.press('ArrowRight');assert.equal((await ui()).bounds.skip,undefined);
     await idle();await heroIdle();assert.deepEqual([(await state()).player.x,(await state()).player.y],[1,1]);
     await page.keyboard.press('ArrowUp');await idle();await heroIdle();const blocked=await state();
     assert.deepEqual([blocked.player.x,blocked.player.y],[1,1]);assert.equal((await ui()).facing,'up');assert.equal((await ui()).hero_pose,'idle');

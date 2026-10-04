@@ -13,6 +13,8 @@ pub struct Art {
     pub size: [usize; 2],
     original_image: Option<image::RgbaImage>,
     masked: BTreeMap<(u32, u32), TextureHandle>,
+    creature_masks: Option<image::RgbaImage>,
+    creatures: BTreeMap<(u32, u32, u32, u32), TextureHandle>,
 }
 
 impl Art {
@@ -23,6 +25,7 @@ impl Art {
         self.size = [image.width() as usize, image.height() as usize];
         self.original_image = Some(image.clone());
         self.masked.clear();
+        self.creatures.clear();
         self.heroes.clear();
         self.hero_hits.clear();
         self.impact = None;
@@ -76,6 +79,93 @@ impl Art {
             texture.id(),
             rect,
             egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
+            tint,
+        );
+        true
+    }
+
+    /// Install Chtableb's creature silhouettes. The color atlas and this mask
+    /// atlas use the same cell coordinates; Chtableb is not background artwork.
+    pub fn install_background(&mut self, _ctx: &egui::Context, bytes: &[u8]) -> Result<(), String> {
+        let masks = image::load_from_memory(bytes)
+            .map_err(|error| error.to_string())?
+            .to_rgba8();
+        if masks.width() < 440 || masks.height() < 40 {
+            return Err(
+                "Original creature mask atlas must contain 11 columns of 40px cells".into(),
+            );
+        }
+        self.creature_masks = Some(masks);
+        self.creatures.clear();
+        Ok(())
+    }
+
+    /// Paint a transparent original creature while it moves between cells.
+    /// Numeric atlas cells and grid-aligned atlas rectangles share the same
+    /// mask coordinates. Custom artwork or unavailable masks use normal tiles.
+    pub fn creature(
+        &mut self,
+        painter: &egui::Painter,
+        rect: egui::Rect,
+        sprite: &serde_json::Value,
+        tint: egui::Color32,
+    ) -> bool {
+        let source = if sprite.is_object() {
+            sprite["x"]
+                .as_u64()
+                .zip(sprite["y"].as_u64())
+                .zip(sprite["w"].as_u64().zip(sprite["h"].as_u64()))
+                .and_then(|((x, y), (w, h))| {
+                    Some((
+                        u32::try_from(x).ok()?,
+                        u32::try_from(y).ok()?,
+                        u32::try_from(w).ok()?,
+                        u32::try_from(h).ok()?,
+                    ))
+                })
+        } else {
+            sprite.as_u64().filter(|tile| *tile > 0).and_then(|tile| {
+                let index = u32::try_from(tile - 1).ok()?;
+                Some((index % 11 * 40, (index / 11).checked_mul(40)?, 40, 40))
+            })
+        };
+        let Some((x, y, w, h)) = source else {
+            return self.tile(painter, rect, sprite, tint);
+        };
+        let (Some(colors), Some(masks)) = (&self.original_image, &self.creature_masks) else {
+            return self.tile(painter, rect, sprite, tint);
+        };
+        let valid = w > 0
+            && h > 0
+            && [x, y, w, h].iter().all(|value| value.is_multiple_of(40))
+            && x.checked_add(w).is_some_and(|right| {
+                right <= 440 && right <= colors.width() && right <= masks.width()
+            })
+            && y.checked_add(h)
+                .is_some_and(|bottom| bottom <= colors.height() && bottom <= masks.height());
+        if !valid {
+            return self.tile(painter, rect, sprite, tint);
+        }
+        let texture = self.creatures.entry((x, y, w, h)).or_insert_with(|| {
+            let mut pixels = Vec::with_capacity(w as usize * h as usize * 4);
+            for dy in 0..h {
+                for dx in 0..w {
+                    let mut rgba = colors.get_pixel(x + dx, y + dy).0;
+                    let alpha = 255 - masks.get_pixel(x + dx, y + dy).0[0];
+                    rgba[3] = (u16::from(rgba[3]) * u16::from(alpha) / 255) as u8;
+                    pixels.extend_from_slice(&rgba);
+                }
+            }
+            painter.ctx().load_texture(
+                format!("original creature {x}:{y}:{w}:{h}"),
+                ColorImage::from_rgba_unmultiplied([w as usize, h as usize], &pixels),
+                TextureOptions::NEAREST,
+            )
+        });
+        painter.image(
+            texture.id(),
+            rect,
+            egui::Rect::from_min_max(egui::Pos2::ZERO, egui::pos2(1.0, 1.0)),
             tint,
         );
         true
