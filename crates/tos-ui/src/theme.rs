@@ -1,7 +1,7 @@
 //! Shared visual primitives for the native and WebAssembly interfaces.
 
-use egui::{
-    Color32, FontId, InnerResponse, Layout, Painter, Rect, Response, RichText, Sense, Shape,
+use eframe::egui::{
+    self, Color32, FontId, InnerResponse, Layout, Painter, Rect, Response, RichText, Sense, Shape,
     Stroke, StrokeKind, Ui, WidgetInfo, WidgetText, WidgetType, pos2, vec2,
 };
 

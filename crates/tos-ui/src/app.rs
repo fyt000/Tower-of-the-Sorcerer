@@ -4,6 +4,7 @@ use crate::{
     editor::{CampaignEditor, EditorAction},
     locales::{entity_name, tr, translate_text},
     platform,
+    theme::{self, BG as NAVY, GOLD, Icon, MUTED, SURFACE as CARD, TEXT},
 };
 use eframe::egui::{self, Align2, Color32, FontId, Rect, RichText, Stroke, Vec2};
 use serde_json::{Value, json};
@@ -18,11 +19,6 @@ const SAVE: &str = "tos-rust:save:v1";
 const CAMPAIGN: &str = "tos-rust:campaign:v1";
 const CHECKPOINT: &str = "tos-rust:checkpoint:v1";
 const PREFS: &str = "tos-rust:prefs:v2";
-const NAVY: Color32 = Color32::from_rgb(12, 19, 31);
-const CARD: Color32 = Color32::from_rgb(20, 30, 45);
-const GOLD: Color32 = Color32::from_rgb(220, 184, 108);
-const MUTED: Color32 = Color32::from_rgb(145, 161, 183);
-const TEXT: Color32 = Color32::from_rgb(226, 230, 238);
 
 struct Active {
     effect: Value,
@@ -583,61 +579,76 @@ impl TowerApp {
 
     fn header(&mut self, ui: &mut egui::Ui) {
         let narrow = ui.available_width() < 1060.0;
-        ui.horizontal_wrapped(|ui| {
-            ui.label(
-                RichText::new(translate_text(&self.locale, &self.engine.campaign.title))
-                    .font(FontId::new(34.0, egui::FontFamily::Name("serif".into())))
-                    .color(GOLD),
+        ui.horizontal(|ui| {
+            let (mark, _) = ui.allocate_exact_size(
+                Vec2::splat(if narrow { 36.0 } else { 48.0 }),
+                egui::Sense::hover(),
             );
-            ui.add_space(12.0);
-            ui.label(
-                RichText::new(format!("{} {}", self.text("floor"), self.visual["floor"]))
-                    .size(18.0)
-                    .color(MUTED),
-            );
-            if self.snapshot["cycle"].as_u64().unwrap_or(0) > 1 {
+            theme::icon(ui.painter(), mark.shrink(5.0), Icon::Tower, GOLD);
+            ui.add_space(if narrow { 2.0 } else { 8.0 });
+            ui.vertical(|ui| {
+                if !narrow {
+                    theme::caption(ui, &self.text("classic_adventure"));
+                }
                 ui.label(
-                    RichText::new(format!(
-                        "{} ×{}",
-                        self.text("backside"),
-                        self.snapshot["backside_multiplier"]
-                    ))
-                    .color(GOLD),
+                    RichText::new(translate_text(&self.locale, &self.engine.campaign.title))
+                        .font(FontId::new(
+                            if narrow { 29.0 } else { 40.0 },
+                            egui::FontFamily::Name("serif".into()),
+                        ))
+                        .color(TEXT),
                 );
-            }
+            });
             if !narrow {
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    self.header_controls(ui)
+                    self.header_controls(ui, false)
                 });
             }
         });
         if narrow {
-            ui.horizontal_wrapped(|ui| self.header_controls(ui));
+            ui.add_space(8.0);
+            ui.horizontal(|ui| self.header_controls(ui, true));
         }
-        ui.add_space(8.0);
-        ui.separator();
-        ui.add_space(14.0);
+        ui.add_space(if narrow { 6.0 } else { 24.0 });
     }
 
-    fn header_controls(&mut self, ui: &mut egui::Ui) {
-        let settings = ui.button(self.text("settings"));
+    fn header_controls(&mut self, ui: &mut egui::Ui, narrow: bool) {
+        let settings = theme::action(
+            ui,
+            if narrow {
+                String::new()
+            } else {
+                self.text("settings")
+            },
+            Icon::Settings,
+            false,
+        );
         self.record("settings", &settings);
-        if settings.clicked() {
+        if settings.on_hover_text(self.text("settings")).clicked() {
             self.settings = !self.settings;
         }
-        let edit = ui.button(self.text("editor"));
+        let edit = theme::action(ui, self.text("editor_short"), Icon::Edit, false);
         self.record("editor", &edit);
         if edit.clicked() {
             self.editor_open = true;
         }
-        let save = ui.button(self.text("save"));
+        let save = theme::action(ui, self.text("save_short"), Icon::Save, true);
         self.record("save", &save);
         if save.clicked() {
             self.checkpoint();
         }
-        let restore = ui.button(self.text("restore"));
+        let restore = theme::action(
+            ui,
+            if narrow {
+                String::new()
+            } else {
+                self.text("restore_short")
+            },
+            Icon::Restore,
+            false,
+        );
         self.record("restore", &restore);
-        if restore.clicked() {
+        if restore.on_hover_text(self.text("restore")).clicked() {
             self.restore_checkpoint();
         }
     }
@@ -680,65 +691,135 @@ impl TowerApp {
         if let Some(battle) = self.battle_progress(self.now()) {
             player["hp"] = json!(battle.hero_hp);
         }
-        if !compact {
-            ui.label(
-                RichText::new(self.text("adventurer"))
-                    .size(25.0)
-                    .color(GOLD),
-            );
-            ui.add_space(14.0);
-        }
         let metrics = [
-            ("health", "hp", Color32::from_rgb(232, 113, 123)),
-            ("attack", "attack", GOLD),
-            ("defense", "defense", Color32::from_rgb(131, 175, 223)),
-            ("gold", "gold", GOLD),
+            ("health", "hp", theme::RED, Icon::Heart),
+            ("attack", "attack", GOLD, Icon::Sword),
+            ("defense", "defense", theme::BLUE, Icon::Shield),
+            ("gold", "gold", theme::GREEN, Icon::Coin),
         ];
         if compact {
-            ui.horizontal_wrapped(|ui| {
-                for (label, key, color) in metrics {
-                    ui.vertical(|ui| {
-                        ui.label(RichText::new(self.text(label)).color(MUTED));
-                        ui.label(RichText::new(number(&player[key])).size(25.0).color(color));
-                    });
-                    ui.add_space(14.0);
+            let width = (ui.available_width() - 24.0) / 4.0;
+            ui.horizontal_top(|ui| {
+                for (label, key, color, icon) in metrics {
+                    metric(
+                        ui,
+                        width,
+                        &self.text(label),
+                        &number(&player[key]),
+                        color,
+                        icon,
+                        true,
+                    );
                 }
             });
-        } else {
-            for (label, key, color) in metrics {
-                ui.horizontal(|ui| {
-                    ui.label(RichText::new(self.text(label)).color(MUTED));
-                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        ui.label(RichText::new(number(&player[key])).size(29.0).color(color));
-                    });
-                });
-                ui.add_space(8.0);
-            }
+            ui.add_space(4.0);
+            self.keys(ui, true);
+            return;
         }
-        ui.add_space(12.0);
         ui.horizontal(|ui| {
-            for (key, color) in [
-                ("yellow", GOLD),
-                ("blue", Color32::from_rgb(112, 168, 232)),
-                ("red", Color32::from_rgb(231, 118, 126)),
-            ] {
+            let (portrait, _) = ui.allocate_exact_size(Vec2::splat(62.0), egui::Sense::hover());
+            ui.painter()
+                .rect_filled(portrait, 14.0, theme::SURFACE_RAISED);
+            ui.painter().rect_stroke(
+                portrait,
+                14.0,
+                Stroke::new(1.0, theme::BORDER),
+                egui::StrokeKind::Inside,
+            );
+            if let Some(hero) = self.assets.heroes.get("down") {
+                ui.painter().image(
+                    hero[0].id(),
+                    portrait.shrink(9.0),
+                    Rect::from_min_max(egui::Pos2::ZERO, egui::pos2(1.0, 1.0)),
+                    Color32::WHITE,
+                );
+            }
+            ui.add_space(5.0);
+            ui.vertical(|ui| {
                 ui.label(
-                    RichText::new(format!("◇ {}", number(&player["keys"][key])))
-                        .size(22.0)
-                        .color(color),
-                )
-                .on_hover_text(self.text(key));
-                ui.add_space(9.0);
+                    RichText::new(self.text("adventurer"))
+                        .size(23.0)
+                        .strong()
+                        .color(TEXT),
+                );
+                ui.label(
+                    RichText::new(format!("{} {}", self.text("floor"), self.visual["floor"]))
+                        .size(15.0)
+                        .color(MUTED),
+                );
+            });
+        });
+        ui.add_space(18.0);
+        let width = (ui.available_width() - 8.0) / 2.0;
+        for row in metrics.chunks(2) {
+            ui.horizontal_top(|ui| {
+                for (label, key, color, icon) in row {
+                    metric(
+                        ui,
+                        width,
+                        &self.text(label),
+                        &number(&player[*key]),
+                        *color,
+                        *icon,
+                        false,
+                    );
+                }
+            });
+            ui.add_space(3.0);
+        }
+        if self.visual["cycle"].as_u64().unwrap_or(1) > 1 {
+            ui.add_space(8.0);
+            ui.label(
+                RichText::new(format!(
+                    "{} ×{}",
+                    self.text("backside"),
+                    self.visual["backside_multiplier"]
+                ))
+                .size(15.0)
+                .color(GOLD),
+            );
+        }
+    }
+
+    fn keys(&self, ui: &mut egui::Ui, compact: bool) {
+        if !compact {
+            section(ui, &self.text("keyring"), Icon::Key);
+            ui.add_space(14.0);
+        }
+        let width = (ui.available_width() - 16.0) / 3.0;
+        ui.horizontal(|ui| {
+            for (key, color) in [("yellow", GOLD), ("blue", theme::BLUE), ("red", theme::RED)] {
+                let (rect, response) = ui.allocate_exact_size(
+                    Vec2::new(width, if compact { 22.0 } else { 38.0 }),
+                    egui::Sense::hover(),
+                );
+                if !compact {
+                    ui.painter().rect_filled(rect, 8.0, theme::SURFACE_RAISED);
+                }
+                theme::icon(
+                    ui.painter(),
+                    Rect::from_center_size(
+                        egui::pos2(rect.min.x + 20.0, rect.center().y),
+                        Vec2::splat(18.0),
+                    ),
+                    Icon::Key,
+                    color,
+                );
+                ui.painter().text(
+                    egui::pos2(rect.min.x + 39.0, rect.center().y),
+                    Align2::LEFT_CENTER,
+                    number(&self.visual["player"]["keys"][key]),
+                    FontId::proportional(19.0),
+                    TEXT,
+                );
+                response.on_hover_text(self.text(key));
             }
         });
     }
 
     fn inventory(&mut self, ui: &mut egui::Ui) {
-        ui.add_space(15.0);
-        ui.separator();
+        section(ui, &self.text("inventory"), Icon::Compass);
         ui.add_space(14.0);
-        ui.label(RichText::new(self.text("inventory")).size(23.0).color(GOLD));
-        ui.add_space(10.0);
         let items = self.visual["player"]["inventory"]
             .as_array()
             .into_iter()
@@ -777,45 +858,82 @@ impl TowerApp {
         let mut command = None;
         egui::ScrollArea::vertical()
             .id_salt("inventory")
-            .max_height(280.0)
+            .max_height(250.0)
             .show(ui, |ui| {
-                for item in items {
-                    let id = item["id"].as_str().unwrap_or("");
-                    let name = entity_name(
-                        &self.locale,
-                        "items",
-                        id,
-                        item["name"].as_str().unwrap_or(id),
-                    );
-                    ui.horizontal(|ui| {
-                        let (rect, _) =
-                            ui.allocate_exact_size(Vec2::splat(30.0), egui::Sense::hover());
-                        self.assets
-                            .tile(ui.painter(), rect, &item["sprite"], Color32::WHITE);
-                        let mut text = name;
-                        if let Some(n) = item["charges"].as_u64() {
-                            text = format!("{text} · {n}");
-                        }
-                        if item["usable"].as_bool().unwrap_or(false) {
-                            let button = ui.add_enabled(
-                                !self.busy() && self.snapshot["pending_interaction"].is_null(),
-                                egui::Button::new(text),
-                            );
-                            self.record(&format!("item:{id}"), &button);
-                            if button.clicked() {
-                                if id == "flying_orb" {
-                                    self.settings = true;
-                                    self.notify(self.text("flying_hint"));
+                ui.horizontal_wrapped(|ui| {
+                    for item in items {
+                        let id = item["id"].as_str().unwrap_or("");
+                        let name = entity_name(
+                            &self.locale,
+                            "items",
+                            id,
+                            item["name"].as_str().unwrap_or(id),
+                        );
+                        let usable = item["usable"].as_bool().unwrap_or(false);
+                        let enabled = usable
+                            && !self.busy()
+                            && self.snapshot["pending_interaction"].is_null();
+                        let (rect, response) = ui.allocate_exact_size(
+                            Vec2::splat(54.0),
+                            if enabled {
+                                egui::Sense::click()
+                            } else {
+                                egui::Sense::hover()
+                            },
+                        );
+                        ui.painter().rect_filled(
+                            rect,
+                            10.0,
+                            if response.hovered() {
+                                Color32::from_rgb(34, 45, 61)
+                            } else {
+                                theme::SURFACE_RAISED
+                            },
+                        );
+                        ui.painter().rect_stroke(
+                            rect,
+                            10.0,
+                            Stroke::new(
+                                1.0,
+                                if response.hovered() {
+                                    GOLD
                                 } else {
-                                    command = Some(json!({"type":"use_item","item":id}));
-                                }
-                            }
-                        } else {
-                            ui.label(text);
+                                    theme::BORDER
+                                },
+                            ),
+                            egui::StrokeKind::Inside,
+                        );
+                        self.assets.tile(
+                            ui.painter(),
+                            rect.shrink(10.0),
+                            &item["sprite"],
+                            Color32::WHITE,
+                        );
+                        if let Some(n) = item["charges"].as_u64() {
+                            let badge = Rect::from_min_size(
+                                rect.right_bottom() - Vec2::new(24.0, 18.0),
+                                Vec2::new(24.0, 18.0),
+                            );
+                            ui.painter().rect_filled(badge, 5.0, CARD);
+                            ui.painter().text(
+                                badge.center(),
+                                Align2::CENTER_CENTER,
+                                n.to_string(),
+                                FontId::proportional(13.0),
+                                GOLD,
+                            );
                         }
-                    });
-                    ui.add_space(8.0);
-                }
+                        self.record(&format!("item:{id}"), &response);
+                        if response.on_hover_text(name).clicked() && enabled {
+                            if id == "flying_orb" {
+                                self.settings = true;
+                                self.notify(self.text("flying_hint"));
+                            } else {
+                                command = Some(json!({"type":"use_item","item":id}));
+                            }
+                        }
+                    }
+                });
             });
         if let Some(c) = command {
             self.submit(c);
@@ -823,8 +941,14 @@ impl TowerApp {
     }
 
     fn journal(&self, ui: &mut egui::Ui, max_height: f32) {
-        ui.label(RichText::new(self.text("journal")).size(24.0).color(GOLD));
-        ui.add_space(12.0);
+        section(ui, &self.text("journal"), Icon::Book);
+        ui.add_space(6.0);
+        ui.label(
+            RichText::new(self.text("journal_subtitle"))
+                .size(14.0)
+                .color(MUTED),
+        );
+        ui.add_space(16.0);
         egui::ScrollArea::vertical()
             .id_salt("journal")
             .max_height(max_height)
@@ -837,24 +961,50 @@ impl TowerApp {
                     .take(50)
                     .enumerate()
                 {
-                    let text = entry.as_str().unwrap_or("");
-                    ui.label(
-                        RichText::new(translate_text(&self.locale, text))
-                            .size(18.0)
-                            .color(if i == 0 { TEXT } else { MUTED }),
-                    );
-                    ui.add_space(9.0);
-                    ui.separator();
-                    ui.add_space(9.0);
+                    ui.horizontal_top(|ui| {
+                        let (dot, _) =
+                            ui.allocate_exact_size(Vec2::new(14.0, 24.0), egui::Sense::hover());
+                        ui.painter().circle_filled(
+                            dot.center(),
+                            if i == 0 { 3.5 } else { 2.5 },
+                            if i == 0 { GOLD } else { theme::BORDER },
+                        );
+                        ui.add(
+                            egui::Label::new(
+                                RichText::new(translate_text(
+                                    &self.locale,
+                                    entry.as_str().unwrap_or(""),
+                                ))
+                                .size(17.0)
+                                .color(if i == 0 {
+                                    TEXT
+                                } else {
+                                    MUTED
+                                }),
+                            )
+                            .wrap(),
+                        );
+                    });
+                    ui.add_space(11.0);
                 }
             });
     }
 
     fn inspection(&self, ui: &mut egui::Ui) {
-        ui.label(RichText::new(self.text("inspect")).size(23.0).color(GOLD));
-        ui.add_space(10.0);
+        section(ui, &self.text("inspect"), Icon::Compass);
+        ui.add_space(16.0);
         let Some((x, y)) = self.selected.filter(|_| !self.busy()) else {
-            ui.label(RichText::new(self.text("inspect_hint")).color(MUTED));
+            ui.label(
+                RichText::new(self.text("inspect_hint"))
+                    .size(17.0)
+                    .color(MUTED),
+            );
+            ui.add_space(10.0);
+            ui.label(
+                RichText::new(self.text("orb_required"))
+                    .size(15.0)
+                    .color(MUTED),
+            );
             return;
         };
         let info = self.engine.inspect(x, y);
@@ -865,8 +1015,19 @@ impl TowerApp {
             &id,
             info["name"].as_str().unwrap_or(""),
         );
-        ui.label(RichText::new(name).size(23.0));
-        ui.label(RichText::new(format!("({x}, {y})")).color(MUTED));
+        ui.horizontal(|ui| {
+            let (sprite, _) = ui.allocate_exact_size(Vec2::splat(42.0), egui::Sense::hover());
+            self.assets.tile(
+                ui.painter(),
+                sprite,
+                &self.visual["tile_defs"][&id]["sprite"],
+                Color32::WHITE,
+            );
+            ui.vertical(|ui| {
+                ui.label(RichText::new(name).size(21.0).strong());
+                ui.label(RichText::new(format!("{x}, {y}")).size(14.0).color(MUTED));
+            });
+        });
         let enemy = &info["enemy"];
         if enemy.is_object() {
             ui.add_space(8.0);
@@ -1188,26 +1349,19 @@ impl TowerApp {
             self.audio.unlock();
             self.route = self.engine.path_to(x, y).into();
         }
-        ui.add_space(12.0);
-        ui.horizontal_wrapped(|ui| {
-            ui.label(
-                RichText::new(self.text("movement_hint"))
-                    .size(17.0)
-                    .color(MUTED),
-            );
-            if self.busy() {
-                let skip = ui.button(self.text("skip"));
-                self.record("skip", &skip);
-                if skip.clicked() {
-                    self.queue.clear();
-                    self.active = None;
-                    self.visual = self.snapshot.clone();
-                    self.route.clear();
-                    self.music_paused = false;
-                    self.music_override = None;
-                }
+        if self.busy() {
+            ui.add_space(10.0);
+            let skip = theme::action(ui, self.text("skip"), Icon::ArrowRight, false);
+            self.record("skip", &skip);
+            if skip.clicked() {
+                self.queue.clear();
+                self.active = None;
+                self.visual = self.snapshot.clone();
+                self.route.clear();
+                self.music_paused = false;
+                self.music_override = None;
             }
-        });
+        }
         if let Some(a) = &self.active
             && a.effect["type"] == "battle"
         {
@@ -1245,14 +1399,18 @@ impl TowerApp {
 
     fn directional_controls(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
-            ui.add_space(12.0);
-            for (direction, label) in [("left", "←"), ("up", "↑"), ("down", "↓"), ("right", "→")]
-            {
-                let r = ui.add_enabled(
-                    !self.busy() && self.snapshot["pending_interaction"].is_null(),
-                    egui::Button::new(RichText::new(label).size(25.0))
-                        .min_size(Vec2::new(45.0, 44.0)),
-                );
+            for (direction, icon) in [
+                ("left", Icon::ArrowLeft),
+                ("up", Icon::ArrowUp),
+                ("down", Icon::ArrowDown),
+                ("right", Icon::ArrowRight),
+            ] {
+                let r = ui
+                    .add_enabled_ui(
+                        !self.busy() && self.snapshot["pending_interaction"].is_null(),
+                        |ui| theme::action(ui, String::new(), icon, false),
+                    )
+                    .inner;
                 self.record(direction, &r);
                 if r.clicked() {
                     self.route.clear();
@@ -1260,6 +1418,150 @@ impl TowerApp {
                 }
             }
         });
+    }
+
+    fn board_card(&mut self, ui: &mut egui::Ui, width: f32, now: f64, compact: bool) {
+        theme::frame()
+            .inner_margin(if compact { 10 } else { 16 })
+            .show(ui, |ui| {
+                ui.vertical(|ui| {
+                    ui.set_width(width - if compact { 20.0 } else { 32.0 });
+                    ui.horizontal(|ui| {
+                        let (badge, _) = ui.allocate_exact_size(
+                            Vec2::splat(if compact { 32.0 } else { 42.0 }),
+                            egui::Sense::hover(),
+                        );
+                        ui.painter()
+                            .rect_filled(badge, 10.0, Color32::from_rgb(43, 40, 35));
+                        ui.painter().text(
+                            badge.center(),
+                            Align2::CENTER_CENTER,
+                            format!("{:02}", self.visual["floor"].as_i64().unwrap_or(1)),
+                            FontId::proportional(if compact { 19.0 } else { 23.0 }),
+                            GOLD,
+                        );
+                        ui.add_space(4.0);
+                        ui.vertical(|ui| {
+                            ui.spacing_mut().item_spacing.y = 2.0;
+                            if !compact {
+                                theme::caption(ui, &self.text("current_floor"));
+                            }
+                            let title = self
+                                .engine
+                                .campaign
+                                .floors
+                                .iter()
+                                .find(|f| Some(i64::from(f.id)) == self.visual["floor"].as_i64())
+                                .map(|f| f.title.as_str())
+                                .unwrap_or("");
+                            ui.label(
+                                RichText::new(translate_text(&self.locale, title))
+                                    .size(if compact { 18.0 } else { 22.0 })
+                                    .strong(),
+                            );
+                        });
+                        if !compact {
+                            ui.with_layout(
+                                egui::Layout::right_to_left(egui::Align::Center),
+                                |ui| {
+                                    ui.label(
+                                        RichText::new(format!(
+                                            "{} {}",
+                                            number(&self.visual["steps"]),
+                                            self.text("turns")
+                                        ))
+                                        .size(14.0)
+                                        .color(MUTED),
+                                    );
+                                },
+                            );
+                        }
+                    });
+                    ui.add_space(if compact { 8.0 } else { 16.0 });
+                    let available = ui.available_width();
+                    let board_size = if compact {
+                        available
+                    } else {
+                        // Keep the footer visible in the default native window and
+                        // on smaller desktop viewports, including high-DPI displays.
+                        let viewport_height = self.context.input(|i| i.viewport_rect().height());
+                        available.min((viewport_height - ui.cursor().min.y - 140.0).max(240.0))
+                    };
+                    let board_inset = (available - board_size) * 0.5;
+                    let board_start = ui.cursor().min + Vec2::new(board_inset, 0.0);
+                    let width_cells = self.visual["width"]
+                        .as_u64()
+                        .unwrap_or(11)
+                        .max(self.visual["height"].as_u64().unwrap_or(11))
+                        as f32;
+                    let cell = (board_size / width_cells).floor().max(20.0);
+                    let extent = Vec2::new(
+                        self.visual["width"].as_u64().unwrap_or(11) as f32 * cell,
+                        self.visual["height"].as_u64().unwrap_or(11) as f32 * cell,
+                    );
+                    let surround = Rect::from_min_size(
+                        board_start - Vec2::splat(4.0),
+                        extent + Vec2::splat(8.0),
+                    );
+                    ui.painter().rect_stroke(
+                        surround,
+                        4.0,
+                        Stroke::new(1.0, theme::BORDER),
+                        egui::StrokeKind::Outside,
+                    );
+                    for corner in [
+                        surround.left_top(),
+                        surround.right_top(),
+                        surround.left_bottom(),
+                        surround.right_bottom(),
+                    ] {
+                        let dx = if corner.x < surround.center().x {
+                            1.0
+                        } else {
+                            -1.0
+                        };
+                        let dy = if corner.y < surround.center().y {
+                            1.0
+                        } else {
+                            -1.0
+                        };
+                        ui.painter().line_segment(
+                            [corner, corner + Vec2::new(dx * 14.0, 0.0)],
+                            Stroke::new(2.0, GOLD),
+                        );
+                        ui.painter().line_segment(
+                            [corner, corner + Vec2::new(0.0, dy * 14.0)],
+                            Stroke::new(2.0, GOLD),
+                        );
+                    }
+                    ui.horizontal_top(|ui| {
+                        ui.spacing_mut().item_spacing.x = 0.0;
+                        ui.add_space(board_inset);
+                        ui.vertical(|ui| {
+                            ui.set_width(board_size);
+                            self.board(ui, board_size, now);
+                        });
+                    });
+                    ui.add_space(if compact { 2.0 } else { 8.0 });
+                    ui.horizontal(|ui| {
+                        self.directional_controls(ui);
+                        if !compact {
+                            ui.add_space(6.0);
+                            ui.label(
+                                RichText::new(self.text("keyboard_hint"))
+                                    .size(14.0)
+                                    .color(MUTED),
+                            );
+                        }
+                    });
+                    ui.add_space(4.0);
+                    ui.label(
+                        RichText::new(self.text("controls_hint"))
+                            .size(if compact { 14.0 } else { 15.0 })
+                            .color(MUTED),
+                    );
+                });
+            });
     }
 
     fn dialogs(&mut self, now: f64) {
@@ -1299,26 +1601,28 @@ impl TowerApp {
         let visible: String = text.chars().take(count).collect();
         let mut action = None;
         let mut next = false;
-        egui::Window::new(self.text("dialogue"))
-            .id(egui::Id::new("conversation"))
-            .anchor(Align2::CENTER_CENTER, Vec2::ZERO)
-            .collapsible(false)
-            .resizable(false)
-            .max_width(560.0)
+        let viewport = self.context.input(|i| i.viewport_rect());
+        let dialog_width = (viewport.width() - 96.0).clamp(240.0, 520.0);
+        egui::Modal::new(egui::Id::new("conversation"))
+            .backdrop_color(Color32::from_black_alpha(150))
+            .frame(theme::frame().inner_margin(24))
             .show(&self.context.clone(), |ui| {
+                ui.set_width(dialog_width);
+                theme::caption(ui, &self.text("dialogue"));
+                ui.add_space(8.0);
                 if let Some(name) = pending["title"].as_str() {
                     ui.label(
                         RichText::new(translate_text(&self.locale, name))
                             .size(27.0)
-                            .color(GOLD),
+                            .color(TEXT),
                     );
                     ui.add_space(12.0);
                 }
-                ui.set_min_width(280.0);
+                ui.set_min_width(dialog_width.min(360.0));
                 ui.label(RichText::new(visible).size(21.0));
                 ui.add_space(18.0);
                 if scripted.is_some() {
-                    let button = ui.button(self.text("continue"));
+                    let button = theme::action(ui, self.text("continue"), Icon::ArrowRight, true);
                     self.record("dialogue_continue", &button);
                     if button.clicked() {
                         next = true;
@@ -1336,8 +1640,13 @@ impl TowerApp {
                             .or_else(|| offer["name"].as_str())
                             .unwrap_or("Accept");
                         let button = ui.add(
-                            egui::Button::new(translate_text(&self.locale, label))
-                                .min_size(Vec2::new(240.0, 40.0)),
+                            egui::Button::new(
+                                RichText::new(translate_text(&self.locale, label)).size(17.0),
+                            )
+                            .fill(theme::SURFACE_RAISED)
+                            .stroke(Stroke::new(1.0, theme::BORDER))
+                            .corner_radius(9)
+                            .min_size(Vec2::new(ui.available_width(), 44.0)),
                         );
                         let id = offer["id"].as_str().unwrap_or("accept");
                         self.record(&format!("choice:{id}"), &button);
@@ -1346,7 +1655,7 @@ impl TowerApp {
                         }
                         ui.add_space(6.0);
                     }
-                    let close = ui.button(self.text("close"));
+                    let close = theme::action(ui, self.text("close"), Icon::Close, false);
                     self.record("dialogue_close", &close);
                     if close.clicked() {
                         action = Some(json!({"type":"cancel"}));
@@ -1379,101 +1688,126 @@ impl TowerApp {
             return;
         }
         let mut opened = self.settings;
+        let viewport = self.context.input(|i| i.viewport_rect());
+        let width = (viewport.width() - 96.0).clamp(260.0, 490.0);
         let mut new_game = false;
         let mut import = false;
         let mut export = false;
         let mut language = self.locale.clone();
         let mut changed = false;
         let mut flying = None;
-        egui::Window::new(self.text("settings"))
-            .id(egui::Id::new("settings"))
-            .open(&mut opened)
-            .default_width(490.0)
+        let response = egui::Modal::new(egui::Id::new("settings_modal"))
+            .backdrop_color(Color32::from_black_alpha(150))
+            .frame(theme::frame().inner_margin(24))
             .show(&self.context.clone(), |ui| {
-                ui.horizontal(|ui| {
-                    ui.label(self.text("language"));
-                    if ui
-                        .selectable_value(&mut language, "en".into(), "English")
-                        .clicked()
-                    {
-                        changed = true;
-                    }
-                    if ui
-                        .selectable_value(&mut language, "zh-CN".into(), "简体中文")
-                        .clicked()
-                    {
-                        changed = true;
-                    }
-                });
-                ui.add_space(12.0);
-                changed |= ui
-                    .checkbox(&mut self.audio.enabled, tr(&language, "audio"))
-                    .changed();
-                changed |= ui
-                    .checkbox(&mut self.audio.music_enabled, tr(&language, "music"))
-                    .changed();
-                changed |= ui
-                    .add(
-                        egui::Slider::new(&mut self.audio.volume, 0.0..=1.0)
-                            .text(tr(&language, "volume")),
-                    )
-                    .changed();
-                changed |= ui
-                    .add(
-                        egui::Slider::new(&mut self.speed, 0.5..=4.0)
-                            .text(tr(&language, "animation_speed")),
-                    )
-                    .changed();
-                if let Some(error) = &self.audio.error {
-                    ui.label(RichText::new(error).color(MUTED));
-                }
-                ui.separator();
-                ui.add_space(12.0);
-                let new = ui.button(self.text("new_game"));
-                self.record("new_game", &new);
-                if new.clicked() {
-                    new_game = true;
-                }
-                let save = ui.button(self.text("export_save"));
-                if save.clicked() {
-                    export = true;
-                }
-                ui.add_space(12.0);
-                ui.label(self.text("import_hint"));
-                ui.add(
-                    egui::TextEdit::multiline(&mut self.import_text)
-                        .desired_rows(4)
-                        .desired_width(f32::INFINITY)
-                        .hint_text("{…}"),
-                );
-                if ui.button(self.text("import")).clicked() {
-                    import = true;
-                }
-                if self
-                    .engine
-                    .player()
-                    .inventory
-                    .iter()
-                    .any(|i| i == "flying_orb")
-                {
-                    ui.separator();
-                    ui.label(self.text("flying_hint"));
-                    ui.horizontal_wrapped(|ui| {
-                        for f in self.snapshot["visited_floors"]
-                            .as_array()
-                            .into_iter()
-                            .flatten()
-                        {
-                            if let Some(floor) = f.as_i64()
-                                && ui.button(floor.to_string()).clicked()
+                ui.set_width(width);
+                ui.set_max_height((viewport.height() - 140.0).min(780.0));
+                egui::ScrollArea::vertical()
+                    .id_salt("settings_content")
+                    .max_height(viewport.height() - 100.0)
+                    .show(ui, |ui| {
+                        ui.horizontal(|ui| {
+                            ui.label(RichText::new(self.text("settings")).size(28.0).strong());
+                            ui.with_layout(
+                                egui::Layout::right_to_left(egui::Align::Center),
+                                |ui| {
+                                    if theme::action(ui, String::new(), Icon::Close, false)
+                                        .on_hover_text(self.text("close"))
+                                        .clicked()
+                                    {
+                                        opened = false;
+                                    }
+                                },
+                            );
+                        });
+                        ui.add_space(14.0);
+                        theme::caption(ui, &self.text("language"));
+                        ui.horizontal_wrapped(|ui| {
+                            if ui
+                                .selectable_value(&mut language, "en".into(), "English")
+                                .clicked()
                             {
-                                flying = Some(floor);
+                                changed = true;
                             }
+                            if ui
+                                .selectable_value(&mut language, "zh-CN".into(), "简体中文")
+                                .clicked()
+                            {
+                                changed = true;
+                            }
+                        });
+                        ui.add_space(14.0);
+                        ui.separator();
+                        ui.add_space(10.0);
+                        changed |= ui
+                            .checkbox(&mut self.audio.enabled, tr(&language, "audio"))
+                            .changed();
+                        changed |= ui
+                            .checkbox(&mut self.audio.music_enabled, tr(&language, "music"))
+                            .changed();
+                        changed |= ui
+                            .add(
+                                egui::Slider::new(&mut self.audio.volume, 0.0..=1.0)
+                                    .text(tr(&language, "volume")),
+                            )
+                            .changed();
+                        changed |= ui
+                            .add(
+                                egui::Slider::new(&mut self.speed, 0.5..=4.0)
+                                    .text(tr(&language, "animation_speed")),
+                            )
+                            .changed();
+                        if let Some(error) = &self.audio.error {
+                            ui.label(RichText::new(error).color(MUTED));
+                        }
+                        ui.separator();
+                        ui.add_space(12.0);
+                        let new = theme::action(ui, self.text("new_game"), Icon::Tower, false);
+                        self.record("new_game", &new);
+                        if new.clicked() {
+                            new_game = true;
+                        }
+                        let save = theme::action(ui, self.text("export_save"), Icon::Save, false);
+                        if save.clicked() {
+                            export = true;
+                        }
+                        ui.add_space(12.0);
+                        ui.label(self.text("import_hint"));
+                        ui.add(
+                            egui::TextEdit::multiline(&mut self.import_text)
+                                .desired_rows(4)
+                                .desired_width(f32::INFINITY)
+                                .hint_text("{…}"),
+                        );
+                        if ui.button(self.text("import")).clicked() {
+                            import = true;
+                        }
+                        if self
+                            .engine
+                            .player()
+                            .inventory
+                            .iter()
+                            .any(|i| i == "flying_orb")
+                        {
+                            ui.separator();
+                            ui.label(self.text("flying_hint"));
+                            ui.horizontal_wrapped(|ui| {
+                                for f in self.snapshot["visited_floors"]
+                                    .as_array()
+                                    .into_iter()
+                                    .flatten()
+                                {
+                                    if let Some(floor) = f.as_i64()
+                                        && ui.button(floor.to_string()).clicked()
+                                    {
+                                        flying = Some(floor);
+                                    }
+                                }
+                            });
                         }
                     });
-                }
             });
-        self.settings = opened;
+        self.settings = opened && !response.should_close();
         if changed {
             self.locale = language;
             self.audio.unlock();
@@ -1559,99 +1893,114 @@ impl eframe::App for TowerApp {
         self.advance(now);
         self.bounds.clear();
         if self.editor_open {
-            let action = self.editor.show(ui, &self.locale);
-            match action {
-                EditorAction::Play(value) => match self.replace_campaign(&value.to_string()) {
-                    Ok(()) => self.editor_open = false,
-                    Err(e) => self.notify(e),
-                },
-                EditorAction::Export(value) => match platform::export(
-                    "campaign.json",
-                    &serde_json::to_string_pretty(&value).unwrap(),
-                ) {
-                    Ok(path) => {
-                        self.editor.mark_exported();
-                        self.notify(path);
-                    }
-                    Err(e) => self.notify(e),
-                },
-                EditorAction::None => {}
-            }
-            let back = ui.button(self.text("back_to_game"));
-            self.record("back_to_game", &back);
-            if back.clicked() {
-                self.editor_open = false;
-            }
+            let margin = if ui.available_width() < 700.0 { 14 } else { 24 };
+            egui::Frame::new().inner_margin(margin).show(ui, |ui| {
+                let action = self.editor.show(ui, &self.locale);
+                match action {
+                    EditorAction::Play(value) => match self.replace_campaign(&value.to_string()) {
+                        Ok(()) => self.editor_open = false,
+                        Err(e) => self.notify(e),
+                    },
+                    EditorAction::Export(value) => match platform::export(
+                        "campaign.json",
+                        &serde_json::to_string_pretty(&value).unwrap(),
+                    ) {
+                        Ok(path) => {
+                            self.editor.mark_exported();
+                            self.notify(path);
+                        }
+                        Err(e) => self.notify(e),
+                    },
+                    EditorAction::None => {}
+                }
+                ui.add_space(8.0);
+                let back = theme::action(ui, self.text("back_to_game"), Icon::ArrowLeft, false);
+                self.record("back_to_game", &back);
+                if back.clicked() {
+                    self.editor_open = false;
+                }
+            });
         } else {
+            let narrow = ui.available_width() < 1060.0;
+            let bg = ui.max_rect();
+            let mut mesh = egui::Mesh::default();
+            mesh.colored_vertex(bg.left_top(), Color32::from_rgb(18, 25, 39));
+            mesh.colored_vertex(bg.right_top(), Color32::from_rgb(14, 20, 32));
+            mesh.colored_vertex(bg.right_bottom(), NAVY);
+            mesh.colored_vertex(bg.left_bottom(), NAVY);
+            mesh.add_triangle(0, 1, 2);
+            mesh.add_triangle(0, 2, 3);
+            ui.painter().add(mesh);
             egui::Frame::new()
-                .fill(NAVY)
-                .inner_margin(egui::Margin::same(22))
+                .inner_margin(if narrow { 12 } else { 28 })
                 .show(ui, |ui| {
-                    self.header(ui);
-                    let wide = ui.available_width() > 1060.0;
-                    if wide {
-                        let available = ui.available_width();
-                        let center = (available - 600.0).clamp(400.0, 620.0);
-                        ui.horizontal_top(|ui| {
-                            card(ui, 235.0, |ui| {
-                                self.stats(ui, false);
-                                self.inventory(ui);
-                                ui.add_space(20.0);
-                                self.directional_controls(ui);
-                            });
-                            ui.add_space(18.0);
-                            ui.vertical(|ui| {
-                                ui.set_width(center);
-                                ui.label(
-                                    RichText::new(translate_text(
-                                        &self.locale,
-                                        self.engine
-                                            .campaign
-                                            .floors
-                                            .iter()
-                                            .find(|f| {
-                                                Some(i64::from(f.id))
-                                                    == self.visual["floor"].as_i64()
-                                            })
-                                            .map(|f| f.title.as_str())
-                                            .unwrap_or(""),
-                                    ))
-                                    .size(22.0)
-                                    .color(MUTED),
-                                );
-                                ui.add_space(12.0);
-                                self.board(
-                                    ui,
-                                    center.min(ui.available_height() - 80.0).max(360.0),
-                                    now,
-                                );
-                            });
-                            ui.add_space(18.0);
-                            card(ui, (available - center - 343.0).max(260.0), |ui| {
-                                self.inspection(ui);
-                                ui.add_space(20.0);
-                                ui.separator();
-                                ui.add_space(20.0);
-                                self.journal(ui, (ui.available_height() - 20.0).max(220.0));
+                    let shell_width = ui.available_width().min(1232.0);
+                    let inset = ((ui.available_width() - shell_width) * 0.5).max(0.0);
+                    egui::ScrollArea::vertical()
+                        .id_salt("game_workspace")
+                        .auto_shrink([false, false])
+                        .show(ui, |ui| {
+                            ui.horizontal_top(|ui| {
+                                ui.add_space(inset);
+                                ui.vertical(|ui| {
+                                    ui.set_width(shell_width);
+                                    if narrow {
+                                        ui.spacing_mut().item_spacing.y = 4.0;
+                                    }
+                                    self.header(ui);
+                                    if !narrow {
+                                        let left = (shell_width * 0.198).clamp(216.0, 244.0);
+                                        let right = (shell_width * 0.25).clamp(252.0, 308.0);
+                                        let center = shell_width - left - right - 48.0;
+                                        ui.horizontal_top(|ui| {
+                                            ui.vertical(|ui| {
+                                                ui.set_width(left);
+                                                theme::card(ui, left, |ui| self.stats(ui, false));
+                                                ui.add_space(12.0);
+                                                theme::card(ui, left, |ui| self.keys(ui, false));
+                                                ui.add_space(12.0);
+                                                theme::card(ui, left, |ui| self.inventory(ui));
+                                                ui.add_space(14.0);
+                                                ui.label(
+                                                    RichText::new(self.text("checkpoint_hint"))
+                                                        .size(14.0)
+                                                        .color(MUTED),
+                                                );
+                                            });
+                                            ui.add_space(16.0);
+                                            ui.vertical(|ui| {
+                                                ui.set_width(center);
+                                                self.board_card(ui, center, now, false);
+                                            });
+                                            ui.add_space(16.0);
+                                            ui.vertical(|ui| {
+                                                ui.set_width(right);
+                                                theme::card(ui, right, |ui| self.inspection(ui));
+                                                ui.add_space(12.0);
+                                                theme::card(ui, right, |ui| {
+                                                    self.journal(ui, 420.0)
+                                                });
+                                            });
+                                        });
+                                    } else {
+                                        theme::frame().inner_margin(8).show(ui, |ui| {
+                                            ui.vertical(|ui| {
+                                                ui.set_width(shell_width - 16.0);
+                                                self.stats(ui, true);
+                                            });
+                                        });
+                                        ui.add_space(10.0);
+                                        self.board_card(ui, shell_width, now, true);
+                                        ui.add_space(12.0);
+                                        theme::card(ui, shell_width, |ui| self.inventory(ui));
+                                        ui.add_space(12.0);
+                                        theme::card(ui, shell_width, |ui| self.inspection(ui));
+                                        ui.add_space(12.0);
+                                        theme::card(ui, shell_width, |ui| self.journal(ui, 300.0));
+                                    }
+                                });
                             });
                         });
-                    } else {
-                        egui::ScrollArea::vertical()
-                            .id_salt("mobile")
-                            .show(ui, |ui| {
-                                self.stats(ui, true);
-                                ui.add_space(12.0);
-                                let size = ui.available_width().min(560.0);
-                                self.board(ui, size, now);
-                                self.directional_controls(ui);
-                                ui.add_space(20.0);
-                                ui.collapsing(self.text("inventory"), |ui| self.inventory(ui));
-                                ui.add_space(10.0);
-                                self.inspection(ui);
-                                ui.add_space(25.0);
-                                self.journal(ui, 300.0);
-                            });
-                    }
                 });
             self.keyboard();
             self.dialogs(now);
@@ -1715,18 +2064,53 @@ fn restore_journey(engine: &mut Engine, source: &str) -> Result<Option<String>, 
     Ok(Some(migrated))
 }
 
-fn card(ui: &mut egui::Ui, width: f32, contents: impl FnOnce(&mut egui::Ui)) {
-    egui::Frame::new()
-        .fill(CARD)
-        .stroke(Stroke::new(1.0, Color32::from_rgb(39, 53, 72)))
-        .corner_radius(12)
-        .inner_margin(18)
-        .show(ui, |ui| {
-            ui.vertical(|ui| {
-                ui.set_width(width);
-                contents(ui);
-            });
-        });
+fn section(ui: &mut egui::Ui, title: &str, icon: Icon) {
+    ui.horizontal(|ui| {
+        let (rect, _) = ui.allocate_exact_size(Vec2::splat(19.0), egui::Sense::hover());
+        theme::icon(ui.painter(), rect, icon, GOLD);
+        ui.label(RichText::new(title).size(20.0).strong().color(TEXT));
+    });
+}
+
+fn metric(
+    ui: &mut egui::Ui,
+    width: f32,
+    label: &str,
+    value: &str,
+    color: Color32,
+    icon: Icon,
+    compact: bool,
+) {
+    let (rect, response) = ui.allocate_exact_size(
+        Vec2::new(width, if compact { 54.0 } else { 85.0 }),
+        egui::Sense::hover(),
+    );
+    ui.painter().rect_filled(rect, 10.0, theme::SURFACE_RAISED);
+    let inset = if compact { 9.0 } else { 12.0 };
+    let icon_rect = Rect::from_min_size(rect.min + Vec2::new(inset, 12.0), Vec2::splat(15.0));
+    theme::icon(ui.painter(), icon_rect, icon, color);
+    ui.painter().text(
+        rect.min + Vec2::new(inset + 22.0, 19.5),
+        Align2::LEFT_CENTER,
+        label,
+        FontId::proportional(if compact { 12.0 } else { 14.0 }),
+        MUTED,
+    );
+    let size = if value.chars().count() > 7 {
+        21.0
+    } else if compact {
+        24.0
+    } else {
+        28.0
+    };
+    ui.painter().text(
+        rect.min + Vec2::new(inset, if compact { 37.0 } else { 54.0 }),
+        Align2::LEFT_CENTER,
+        value,
+        FontId::proportional(size),
+        TEXT,
+    );
+    response.on_hover_text(format!("{label}: {value}"));
 }
 fn number(value: &Value) -> String {
     value
@@ -1763,23 +2147,34 @@ fn configure(ctx: &egui::Context, chinese: Option<Vec<u8>>) {
     style.visuals.panel_fill = NAVY;
     style.visuals.window_fill = CARD;
     style.visuals.widgets.noninteractive.bg_fill = CARD;
-    style.visuals.widgets.inactive.bg_fill = Color32::from_rgb(35, 48, 66);
-    style.visuals.widgets.inactive.weak_bg_fill = Color32::from_rgb(35, 48, 66);
+    style.visuals.widgets.inactive.bg_fill = theme::SURFACE_RAISED;
+    style.visuals.widgets.inactive.weak_bg_fill = theme::SURFACE_RAISED;
     style.visuals.widgets.hovered.bg_fill = Color32::from_rgb(59, 68, 81);
     style.visuals.widgets.hovered.weak_bg_fill = Color32::from_rgb(59, 68, 81);
     style.visuals.selection.bg_fill = Color32::from_rgb(93, 77, 47);
     style.visuals.selection.stroke = Stroke::new(1.0, GOLD);
-    style.spacing.item_spacing = Vec2::new(9.0, 9.0);
-    style.spacing.button_padding = Vec2::new(13.0, 9.0);
+    style.visuals.window_corner_radius = egui::CornerRadius::same(16);
+    style.visuals.window_stroke = Stroke::new(1.0, theme::BORDER);
+    style.visuals.widgets.inactive.bg_stroke = Stroke::new(1.0, theme::BORDER);
+    style.visuals.widgets.hovered.bg_stroke = Stroke::new(1.0, GOLD);
+    style.visuals.widgets.active.bg_stroke = Stroke::new(1.0, GOLD);
+    style.spacing.item_spacing = Vec2::new(8.0, 8.0);
+    style.spacing.icon_width = 18.0;
+    style.spacing.icon_spacing = 8.0;
+    style.visuals.widgets.inactive.corner_radius = egui::CornerRadius::same(8);
+    style.visuals.widgets.hovered.corner_radius = egui::CornerRadius::same(8);
+    style.visuals.widgets.active.corner_radius = egui::CornerRadius::same(8);
+    style.spacing.button_padding = Vec2::new(12.0, 8.0);
+    style.spacing.window_margin = egui::Margin::same(22);
     style
         .text_styles
-        .insert(egui::TextStyle::Body, FontId::proportional(18.0));
+        .insert(egui::TextStyle::Body, FontId::proportional(17.0));
     style
         .text_styles
-        .insert(egui::TextStyle::Button, FontId::proportional(18.0));
+        .insert(egui::TextStyle::Button, FontId::proportional(17.0));
     style
         .text_styles
-        .insert(egui::TextStyle::Small, FontId::proportional(16.0));
+        .insert(egui::TextStyle::Small, FontId::proportional(15.0));
     style
         .text_styles
         .insert(egui::TextStyle::Heading, FontId::proportional(28.0));
@@ -1794,9 +2189,14 @@ fn install_fonts(ctx: &egui::Context, chinese: Option<Vec<u8>>) {
     let mut fonts = egui::FontDefinitions::default();
     fonts.font_data.insert(
         "sans".into(),
-        Arc::new(egui::FontData::from_static(include_bytes!(
-            "../../../web/fonts/DM-Sans.ttf"
-        ))),
+        Arc::new(
+            egui::FontData::from_static(include_bytes!("../../../web/fonts/DM-Sans.ttf")).tweak(
+                egui::FontTweak {
+                    coords: egui::epaint::text::VariationCoords::new([(b"wght", 400.0)]),
+                    ..Default::default()
+                },
+            ),
+        ),
     );
     fonts.font_data.insert(
         "serif".into(),

@@ -216,6 +216,10 @@ mod tests {
         );
         assert_eq!(translate_text("zh-CN", "Old man"), "老人");
         assert_eq!(translate_text("zh-CN", "Key merchant"), "钥匙商人");
+        assert_eq!(
+            translate_text("zh-CN", "Accept the gift · 0 gold"),
+            "接受礼物 · 0金币"
+        );
         assert_eq!(translate_text("zh-CN", "Custom Old man"), "Custom Old man");
         let combined = format!("{} {}", dialogue("en", 4), dialogue("en", 57));
         let translated = translate_text("zh-CN", &combined);

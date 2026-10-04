@@ -45,6 +45,12 @@ try {
     const s=await state(),u=await ui();assert.equal(s.floors.length,51);assert.equal(s.width,11);
     const b=u.bounds.board;assert(b.x>=0&&b.x+b.w<=1440&&b.y+b.h<=1000,JSON.stringify(b));
     assert.equal(u.sprites_loaded,true);await page.screenshot({path:resolve(output,'desktop.png')});
+    await page.setViewportSize({width:1360,height:920});await page.waitForTimeout(150);
+    const compact=(await ui()).bounds;
+    assert(compact.board.y+compact.board.h<920);
+    assert(compact.right.y+compact.right.h<=892,'Movement controls must fit the default native-sized viewport');
+    await page.screenshot({path:resolve(output,'compact-desktop.png')});
+    await page.setViewportSize({width:1440,height:1000});await page.waitForTimeout(150);
   });
   await test('Known original first-version save migrates and remains backed up',async()=>{
     const legacy=JSON.parse(await page.evaluate(()=>window.tower.save_json()));

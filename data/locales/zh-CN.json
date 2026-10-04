@@ -240,7 +240,18 @@
     "victory": "胜利场景",
     "credits": "制作名单",
     "": "无",
-    "editor.apply_draft_first": "请先应用或放弃高级JSON草稿，再试玩或导出。"
+    "editor.apply_draft_first": "请先应用或放弃高级JSON草稿，再试玩或导出。",
+    "classic_adventure": "经典冒险 · 全新旅程",
+    "editor_short": "创作工坊",
+    "save_short": "保存",
+    "restore_short": "读取",
+    "keyring": "钥匙",
+    "current_floor": "正在探索",
+    "turns": "步",
+    "controls_hint": "点击目标格自动寻路，遇到障碍即停。",
+    "checkpoint_hint": "旅程会自动保存。点击保存可保留独立的进度检查点。",
+    "journal_subtitle": "记录冒险中的每一步。",
+    "keyboard_hint": "W A S D / 方向键"
   },
   "entities": {
     "enemy": {
@@ -899,6 +910,10 @@
       "suffix": " HP.",
       "translation_prefix": "魔法领域：生命减少",
       "translation_suffix": "点。"
+    },
+    {
+      "source": "{offer} · {cost} gold",
+      "translation": "{offer} · {cost}金币"
     }
   ]
 }

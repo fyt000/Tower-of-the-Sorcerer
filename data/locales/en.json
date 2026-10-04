@@ -240,7 +240,18 @@
     "victory": "Victory scene",
     "credits": "Credits",
     "": "None",
-    "editor.apply_draft_first": "Apply or discard the advanced JSON draft before playing or exporting."
+    "editor.apply_draft_first": "Apply or discard the advanced JSON draft before playing or exporting.",
+    "classic_adventure": "A CLASSIC ADVENTURE",
+    "editor_short": "Workshop",
+    "save_short": "Save",
+    "restore_short": "Restore",
+    "keyring": "Keyring",
+    "current_floor": "EXPLORING",
+    "turns": "moves",
+    "controls_hint": "Click a tile to travel. Your path stops at obstacles.",
+    "checkpoint_hint": "Your journey saves automatically. Save keeps a separate checkpoint.",
+    "journal_subtitle": "Every step tells a story.",
+    "keyboard_hint": "W A S D / arrows"
   },
   "entities": {
     "enemy": {

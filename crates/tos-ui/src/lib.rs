@@ -5,6 +5,7 @@ mod audio;
 pub mod editor;
 pub mod locales;
 mod platform;
+pub(crate) mod theme;
 pub use app::TowerApp;
 
 #[cfg(target_arch = "wasm32")]
