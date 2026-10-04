@@ -5,36 +5,34 @@
       "language_nav": "Manual language",
       "title": "Tower of the Sorcerer",
       "manual": "The adventurer’s handbook",
-      "description": "An English adaptation of the original Tower of the Sorcerer help: rules, combat, special items and optional opening hints.",
-      "edition": "Original Windows 1.2 help · English adaptation",
+      "description": "A guide to Tower of the Sorcerer: movement, combat, special items and optional opening hints.",
+      "edition": "Player’s guide · English",
       "intro": "A thoughtful climb through fifty floors. Learn the rules, choose your battles, and keep a few surprises for the journey.",
       "tagline": "Every step is a decision",
       "contents": "In this handbook",
       "chapter": "Chapter",
-      "source": "Based on",
       "game": "Open the game in a separate tab",
       "skip": "Skip to the handbook",
       "top": "Back to contents",
-      "attribution": "Original game and help by Oz & Kenichi. This handbook adapts selected material from TSW.txt and Tsw.hlp; it is not an official translation. Original prose remains the work of its authors and is outside the remake’s MIT license.",
-      "footer": "This is a separate help document. English and Simplified Chinese editions contain the same topics. Open the marked hints only when you want spoilers."
+      "attribution": "Adapted from TSW.txt and Tsw.hlp by Oz & Kenichi, with updated controls and saving instructions, clearer combat formulas, and interactive character introductions for this remake.",
+      "footer": "Adapted game text and artwork retain their authors’ rights and are outside the remake code’s MIT license."
     },
     "zh-CN": {
       "language": "简体中文",
       "language_nav": "帮助文档语言",
       "title": "魔塔",
       "manual": "冒险者手册",
-      "description": "原版魔塔帮助的简体中文译编：基本规则、战斗、特殊道具，以及可自行展开的开局提示。",
-      "edition": "原版 Windows 1.2 帮助 · 简体中文译编",
+      "description": "魔塔游戏指南：移动、战斗、特殊道具，以及可自行展开的开局提示。",
+      "edition": "游戏指南 · 简体中文",
       "intro": "五十层的旅程，需要的不只是勇气。了解规则，选择战斗，把一些惊喜留给自己的探索。",
       "tagline": "每一步，都值得思考",
       "contents": "手册目录",
       "chapter": "章节",
-      "source": "内容来源",
       "game": "在独立标签页打开游戏",
       "skip": "跳转到手册正文",
       "top": "返回目录",
-      "attribution": "原版游戏及帮助由 Oz 与 Kenichi 制作。本手册选译、整理自 TSW.txt 和 Tsw.hlp，属于非官方译编。原文的权利归原作者所有，不属于重制版代码的 MIT 许可范围。",
-      "footer": "本手册是独立的帮助文档。英文与简体中文版包含相同主题。带有剧透标记的提示，可按需要自行展开。"
+      "attribution": "本手册改编自 Oz 与 Kenichi 的 TSW.txt 和 Tsw.hlp，并加入重制版的操作与存档说明、更清晰的战斗公式，以及可点击的角色介绍。",
+      "footer": "改编所用的游戏文字与美术保留原作者的权利，不属于重制版代码的 MIT 许可范围。"
     }
   },
   "sections": [
@@ -49,8 +47,8 @@
         {
           "type": "p",
           "text": {
-            "en": "A hero enters a tower to rescue a captive princess. It sounds familiar, but the original authors warn that the story may not unfold as you expect. Discover the reason as you play.",
-            "zh-CN": "勇士走进魔塔，要救出被囚禁的公主。这个故事似乎很熟悉，但原作者提醒你：事情未必会按想象中发展。原因，就留待冒险中发现吧。"
+            "en": "A hero enters a tower to rescue a captive princess. It sounds familiar, but the story may not unfold as you expect. Discover the reason as you play.",
+            "zh-CN": "勇士走进魔塔，要救出被囚禁的公主。这个故事似乎很熟悉，但事情未必会按想象中发展。原因，就留待冒险中发现吧。"
           }
         },
         {
@@ -58,17 +56,6 @@
           "text": {
             "en": "Tower of the Sorcerer sits between a role-playing game and a puzzle. There is no random element: the same actions in the same situation produce the same result. Take your time, think ahead, and choose the order in which you spend health, gold and keys.",
             "zh-CN": "魔塔介于角色扮演游戏与解谜游戏之间，没有随机因素：在相同局面下采取相同行动，就会得到相同结果。无需急着前进，先想一想，再决定如何使用生命值、金币和钥匙。"
-          }
-        },
-        {
-          "type": "note",
-          "title": {
-            "en": "Reading this edition",
-            "zh-CN": "关于这份手册"
-          },
-          "text": {
-            "en": "The main explanations are adapted from the original manuals. Boxes marked “Rust remake” describe this version; boxes marked “Rule clarification” explain a detail established by the project’s original-executable research. The original Windows setup and controls are retained below for reference.",
-            "zh-CN": "正文译编自原版帮助。标注“Rust 重制版”的提示说明当前版本；标注“规则补充”的提示说明项目通过原版程序研究确认的细节。下方也保留了原版 Windows 的设置与操作说明，供查阅。"
           }
         }
       ]
@@ -84,8 +71,8 @@
         {
           "type": "note",
           "title": {
-            "en": "Rust remake · current controls",
-            "zh-CN": "Rust 重制版 · 当前操作"
+            "en": "Movement and items",
+            "zh-CN": "移动与道具"
           },
           "text": {
             "en": "Move with the arrow keys or WASD, or click a destination on the map. Click routes follow clear roads and stop at obstacles; selecting an enemy or door directly can make it the final action. Use the inventory to activate items, and Enter or Space to advance dialogue. Settings contains language, audio, animation speed and portable-save options.",
@@ -95,43 +82,13 @@
         {
           "type": "note",
           "title": {
-            "en": "Rust remake · saves",
-            "zh-CN": "Rust 重制版 · 存档"
+            "en": "Autosaves and checkpoints",
+            "zh-CN": "自动存档与检查点"
           },
           "text": {
-            "en": "Accepted game actions autosave. “Save game” keeps a separate checkpoint, and “Restore checkpoint” returns to it. The original text manual says saving requires the Hero Orb; this remake permits saving before you obtain it. The orb is still required for detailed enemy forecasts.",
-            "zh-CN": "游戏会在接受行动后自动保存。“保存游戏”保留独立检查点，“读取检查点”回到该进度。原版文字手册说存档需要英雄宝珠；重制版在获得它之前也可以保存。但查看详细的敌人属性和战斗预测，仍然需要英雄宝珠。"
+            "en": "Accepted game actions autosave. “Save game” keeps a separate checkpoint, and “Restore checkpoint” returns to it. You can save from the start of your journey. Detailed enemy information and battle forecasts require the Hero Orb.",
+            "zh-CN": "游戏会在接受行动后自动保存。“保存游戏”保留独立检查点，“读取检查点”回到该进度。从冒险开始就可以保存；查看详细敌人信息和战斗预测则需要英雄宝珠。"
           }
-        },
-        {
-          "type": "details",
-          "summary": {
-            "en": "Original Windows 1.2 setup and controls",
-            "zh-CN": "查看原版 Windows 1.2 的设置与操作"
-          },
-          "blocks": [
-            {
-              "type": "ul",
-              "items": [
-                {
-                  "en": "At first launch, choose mouse or keyboard mode, font size, and a save directory. The default mode is mouse, and saves go in the installation’s SAVEDAT folder.",
-                  "zh-CN": "首次启动时，选择鼠标或键盘模式、字体大小和存档目录。默认使用鼠标，存档保存在安装目录的 SAVEDAT 文件夹中。"
-                },
-                {
-                  "en": "The original menu switches between 640 × 400 and 800 × 500 display sizes. TSW.txt also mentions the TSW12.INI settings file in the Windows directory.",
-                  "zh-CN": "原版菜单可切换 640 × 400 与 800 × 500 两种窗口尺寸。TSW.txt 还说明，设置保存在 Windows 目录的 TSW12.INI 文件中。"
-                },
-                {
-                  "en": "With the mouse, click the direction buttons at the bottom right to move, the upper menu to save, and item icons to use them.",
-                  "zh-CN": "鼠标模式下，点击右下角的方向按钮移动，通过上方菜单存档，点击道具图标使用道具。"
-                },
-                {
-                  "en": "With the keyboard, use the arrow keys to move, Alt to select a menu, Enter to begin selecting an item, the arrow keys to choose it, and Escape to cancel.",
-                  "zh-CN": "键盘模式下，方向键用于移动，Alt 用于选择菜单，Enter 进入道具选择，再用方向键挑选，Escape 取消。"
-                }
-              ]
-            }
-          ]
         }
       ]
     },
@@ -146,8 +103,8 @@
         {
           "type": "table",
           "caption": {
-            "en": "What the original status indicators mean",
-            "zh-CN": "原版状态栏各项数值的含义"
+            "en": "Your status at a glance",
+            "zh-CN": "状态栏各项数值的含义"
           },
           "headers": [
             {
@@ -182,8 +139,8 @@
                 "sprite": "health"
               },
               {
-                "en": "Damage reduces health; reaching zero ends the game. Potions and altar offerings restore it. The manual gives no upper limit.",
-                "zh-CN": "受到伤害会减少生命值，降至零即告失败。药水与祭坛供奉可以补充生命值，原版手册说明它没有上限。"
+                "en": "Damage reduces health; reaching zero ends the game. Potions and altar offerings restore it.",
+                "zh-CN": "受到伤害会减少生命值，降至零即告失败。药水与祭坛供奉可以补充生命值。"
               }
             ],
             [
@@ -278,13 +235,6 @@
               }
             ]
           ]
-        },
-        {
-          "type": "p",
-          "text": {
-            "en": "The help file calls the middle key color “purple”, while TSW.txt calls it “blue”. This handbook uses blue, matching the remake’s labels.",
-            "zh-CN": "帮助文件将中间一种钥匙称为“紫色”，TSW.txt 则称为“蓝色”。本手册统一使用“蓝色”，与重制版的名称一致。"
-          }
         }
       ]
     },
@@ -595,8 +545,8 @@
         {
           "type": "p",
           "text": {
-            "en": "The original manual reminds you that the Cross and similar equipment affect only certain creatures. Their extra strength is not a universal increase against every enemy.",
-            "zh-CN": "原版手册提醒你：十字架等道具的额外效果只对特定敌人生效，并不会让你对所有敌人都同样变强。"
+            "en": "The Cross and similar items affect only certain creatures. Their extra strength is not a universal increase against every enemy.",
+            "zh-CN": "十字架等道具的额外效果只对特定敌人生效，并不会让你对所有敌人都同样变强。"
           }
         }
       ]
@@ -650,15 +600,15 @@
         {
           "type": "p",
           "text": {
-            "en": "The original help introduces seven of the tower’s fifteen special items. Their descriptions encourage experimentation; acquisition hints are folded away below.",
-            "zh-CN": "原版帮助介绍了塔中十五种特殊道具里的七种，鼓励你尝试不同用法。获得地点等提示收在可自行展开的内容中。"
+            "en": "These items help you explore the tower, remember clues and overcome obstacles. Open the acquisition hints when you want to know where to find them.",
+            "zh-CN": "这些道具帮助你探索魔塔、记住线索并突破障碍。想知道获得地点时，可以展开相应提示。"
           }
         },
         {
           "type": "item",
           "id": "hero-orb",
           "title": {
-            "en": "Orb of the Hero · Hero Orb",
+            "en": "Orb of the Hero",
             "zh-CN": "英雄宝珠"
           },
           "blocks": [
@@ -726,7 +676,7 @@
           "type": "item",
           "id": "flight-orb",
           "title": {
-            "en": "Orb of Flight · Orb of Flying",
+            "en": "Orb of Flight",
             "zh-CN": "飞行宝珠"
           },
           "blocks": [
@@ -767,8 +717,8 @@
             {
               "type": "p",
               "text": {
-                "en": "Makes openings in the walls around you. The help suggests trying different places: an unexpected opening may be more valuable than a direct route.",
-                "zh-CN": "在周围的墙壁上开出通路。帮助鼓励你尝试不同位置：出乎意料的入口，可能比眼前的直路更有价值。"
+                "en": "Makes openings in the walls around you. Try different places: an unexpected opening may be more valuable than a direct route.",
+                "zh-CN": "在周围的墙壁上开出通路。不妨尝试不同位置：出乎意料的入口，可能比眼前的直路更有价值。"
               }
             },
             {
@@ -781,8 +731,8 @@
                 {
                   "type": "p",
                   "text": {
-                    "en": "TSW.txt says it appears after defeating the Giant Octopus on floor 16.",
-                    "zh-CN": "TSW.txt 提示：击败第 16 层的巨型章鱼后，它就会出现。"
+                    "en": "It appears after defeating the Giant Octopus on floor 16.",
+                    "zh-CN": "击败第 16 层的巨型章鱼后，它就会出现。"
                   }
                 }
               ]
@@ -815,8 +765,8 @@
                 {
                   "type": "p",
                   "text": {
-                    "en": "The text manual hints that someone already has it and may be willing to give it to you.",
-                    "zh-CN": "文字手册提示：已经有人持有这件道具，也许愿意送给你。"
+                    "en": "Someone already has this item and may be willing to give it to you.",
+                    "zh-CN": "已经有人持有这件道具，也许愿意送给你。"
                   }
                 }
               ]
@@ -828,15 +778,15 @@
           "type": "item",
           "id": "destruction-ball",
           "title": {
-            "en": "Destruction Ball · “destructible ball”",
+            "en": "Destruction Ball",
             "zh-CN": "破坏之球"
           },
           "blocks": [
             {
               "type": "p",
               "text": {
-                "en": "A bomb for destroying enemies around you, including opponents too costly to fight normally. It does not work against every enemy. The help file specifies enemies on the surrounding sides, rather than all enemies on the floor.",
-                "zh-CN": "用于消灭身边敌人的炸弹，适合对付正常战斗代价过高的对手，但并非对所有敌人有效。帮助文件说明它影响周围各方向的敌人，并非清除整层敌人。"
+                "en": "A bomb for destroying enemies on the four neighboring sides, including opponents too costly to fight normally. It does not work against every enemy.",
+                "zh-CN": "用于消灭上下左右相邻敌人的炸弹，适合对付正常战斗代价过高的对手，但并非对所有敌人有效。"
               }
             }
           ],
@@ -846,26 +796,26 @@
           "type": "item",
           "id": "warp-staff",
           "title": {
-            "en": "Warp Staff · Space Staff",
+            "en": "Warp Staff",
             "zh-CN": "传送法杖"
           },
           "blocks": [
             {
               "type": "p",
               "text": {
-                "en": "Moves you to another place on the same floor. Like the Mattock, it can reveal surprising ways through the tower. The original help describes the destination as random or unknown.",
-                "zh-CN": "把你传送到同一楼层的另一处。像魔法镐一样，它能带来意想不到的通路。原版帮助将目的地描述为随机或无法预知。"
+                "en": "Moves you to another place on the same floor. Like the Mattock, it can reveal surprising ways through the tower.",
+                "zh-CN": "把你传送到同一楼层的另一处。像魔法镐一样，它能带来意想不到的通路。"
               }
             },
             {
               "type": "note",
               "title": {
-                "en": "Rule clarification · destination",
-                "zh-CN": "规则补充 · 传送目的地"
+                "en": "Destination and charges",
+                "zh-CN": "目的地与使用次数"
               },
               "text": {
-                "en": "The original executable actually mirrors your position through the center of the 11 × 11 map: using zero-based coordinates, (x, y) becomes (10 − x, 10 − y). The destination must be ordinary road. A charge is spent even when that destination is blocked. The remake follows this deterministic rule.",
-                "zh-CN": "原版程序实际上会把位置关于 11 × 11 地图的中心对称：以零为起点计数时，(x, y) 变为 (10 − x, 10 − y)。目的地必须是普通通路，即使目的地被阻挡也会消耗一次使用次数。重制版沿用这条确定性的规则。"
+                "en": "The destination mirrors your position through the center of the 11 × 11 map: using zero-based coordinates, (x, y) becomes (10 − x, 10 − y). It must be ordinary road. A charge is spent even when the destination is blocked.",
+                "zh-CN": "目的地是当前位置关于 11 × 11 地图中心的对称点：以零为起点计数时，(x, y) 变为 (10 − x, 10 − y)。目的地必须是普通通路，即使目的地被阻挡也会消耗一次使用次数。"
               }
             }
           ],
@@ -876,27 +826,27 @@
     {
       "id": "fairies",
       "title": {
-        "en": "The fairies’ appraisal",
-        "zh-CN": "仙子的评价"
+        "en": "Meeting the fairies",
+        "zh-CN": "与仙子交谈"
       },
       "source": "TSW.txt, “About fairies” / Tsw.hlp, “Fighting Explanation & About Fairies”; docs/mechanics.md",
       "blocks": [
         {
           "type": "p",
           "text": {
-            "en": "In the original game, clearing a major area brings out a fairy. She appraises your progress using your remaining health, attack, defense and keys. Keeping resources matters beyond merely surviving the next battle.",
-            "zh-CN": "原版中，完成一个主要区域后，仙子会出现，根据剩余生命值、攻击力、防御力与钥匙评价你的表现。保留资源的意义，不止是撑过下一场战斗。"
+            "en": "A fairy appears after you clear a major area. Speak with her to continue your journey.",
+            "zh-CN": "完成一个主要区域后，仙子会出现。与她交谈，继续你的旅程。"
           }
         },
         {
           "type": "note",
           "title": {
-            "en": "Rust remake · fairy behavior",
-            "zh-CN": "Rust 重制版 · 仙子行为"
+            "en": "Keeping a checkpoint",
+            "zh-CN": "保留检查点"
           },
           "text": {
-            "en": "The remake has the fairy’s continue interaction and normal saving, but the original score/rank tables and automatic fairy checkpoint files are not yet reproduced. Do not rely on a fairy visit to create a checkpoint; use “Save game” when you want one.",
-            "zh-CN": "重制版提供仙子的继续对话与普通存档，但尚未复现原版评分、等级表，以及仙子自动生成的检查点文件。需要保留检查点时，请使用“保存游戏”。"
+            "en": "Use “Save game” when you want to keep a checkpoint to return to. A fairy conversation does not create a separate checkpoint for you.",
+            "zh-CN": "需要保留可返回的进度时，请使用“保存游戏”。与仙子交谈不会为你建立独立检查点。"
           }
         }
       ]
@@ -912,15 +862,15 @@
         {
           "type": "p",
           "text": {
-            "en": "The authors included an opening route to help you learn the game. It is one suggested approach, not a promise that every custom campaign follows the same route.",
-            "zh-CN": "作者提供了一条开局路线，帮助你熟悉游戏。这是一种参考方案；自定义关卡未必适用。"
+            "en": "This route through floors 1–10 prioritizes equipment and defense before tackling tougher enemies.",
+            "zh-CN": "这条第 1—10 层的参考路线优先取得装备、提升防御，再挑战较强的敌人。"
           }
         },
         {
           "type": "details",
           "summary": {
-            "en": "Reveal the original floor 1–10 walkthrough · spoilers",
-            "zh-CN": "展开原版第 1—10 层攻略 · 剧透"
+            "en": "Reveal the floor 1–10 walkthrough · spoilers",
+            "zh-CN": "展开第 1—10 层攻略 · 剧透"
           },
           "blocks": [
             {
@@ -954,8 +904,8 @@
                   "zh-CN": "收集第 1—10 层的宝石，击败不会对你造成伤害的敌人，收集金币，并通过祭坛提升攻击力与防御力。"
                 },
                 {
-                  "en": "When ready, defeat the floor-8 gatekeepers and obtain the red key, then challenge the Skeleton boss on floor 10. The manual suggests that one blue key and five yellow keys may be left uncollected if necessary.",
-                  "zh-CN": "准备好后，击败第 8 层的门卫取得红钥匙，再挑战第 10 层的骷髅首领。手册建议：必要时可以放弃收集一把蓝钥匙和五把黄钥匙。"
+                  "en": "When ready, defeat the floor-8 gatekeepers and obtain the red key, then challenge the Skeleton boss on floor 10. You can leave one blue key and five yellow keys uncollected if necessary.",
+                  "zh-CN": "准备好后，击败第 8 层的门卫取得红钥匙，再挑战第 10 层的骷髅首领。必要时可以放弃收集一把蓝钥匙和五把黄钥匙。"
                 }
               ]
             },
@@ -981,8 +931,8 @@
         {
           "type": "p",
           "text": {
-            "en": "The original help divides the tower into five ten-floor regions. Its summaries reveal enemies and later story warnings.",
-            "zh-CN": "原版帮助将魔塔分为五个区域，每个区域十层。以下介绍会透露敌人和后续剧情提示。"
+            "en": "The tower has five ten-floor regions. The guide below reveals enemies and later story hints.",
+            "zh-CN": "魔塔分为五个区域，每个区域十层。以下介绍会透露敌人和后续剧情提示。"
           }
         },
         {
@@ -995,8 +945,8 @@
             {
               "type": "table",
               "caption": {
-                "en": "The authors’ overview of the tower",
-                "zh-CN": "作者对魔塔各区域的介绍"
+                "en": "The five regions",
+                "zh-CN": "五个区域概览"
               },
               "headers": [
                 {
@@ -1035,8 +985,8 @@
                     "zh-CN": "21—30 · 大魔法师"
                   },
                   {
-                    "en": "This region’s boss is very strong. The authors advise patience; there is comparatively little else here.",
-                    "zh-CN": "这里的首领非常强大，作者建议暂时忍耐。这一区域的其他内容相对较少。"
+                    "en": "This region’s boss is very strong. Be patient; there is comparatively little else here.",
+                    "zh-CN": "这里的首领非常强大，不妨暂时忍耐。这一区域的其他内容相对较少。"
                   }
                 ],
                 [
@@ -1055,8 +1005,8 @@
                     "zh-CN": "41—50 · 魔法队长杰诺"
                   },
                   {
-                    "en": "Magical enemies dominate. Zeno orchestrated the hero’s capture in the introduction. The original help warns that trying to fight this final opponent head-on will lead to destruction.",
-                    "zh-CN": "魔法类敌人占据主导。杰诺正是序章中囚禁勇士的幕后人物。原版帮助警告：试图正面硬拼这位最终对手，将会走向毁灭。"
+                    "en": "Magical enemies dominate. Zeno orchestrated the hero’s capture in the introduction. Trying to fight this final opponent head-on will lead to destruction.",
+                    "zh-CN": "魔法类敌人占据主导。杰诺正是序章中囚禁勇士的幕后人物。试图正面硬拼这位最终对手，将会走向毁灭。"
                   }
                 ]
               ]
@@ -1068,27 +1018,16 @@
     {
       "id": "voices",
       "title": {
-        "en": "A few voices from the old help",
-        "zh-CN": "旧帮助里的几句自我介绍"
+        "en": "Meet the characters",
+        "zh-CN": "认识塔中的角色"
       },
       "source": "Tsw.hlp, character hotspots: “The hero”, “The green slime”, “The red slime”, “The small bat”, “The priest”, “The skeleton C”, “The skeleton B”",
       "blocks": [
         {
-          "type": "p",
-          "text": {
-            "en": "The original help’s clickable screen illustration includes playful character introductions. These are adapted here as a small keepsake of its tone.",
-            "zh-CN": "原版帮助的画面示意图中，可以点击角色，读到有趣的自我介绍。这里选译了几句，保留一点旧手册的气氛。"
-          }
-        },
-        {
           "type": "characters",
-          "instruction": {
-            "en": "Click a character to read its introduction, just as in the original help. You can also use Tab, then Enter or Space.",
-            "zh-CN": "点击角色，听听它们的自我介绍，就像原版帮助一样。也可用 Tab 选中，再按 Enter 或空格展开。"
-          },
           "action": {
-            "en": "Click to introduce ↓",
-            "zh-CN": "点击角色 ↓"
+            "en": "Read introduction ↓",
+            "zh-CN": "自我介绍 ↓"
           },
           "entries": [
             {

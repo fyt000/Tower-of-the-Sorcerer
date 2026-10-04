@@ -1,4 +1,4 @@
-# Standalone original-game help
+# Standalone help and source evidence
 
 The help is a separate static document, like the original Windows help window.
 Open [English](../web/help.html) or [Simplified Chinese](../web/help.zh-CN.html)
@@ -42,7 +42,7 @@ Original spelling and wording are retained in that evidence file.
 Images, screen hotspots, formatting and executable WinHelp macros are omitted.
 
 `data/help/manual.json` is the editable, paired English/Simplified Chinese
-adaptation. It covers the introduction, old and current controls, status,
+adaptation. It covers the introduction, current controls, status,
 ordinary combat, strategy, seven special items, fairies, the first-area route,
 five regions and character introductions. Both originals introduce only seven
 of the fifteen special items; this page keeps that scope. It is an adaptation
@@ -51,13 +51,16 @@ Its sprite coordinates were checked against `web/assets/manifest.json` and the
 current campaign definitions. Portraits use the original 40-pixel atlas cells;
 item/status icons reuse the same artwork. No original media is newly committed.
 
-Original descriptions and remake-specific notes are explicitly distinguished.
-The save gate, fairy scoring and old controls differ in the remake. The original
-help's “random” Warp Staff description is retained alongside the deterministic
-mirror rule established in [mechanics.md](mechanics.md). Its charge is spent
-even if the destination is blocked. The middle key color is normalized to blue
-from the help's “purple”, matching `TSW.txt` and the game dictionary. Chinese
-entity names match the existing Simplified Chinese game labels.
+The player-facing handbook describes the current game directly. Adaptation
+credits and the remake's additions are mentioned only in the footer; chapter
+source references remain in the authored data and this evidence documentation.
+Obsolete Windows setup, the old save gate and fairy score/rank descriptions are
+retained in `original.json`, rather than presented as current instructions.
+The Warp Staff uses the deterministic mirror rule established in
+[mechanics.md](mechanics.md); its charge is spent even if the destination is
+blocked. The middle key color is normalized to blue from the help's “purple”,
+matching `TSW.txt` and the game dictionary. Chinese entity names match the
+existing Simplified Chinese game labels.
 
 Original help remains the work of **Oz & Kenichi**, outside the remake's MIT
 license. The page includes this attribution. The original contact/distribution

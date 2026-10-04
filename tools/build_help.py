@@ -89,8 +89,7 @@ def render(manual: dict, language: str) -> str:
                                      f'<span class="character-action">{t(entry["action"])}</span></summary>'
                                      f'<blockquote>{t(character["text"])}</blockquote></details>'
                                      for character in entry["entries"])
-                result.append(f'<p class="gallery-instruction">{t(entry["instruction"])}</p>'
-                              f'<div class="character-gallery">{characters}</div>')
+                result.append(f'<div class="character-gallery">{characters}</div>')
             else:
                 raise ValueError(f"Unknown manual block: {kind}")
         return "\n".join(result)
@@ -101,8 +100,7 @@ def render(manual: dict, language: str) -> str:
     chapters = "\n".join(f'<section id="{t(section["id"])}" aria-labelledby="{t(section["id"])}-title">'
                          f'<p class="chapter">{t(labels["chapter"])} {i:02}</p>'
                          f'<h2 id="{t(section["id"])}-title">{t(section["title"])}</h2>'
-                         f'{blocks(section["blocks"])}'
-                         f'<p class="source">{t(labels["source"])}: {t(section["source"])}</p></section>'
+                         f'{blocks(section["blocks"])}</section>'
                          for i, section in enumerate(sections, 1))
     language_links = "\n".join(f'<a href="{filename}" lang="{code}" hreflang="{code}"'
                                + (' aria-current="page"' if code == language else '')
@@ -124,7 +122,7 @@ def render(manual: dict, language: str) -> str:
 <body>
   <a class="skip-link" href="#manual">{t(labels['skip'])}</a>
   <header class="masthead">
-    <a class="wordmark" href="#top">{sprite('hero')}<span>TOWER OF THE SORCERER<small>Oz &amp; Kenichi · 1.2</small></span></a>
+    <a class="wordmark" href="#top">{sprite('hero')}<span>TOWER OF THE SORCERER<small>{t(labels['manual'])}</small></span></a>
     <nav class="languages" aria-label="{t(labels['language_nav'])}">{language_links}</nav>
   </header>
   <div class="layout" id="top">

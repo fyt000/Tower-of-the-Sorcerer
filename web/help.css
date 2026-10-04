@@ -78,7 +78,6 @@ li { padding-left: .3rem; margin: .65rem 0; }
 .note { background: #1c2738; border-left: 3px solid #a68b5b; padding: 1rem 1.25rem; margin: 1.5rem 0; font-size: .9rem; }
 .note strong { color: var(--accent); }
 .note p { margin: .45rem 0 0; }
-.source { font-size: .7rem; color: var(--muted); margin-top: 1.5rem; overflow-wrap: anywhere; }
 .table-scroll { overflow-x: auto; margin: 1.2rem 0; }
 table { border-collapse: collapse; width: 100%; font-size: .9rem; text-align: left; }
 caption { text-align: left; font-size: .75rem; color: var(--muted); margin-bottom: .8rem; }
@@ -118,7 +117,6 @@ summary { color: var(--accent); cursor: pointer; font-size: .93rem; font-weight:
 .example-steps li { padding-left: .4rem; }
 .example-steps strong { display: block; font-size: 1.05rem; color: var(--ink); }
 .example-result { border-top: 1px solid #365349; padding-top: 1rem; color: var(--hero); font-weight: 600; }
-.gallery-instruction { color: var(--accent); font-size: .9rem; }
 .character-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: .85rem; margin: 1.2rem 0; align-items: start; }
 .character { margin: 0; padding: 0; background: #0c1421; text-align: center; }
 .character summary { list-style: none; display: flex; align-items: center; flex-direction: column; gap: .6rem; padding: 1rem .65rem; border-radius: 5px; }
