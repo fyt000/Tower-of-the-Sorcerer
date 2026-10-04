@@ -1,18 +1,16 @@
 import { existsSync, readFileSync, mkdirSync, copyFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
-import { homedir } from 'node:os';
+import { cargoBin, cargo, rustEnv } from './rust-env.mjs';
 
 const root = resolve(import.meta.dirname, '..');
-const cargoBin = join(homedir(), '.cargo', 'bin');
-const env = { ...process.env, PATH: `${cargoBin}${process.platform === 'win32' ? ';' : ':'}${process.env.PATH}` };
+const env = rustEnv;
 function run(program, args) {
   const result = spawnSync(program, args, { cwd: root, env, stdio: 'inherit' });
   if (result.error) throw result.error;
   if (result.status !== 0) process.exit(result.status || 1);
 }
-const cargo = join(cargoBin, process.platform === 'win32' ? 'cargo.exe' : 'cargo');
-run(cargo, ['build', '--release', '-p', 'tos-wasm', '--target', 'wasm32-unknown-unknown']);
+run(cargo, ['rustc', '--release', '-p', 'tos-ui', '--lib', '--target', 'wasm32-unknown-unknown', '--crate-type', 'cdylib']);
 const lock = readFileSync(join(root, 'Cargo.lock'), 'utf8');
 const version = lock.match(/name = "wasm-bindgen"\r?\nversion = "([^"]+)"/)[1];
 let bindgen = join(cargoBin, process.platform === 'win32' ? 'wasm-bindgen.exe' : 'wasm-bindgen');
@@ -25,7 +23,7 @@ if (!probe.stdout?.includes(version)) {
   bindgen = join(cargoBin, process.platform === 'win32' ? 'wasm-bindgen.exe' : 'wasm-bindgen');
 }
 mkdirSync(join(root, 'web', 'pkg'), { recursive: true });
-run(bindgen, ['--target', 'web', '--out-dir', 'web/pkg', '--out-name', 'tos_wasm', 'target/wasm32-unknown-unknown/release/tos_wasm.wasm']);
+run(bindgen, ['--target', 'web', '--out-dir', 'web/pkg', '--out-name', 'tos_ui', 'target/wasm32-unknown-unknown/release/tos_ui.wasm']);
 copyFileSync(join(root, 'data', 'campaign.json'), join(root, 'web', 'campaign.json'));
-run(cargo, ['build', '--release', '-p', 'tos-cli']);
-console.log('Built native CLI + browser WebAssembly. Run npm start.');
+run(cargo, ['build', '--release', '-p', 'tos-cli', '-p', 'tos-ui']);
+console.log('Built shared Rust browser UI, native desktop GUI, CLI, and MCP. Run npm start or target/release/tos-ui.exe.');

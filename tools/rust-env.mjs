@@ -1,0 +1,12 @@
+import { spawnSync } from 'node:child_process';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
+import { existsSync, readdirSync } from 'node:fs';
+export const cargoBin = join(homedir(), '.cargo', 'bin');
+export const cargo = join(cargoBin, process.platform === 'win32' ? 'cargo.exe' : 'cargo');
+const rustc = join(cargoBin, process.platform === 'win32' ? 'rustc.exe' : 'rustc');
+const sysroot = spawnSync(rustc, ['--print', 'sysroot'], { encoding: 'utf8' }).stdout?.trim();
+const bundled = process.platform === 'win32' && sysroot ? join(sysroot, 'lib', 'rustlib', 'x86_64-pc-windows-gnu', 'bin', 'self-contained') : '';
+const packages = join(homedir(), 'AppData', 'Local', 'Microsoft', 'WinGet', 'Packages');
+const mingw = process.platform === 'win32' && existsSync(packages) ? readdirSync(packages).filter(name => name.startsWith('BrechtSanders.WinLibs.')).map(name => join(packages, name, 'mingw64', 'bin')).find(path => existsSync(join(path, 'dlltool.exe'))) : '';
+export const rustEnv = { ...process.env, PATH: [cargoBin, ...(mingw ? [mingw] : []), ...(bundled ? [bundled] : []), process.env.PATH].join(process.platform === 'win32' ? ';' : ':') };

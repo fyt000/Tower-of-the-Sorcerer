@@ -9,6 +9,7 @@
 /web/pkg/
 /web/campaign.json
 /test-results/
+/dist/
 *.save.json
 *.log
 /web/assets/

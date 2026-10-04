@@ -1,1 +1,4 @@
 Pillow>=11.3,<13
+pefile>=2024.8.26
+capstone>=5.0.6,<6
+unicorn>=2.1.4,<3
