@@ -49,13 +49,12 @@ mod web {
                 .unwrap_or_default()
         }
         pub fn command_json(&self, source: &str) -> Result<String, JsValue> {
-            let command =
-                serde_json::from_str(source).map_err(|e| JsValue::from_str(&e.to_string()))?;
             let mut app = self
                 .runner
                 .app_mut::<TowerApp>()
                 .ok_or_else(|| JsValue::from_str("Application not ready"))?;
-            app.submit(command);
+            app.submit_json(source)
+                .map_err(|error| JsValue::from_str(&error))?;
             Ok(app.engine.snapshot().to_string())
         }
         pub fn import_campaign(&self, source: &str) -> Result<(), JsValue> {

@@ -27,8 +27,7 @@ impl Game {
     }
 
     pub fn command_json(&mut self, command: &str) -> Result<String, JsValue> {
-        let command = serde_json::from_str(command).map_err(js_error)?;
-        self.engine.command(command).map_err(js_error)?;
+        self.engine.command_json(command).map_err(js_error)?;
         Ok(self.state_json())
     }
 

@@ -13,6 +13,83 @@ turns, conversations, journal, settings, language switching and the visual edito
 The browser's handwritten JavaScript only initializes the generated WebAssembly
 module. There is no native WebView or second game UI to keep synchronized.
 
+## Input and responsibility boundaries
+
+Commands follow one path across all clients:
+
+```text
+JSON / MCP arguments → Command deserialization + validation
+                    → Engine::execute(Command)
+                    → game state + ordered presentation messages
+```
+
+`command.rs` owns the closed command schema and `Direction`. It rejects missing
+arguments, wrong types, unknown fields, unknown directions, blank identifiers,
+floors outside `i32`, and flying-item commands without a destination. Its MCP
+schema describes the same variants. `Engine::command_json` and the compatibility
+`Engine::command(Value)` wrapper decode before execution. `Engine::execute`
+checks invariants again for directly constructed Rust commands. The UI also
+validates before changing facing, audio, active animation or queued movement.
+
+Malformed input returns an error without changing the save or `last_action`.
+A correctly formed move into a wall or an unavailable shop choice is a normal
+game outcome: execution returns `Ok(())`, with `last_action.ok = false` and an
+explanation. An owned quest tag without a usable action is also blocked without
+consuming it. Item ownership,
+visited floors, gold and conversation state are gameplay decisions, so those
+checks belong in the engine rather than in the JSON parser. The CLI and MCP
+adapters handle their own transport envelopes and use this shared command type.
+
+Campaign construction has a similar boundary. `Engine::from_json` decodes the
+authored document; both it and `Engine::new(Campaign)` validate it before
+creating a playable session. `Campaign::validate` checks geometry, references,
+known rule types, bounds, merged interaction overrides and script fields.
+`CompiledScripts::compile` produces typed events, conditions, effects and
+offers. Gameplay matches those enums, along with `TileKind`, `EnemySpecial`,
+`Stat`, `KeyColor` and the internal game status. The engine's campaign is private
+and available through a shared accessor. Editing constructs a new validated
+engine, keeping compiled behavior consistent with its source.
+
+The source files follow these responsibilities:
+
+| File | Responsibility |
+| --- | --- |
+| `tos-core/src/lib.rs` | Engine construction, command orchestration, inspection and tower cycles |
+| `campaign.rs` / `domain.rs` | Authored content, validation and closed gameplay vocabularies |
+| `command.rs` | Command decoding, validation, error type and MCP schema |
+| `events.rs` | Typed script representation, compilation, validation and execution |
+| `navigation.rs` / `combat.rs` | Paths, movement, hazards, stairs and shared combat calculation |
+| `interactions.rs` / `items.rs` | Conversations, purchases, original tools and custom item effects |
+| `stats.rs` | Exhaustive access and saturating mutation of player statistics |
+| `persistence.rs` | Save schema, atomic load validation and stable campaign fingerprint |
+| `presentation.rs` | Renderer messages describing committed gameplay results |
+| `original.rs` | Named, documented compatibility defaults from the original mechanics |
+
+JSON remains intentional for campaign authoring and editor round trips,
+extension metadata, save interchange, snapshots and presentation payloads.
+Item IDs and flags remain strings so campaigns can define new resources and
+quest tags. Original built-in tools are selected by their existing item IDs;
+custom tools execute compiled effects. Cinematic payloads remain extensible
+because the renderer owns their extra fields; known fields still receive input
+validation. This avoids building a generic schema/plugin framework around a
+small game while removing dynamic decoding from gameplay script execution.
+
+An omitted configurable rule may use its documented default. A supplied
+malformed rule fails import; for example, a condition object cannot become an
+empty list and silently pass. Core runtime code has no bare `unwrap()` calls.
+Remaining `expect`/assertions document internal invariants established by input
+validation or JSON-serializable concrete types. They do not recover by silently
+discarding effects or replacing a bad interaction. Invalid cached/custom
+campaigns are preserved in recovery storage and reported by the UI before it
+loads the bundled fallback.
+
+Original mechanics such as the backside ×44 multiplier, ten-floor scaling,
+elixir attack ×10 + defense ×5, three Warp Staff charges and bomb tile families
+are named in `original.rs`. Import limits (map sides 64, floors 256, stats one
+billion), save limits and standard FNV hash constants are documented separately.
+The fingerprint and save wire format remain compatible with existing saves;
+the shipped original campaign's canonical fingerprint is regression-tested.
+
 ## Simulation and presentation
 
 Each command commits the deterministic result immediately and emits an ordered

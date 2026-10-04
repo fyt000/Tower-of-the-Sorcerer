@@ -98,6 +98,24 @@ try {
     await button('restore');await idle();assert.deepEqual([(await state()).cycle,(await state()).player.hp,(await state()).steps],[2,666,16]);
     await importCampaign(original);
   });
+  await test('Rejected cached campaign is preserved and its validation error is visible',async()=>{
+    const rejected='{"id":"broken-cached-campaign"}';
+    await page.addInitScript(source=>{
+      if(!sessionStorage.getItem('invalid-campaign-recovery-fixture')) {
+        localStorage.setItem('tos-rust:campaign:v1',source);
+        localStorage.removeItem('tos-rust:save:v1');
+        sessionStorage.setItem('invalid-campaign-recovery-fixture','installed');
+      }
+    },rejected);
+    await page.reload();await ready();
+    assert.equal(await page.evaluate(()=>localStorage.getItem('tos-rust:campaign:recovery')),rejected);
+    assert.equal(JSON.parse(await page.evaluate(()=>localStorage.getItem('tos-rust:campaign:v1'))).id,JSON.parse(original).id);
+    const notice=(await ui()).notice;
+    assert.match(notice,/Campaign could not be loaded:.*missing field/);
+    assert.match(notice,/rejected campaign is preserved/);
+    assert.match(notice,/Loaded the bundled campaign/);
+    assert.equal((await state()).floors.length,51);
+  });
   await test('Actual mouse click follows road and collects the selected key',async()=>{
     await cell(4,9);assert.equal((await ui()).bounds.skip,undefined,'Ordinary travel must not show a skip-scene control');
     await idle();await heroIdle();const s=await state();assert.deepEqual([s.player.x,s.player.y,s.player.keys.yellow],[4,9,1]);
@@ -137,6 +155,39 @@ try {
     await page.screenshot({path:resolve(output,'battle.png')});
     await idle();assert.equal((await state()).player.hp,94);assert.equal((await state()).player.gold,2);assert.equal((await state()).player.x,2);
     assert.equal((await ui()).audio.effects_played-effectsBefore,5,'Three hero strikes and two enemy strikes each play the original attack sound');
+  });
+  await test('Malformed JSON commands preserve an active battle, save, facing and sound state',async()=>{
+    await importCampaign(corridor);
+    await command({type:'move',direction:'right'});await idle();
+    await command({type:'move',direction:'right'});await sceneUntil('battle');
+    // Keep the comparison in one synchronous browser task. No animation frame
+    // can advance naturally between these before/after snapshots.
+    const result=await page.evaluate(()=>{
+      const beforeUi=JSON.parse(window.tower.ui_json());
+      const beforeSave=window.tower.save_json();
+      const beforeState=window.tower.state_json();
+      const rejected=[];
+      for(const source of [
+        'not json',
+        '{"type":"move","direction":"diagonal"}',
+        '{"type":"move","direction":"up","unexpected":true}',
+        '{"type":"choose"}',
+        '{"type":"new_game","unexpected":true}'
+      ]) {
+        try { window.tower.command_json(source);rejected.push(null); }
+        catch(error) { rejected.push(String(error)); }
+      }
+      return {beforeUi,afterUi:JSON.parse(window.tower.ui_json()),beforeSave,afterSave:window.tower.save_json(),beforeState,afterState:window.tower.state_json(),rejected};
+    });
+    assert.equal(result.beforeUi.animation,'battle','The rejected input must arrive during an actual active animation');
+    assert(result.rejected.every(error=>error?.includes('Invalid command')),JSON.stringify(result.rejected));
+    assert.equal(result.afterSave,result.beforeSave,'Rejected commands must not mutate persistent game state');
+    assert.equal(result.afterState,result.beforeState,'Rejected commands must not change last_action or the snapshot');
+    for(const field of ['animation','presentation_remaining','path_remaining','facing','hero_pose','battle']) {
+      assert.deepEqual(result.afterUi[field],result.beforeUi[field],`Rejected commands must preserve ${field}`);
+    }
+    assert.deepEqual(result.afterUi.audio,result.beforeUi.audio,'Rejected commands must not unlock or play audio');
+    await idle();
   });
   await test('Invalid campaign/save import preserves the live session',async()=>{
     const before=(await state()).player;

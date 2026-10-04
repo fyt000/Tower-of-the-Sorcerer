@@ -333,7 +333,7 @@ fn princess_time_gate_runs_the_first_cycle_scene_on_floor_50() {
         restored.tile_at(50, 5, 4),
         Some(
             restored
-                .campaign
+                .campaign()
                 .floors
                 .iter()
                 .find(|f| f.id == 50)

@@ -40,7 +40,7 @@ fn hero_first_formula_and_lethal_boundary() {
         attack: 8,
         defense: 1,
         gold: 2,
-        special: String::new(),
+        special: tos_core::EnemySpecial::Normal,
     };
     assert_eq!(forecast(&p, &e).damage, Some(6));
     assert!(forecast(&p, &e).can_win);
@@ -64,7 +64,7 @@ fn cross_doubles_attack_but_preserves_original_base_attack_guard() {
         attack: 8,
         defense: 9,
         gold: 1,
-        special: "undead".into(),
+        special: tos_core::EnemySpecial::Undead,
     };
     assert_eq!(forecast(&p, &e).damage, Some(6));
     assert_eq!(forecast(&p, &Enemy { defense: 10, ..e }).damage, None);
@@ -218,9 +218,9 @@ fn wing_checks_same_position_on_destination_and_preserves_item_on_failure() {
 #[test]
 fn imported_original_has_all_maps_and_verified_enemy_identities() {
     let engine = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
-    assert_eq!(engine.campaign.floors.len(), 51);
-    assert_eq!(engine.campaign.enemies.len(), 33);
-    let vampire = &engine.campaign.enemies[engine.campaign.tiles["95"].enemy.as_ref().unwrap()];
+    assert_eq!(engine.campaign().floors.len(), 51);
+    assert_eq!(engine.campaign().enemies.len(), 33);
+    let vampire = &engine.campaign().enemies[engine.campaign().tiles["95"].enemy.as_ref().unwrap()];
     assert_eq!(
         (vampire.hp, vampire.attack, vampire.defense),
         (444, 199, 66)
@@ -228,7 +228,7 @@ fn imported_original_has_all_maps_and_verified_enemy_identities() {
     assert_eq!(vampire.special, "undead");
     assert_eq!(
         engine
-            .campaign
+            .campaign()
             .floors
             .iter()
             .find(|f| f.id == 0)

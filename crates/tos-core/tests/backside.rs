@@ -184,7 +184,7 @@ fn first_ending_resets_maps_flags_counters_keys_and_gold_while_carrying_stats() 
     assert_eq!(save["event_counts"], json!({}));
     assert_eq!(save["flags"], json!(["backside"]));
     assert_eq!(save["visited_floors"], json!([1]));
-    for floor in &game.campaign.floors {
+    for floor in &game.campaign().floors {
         assert_eq!(save["floors"][floor.id.to_string()], json!(floor.tiles));
     }
     assert!(
@@ -353,7 +353,7 @@ fn backside_enemy_gold_and_three_percent_old_man_gift_are_not_scaled() {
     step(&mut game, "right");
     assert_eq!(game.player().gold, 8);
     let npc = game
-        .campaign
+        .campaign()
         .interactions
         .iter()
         .find(|npc| npc["floor"] == 2 && npc["name"] == "Old man")

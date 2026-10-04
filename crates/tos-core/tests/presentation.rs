@@ -108,7 +108,7 @@ fn fatal_and_enemy_first_animation_turns_end_at_the_actual_lethal_strike() {
     assert_eq!(battle["hero_strikes"], 1);
     assert_eq!(battle["enemy_strikes"], 1);
     assert_eq!(state["status"], "lost");
-    let mut campaign = serde_json::to_value(corridor().campaign).unwrap();
+    let mut campaign = serde_json::to_value(corridor().campaign()).unwrap();
     campaign["events"] = json!([{"id":"ambush","trigger":{"type":"step","floor":1,"x":1,"y":0},"effects":[{"type":"battle_at","floor":1,"x":2,"y":0,"first_strike":true}]}]);
     let mut game = Engine::from_json(&campaign.to_string()).unwrap();
     step(&mut game, "right");
@@ -145,7 +145,7 @@ fn backside_scales_monster_statistics_but_preserves_gold_reward() {
 
 #[test]
 fn presentation_effects_are_ordered_but_do_not_delay_the_simulation() {
-    let mut definition: Value = serde_json::to_value(corridor().campaign).unwrap();
+    let mut definition: Value = serde_json::to_value(corridor().campaign()).unwrap();
     definition["events"] = json!([{"id":"scene","trigger":{"type":"step","floor":1,"x":1,"y":0},"effects":[
         {"type":"sound","cue":"3f"},{"type":"wait","ms":200},{"type":"message","text":"A trap!","dialogue_id":9},{"type":"set_tile","floor":1,"x":4,"y":0,"tile":6}]}]);
     let mut game = Engine::from_json(&definition.to_string()).unwrap();
@@ -163,7 +163,7 @@ fn presentation_effects_are_ordered_but_do_not_delay_the_simulation() {
 
 #[test]
 fn stairs_expose_the_original_wipe_sound_and_configurable_timing() {
-    let mut campaign = serde_json::to_value(corridor().campaign).unwrap();
+    let mut campaign = serde_json::to_value(corridor().campaign()).unwrap();
     campaign["rules"]["presentation"] = json!({"floor_transition_ms":600});
     campaign["tiles"]["11"] = json!({"name":"Up","kind":"stairs_up"});
     campaign["tiles"]["12"] = json!({"name":"Down","kind":"stairs_down"});

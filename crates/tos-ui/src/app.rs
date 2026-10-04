@@ -13,7 +13,7 @@ use std::{
     sync::mpsc,
     time::Duration,
 };
-use tos_core::Engine;
+use tos_core::{Command, Direction, Engine};
 
 const SAVE: &str = "tos-rust:save:v1";
 const CAMPAIGN: &str = "tos-rust:campaign:v1";
@@ -52,7 +52,7 @@ pub struct TowerApp {
     context: egui::Context,
     queue: VecDeque<Value>,
     active: Option<Active>,
-    route: VecDeque<String>,
+    route: VecDeque<Direction>,
     facing: String,
     hero_idle_at: f64,
     selected: Option<(usize, usize)>,
@@ -86,24 +86,52 @@ impl TowerApp {
         let source = campaign
             .or_else(|| platform::read(CAMPAIGN).map(upgrade_original_campaign))
             .unwrap_or_else(|| include_str!("../../../data/campaign.json").into());
-        let mut engine = Engine::from_json(&source).unwrap_or_else(|_| {
-            Engine::from_json(include_str!("../../../data/campaign.json"))
-                .expect("bundled campaign")
-        });
         let mut recovery = None;
+        let mut engine = match Engine::from_json(&source) {
+            Ok(engine) => engine,
+            Err(error) => {
+                let backup = match platform::write("tos-rust:campaign:recovery", &source) {
+                    Ok(()) => "The rejected campaign is preserved in recovery storage.".into(),
+                    Err(error) => format!("The rejected campaign could not be preserved: {error}."),
+                };
+                let bundled = include_str!("../../../data/campaign.json");
+                let storage = match platform::write(CAMPAIGN, bundled) {
+                    Ok(()) => String::new(),
+                    Err(error) => format!(" The bundled campaign could not be cached: {error}."),
+                };
+                recovery = Some(format!(
+                    "Campaign could not be loaded: {error}. {backup} Loaded the bundled campaign.{storage}"
+                ));
+                Engine::from_json(bundled).expect("bundled campaign is validated by the test suite")
+            }
+        };
         if let Some(save) = platform::read(SAVE) {
             match restore_journey(&mut engine, &save) {
                 Ok(Some(migrated)) => {
                     let _ = platform::write("tos-rust:save:recovery", &save);
                     let _ = platform::write(SAVE, &migrated);
-                    recovery=Some("Your saved journey was migrated to the restored original campaign. A recovery copy is preserved.".into());
+                    let message = "Your saved journey was migrated to the restored original campaign. A recovery copy is preserved.";
+                    match recovery.as_mut() {
+                        Some(previous) => {
+                            previous.push(' ');
+                            previous.push_str(message);
+                        }
+                        None => recovery = Some(message.into()),
+                    }
                 }
                 Ok(None) => {}
                 Err(error) => {
                     let _ = platform::write("tos-rust:save:recovery", &save);
-                    recovery = Some(format!(
+                    let message = format!(
                         "Saved journey needs migration: {error}. A recovery copy is preserved."
-                    ));
+                    );
+                    match recovery.as_mut() {
+                        Some(previous) => {
+                            previous.push(' ');
+                            previous.push_str(&message);
+                        }
+                        None => recovery = Some(message),
+                    }
                 }
             }
         }
@@ -111,7 +139,9 @@ impl TowerApp {
             .and_then(|s| serde_json::from_str(&s).ok())
             .unwrap_or_default();
         let snapshot = engine.snapshot();
-        let editor = CampaignEditor::new(serde_json::to_value(&engine.campaign).unwrap());
+        let editor = CampaignEditor::new(
+            serde_json::to_value(engine.campaign()).expect("validated campaign serializes to JSON"),
+        );
         let (sender, receiver) = mpsc::channel();
         let mut app = Self {
             engine,
@@ -201,7 +231,8 @@ impl TowerApp {
 
     pub fn replace_campaign(&mut self, source: &str) -> Result<(), String> {
         let engine = Engine::from_json(source)?;
-        let campaign = serde_json::to_value(&engine.campaign).unwrap();
+        let campaign =
+            serde_json::to_value(engine.campaign()).expect("validated campaign serializes to JSON");
         self.engine = engine;
         self.snapshot = self.engine.snapshot();
         self.visual = self.snapshot.clone();
@@ -237,19 +268,24 @@ impl TowerApp {
         Ok(())
     }
 
-    pub fn submit(&mut self, command: Value) {
+    /// External JSON is decoded before touching audio, movement or animation.
+    pub fn submit_json(&mut self, source: &str) -> Result<(), String> {
+        let command = Command::from_json(source).map_err(|error| error.to_string())?;
+        self.submit(command)
+    }
+
+    pub fn submit(&mut self, command: Command) -> Result<(), String> {
+        command.validate().map_err(|error| error.to_string())?;
+        let direction = match &command {
+            Command::Move { direction } => Some(*direction),
+            _ => None,
+        };
+        self.engine.execute(command)?;
         self.audio.unlock();
         self.visual = self.snapshot.clone();
-        if let Some(direction) = command["direction"].as_str() {
-            self.facing = direction.into();
+        if let Some(direction) = direction {
+            self.facing = direction.as_str().into();
             self.hero_idle_at = self.now() + self.ambient_interval();
-        }
-        match self.engine.command(command) {
-            Ok(()) => {}
-            Err(e) => {
-                self.notify(e);
-                return;
-            }
         }
         self.snapshot = self.engine.snapshot();
         self.queue = self.snapshot["last_action"]["presentation"]
@@ -286,10 +322,17 @@ impl TowerApp {
         }
         self.persist();
         self.context.request_repaint();
+        Ok(())
+    }
+
+    fn apply_command(&mut self, command: Command) {
+        if let Err(error) = self.submit(command) {
+            self.notify(error);
+        }
     }
 
     pub fn debug_json(&self) -> Value {
-        json!({"ready":true,"locale":self.locale,"visual_floor":self.visual["floor"],"visual_player":self.visual["player"],"visual_log":self.visual["log"],"editor_open":self.editor_open,"editor":self.editor.debug_json(),"bounds":self.bounds,"animation":self.active.as_ref().map(|a|a.effect["type"].clone()),"presentation_remaining":self.queue.len(),"path_remaining":self.route.len(),"animations_seen":self.animation_history,"animation_details":self.animation_details,"hero_pose":if self.active.as_ref().is_some_and(|a|a.effect["type"]=="move")||self.now()<self.hero_idle_at{"walking"}else{"idle"},"facing":self.facing,"battle":self.battle_progress(self.now()).map(|b|json!({"hero_hp":b.hero_hp,"enemy_hp":b.enemy_hp,"hero_turn":b.hero_turn,"completed":b.completed,"phase":b.phase})),"audio":{"unlocked":self.audio.unlocked,"enabled":self.audio.enabled,"effects_played":self.audio.effects_played,"music":self.audio.music_name,"error":self.audio.error},"sprites_loaded":self.assets.atlas.is_some()})
+        json!({"ready":true,"notice":self.toast.as_ref().map(|(message,_)|message),"locale":self.locale,"visual_floor":self.visual["floor"],"visual_player":self.visual["player"],"visual_log":self.visual["log"],"editor_open":self.editor_open,"editor":self.editor.debug_json(),"bounds":self.bounds,"animation":self.active.as_ref().map(|a|a.effect["type"].clone()),"presentation_remaining":self.queue.len(),"path_remaining":self.route.len(),"animations_seen":self.animation_history,"animation_details":self.animation_details,"hero_pose":if self.active.as_ref().is_some_and(|a|a.effect["type"]=="move")||self.now()<self.hero_idle_at{"walking"}else{"idle"},"facing":self.facing,"battle":self.battle_progress(self.now()).map(|b|json!({"hero_hp":b.hero_hp,"enemy_hp":b.enemy_hp,"hero_turn":b.hero_turn,"completed":b.completed,"phase":b.phase})),"audio":{"unlocked":self.audio.unlocked,"enabled":self.audio.enabled,"effects_played":self.audio.effects_played,"music":self.audio.music_name,"error":self.audio.error},"sprites_loaded":self.assets.atlas.is_some()})
     }
 
     pub fn editor_campaign_json(&self) -> String {
@@ -355,7 +398,7 @@ impl TowerApp {
             && !self.music_paused
         {
             let floor = self.visual["floor"].as_i64().unwrap_or(1);
-            let name = self.engine.campaign.rules["audio"]["floor_music"]
+            let name = self.engine.campaign().rules["audio"]["floor_music"]
                 .as_array()
                 .and_then(|entries| {
                     entries.iter().find(|entry| {
@@ -453,7 +496,7 @@ impl TowerApp {
                     }
                     if let Some(id) = name.strip_prefix("music:") {
                         if let Some(file) =
-                            self.engine.campaign.rules["audio"]["music_cues"][id].as_str()
+                            self.engine.campaign().rules["audio"]["music_cues"][id].as_str()
                         {
                             let path = format!("assets/midi/{file}.mid");
                             self.music_override = Some(path.clone());
@@ -511,7 +554,7 @@ impl TowerApp {
             if self.active.is_none() {
                 self.visual = self.snapshot.clone();
                 if let Some(direction) = self.route.pop_front() {
-                    self.submit(json!({"type":"move","direction":direction}));
+                    self.apply_command(Command::Move { direction });
                 }
             }
         }
@@ -556,7 +599,7 @@ impl TowerApp {
                             + e["from_x"].as_u64().unwrap_or(0) as usize;
                         let to = e["y"].as_u64().unwrap_or(0) as usize * width
                             + e["x"].as_u64().unwrap_or(0) as usize;
-                        let empty = self.engine.campaign.rules["empty_tile"]
+                        let empty = self.engine.campaign().rules["empty_tile"]
                             .as_u64()
                             .unwrap_or(6);
                         if let Some(tiles) = self.visual["tiles"].as_array_mut()
@@ -590,8 +633,8 @@ impl TowerApp {
         }
         self.visual["floor"] = json!(floor);
         self.visual["player"]["floor"] = json!(floor);
-        let tiles = (0..self.engine.campaign.height)
-            .flat_map(|y| (0..self.engine.campaign.width).map(move |x| (x, y)))
+        let tiles = (0..self.engine.campaign().height)
+            .flat_map(|y| (0..self.engine.campaign().width).map(move |x| (x, y)))
             .filter_map(|(x, y)| self.engine.tile_at(floor, x, y))
             .collect::<Vec<_>>();
         self.visual["tiles"] = if e["tiles"].is_array() {
@@ -616,7 +659,7 @@ impl TowerApp {
     }
 
     fn ambient_interval(&self) -> f64 {
-        self.engine.campaign.rules["presentation"]["ambient_frame_ms"]
+        self.engine.campaign().rules["presentation"]["ambient_frame_ms"]
             .as_f64()
             .unwrap_or(150.0)
             .clamp(60.0, 1000.0)
@@ -690,7 +733,7 @@ impl TowerApp {
                     theme::caption(ui, &self.text("classic_adventure"));
                 }
                 ui.label(
-                    RichText::new(translate_text(&self.locale, &self.engine.campaign.title))
+                    RichText::new(translate_text(&self.locale, &self.engine.campaign().title))
                         .font(FontId::new(
                             if narrow { 29.0 } else { 40.0 },
                             egui::FontFamily::Name("serif".into()),
@@ -753,7 +796,7 @@ impl TowerApp {
     }
 
     fn checkpoint(&mut self) {
-        let value = json!({"campaign":self.engine.campaign,"save":serde_json::from_str::<Value>(&self.engine.save_json()).unwrap()});
+        let value = json!({"campaign":self.engine.campaign(),"save":serde_json::from_str::<Value>(&self.engine.save_json()).expect("engine-generated save is valid JSON")});
         match platform::write(CHECKPOINT, &value.to_string()) {
             Ok(()) => self.notify(self.text("saved")),
             Err(e) => self.notify(e),
@@ -763,18 +806,16 @@ impl TowerApp {
         let result = (|| -> Result<(), String> {
             let source = platform::read(CHECKPOINT).ok_or_else(|| self.text("no_checkpoint"))?;
             let value: Value = serde_json::from_str(&source).map_err(|e| e.to_string())?;
-            let original_campaign = if value["campaign"].is_string() {
-                value["campaign"].as_str().unwrap().into()
-            } else {
-                value["campaign"].to_string()
+            let original_campaign = match value["campaign"].as_str() {
+                Some(source) => source.to_owned(),
+                None => value["campaign"].to_string(),
             };
             let campaign = original_campaign_upgrade(&original_campaign)
                 .unwrap_or(&original_campaign)
                 .to_owned();
-            let save = if value["save"].is_string() {
-                value["save"].as_str().unwrap().into()
-            } else {
-                value["save"].to_string()
+            let save = match value["save"].as_str() {
+                Some(source) => source.to_owned(),
+                None => value["save"].to_string(),
             };
             let mut engine = Engine::from_json(&campaign)?;
             restore_journey(&mut engine, &save)?;
@@ -907,11 +948,11 @@ impl TowerApp {
                 );
                 let sprite = self
                     .engine
-                    .campaign
+                    .campaign()
                     .tiles
                     .values()
-                    .find(|def| def.kind == "key" && def.key.as_deref() == Some(key))
-                    .map(|def| serde_json::to_value(&def.sprite).unwrap_or_default())
+                    .find(|def| def.kind == "key" && def.key.is_some_and(|color| color == key))
+                    .map(|def| def.sprite.clone())
                     .unwrap_or_else(|| {
                         json!(match key {
                             "yellow" => 29,
@@ -948,7 +989,7 @@ impl TowerApp {
             .map(|item| {
                 let definition = self
                     .engine
-                    .campaign
+                    .campaign()
                     .tiles
                     .values()
                     .find(|def| def.item.as_deref() == Some(item));
@@ -1049,14 +1090,17 @@ impl TowerApp {
                                 self.settings = true;
                                 self.notify(self.text("flying_hint"));
                             } else {
-                                command = Some(json!({"type":"use_item","item":id}));
+                                command = Some(Command::UseItem {
+                                    item: id.into(),
+                                    floor: None,
+                                });
                             }
                         }
                     }
                 });
             });
         if let Some(c) = command {
-            self.submit(c);
+            self.apply_command(c);
         }
     }
 
@@ -1780,7 +1824,16 @@ impl TowerApp {
             && let Some((x, y)) = hover
         {
             self.audio.unlock();
-            self.route = self.engine.path_to(x, y).into();
+            match self
+                .engine
+                .path_to(x, y)
+                .iter()
+                .map(|name| name.parse())
+                .collect()
+            {
+                Ok(route) => self.route = route,
+                Err(error) => self.notify(format!("Invalid engine route: {error}")),
+            }
         }
         if self.busy() && !self.travel_only() {
             ui.add_space(10.0);
@@ -1830,7 +1883,7 @@ impl TowerApp {
                             }
                             let title = self
                                 .engine
-                                .campaign
+                                .campaign()
                                 .floors
                                 .iter()
                                 .find(|f| Some(i64::from(f.id)) == self.visual["floor"].as_i64())
@@ -2103,7 +2156,7 @@ impl TowerApp {
                                 let id = offer["id"].as_str().unwrap_or("accept");
                                 self.record(&format!("choice:{id}"), &button);
                                 if button.clicked() {
-                                    action = Some(json!({"type":"choose","choice":id}));
+                                    action = Some(Command::Choose { choice: id.into() });
                                 }
                             }
                             if needs_close {
@@ -2111,7 +2164,7 @@ impl TowerApp {
                                     theme::action(ui, self.text("close"), Icon::Close, false);
                                 self.record("dialogue_close", &close);
                                 if close.clicked() {
-                                    action = Some(json!({"type":"cancel"}));
+                                    action = Some(Command::Cancel);
                                 }
                             }
                         });
@@ -2128,7 +2181,9 @@ impl TowerApp {
                 .as_array()
                 .is_some_and(|choices| choices.len() == 1 && choices[0]["id"] == "leave")
             {
-                action = Some(json!({"type":"choose","choice":"leave"}));
+                action = Some(Command::Choose {
+                    choice: "leave".into(),
+                });
             }
         }
         if skip_scene {
@@ -2137,7 +2192,7 @@ impl TowerApp {
             self.finish_effect();
         }
         if let Some(command) = action {
-            self.submit(command);
+            self.apply_command(command);
         }
     }
 
@@ -2273,7 +2328,7 @@ impl TowerApp {
             self.preferences();
         }
         if new_game {
-            self.submit(json!({"type":"new_game"}));
+            self.apply_command(Command::NewGame);
             self.settings = false;
         }
         if export {
@@ -2302,7 +2357,10 @@ impl TowerApp {
         }
         if let Some(floor) = flying {
             self.settings = false;
-            self.submit(json!({"type":"use_item","item":"flying_orb","floor":floor}));
+            self.apply_command(Command::UseItem {
+                item: "flying_orb".into(),
+                floor: Some(i32::try_from(floor).expect("floor ID came from a validated campaign")),
+            });
         }
     }
 
@@ -2316,10 +2374,10 @@ impl TowerApp {
         }
         let direction = self.context.input(|i| {
             [
-                (egui::Key::ArrowUp, egui::Key::W, "up"),
-                (egui::Key::ArrowDown, egui::Key::S, "down"),
-                (egui::Key::ArrowLeft, egui::Key::A, "left"),
-                (egui::Key::ArrowRight, egui::Key::D, "right"),
+                (egui::Key::ArrowUp, egui::Key::W, Direction::Up),
+                (egui::Key::ArrowDown, egui::Key::S, Direction::Down),
+                (egui::Key::ArrowLeft, egui::Key::A, Direction::Left),
+                (egui::Key::ArrowRight, egui::Key::D, Direction::Right),
             ]
             .iter()
             .find_map(|(a, b, d)| (i.key_pressed(*a) || i.key_pressed(*b)).then_some(*d))
@@ -2327,9 +2385,9 @@ impl TowerApp {
         if let Some(direction) = direction {
             self.route.clear();
             if self.busy() {
-                self.route.push_back(direction.into());
+                self.route.push_back(direction);
             } else {
-                self.submit(json!({"type":"move","direction":direction}));
+                self.apply_command(Command::Move { direction });
             }
         }
     }
@@ -2365,7 +2423,8 @@ impl eframe::App for TowerApp {
                     },
                     EditorAction::Export(value) => match platform::export(
                         "campaign.json",
-                        &serde_json::to_string_pretty(&value).unwrap(),
+                        &serde_json::to_string_pretty(&value)
+                            .expect("JSON editor document serializes to JSON"),
                     ) {
                         Ok(path) => {
                             self.editor.mark_exported();
@@ -2693,8 +2752,8 @@ fn install_fonts(ctx: &egui::Context, chinese: Option<Vec<u8>>) {
     );
     fonts
         .families
-        .get_mut(&egui::FontFamily::Proportional)
-        .unwrap()
+        .entry(egui::FontFamily::Proportional)
+        .or_default()
         .insert(0, "sans".into());
     fonts.families.insert(
         egui::FontFamily::Name("serif".into()),

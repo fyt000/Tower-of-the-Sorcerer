@@ -1,10 +1,11 @@
+use serde::{Deserialize, de::DeserializeOwned};
 use serde_json::{Value, json};
 use std::{
     env, fs,
     io::{self, BufRead, Write},
     path::{Path, PathBuf},
 };
-use tos_core::Engine;
+use tos_core::{Command, Direction, Engine};
 
 const DEFAULT_CAMPAIGN: &str = include_str!("../../../data/campaign.json");
 
@@ -44,11 +45,11 @@ fn run() -> Result<(), String> {
         "validate" => {
             println!(
                 "Valid campaign: {} · {} floors · {} tile definitions · {} enemies · {} events",
-                engine.campaign.title,
-                engine.campaign.floors.len(),
-                engine.campaign.tiles.len(),
-                engine.campaign.enemies.len(),
-                engine.campaign.events.len()
+                engine.campaign().title,
+                engine.campaign().floors.len(),
+                engine.campaign().tiles.len(),
+                engine.campaign().enemies.len(),
+                engine.campaign().events.len()
             );
             Ok(())
         }
@@ -62,12 +63,10 @@ fn run() -> Result<(), String> {
                 if line.trim().is_empty() {
                     continue;
                 }
-                let result = serde_json::from_str(&line)
-                    .map_err(|e| e.to_string())
-                    .and_then(|command| engine.command(command));
+                let result = engine.command_json(&line);
                 match result {
                     Ok(()) => println!("{}", engine.snapshot()),
-                    Err(error) => println!("{}", json!({"error":error})),
+                    Err(error) => println!("{}", json!({"error":error.to_string()})),
                 }
             }
             Ok(())
@@ -85,9 +84,9 @@ fn run() -> Result<(), String> {
                 if line.trim().is_empty() || line.starts_with('#') {
                     continue;
                 }
-                engine.command(
-                    serde_json::from_str(line).map_err(|e| format!("Line {}: {e}", i + 1))?,
-                )?;
+                engine
+                    .command_json(line)
+                    .map_err(|error| format!("Line {}: {error}", i + 1))?;
             }
             println!("{}", engine.snapshot());
             Ok(())
@@ -113,18 +112,20 @@ fn play(engine: &mut Engine) -> Result<(), String> {
             "\nFloor {} · HP {} · ATK {} · DEF {} · Gold {} · Keys {}/{}/{}",
             p.floor, p.hp, p.attack, p.defense, p.gold, p.keys.yellow, p.keys.blue, p.keys.red
         );
-        let tiles = state["tiles"].as_array().unwrap();
-        for y in 0..engine.campaign.height {
-            for x in 0..engine.campaign.width {
+        for y in 0..engine.campaign().height {
+            for x in 0..engine.campaign().width {
                 if p.x == x && p.y == y {
                     print!("@ ");
                     continue;
                 }
-                let id = tiles[y * engine.campaign.width + x]
-                    .as_u64()
-                    .unwrap()
-                    .to_string();
-                let tile = &engine.campaign.tiles[&id];
+                let id = engine
+                    .tile_at(p.floor, x, y)
+                    .ok_or("Current floor is missing a tile")?;
+                let tile = engine
+                    .campaign()
+                    .tiles
+                    .get(&id.to_string())
+                    .ok_or("Current floor references an undefined tile")?;
                 let glyph = match tile.kind.as_str() {
                     "wall" | "hidden_wall" => "#",
                     "enemy" => "M",
@@ -150,12 +151,18 @@ fn play(engine: &mut Engine) -> Result<(), String> {
                 dialog["title"].as_str().unwrap_or(""),
                 dialog["text"].as_str().unwrap_or("")
             );
-            for choice in dialog["choices"].as_array().unwrap() {
-                println!(
-                    "  choose {} — {}",
-                    choice["id"].as_str().unwrap_or(""),
-                    choice["label"].as_str().unwrap_or("")
-                );
+            if let Some(choices) = dialog
+                .get("choices")
+                .or_else(|| dialog.get("offers"))
+                .and_then(Value::as_array)
+            {
+                for choice in choices {
+                    println!(
+                        "  choose {} — {}",
+                        choice["id"].as_str().unwrap_or(""),
+                        choice["label"].as_str().unwrap_or("")
+                    );
+                }
             }
         }
         if let Some(message) = state["last_action"]["message"].as_str() {
@@ -177,10 +184,18 @@ fn play(engine: &mut Engine) -> Result<(), String> {
         };
         let command = match first {
             "quit" | "q" => return Ok(()),
-            "w" | "up" => json!({"type":"move","direction":"up"}),
-            "s" | "down" => json!({"type":"move","direction":"down"}),
-            "a" | "left" => json!({"type":"move","direction":"left"}),
-            "d" | "right" => json!({"type":"move","direction":"right"}),
+            "w" | "up" => Command::Move {
+                direction: Direction::Up,
+            },
+            "s" | "down" => Command::Move {
+                direction: Direction::Down,
+            },
+            "a" | "left" => Command::Move {
+                direction: Direction::Left,
+            },
+            "d" | "right" => Command::Move {
+                direction: Direction::Right,
+            },
             "inspect" => {
                 if let (Some(x), Some(y)) = (
                     words.get(1).and_then(|s| s.parse::<usize>().ok()),
@@ -197,17 +212,29 @@ fn play(engine: &mut Engine) -> Result<(), String> {
                 }
                 continue;
             }
-            "choose" => json!({"type":"choose","choice":words.get(1).unwrap_or(&"leave")}),
-            "cancel" => json!({"type":"cancel"}),
+            "choose" => Command::Choose {
+                choice: words.get(1).copied().unwrap_or("leave").into(),
+            },
+            "cancel" => Command::Cancel,
             "use" => {
-                json!({"type":"use_item","item":words.get(1).unwrap_or(&""),"floor":words.get(2).and_then(|s|s.parse::<i32>().ok())})
+                let floor = match words.get(2).map(|s| s.parse::<i32>()).transpose() {
+                    Ok(floor) => floor,
+                    Err(error) => {
+                        println!("Invalid destination floor: {error}");
+                        continue;
+                    }
+                };
+                Command::UseItem {
+                    item: words.get(1).copied().unwrap_or("").into(),
+                    floor,
+                }
             }
             _ => {
                 println!("Unknown command");
                 continue;
             }
         };
-        if let Err(error) = engine.command(command) {
+        if let Err(error) = engine.execute(command) {
             println!("{error}");
         }
     }
@@ -267,62 +294,97 @@ fn serve(root: &Path, port: u16) -> Result<(), String> {
 }
 
 fn tool_definitions() -> Value {
+    let action_schema = Command::json_schema();
     json!([
         {"name":"game_state","description":"Read complete deterministic game state, map, inventory and combat forecasts.","inputSchema":{"type":"object","properties":{},"additionalProperties":false},"annotations":{"readOnlyHint":true}},
         {"name":"inspect_tile","description":"Inspect a tile and predict exact combat damage without taking an action.","inputSchema":{"type":"object","properties":{"x":{"type":"integer","minimum":0},"y":{"type":"integer","minimum":0}},"required":["x","y"],"additionalProperties":false},"annotations":{"readOnlyHint":true}},
         {"name":"plan_path","description":"Plan a click route through clear road. An obstacle can be the final action, never an intermediate step. Unreachable targets return the closest reachable road prefix.","inputSchema":{"type":"object","properties":{"x":{"type":"integer","minimum":0},"y":{"type":"integer","minimum":0}},"required":["x","y"],"additionalProperties":false},"annotations":{"readOnlyHint":true}},
-        {"name":"game_action","description":"Commit one game action. Move, choose a shop/dialogue response, cancel, or use an item.","inputSchema":{"type":"object","properties":{"action":{"type":"object","properties":{"type":{"enum":["move","choose","cancel","use_item"]},"direction":{"enum":["up","down","left","right"]},"choice":{"type":"string"},"item":{"type":"string"},"floor":{"type":"integer"}},"required":["type"]}},"required":["action"]}},
-        {"name":"simulate_actions","description":"Simulate up to 1000 actions on a copy and return the resulting state. Does not modify the session.","inputSchema":{"type":"object","properties":{"actions":{"type":"array","maxItems":1000,"items":{"type":"object"}}},"required":["actions"]},"annotations":{"readOnlyHint":true}},
+        {"name":"game_action","description":"Commit one game action. Move, choose a shop/dialogue response, cancel, use an item, or reset the journey.","inputSchema":{"type":"object","properties":{"action":action_schema},"required":["action"],"additionalProperties":false}},
+        {"name":"simulate_actions","description":"Simulate up to 1000 actions on a copy and return the resulting state. Does not modify the session.","inputSchema":{"type":"object","properties":{"actions":{"type":"array","maxItems":1000,"items":action_schema}},"required":["actions"],"additionalProperties":false},"annotations":{"readOnlyHint":true}},
         {"name":"save_game","description":"Export a portable JSON save including flags and changed floors.","inputSchema":{"type":"object","properties":{},"additionalProperties":false},"annotations":{"readOnlyHint":true}},
-        {"name":"load_game","description":"Restore an exported save for this campaign revision.","inputSchema":{"type":"object","properties":{"save":{"type":"string"}},"required":["save"]}},
+        {"name":"load_game","description":"Restore an exported save for this campaign revision.","inputSchema":{"type":"object","properties":{"save":{"type":"string"}},"required":["save"],"additionalProperties":false}},
         {"name":"new_game","description":"Reset the current session to the campaign's initial state.","inputSchema":{"type":"object","properties":{},"additionalProperties":false}}
     ])
 }
 
+// MCP envelopes are transport data. Reject unknown or mistyped arguments here;
+// the engine then receives the same Command used by keyboard and browser input.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ActionArguments {
+    action: Command,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SimulationArguments {
+    actions: Vec<Command>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct TileArguments {
+    x: usize,
+    y: usize,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SaveArguments {
+    save: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct EmptyArguments {}
+
+fn arguments<T: DeserializeOwned>(value: &Value) -> Result<T, String> {
+    serde_json::from_value(value.clone())
+        .map_err(|error| format!("Invalid tool arguments: {error}"))
+}
+
 fn call_tool(engine: &mut Engine, name: &str, args: &Value) -> Result<Value, String> {
     match name {
-        "game_state" => Ok(engine.snapshot()),
+        "game_state" => {
+            arguments::<EmptyArguments>(args)?;
+            Ok(engine.snapshot())
+        }
         "plan_path" => {
-            let x = args["x"]
-                .as_u64()
-                .ok_or("x must be a nonnegative integer")? as usize;
-            let y = args["y"]
-                .as_u64()
-                .ok_or("y must be a nonnegative integer")? as usize;
+            let TileArguments { x, y } = arguments(args)?;
             Ok(json!({"directions":engine.path_to(x,y),"floor":engine.player().floor}))
         }
-        "inspect_tile" => Ok(engine.inspect(
-            args["x"]
-                .as_u64()
-                .ok_or("x must be a nonnegative integer")? as usize,
-            args["y"]
-                .as_u64()
-                .ok_or("y must be a nonnegative integer")? as usize,
-        )),
+        "inspect_tile" => {
+            let TileArguments { x, y } = arguments(args)?;
+            Ok(engine.inspect(x, y))
+        }
         "game_action" => {
-            engine.command(args.get("action").ok_or("Missing action")?.clone())?;
+            let ActionArguments { action } = arguments(args)?;
+            engine.execute(action)?;
             Ok(engine.snapshot())
         }
         "simulate_actions" => {
-            let actions = args["actions"]
-                .as_array()
-                .ok_or("actions must be an array")?;
+            let SimulationArguments { actions } = arguments(args)?;
             if actions.len() > 1000 {
                 return Err("Maximum 1000 simulated actions".into());
             }
             let mut simulation = engine.clone();
             for action in actions {
-                simulation.command(action.clone())?;
+                simulation.execute(action)?;
             }
             Ok(simulation.snapshot())
         }
-        "save_game" => Ok(json!({"save":engine.save_json()})),
+        "save_game" => {
+            arguments::<EmptyArguments>(args)?;
+            Ok(json!({"save":engine.save_json()}))
+        }
         "load_game" => {
-            engine.load_json(args["save"].as_str().ok_or("save must be a JSON string")?)?;
+            let SaveArguments { save } = arguments(args)?;
+            engine.load_json(&save)?;
             Ok(engine.snapshot())
         }
         "new_game" => {
-            engine.command(json!({"type":"new_game"}))?;
+            arguments::<EmptyArguments>(args)?;
+            engine.execute(Command::NewGame)?;
             Ok(engine.snapshot())
         }
         _ => Err(format!("Unknown tool {name}")),
@@ -366,11 +428,11 @@ fn mcp(engine: &mut Engine) -> Result<(), String> {
             "ping" => Ok(json!({})),
             "tools/list" => Ok(json!({"tools":tool_definitions()})),
             "tools/call" => {
-                match call_tool(
-                    engine,
-                    params["name"].as_str().unwrap_or(""),
-                    &params["arguments"],
-                ) {
+                let args = params
+                    .get("arguments")
+                    .cloned()
+                    .unwrap_or_else(|| json!({}));
+                match call_tool(engine, params["name"].as_str().unwrap_or(""), &args) {
                     Ok(value) => Ok(
                         json!({"content":[{"type":"text","text":value.to_string()}],"structuredContent":value,"isError":false}),
                     ),
@@ -387,7 +449,7 @@ fn mcp(engine: &mut Engine) -> Result<(), String> {
                 let value = match uri {
                     "tos://state" => Ok(engine.snapshot()),
                     "tos://campaign" => {
-                        serde_json::to_value(&engine.campaign).map_err(|e| e.to_string())
+                        serde_json::to_value(engine.campaign()).map_err(|e| e.to_string())
                     }
                     _ => Err("Unknown resource".into()),
                 };
@@ -405,4 +467,64 @@ fn mcp(engine: &mut Engine) -> Result<(), String> {
         io::stdout().flush().map_err(|e| e.to_string())?;
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn mcp_action_schema_and_runtime_share_the_command_contract() {
+        let definitions = tool_definitions();
+        let action = definitions
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|tool| tool["name"] == "game_action")
+            .unwrap();
+        assert_eq!(
+            action["inputSchema"]["properties"]["action"],
+            Command::json_schema()
+        );
+        assert_eq!(action["inputSchema"]["additionalProperties"], false);
+
+        let mut engine = Engine::from_json(DEFAULT_CAMPAIGN).unwrap();
+        for args in [
+            json!({"action":{"type":"move"}}),
+            json!({"action":{"type":"move","direction":"up","typo":true}}),
+            json!({"action":{"type":"choose","choice":" "}}),
+            json!({"action":{"type":"use_item","item":"flying_orb","floor":2147483648_i64}}),
+            json!({"action":{"type":"use_item","item":"flying_orb"}}),
+            json!({"action":{"type":"cancel","choice":"leave"}}),
+            json!({"action":{"type":"new_game","unexpected":true}}),
+            json!({"action":{"type":"cancel"},"extra":true}),
+        ] {
+            let before = engine.snapshot();
+            let save = engine.save_json();
+            assert!(
+                call_tool(&mut engine, "game_action", &args).is_err(),
+                "accepted {args}"
+            );
+            assert_eq!(engine.snapshot(), before);
+            assert_eq!(engine.save_json(), save);
+        }
+    }
+
+    #[test]
+    fn invalid_simulation_cannot_modify_the_live_session() {
+        let mut engine = Engine::from_json(DEFAULT_CAMPAIGN).unwrap();
+        let before = engine.snapshot();
+        assert!(
+            call_tool(
+                &mut engine,
+                "simulate_actions",
+                &json!({"actions":[
+                    {"type":"move","direction":"up"},
+                    {"type":"use_item","item":"flying_orb"}
+                ]})
+            )
+            .is_err()
+        );
+        assert_eq!(engine.snapshot(), before);
+    }
 }

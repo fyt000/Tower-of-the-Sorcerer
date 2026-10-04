@@ -57,7 +57,7 @@ fn walk_to(engine: &mut Engine, target: (usize, usize)) {
             let Some(tile) = engine.tile_at(floor, nx, ny) else {
                 continue;
             };
-            let definition = &engine.campaign.tiles[&tile.to_string()];
+            let definition = &engine.campaign().tiles[&tile.to_string()];
             let traversable = match definition.kind.as_str() {
                 "floor" | "empty" | "key" | "potion" | "gem" | "item" | "equipment" | "trigger" => {
                     true
@@ -67,9 +67,9 @@ fn walk_to(engine: &mut Engine, target: (usize, usize)) {
                 "enemy" => definition
                     .enemy
                     .as_ref()
-                    .and_then(|id| engine.campaign.enemies.get(id))
+                    .and_then(|id| engine.campaign().enemies.get(id))
                     .is_some_and(|enemy| tos_core::forecast(engine.player(), enemy).can_win),
-                "door" => match definition.key.as_deref() {
+                "door" => match definition.key.map(|key| key.as_str()) {
                     Some("yellow") => engine.player().keys.yellow > 0,
                     Some("blue") => engine.player().keys.blue > 0,
                     Some("red") => engine.player().keys.red > 0,
