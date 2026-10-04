@@ -1664,39 +1664,6 @@ fn restore_journey(engine: &mut Engine, source: &str) -> Result<Option<String>, 
     Ok(Some(migrated))
 }
 
-#[cfg(test)]
-mod migration_tests {
-    use super::*;
-    #[test]
-    fn known_original_save_migrates_with_player_progress() {
-        let mut engine = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
-        let mut saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
-        saved["campaign_fingerprint"] = json!("56277325ec91e254");
-        saved["player"]["hp"] = json!(725);
-        saved.as_object_mut().unwrap().remove("cycle");
-        assert!(
-            restore_journey(&mut engine, &saved.to_string())
-                .unwrap()
-                .is_some()
-        );
-        assert_eq!(engine.player().hp, 725);
-        assert_eq!(engine.snapshot()["cycle"], 1);
-    }
-    #[test]
-    fn custom_campaign_and_unknown_save_are_not_migrated() {
-        let mut campaign: Value =
-            serde_json::from_str(include_str!("../../../data/campaign.json")).unwrap();
-        campaign["title"] = json!("Custom adventure");
-        let mut engine = Engine::from_json(&campaign.to_string()).unwrap();
-        let mut saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
-        saved["campaign_fingerprint"] = json!("56277325ec91e254");
-        assert!(restore_journey(&mut engine, &saved.to_string()).is_err());
-        saved["campaign_fingerprint"] = json!("unknown");
-        assert!(restore_journey(&mut engine, &saved.to_string()).is_err());
-        assert_eq!(engine.player().hp, 1000);
-    }
-}
-
 fn card(ui: &mut egui::Ui, width: f32, contents: impl FnOnce(&mut egui::Ui)) {
     egui::Frame::new()
         .fill(CARD)
@@ -1805,4 +1772,37 @@ fn install_fonts(ctx: &egui::Context, chinese: Option<Vec<u8>>) {
         }
     }
     ctx.set_fonts(fonts);
+}
+
+#[cfg(test)]
+mod migration_tests {
+    use super::*;
+    #[test]
+    fn known_original_save_migrates_with_player_progress() {
+        let mut engine = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
+        let mut saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
+        saved["campaign_fingerprint"] = json!("56277325ec91e254");
+        saved["player"]["hp"] = json!(725);
+        saved.as_object_mut().unwrap().remove("cycle");
+        assert!(
+            restore_journey(&mut engine, &saved.to_string())
+                .unwrap()
+                .is_some()
+        );
+        assert_eq!(engine.player().hp, 725);
+        assert_eq!(engine.snapshot()["cycle"], 1);
+    }
+    #[test]
+    fn custom_campaign_and_unknown_save_are_not_migrated() {
+        let mut campaign: Value =
+            serde_json::from_str(include_str!("../../../data/campaign.json")).unwrap();
+        campaign["title"] = json!("Custom adventure");
+        let mut engine = Engine::from_json(&campaign.to_string()).unwrap();
+        let mut saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
+        saved["campaign_fingerprint"] = json!("56277325ec91e254");
+        assert!(restore_journey(&mut engine, &saved.to_string()).is_err());
+        saved["campaign_fingerprint"] = json!("unknown");
+        assert!(restore_journey(&mut engine, &saved.to_string()).is_err());
+        assert_eq!(engine.player().hp, 1000);
+    }
 }
