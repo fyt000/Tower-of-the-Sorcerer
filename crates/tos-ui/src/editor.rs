@@ -305,14 +305,25 @@ impl CampaignEditor {
             .max_height(body_height)
             .auto_shrink([false, false])
             .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible)
-            .show(ui, |ui| match self.section {
-                Section::Floors => self.floors_ui(ui, locale),
-                Section::Enemies => self.enemies_ui(ui, locale),
-                Section::Tiles => self.tiles_ui(ui, locale),
-                Section::Rules => self.rules_ui(ui, locale),
-                Section::Npcs => self.npcs_ui(ui, locale),
-                Section::Events => self.events_ui(ui, locale),
-                Section::Advanced => self.advanced_ui(ui, locale),
+            .show(ui, |ui| {
+                // Validation notices and toolbar controls appear/disappear
+                // before this body. Their automatic IDs must not change a
+                // focused text or number field's identity between keystrokes.
+                ui.scope_builder(
+                    egui::UiBuilder::new().id(egui::Id::new((
+                        "campaign-editor-section",
+                        format!("{:?}", self.section),
+                    ))),
+                    |ui| match self.section {
+                        Section::Floors => self.floors_ui(ui, locale),
+                        Section::Enemies => self.enemies_ui(ui, locale),
+                        Section::Tiles => self.tiles_ui(ui, locale),
+                        Section::Rules => self.rules_ui(ui, locale),
+                        Section::Npcs => self.npcs_ui(ui, locale),
+                        Section::Events => self.events_ui(ui, locale),
+                        Section::Advanced => self.advanced_ui(ui, locale),
+                    },
+                );
             });
         self.bounds.insert("content".into(), content.inner_rect);
         if self.section != Section::Advanced {
@@ -1764,7 +1775,7 @@ mod tests {
         for width in [1360.0, 390.0] {
             let mut editor = CampaignEditor::new(campaign());
             let context = egui::Context::default();
-            context.style_mut(|style| {
+            context.all_styles_mut(|style| {
                 for font in style.text_styles.values_mut() {
                     font.size = 20.0;
                 }
@@ -1811,5 +1822,73 @@ mod tests {
         assert_eq!(value["tiles"]["8"]["target_floor"], 3);
         assert_eq!(value["rules"]["stair_links"], json!({"3:up":2,"2:down":3}));
         assert_eq!(value["floors"][0]["tiles"], json!([]));
+    }
+    #[test]
+    fn numeric_typing_keeps_focus_when_validation_notice_disappears() {
+        let context = egui::Context::default();
+        let mut editor = CampaignEditor::new(campaign());
+        editor.section = Section::Enemies;
+        editor.validation = Some(Ok(()));
+        let render = |editor: &mut CampaignEditor, events| {
+            context
+                .run_ui(
+                    egui::RawInput {
+                        screen_rect: Some(Rect::from_min_size(
+                            Pos2::ZERO,
+                            Vec2::new(1360.0, 920.0),
+                        )),
+                        events,
+                        ..Default::default()
+                    },
+                    |ui| {
+                        editor.show(ui, "en");
+                    },
+                )
+                .drop_without_applying_deltas();
+        };
+        render(&mut editor, vec![]);
+        render(&mut editor, vec![]);
+        let point = editor.bounds["enemy.hp"].center();
+        render(
+            &mut editor,
+            vec![
+                egui::Event::PointerMoved(point),
+                egui::Event::PointerButton {
+                    pos: point,
+                    button: egui::PointerButton::Primary,
+                    pressed: true,
+                    modifiers: egui::Modifiers::NONE,
+                },
+            ],
+        );
+        render(
+            &mut editor,
+            vec![egui::Event::PointerButton {
+                pos: point,
+                button: egui::PointerButton::Primary,
+                pressed: false,
+                modifiers: egui::Modifiers::NONE,
+            }],
+        );
+        render(&mut editor, vec![]);
+        for digit in ["1", "3", "7"] {
+            render(&mut editor, vec![egui::Event::Text(digit.into())]);
+        }
+        render(
+            &mut editor,
+            vec![egui::Event::Key {
+                key: egui::Key::Enter,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: egui::Modifiers::NONE,
+            }],
+        );
+        assert_eq!(
+            editor.campaign["enemies"][&editor.selected_enemy]["hp"],
+            137
+        );
+        assert!(editor.validation.is_none());
+        assert!(editor.is_dirty());
     }
 }
