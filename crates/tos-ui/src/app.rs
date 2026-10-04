@@ -545,7 +545,7 @@ impl TowerApp {
     fn header(&mut self, ui: &mut egui::Ui) {
         ui.horizontal_wrapped(|ui| {
             ui.label(
-                RichText::new(self.text("game_title"))
+                RichText::new(translate_text(&self.locale, &self.engine.campaign.title))
                     .font(FontId::new(34.0, egui::FontFamily::Name("serif".into())))
                     .color(GOLD),
             );
