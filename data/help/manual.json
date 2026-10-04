@@ -1,0 +1,1342 @@
+{
+  "labels": {
+    "en": {
+      "language": "English",
+      "language_nav": "Manual language",
+      "title": "Tower of the Sorcerer",
+      "manual": "The adventurer’s handbook",
+      "description": "An English adaptation of the original Tower of the Sorcerer help: rules, combat, special items and optional opening hints.",
+      "edition": "Original Windows 1.2 help · English adaptation",
+      "intro": "A thoughtful climb through fifty floors. Learn the rules, choose your battles, and keep a few surprises for the journey.",
+      "tagline": "Every step is a decision",
+      "contents": "In this handbook",
+      "chapter": "Chapter",
+      "source": "Based on",
+      "game": "Open the game in a separate tab",
+      "skip": "Skip to the handbook",
+      "top": "Back to contents",
+      "attribution": "Original game and help by Oz & Kenichi. This handbook adapts selected material from TSW.txt and Tsw.hlp; it is not an official translation. Original prose remains the work of its authors and is outside the remake’s MIT license.",
+      "footer": "This is a separate help document. English and Simplified Chinese editions contain the same topics. Open the marked hints only when you want spoilers."
+    },
+    "zh-CN": {
+      "language": "简体中文",
+      "language_nav": "帮助文档语言",
+      "title": "魔塔",
+      "manual": "冒险者手册",
+      "description": "原版魔塔帮助的简体中文译编：基本规则、战斗、特殊道具，以及可自行展开的开局提示。",
+      "edition": "原版 Windows 1.2 帮助 · 简体中文译编",
+      "intro": "五十层的旅程，需要的不只是勇气。了解规则，选择战斗，把一些惊喜留给自己的探索。",
+      "tagline": "每一步，都值得思考",
+      "contents": "手册目录",
+      "chapter": "章节",
+      "source": "内容来源",
+      "game": "在独立标签页打开游戏",
+      "skip": "跳转到手册正文",
+      "top": "返回目录",
+      "attribution": "原版游戏及帮助由 Oz 与 Kenichi 制作。本手册选译、整理自 TSW.txt 和 Tsw.hlp，属于非官方译编。原文的权利归原作者所有，不属于重制版代码的 MIT 许可范围。",
+      "footer": "本手册是独立的帮助文档。英文与简体中文版包含相同主题。带有剧透标记的提示，可按需要自行展开。"
+    }
+  },
+  "sections": [
+    {
+      "id": "introduction",
+      "title": {
+        "en": "Before you enter the tower",
+        "zh-CN": "踏入魔塔之前"
+      },
+      "source": "TSW.txt, “The story” / Tsw.hlp, “The story & Setting up The Game”",
+      "blocks": [
+        {
+          "type": "p",
+          "text": {
+            "en": "A hero enters a tower to rescue a captive princess. It sounds familiar, but the original authors warn that the story may not unfold as you expect. Discover the reason as you play.",
+            "zh-CN": "勇士走进魔塔，要救出被囚禁的公主。这个故事似乎很熟悉，但原作者提醒你：事情未必会按想象中发展。原因，就留待冒险中发现吧。"
+          }
+        },
+        {
+          "type": "p",
+          "text": {
+            "en": "Tower of the Sorcerer sits between a role-playing game and a puzzle. There is no random element: the same actions in the same situation produce the same result. Take your time, think ahead, and choose the order in which you spend health, gold and keys.",
+            "zh-CN": "魔塔介于角色扮演游戏与解谜游戏之间，没有随机因素：在相同局面下采取相同行动，就会得到相同结果。无需急着前进，先想一想，再决定如何使用生命值、金币和钥匙。"
+          }
+        },
+        {
+          "type": "note",
+          "title": {
+            "en": "Reading this edition",
+            "zh-CN": "关于这份手册"
+          },
+          "text": {
+            "en": "The main explanations are adapted from the original manuals. Boxes marked “Rust remake” describe this version; boxes marked “Rule clarification” explain a detail established by the project’s original-executable research. The original Windows setup and controls are retained below for reference.",
+            "zh-CN": "正文译编自原版帮助。标注“Rust 重制版”的提示说明当前版本；标注“规则补充”的提示说明项目通过原版程序研究确认的细节。下方也保留了原版 Windows 的设置与操作说明，供查阅。"
+          }
+        }
+      ]
+    },
+    {
+      "id": "controls",
+      "title": {
+        "en": "Movement, items and saving",
+        "zh-CN": "移动、道具与存档"
+      },
+      "source": "TSW.txt, “Setting Up TSW” and “Playing the game” / Tsw.hlp, “How to Play”; remake README",
+      "blocks": [
+        {
+          "type": "note",
+          "title": {
+            "en": "Rust remake · current controls",
+            "zh-CN": "Rust 重制版 · 当前操作"
+          },
+          "text": {
+            "en": "Move with the arrow keys or WASD, or click a destination on the map. Click routes follow clear roads and stop at obstacles; selecting an enemy or door directly can make it the final action. Use the inventory to activate items, and Enter or Space to advance dialogue. Settings contains language, audio, animation speed and portable-save options.",
+            "zh-CN": "使用方向键或 WASD 移动，也可点击地图上的目标。自动路线沿畅通道路前进，遇到障碍停止；直接点选敌人或门，可以将其作为路线最后一步的行动。通过道具栏使用物品，按 Enter 或空格继续对话。设置中可调整语言、音效、动画速度，并导入或导出便携存档。"
+          }
+        },
+        {
+          "type": "note",
+          "title": {
+            "en": "Rust remake · saves",
+            "zh-CN": "Rust 重制版 · 存档"
+          },
+          "text": {
+            "en": "Accepted game actions autosave. “Save game” keeps a separate checkpoint, and “Restore checkpoint” returns to it. The original text manual says saving requires the Hero Orb; this remake permits saving before you obtain it. The orb is still required for detailed enemy forecasts.",
+            "zh-CN": "游戏会在接受行动后自动保存。“保存游戏”保留独立检查点，“读取检查点”回到该进度。原版文字手册说存档需要英雄宝珠；重制版在获得它之前也可以保存。但查看详细的敌人属性和战斗预测，仍然需要英雄宝珠。"
+          }
+        },
+        {
+          "type": "details",
+          "summary": {
+            "en": "Original Windows 1.2 setup and controls",
+            "zh-CN": "查看原版 Windows 1.2 的设置与操作"
+          },
+          "blocks": [
+            {
+              "type": "ul",
+              "items": [
+                {
+                  "en": "At first launch, choose mouse or keyboard mode, font size, and a save directory. The default mode is mouse, and saves go in the installation’s SAVEDAT folder.",
+                  "zh-CN": "首次启动时，选择鼠标或键盘模式、字体大小和存档目录。默认使用鼠标，存档保存在安装目录的 SAVEDAT 文件夹中。"
+                },
+                {
+                  "en": "The original menu switches between 640 × 400 and 800 × 500 display sizes. TSW.txt also mentions the TSW12.INI settings file in the Windows directory.",
+                  "zh-CN": "原版菜单可切换 640 × 400 与 800 × 500 两种窗口尺寸。TSW.txt 还说明，设置保存在 Windows 目录的 TSW12.INI 文件中。"
+                },
+                {
+                  "en": "With the mouse, click the direction buttons at the bottom right to move, the upper menu to save, and item icons to use them.",
+                  "zh-CN": "鼠标模式下，点击右下角的方向按钮移动，通过上方菜单存档，点击道具图标使用道具。"
+                },
+                {
+                  "en": "With the keyboard, use the arrow keys to move, Alt to select a menu, Enter to begin selecting an item, the arrow keys to choose it, and Escape to cancel.",
+                  "zh-CN": "键盘模式下，方向键用于移动，Alt 用于选择菜单，Enter 进入道具选择，再用方向键挑选，Escape 取消。"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "status",
+      "title": {
+        "en": "Understanding your status",
+        "zh-CN": "认识自己的状态"
+      },
+      "source": "TSW.txt, “The screen and the rule and parameter explanation” / Tsw.hlp, screen hotspots",
+      "blocks": [
+        {
+          "type": "table",
+          "caption": {
+            "en": "What the original status indicators mean",
+            "zh-CN": "原版状态栏各项数值的含义"
+          },
+          "headers": [
+            {
+              "en": "Indicator",
+              "zh-CN": "项目"
+            },
+            {
+              "en": "Meaning",
+              "zh-CN": "含义"
+            }
+          ],
+          "rows": [
+            [
+              {
+                "text": {
+                  "en": "Floor",
+                  "zh-CN": "楼层"
+                },
+                "sprite": "floor"
+              },
+              {
+                "en": "Your current place in the fifty-floor tower.",
+                "zh-CN": "你在五十层魔塔中的当前位置。"
+              }
+            ],
+            [
+              {
+                "text": {
+                  "en": "Health · HP",
+                  "zh-CN": "生命值 · HP"
+                },
+                "sprite": "health"
+              },
+              {
+                "en": "Damage reduces health; reaching zero ends the game. Potions and altar offerings restore it. The manual gives no upper limit.",
+                "zh-CN": "受到伤害会减少生命值，降至零即告失败。药水与祭坛供奉可以补充生命值，原版手册说明它没有上限。"
+              }
+            ],
+            [
+              {
+                "text": {
+                  "en": "Attack · ATK",
+                  "zh-CN": "攻击力 · ATK"
+                },
+                "sprite": "attack"
+              },
+              {
+                "en": "Determines how much damage you deal. Red crystals, swords and altar offerings increase it.",
+                "zh-CN": "决定你对敌人造成的伤害。红宝石、剑与祭坛供奉可以提高攻击力。"
+              }
+            ],
+            [
+              {
+                "text": {
+                  "en": "Defense · DEF",
+                  "zh-CN": "防御力 · DEF"
+                },
+                "sprite": "defense"
+              },
+              {
+                "en": "Reduces damage from ordinary attacks. Blue crystals, shields and altar offerings increase it.",
+                "zh-CN": "减少普通攻击造成的伤害。蓝宝石、盾与祭坛供奉可以提高防御力。"
+              }
+            ],
+            [
+              {
+                "text": {
+                  "en": "Gold",
+                  "zh-CN": "金币"
+                },
+                "sprite": "gold"
+              },
+              {
+                "en": "Earned by defeating enemies. Spend it at altars or trade with merchants.",
+                "zh-CN": "击败敌人后获得，可用于祭坛供奉或与商人交易。"
+              }
+            ],
+            [
+              {
+                "text": {
+                  "en": "Keys",
+                  "zh-CN": "钥匙"
+                },
+                "sprite": "keys"
+              },
+              {
+                "en": "Opening a colored door spends one key of the matching color: yellow, blue or red.",
+                "zh-CN": "打开黄、蓝、红三种颜色的门，分别消耗一把对应颜色的钥匙。"
+              }
+            ],
+            [
+              {
+                "text": {
+                  "en": "Equipment",
+                  "zh-CN": "装备"
+                },
+                "sprite": "attack"
+              },
+              {
+                "en": "The weapon and shield displays show your current equipment. Swords raise attack; shields raise defense.",
+                "zh-CN": "武器和盾牌栏显示当前装备。剑提高攻击力，盾提高防御力。"
+              }
+            ],
+            [
+              {
+                "text": {
+                  "en": "Inventory",
+                  "zh-CN": "道具"
+                },
+                "sprite": "hero-orb"
+              },
+              {
+                "en": "Shows the special items you have collected. Select an item to use its ability.",
+                "zh-CN": "显示已经收集的特殊道具，选择道具即可使用其能力。"
+              }
+            ],
+            [
+              {
+                "text": {
+                  "en": "Information",
+                  "zh-CN": "信息"
+                },
+                "sprite": "wisdom-orb"
+              },
+              {
+                "en": "Enemy information, status messages and conversations explain what is happening around you.",
+                "zh-CN": "敌人信息、状态消息和对话帮助你了解周围发生的事情。"
+              }
+            ]
+          ]
+        },
+        {
+          "type": "p",
+          "text": {
+            "en": "The help file calls the middle key color “purple”, while TSW.txt calls it “blue”. This handbook uses blue, matching the remake’s labels.",
+            "zh-CN": "帮助文件将中间一种钥匙称为“紫色”，TSW.txt 则称为“蓝色”。本手册统一使用“蓝色”，与重制版的名称一致。"
+          }
+        }
+      ]
+    },
+    {
+      "id": "combat",
+      "title": {
+        "en": "Think before you fight",
+        "zh-CN": "战斗之前，先算一算"
+      },
+      "source": "TSW.txt, “On Battle” / Tsw.hlp, “Fighting Explanation & About Fairies”; docs/mechanics.md",
+      "blocks": [
+        {
+          "type": "p",
+          "text": {
+            "en": "Walking into an enemy begins a battle. In an ordinary battle, you strike first, then the enemy retaliates. Attacks alternate until one side reaches zero health. If you win, you take the enemy’s gold.",
+            "zh-CN": "走向敌人就会开始战斗。普通战斗中，你先攻击，敌人再反击，双方轮流出手，直到一方的生命值降至零。胜利后，你获得敌人的金币。"
+          }
+        },
+        {
+          "type": "formulas",
+          "legend": {
+            "en": "Ordinary battles, without an item multiplier. HP = health · ATK = attack · DEF = defense. Your values are green; the enemy’s values are red.",
+            "zh-CN": "以下适用于无特殊道具倍率的普通战斗。HP = 生命值，ATK = 攻击力，DEF = 防御力。绿色表示你，红色表示敌人。"
+          },
+          "cards": [
+            {
+              "title": {
+                "en": "01 · Your damage per hit",
+                "zh-CN": "01 · 你每次攻击的伤害"
+              },
+              "expression": [
+                {
+                  "term": {
+                    "en": "Hero ATK",
+                    "zh-CN": "你的 ATK"
+                  },
+                  "side": "hero"
+                },
+                {
+                  "op": "−"
+                },
+                {
+                  "term": {
+                    "en": "Enemy DEF",
+                    "zh-CN": "敌人 DEF"
+                  },
+                  "side": "enemy"
+                }
+              ],
+              "accessible": {
+                "en": "Damage per hero hit equals hero attack minus enemy defense.",
+                "zh-CN": "你的每击伤害等于你的攻击力减去敌人的防御力。"
+              },
+              "caption": {
+                "en": "Your base attack must be greater than the enemy’s defense to begin the fight.",
+                "zh-CN": "你的基础攻击力必须大于敌人的防御力，才能开始战斗。"
+              }
+            },
+            {
+              "title": {
+                "en": "02 · Damage from one enemy retaliation",
+                "zh-CN": "02 · 敌人每次反击的伤害"
+              },
+              "expression": [
+                {
+                  "op": "max"
+                },
+                {
+                  "op": "("
+                },
+                {
+                  "term": {
+                    "en": "Enemy ATK",
+                    "zh-CN": "敌人 ATK"
+                  },
+                  "side": "enemy"
+                },
+                {
+                  "op": "−"
+                },
+                {
+                  "term": {
+                    "en": "Hero DEF",
+                    "zh-CN": "你的 DEF"
+                  },
+                  "side": "hero"
+                },
+                {
+                  "op": ","
+                },
+                {
+                  "term": {
+                    "en": "0",
+                    "zh-CN": "0"
+                  },
+                  "side": "neutral"
+                },
+                {
+                  "op": ")"
+                }
+              ],
+              "accessible": {
+                "en": "Enemy damage per retaliation equals the greater of enemy attack minus hero defense, and zero.",
+                "zh-CN": "敌人每次反击的伤害等于敌人的攻击力减去你的防御力，最低为零。"
+              },
+              "caption": {
+                "en": "max means “take the larger value”. If your defense blocks the attack, you lose no HP.",
+                "zh-CN": "max 表示取较大值。防御足以挡住攻击时，你不会损失生命值。"
+              }
+            },
+            {
+              "title": {
+                "en": "03 · Number of enemy retaliations",
+                "zh-CN": "03 · 敌人的反击次数"
+              },
+              "expression": [
+                {
+                  "floor": [
+                    {
+                      "fraction": {
+                        "top": [
+                          {
+                            "term": {
+                              "en": "Enemy HP",
+                              "zh-CN": "敌人 HP"
+                            },
+                            "side": "enemy"
+                          },
+                          {
+                            "op": "−"
+                          },
+                          {
+                            "term": {
+                              "en": "1",
+                              "zh-CN": "1"
+                            },
+                            "side": "neutral"
+                          }
+                        ],
+                        "bottom": [
+                          {
+                            "term": {
+                              "en": "Your damage per hit",
+                              "zh-CN": "你的每击伤害"
+                            },
+                            "side": "hero"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ],
+              "accessible": {
+                "en": "Retaliations equal enemy health minus one, divided by your damage per hit, rounded down.",
+                "zh-CN": "反击次数等于敌人生命值减一，再除以你的每击伤害，向下取整。"
+              },
+              "caption": {
+                "en": "⌊ ⌋ means round down. The enemy does not retaliate after your killing blow.",
+                "zh-CN": "⌊ ⌋ 表示向下取整。敌人被最后一击击败后，不会再反击。"
+              }
+            },
+            {
+              "title": {
+                "en": "04 · Total health lost",
+                "zh-CN": "04 · 总生命值损失"
+              },
+              "expression": [
+                {
+                  "term": {
+                    "en": "Retaliations",
+                    "zh-CN": "反击次数"
+                  },
+                  "side": "neutral"
+                },
+                {
+                  "op": "×"
+                },
+                {
+                  "term": {
+                    "en": "Damage per retaliation",
+                    "zh-CN": "每次反击伤害"
+                  },
+                  "side": "neutral"
+                }
+              ],
+              "accessible": {
+                "en": "Total health lost equals the number of retaliations multiplied by the damage per retaliation.",
+                "zh-CN": "总生命值损失等于反击次数乘以每次反击的伤害。"
+              },
+              "caption": {
+                "en": "Use the results of steps 02 and 03.",
+                "zh-CN": "将第 02 步和第 03 步的结果相乘。"
+              }
+            },
+            {
+              "title": {
+                "en": "05 · The survival check",
+                "zh-CN": "05 · 能否存活"
+              },
+              "expression": [
+                {
+                  "term": {
+                    "en": "Hero HP",
+                    "zh-CN": "你的 HP"
+                  },
+                  "side": "hero"
+                },
+                {
+                  "op": ">"
+                },
+                {
+                  "term": {
+                    "en": "Total health lost",
+                    "zh-CN": "总生命值损失"
+                  },
+                  "side": "neutral"
+                }
+              ],
+              "accessible": {
+                "en": "To survive, your current health must be strictly greater than the total health lost.",
+                "zh-CN": "要存活，你的当前生命值必须严格大于总生命值损失。"
+              },
+              "caption": {
+                "en": "Equal is not enough: reaching zero HP is fatal. Special encounters may strike first or follow scripted rules.",
+                "zh-CN": "等于损失也不够：生命值降到零就会失败。特殊遭遇可能先手攻击，或遵循剧情规则。"
+              }
+            }
+          ]
+        },
+        {
+          "type": "example",
+          "title": {
+            "en": "Worked example · a three-hit victory",
+            "zh-CN": "计算示例 · 三击获胜"
+          },
+          "sides": [
+            {
+              "sprite": "hero",
+              "title": {
+                "en": "Hero",
+                "zh-CN": "勇士"
+              },
+              "stats": {
+                "en": "ATK 15 · DEF 12 · HP to be checked",
+                "zh-CN": "ATK 15 · DEF 12 · HP 待判断"
+              }
+            },
+            {
+              "sprite": "green-slime",
+              "title": {
+                "en": "Example enemy",
+                "zh-CN": "示例敌人"
+              },
+              "stats": {
+                "en": "HP 30 · ATK 18 · DEF 5",
+                "zh-CN": "HP 30 · ATK 18 · DEF 5"
+              }
+            }
+          ],
+          "steps": [
+            {
+              "label": {
+                "en": "Your damage per hit",
+                "zh-CN": "你的每击伤害"
+              },
+              "calculation": {
+                "en": "15 − 5 = 10 HP",
+                "zh-CN": "15 − 5 = 10 生命值"
+              }
+            },
+            {
+              "label": {
+                "en": "Damage per retaliation",
+                "zh-CN": "每次反击的伤害"
+              },
+              "calculation": {
+                "en": "18 − 12 = 6 HP",
+                "zh-CN": "18 − 12 = 6 生命值"
+              }
+            },
+            {
+              "label": {
+                "en": "Enemy retaliations",
+                "zh-CN": "敌人的反击次数"
+              },
+              "calculation": {
+                "en": "⌊ (30 − 1) ÷ 10 ⌋ = 2",
+                "zh-CN": "⌊ (30 − 1) ÷ 10 ⌋ = 2"
+              }
+            },
+            {
+              "label": {
+                "en": "Total health lost",
+                "zh-CN": "总生命值损失"
+              },
+              "calculation": {
+                "en": "2 × 6 = 12 HP",
+                "zh-CN": "2 × 6 = 12 生命值"
+              }
+            }
+          ],
+          "result": {
+            "en": "You need at least 13 HP to survive. At 13 HP, you finish with 1 HP.",
+            "zh-CN": "你至少需要 13 生命值才能存活。以 13 生命值开战，战后剩余 1 生命值。"
+          }
+        },
+        {
+          "type": "p",
+          "text": {
+            "en": "The original manual reminds you that the Cross and similar equipment affect only certain creatures. Their extra strength is not a universal increase against every enemy.",
+            "zh-CN": "原版手册提醒你：十字架等道具的额外效果只对特定敌人生效，并不会让你对所有敌人都同样变强。"
+          }
+        }
+      ]
+    },
+    {
+      "id": "strategy",
+      "title": {
+        "en": "Spend your strength wisely",
+        "zh-CN": "把力量用在值得的地方"
+      },
+      "source": "TSW.txt, “How to conquer this game” / Tsw.hlp, “How to win the game”",
+      "blocks": [
+        {
+          "type": "p",
+          "text": {
+            "en": "You cannot win simply by killing every creature and collecting every item. A treasure may be visible but expensive to reach. Decide what to collect now, what to leave for later, and which enemies you can avoid.",
+            "zh-CN": "仅靠清空敌人、收集所有道具，并不能保证通关。看得见的宝物，也可能需要付出很大代价。决定哪些现在拿、哪些以后再拿，以及哪些敌人可以绕过。"
+          }
+        },
+        {
+          "type": "ul",
+          "items": [
+            {
+              "en": "Avoid unnecessary fights, especially before your equipment improves.",
+              "zh-CN": "避免不必要的战斗，尤其是在装备尚未提升时。"
+            },
+            {
+              "en": "Compare the health cost of a route with the strength or resources it gives you.",
+              "zh-CN": "比较一条路线消耗的生命值，与它能带来的力量和资源。"
+            },
+            {
+              "en": "Return to earlier floors when improved attack or defense makes their enemies cheaper to defeat.",
+              "zh-CN": "攻击或防御提高后，再回到较低楼层，可能就能以更小的代价击败敌人。"
+            },
+            {
+              "en": "Listen to people in the tower. Information that seems unhelpful now may matter later.",
+              "zh-CN": "认真听取塔中人物的话。现在看似无用的信息，以后可能成为关键。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "items",
+      "title": {
+        "en": "Special items",
+        "zh-CN": "特殊道具"
+      },
+      "source": "TSW.txt, “The explanation of the special items” / Tsw.hlp, “Special Item Explanation”; docs/mechanics.md",
+      "blocks": [
+        {
+          "type": "p",
+          "text": {
+            "en": "The original help introduces seven of the tower’s fifteen special items. Their descriptions encourage experimentation; acquisition hints are folded away below.",
+            "zh-CN": "原版帮助介绍了塔中十五种特殊道具里的七种，鼓励你尝试不同用法。获得地点等提示收在可自行展开的内容中。"
+          }
+        },
+        {
+          "type": "item",
+          "id": "hero-orb",
+          "title": {
+            "en": "Orb of the Hero · Hero Orb",
+            "zh-CN": "英雄宝珠"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": {
+                "en": "Compares your strength with an enemy’s and forecasts the battle result. Remember that the Cross and similar items help only against the creatures they affect.",
+                "zh-CN": "比较勇士与敌人的能力，预测战斗结果。注意十字架等道具只对相应种类的敌人生效。"
+              }
+            },
+            {
+              "type": "details",
+              "summary": {
+                "en": "Acquisition hint · spoiler",
+                "zh-CN": "获得提示 · 剧透"
+              },
+              "blocks": [
+                {
+                  "type": "p",
+                  "text": {
+                    "en": "Speak with the old man on floor 3.",
+                    "zh-CN": "与第 3 层的老人交谈。"
+                  }
+                }
+              ]
+            }
+          ],
+          "sprite": "hero-orb"
+        },
+        {
+          "type": "item",
+          "id": "wisdom-orb",
+          "title": {
+            "en": "Orb of Wisdom",
+            "zh-CN": "智慧宝珠"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": {
+                "en": "Remembers the important information you have heard. Reviewing it later can make a previously puzzling clue understandable. It is a different item from the Hero Orb.",
+                "zh-CN": "记住你听到的重要信息。以后再回顾，之前令人困惑的线索也许就有了新的含义。它与英雄宝珠是不同的道具。"
+              }
+            },
+            {
+              "type": "details",
+              "summary": {
+                "en": "Acquisition hint · spoiler",
+                "zh-CN": "获得提示 · 剧透"
+              },
+              "blocks": [
+                {
+                  "type": "p",
+                  "text": {
+                    "en": "It is on floor 6, guarded by Skeleton B.",
+                    "zh-CN": "它在第 6 层，由骷髅战士（Skeleton B）守着。"
+                  }
+                }
+              ]
+            }
+          ],
+          "sprite": "wisdom-orb"
+        },
+        {
+          "type": "item",
+          "id": "flight-orb",
+          "title": {
+            "en": "Orb of Flight · Orb of Flying",
+            "zh-CN": "飞行宝珠"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": {
+                "en": "Use it beside stairs to travel to floors you have already visited. It can be used repeatedly without being exhausted, saving you the climb back through familiar passages.",
+                "zh-CN": "站在楼梯旁使用，可以前往已经到访的楼层。它可以反复使用而不会耗尽，省去在熟悉通道中往返的时间。"
+              }
+            },
+            {
+              "type": "details",
+              "summary": {
+                "en": "Acquisition hint · spoiler",
+                "zh-CN": "获得提示 · 剧透"
+              },
+              "blocks": [
+                {
+                  "type": "p",
+                  "text": {
+                    "en": "It is on floor 1, guarded by Skeleton B.",
+                    "zh-CN": "它在第 1 层，由骷髅战士（Skeleton B）守着。"
+                  }
+                }
+              ]
+            }
+          ],
+          "sprite": "flight-orb"
+        },
+        {
+          "type": "item",
+          "id": "mattock",
+          "title": {
+            "en": "Magic Mattock",
+            "zh-CN": "魔法镐"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": {
+                "en": "Makes openings in the walls around you. The help suggests trying different places: an unexpected opening may be more valuable than a direct route.",
+                "zh-CN": "在周围的墙壁上开出通路。帮助鼓励你尝试不同位置：出乎意料的入口，可能比眼前的直路更有价值。"
+              }
+            },
+            {
+              "type": "details",
+              "summary": {
+                "en": "Acquisition hint · spoiler",
+                "zh-CN": "获得提示 · 剧透"
+              },
+              "blocks": [
+                {
+                  "type": "p",
+                  "text": {
+                    "en": "TSW.txt says it appears after defeating the Giant Octopus on floor 16.",
+                    "zh-CN": "TSW.txt 提示：击败第 16 层的巨型章鱼后，它就会出现。"
+                  }
+                }
+              ]
+            }
+          ],
+          "sprite": "mattock"
+        },
+        {
+          "type": "item",
+          "id": "elixir",
+          "title": {
+            "en": "Magic Elixir",
+            "zh-CN": "魔法灵药"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": {
+                "en": "Restores health according to your attack and defense at the moment you drink it. Its timing matters: using it after becoming stronger can yield more health.",
+                "zh-CN": "根据饮用时的攻击力与防御力恢复生命值。使用时机很重要：变强之后再使用，可能获得更多生命值。"
+              }
+            },
+            {
+              "type": "details",
+              "summary": {
+                "en": "Acquisition hint · spoiler",
+                "zh-CN": "获得提示 · 剧透"
+              },
+              "blocks": [
+                {
+                  "type": "p",
+                  "text": {
+                    "en": "The text manual hints that someone already has it and may be willing to give it to you.",
+                    "zh-CN": "文字手册提示：已经有人持有这件道具，也许愿意送给你。"
+                  }
+                }
+              ]
+            }
+          ],
+          "sprite": "elixir"
+        },
+        {
+          "type": "item",
+          "id": "destruction-ball",
+          "title": {
+            "en": "Destruction Ball · “destructible ball”",
+            "zh-CN": "破坏之球"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": {
+                "en": "A bomb for destroying enemies around you, including opponents too costly to fight normally. It does not work against every enemy. The help file specifies enemies on the surrounding sides, rather than all enemies on the floor.",
+                "zh-CN": "用于消灭身边敌人的炸弹，适合对付正常战斗代价过高的对手，但并非对所有敌人有效。帮助文件说明它影响周围各方向的敌人，并非清除整层敌人。"
+              }
+            }
+          ],
+          "sprite": "destruction-ball"
+        },
+        {
+          "type": "item",
+          "id": "warp-staff",
+          "title": {
+            "en": "Warp Staff · Space Staff",
+            "zh-CN": "传送法杖"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": {
+                "en": "Moves you to another place on the same floor. Like the Mattock, it can reveal surprising ways through the tower. The original help describes the destination as random or unknown.",
+                "zh-CN": "把你传送到同一楼层的另一处。像魔法镐一样，它能带来意想不到的通路。原版帮助将目的地描述为随机或无法预知。"
+              }
+            },
+            {
+              "type": "note",
+              "title": {
+                "en": "Rule clarification · destination",
+                "zh-CN": "规则补充 · 传送目的地"
+              },
+              "text": {
+                "en": "The original executable actually mirrors your position through the center of the 11 × 11 map: using zero-based coordinates, (x, y) becomes (10 − x, 10 − y). The destination must be ordinary road. A charge is spent even when that destination is blocked. The remake follows this deterministic rule.",
+                "zh-CN": "原版程序实际上会把位置关于 11 × 11 地图的中心对称：以零为起点计数时，(x, y) 变为 (10 − x, 10 − y)。目的地必须是普通通路，即使目的地被阻挡也会消耗一次使用次数。重制版沿用这条确定性的规则。"
+              }
+            }
+          ],
+          "sprite": "warp-staff"
+        }
+      ]
+    },
+    {
+      "id": "fairies",
+      "title": {
+        "en": "The fairies’ appraisal",
+        "zh-CN": "仙子的评价"
+      },
+      "source": "TSW.txt, “About fairies” / Tsw.hlp, “Fighting Explanation & About Fairies”; docs/mechanics.md",
+      "blocks": [
+        {
+          "type": "p",
+          "text": {
+            "en": "In the original game, clearing a major area brings out a fairy. She appraises your progress using your remaining health, attack, defense and keys. Keeping resources matters beyond merely surviving the next battle.",
+            "zh-CN": "原版中，完成一个主要区域后，仙子会出现，根据剩余生命值、攻击力、防御力与钥匙评价你的表现。保留资源的意义，不止是撑过下一场战斗。"
+          }
+        },
+        {
+          "type": "note",
+          "title": {
+            "en": "Rust remake · fairy behavior",
+            "zh-CN": "Rust 重制版 · 仙子行为"
+          },
+          "text": {
+            "en": "The remake has the fairy’s continue interaction and normal saving, but the original score/rank tables and automatic fairy checkpoint files are not yet reproduced. Do not rely on a fairy visit to create a checkpoint; use “Save game” when you want one.",
+            "zh-CN": "重制版提供仙子的继续对话与普通存档，但尚未复现原版评分、等级表，以及仙子自动生成的检查点文件。需要保留检查点时，请使用“保存游戏”。"
+          }
+        }
+      ]
+    },
+    {
+      "id": "opening",
+      "title": {
+        "en": "A route through the first area",
+        "zh-CN": "第一区域的参考路线"
+      },
+      "source": "TSW.txt, “First Area Walk-through” / Tsw.hlp, “How to win the game”",
+      "blocks": [
+        {
+          "type": "p",
+          "text": {
+            "en": "The authors included an opening route to help you learn the game. It is one suggested approach, not a promise that every custom campaign follows the same route.",
+            "zh-CN": "作者提供了一条开局路线，帮助你熟悉游戏。这是一种参考方案；自定义关卡未必适用。"
+          }
+        },
+        {
+          "type": "details",
+          "summary": {
+            "en": "Reveal the original floor 1–10 walkthrough · spoilers",
+            "zh-CN": "展开原版第 1—10 层攻略 · 剧透"
+          },
+          "blocks": [
+            {
+              "type": "p",
+              "text": {
+                "en": "Avoid unnecessary fights. In particular, do not fight the armed Skeleton before obtaining a shield.",
+                "zh-CN": "避免不必要的战斗。尤其在获得盾牌之前，不要挑战持武器的骷髅。"
+              }
+            },
+            {
+              "type": "ol",
+              "items": [
+                {
+                  "en": "After the introduction, head for floor 5 and collect its sword. Check the walls for a secret passage.",
+                  "zh-CN": "序章结束后，先前往第 5 层取得剑。检查墙壁，寻找隐藏通路。"
+                },
+                {
+                  "en": "Offer gold at the altar on floor 4 to raise defense.",
+                  "zh-CN": "在第 4 层祭坛供奉金币，提高防御力。"
+                },
+                {
+                  "en": "Gather the crystals on floors 1–5, then offer at the altar again to improve defense.",
+                  "zh-CN": "收集第 1—5 层的宝石，再次供奉祭坛，继续提高防御力。"
+                },
+                {
+                  "en": "Collect the shield on floor 9.",
+                  "zh-CN": "取得第 9 层的盾。"
+                },
+                {
+                  "en": "Gather crystals throughout floors 1–10. Defeat enemies that cannot hurt you, collect their gold, and improve attack and defense at the altar.",
+                  "zh-CN": "收集第 1—10 层的宝石，击败不会对你造成伤害的敌人，收集金币，并通过祭坛提升攻击力与防御力。"
+                },
+                {
+                  "en": "When ready, defeat the floor-8 gatekeepers and obtain the red key, then challenge the Skeleton boss on floor 10. The manual suggests that one blue key and five yellow keys may be left uncollected if necessary.",
+                  "zh-CN": "准备好后，击败第 8 层的门卫取得红钥匙，再挑战第 10 层的骷髅首领。手册建议：必要时可以放弃收集一把蓝钥匙和五把黄钥匙。"
+                }
+              ]
+            },
+            {
+              "type": "p",
+              "text": {
+                "en": "Experiment while learning. As the rules become familiar, you can work out a shorter or more efficient route yourself.",
+                "zh-CN": "刚开始可以多尝试。熟悉规则之后，你就能自己规划更短或更有效率的路线。"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "areas",
+      "title": {
+        "en": "The five regions of the tower",
+        "zh-CN": "魔塔的五个区域"
+      },
+      "source": "TSW.txt, “The explanation of each area” / Tsw.hlp, “Area Explanation”",
+      "blocks": [
+        {
+          "type": "p",
+          "text": {
+            "en": "The original help divides the tower into five ten-floor regions. Its summaries reveal enemies and later story warnings.",
+            "zh-CN": "原版帮助将魔塔分为五个区域，每个区域十层。以下介绍会透露敌人和后续剧情提示。"
+          }
+        },
+        {
+          "type": "details",
+          "summary": {
+            "en": "Reveal the region guide · later-game spoilers",
+            "zh-CN": "展开区域介绍 · 后期内容剧透"
+          },
+          "blocks": [
+            {
+              "type": "table",
+              "caption": {
+                "en": "The authors’ overview of the tower",
+                "zh-CN": "作者对魔塔各区域的介绍"
+              },
+              "headers": [
+                {
+                  "en": "Floors / region",
+                  "zh-CN": "楼层与区域"
+                },
+                {
+                  "en": "What to expect",
+                  "zh-CN": "区域介绍"
+                }
+              ],
+              "rows": [
+                [
+                  {
+                    "en": "1–10 · Skeleton corps",
+                    "zh-CN": "1—10 · 骷髅军团"
+                  },
+                  {
+                    "en": "Comparatively weak enemies teach basic tactics. The Skeleton carrying a sword and shield is a troublesome opponent.",
+                    "zh-CN": "敌人相对较弱，适合学习基本操作与战术。持剑盾的骷髅是较难对付的敌人。"
+                  }
+                ],
+                [
+                  {
+                    "en": "11–20 · Immortal force",
+                    "zh-CN": "11—20 · 不死军团"
+                  },
+                  {
+                    "en": "Zombies and Vampires are powerful; the Cross is valuable against them. A Giant Octopus blocks the route and guards a special reward.",
+                    "zh-CN": "僵尸与吸血鬼实力强大，十字架能帮助你应对。巨型章鱼挡在途中，击败它会带来特殊奖励。"
+                  }
+                ],
+                [
+                  {
+                    "en": "21–30 · Great Magic Master",
+                    "zh-CN": "21—30 · 大魔法师"
+                  },
+                  {
+                    "en": "This region’s boss is very strong. The authors advise patience; there is comparatively little else here.",
+                    "zh-CN": "这里的首领非常强大，作者建议暂时忍耐。这一区域的其他内容相对较少。"
+                  }
+                ],
+                [
+                  {
+                    "en": "31–40 · Golden Knight corps",
+                    "zh-CN": "31—40 · 黄金骑士军团"
+                  },
+                  {
+                    "en": "Knights, swordsmen and soldiers make this a tough region. The Golden Knight is an unreliable speaker; a Giant Dragon presents another obstacle.",
+                    "zh-CN": "骑士、剑士和士兵使这一区域颇具挑战。黄金骑士的话不能轻信，巨龙也是一道障碍。"
+                  }
+                ],
+                [
+                  {
+                    "en": "41–50 · Magic Sergeant Zeno",
+                    "zh-CN": "41—50 · 魔法队长杰诺"
+                  },
+                  {
+                    "en": "Magical enemies dominate. Zeno orchestrated the hero’s capture in the introduction. The original help warns that trying to fight this final opponent head-on will lead to destruction.",
+                    "zh-CN": "魔法类敌人占据主导。杰诺正是序章中囚禁勇士的幕后人物。原版帮助警告：试图正面硬拼这位最终对手，将会走向毁灭。"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "voices",
+      "title": {
+        "en": "A few voices from the old help",
+        "zh-CN": "旧帮助里的几句自我介绍"
+      },
+      "source": "Tsw.hlp, character hotspots: “The hero”, “The green slime”, “The red slime”, “The small bat”, “The priest”, “The skeleton C”, “The skeleton B”",
+      "blocks": [
+        {
+          "type": "p",
+          "text": {
+            "en": "The original help’s clickable screen illustration includes playful character introductions. These are adapted here as a small keepsake of its tone.",
+            "zh-CN": "原版帮助的画面示意图中，可以点击角色，读到有趣的自我介绍。这里选译了几句，保留一点旧手册的气氛。"
+          }
+        },
+        {
+          "type": "characters",
+          "instruction": {
+            "en": "Click a character to read its introduction, just as in the original help. You can also use Tab, then Enter or Space.",
+            "zh-CN": "点击角色，听听它们的自我介绍，就像原版帮助一样。也可用 Tab 选中，再按 Enter 或空格展开。"
+          },
+          "action": {
+            "en": "Click to introduce ↓",
+            "zh-CN": "点击角色 ↓"
+          },
+          "entries": [
+            {
+              "id": "hero",
+              "sprite": "hero",
+              "name": {
+                "en": "Hero",
+                "zh-CN": "勇士"
+              },
+              "text": {
+                "en": "I’m the hero of this story. I’ll defeat Zeno and rescue the princess!",
+                "zh-CN": "我是这个故事的勇士。我要打败杰诺，救出公主！"
+              }
+            },
+            {
+              "id": "green-slime",
+              "sprite": "green-slime",
+              "name": {
+                "en": "Green Slime",
+                "zh-CN": "绿色史莱姆"
+              },
+              "text": {
+                "en": "I’m just a little weakling, so everyone picks on me. Sob…",
+                "zh-CN": "我是个小喽啰，所以总被大家欺负。呜呜……"
+              }
+            },
+            {
+              "id": "red-slime",
+              "sprite": "red-slime",
+              "name": {
+                "en": "Red Slime",
+                "zh-CN": "红色史莱姆"
+              },
+              "text": {
+                "en": "I’m a little weakling too, but nobody bullies me!",
+                "zh-CN": "我也是个小喽啰，可从来没人欺负我！"
+              }
+            },
+            {
+              "id": "bat",
+              "sprite": "bat",
+              "name": {
+                "en": "Small Bat",
+                "zh-CN": "小蝙蝠"
+              },
+              "text": {
+                "en": "I can fly freely through the sky.",
+                "zh-CN": "我可以在天空中自由飞翔。"
+              }
+            },
+            {
+              "id": "priest",
+              "sprite": "priest",
+              "name": {
+                "en": "Priest",
+                "zh-CN": "初级法师"
+              },
+              "text": {
+                "en": "Can any of you defeat me?",
+                "zh-CN": "你们谁能打败我？"
+              }
+            },
+            {
+              "id": "skeleton-c",
+              "sprite": "skeleton-c",
+              "name": {
+                "en": "Skeleton C",
+                "zh-CN": "骷髅士兵"
+              },
+              "text": {
+                "en": "I’m deathless. After all, I’ve already died once.",
+                "zh-CN": "我是不死的。毕竟，我已经死过一次了。"
+              }
+            },
+            {
+              "id": "skeleton-b",
+              "sprite": "skeleton-b",
+              "name": {
+                "en": "Skeleton B",
+                "zh-CN": "骷髅战士"
+              },
+              "text": {
+                "en": "Defeat me, and I’ll acknowledge your skill with a sword.",
+                "zh-CN": "如果你能打败我，我就承认你的剑术。"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sprites": {
+    "hero-orb": {
+      "source": "assets/original-atlas.png",
+      "x": 80,
+      "y": 120,
+      "width": 440,
+      "height": 800,
+      "original_tile": 36
+    },
+    "wisdom-orb": {
+      "source": "assets/original-atlas.png",
+      "x": 120,
+      "y": 120,
+      "width": 440,
+      "height": 800,
+      "original_tile": 37
+    },
+    "flight-orb": {
+      "source": "assets/original-atlas.png",
+      "x": 160,
+      "y": 120,
+      "width": 440,
+      "height": 800,
+      "original_tile": 38
+    },
+    "mattock": {
+      "source": "assets/original-atlas.png",
+      "x": 280,
+      "y": 120,
+      "width": 440,
+      "height": 800,
+      "original_tile": 41
+    },
+    "elixir": {
+      "source": "assets/original-atlas.png",
+      "x": 240,
+      "y": 120,
+      "width": 440,
+      "height": 800,
+      "original_tile": 40
+    },
+    "destruction-ball": {
+      "source": "assets/original-atlas.png",
+      "x": 320,
+      "y": 120,
+      "width": 440,
+      "height": 800,
+      "original_tile": 42
+    },
+    "warp-staff": {
+      "source": "assets/original-atlas.png",
+      "x": 360,
+      "y": 120,
+      "width": 440,
+      "height": 800,
+      "original_tile": 43
+    },
+    "green-slime": {
+      "source": "assets/original-atlas.png",
+      "x": 200,
+      "y": 200,
+      "width": 440,
+      "height": 800,
+      "original_tile": 61
+    },
+    "red-slime": {
+      "source": "assets/original-atlas.png",
+      "x": 280,
+      "y": 200,
+      "width": 440,
+      "height": 800,
+      "original_tile": 63
+    },
+    "bat": {
+      "source": "assets/original-atlas.png",
+      "x": 0,
+      "y": 240,
+      "width": 440,
+      "height": 800,
+      "original_tile": 67
+    },
+    "priest": {
+      "source": "assets/original-atlas.png",
+      "x": 80,
+      "y": 240,
+      "width": 440,
+      "height": 800,
+      "original_tile": 69
+    },
+    "skeleton-c": {
+      "source": "assets/original-atlas.png",
+      "x": 400,
+      "y": 240,
+      "width": 440,
+      "height": 800,
+      "original_tile": 77
+    },
+    "skeleton-b": {
+      "source": "assets/original-atlas.png",
+      "x": 40,
+      "y": 280,
+      "width": 440,
+      "height": 800,
+      "original_tile": 79
+    },
+    "health": {
+      "source": "assets/original-atlas.png",
+      "x": 360,
+      "y": 80,
+      "width": 440,
+      "height": 800,
+      "original_tile": 32
+    },
+    "attack": {
+      "source": "assets/original-atlas.png",
+      "x": 240,
+      "y": 160,
+      "width": 440,
+      "height": 800,
+      "original_tile": 51
+    },
+    "defense": {
+      "source": "assets/original-atlas.png",
+      "x": 0,
+      "y": 200,
+      "width": 440,
+      "height": 800,
+      "original_tile": 56
+    },
+    "gold": {
+      "source": "assets/original-atlas.png",
+      "x": 200,
+      "y": 160,
+      "width": 440,
+      "height": 800,
+      "original_tile": 50
+    },
+    "keys": {
+      "source": "assets/original-atlas.png",
+      "x": 240,
+      "y": 80,
+      "width": 440,
+      "height": 800,
+      "original_tile": 29
+    },
+    "floor": {
+      "source": "assets/original-atlas.png",
+      "x": 400,
+      "y": 0,
+      "width": 440,
+      "height": 800,
+      "original_tile": 11
+    },
+    "hero": {
+      "source": "assets/hero-down.png",
+      "width": 40,
+      "height": 40
+    }
+  }
+}

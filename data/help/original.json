@@ -1,0 +1,187 @@
+{
+  "source_edition": "Tower of the Sorcerer for Windows 1.2, English installation",
+  "attribution": "Original help and game by Oz & Kenichi; not covered by the remake's MIT license.",
+  "files": {
+    "TSW.txt": {
+      "sha256": "53bf64bc269815ce051cb26f9a5737b978167ce79cd3361017931dc884a9b31e",
+      "bytes": 10547
+    },
+    "Tsw.hlp": {
+      "sha256": "1daecbe601c76b7db4e280ec161adfe2874e680bcc6344f57c2ddaea431270f0",
+      "bytes": 222052
+    },
+    "Tsw.cnt": {
+      "sha256": "9f5448c43b4daf3583e3ba737bd5589558facd98a41865f71623d71569c98055",
+      "bytes": 463
+    }
+  },
+  "text_manual": "The explanation of the rules of \"Tower of the Sorcerer\"\n\nThe story:\n----------\nIt may seem that the story is usual. \nBrave man is trying to save princess caught in the tower. \nBut this is not so usual and normal story. Well, this story is even not from this game. \nWhy? \nCheck this while playing.\n\n\"Tower of the Sorcerer\" is something between the Role Playing Game and puzzle. \nPlay this with no hurry, thinking and deciding what would be the best.\n\nAnd there is not the random element in this game.   \nYou will get the same result anytime, if it does that is same.\n\nSetting Up TSW:\n---------------\n  1. Right when you start, you should choose whether you want to use the mouse or keyboard.\n     (Mouse Mode is default)\n  2. Next, you should choose which size font you'd like to use.\n  3. Finally, choose a directory to save your games in.\n     (The default is instdir/savedat.)\n\n  + Display mode is two, 640x400 and 800x500.\n    You can change it by menu bar. (The default is 640x400.)\n\nSetup Information:\n------------------\nThe first time you run the program, the setup file (TSW12.INI) is made in the Windows Directory.\nWhen you delete this software, please delete it's setup file too. \n\nPlaying the game:\n-----------------\n*Using the mouse:\n\nYou must click the arrow buttons on the bottom right of the window to move around.\nAnd you can save the data and with the menu on the upper side.\n(road savedata etc.,)\n\nWhen you want to use items, click on their icon.\n\n*Using the Keyboard:\n\nTo move around, use the arrow keys.\nPressing the ALT key chooses a menu.\n\nWhen you want to use items, press the Enter key.\nYou can choose items by using the arrow keys.\nIf you've changed your mind, press the Escape key.  \n\n+Summary:\nThe only keys that do anything are the arrow keys,\nEnter key, Alt key, and Escape key.\n\nThe screen and the rule and parameter explanation:\n--------------------------------------------------\n*The floor number.\nThe indicator on the upper-left corner of the screen is the floor number.\nIt goes from 1 to the 50th floor.\n\n*Your vital power.\nUnder the floor number is a heart that expresses your vital power.\nYour life decreases when you are attacked by an enemy, and the game is over when it reaches zero.\nYou can recover life by taking medicine or offering to an altar.\nYour life no limits. (^_^)\n\n*Your offensive power.\nUnder the heart symbol is the offensive power (Indicated by a sword).\nIt determines the damage that the enemy takes.\nThe player can raise it by taking red crystals or offering gold to an alter.\n\n*Your defensive power.\nUnder the sword symbol is a shield that shows the defensive power.\nThis determines how well protected the player is.\nThe player can raise this by taking blue crystal or offering gold to an altar.\n\n*Your gold.\nThe coin beneath shield shows how much money you have.\nThe player gets gold when the player beats an enemy.\nThe player may then offer this gold to an altar or use it to buy articles from merchants.\n\n*Your special items.\nThe special items that the player has are shown on the lower right of the screen.\nThe player can use items by clicking on them.\n\n*The player's weapons.\nOn the upper right part of the screen where it says \"WEAPON\" shows the weapon that the player has.\nWhen the player has a sword, it is shown there.\nHaving a weapon sufficiently adds to your offensive power.\n\n*The player's shield.\nBeneath the weapon, where \"SHIELD\" is written, is the player's shield.\nIf the player loses his shield, no shield is shown.\nOwning a shield increases your defensive power.\n\n*The player's keys.\nOn the right side of the screen are shown the blue, yellow, and red keys that you find.\nEach key you get is shown in this box.\nEvery door you open takes away a key of that color.\n\n*The information window\nThe enemy's information is on the bottom right corner of the screen.\n\n*Status Bar\nThe blue bar at the bottom of the screen explains what happens.\n\n*The message window.\nWhen talking to characters, monsters and such, the message window will open and the message will be expressed.\n\nOn Battle:\n----------\nThe battles start when the player engages the enemy.\nThe player hits the enemy first, then the enemy hits the player.\nThey continue to take turns in the battle (Friendly, aren't they?)\nThe first one whos life value reaches zero, loses.\nIf the player beats the monster, he takes the monster's gold.\nSo, here is how to calculate the results of battle:\nThe monster's damage by one attack\n    = (Player's Attack Power) - (Monster's Strength). \n\nThe player's damage by one attack.\n    = (Monster's Power) - (Player's Strength). \n\nTherefore, the player can easily calculate the enemy's damage, and the damage of the player too.\n(Even though the Hero Orb does this for you.)\nAnd the player can't attack any enemy who is stronger than the player's Attack Power.\n\nAbout fairies: \n--------------\nWhen the player finishes off the major boss of an area, a fairy comes out, and scores the player's ability by adding the life, the offensive power, the defensive power, and the number of keys.\n\nHow to conquer this game:\n-------------------------\nAlthough it looks like a cute window on your computer screen, this game has an element of mental challenge.\nYou can't simply kill all the creatures and take all the items.\nThough there are items scattered throughout each level, you should first determine the best way to defeat or avoid the enemies to get items or ascend the tower.\n\nFirst Area Walk-through:\n------------------------\nTIPS:\nDon't fight anyone you don't need to fight.\nDon't fight the armed Skeleton before you get a shield.\n 1. To start with, make your way to the fifth floor, and take the sword on that level first of all. \n   (There is a secret tunnel there, just press the wall)\n 2. Next, you should offer to the altar on the fouth floor, and raise your defensive power.\n 3. Then, gather all the crystals from the 1st floor to the 5th.\n    Use the altar again and raise the defensive power. \n 4. Next, the player should take the shield from the 9th floor. \n 5. Gather all crystals from the 1st floor to the 10th.\n    Beat the enemies that won't hurt you and gather coins.\n    Raise the offensive and defensive power by offering to an altar.\n 6. Although you shouldn't yet, you can beat the gate-keeper on the 8th floor and take the red key.\n    Go to the 10th floor and beat the skeleton Boss.\n    You may leave one blue key and five yellow keys if you need to. \n\nAt the start, you may play around with the game, just to get used to playing it.\nAs you become used to it, you can figure out how to pass levels and the game too.\n\n\nThe explanation of each area:\n-----------------------------\nNow, I will explain each area briefly.\n\n*The army corps of skeletons.\n>From the 1st floor to the 10th. \nThe enemies here are comparatively weak.\nBut the Skeleton who has a sword and a shield is rather trouble some.\nLearn to master the basic operation and tactics in this area. \n\n*The corps of immortal force.\n>From the 11st floor to the 20th. \nThe undead system, (Zombies, Vampires and the like) will appear.\nThey are really powerful, and you will need the cross if you're thinking about fighting them.\nThe Giant Octopus is ready for you on this route.\nAnd when you beat him, the precious item will appear.\nIt is more difficult than the first block(1st-10th floor), so be careful. \n\n*The Great Magic Master.\n>From the 21st floor to the 30th. \nThe Great Magic Master in this area is a fast boss!\nFor the time being, you just have to put up with him.\nThere is practically nothing in this area.\n\n*The Golden Knight corps.\n>From the 31st floor to the 40th. \nThis area is ruled by the Knight corps which is made up of Knights, Swordsmen, Soldiers and the like.\nThough they all have high fighting power, the boss never means what he says.\nThat's why the other bosses don't like the Golden Knight.\nThis boss is weak, but in this area, the Giant Dragon will block your way.\n\n*The Magic Sergeant Zeno.\n>From the 41st floor to the 50th.\nThis area is presided over by the Magic Sergeant Zeno, who is a sub officer of this tower.\nMagical enemies will mainly appear.\nThe Magic Sergeant Zeno is the head bad-guy in this tower, and he is the ringleader who\ncaptured the player in the intro.\nHe is the last boss, and if you should fight him seriously, you will have done nothing but killed yourself.\n\nThe explanation of the special items:\n-------------------------------------\n*The orb of the hero.\n\nIt will analyze the player's strength and the monster's strength, and forecast who will win.\nBut, when your strength is doubled by the cross and other items, keep in mind that this extra strength only works against certain creatures (like the Vampire and Zombie Knight).\nYou also need this item to use the save function.\nSo, please get this item from the old man on the 3rd floor.\n\n\n*The orb of wisdom.\n\nIt will remember any information which you have heard.\nWhen you look at the information later, you may find out something new.\nYou can get this item on the 6th floor.\nBut you must beat Skeleton B before getting it.\n\n*The orb of flying.\n\nIf you use this next to stairs, you will be able to fly up or down any stairs which you have already been to (Like an elevator!).\nIt can never be exhausted, no matter how many times you use it\n(So please use it a lot, because it saves time!)\nThis item is very convenient.\nYou can get it on the 1st floor.\nBut you must beat Skeleton B before getting it. \n\n*The Magic Mattock.\n\nIt can pull down the wall sides.\nThis is a very effective item.\nWhen you beat big octopus that is on the 16th floor, this item will appear. \n\n*The Magic Elixir.\n\nThis is the magic medicine.\nIt will recover your vital power according to your offensive and defensive powers at that time.\nSomeone already has this item, but they might give it to you... \n\n*The destructible ball.\n\nThis is a bomb.\nIt can destroy any enemy character who is too strong.\nBut it has no effect against a part of the enemy character.\n\n*The Warp Staff.\n\nThis is a very treasured item, the Space Staff.\nYou can warp to other places on the same floor.\nYou can't know where you will go.\nStrange things may happen when you use it in certain areas. \n\nThere are 15 special items. Collect them all! \n------------------------------------\nLast Updated: Friday, April 28, 2000\n",
+  "contents": ":Base Tsw.hlp>main\n:Title Tower of the Sorcerer\n:Index Tower of the Sorcerer =Tsw.hlp\n1 Tower of the Sorcerer\n2 Index =HLP000012\n2 The story & Setting up The Game =HLP000003\n2 How to Play =HLP000005\n2 Screen and Operation Explanation =HLP000006\n2 Fighting Explanation & About Fairies =HLP000007\n2 How to win the game =HLP000009\n2 Explanation of The Areas =HLP000010\n2 The explanation of Special Items =HLP000011\n2 Contacting The Authors =HLP000028\n\n",
+  "help_topics": [
+    {
+      "number": 1,
+      "title": "Tower of the Sorcerer",
+      "text": "Tower of the Sorcerer\n(c) 1998 Oz & Kenichi\n(c) 1996 N.W\n\nThe story & Setting up The Game\n\nHow to Play\n\nScreen and Operation Explanation\n\nExplanation of how to fight & About Fairies\n\nHow to win the game\n\nExplanation of each Area\n\nThe explanation of Special Items\n\nContacting The Authors"
+    },
+    {
+      "number": 2,
+      "title": "The story & Setting up The Game",
+      "text": "The story & Setting up The Game\n\nThe story:\n\nIt is up to you to rescue a princess who was locked in a magic tower.\nYou may have heard such stories before, but those stories aren't related to this game at all.\nWhy?\nYou will know why when you play this game.\nThis game requires great skill, and mental prowess.\n\n\nGame Setup:\n\n1. When you start, first of all, choose whether you're using the mouse or the keyboard.\n(Default is Mouse)\n2. Next, you will adjust the font size.\n(Default is Normal)\n3. Finally, Choose where you want the game to save itself.\n(Default is \"[Install dir] / SAVEDAT)\n[You may also want to change the game speed to high...]"
+    },
+    {
+      "number": 3,
+      "title": "How to Play:",
+      "text": "How to Play:\n\nHow to Play:\n\n*Mouse control.\n\nYou may move by clicking the buttons on the bottom right.\nYou can save the game using the menu on the upper left.\nWhen you want to use items, you may click their icon.\n\n\n*Keyboard control.\n\nYou may move with the arrow keys.\nYou may use the Alt key to choose a menu.\nWhen you want to use items, click the Enter key.\nYou can choose items with the arrow keys.\nIf you change your mind about using an item, press the Esc key.\n\n+Summary:\nThe Keys you may use are the arrow keys, Enter key, Alt key, and Esc key."
+    },
+    {
+      "number": 4,
+      "title": "Screen and Operation Explanation",
+      "text": "Screen and Operation Explanation\n\nScreen and Operation Explanation:\n\nClick the icon, please."
+    },
+    {
+      "number": 5,
+      "title": "The number of floor.",
+      "text": "The number of floor.\nThe indication on the top of the left of the screen is the number of floor. It is from the 1th to the 50th floor."
+    },
+    {
+      "number": 6,
+      "title": "The vital power.",
+      "text": "The vital power.\nThe heart mark which is under that expresses the vital power of the player. That decrease when you are attacked by the enemy,and it is game over when it reached zero.\nYou can recover that by taking a medicine and offering to an altar. The top has no limits. (^_^)v"
+    },
+    {
+      "number": 7,
+      "title": "The offensive power.",
+      "text": "The offensive power.\nThe mark of sword under the heart mark is the offensive power. It have a connection with the damage of the vital power of the enemy.\nThe player can point up it by taking red crystal and offering to an alter."
+    },
+    {
+      "number": 8,
+      "title": "The defensive power.",
+      "text": "The defensive power.\nThe mark of shield under the mark of sword is the defensive power. There is connection with damage of the vital power of the player.\nThe player can point up by taking blue crystal and offering to an altar."
+    },
+    {
+      "number": 9,
+      "title": "The gold.",
+      "text": "The gold.\nThe mark of coin under the mark of shield is the money. The player get the gold when the player beat the enemy.\nThe player can offer to an altar and buy articles from merchant by the golds."
+    },
+    {
+      "number": 10,
+      "title": "The special items.",
+      "text": "The special items.\nThe special items which the player have at present is expressed on the left and under column of the screen. The player can use items when clicked it."
+    },
+    {
+      "number": 11,
+      "title": "The weapons which the player have.",
+      "text": "The weapons which the player have.\nThe column in which \"WEAPON\" is written on the top of the right of the screen is the weapon which the player have.\nIt is expressed on this column, when the player took a sword. And the offensive power point up so much."
+    },
+    {
+      "number": 12,
+      "title": "The shield which the player have.",
+      "text": "The shield which the player have.\nThe column in which \"SHIELD\" is written under the weapons is the shield which the player have.\nIt is expressed on this column, when the player took a shield. And the defensive power point up so much."
+    },
+    {
+      "number": 13,
+      "title": "The key which the player have.",
+      "text": "The key which the player have.\nThe number of keys which the player have is the column on the middle and right of the screen. There kinds of keys which are yellow, purple and red are expressed. The number of keys increase as the player took the key. And they decrease as the player opened the door of each color."
+    },
+    {
+      "number": 14,
+      "title": "The window of information No.1.",
+      "text": "The window of information No.1.\nThe palameter of the monster  is the column on the right and bottom of the screen."
+    },
+    {
+      "number": 15,
+      "title": "The window of information No.2.",
+      "text": "The window of information No.2.\nThe long blank column which is at the bottom of the screen express conditions around."
+    },
+    {
+      "number": 16,
+      "title": "The hero:",
+      "text": "The hero:\n\nI'm the hero of this story.\nI will defeat the magic master Zeno, and save the princess! Oh!"
+    },
+    {
+      "number": 17,
+      "title": "The green slime:",
+      "text": "The green slime:\n\nI'm small fish character. So, I'm always bullied by every one. I'm sobbing."
+    },
+    {
+      "number": 18,
+      "title": "The red slime:",
+      "text": "The red slime:\n\nI'm small fish, too. But I'm never be bullied."
+    },
+    {
+      "number": 19,
+      "title": "The small bat:",
+      "text": "The small bat:\n\nI can fly freely in the sky."
+    },
+    {
+      "number": 20,
+      "title": "The priest:",
+      "text": "The priest:\n\nAll of you, can you defeat me?"
+    },
+    {
+      "number": 21,
+      "title": "The skeleton C:",
+      "text": "The skeleton C:\n\nI'm deathless.\nBecanse I have died once."
+    },
+    {
+      "number": 22,
+      "title": "The skeleton B:",
+      "text": "The skeleton B:\n\nIf you should defeat me, I would acknowledge your ability in fencing."
+    },
+    {
+      "number": 23,
+      "title": "This is a red crystal.",
+      "text": "This is a red crystal."
+    },
+    {
+      "number": 24,
+      "title": "This is a blue crystal.",
+      "text": "This is a blue crystal."
+    },
+    {
+      "number": 25,
+      "title": "This is a red elixir.",
+      "text": "This is a red elixir."
+    },
+    {
+      "number": 26,
+      "title": "This is a special item.",
+      "text": "This is a special item."
+    },
+    {
+      "number": 27,
+      "title": "This is a key.",
+      "text": "This is a key."
+    },
+    {
+      "number": 28,
+      "title": "This is a blue elixir.",
+      "text": "This is a blue elixir."
+    },
+    {
+      "number": 29,
+      "title": "Fighting Explanation & About Fairies",
+      "text": "Fighting Explanation & About Fairies\n\nAbout Battle:\n\nThe battle starts when the player engages the enemy.\nThe first attack is the player hitting the enemy, and then the enemy hits the player.\nThe player and enemy take turns in battle. The first whose life reaches zero, loses.\nIf the player wins, the enemy's gold is taken.\nSo, here is how to calculate the battle\n\nFirst Attack: monster's damage\n= (The player's offensive power) - (The monster's defensive power).\nNext Attack: Player's damage\n= (The monster's offensive power) - (The player's defensive power).\nTherefore, the player can calculate easily how many of attacks it will take, and how much damage the player will take. (The orb of hero can calculate this too.)\nNOTE: The player can't attack any enemy who has Armor(defensive power) more powerful than the player's attack(offensive power).\n\n\n\nAbout Fairies:\nWhen the player clears an area, a fairy appears, and scores the player's ability from their vital power, offensive power, defensive power, the number of keys."
+    },
+    {
+      "number": 30,
+      "title": "How to win the game",
+      "text": "How to win the game\n\nHow to win the game:\n\nAlthough this game may appear to be a simple maze to the eyes, it is really an adventure.\nYou can't simply beat this game by killing the enemies and taking their stuff.\nYou may see items on screen, and enemies guarding them, but you must find out what to do, in what order, and at what cost. If the enemy is too strong for you, you should figure out whether to defeat the enemy and take the items, or to wait until you are stronger.\n\nI will show you one way to conquer the first area.\n\n1. Right after the introduction, take the sword which is on the 5th floor. (You may need to check for a secret tunnel...)\n2. Next, find an altar and raise your defensive power.\n3. And then, gather the power crystals from the first to five floors.\nOffer to the altar again and raise your defensive power.\nDon't fight anyone you don't need to.\n4. Next take the shield from the 9th floor. Don't fight the armed Skeleton before this.\n5. Gather all the crystals from the 1st to 10th floors. Kill enemies and gather coins. Then, raise the offensive and defensive power at the altar.\n6. At worst, you may have to beat the gate-keepers on the 8th floor and take a red key.\nGo to the 10th floor and beat the Skeleton boss. You may leave one purple key and five yellow keys, if you must.\n\nIn the beginning, it may be hard, because you don't have the knack of it yet. As you become used to the game, you should find out shortest course on your own."
+    },
+    {
+      "number": 31,
+      "title": "Area Explanation",
+      "text": "Area Explanation\n\nArea Explanation:\n\nNow, I will briefly explain each area.\n\n*The skeleton corps.\nFrom the 1st floor to the 10th.\nIt's the first area. The enemies are comparatively weak. But the Skeleton with the sword and shield is rather troublesome. This area tests your tactical ability and game-play.\n\n*The immortal force.\nFrom the 11th floor to the 20th.\nUndead creatures, such as Zombies and Vampires, will appear. As the Zombie and Vampire have very high powers, you will need the cross if you fight them.\nA Giant Octopus will block your way. When you beat him, the precious items will appear. As this area is more difficult than from the first, be careful.\n\n*The Great Magic Master.\nFrom the 21st floor to 30th.\nThe Great Magic Master, who is the boss in this area, is very strong. For the time being, you must put up with him. There is practically nothing else in this area.\n\n*The Golden Knight corps.\nFrom the 31st floor to the 40th floor.\nThis area is presided over by the Knight corps, which is composed of Knights, Swordsmen, Soldiers, etcetera... Though this area is pretty hard, the boss is very enigmatic. For that reason, this Golden Knight seems to be disliked by other bosses. This boss may be weak, but beware the Giant Dragon who resides in this area.\n\n*The Magic Sergeant Zeno.\nFrom the 41st floor to the 50th floor.\nThis area is owned by the Magic Sergeant Zeno, who is a sub-officer of this tower. Magician- type enemies will mainly appear. The Magic Sergeant Zeno is a powerful influence in this tower, and he is the ringleader who imprisoned the player in the introduction. Zeno is the last boss. If you try and fight him, you will have done nothing but agreed to your own destruction."
+    },
+    {
+      "number": 32,
+      "title": "Special Item Explanation",
+      "text": "Special Item Explanation\n\nSpecial Item Explanation:\n\n*The Hero Orb.\n\nIt will analyze the player's abilities VS the monster's abilities, and forecast the results of battle. But, keep in mind that when you have an item like the cross, the numbers are slightly different with creatures affected by it, like the Vampire and Zombie Knight.\n\n*The Orb of Flight.\n\nIf you use this next to stairs, you will be able to fly up or down any stairs which you have been on. It never be exhausted even if you use many times. So, it will save a lot of time and trouble.\n\n*The Orb of Wisdom.\n\nIt will remember any important information you have heard. If you use the orb often, something that was confusing may make more sense in your current situation.\n\n*The mattock.\n\nThis is a magic mattock. It can create holes in the walls. As this can be a very effective item, please try using it in many ways. If you do, you should find out many strange and important ways to use it. I know I have left the mattock in a very precarious place, please don't give up in your search.\n\n*The elixir.\n\nThis is the magic recovery medicine. It has the ability of healing according to your current offensive and defensive power, and depending on when you use it, it can be very effective.\n\n*The destructible ball.\n\nThis is a bomb. It can kill enemies on all sides, but you should use it against enemies who you can't attack in normal ways.\n\n*The Warp Staff.\n\nYou can warp to a random place on the same floor. Like the Mattock, you can find out many strange and important ways to use it.\n\nThere are 15 different special items. Collect them all!"
+    },
+    {
+      "number": 33,
+      "title": "Contacting The Authors",
+      "text": "Contacting The Authors\n\nContacting The Authors:\n\nE-mail us!\n\nOz     : furano@po2.across.or.jp\nKenichi: furano@yyy.or.jp\n\nPlease request and bug report to Oz,\nthe hint and impression of game to Kenichi.\n\n\nReprinting & Distribution\n\nIt's O.K to copy the game if you follow these conditions:\n1.Don't alter the game in any way.\n2.Speak with Oz (who owns a copyright) in advance.\n3.Always to write expressly that it is free software."
+    }
+  ]
+}

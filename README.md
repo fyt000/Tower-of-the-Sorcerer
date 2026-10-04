@@ -36,6 +36,13 @@ audio, settings and editor as the browser. `--assets-root PATH` overrides the
 folder containing `assets/` and `fonts/`; `--save PATH` imports a portable save.
 The default campaign is embedded, so native play does not need a web server.
 
+The standalone handbook is available in [English](web/help.html) and
+[Simplified Chinese](web/help.zh-CN.html), or at `/help.html` and
+`/help.zh-CN.html` on the local server. It adapts the original text and Windows
+help, with original sprite icons, clickable character introductions, combat
+formulas and optional walkthrough hints. It opens separately from the game;
+see [original-help.md](docs/original-help.md) for sources and editing instructions.
+
 Use arrow keys or WASD, or click a destination on the
 map. Click routes traverse clear road and stop at intervening obstacles. A
 directly selected enemy, door, pickup, NPC or stair can be the final action;
