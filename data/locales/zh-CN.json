@@ -26,8 +26,9 @@
     "inspect_hint": "指向格子以查看详情。",
     "damage": "伤害",
     "orb_required": "获得英雄宝珠后可预测战斗。",
-    "movement_hint": "用方向键、WASD或方向按钮移动。点击目标可沿畅通路线前进，遇到障碍时停下。",
+    "movement_hint": "方向键或 WASD 移动。点击目标沿畅通道路行走，遇到障碍停止。",
     "skip": "跳过动画",
+    "skip_scene": "跳过剧情",
     "hero_hit": "勇士攻击",
     "enemy_hit": "敌人攻击",
     "hero_turn": "勇士回合",
@@ -251,7 +252,13 @@
     "controls_hint": "点击目标格自动寻路，遇到障碍即停。",
     "checkpoint_hint": "旅程会自动保存。点击保存可保留独立的进度检查点。",
     "journal_subtitle": "记录冒险中的每一步。",
-    "keyboard_hint": "W A S D / 方向键"
+    "keyboard_hint": "W A S D / 方向键",
+    "capture_incantation": "行动的时刻到了。\n借助全知之力，\n我将打破神圣之剑，\n获得伟大的智慧。",
+    "combat_enemy": "对手",
+    "strikes_resolved": "已结算攻击",
+    "combat_forecast": "战斗预测",
+    "forecast_survive": "你能在这场战斗中存活。",
+    "forecast_unsafe": "无法安全战胜这个对手。"
   },
   "entities": {
     "enemy": {

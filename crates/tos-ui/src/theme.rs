@@ -66,8 +66,6 @@ pub enum Icon {
     Book,
     Compass,
     ArrowLeft,
-    ArrowUp,
-    ArrowDown,
     ArrowRight,
     Close,
 }
@@ -271,14 +269,6 @@ pub fn icon(painter: &Painter, rect: Rect, kind: Icon, color: Color32) {
         Icon::ArrowLeft => {
             line([20., 12.], [4., 12.]);
             path(&[[10., 6.], [4., 12.], [10., 18.]], false);
-        }
-        Icon::ArrowUp => {
-            line([12., 20.], [12., 4.]);
-            path(&[[6., 10.], [12., 4.], [18., 10.]], false);
-        }
-        Icon::ArrowDown => {
-            line([12., 4.], [12., 20.]);
-            path(&[[6., 14.], [12., 20.], [18., 14.]], false);
         }
         Icon::ArrowRight => {
             line([4., 12.], [20., 12.]);

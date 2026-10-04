@@ -131,6 +131,14 @@ this distinction should not be confused with the damage formula or strike
 ordering. Dedicated hit textures in `assets.rs` recover the original artwork
 without committing generated bitmap assets.
 
+The replacement remains visible after the HP calculation. Opcode 9 installs
+road plus the hit image in both ambient buffers (`0x453008`, `0x453145`);
+opcodes 4 and 5 only update the HP labels (`0x452b2a..0x452c95`). The previous
+strike's image therefore remains through the next sound beat until the next
+overlay replaces it. The shared renderer uses this persistent replacement and
+animates entry into a winnable encounter before the first strike; fatal
+encounters retain their source coordinates.
+
 ## Stairs: spiral cover and reveal
 
 `kaidanwork` at `0x442dc8..0x442f7c` prepares two groups of 121 records with

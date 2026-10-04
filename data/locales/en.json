@@ -26,8 +26,9 @@
     "inspect_hint": "Point at a tile to inspect it.",
     "damage": "Damage",
     "orb_required": "Find the Hero Orb to forecast combat.",
-    "movement_hint": "Arrow keys / WASD or direction buttons to move. Click a target to follow a clear path, stopping at obstacles.",
+    "movement_hint": "Arrow keys / WASD to move. Click a target to follow a clear path, stopping at obstacles.",
     "skip": "Skip animation",
+    "skip_scene": "Skip scene",
     "hero_hit": "Hero strikes",
     "enemy_hit": "Enemy strikes",
     "hero_turn": "Hero's turn",
@@ -251,7 +252,13 @@
     "controls_hint": "Click a tile to travel. Your path stops at obstacles.",
     "checkpoint_hint": "Your journey saves automatically. Save keeps a separate checkpoint.",
     "journal_subtitle": "Every step tells a story.",
-    "keyboard_hint": "W A S D / arrows"
+    "keyboard_hint": "W A S D / arrows",
+    "capture_incantation": "Now is the time to act.\nUsing omniscient power,\nI shall break the sacred sword\nand receive great wisdom.",
+    "combat_enemy": "Opponent",
+    "strikes_resolved": "Strikes resolved",
+    "combat_forecast": "Combat forecast",
+    "forecast_survive": "You will survive this encounter.",
+    "forecast_unsafe": "This encounter cannot be won safely."
   },
   "entities": {
     "enemy": {

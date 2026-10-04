@@ -1,6 +1,6 @@
 # Campaign configuration
 
-`data/campaign.json` is the editable game definition. The native executable embeds it at build time; the browser fetches `web/campaign.json`, copied by the build script. Browser menu → Load custom campaign accepts an independent JSON campaign. CLI `--campaign PATH` loads a file instead of the embedded default.
+`data/campaign.json` is the editable game definition. Browser and native executables embed it at build time and can load an independent campaign through Settings → Import, a dropped JSON file, or the campaign editor. Imported campaigns persist in browser or native storage. CLI `--campaign PATH` loads a file instead of the embedded default.
 
 ## Top-level contract
 
@@ -181,6 +181,10 @@ Presentation effects can customize `wait.ms`, `cinematic.duration_ms`, and
 `move_tile.duration_ms`. The GUI's animation speed setting scales the timeline;
 the durations approximate the original timer-driven scenes.
 
+`rules.presentation.ambient_frame_ms` defaults to 150 ms, clamped to 60–1000 ms.
+It controls stationary enemy/NPC pose swaps and the hero's walking cadence and
+brief return-to-idle delay. Custom sprite rectangles retain their authored art.
+
 `rules.presentation.floor_transition_ms` defaults to 450 ms for stairs and
 wings. Their presentation includes `style: "original_spiral"`, the direction,
 and `sound: "kai"`. Scripted teleport effects can supply `transition` and
@@ -195,14 +199,15 @@ The original campaign uses these additional cinematic fields:
 
 - `magic`: `floor`, `x`, `y`, `frames` (dither-mask tile IDs), `color_tile`, and
   `underlying_tile`; an optional `targets` array applies a materialization to
-  multiple original positions.
+  multiple original positions, swept in array order for each mask frame.
 - `title`: `asset`, `target_asset`, mask `frames`, and optional `sound_cue` with
   `sound_offsets_ms`. Capture uses the original title-to-vortex sequence.
 - `scan`: `asset`, `background_asset`, `text`, and `translation_key`. Capture
   reveals the original incantation over its vortex background.
 - `transformation`: `floor`, center coordinates, `width`, `height`,
   `from_tiles`, target `tile`, and `original_frames`. Floor 20 retains the
-  Vampire's nine-cell body and original 32 blend records.
+  Vampire's nine-cell body and original 32 bat-convergence frames. The extracted
+  background atlas supplies transparent masks while the bats move.
 - `tile_reveal`: `floor`, coordinates, `from_tile`, target `tile`, and
   `original_steps`. A following `set_tile` commits the same deterministic
   outcome for browser, native, headless, and MCP consumers.

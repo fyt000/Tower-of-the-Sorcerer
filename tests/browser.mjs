@@ -39,6 +39,9 @@ async function dialogueInsideBoard(){
   await page.waitForFunction(()=>!!JSON.parse(window.tower.ui_json()).bounds.dialogue,undefined,{timeout:5000});
   const {board:b,dialogue:d}=(await ui()).bounds;
   assert(d.x>=b.x-1&&d.y>=b.y-1&&d.x+d.w<=b.x+b.w+1&&d.y+d.h<=b.y+b.h+1,`Dialogue must remain inside the board: ${JSON.stringify({board:b,dialogue:d})}`);
+  for(const [id,r] of Object.entries((await ui()).bounds).filter(([id])=>id.startsWith('choice:')||id==='dialogue_continue')) {
+    assert(r.y>=d.y&&r.y+r.h<=d.y+d.h,`Dialogue action ${id} must remain visible inside its panel`);
+  }
 }
 
 const corridor=JSON.stringify({id:'browser-regression',title:'Browser test',width:5,height:3,
@@ -84,7 +87,7 @@ try {
       if(!sessionStorage.getItem('cached-campaign-migration-fixture')){
         localStorage.setItem('tos-rust:campaign:v1',campaign);
         localStorage.setItem('tos-rust:save:v1',JSON.stringify(save));
-        localStorage.setItem('tos-rust:checkpoint:v1',JSON.stringify(checkpoint));
+        localStorage.setItem('tos-rust:checkpoint:v1',JSON.stringify({campaign,save:checkpoint}));
         sessionStorage.setItem('cached-campaign-migration-fixture','installed');
       }
     },{campaign:previousOriginal,save:legacy,checkpoint});
@@ -119,11 +122,11 @@ try {
   await test('Keyboard travel remains responsive and blocked movement preserves position and facing',async()=>{
     await page.keyboard.press('ArrowLeft');await page.waitForTimeout(35);await page.keyboard.press('ArrowRight');assert.equal((await ui()).bounds.skip,undefined);
     await idle();await heroIdle();assert.deepEqual([(await state()).player.x,(await state()).player.y],[1,1]);
-    await page.keyboard.press('ArrowUp');await idle();await heroIdle();const blocked=await state();
+    await page.keyboard.press('ArrowUp');await page.waitForFunction(()=>JSON.parse(window.tower.ui_json()).facing==='up');await idle();await heroIdle();const blocked=await state();
     assert.deepEqual([blocked.player.x,blocked.player.y],[1,1]);assert.equal((await ui()).facing,'up');assert.equal((await ui()).hero_pose,'idle');
   });
   await test('Real enemy click animates every strike, its sound and progressive damage',async()=>{
-    await page.waitForFunction(()=>{const a=JSON.parse(window.tower.ui_json()).audio;return a.unlocked&&a.enabled&&a.effects_played>0;});
+    await page.waitForFunction(()=>{const a=JSON.parse(window.tower.ui_json()).audio;return a.unlocked&&a.enabled;});
     const effectsBefore=(await ui()).audio.effects_played;
     await cell(2,1);await sceneUntil('battle');
     const battle=(await state()).last_action.presentation.find(e=>e.type==='battle');assert.equal(battle.hero_strikes,3);assert.equal(battle.enemy_strikes,2);
@@ -163,7 +166,7 @@ try {
     await page.screenshot({path:resolve(output,'capture-dialogue.png')});await button('dialogue_continue');
     await sceneUntil('dialogue');await button('dialogue_continue');
     await cinematicUntil('title');assert.equal((await ui()).animation_details.at(-1).asset,'data3-title05');assert.equal((await ui()).visual_floor,3);await page.screenshot({path:resolve(output,'capture-title.png')});
-    await cinematicUntil('scan');assert.equal((await ui()).animation_details.at(-1).asset,'data3-open2');assert.equal((await ui()).visual_floor,3);await page.screenshot({path:resolve(output,'capture-scan.png')});
+    await cinematicUntil('scan');assert.equal((await ui()).animation_details.at(-1).asset,'data3-open2');assert.equal((await ui()).visual_floor,3);await page.waitForTimeout(1000);await page.screenshot({path:resolve(output,'capture-scan.png')});
     await sceneUntil('floor');
     await sceneUntil('dialogue');assert.equal((await ui()).visual_floor,2);assert.equal((await ui()).visual_player.hp,400);assert(!(await ui()).visual_player.inventory.includes('sword_5'));
     for(let n=0;n<3;n++){await button('dialogue_continue');await sceneUntil('dialogue');}

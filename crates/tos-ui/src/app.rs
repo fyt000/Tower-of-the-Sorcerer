@@ -1,5 +1,5 @@
 use crate::{
-    assets::Art,
+    assets::{Art, stair_wipe_order},
     audio::Audio,
     editor::{CampaignEditor, EditorAction},
     locales::{entity_name, tr, translate_text},
@@ -24,6 +24,7 @@ struct Active {
     effect: Value,
     start: f64,
     duration: f64,
+    sounds_played: usize,
 }
 
 struct BattleProgress {
@@ -31,6 +32,8 @@ struct BattleProgress {
     enemy_hp: i64,
     hero_turn: bool,
     completed: i64,
+    strike: i64,
+    phase: f32,
 }
 
 pub struct TowerApp {
@@ -51,6 +54,7 @@ pub struct TowerApp {
     active: Option<Active>,
     route: VecDeque<String>,
     facing: String,
+    hero_idle_at: f64,
     selected: Option<(usize, usize)>,
     settings: bool,
     import_text: String,
@@ -63,6 +67,7 @@ pub struct TowerApp {
     music_paused: bool,
     music_override: Option<String>,
     animation_history: Vec<String>,
+    animation_details: Vec<Value>,
 }
 
 impl TowerApp {
@@ -79,7 +84,7 @@ impl TowerApp {
         let initial_chinese = None;
         configure(&cc.egui_ctx, initial_chinese);
         let source = campaign
-            .or_else(|| platform::read(CAMPAIGN))
+            .or_else(|| platform::read(CAMPAIGN).map(upgrade_original_campaign))
             .unwrap_or_else(|| include_str!("../../../data/campaign.json").into());
         let mut engine = Engine::from_json(&source).unwrap_or_else(|_| {
             Engine::from_json(include_str!("../../../data/campaign.json"))
@@ -126,6 +131,7 @@ impl TowerApp {
             active: None,
             route: VecDeque::new(),
             facing: "down".into(),
+            hero_idle_at: 0.0,
             selected: None,
             settings: false,
             import_text: String::new(),
@@ -138,11 +144,16 @@ impl TowerApp {
             music_paused: false,
             music_override: None,
             animation_history: vec![],
+            animation_details: vec![],
         };
         app.audio.enabled = prefs["audio"].as_bool().unwrap_or(true);
         app.audio.music_enabled = prefs["music"].as_bool().unwrap_or(true);
         app.audio.volume = prefs["volume"].as_f64().unwrap_or(0.55) as f32;
         app.request("assets/original-atlas.png");
+        app.request("assets/original-background-atlas.png");
+        for scene in ["data3-title05", "data3-open1", "data3-open2"] {
+            app.request(&format!("assets/{scene}.png"));
+        }
         #[cfg(target_arch = "wasm32")]
         app.request("fonts/NotoSansSC.ttf");
         for name in ["get", "open", "taisen", "kai", "kai2", "3f", "20f", "zeno"] {
@@ -196,6 +207,7 @@ impl TowerApp {
         self.visual = self.snapshot.clone();
         self.queue.clear();
         self.active = None;
+        self.hero_idle_at = 0.0;
         self.route.clear();
         self.selected = None;
         self.music_paused = false;
@@ -215,6 +227,7 @@ impl TowerApp {
         self.visual = self.snapshot.clone();
         self.queue.clear();
         self.active = None;
+        self.hero_idle_at = 0.0;
         self.route.clear();
         self.selected = None;
         self.music_paused = false;
@@ -229,6 +242,7 @@ impl TowerApp {
         self.visual = self.snapshot.clone();
         if let Some(direction) = command["direction"].as_str() {
             self.facing = direction.into();
+            self.hero_idle_at = self.now() + self.ambient_interval();
         }
         match self.engine.command(command) {
             Ok(()) => {}
@@ -244,6 +258,9 @@ impl TowerApp {
             .unwrap_or_default()
             .into();
         self.active = None;
+        if !self.queue.iter().any(|e| e["type"] == "move") {
+            self.hero_idle_at = 0.0;
+        }
         if self.queue.is_empty() {
             self.visual = self.snapshot.clone();
         }
@@ -272,7 +289,7 @@ impl TowerApp {
     }
 
     pub fn debug_json(&self) -> Value {
-        json!({"ready":true,"locale":self.locale,"visual_floor":self.visual["floor"],"visual_player":self.visual["player"],"visual_log":self.visual["log"],"editor_open":self.editor_open,"editor":self.editor.debug_json(),"bounds":self.bounds,"animation":self.active.as_ref().map(|a|a.effect["type"].clone()),"presentation_remaining":self.queue.len(),"path_remaining":self.route.len(),"animations_seen":self.animation_history,"audio":{"unlocked":self.audio.unlocked,"enabled":self.audio.enabled,"effects_played":self.audio.effects_played,"music":self.audio.music_name,"error":self.audio.error},"sprites_loaded":self.assets.atlas.is_some()})
+        json!({"ready":true,"locale":self.locale,"visual_floor":self.visual["floor"],"visual_player":self.visual["player"],"visual_log":self.visual["log"],"editor_open":self.editor_open,"editor":self.editor.debug_json(),"bounds":self.bounds,"animation":self.active.as_ref().map(|a|a.effect["type"].clone()),"presentation_remaining":self.queue.len(),"path_remaining":self.route.len(),"animations_seen":self.animation_history,"animation_details":self.animation_details,"hero_pose":if self.active.as_ref().is_some_and(|a|a.effect["type"]=="move")||self.now()<self.hero_idle_at{"walking"}else{"idle"},"facing":self.facing,"battle":self.battle_progress(self.now()).map(|b|json!({"hero_hp":b.hero_hp,"enemy_hp":b.enemy_hp,"hero_turn":b.hero_turn,"completed":b.completed,"phase":b.phase})),"audio":{"unlocked":self.audio.unlocked,"enabled":self.audio.enabled,"effects_played":self.audio.effects_played,"music":self.audio.music_name,"error":self.audio.error},"sprites_loaded":self.assets.atlas.is_some()})
     }
 
     pub fn editor_campaign_json(&self) -> String {
@@ -308,8 +325,16 @@ impl TowerApp {
                                 Vec2::new(self.assets.size[0] as f32, self.assets.size[1] as f32),
                             );
                         }
+                    } else if path.ends_with("original-background-atlas.png") {
+                        if let Err(e) = self.assets.install_background(&self.context, &bytes) {
+                            self.notify(e);
+                        }
                     } else if path.ends_with(".ttf") {
                         install_fonts(&self.context, Some(bytes));
+                    } else if path.ends_with(".png") {
+                        if let Err(e) = self.assets.install_scene(&self.context, &path, &bytes) {
+                            self.notify(e);
+                        }
                     } else if let Err(e) = self.audio.install(&path, &bytes) {
                         self.notify(format!("{path}: {e}"));
                     }
@@ -361,6 +386,42 @@ impl TowerApp {
         {
             self.floor_visual(&effect);
         }
+        if let Some(active) = &mut self.active {
+            let elapsed_ms = (now - active.start) * 1000.0 * f64::from(self.speed);
+            let (cue, due) = if active.effect["type"] == "battle" {
+                let total = active.effect["hero_strikes"].as_u64().unwrap_or(1)
+                    + active.effect["enemy_strikes"].as_u64().unwrap_or(0);
+                let interval = active.effect["strike_ms"]
+                    .as_f64()
+                    .unwrap_or(450.0)
+                    .max(1.0);
+                (
+                    active.effect["hit_sound"]
+                        .as_str()
+                        .unwrap_or("taisen")
+                        .to_owned(),
+                    ((elapsed_ms / interval).floor() as usize + 1).min(total as usize),
+                )
+            } else {
+                let due = active.effect["sound_offsets_ms"]
+                    .as_array()
+                    .map(|offsets| {
+                        offsets
+                            .iter()
+                            .take_while(|v| v.as_f64().unwrap_or(0.0) <= elapsed_ms)
+                            .count()
+                    })
+                    .unwrap_or(0);
+                (
+                    active.effect["sound_cue"].as_str().unwrap_or("").to_owned(),
+                    due,
+                )
+            };
+            while active.sounds_played < due {
+                self.audio.play(&format!("assets/wav/{cue}.wav"), false);
+                active.sounds_played += 1;
+            }
+        }
         let expired = self
             .active
             .as_ref()
@@ -372,6 +433,10 @@ impl TowerApp {
             while let Some(effect) = self.queue.pop_front() {
                 let kind = effect["type"].as_str().unwrap_or("").to_string();
                 self.animation_history.push(kind.clone());
+                self.animation_details.push(json!({"type":kind,"kind":effect["kind"],"style":effect["style"],"asset":effect["asset"]}));
+                if self.animation_details.len() > 120 {
+                    self.animation_details.remove(0);
+                }
                 if self.animation_history.len() > 120 {
                     self.animation_history.remove(0);
                 }
@@ -419,6 +484,17 @@ impl TowerApp {
                         }
                     }
                 }
+                if kind == "floor" {
+                    let cue = effect["sound"].as_str().unwrap_or("none");
+                    if cue != "none" {
+                        self.audio.play(&format!("assets/wav/{cue}.wav"), false);
+                    }
+                }
+                for field in ["asset", "target_asset", "background_asset"] {
+                    if let Some(asset) = effect[field].as_str() {
+                        self.request(&format!("assets/{asset}.png"));
+                    }
+                }
                 let duration = effect["duration_ms"]
                     .as_f64()
                     .unwrap_or(if kind == "dialogue" { 0.0 } else { 100.0 })
@@ -428,6 +504,7 @@ impl TowerApp {
                     effect,
                     start: now,
                     duration: duration.max(0.025),
+                    sounds_played: 0,
                 });
                 break;
             }
@@ -458,6 +535,7 @@ impl TowerApp {
                     }
                 }
                 "move" => {
+                    self.hero_idle_at = self.now() + self.ambient_interval();
                     self.visual["player"]["x"] = e["to"]["x"].clone();
                     self.visual["player"]["y"] = e["to"]["y"].clone();
                 }
@@ -537,19 +615,38 @@ impl TowerApp {
         self.active.is_some() || !self.queue.is_empty()
     }
 
+    fn ambient_interval(&self) -> f64 {
+        self.engine.campaign.rules["presentation"]["ambient_frame_ms"]
+            .as_f64()
+            .unwrap_or(150.0)
+            .clamp(60.0, 1000.0)
+            / 1000.0
+            / f64::from(self.speed)
+    }
+    fn travel_only(&self) -> bool {
+        self.active.as_ref().is_none_or(|a| {
+            ["move", "tile", "audio"].contains(&a.effect["type"].as_str().unwrap_or(""))
+        }) && self
+            .queue
+            .iter()
+            .all(|e| ["move", "tile", "audio"].contains(&e["type"].as_str().unwrap_or("")))
+    }
     fn battle_progress(&self, now: f64) -> Option<BattleProgress> {
         let active = self
             .active
             .as_ref()
             .filter(|a| a.effect["type"] == "battle")?;
-        let effect = &active.effect;
-        let rounds = effect["rounds"].as_i64().unwrap_or(0);
-        let hero_strikes = effect["hero_strikes"].as_i64().unwrap_or(rounds + 1);
-        let enemy_strikes = effect["enemy_strikes"].as_i64().unwrap_or(rounds);
+        let e = &active.effect;
+        let hero_strikes = e["hero_strikes"].as_i64().unwrap_or(1);
+        let enemy_strikes = e["enemy_strikes"].as_i64().unwrap_or(0);
         let total = (hero_strikes + enemy_strikes).max(1);
-        let completed = (((now - active.start) / active.duration).clamp(0.0, 1.0) * total as f64)
-            .floor() as i64;
-        let hero_first = !effect["enemy_first"].as_bool().unwrap_or(false);
+        let position = ((now - active.start) / active.duration).clamp(0.0, 1.0) * total as f64;
+        let index = (position.floor() as i64).min(total - 1);
+        let phase = (position - index as f64).clamp(0.0, 1.0) as f32;
+        let completed = (index
+            + i64::from(phase >= e["damage_phase"].as_f64().unwrap_or(2.0 / 3.0) as f32))
+        .min(total);
+        let hero_first = !e["enemy_first"].as_bool().unwrap_or(false);
         let hero_hits = (if hero_first {
             (completed + 1) / 2
         } else {
@@ -563,14 +660,16 @@ impl TowerApp {
         })
         .min(enemy_strikes);
         Some(BattleProgress {
-            hero_hp: (effect["hero_hp"].as_i64().unwrap_or(0)
-                - enemy_hits * effect["enemy_hit"].as_i64().unwrap_or(0))
+            hero_hp: (e["hero_hp"].as_i64().unwrap_or(0)
+                - enemy_hits * e["enemy_hit"].as_i64().unwrap_or(0))
             .max(0),
-            enemy_hp: (effect["enemy_hp"].as_i64().unwrap_or(0)
-                - hero_hits * effect["hero_hit"].as_i64().unwrap_or(0))
+            enemy_hp: (e["enemy_hp"].as_i64().unwrap_or(0)
+                - hero_hits * e["hero_hit"].as_i64().unwrap_or(0))
             .max(0),
-            hero_turn: (completed % 2 == 0) == hero_first,
+            hero_turn: (index % 2 == 0) == hero_first,
             completed,
+            strike: index,
+            phase,
         })
     }
     fn record(&mut self, id: &str, response: &egui::Response) {
@@ -664,18 +763,24 @@ impl TowerApp {
         let result = (|| -> Result<(), String> {
             let source = platform::read(CHECKPOINT).ok_or_else(|| self.text("no_checkpoint"))?;
             let value: Value = serde_json::from_str(&source).map_err(|e| e.to_string())?;
-            let campaign = if value["campaign"].is_string() {
+            let original_campaign = if value["campaign"].is_string() {
                 value["campaign"].as_str().unwrap().into()
             } else {
                 value["campaign"].to_string()
             };
+            let campaign = original_campaign_upgrade(&original_campaign)
+                .unwrap_or(&original_campaign)
+                .to_owned();
             let save = if value["save"].is_string() {
                 value["save"].as_str().unwrap().into()
             } else {
                 value["save"].to_string()
             };
             let mut engine = Engine::from_json(&campaign)?;
-            engine.load_json(&save)?;
+            restore_journey(&mut engine, &save)?;
+            if campaign != original_campaign {
+                let _ = platform::write("tos-rust:campaign:recovery", &original_campaign);
+            }
             self.replace_campaign(&campaign)?;
             self.load_save(&save)?;
             Ok(())
@@ -728,7 +833,7 @@ impl TowerApp {
             );
             if let Some(hero) = self.assets.heroes.get("down") {
                 ui.painter().image(
-                    hero[0].id(),
+                    hero[2].id(),
                     portrait.shrink(9.0),
                     Rect::from_min_max(egui::Pos2::ZERO, egui::pos2(1.0, 1.0)),
                     Color32::WHITE,
@@ -796,15 +901,30 @@ impl TowerApp {
                 if !compact {
                     ui.painter().rect_filled(rect, 8.0, theme::SURFACE_RAISED);
                 }
-                theme::icon(
-                    ui.painter(),
-                    Rect::from_center_size(
-                        egui::pos2(rect.min.x + 20.0, rect.center().y),
-                        Vec2::splat(18.0),
-                    ),
-                    Icon::Key,
-                    color,
+                let icon_rect = Rect::from_center_size(
+                    egui::pos2(rect.min.x + 20.0, rect.center().y),
+                    Vec2::splat(if compact { 22.0 } else { 28.0 }),
                 );
+                let sprite = self
+                    .engine
+                    .campaign
+                    .tiles
+                    .values()
+                    .find(|def| def.kind == "key" && def.key.as_deref() == Some(key))
+                    .map(|def| serde_json::to_value(&def.sprite).unwrap_or_default())
+                    .unwrap_or_else(|| {
+                        json!(match key {
+                            "yellow" => 29,
+                            "blue" => 31,
+                            _ => 30,
+                        })
+                    });
+                if !self
+                    .assets
+                    .tile(ui.painter(), icon_rect, &sprite, Color32::WHITE)
+                {
+                    theme::icon(ui.painter(), icon_rect, Icon::Key, color);
+                }
                 ui.painter().text(
                     egui::pos2(rect.min.x + 39.0, rect.center().y),
                     Align2::LEFT_CENTER,
@@ -993,7 +1113,83 @@ impl TowerApp {
     fn inspection(&self, ui: &mut egui::Ui) {
         section(ui, &self.text("inspect"), Icon::Compass);
         ui.add_space(16.0);
-        let Some((x, y)) = self.selected.filter(|_| !self.busy()) else {
+        if let Some(active) = self
+            .active
+            .as_ref()
+            .filter(|a| a.effect["type"] == "battle")
+            && let Some(progress) = self.battle_progress(self.now())
+        {
+            let e = &active.effect;
+            let name = translate_text(&self.locale, e["enemy_name"].as_str().unwrap_or(""));
+            ui.label(RichText::new(name).size(22.0).strong());
+            ui.add_space(6.0);
+            ui.label(
+                RichText::new(self.text(if progress.hero_turn {
+                    "hero_turn"
+                } else {
+                    "enemy_turn"
+                }))
+                .size(17.0)
+                .color(GOLD),
+            );
+            ui.add_space(10.0);
+            for (label, hp, maximum, color) in [
+                (
+                    self.text("adventurer"),
+                    progress.hero_hp,
+                    e["hero_hp"].as_i64().unwrap_or(1),
+                    theme::GREEN,
+                ),
+                (
+                    self.text("combat_enemy"),
+                    progress.enemy_hp,
+                    e["enemy_hp"].as_i64().unwrap_or(1),
+                    theme::RED,
+                ),
+            ] {
+                ui.horizontal(|ui| {
+                    ui.label(RichText::new(label).size(15.0).color(MUTED));
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        ui.label(RichText::new(number(&json!(hp))).size(18.0).strong());
+                    });
+                });
+                ui.add(
+                    egui::ProgressBar::new(hp as f32 / maximum.max(1) as f32)
+                        .fill(color)
+                        .desired_height(5.0),
+                );
+                ui.add_space(10.0);
+            }
+            ui.separator();
+            ui.add_space(6.0);
+            for (key, label) in [("hero_hit", "hero_hit"), ("enemy_hit", "enemy_hit")] {
+                ui.horizontal(|ui| {
+                    ui.label(RichText::new(self.text(label)).size(15.0).color(MUTED));
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        ui.label(
+                            RichText::new(format!("−{}", number(&e[key])))
+                                .size(18.0)
+                                .color(TEXT),
+                        );
+                    });
+                });
+            }
+            let strikes =
+                e["hero_strikes"].as_i64().unwrap_or(0) + e["enemy_strikes"].as_i64().unwrap_or(0);
+            ui.add_space(8.0);
+            ui.label(
+                RichText::new(format!(
+                    "{} {}/{}",
+                    self.text("strikes_resolved"),
+                    progress.completed,
+                    strikes
+                ))
+                .size(14.0)
+                .color(MUTED),
+            );
+            return;
+        }
+        let Some((x, y)) = self.selected.filter(|_| !self.busy() || self.travel_only()) else {
             ui.label(
                 RichText::new(self.text("inspect_hint"))
                     .size(17.0)
@@ -1016,10 +1212,12 @@ impl TowerApp {
             info["name"].as_str().unwrap_or(""),
         );
         ui.horizontal(|ui| {
-            let (sprite, _) = ui.allocate_exact_size(Vec2::splat(42.0), egui::Sense::hover());
+            let (sprite, _) = ui.allocate_exact_size(Vec2::splat(54.0), egui::Sense::hover());
+            ui.painter()
+                .rect_filled(sprite, 10.0, theme::SURFACE_RAISED);
             self.assets.tile(
                 ui.painter(),
-                sprite,
+                sprite.shrink(7.0),
                 &self.visual["tile_defs"][&id]["sprite"],
                 Color32::WHITE,
             );
@@ -1030,38 +1228,72 @@ impl TowerApp {
         });
         let enemy = &info["enemy"];
         if enemy.is_object() {
-            ui.add_space(8.0);
-            for (key, label) in [
-                ("hp", "health"),
-                ("attack", "attack"),
-                ("defense", "defense"),
-                ("gold", "gold"),
-                ("damage", "damage"),
+            ui.add_space(16.0);
+            let width = (ui.available_width() - 8.0) / 2.0;
+            for row in [
+                [
+                    ("hp", "health", theme::RED, Icon::Heart),
+                    ("attack", "attack", GOLD, Icon::Sword),
+                ],
+                [
+                    ("defense", "defense", theme::BLUE, Icon::Shield),
+                    ("gold", "gold", theme::GREEN, Icon::Coin),
+                ],
             ] {
-                ui.horizontal(|ui| {
-                    ui.label(self.text(label));
-                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        ui.label(RichText::new(number(&enemy[key])).color(
-                            if key == "damage" && !enemy["can_win"].as_bool().unwrap_or(false) {
-                                Color32::LIGHT_RED
-                            } else {
-                                GOLD
-                            },
-                        ));
-                    });
+                ui.horizontal_top(|ui| {
+                    for (key, label, color, icon) in row {
+                        metric(
+                            ui,
+                            width,
+                            &self.text(label),
+                            &number(&enemy[key]),
+                            color,
+                            icon,
+                            true,
+                        );
+                    }
                 });
+                ui.add_space(4.0);
             }
+            ui.add_space(10.0);
+            theme::caption(ui, &self.text("combat_forecast"));
+            let survives = enemy["can_win"].as_bool().unwrap_or(false);
+            let color = if survives { theme::GREEN } else { theme::RED };
+            ui.horizontal(|ui| {
+                ui.label(RichText::new(self.text("damage")).size(16.0).color(MUTED));
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    ui.label(
+                        RichText::new(number(&enemy["damage"]))
+                            .size(26.0)
+                            .strong()
+                            .color(color),
+                    );
+                });
+            });
+            ui.label(
+                RichText::new(self.text(if survives {
+                    "forecast_survive"
+                } else {
+                    "forecast_unsafe"
+                }))
+                .size(15.0)
+                .color(color),
+            );
             if let Some(reason) = enemy["reason"].as_str().filter(|s| !s.is_empty()) {
                 ui.label(
-                    RichText::new(translate_text(&self.locale, reason)).color(Color32::LIGHT_RED),
+                    RichText::new(translate_text(&self.locale, reason))
+                        .size(15.0)
+                        .color(theme::RED),
                 );
             }
         } else {
+            ui.add_space(12.0);
             ui.label(translate_text(
                 &self.locale,
                 info["description"].as_str().unwrap_or(""),
             ));
-            if info["kind"] == "enemy" || info["kind"] == "monster" {
+            if info["details_locked"] == true {
+                ui.add_space(8.0);
                 ui.label(RichText::new(self.text("orb_required")).color(MUTED));
             }
         }
@@ -1106,48 +1338,12 @@ impl TowerApp {
                     continue;
                 }
                 let kind = def["kind"].as_str().unwrap_or("wall");
-                let animated = (97..=132).contains(&tile)
-                    || (kind == "enemy" || kind == "monster" || kind == "npc")
-                        && ((61..=96).contains(&tile)
-                            || (133..=158).contains(&tile)
-                            || (19..=28).contains(&tile));
-                let frame = if animated && (now * 2.8) as u64 % 2 == 1 {
-                    1
-                } else {
-                    0
-                };
-                let sprite = if frame > 0
-                    && ((97..=105).contains(&tile) || (115..=123).contains(&tile))
+                let frame = (now / self.ambient_interval()) as usize % 2;
+                let sprite = Art::animated_sprite(&def["sprite"], frame);
+                if !self
+                    .assets
+                    .tile(&painter, tile_rect, &sprite, Color32::WHITE)
                 {
-                    json!(tile + 9)
-                } else if frame > 0 && ((106..=114).contains(&tile) || (124..=132).contains(&tile))
-                {
-                    json!(tile - 9)
-                } else if frame > 0 && tile % 2 == 1 {
-                    json!(tile + 1)
-                } else {
-                    def["sprite"].clone()
-                };
-                let wiggle = if animated {
-                    ((now * 4.0 + (x + y) as f64).sin() * 0.65) as f32
-                } else {
-                    0.0
-                };
-                let tint = if battle.is_some_and(|b| {
-                    b.effect["x"].as_u64() == Some(x as u64)
-                        && b.effect["y"].as_u64() == Some(y as u64)
-                        && (((now - b.start) * 12.0) as u64).is_multiple_of(2)
-                }) {
-                    Color32::from_rgb(255, 150, 150)
-                } else {
-                    Color32::WHITE
-                };
-                if !self.assets.tile(
-                    &painter,
-                    tile_rect.translate(Vec2::new(wiggle, 0.0)),
-                    &sprite,
-                    tint,
-                ) {
                     let color = match kind {
                         "wall" | "hidden_wall" => Color32::from_rgb(70, 76, 89),
                         "enemy" | "monster" => Color32::from_rgb(164, 65, 83),
@@ -1205,36 +1401,61 @@ impl TowerApp {
                 )
             })
             .unwrap_or(Color32::WHITE);
-        if let Some(frames) = self.assets.heroes.get(&self.facing) {
+        let battle_overlay = battle.and_then(|b| {
+            self.battle_progress(now).and_then(|progress| {
+                let overlay = b.effect["overlay_phase"].as_f64().unwrap_or(1.0 / 3.0) as f32;
+                let strike = progress.strike - i64::from(progress.phase < overlay);
+                (strike >= 0).then_some(
+                    (strike % 2 == 0) != b.effect["enemy_first"].as_bool().unwrap_or(false),
+                )
+            })
+        });
+        let replace_hero = battle_overlay.is_some()
+            && battle.is_some_and(|b| {
+                b.effect["x"] == self.visual["player"]["x"]
+                    && b.effect["y"] == self.visual["player"]["y"]
+            });
+        if !replace_hero && let Some(frames) = self.assets.heroes.get(&self.facing) {
             painter.image(
-                frames[if walking && (now * 15.0) as u64 % 2 == 1 {
-                    1
+                frames[if walking || now < self.hero_idle_at {
+                    (now / self.ambient_interval()) as usize % 2
                 } else {
-                    0
+                    2
                 }]
                 .id(),
                 hero_rect,
                 Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
                 hero_tint,
             );
-        } else {
+        } else if !replace_hero {
             painter.circle_filled(hero_rect.center(), cell * 0.28, GOLD);
         }
-        if let Some(b) = battle {
-            let target = rect.min
-                + Vec2::new(
-                    (b.effect["x"].as_f64().unwrap_or(0.0) as f32 + 0.5) * cell,
-                    (b.effect["y"].as_f64().unwrap_or(0.0) as f32 + 0.5) * cell,
-                );
-            let pulse = ((now - b.start) * 7.0).sin().abs() as f32;
-            painter.line_segment(
-                [hero_rect.center(), target],
-                Stroke::new(
-                    2.0 + 3.0 * pulse,
-                    Color32::from_rgba_unmultiplied(248, 190, 109, (180.0 * pulse) as u8),
-                ),
+        if let Some(b) = battle
+            && let Some(hero_turn) = battle_overlay
+        {
+            let target = Rect::from_min_size(
+                rect.min
+                    + Vec2::new(
+                        b.effect["x"].as_f64().unwrap_or(0.0) as f32 * cell,
+                        b.effect["y"].as_f64().unwrap_or(0.0) as f32 * cell,
+                    ),
+                Vec2::splat(cell),
             );
-            painter.circle_stroke(target, cell * (0.25 + 0.15 * pulse), Stroke::new(2.0, GOLD));
+            let texture = if hero_turn {
+                self.assets.impact.as_ref()
+            } else {
+                self.assets.hero_hits.get(&self.facing)
+            };
+            if let Some(texture) = texture {
+                self.assets
+                    .tile(&painter, target, &json!(6), Color32::WHITE);
+                painter.image(
+                    texture.id(),
+                    target,
+                    Rect::from_min_max(egui::Pos2::ZERO, egui::pos2(1.0, 1.0)),
+                    Color32::WHITE,
+                );
+            }
         }
         if let Some(a) = &self.active
             && a.effect["type"] == "move_tile"
@@ -1250,51 +1471,249 @@ impl TowerApp {
                 Vec2::splat(cell),
             );
             self.assets
-                .tile(&painter, moving, &a.effect["tile"], Color32::WHITE);
+                .creature(&painter, moving, &a.effect["tile"], Color32::WHITE);
         }
         if let Some(a) = &self.active
             && a.effect["type"] == "cinematic"
         {
             let p = ((now - a.start) / a.duration).clamp(0.0, 1.0) as f32;
-            let kind = a.effect["kind"].as_str().unwrap_or("magic");
+            let e = a.effect.clone();
+            let kind = e["kind"].as_str().unwrap_or("");
             match kind {
-                "magic" | "capture" | "fairy" => {
-                    let color = if kind == "fairy" {
-                        Color32::from_rgb(118, 217, 194)
-                    } else {
-                        Color32::from_rgb(201, 137, 242)
-                    };
-                    let radius = cell * (0.5 + p * 3.0);
-                    let center = hero_rect.center();
-                    painter.circle_stroke(
-                        center,
-                        radius,
-                        Stroke::new(2.5, color.gamma_multiply(1.0 - p * 0.7)),
-                    );
-                    for ray in 0..10 {
-                        let angle = (ray as f32 / 10.0 + p) * std::f32::consts::TAU;
-                        let at = center + Vec2::angled(angle) * radius;
-                        painter.circle_filled(at, cell * 0.08, color);
+                "magic" => {
+                    let targets = e["targets"]
+                        .as_array()
+                        .filter(|v| !v.is_empty())
+                        .cloned()
+                        .unwrap_or_else(|| vec![e.clone()]);
+                    let frames = e["frames"]
+                        .as_array()
+                        .filter(|v| !v.is_empty())
+                        .cloned()
+                        .unwrap_or_else(|| (166..=182).map(|f| json!(f)).collect());
+                    let step = ((p * (frames.len() * targets.len()) as f32) as usize)
+                        .min(frames.len() * targets.len() - 1);
+                    let sweep = step / targets.len();
+                    for (index, target) in targets.iter().enumerate() {
+                        let x = target["x"]
+                            .as_u64()
+                            .or_else(|| e["x"].as_u64())
+                            .unwrap_or(0);
+                        let y = target["y"]
+                            .as_u64()
+                            .or_else(|| e["y"].as_u64())
+                            .unwrap_or(0);
+                        if x >= width as u64 || y >= height as u64 {
+                            continue;
+                        }
+                        let at = Rect::from_min_size(
+                            rect.min + Vec2::new(x as f32 * cell, y as f32 * cell),
+                            Vec2::splat(cell),
+                        );
+                        self.assets
+                            .tile(&painter, at, &e["underlying_tile"], Color32::WHITE);
+                        if index > step % targets.len() && sweep == 0 {
+                            continue;
+                        }
+                        let frame = frames[if index <= step % targets.len() {
+                            sweep
+                        } else {
+                            sweep - 1
+                        }]
+                        .as_u64()
+                        .unwrap_or(182) as u32;
+                        self.assets.masked_tile(
+                            &painter,
+                            at,
+                            e["color_tile"]
+                                .as_u64()
+                                .or_else(|| e["tile"].as_u64())
+                                .unwrap_or(91) as u32,
+                            frame,
+                            Color32::WHITE,
+                        );
                     }
-                    self.assets.tile(
-                        &painter,
-                        hero_rect.expand(cell * 0.15),
-                        &json!(166 + (p * 16.0) as u64),
-                        Color32::from_white_alpha(200),
-                    );
                 }
-                "fade_out" | "fade_in" | "fade" => {
-                    let opacity = if kind == "fade_out" {
-                        p
-                    } else if kind == "fade_in" {
-                        1.0 - p
+                "tile_reveal" => {
+                    let x = e["x"].as_u64().unwrap_or(0) as f32;
+                    let y = e["y"].as_u64().unwrap_or(0) as f32;
+                    let at = Rect::from_min_size(
+                        rect.min + Vec2::new(x * cell, y * cell),
+                        Vec2::splat(cell),
+                    );
+                    self.assets.tile(&painter, at, &e["tile"], Color32::WHITE);
+                    let amount = (p * 16.0).floor() / 16.0;
+                    // Original door-open helper retracts the two sides in 16 steps.
+                    for left in [true, false] {
+                        let clip = if left {
+                            Rect::from_min_max(
+                                at.min,
+                                egui::pos2(at.center().x - cell * amount * 0.5, at.max.y),
+                            )
+                        } else {
+                            Rect::from_min_max(
+                                egui::pos2(at.center().x + cell * amount * 0.5, at.min.y),
+                                at.max,
+                            )
+                        };
+                        let shifted = at.translate(Vec2::new(
+                            if left {
+                                -cell * amount * 0.5
+                            } else {
+                                cell * amount * 0.5
+                            },
+                            0.0,
+                        ));
+                        self.assets.tile(
+                            &painter.with_clip_rect(clip),
+                            shifted,
+                            &e["from_tile"],
+                            Color32::WHITE,
+                        );
+                    }
+                }
+                "title" | "scan" => {
+                    painter.rect_filled(rect, 0.0, Color32::BLACK);
+                    let asset_key = if kind == "scan" {
+                        "background_asset"
                     } else {
+                        "asset"
+                    };
+                    let asset = format!(
+                        "assets/{}.png",
+                        e[asset_key].as_str().unwrap_or("data3-open1")
+                    );
+                    let scene_rect = self
+                        .assets
+                        .scenes
+                        .get(&asset)
+                        .map(|texture| {
+                            let size = texture.size_vec2();
+                            Rect::from_center_size(
+                                rect.center(),
+                                size * (rect.width() / size.x).min(rect.height() / size.y),
+                            )
+                        })
+                        .unwrap_or(rect);
+                    if let Some(texture) = self.assets.scenes.get(&asset) {
+                        painter.image(
+                            texture.id(),
+                            scene_rect,
+                            Rect::from_min_max(egui::Pos2::ZERO, egui::pos2(1.0, 1.0)),
+                            Color32::WHITE,
+                        );
+                    }
+                    if kind == "title" {
+                        let frames = e["frames"].as_array();
+                        let mask = frames
+                            .and_then(|frames| {
+                                frames.get(
+                                    ((p * frames.len() as f32) as usize)
+                                        .min(frames.len().saturating_sub(1)),
+                                )
+                            })
+                            .and_then(Value::as_u64)
+                            .unwrap_or(182) as u32;
+                        let target = format!(
+                            "assets/{}.png",
+                            e["target_asset"].as_str().unwrap_or("data3-open1")
+                        );
+                        self.assets
+                            .masked_scene(&painter, scene_rect, &target, mask);
+                    } else if self.locale.starts_with("zh") {
+                        let text = tr(
+                            &self.locale,
+                            e["translation_key"]
+                                .as_str()
+                                .unwrap_or("capture_incantation"),
+                        );
+                        let lines = text.lines().collect::<Vec<_>>();
+                        for (i, line) in lines.iter().enumerate() {
+                            if p >= i as f32 / lines.len().max(1) as f32 {
+                                painter.text(
+                                    scene_rect.center()
+                                        + Vec2::new(
+                                            0.0,
+                                            (i as f32 - (lines.len() - 1) as f32 / 2.0) * 30.0,
+                                        ),
+                                    Align2::CENTER_CENTER,
+                                    line,
+                                    FontId::proportional((cell * 0.4).clamp(16.0, 24.0)),
+                                    Color32::WHITE,
+                                );
+                            }
+                        }
+                    } else if let Some(texture) = self.assets.scenes.get(&format!(
+                        "assets/{}.png",
+                        e["asset"].as_str().unwrap_or("data3-open2")
+                    )) {
+                        let clip = Rect::from_min_max(
+                            scene_rect.min,
+                            egui::pos2(
+                                scene_rect.max.x,
+                                scene_rect.min.y + scene_rect.height() * p,
+                            ),
+                        );
+                        painter.with_clip_rect(clip).image(
+                            texture.id(),
+                            scene_rect,
+                            Rect::from_min_max(egui::Pos2::ZERO, egui::pos2(1.0, 1.0)),
+                            Color32::WHITE,
+                        );
+                    }
+                }
+                "transformation" => {
+                    let x = e["x"].as_u64().unwrap_or(5) as usize;
+                    let y = e["y"].as_u64().unwrap_or(5) as usize;
+                    let w = e["width"].as_u64().unwrap_or(3) as usize;
+                    let h = e["height"].as_u64().unwrap_or(3) as usize;
+                    let origin_x = x.saturating_sub(w / 2);
+                    let origin_y = y.saturating_sub(h / 2);
+                    for dy in 0..h {
+                        for dx in 0..w {
+                            let at = Rect::from_min_size(
+                                rect.min
+                                    + Vec2::new(
+                                        (origin_x + dx) as f32 * cell,
+                                        (origin_y + dy) as f32 * cell,
+                                    ),
+                                Vec2::splat(cell),
+                            );
+                            self.assets.tile(&painter, at, &json!(6), Color32::WHITE);
+                        }
+                    }
+                    let amount = (p * 32.0).floor() / 32.0;
+                    for dy in 0..h {
+                        for dx in 0..w {
+                            if dx == w / 2 && dy == h / 2 {
+                                continue;
+                            }
+                            let source = Vec2::new((origin_x + dx) as f32, (origin_y + dy) as f32);
+                            let center = Vec2::new(x as f32, y as f32);
+                            let at = Rect::from_min_size(
+                                rect.min + (source + (center - source) * amount) * cell,
+                                Vec2::splat(cell),
+                            );
+                            let sprite = Art::animated_sprite(
+                                &e["from_tiles"][dy * w + dx],
+                                (now / self.ambient_interval()) as usize % 2,
+                            );
+                            self.assets.creature(&painter, at, &sprite, Color32::WHITE);
+                        }
+                    }
+                }
+                "capture" | "fade_out" | "fade_in" | "fade" | "fairy" => {
+                    let opacity = if kind == "fade_in" {
+                        1.0 - p
+                    } else if kind == "fade" || kind == "fairy" {
                         (p * std::f32::consts::PI).sin()
+                    } else {
+                        p
                     };
                     painter.rect_filled(
                         rect,
                         0.0,
-                        Color32::from_rgba_unmultiplied(5, 10, 20, (opacity * 245.0) as u8),
+                        Color32::from_black_alpha((opacity * 255.0) as u8),
                     );
                 }
                 "victory" | "credits" => {
@@ -1314,7 +1733,7 @@ impl TowerApp {
                         painter.text(
                             rect.center() + Vec2::new(0.0, 25.0),
                             Align2::CENTER_CENTER,
-                            "Oz & Kenichi · Shigemasa Ozawa",
+                            "Oz & Kenichi / Shigemasa Ozawa",
                             FontId::proportional(18.0),
                             TEXT,
                         );
@@ -1327,97 +1746,60 @@ impl TowerApp {
             && a.effect["type"] == "floor"
         {
             let p = ((now - a.start) / a.duration).clamp(0.0, 1.0) as f32;
-            let opacity = (1.0 - (p * 2.0 - 1.0).abs()) * 235.0;
-            painter.rect_filled(
-                rect,
-                0.0,
-                Color32::from_rgba_unmultiplied(8, 15, 26, opacity as u8),
-            );
-            painter.text(
-                rect.center(),
-                Align2::CENTER_CENTER,
-                format!("{} {}", self.text("floor"), a.effect["to"]),
-                FontId::proportional(32.0),
-                GOLD,
-            );
+            if a.effect["style"].as_str().unwrap_or("original_spiral") == "original_spiral" {
+                let order = stair_wipe_order(width, height);
+                let covered = if p < 0.5 {
+                    (p * 2.0 * order.len() as f32).ceil() as usize
+                } else {
+                    order.len()
+                };
+                let revealed = if p < 0.5 {
+                    0
+                } else {
+                    ((p * 2.0 - 1.0) * order.len() as f32).floor() as usize
+                };
+                for index in order.iter().take(covered).skip(revealed) {
+                    let at = Rect::from_min_size(
+                        rect.min
+                            + Vec2::new(
+                                (index % width) as f32 * cell,
+                                (index / width) as f32 * cell,
+                            ),
+                        Vec2::splat(cell),
+                    );
+                    self.assets.tile(&painter, at, &json!(159), Color32::WHITE);
+                }
+            } else {
+                let opacity = (1.0 - (p * 2.0 - 1.0).abs()) * 255.0;
+                painter.rect_filled(rect, 0.0, Color32::from_black_alpha(opacity as u8));
+            }
         }
         if response.clicked()
-            && !self.busy()
+            && self.travel_only()
             && self.snapshot["pending_interaction"].is_null()
             && let Some((x, y)) = hover
         {
             self.audio.unlock();
             self.route = self.engine.path_to(x, y).into();
         }
-        if self.busy() {
+        if self.busy() && !self.travel_only() {
             ui.add_space(10.0);
             let skip = theme::action(ui, self.text("skip"), Icon::ArrowRight, false);
             self.record("skip", &skip);
             if skip.clicked() {
-                self.queue.clear();
-                self.active = None;
-                self.visual = self.snapshot.clone();
-                self.route.clear();
-                self.music_paused = false;
-                self.music_override = None;
+                self.skip_presentation();
             }
-        }
-        if let Some(a) = &self.active
-            && a.effect["type"] == "battle"
-        {
-            let e = &a.effect;
-            let battle = self.battle_progress(now).expect("active battle");
-            let ehp = battle.enemy_hp;
-            let hhp = battle.hero_hp;
-            ui.label(
-                RichText::new(format!(
-                    "{} · {} {}  |  {} {}",
-                    translate_text(&self.locale, e["enemy_name"].as_str().unwrap_or("")),
-                    self.text("health"),
-                    ehp,
-                    self.text("adventurer"),
-                    hhp
-                ))
-                .size(19.0)
-                .color(GOLD),
-            );
-            ui.label(format!(
-                "{}: {}    {}: {}    {} {}",
-                self.text("hero_hit"),
-                e["hero_hit"],
-                self.text("enemy_hit"),
-                e["enemy_hit"],
-                self.text(if battle.hero_turn {
-                    "hero_turn"
-                } else {
-                    "enemy_turn"
-                }),
-                battle.completed / 2 + 1
-            ));
         }
     }
 
-    fn directional_controls(&mut self, ui: &mut egui::Ui) {
-        ui.horizontal(|ui| {
-            for (direction, icon) in [
-                ("left", Icon::ArrowLeft),
-                ("up", Icon::ArrowUp),
-                ("down", Icon::ArrowDown),
-                ("right", Icon::ArrowRight),
-            ] {
-                let r = ui
-                    .add_enabled_ui(
-                        !self.busy() && self.snapshot["pending_interaction"].is_null(),
-                        |ui| theme::action(ui, String::new(), icon, false),
-                    )
-                    .inner;
-                self.record(direction, &r);
-                if r.clicked() {
-                    self.route.clear();
-                    self.submit(json!({"type":"move","direction":direction}));
-                }
-            }
-        });
+    fn skip_presentation(&mut self) {
+        self.queue.clear();
+        self.active = None;
+        self.visual = self.snapshot.clone();
+        self.route.clear();
+        self.hero_idle_at = 0.0;
+        self.music_paused = false;
+        self.music_override = None;
     }
 
     fn board_card(&mut self, ui: &mut egui::Ui, width: f32, now: f64, compact: bool) {
@@ -1542,18 +1924,14 @@ impl TowerApp {
                             self.board(ui, board_size, now);
                         });
                     });
-                    ui.add_space(if compact { 2.0 } else { 8.0 });
-                    ui.horizontal(|ui| {
-                        self.directional_controls(ui);
-                        if !compact {
-                            ui.add_space(6.0);
-                            ui.label(
-                                RichText::new(self.text("keyboard_hint"))
-                                    .size(14.0)
-                                    .color(MUTED),
-                            );
-                        }
-                    });
+                    ui.add_space(4.0);
+                    if !compact {
+                        ui.label(
+                            RichText::new(self.text("keyboard_hint"))
+                                .size(14.0)
+                                .color(MUTED),
+                        );
+                    }
                     ui.add_space(4.0);
                     ui.label(
                         RichText::new(self.text("controls_hint"))
@@ -1601,11 +1979,36 @@ impl TowerApp {
         let visible: String = text.chars().take(count).collect();
         let mut action = None;
         let mut next = false;
+        let mut skip_scene = false;
         let viewport = self.context.input(|i| i.viewport_rect());
-        let dialog_width = (viewport.width() - 96.0).clamp(240.0, 520.0);
-        egui::Modal::new(egui::Id::new("conversation"))
-            .backdrop_color(Color32::from_black_alpha(150))
-            .frame(theme::frame().inner_margin(24))
+        let bounds = &self.bounds["board"];
+        let board = Rect::from_min_size(
+            egui::pos2(
+                bounds["x"].as_f64().unwrap_or(0.0) as f32,
+                bounds["y"].as_f64().unwrap_or(0.0) as f32,
+            ),
+            Vec2::new(
+                bounds["w"].as_f64().unwrap_or(360.0) as f32,
+                bounds["h"].as_f64().unwrap_or(360.0) as f32,
+            ),
+        );
+        let inset = if board.width() < 380.0 { 16 } else { 24 };
+        let dialog_width = (board.width() - 28.0 - inset as f32 * 2.0).min(480.0);
+        self.context
+            .layer_painter(egui::LayerId::new(
+                egui::Order::Middle,
+                egui::Id::new("conversation_shade"),
+            ))
+            .with_clip_rect(board)
+            .rect_filled(board, 6.0, Color32::from_black_alpha(140));
+        let modal_id = egui::Id::new("conversation");
+        let response = egui::Modal::new(modal_id)
+            .area(
+                egui::Modal::default_area(modal_id)
+                    .anchor(Align2::CENTER_CENTER, board.center() - viewport.center()),
+            )
+            .backdrop_color(Color32::TRANSPARENT)
+            .frame(theme::frame().inner_margin(inset))
             .show(&self.context.clone(), |ui| {
                 ui.set_width(dialog_width);
                 theme::caption(ui, &self.text("dialogue"));
@@ -1613,55 +2016,108 @@ impl TowerApp {
                 if let Some(name) = pending["title"].as_str() {
                     ui.label(
                         RichText::new(translate_text(&self.locale, name))
-                            .size(27.0)
+                            .size(if board.width() < 380.0 { 24.0 } else { 27.0 })
                             .color(TEXT),
                     );
-                    ui.add_space(12.0);
+                    ui.add_space(10.0);
                 }
-                ui.set_min_width(dialog_width.min(360.0));
-                ui.label(RichText::new(visible).size(21.0));
-                ui.add_space(18.0);
-                if scripted.is_some() {
-                    let button = theme::action(ui, self.text("continue"), Icon::ArrowRight, true);
-                    self.record("dialogue_continue", &button);
-                    if button.clicked() {
-                        next = true;
-                    }
+                let offers = pending["offers"]
+                    .as_array()
+                    .or_else(|| pending["choices"].as_array())
+                    .cloned()
+                    .unwrap_or_default();
+                let needs_close = scripted.is_none()
+                    && !offers
+                        .iter()
+                        .any(|o| o["id"] == "leave" || o["id"] == "cancel");
+                let action_height = if scripted.is_some() {
+                    38.0
                 } else {
-                    let offers = pending["offers"]
-                        .as_array()
-                        .or_else(|| pending["choices"].as_array())
-                        .cloned()
-                        .unwrap_or_default();
-                    for offer in offers {
-                        let label = offer["label"]
-                            .as_str()
-                            .or_else(|| offer["text"].as_str())
-                            .or_else(|| offer["name"].as_str())
-                            .unwrap_or("Accept");
-                        let button = ui.add(
-                            egui::Button::new(
-                                RichText::new(translate_text(&self.locale, label)).size(17.0),
-                            )
-                            .fill(theme::SURFACE_RAISED)
-                            .stroke(Stroke::new(1.0, theme::BORDER))
-                            .corner_radius(9)
-                            .min_size(Vec2::new(ui.available_width(), 44.0)),
+                    (offers.len() as f32 * 50.0 + if needs_close { 44.0 } else { 0.0 })
+                        .min(board.height() * 0.42)
+                };
+                let body_height = (board.height()
+                    - inset as f32 * 2.0
+                    - 74.0
+                    - action_height
+                    - if pending["title"].is_string() {
+                        42.0
+                    } else {
+                        0.0
+                    })
+                .max(45.0);
+                egui::ScrollArea::vertical()
+                    .id_salt("conversation_text")
+                    .max_height(body_height)
+                    .auto_shrink([false, true])
+                    .show(ui, |ui| {
+                        let font_size = if board.width() < 380.0 { 19.0 } else { 21.0 };
+                        let full = ui.painter().layout(
+                            text.clone(),
+                            FontId::proportional(font_size),
+                            TEXT,
+                            ui.available_width(),
                         );
-                        let id = offer["id"].as_str().unwrap_or("accept");
-                        self.record(&format!("choice:{id}"), &button);
+                        // Reserve the complete speech so typing cannot move the choice buttons.
+                        ui.set_min_height(full.size().y.min(body_height));
+                        ui.label(RichText::new(visible).size(font_size));
+                    });
+                ui.add_space(14.0);
+                if scripted.is_some() {
+                    ui.horizontal(|ui| {
+                        let button =
+                            theme::action(ui, self.text("continue"), Icon::ArrowRight, true);
+                        self.record("dialogue_continue", &button);
                         if button.clicked() {
-                            action = Some(json!({"type":"choose","choice":id}));
+                            next = true;
                         }
-                        ui.add_space(6.0);
-                    }
-                    let close = theme::action(ui, self.text("close"), Icon::Close, false);
-                    self.record("dialogue_close", &close);
-                    if close.clicked() {
-                        action = Some(json!({"type":"cancel"}));
-                    }
+                        let skip = theme::action(ui, self.text("skip_scene"), Icon::Close, false);
+                        self.record("skip", &skip);
+                        if skip.clicked() {
+                            skip_scene = true;
+                        }
+                    });
+                } else {
+                    egui::ScrollArea::vertical()
+                        .id_salt("conversation_choices")
+                        .max_height(action_height)
+                        .auto_shrink([false, true])
+                        .show(ui, |ui| {
+                            ui.spacing_mut().item_spacing.y = 6.0;
+                            for offer in offers {
+                                let label = offer["label"]
+                                    .as_str()
+                                    .or_else(|| offer["text"].as_str())
+                                    .or_else(|| offer["name"].as_str())
+                                    .unwrap_or("Accept");
+                                let button = ui.add(
+                                    egui::Button::new(
+                                        RichText::new(translate_text(&self.locale, label))
+                                            .size(17.0),
+                                    )
+                                    .fill(theme::SURFACE_RAISED)
+                                    .stroke(Stroke::new(1.0, theme::BORDER))
+                                    .corner_radius(9)
+                                    .min_size(Vec2::new(ui.available_width(), 44.0)),
+                                );
+                                let id = offer["id"].as_str().unwrap_or("accept");
+                                self.record(&format!("choice:{id}"), &button);
+                                if button.clicked() {
+                                    action = Some(json!({"type":"choose","choice":id}));
+                                }
+                            }
+                            if needs_close {
+                                let close =
+                                    theme::action(ui, self.text("close"), Icon::Close, false);
+                                self.record("dialogue_close", &close);
+                                if close.clicked() {
+                                    action = Some(json!({"type":"cancel"}));
+                                }
+                            }
+                        });
                 }
             });
+        self.record("dialogue", &response.response);
         if self
             .context
             .input(|i| i.key_pressed(egui::Key::Enter) || i.key_pressed(egui::Key::Space))
@@ -1675,7 +2131,9 @@ impl TowerApp {
                 action = Some(json!({"type":"choose","choice":"leave"}));
             }
         }
-        if next {
+        if skip_scene {
+            self.skip_presentation();
+        } else if next {
             self.finish_effect();
         }
         if let Some(command) = action {
@@ -1851,7 +2309,7 @@ impl TowerApp {
     fn keyboard(&mut self) {
         if self.settings
             || self.editor_open
-            || self.busy()
+            || !self.travel_only()
             || !self.snapshot["pending_interaction"].is_null()
         {
             return;
@@ -1868,7 +2326,11 @@ impl TowerApp {
         });
         if let Some(direction) = direction {
             self.route.clear();
-            self.submit(json!({"type":"move","direction":direction}));
+            if self.busy() {
+                self.route.push_back(direction.into());
+            } else {
+                self.submit(json!({"type":"move","direction":direction}));
+            }
         }
     }
 }
@@ -2039,13 +2501,36 @@ impl eframe::App for TowerApp {
 
 /// Only the known first-release original campaign is eligible for migration.
 /// Custom campaigns and unknown revisions keep the core's strict fingerprint check.
+fn original_campaign_upgrade(source: &str) -> Option<&'static str> {
+    if let Ok(engine) = Engine::from_json(source) {
+        let saved: Value = serde_json::from_str(&engine.save_json()).unwrap_or_default();
+        if ["56277325ec91e254", "800993184d7842ca"]
+            .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
+        {
+            return Some(include_str!("../../../data/campaign.json"));
+        }
+    }
+    None
+}
+
+fn upgrade_original_campaign(source: String) -> String {
+    if let Some(updated) = original_campaign_upgrade(&source) {
+        let _ = platform::write("tos-rust:campaign:recovery", &source);
+        let _ = platform::write(CAMPAIGN, updated);
+        return updated.to_owned();
+    }
+    source
+}
+
 fn restore_journey(engine: &mut Engine, source: &str) -> Result<Option<String>, String> {
     let original_error = match engine.load_json(source) {
         Ok(()) => return Ok(None),
         Err(error) => error,
     };
     let mut saved: Value = serde_json::from_str(source).map_err(|_| original_error.clone())?;
-    if saved["campaign_fingerprint"] != "56277325ec91e254" {
+    if !["56277325ec91e254", "800993184d7842ca"]
+        .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
+    {
         return Err(original_error);
     }
     let bundled = Engine::from_json(include_str!("../../../data/campaign.json"))?;
@@ -2055,7 +2540,9 @@ fn restore_journey(engine: &mut Engine, source: &str) -> Result<Option<String>, 
         return Err(original_error);
     }
     saved["campaign_fingerprint"] = expected["campaign_fingerprint"].clone();
-    saved["cycle"] = json!(1);
+    if saved["cycle"].is_null() {
+        saved["cycle"] = json!(1);
+    }
     if saved["status"] == "won" && saved["player"]["floor"] == 50 {
         saved["status"] = json!("playing");
     }
@@ -2247,6 +2734,28 @@ mod migration_tests {
         );
         assert_eq!(engine.player().hp, 725);
         assert_eq!(engine.snapshot()["cycle"], 1);
+    }
+    #[test]
+    fn previous_ui_save_preserves_backside_cycle_and_progress() {
+        let mut engine = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
+        let mut saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
+        saved["campaign_fingerprint"] = json!("800993184d7842ca");
+        saved["cycle"] = json!(2);
+        saved["player"]["hp"] = json!(7500);
+        saved["player"]["gold"] = json!(128);
+        saved["steps"] = json!(42);
+        let floors = saved["floors"].clone();
+        assert!(
+            restore_journey(&mut engine, &saved.to_string())
+                .unwrap()
+                .is_some()
+        );
+        let restored: Value = serde_json::from_str(&engine.save_json()).unwrap();
+        assert_eq!(restored["cycle"], 2);
+        assert_eq!(restored["steps"], 42);
+        assert_eq!(restored["floors"], floors);
+        assert_eq!(engine.player().hp, 7500);
+        assert_eq!(engine.player().gold, 128);
     }
     #[test]
     fn custom_campaign_and_unknown_save_are_not_migrated() {

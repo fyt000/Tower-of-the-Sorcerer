@@ -126,9 +126,11 @@ folder under `tos-rust`; `TOS_STORAGE_DIR` overrides it.
 Settings can export a portable JSON save and import pasted JSON. Both graphical
 targets also accept dropped save/campaign JSON files. Save validation is atomic:
 bad imports leave the current game intact. A campaign fingerprint rejects
-incompatible revisions. The known first-version bundled original save is
-migrated conservatively and backed up under `tos-rust:save:recovery`; unknown or
-custom revisions remain strictly checked.
+incompatible revisions. The two known previous bundled original revisions are
+migrated conservatively, including cached campaigns and checkpoints, while
+preserving the backside cycle and player progress. Original save and campaign
+copies remain under `tos-rust:save:recovery` and `tos-rust:campaign:recovery`;
+unknown or custom revisions remain strictly checked.
 
 ## Visual campaign editor
 
