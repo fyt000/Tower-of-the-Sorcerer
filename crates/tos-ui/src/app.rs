@@ -560,6 +560,7 @@ impl TowerApp {
     }
 
     fn header(&mut self, ui: &mut egui::Ui) {
+        let narrow = ui.available_width() < 1060.0;
         ui.horizontal_wrapped(|ui| {
             ui.label(
                 RichText::new(translate_text(&self.locale, &self.engine.campaign.title))
@@ -582,32 +583,41 @@ impl TowerApp {
                     .color(GOLD),
                 );
             }
-            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                let settings = ui.button(self.text("settings"));
-                self.record("settings", &settings);
-                if settings.clicked() {
-                    self.settings = !self.settings;
-                }
-                let edit = ui.button(self.text("editor"));
-                self.record("editor", &edit);
-                if edit.clicked() {
-                    self.editor_open = true;
-                }
-                let save = ui.button(self.text("save"));
-                self.record("save", &save);
-                if save.clicked() {
-                    self.checkpoint();
-                }
-                let restore = ui.button(self.text("restore"));
-                self.record("restore", &restore);
-                if restore.clicked() {
-                    self.restore_checkpoint();
-                }
-            });
+            if !narrow {
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    self.header_controls(ui)
+                });
+            }
         });
+        if narrow {
+            ui.horizontal_wrapped(|ui| self.header_controls(ui));
+        }
         ui.add_space(8.0);
         ui.separator();
         ui.add_space(14.0);
+    }
+
+    fn header_controls(&mut self, ui: &mut egui::Ui) {
+        let settings = ui.button(self.text("settings"));
+        self.record("settings", &settings);
+        if settings.clicked() {
+            self.settings = !self.settings;
+        }
+        let edit = ui.button(self.text("editor"));
+        self.record("editor", &edit);
+        if edit.clicked() {
+            self.editor_open = true;
+        }
+        let save = ui.button(self.text("save"));
+        self.record("save", &save);
+        if save.clicked() {
+            self.checkpoint();
+        }
+        let restore = ui.button(self.text("restore"));
+        self.record("restore", &restore);
+        if restore.clicked() {
+            self.restore_checkpoint();
+        }
     }
 
     fn checkpoint(&mut self) {
