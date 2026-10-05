@@ -119,7 +119,7 @@ An event includes optional `id`, `trigger`, optional `conditions`, required orde
 }
 ```
 
-Triggers: `step`, `bump`, `door_opened`, `enter_floor`, `enemy_defeated`, and `interact`. Optional `floor`, `x`, `y`, and `tile` restrict the trigger. `bump` runs at the intended destination before collision handling, enabling scripted walls and concealed encounters. `door_opened` runs after a colored door consumes its key. `interact` occurs when the player acknowledges an NPC conversation. Events run in file order; an event is marked as executed before its effects, preventing recursive forced battles from repeating it.
+Triggers: `step`, `bump`, `door_opened`, `enter_floor`, `stairs_up`, `enemy_defeated`, and `interact`. Optional `floor`, `x`, `y`, and `tile` restrict the trigger. `bump` runs at the intended destination before collision handling, enabling scripted walls and concealed encounters. `door_opened` runs after a colored door consumes its key. `enter_floor` runs after stair or Flight Orb travel. `stairs_up` follows it only for upward stair travel; it excludes flight, descending stairs, and scripted teleports. `interact` occurs when the player acknowledges an NPC conversation. Events run in file order; an event is marked as executed before its effects, preventing recursive forced battles from repeating it.
 
 A trigger may use `positions: [{"x":9,"y":4},{"x":9,"y":6}]` instead of `x` or `y`. This nonempty array matches any listed position, with one shared event ID and once count. Each coordinate must lie within the map. Combining `positions` with either `x` or `y`, an empty array, or malformed entries is an import error. The floor-33 trap uses this to cover both entrances without separate once flags.
 

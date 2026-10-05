@@ -315,6 +315,7 @@ impl Engine {
         arrival_kind: TileKind,
         travel: crate::flight::FloorTravel,
     ) -> Result<(), String> {
+        let cycle = self.state.cycle;
         let tiles = self.state.floors.get(&target).ok_or("Unknown floor")?;
         let metadata = self
             .campaign
@@ -362,6 +363,20 @@ impl Engine {
             self.state.player.y,
             None,
         );
+        if travel == crate::flight::FloorTravel::Stairs
+            && target > from
+            && self.state.status == GameStatus::Playing
+            && self.state.cycle == cycle
+            && self.state.player.floor == target
+        {
+            self.run_events(
+                TriggerKind::StairsUp,
+                target,
+                self.state.player.x,
+                self.state.player.y,
+                None,
+            );
+        }
         Ok(())
     }
 

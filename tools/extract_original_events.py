@@ -12,7 +12,8 @@ from original_animation import tile_transition
 def probe(*args, **kwargs):
     # Presentation is part of the evidence, even though headless play applies
     # the resulting deterministic state changes without waiting in real time.
-    return original_probe(*args, include_presentation=True, follow_calls=[0x4660d0], **kwargs)
+    follow_calls=[0x4660d0,*kwargs.pop('follow_calls',())]
+    return original_probe(*args, include_presentation=True, follow_calls=follow_calls, **kwargs)
 
 DIALOGUES={s['id']:s['text'] for s in json.loads((ROOT/'data/original-dialogue.json').read_text(encoding='utf-8'))}
 TILES=list(RAW)
@@ -54,8 +55,9 @@ def convert(p,f,tiles=None):
             # Temporary magic graphics are located on the queued tile, rather
             # than invariably on the hero. Retain the actual atlas sequence.
             frames=[b];waits=0
-            color_tile=queue[cursor][2] if cursor<len(queue) and queue[cursor][:2]==[0,6] else 91
-            underlying_tile=tiles[f*123+2+a]
+            operand=queue[cursor] if cursor<len(queue) and queue[cursor][0]==0 and queue[cursor][2] else None
+            color_tile=operand[2] if operand else 91
+            underlying_tile=operand[1] if operand else tiles[f*123+2+a]
             while cursor<len(queue):
                 q=queue[cursor]
                 if q[0]==0:
@@ -216,6 +218,43 @@ for f in [10,15,20,25,30,33,38,40,48,49]:
         INITIAL_STAGES[f]=stage
 
 if __name__=='__main__':
+    # These callbacks live in handan's *upstairs* branch, not in the initial
+    # tile-7 map scan. 32F materializes its Knight only after stair arrival.
+    # handan 0x444E8B/0x444EAF guards each scene with its own once flag.
+    p=probe(0x46cb1c,32,5,9)
+    effects,_,unknown=convert(p,32)
+    effects.insert(0,{'type':'flag','flag':'floor_32_knight_challenged'})
+    add('floor_32_golden_knight_arrival',{'type':'stairs_up','floor':32},effects,
+        source='Original handan 0x444E8B..0x444EAF + mevent 0x463EC7 + ichicheck 0x472A2C: once-only stair arrival, 13 approach moves, speech and enemy-first battle',unknown=unknown)
+
+    # Recover the previously unreachable post-combat branch by satisfying its
+    # successful-battle predicate and seeding the relocated 29F Thief.
+    p=probe(0x4664e4,32,5,9,globals=[(0x4b8868,1)],changes=[(29,6,1,21)])
+    effects,_,unknown=convert(p,32)
+    effects.insert(0,{'type':'flag','flag':'floor_32_knight_challenged','value':False})
+    add('floor_32_golden_knight_retreat',
+        {'type':'enemy_defeated','floor':32,'x':5,'y':9,'tile':133},effects,
+        [{'type':'flag','flag':'floor_32_knight_challenged'}],
+        source='Original moncheck 0x46903B: successful Knight battle, 13 retreat moves, return Thief from 29F to 2F',unknown=unknown)
+
+    # 42F is another stair callback. Capture the two apparition helpers
+    # separately: their Delphi drawing calls are skipped, while their queue
+    # targets/masks remain independently verified by audit_original_events.py.
+    guards=[71,93,81,83]
+    apparition=summon(42,60,91)
+    apparition.extend(tile_effect(42,i,93) for i in guards)
+    guard_probe=probe(0x461ef4,42,5,9,globals=list(zip(
+        [0x48c558,0x48c55c,0x48c560,0x48c564],guards)))
+    masks=list(dict.fromkeys(q[2] for q in guard_probe['queue'] if q[0]==9))
+    apparition.extend([{'type':'sound','cue':'3f'},overlay(42,82,masks,900,
+        color_tile=93,underlying_tile=6,targets=[{'x':i%11,'y':i//11} for i in guards])])
+    p=probe(0x46cb1c,42,5,9)
+    stage=list(RAW)
+    for i,t in [(60,91),*[(i,93) for i in guards]]:stage[42*123+2+i]=t
+    effects,_,unknown=convert(p,42,stage)
+    add('floor_42_zeno_and_golden_knight_arrival',{'type':'stairs_up','floor':42},apparition+effects,
+        source='Original handan 0x444EAF..0x444ED3 + ichicheck 0x475FBA: once-only stair arrival, Zeno/four Sorcerers apparition, Knight execution, four speeches and departure',unknown=unknown)
+
     # Recover independent gate / treasure predicates by testing all combinations
     # of the cells read by the original post-combat handler. Keep minimal sets of
     # defeated guards; this avoids requiring unrelated enemies to be killed.

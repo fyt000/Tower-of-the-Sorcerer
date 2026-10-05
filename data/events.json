@@ -4986,6 +4986,759 @@
     "source": "Original ichicheck 0x46CB1C; ordered tile motion, sound and waits retained"
   },
   {
+    "id": "floor_32_golden_knight_arrival",
+    "once": true,
+    "trigger": {
+      "type": "stairs_up",
+      "floor": 32
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "flag",
+        "flag": "floor_32_knight_challenged"
+      },
+      {
+        "type": "wait",
+        "ms": 250
+      },
+      {
+        "type": "sound",
+        "cue": "get"
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
+        "type": "set_tile",
+        "floor": 32,
+        "x": 9,
+        "y": 0,
+        "tile": 133
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 9,
+        "from_y": 0,
+        "x": 8,
+        "y": 0,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 8,
+        "from_y": 0,
+        "x": 7,
+        "y": 0,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 7,
+        "from_y": 0,
+        "x": 6,
+        "y": 0,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 6,
+        "from_y": 0,
+        "x": 5,
+        "y": 0,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 0,
+        "x": 5,
+        "y": 1,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 1,
+        "x": 5,
+        "y": 2,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 2,
+        "x": 5,
+        "y": 3,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 3,
+        "x": 5,
+        "y": 4,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 4,
+        "x": 5,
+        "y": 5,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 175
+      },
+      {
+        "type": "message",
+        "text": "You are a brave man beating the bosses of the first and second areas, and ascending the tower. But the game is over now. Here and Now, I will beat you for myself! Give up!",
+        "dialogue_id": 29,
+        "original_queue_id": 30
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 5,
+        "x": 5,
+        "y": 6,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 6,
+        "x": 5,
+        "y": 7,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 7,
+        "x": 5,
+        "y": 8,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 8,
+        "x": 5,
+        "y": 9,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "battle_at",
+        "floor": 32,
+        "x": 5,
+        "y": 9,
+        "first_strike": true
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      }
+    ],
+    "source": "Original handan 0x444E8B..0x444EAF + mevent 0x463EC7 + ichicheck 0x472A2C: once-only stair arrival, 13 approach moves, speech and enemy-first battle"
+  },
+  {
+    "id": "floor_32_golden_knight_retreat",
+    "once": true,
+    "trigger": {
+      "type": "enemy_defeated",
+      "floor": 32,
+      "x": 5,
+      "y": 9,
+      "tile": 133
+    },
+    "conditions": [
+      {
+        "type": "flag",
+        "flag": "floor_32_knight_challenged"
+      }
+    ],
+    "effects": [
+      {
+        "type": "flag",
+        "flag": "floor_32_knight_challenged",
+        "value": false
+      },
+      {
+        "type": "set_tile",
+        "floor": 2,
+        "x": 10,
+        "y": 10,
+        "tile": 21
+      },
+      {
+        "type": "set_tile",
+        "floor": 29,
+        "x": 6,
+        "y": 1,
+        "tile": 6
+      },
+      {
+        "type": "wait",
+        "ms": 50
+      },
+      {
+        "type": "message",
+        "text": "You think you're pretty strong, huh? If you can make it to the 40th floor, I shall fight with you again. There, you will die!",
+        "dialogue_id": 30,
+        "original_queue_id": 31
+      },
+      {
+        "type": "wait",
+        "ms": 125
+      },
+      {
+        "type": "set_tile",
+        "floor": 32,
+        "x": 5,
+        "y": 9,
+        "tile": 133
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 9,
+        "x": 5,
+        "y": 8,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 8,
+        "x": 5,
+        "y": 7,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 7,
+        "x": 5,
+        "y": 6,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 6,
+        "x": 5,
+        "y": 5,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 5,
+        "x": 5,
+        "y": 4,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 4,
+        "x": 5,
+        "y": 3,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 3,
+        "x": 5,
+        "y": 2,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 2,
+        "x": 5,
+        "y": 1,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 1,
+        "x": 5,
+        "y": 0,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 5,
+        "from_y": 0,
+        "x": 6,
+        "y": 0,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 6,
+        "from_y": 0,
+        "x": 7,
+        "y": 0,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 7,
+        "from_y": 0,
+        "x": 8,
+        "y": 0,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "move_tile",
+        "floor": 32,
+        "from_x": 8,
+        "from_y": 0,
+        "x": 9,
+        "y": 0,
+        "tile": 133,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 75
+      },
+      {
+        "type": "sound",
+        "cue": "get"
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
+        "type": "set_tile",
+        "floor": 32,
+        "x": 9,
+        "y": 0,
+        "tile": 6
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      }
+    ],
+    "source": "Original moncheck 0x46903B: successful Knight battle, 13 retreat moves, return Thief from 29F to 2F"
+  },
+  {
+    "id": "floor_42_zeno_and_golden_knight_arrival",
+    "once": true,
+    "trigger": {
+      "type": "stairs_up",
+      "floor": 42
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 42,
+        "x": 5,
+        "y": 5,
+        "tile": 91
+      },
+      {
+        "type": "sound",
+        "cue": "3f"
+      },
+      {
+        "type": "cinematic",
+        "kind": "magic",
+        "floor": 42,
+        "x": 5,
+        "y": 5,
+        "frames": [
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178,
+          179,
+          180,
+          181,
+          182
+        ],
+        "duration_ms": 650,
+        "color_tile": 91,
+        "underlying_tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 42,
+        "x": 5,
+        "y": 6,
+        "tile": 93
+      },
+      {
+        "type": "set_tile",
+        "floor": 42,
+        "x": 5,
+        "y": 8,
+        "tile": 93
+      },
+      {
+        "type": "set_tile",
+        "floor": 42,
+        "x": 4,
+        "y": 7,
+        "tile": 93
+      },
+      {
+        "type": "set_tile",
+        "floor": 42,
+        "x": 6,
+        "y": 7,
+        "tile": 93
+      },
+      {
+        "type": "sound",
+        "cue": "3f"
+      },
+      {
+        "type": "cinematic",
+        "kind": "magic",
+        "floor": 42,
+        "x": 5,
+        "y": 7,
+        "frames": [
+          167,
+          169,
+          171,
+          175,
+          182
+        ],
+        "duration_ms": 900,
+        "color_tile": 93,
+        "underlying_tile": 6,
+        "targets": [
+          {
+            "x": 5,
+            "y": 6
+          },
+          {
+            "x": 5,
+            "y": 8
+          },
+          {
+            "x": 4,
+            "y": 7
+          },
+          {
+            "x": 6,
+            "y": 7
+          }
+        ]
+      },
+      {
+        "type": "wait",
+        "ms": 150
+      },
+      {
+        "type": "message",
+        "text": "The Golden Knight says \"Oh! Sir Zeno. I was not able to catch the brave man. Please forgive me.\"",
+        "dialogue_id": 40,
+        "original_queue_id": 41
+      },
+      {
+        "type": "wait",
+        "ms": 125
+      },
+      {
+        "type": "message",
+        "text": "The Magic Sergeant, Zeno replies \"You weren't? I dare you to say that again. You come running up here like a coward and tell me you couldn't do your job. What shame! This tower has no need for the likes of you! You've failed me for the last time. You shall now die.\"",
+        "dialogue_id": 41,
+        "original_queue_id": 42
+      },
+      {
+        "type": "wait",
+        "ms": 125
+      },
+      {
+        "type": "message",
+        "text": "The Golden Knight says \"Oh God, please forgive me! Ah!\"",
+        "dialogue_id": 42,
+        "original_queue_id": 43
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
+        "type": "sound",
+        "cue": "zeno"
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
+        "type": "cinematic",
+        "kind": "magic",
+        "floor": 42,
+        "x": 5,
+        "y": 7,
+        "frames": [
+          183
+        ],
+        "duration_ms": 125,
+        "color_tile": 184,
+        "underlying_tile": 133
+      },
+      {
+        "type": "set_tile",
+        "floor": 42,
+        "x": 5,
+        "y": 7,
+        "tile": 6
+      },
+      {
+        "type": "wait",
+        "ms": 175
+      },
+      {
+        "type": "set_tile",
+        "floor": 42,
+        "x": 5,
+        "y": 6,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 42,
+        "x": 5,
+        "y": 8,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 42,
+        "x": 4,
+        "y": 7,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 42,
+        "x": 6,
+        "y": 7,
+        "tile": 6
+      },
+      {
+        "type": "wait",
+        "ms": 150
+      },
+      {
+        "type": "message",
+        "text": "The Magic Sergeant, Zeno says \"I behaved unbecomingly. But don't worry. I quite different from such a fellow. If you should come up to me, I would fight with you directly. I'm waiting for you.\"",
+        "dialogue_id": 43,
+        "original_queue_id": 44
+      },
+      {
+        "type": "wait",
+        "ms": 175
+      },
+      {
+        "type": "sound",
+        "cue": "get"
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
+        "type": "set_tile",
+        "floor": 42,
+        "x": 5,
+        "y": 5,
+        "tile": 6
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      }
+    ],
+    "source": "Original handan 0x444EAF..0x444ED3 + ichicheck 0x475FBA: once-only stair arrival, Zeno/four Sorcerers apparition, Knight execution, four speeches and departure"
+  },
+  {
     "id": "floor_2_guards_0",
     "once": true,
     "trigger": {
@@ -11052,7 +11805,7 @@
         ],
         "duration_ms": 575,
         "color_tile": 91,
-        "underlying_tile": 6
+        "underlying_tile": 21
       },
       {
         "type": "set_tile",

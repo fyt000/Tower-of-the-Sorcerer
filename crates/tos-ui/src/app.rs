@@ -4553,6 +4553,7 @@ fn original_campaign_upgrade(source: &str) -> Option<&'static str> {
             "ad358ec82db8b9ef",
             "c3e406503a26e7f9",
             "abd9d284f2e9b303",
+            "689db6b6a00a3400",
         ]
         .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
         {
@@ -4585,6 +4586,7 @@ fn restore_journey(engine: &mut Engine, source: &str) -> Result<Option<String>, 
         "ad358ec82db8b9ef",
         "c3e406503a26e7f9",
         "abd9d284f2e9b303",
+        "689db6b6a00a3400",
     ]
     .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
     {
@@ -4597,6 +4599,35 @@ fn restore_journey(engine: &mut Engine, source: &str) -> Result<Option<String>, 
         return Err(original_error);
     }
     saved["campaign_fingerprint"] = expected["campaign_fingerprint"].clone();
+    // A newly restored arrival scene must not ambush an existing journey
+    // again on a floor it already reached through stairs.
+    let highest = saved["highest_stair_floor"].as_i64().unwrap_or_else(|| {
+        saved["visited_floors"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_i64)
+            .max()
+            .unwrap_or(1)
+    });
+    for (floor, events) in [
+        (
+            32,
+            &[
+                "floor_32_golden_knight_arrival",
+                "floor_32_golden_knight_retreat",
+            ][..],
+        ),
+        (42, &["floor_42_zeno_and_golden_knight_arrival"][..]),
+    ] {
+        if highest >= floor {
+            for event in events {
+                if saved["event_counts"][*event].is_null() {
+                    saved["event_counts"][*event] = json!(1);
+                }
+            }
+        }
+    }
     if saved["cycle"].is_null() {
         saved["cycle"] = json!(1);
     }
@@ -5192,6 +5223,29 @@ mod migration_tests {
             serde_json::from_str::<Value>(&engine.save_json()).unwrap(),
             saved
         );
+    }
+    #[test]
+    fn stair_scene_revision_preserves_advanced_progress_without_replaying_arrivals() {
+        let mut engine = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
+        let mut saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
+        saved["campaign_fingerprint"] = json!("689db6b6a00a3400");
+        saved["highest_stair_floor"] = json!(42);
+        saved["visited_floors"] = json!([1, 32, 42]);
+        saved["player"]["hp"] = json!(8123);
+        assert!(
+            restore_journey(&mut engine, &saved.to_string())
+                .unwrap()
+                .is_some()
+        );
+        let restored: Value = serde_json::from_str(&engine.save_json()).unwrap();
+        assert_eq!(restored["player"]["hp"], 8123);
+        for event in [
+            "floor_32_golden_knight_arrival",
+            "floor_32_golden_knight_retreat",
+            "floor_42_zeno_and_golden_knight_arrival",
+        ] {
+            assert_eq!(restored["event_counts"][event], 1);
+        }
     }
     #[test]
     fn custom_campaign_and_unknown_save_are_not_migrated() {

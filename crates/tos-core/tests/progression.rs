@@ -43,6 +43,231 @@ fn log_contains(game: &Engine, text: &str) -> bool {
         .any(|line| line.as_str().unwrap().contains(text))
 }
 
+fn climb_to(game: &mut Engine, floor: i32) {
+    let stairs = game
+        .campaign()
+        .floors
+        .iter()
+        .find(|f| f.id == floor - 1)
+        .unwrap()
+        .tiles
+        .iter()
+        .position(|tile| *tile == 11)
+        .unwrap();
+    let (x, y) = (stairs % 11, stairs / 11);
+    if y < 10 {
+        place(game, floor - 1, x, y + 1);
+        step(game, "up");
+    } else {
+        place(game, floor - 1, x - 1, y);
+        step(game, "right");
+    }
+}
+
+#[test]
+fn floor_32_stair_arrival_challenges_then_retreats_and_returns_the_thief() {
+    let mut game = original();
+    edit_save(&mut game, |save| {
+        save["player"]["hp"] = json!(5000);
+        save["player"]["attack"] = json!(70);
+        save["player"]["defense"] = json!(100);
+        save["player"]["gold"] = json!(7);
+        save["floors"]["29"][17] = json!(21);
+    });
+    climb_to(&mut game, 32);
+    assert_eq!(
+        (game.player().floor, game.player().x, game.player().y),
+        (32, 5, 9)
+    );
+    // Six 20-damage hero hits; the Knight strikes first six times for 50.
+    assert_eq!((game.player().hp, game.player().gold), (4700, 107));
+    assert_eq!(game.tile_at(29, 6, 1), Some(6));
+    assert_eq!(game.tile_at(2, 10, 10), Some(21));
+    assert_eq!(game.tile_at(32, 5, 9), Some(6));
+    assert_eq!(game.tile_at(32, 9, 0), Some(6));
+    let state = game.snapshot();
+    let timeline = state["last_action"]["presentation"].as_array().unwrap();
+    let battle = timeline.iter().position(|e| e["type"] == "battle").unwrap();
+    assert_eq!(timeline[battle]["enemy_first"], true);
+    assert_eq!(timeline[battle]["damage"], 300);
+    let approach: Vec<_> = timeline[..battle]
+        .iter()
+        .filter(|e| e["type"] == "move_tile")
+        .collect();
+    let retreat: Vec<_> = timeline[battle + 1..]
+        .iter()
+        .filter(|e| e["type"] == "move_tile")
+        .collect();
+    assert_eq!((approach.len(), retreat.len()), (13, 13));
+    assert_eq!(
+        (approach[0]["from_x"].as_u64(), approach[0]["x"].as_u64()),
+        (Some(9), Some(8))
+    );
+    assert_eq!(
+        (retreat[0]["from_y"].as_u64(), retreat[0]["y"].as_u64()),
+        (Some(9), Some(8))
+    );
+    assert_eq!(
+        (retreat[12]["x"].as_u64(), retreat[12]["y"].as_u64()),
+        (Some(9), Some(0))
+    );
+    let first_speech = timeline
+        .iter()
+        .position(|e| e["dialogue_id"] == 29)
+        .unwrap();
+    let retreat_speech = timeline
+        .iter()
+        .position(|e| e["dialogue_id"] == 30)
+        .unwrap();
+    assert!(first_speech < battle && battle < retreat_speech);
+
+    let saved = game.save_json();
+    game = original();
+    game.load_json(&saved).unwrap();
+    climb_to(&mut game, 32);
+    assert_eq!((game.player().hp, game.player().gold), (4700, 107));
+    assert!(
+        !game.snapshot()["last_action"]["presentation"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|e| e["type"] == "battle" || e["type"] == "move_tile")
+    );
+    let saved: Value = serde_json::from_str(&game.save_json()).unwrap();
+    assert_eq!(saved["event_counts"]["floor_32_golden_knight_arrival"], 1);
+    assert_eq!(saved["event_counts"]["floor_32_golden_knight_retreat"], 1);
+}
+
+#[test]
+fn floor_32_lethal_first_strike_stops_before_retreat_gold_and_thief_relocation() {
+    let mut game = original();
+    edit_save(&mut game, |save| {
+        save["player"]["hp"] = json!(300);
+        save["player"]["attack"] = json!(70);
+        save["player"]["defense"] = json!(100);
+        save["player"]["gold"] = json!(7);
+        save["floors"]["29"][17] = json!(21);
+    });
+    climb_to(&mut game, 32);
+    assert_eq!(game.snapshot()["status"], "lost");
+    assert_eq!((game.player().hp, game.player().gold), (0, 7));
+    assert_eq!(game.tile_at(32, 5, 9), Some(133));
+    assert_eq!(game.tile_at(29, 6, 1), Some(21));
+    assert_eq!(game.tile_at(2, 10, 10), Some(6));
+    let state = game.snapshot();
+    let timeline = state["last_action"]["presentation"].as_array().unwrap();
+    assert_eq!(
+        timeline.iter().filter(|e| e["type"] == "move_tile").count(),
+        13
+    );
+    assert!(!timeline.iter().any(|e| e["dialogue_id"] == 30));
+}
+
+#[test]
+fn floor_42_stair_scene_materializes_zeno_and_four_guards_then_executes_the_knight() {
+    let mut game = original();
+    let before = (game.player().hp, game.player().gold);
+    climb_to(&mut game, 42);
+    assert_eq!(
+        (game.player().floor, game.player().x, game.player().y),
+        (42, 5, 9)
+    );
+    assert_eq!((game.player().hp, game.player().gold), before);
+    for (x, y) in [(5, 5), (5, 6), (5, 7), (5, 8), (4, 7), (6, 7)] {
+        assert_eq!(game.tile_at(42, x, y), Some(6));
+    }
+    assert_eq!(game.tile_at(42, 5, 3), Some(155));
+    let state = game.snapshot();
+    let timeline = state["last_action"]["presentation"].as_array().unwrap();
+    assert!(!timeline.iter().any(|e| e["type"] == "battle"));
+    let magic: Vec<_> = timeline.iter().filter(|e| e["kind"] == "magic").collect();
+    assert_eq!(magic.len(), 3);
+    assert_eq!(
+        (magic[0]["x"].as_u64(), magic[0]["y"].as_u64()),
+        (Some(5), Some(5))
+    );
+    assert_eq!(magic[0]["color_tile"], 91);
+    assert_eq!(magic[1]["color_tile"], 93);
+    assert_eq!(magic[1]["frames"], json!([167, 169, 171, 175, 182]));
+    assert_eq!(
+        magic[1]["targets"],
+        json!([{"x":5,"y":6},{"x":5,"y":8},{"x":4,"y":7},{"x":6,"y":7}])
+    );
+    assert_eq!(magic[2]["frames"], json!([183]));
+    assert_eq!(
+        (
+            magic[2]["color_tile"].as_u64(),
+            magic[2]["underlying_tile"].as_u64()
+        ),
+        (Some(184), Some(133))
+    );
+    let speeches: Vec<_> = timeline
+        .iter()
+        .filter_map(|e| e["dialogue_id"].as_u64())
+        .collect();
+    assert_eq!(speeches, [40, 41, 42, 43]);
+    let saved = game.save_json();
+    game.load_json(&saved).unwrap();
+    climb_to(&mut game, 42);
+    assert!(
+        !game.snapshot()["last_action"]["presentation"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|e| e["type"] == "dialogue" || e["kind"] == "magic")
+    );
+}
+
+#[test]
+fn floor_32_and_42_stair_scenes_do_not_run_on_flight_or_descent() {
+    for floor in [32, 42] {
+        let mut game = original();
+        edit_save(&mut game, |save| {
+            // The original Orb requires the hero to stand beside stairs.
+            save["player"]["x"] = json!(1);
+            save["player"]["y"] = json!(0);
+            save["player"]["inventory"] = json!(["orb_of_flying"]);
+            save["visited_floors"] = json!([1, 32, 42]);
+            save["highest_stair_floor"] = json!(42);
+        });
+        game.command(json!({"type":"use_item","item":"orb_of_flying","floor":floor}))
+            .unwrap();
+        assert_eq!(game.player().floor, floor);
+        assert!(
+            !game.snapshot()["last_action"]["presentation"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|e| e["type"] == "battle" || e["type"] == "dialogue")
+        );
+        let above = game
+            .campaign()
+            .floors
+            .iter()
+            .find(|f| f.id == floor + 1)
+            .unwrap();
+        let stairs = above.tiles.iter().position(|tile| *tile == 12).unwrap();
+        place(&mut game, floor + 1, stairs % 11, stairs / 11 + 1);
+        step(&mut game, "up");
+        assert_eq!(game.player().floor, floor);
+        let state = game.snapshot();
+        assert!(
+            !state["last_action"]["presentation"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|e| e["type"] == "battle" || e["type"] == "dialogue")
+        );
+        let save: Value = serde_json::from_str(&game.save_json()).unwrap();
+        let event = if floor == 32 {
+            "floor_32_golden_knight_arrival"
+        } else {
+            "floor_42_zeno_and_golden_knight_arrival"
+        };
+        assert!(save["event_counts"][event].is_null());
+    }
+}
+
 #[test]
 fn floor_10_only_the_eight_arena_guards_gate_the_skeleton_boss() {
     let mut game = original();
@@ -162,6 +387,28 @@ fn floor_40_all_thirteen_first_strike_fights_have_exact_damage_and_gold() {
     assert_eq!(game.tile_at(40, 5, 7), Some(6));
     assert_eq!(game.tile_at(40, 1, 1), Some(34));
     assert_eq!(game.tile_at(40, 9, 1), Some(35));
+    let state = game.snapshot();
+    let timeline = state["last_action"]["presentation"].as_array().unwrap();
+    let final_battle = timeline
+        .iter()
+        .rposition(|e| e["type"] == "battle")
+        .unwrap();
+    let retreat: Vec<_> = timeline[final_battle + 1..]
+        .iter()
+        .filter(|e| e["type"] == "move_tile")
+        .collect();
+    assert_eq!(retreat.len(), 5);
+    for (number, movement) in retreat.iter().enumerate() {
+        assert_eq!(movement["tile"], 133);
+        assert_eq!(movement["from_y"], 6 - number);
+        assert_eq!(movement["y"], 5 - number);
+        assert_eq!(movement["x"], 5);
+    }
+    assert!(
+        timeline[final_battle + 1..]
+            .iter()
+            .any(|e| e["dialogue_id"] == 38)
+    );
 
     let save = game.save_json();
     let mut restored = original();

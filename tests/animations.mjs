@@ -41,6 +41,39 @@ async function load(campaign) {
   await page.mouse.move(0, 0);
   await page.waitForTimeout(80);
 }
+async function editSave(edit) {
+  const saved = JSON.parse(await page.evaluate(() => window.tower.save_json()));
+  edit(saved);
+  await page.evaluate(saved => window.tower.load_save(JSON.stringify(saved)), saved);
+  await idle();
+}
+async function animationSpeed(speed) {
+  await page.evaluate(speed => {
+    const key = 'tos-rust:prefs:v2';
+    const prefs = JSON.parse(localStorage.getItem(key) || '{}');
+    prefs.speed = speed;
+    localStorage.setItem(key, JSON.stringify(prefs));
+  }, speed);
+  await page.reload();
+  await waitFor(() => window.tower && JSON.parse(window.tower.ui_json()).sprites_loaded);
+}
+async function speech(id) {
+  await waitFor(id => {
+    const u = JSON.parse(window.tower.ui_json());
+    return u.animation === 'dialogue' && u.animation_effect.dialogue_id === id && u.bounds.dialogue_continue;
+  }, id);
+}
+async function continueSpeech() {
+  const before = (await ui()).animation_effect.dialogue_id;
+  // Enter follows the real conversation control without racing a modal's
+  // first layout frame when successive speeches have different heights.
+  await page.locator('canvas').focus();
+  await page.keyboard.press('Enter');
+  await waitFor(before => {
+    const u = JSON.parse(window.tower.ui_json());
+    return u.animation !== 'dialogue' || u.animation_effect.dialogue_id !== before;
+  }, before);
+}
 async function phase(style, minimum = 0.35) {
   await waitFor(({ style, minimum }) => {
     const u = JSON.parse(window.tower.ui_json());
@@ -63,13 +96,14 @@ try {
   await page.goto(process.env.TOS_URL || 'http://127.0.0.1:8080');
   await waitFor(() => window.tower && JSON.parse(window.tower.ui_json()).sprites_loaded);
   await test('Previously published campaign and save migrate together', async () => {
-    for (const [commit, fingerprint] of [['bbc5dd7', 'ad358ec82db8b9ef'], ['4c0ae3f', 'abd9d284f2e9b303']]) {
+    for (const [commit, fingerprint] of [['bbc5dd7', 'ad358ec82db8b9ef'], ['4c0ae3f', 'abd9d284f2e9b303'], ['2e0f15e', '689db6b6a00a3400']]) {
       const oldCampaign = execFileSync('git', ['show', `${commit}:data/campaign.json`], { cwd: root, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024 });
       // Real previously shipped campaigns must upgrade with their progress.
       const saved = JSON.parse(await page.evaluate(() => window.tower.save_json()));
       saved.campaign_fingerprint = fingerprint;
       saved.cycle = 2; saved.steps = 432; saved.player.hp = 8123;
       saved.flags = ['captured']; saved.event_counts = { capture_on_floor_3: 1 };
+      saved.visited_floors = [1, 32, 42]; saved.highest_stair_floor = 42;
       await page.evaluate(({ campaign, saved }) => {
         localStorage.setItem('tos-rust:campaign:v1', campaign);
         localStorage.setItem('tos-rust:save:v1', JSON.stringify(saved));
@@ -79,7 +113,10 @@ try {
       const current = await state();
       assert.deepEqual([current.cycle, current.steps, current.player.hp], [2, 432, 8123]);
       const migrated = JSON.parse(await page.evaluate(() => window.tower.save_json()));
-      assert.deepEqual(migrated.event_counts, { capture_on_floor_3: 1 });
+      assert.deepEqual(migrated.event_counts, { capture_on_floor_3: 1,
+        floor_32_golden_knight_arrival: 1, floor_32_golden_knight_retreat: 1,
+        floor_42_zeno_and_golden_knight_arrival: 1 });
+      assert.deepEqual(migrated.flags, ['captured']);
       assert(await page.evaluate(() => localStorage.getItem('tos-rust:save:recovery')));
     }
   });
@@ -146,6 +183,76 @@ try {
       assert.equal((await ui()).visual_tiles[14], 151);
     }
   });
+  await test('32F Knight approaches, battles, retreats and stays gone after another climb', async () => {
+    await load(original);
+    await editSave(saved => {
+      Object.assign(saved.player, { floor: 31, x: 4, y: 10, hp: 5000, attack: 70, defense: 100, gold: 7 });
+      saved.floors['29'][17] = 21;
+    });
+    await command({ type: 'move', direction: 'right' });
+    await waitFor(() => {
+      const u = JSON.parse(window.tower.ui_json());
+      return u.animation === 'move_tile' && u.animation_effect.from_y === 0 && u.visual_floor === 32;
+    });
+    await capture('32f-knight-approach', [7, 0]);
+    await speech(29);
+    assert.equal((await ui()).visual_player.hp, 5000);
+    await continueSpeech();
+    await speech(30);
+    assert.deepEqual([(await ui()).visual_player.hp, (await ui()).visual_player.gold], [4700, 107]);
+    await continueSpeech();
+    await waitFor(() => {
+      const u = JSON.parse(window.tower.ui_json());
+      return u.animation === 'move_tile' && u.animation_effect.from_y === 9 && u.animation_effect.y === 8;
+    });
+    await capture('32f-knight-retreat', [5, 8]);
+    await idle();
+    const done = await state();
+    assert.deepEqual([done.floor, done.player.x, done.player.y, done.tiles[9], done.tiles[104]], [32, 5, 9, 6, 6]);
+    assert.equal((await ui()).visual_tiles[9], 6);
+    await editSave(saved => Object.assign(saved.player, { floor: 31, x: 4, y: 10 }));
+    await command({ type: 'move', direction: 'right' });
+    await idle();
+    assert.deepEqual([(await state()).player.hp, (await state()).player.gold], [4700, 107]);
+    assert(!(await state()).last_action.presentation.some(e => ['battle', 'move_tile', 'dialogue'].includes(e.type)));
+  });
+  await test('42F Zeno and guards materialize, Knight is executed, and every actor disappears', async () => {
+    // Use the normal Slow preference so a screenshot finishes inside the
+    // original 125ms impact. The campaign's recovered durations stay intact.
+    await animationSpeed(0.5);
+    await load(original);
+    await editSave(saved => Object.assign(saved.player, { floor: 41, x: 4, y: 10 }));
+    const before = await state();
+    await command({ type: 'move', direction: 'right' });
+    await waitFor(() => {
+      const u = JSON.parse(window.tower.ui_json());
+      return u.animation_effect?.kind === 'magic' && u.animation_effect.targets?.length === 4;
+    });
+    await capture('42f-guard-materialization', [5, 6]);
+    await speech(40);
+    const staged = await ui();
+    assert.equal(staged.visual_tiles[60], 91);
+    assert.equal(staged.visual_tiles[82], 133);
+    for (const target of [71, 93, 81, 83]) assert.equal(staged.visual_tiles[target], 93);
+    await capture('42f-knight-and-zeno', [5, 7]);
+    await continueSpeech(); await speech(41); await continueSpeech(); await speech(42); await continueSpeech();
+    await waitFor(() => {
+      const u = JSON.parse(window.tower.ui_json());
+      return u.animation_effect?.kind === 'magic' && u.animation_effect.color_tile === 184;
+    });
+    assert.equal((await ui()).visual_tiles[82], 133);
+    await capture('42f-knight-execution', [5, 7]);
+    await speech(43); await continueSpeech(); await idle();
+    const done = await state(), rendered = await ui();
+    assert.deepEqual([done.player.hp, done.player.gold], [before.player.hp, before.player.gold]);
+    for (const target of [60, 71, 93, 81, 83, 82]) {
+      assert.equal(done.tiles[target], 6);
+      assert.equal(rendered.visual_tiles[target], 6);
+    }
+    await capture('42f-after-execution', [5, 7]);
+    assert(!done.last_action.presentation.some(e => e.type === 'battle'));
+    await animationSpeed(1);
+  });
   await test('Every hero and enemy strike has clean, impact and clean phases', async () => {
     const campaign = room(); campaign.floors[0].tiles[13] = 61;
     campaign.rules.presentation.ambient_frame_ms = 150;
@@ -201,7 +308,8 @@ for i in range(5):
  clean=diff(before,after);impact=diff(hit,after)
  assert impact>15,(i,clean,impact)
  assert clean<impact*0.4,(i,clean,impact)
-print('PASS rendered pixels: blinking eyes/still body, sliding doors, four gate quadrants, falling walls, Bomb dissolve, all five impact pulses')
+assert diff(crop('42f-knight-execution'),crop('42f-after-execution'))>5
+print('PASS rendered pixels: blinking eyes/still body, sliding doors, four gate quadrants, falling walls, Bomb dissolve, all five impact pulses, Knight execution/cleanup')
 ` , report], { encoding: 'utf8' });
   console.log(pixels.trim());
 } finally {

@@ -33,6 +33,7 @@ pub enum TriggerKind {
     Step,
     Bump,
     EnterFloor,
+    StairsUp,
     EnemyDefeated,
     Interact,
     DoorOpened,

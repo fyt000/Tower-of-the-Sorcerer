@@ -1201,6 +1201,7 @@
         ]
       ],
       "configured_events": [
+        "floor_32_golden_knight_retreat",
         "floor_32_guards_0"
       ]
     },

@@ -1299,6 +1299,7 @@ impl CampaignEditor {
                         "bump",
                         "door_opened",
                         "enter_floor",
+                        "stairs_up",
                         "enemy_defeated",
                         "interact",
                     ],

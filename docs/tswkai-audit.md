@@ -108,9 +108,13 @@ that the opening starts from the actual closed gate.
 ## Coverage and boundaries
 
 The original event audit checks all 51 initialized floor records and every one
-of the 56 initialized special-road sites. All have configured events. The
-campaign retains 100 stable event IDs, including guarded rewards, capture,
-thief branches, staged bosses, 23F closing walls, 30F/33F traps, all thirteen
+of the 56 initialized special-road sites. All have configured events. It also
+enumerates direct callers of the event dispatcher, scene builder, post-combat
+handler and movement hazard helper, so stairs and ordinary movement are visible
+as separate entry paths. The campaign has 103 events and retains all 100
+previous event IDs. Coverage includes the restored 32F/42F stair scenes,
+guarded rewards, capture, thief branches, staged bosses, 23F closing walls,
+30F/33F traps, all thirteen
 40F forced battles, clock doors, hidden NPCs, caster gates, 49F sealing/decoy,
 princess/time-gate eligibility, and cycle-specific endings. Alternative trigger
 positions extend coverage without invalidating old event IDs.
@@ -129,9 +133,19 @@ Windows gameplay session. Exact original timer latency, fairy score/rank tables,
 fairy automatic checkpoint files, exact ending raster artwork, and a natural
 complete first-cycle route remain separate fidelity work. The upstream artwork
 also changes some Octopus cells; those differences were not imported without a
-separate interpretation. A floor-32 Golden Knight first-strike special case in
-the upstream forecasting overlay is not sufficient evidence to add an encounter:
-the installed initialized floor has no Golden Knight, and the examined dispatcher
-uses ordinary combat for those knight tiles. This audit therefore does not claim
+separate interpretation. The earlier audit missed the floor-32 Golden Knight
+because he is absent from the initialized map: `handan` at `0x444E8B` calls
+`mevent` and `ichicheck` immediately after the first upward stair arrival.
+The recovered branch creates him, queues thirteen approach moves and an
+enemy-first battle; its post-combat handler queues thirteen retreat moves and
+returns the Thief from floor 29 to floor 2. The adjacent stair branch at
+`0x444EAF` also restores floor 42's Zeno/Knight execution scene. The audit now
+checks these callbacks with their once flags both unset and set, their helper
+materialization masks, and floor 40's existing five-move Knight retreat.
+Magic queue operands also retain their actual underlying sprite: the floor-42
+execution overlays the Knight, and Zeno's time-gate appearance overlays the
+Thief rather than road.
+Floor 47's ordinary-movement hazard helper is recorded separately from these
+stair callbacks and special-road sites. This audit therefore does not claim
 every dynamically reachable map state is proven or that all tswKai QoL features
 have been ported.

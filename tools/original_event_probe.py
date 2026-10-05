@@ -14,7 +14,7 @@ md=capstone.Cs(capstone.CS_ARCH_X86,capstone.CS_MODE_32)
 MAP=0x4b8934
 RAW=(ROOT/'data/original-map-bytes.bin').read_bytes()
 
-def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presentation=False,registers=(),follow_calls=()):
+def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presentation=False,registers=(),follow_calls=(),watch_globals=()):
     u=unicorn.Uc(unicorn.UC_ARCH_X86,unicorn.UC_MODE_32)
     u.mem_map(0,0x300000); u.mem_map(0x400000,0x300000)
     u.mem_write(0x400000,pe.get_memory_mapped_image())
@@ -57,7 +57,9 @@ def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presenta
             'stat_slots':list(struct.unpack('<32I',u.mem_read(0x4b8688,128))),
             'cycle_factor_minus_one':struct.unpack('<I',u.mem_read(0x4b8904,4))[0],
             'later_cycle_flag':struct.unpack('<I',u.mem_read(0x4b8908,4))[0],
-            'calls':sorted(skipped),'followed_calls':sorted(followed)}
+            'calls':sorted(skipped),'followed_calls':sorted(followed),
+            **({'watched_globals':{hex(address):struct.unpack('<I',u.mem_read(address,4))[0]
+                                  for address in watch_globals}} if watch_globals else {})}
 
 if __name__=='__main__':
     addr=int(sys.argv[1],0); f=int(sys.argv[2]);x=int(sys.argv[3]) if len(sys.argv)>3 else 0;y=int(sys.argv[4]) if len(sys.argv)>4 else 0

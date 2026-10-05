@@ -2,8 +2,66 @@
   "source": "Installed English Tower of the Sorcerer Windows v1.2; isolated executable emulation",
   "executable_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
   "floors_reviewed": 51,
-  "configured_event_count": 100,
+  "configured_event_count": 103,
   "initialized_special_road_sites": 56,
+  "direct_handler_callers": {
+    "mevent": {
+      "helper": "0x46397c",
+      "call_sites": [
+        "0x4447d5",
+        "0x444ea0",
+        "0x444ec4"
+      ],
+      "entry_paths": [
+        "special-road movement",
+        "32F upstairs arrival",
+        "42F upstairs arrival"
+      ]
+    },
+    "ichicheck": {
+      "helper": "0x46cb1c",
+      "call_sites": [
+        "0x463bff",
+        "0x463c31",
+        "0x463c91",
+        "0x463e34",
+        "0x463e8b",
+        "0x463ebd",
+        "0x463ec9",
+        "0x463efb",
+        "0x463f2d",
+        "0x463f84",
+        "0x463f90",
+        "0x463fc2",
+        "0x463fcb",
+        "0x46401f"
+      ],
+      "entry_paths": [
+        "mevent floor/position dispatch"
+      ]
+    },
+    "moncheck": {
+      "helper": "0x4664e4",
+      "call_sites": [
+        "0x4533eb"
+      ],
+      "entry_paths": [
+        "successful battle completion"
+      ]
+    },
+    "mazyutu1": {
+      "helper": "0x44c5c4",
+      "call_sites": [
+        "0x44c258",
+        "0x44c298",
+        "0x44c2d7",
+        "0x44c318"
+      ],
+      "entry_paths": [
+        "four ordinary movement neighbor checks"
+      ]
+    }
+  },
   "floors": [
     {
       "floor": 0,
@@ -1182,7 +1240,7 @@
     {
       "floor": 32,
       "special_road_sites": [],
-      "configured_event_count": 1
+      "configured_event_count": 3
     },
     {
       "floor": 33,
@@ -1321,7 +1379,7 @@
     {
       "floor": 42,
       "special_road_sites": [],
-      "configured_event_count": 0
+      "configured_event_count": 1
     },
     {
       "floor": 43,
@@ -1601,6 +1659,214 @@
       "dword ptr [edx + 0x20]"
     ]
   },
+  "stair_arrival_scenes": [
+    {
+      "floor": 32,
+      "builder": "0x444e8b..0x444ed3",
+      "once_flag": "0x4b88f4",
+      "configured_event": "floor_32_golden_knight_arrival",
+      "cases": [
+        {
+          "already_seen": false,
+          "once_flag_after": 1,
+          "queue_records": 78,
+          "opcode_counts": {
+            "0": 61,
+            "1": 1,
+            "6": 1,
+            "10": 1,
+            "11": 1,
+            "12": 13
+          },
+          "called_helpers_not_executed": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c",
+            "0x450758",
+            "dword ptr [edi + 0xc]"
+          ]
+        },
+        {
+          "already_seen": true,
+          "once_flag_after": 1,
+          "queue_records": 0,
+          "opcode_counts": {},
+          "called_helpers_not_executed": []
+        }
+      ]
+    },
+    {
+      "floor": 42,
+      "builder": "0x444e8b..0x444ed3",
+      "once_flag": "0x4b8894",
+      "configured_event": "floor_42_zeno_and_golden_knight_arrival",
+      "cases": [
+        {
+          "already_seen": false,
+          "once_flag_after": 1,
+          "queue_records": 58,
+          "opcode_counts": {
+            "0": 45,
+            "1": 2,
+            "6": 6,
+            "9": 1,
+            "10": 4
+          },
+          "called_helpers_not_executed": [
+            "0x4034dc",
+            "0x44bc0c",
+            "0x450758",
+            "0x461a0c",
+            "0x461ef4"
+          ]
+        },
+        {
+          "already_seen": true,
+          "once_flag_after": 1,
+          "queue_records": 0,
+          "opcode_counts": {},
+          "called_helpers_not_executed": []
+        }
+      ]
+    }
+  ],
+  "floor_32_knight_retreat": {
+    "builder": "0x46903b",
+    "successful_battle_predicate_slot": "0x4b8868",
+    "tile_movements": 13,
+    "changed": [
+      [
+        2,
+        10,
+        10,
+        21
+      ],
+      [
+        29,
+        6,
+        1,
+        6
+      ]
+    ],
+    "queue_records": 66,
+    "opcode_counts": {
+      "0": 49,
+      "1": 1,
+      "6": 1,
+      "10": 1,
+      "12": 13,
+      "17": 1
+    },
+    "called_helpers_not_executed": [
+      "0x4135d4"
+    ]
+  },
+  "floor_40_knight_retreat": {
+    "builder": "0x473961",
+    "forced_battles": 13,
+    "retreat_movements": [
+      [
+        12,
+        71,
+        60
+      ],
+      [
+        12,
+        60,
+        49
+      ],
+      [
+        12,
+        49,
+        38
+      ],
+      [
+        12,
+        38,
+        27
+      ],
+      [
+        12,
+        27,
+        16
+      ]
+    ]
+  },
+  "floor_42_guard_materialization": {
+    "builder": "0x461ef4",
+    "targets": [
+      71,
+      93,
+      81,
+      83
+    ],
+    "mask_tiles": [
+      167,
+      169,
+      171,
+      175,
+      182
+    ],
+    "queue_records": 42,
+    "opcode_counts": {
+      "0": 21,
+      "1": 1,
+      "9": 20
+    },
+    "called_helpers_not_executed": [
+      "0x40923c",
+      "0x44bc0c",
+      "dword ptr [ecx + 0x28]",
+      "dword ptr [ecx + 0x2c]",
+      "dword ptr [edx + 0x1c]",
+      "dword ptr [edx + 0x20]"
+    ]
+  },
+  "magic_operand_records": [
+    {
+      "floor": 42,
+      "target_index": 82,
+      "mask_tile": 183,
+      "underlying_tile": 133,
+      "color_tile": 184
+    },
+    {
+      "floor": 50,
+      "target_index": 49,
+      "mask_tiles": [
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182
+      ],
+      "underlying_tile": 21,
+      "color_tile": 91,
+      "entry_floor": 24
+    }
+  ],
+  "movement_hazard_callback": {
+    "helper": "0x44c5c4",
+    "direct_call_sites": [
+      "0x44c258",
+      "0x44c298",
+      "0x44c2d7",
+      "0x44c318"
+    ],
+    "scope": "Ordinary movement neighbor checks; separate from special roads. Floor-47 retreat variants are checked by audit_original_mechanics.py."
+  },
   "first_cycle_ending": {
     "builder": "0x4463a1..0x448fbc",
     "queue_records": 1098,
@@ -1654,6 +1920,7 @@
   },
   "fidelity_boundaries": [
     "Coverage of all initialized tile-7 sites does not prove every possible later map state or NPC callback.",
+    "The 32F and 42F stair callbacks and movement hazard helper are audited separately from the initial map scan.",
     "Floor-24 portal and floor-43 door trap are dynamically created or differently typed and have dedicated event scenarios.",
     "Capture and materialization helpers have been inspected separately; reported calls are otherwise skipped.",
     "Durations are configurable. Original Delphi timer tick scheduling and Windows timer granularity are not emulated.",
