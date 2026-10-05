@@ -39,7 +39,9 @@ def convert(p,f,tiles=None):
     effects=[];unknown=[]
     transformation=any(q[0]==11 and q[1]==4 for q in p['queue'])
     deferred_changes=[]
-    for ff,x,y,t in p['changed']:
+    # A repeated write is still a gameplay operation even if it matches the
+    # initial map. Branches requiring altered maps need separate probes below.
+    for ff,x,y,t in p['direct_map_writes']:
         tiles[ff*123+2+y*11+x]=t
         (deferred_changes if transformation else effects).append(tile_effect(ff,y*11+x,t))
     queue=list(p['queue']); cursor=0
@@ -180,10 +182,25 @@ add('capture_on_floor_3',{'type':'step','floor':3,'x':4,'y':8},[
     {'type':'flag','flag':'captured'},
     *[{'type':'message','text':DIALOGUES[i],'dialogue_id':i} for i in [0,1,2,3]]],
     source='Original mevent 0x463A2C + magic 0x461A0C + opening2 0x464048 title/scan + opening31 0x4653B8; compact original stages with configurable durations')
-add('thief_opens_prison_tunnel',{'type':'interact','floor':2,'x':2,'y':6},[
-    {'type':'sound','cue':'open'},tile_transition(2,67,RAW[2*123+2+67],7),
-    tile_effect(2,67,6),tile_effect(2,68,6),{'type':'message','text':DIALOGUES[4]+' '+DIALOGUES[57],'dialogue_id':4}],
-    source='Original touzoku 0x465900: door record (13,67,7)')
+p=probe(0x465900,2,2,7)
+effects,stage,unknown=convert(p,2)
+# The interaction already shows the first speech. Its Continue button then
+# runs a separate queue, which moves the Thief to a second conversation site.
+effects=[e for e in effects if e['type']!='message']
+continuation=probe(0x44da10,2,globals=[(0x48c5a4,14)])
+departure,_,more_unknown=convert(continuation,2,stage)
+add('thief_opens_prison_tunnel',{'type':'interact','floor':2,'x':2,'y':6},effects+departure,
+    source='Original touzoku 0x465900 wall opening + dialogue Continue stage 14 at 0x44DCAC; three departure moves to (0,7)',unknown=unknown+more_unknown)
+continuation=probe(0x44da10,2,globals=[(0x48c5a4,15)])
+stage=list(RAW);stage[2*123+2+77]=21
+effects,_,unknown=convert(continuation,2,stage)
+add('thief_leaves_prison',{'type':'interact','floor':2,'x':0,'y':7},effects,
+    source='Original touzoku 0x465B2D dialogue 5 + dialogue Continue stage 15 at 0x44DDF4; two moves and removal',unknown=unknown)
+continuation=probe(0x44da10,2,globals=[(0x48c5a4,16)])
+effects,_,unknown=convert(continuation,2)
+effects.append({'type':'flag','flag':'floor_35_thief_tunnel_started'})
+add('thief_opens_floor_35_tunnel',{'type':'interact','floor':2,'x':10,'y':10},effects,
+    source='Original dialogue Continue stage 16 at 0x44DF94: F35 tunnel and Thief placement; sets 0x4B8808',unknown=unknown)
 
 for floor,index,tile in [(12,10,19),(16,120,25),(19,27,39)]:
     add(f'floor_{floor}_scripted_wall_reveal',
@@ -193,6 +210,7 @@ for floor,index,tile in [(12,10,19),(16,120,25),(19,27,39)]:
 # The F15 thief opens the bypass of the octopus and leaves along the tunnel.
 p=probe(0x465900,15,8,0)
 effects,_,unknown=convert(p,15)
+effects=[e for e in effects if e['type']!='message']  # Shown by the interaction.
 add('thief_opens_floor_15_tunnel',{'type':'interact','floor':15,'x':8,'y':0},effects,
     source='Original touzoku floor-15 branch 0x465C23',unknown=unknown)
 
@@ -202,6 +220,18 @@ for f in [10,15,20,25,30,33,38,40,48,49]:
         if t!=7:continue
         p=probe(0x46cb1c,f,i%11,i//11)
         effects,stage,unknown=convert(p,f)
+        if f==40:
+            # Each of the twelve troops returns only if its cell is road.
+            # The untouched-map probe never executes these restoration writes.
+            troops=[j for j,t in enumerate(RAW[40*123+2:41*123])
+                    if t in [135,137,139,141] and j//11<=3]
+            assert len(troops)==12
+            cleared=probe(0x46cb1c,f,i%11,i//11,
+                          changes=[(f,j%11,j//11,6) for j in troops])
+            assert cleared['queue']==p['queue']
+            assert cleared['direct_map_writes']==[(f,j%11,j//11,RAW[f*123+2+j]) for j in troops]
+            effects[:0]=[{**tile_effect(f,j,RAW[f*123+2+j]),
+                          'conditions':[tile_condition(f,j,6)]} for j in troops]
         stage[f*123+2+i]=6;effects.insert(0,tile_effect(f,i,6))
         trigger={'type':'step','floor':f,'x':i%11,'y':i//11}
         source='Original ichicheck 0x46CB1C; ordered tile motion, sound and waits retained'
@@ -380,12 +410,17 @@ if __name__=='__main__':
     for i,t in enumerate(RAW[23*123+2:24*123]):
         if t==7:add(f'floor_23_wall_{i}',{'type':'step','floor':23,'x':i%11,'y':i//11},[{'type':'sound','cue':'open'},tile_effect(23,i,8)],source='Original mevent 0x463C9B')
 
-    portal_effects=[{'type':'message','text':DIALOGUES[25],'dialogue_id':25},
-        {'type':'message','text':DIALOGUES[24],'dialogue_id':24}]
-    portal_effects.extend(tile_effect(24,i,t) for i,t in [(4,8),(6,8),(16,6),(27,6),(38,6),(5,7)])
-    portal_effects.append(tile_effect(50,92,21))
+    # handan always places the F50 Thief and speaks queue IDs 25 then 26;
+    # only the F24 portal writes depend on the F25 boss having disappeared.
+    p=probe(0x444490,26,5,6,globals=[(0x48c584,60)],changes=[(25,5,5,6)])
+    portal_effects,_,unknown=convert(p,26)
+    portal_effects=[e for e in portal_effects if e.get('dialogue_id')!=24]  # Already shown by interaction.
+    for effect in portal_effects:
+        if effect['type']=='set_tile' and effect['floor']==24:
+            effect['conditions']=[tile_condition(25,60,6)]
     add('princess_doll_unlocks_time_gate',{'type':'interact','floor':26,'x':5,'y':5},portal_effects,
-        [tile_condition(25,60,6)],source='Original handan princess branch 0x445397')
+        source='Original handan princess branch 0x445397: unconditional speeches/Thief at F50 (5,4); only F24 gate requires F25 boss cell road',unknown=unknown)
+    EVENTS[-1]['once']=False
     p=probe(0x46cb1c,24,5,0)
     effects,_,unknown=convert(p,24)
     effects.insert(0,tile_effect(24,5,6))

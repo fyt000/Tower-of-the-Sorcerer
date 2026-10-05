@@ -247,8 +247,8 @@ fn typed_campaign_preserves_the_published_save_fingerprint() {
     let engine = Engine::new(campaign).unwrap();
     let saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
     // Behavior enums must preserve their canonical JSON spellings. Explicit
-    // item, animation and stair-event fidelity rules revise the bundled
+    // item, animation and hidden-event fidelity rules revise the bundled
     // campaign. The GUI keeps known previous revisions recoverable through
     // its tested migration.
-    assert_eq!(saved["campaign_fingerprint"], "3a59316f31dbcd22");
+    assert_eq!(saved["campaign_fingerprint"], "928eb19f7c6a7a71");
 }

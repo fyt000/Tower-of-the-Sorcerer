@@ -285,11 +285,11 @@ def original_interactions(map_bytes: bytes, dialogue: list[dict]) -> list[dict]:
                 if clue is not None:
                     record["after_text"] = {"flag": flag, "text": text[clue]}
             elif tile == 21:
-                ids = {2: [3, 4, 57], 15: [17], 29: [26, 27, 28]}.get(floor, [31])
-                record.update(text="Talk to the thief to continue.", dialogue_ids=ids,
+                ids = {2: [3], 15: [17], 29: [26]}[floor]
+                record.update(text=text[ids[0]], dialogue_ids=ids,
                               source="Original TTSW10.touzoku 0x465900; map effects live in events.json")
             else:
-                record.update(text="Speak to the princess.", dialogue_ids=[25], source="Original princess case TTSW10.handan 0x445397; dialogue/map effects live in events.json")
+                record.update(text=text[24], dialogue_ids=[24], source="Original princess case TTSW10.handan 0x445397; second speech and conditional gate writes live in events.json")
             interactions.append(record)
     # These NPCs are absent in the initializer and revealed by original events.
     # handan's tile-10 branch at 0x4448CE hides a repeatable key merchant and
@@ -311,7 +311,32 @@ def original_interactions(map_bytes: bytes, dialogue: list[dict]) -> list[dict]:
         interactions.append({"floor": floor, "x": x, "y": y, "name": "Fairy",
                              "text": text[227], "dialogue_ids": [227], "offers": [], "effects": [], "disappear": True,
                              "source": "Original fairy 0x478F0C clears fairy on continue; score/rank overlay replaced by modern acknowledgement"})
-    interactions.append({"floor": 50, "x": 4, "y": 8, "name": "Thief", "text": text[263],
+    # touzoku chooses speech using hero coordinates and continuation flags.
+    # Dialogue's Continue callback (0x44DA10) owns the F35 tunnel writes; these
+    # are not in the initial maps or the NPC's speech queue builder.
+    interactions.append({"floor": 2, "x": 0, "y": 7, "name": "Thief",
+                         "text": text[4] + " " + text[57], "dialogue_ids": [4, 57],
+                         "offers": [], "effects": [], "disappear": False,
+                         "source": "Original touzoku prison departure at 0x465B2D; Continue stage 15 marches the Thief out"})
+    interactions.append({"floor": 2, "x": 10, "y": 10, "name": "Thief",
+                         "text": text[5], "dialogue_ids": [5, 6],
+                         "after_text": {"flag": "floor_35_thief_tunnel_started", "text": text[6]},
+                         "offers": [], "effects": [], "disappear": False,
+                         "source": "Original touzoku 0x465B97; Continue stage 16 at 0x44DF94 opens F35 (3,8) and places the Thief at (4,9)"})
+    interactions.append({"floor": 29, "x": 6, "y": 1, "name": "Thief",
+                         "text": text[27], "dialogue_ids": [27, 28],
+                         "after_text": {"flag": "floor_29_thief_met", "text": text[28]},
+                         "offers": [], "effects": [{"type": "flag", "flag": "floor_29_thief_met"}],
+                         "disappear": False,
+                         "source": "Original touzoku 0x465EEE reads 0x4B8860; Continue stage 38 sets it, without any F23-wall prerequisite"})
+    interactions.append({"floor": 35, "x": 4, "y": 9, "name": "Thief",
+                         "text": text[31], "dialogue_ids": [31, 32],
+                         "after_text": {"flag": "floor_35_thief_met", "text": text[32]},
+                         "offers": [], "effects": [{"type": "set_tile", "floor": 2, "x": 10, "y": 10, "tile": 6},
+                                                   {"type": "flag", "flag": "floor_35_thief_met"}],
+                         "disappear": False,
+                         "source": "Original touzoku 0x465FD3 clears F2 Thief and reads 0x4B8870; Continue stage 42 sets that flag"})
+    interactions.append({"floor": 50, "x": 5, "y": 4, "name": "Thief", "text": text[263],
                          "dialogue_ids": [263], "offers": [], "effects": [], "disappear": False,
                          "source": "Original touzoku 0x465900 floor-50 branch queues dialogue 264 (zero-based 263), no map/stat effects"})
     return interactions

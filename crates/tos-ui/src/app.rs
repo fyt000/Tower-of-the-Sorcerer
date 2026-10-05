@@ -4554,6 +4554,7 @@ fn original_campaign_upgrade(source: &str) -> Option<&'static str> {
             "c3e406503a26e7f9",
             "abd9d284f2e9b303",
             "689db6b6a00a3400",
+            "3a59316f31dbcd22",
         ]
         .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
         {
@@ -4587,6 +4588,7 @@ fn restore_journey(engine: &mut Engine, source: &str) -> Result<Option<String>, 
         "c3e406503a26e7f9",
         "abd9d284f2e9b303",
         "689db6b6a00a3400",
+        "3a59316f31dbcd22",
     ]
     .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
     {
@@ -4599,6 +4601,28 @@ fn restore_journey(engine: &mut Engine, source: &str) -> Result<Option<String>, 
         return Err(original_error);
     }
     saved["campaign_fingerprint"] = expected["campaign_fingerprint"].clone();
+    // Earlier campaigns put a second Thief in the F50 border. The original
+    // doll places him at (5,4), later transformed by the time gate. Preserve
+    // an existing Zeno encounter and remove only that misplaced NPC.
+    if saved["floors"]["50"][92] == 21 {
+        saved["floors"]["50"][92] = json!(14);
+        if saved["floors"]["50"][49] == 6
+            && saved["event_counts"]["princess_doll_unlocks_time_gate"]
+                .as_u64()
+                .unwrap_or(0)
+                > 0
+            && saved["event_counts"]["time_gate_to_floor_50"]
+                .as_u64()
+                .unwrap_or(0)
+                == 0
+        {
+            saved["floors"]["50"][49] = json!(21);
+        }
+        if saved["pending_tile"] == json!([50, 4, 8]) {
+            saved["pending_tile"] = Value::Null;
+            saved["pending_interaction"] = Value::Null;
+        }
+    }
     // A newly restored arrival scene must not ambush an existing journey
     // again on a floor it already reached through stairs.
     let highest = saved["highest_stair_floor"].as_i64().unwrap_or_else(|| {
@@ -5245,6 +5269,41 @@ mod migration_tests {
             "floor_42_zeno_and_golden_knight_arrival",
         ] {
             assert_eq!(restored["event_counts"][event], 1);
+        }
+    }
+    #[test]
+    fn hidden_event_revision_repairs_old_thief_placement_without_replacing_zeno() {
+        for portal_taken in [false, true] {
+            let mut engine =
+                Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
+            let mut saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
+            saved["campaign_fingerprint"] = json!("3a59316f31dbcd22");
+            saved["floors"]["50"][92] = json!(21);
+            saved["floors"]["50"][49] = json!(if portal_taken { 91 } else { 6 });
+            saved["event_counts"]["princess_doll_unlocks_time_gate"] = json!(1);
+            if portal_taken {
+                saved["event_counts"]["time_gate_to_floor_50"] = json!(1);
+            }
+            saved["pending_tile"] = json!([50, 4, 8]);
+            saved["pending_interaction"] =
+                json!({"title":"Thief","text":"Old greeting","choices":[]});
+            saved["player"]["hp"] = json!(8123);
+            saved["steps"] = json!(512);
+            assert!(
+                restore_journey(&mut engine, &saved.to_string())
+                    .unwrap()
+                    .is_some()
+            );
+            let restored: Value = serde_json::from_str(&engine.save_json()).unwrap();
+            assert_eq!(restored["floors"]["50"][92], 14);
+            assert_eq!(
+                restored["floors"]["50"][49],
+                if portal_taken { 91 } else { 21 }
+            );
+            assert!(restored["pending_tile"].is_null());
+            assert!(restored["pending_interaction"].is_null());
+            assert_eq!(restored["steps"], 512);
+            assert_eq!(engine.player().hp, 8123);
         }
     }
     #[test]

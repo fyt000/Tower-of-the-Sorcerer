@@ -96,7 +96,7 @@ try {
   await page.goto(process.env.TOS_URL || 'http://127.0.0.1:8080');
   await waitFor(() => window.tower && JSON.parse(window.tower.ui_json()).sprites_loaded);
   await test('Previously published campaign and save migrate together', async () => {
-    for (const [commit, fingerprint] of [['bbc5dd7', 'ad358ec82db8b9ef'], ['4c0ae3f', 'abd9d284f2e9b303'], ['2e0f15e', '689db6b6a00a3400']]) {
+    for (const [commit, fingerprint] of [['bbc5dd7', 'ad358ec82db8b9ef'], ['4c0ae3f', 'abd9d284f2e9b303'], ['2e0f15e', '689db6b6a00a3400'], ['2767a0c', '3a59316f31dbcd22']]) {
       const oldCampaign = execFileSync('git', ['show', `${commit}:data/campaign.json`], { cwd: root, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024 });
       // Real previously shipped campaigns must upgrade with their progress.
       const saved = JSON.parse(await page.evaluate(() => window.tower.save_json()));

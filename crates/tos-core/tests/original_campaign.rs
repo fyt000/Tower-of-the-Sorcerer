@@ -356,11 +356,24 @@ fn original_fairy_acknowledgement_clears_spawned_npc_without_changing_stats() {
 #[test]
 fn original_floor_50_thief_speaks_his_actual_dialogue_without_changing_the_world() {
     let mut game = original();
-    place(&mut game, 50, 5, 8);
-    // The ending sequence spawns him; he is absent from the initial map.
-    edit_save(&mut game, |save| save["floors"]["50"][92] = json!(21));
+    // The doll places him at (5,4). Reach him through Ascent Wing before
+    // taking the time gate, which transforms that same Thief into Zeno.
+    place(&mut game, 26, 5, 6);
+    step(&mut game, "up");
+    command(&mut game, json!({"type":"choose","choice":"leave"}));
+    assert_eq!(game.tile_at(50, 5, 4), Some(21));
+    assert_eq!(game.tile_at(50, 4, 8), Some(14));
+    place(&mut game, 49, 5, 5);
+    edit_save(&mut game, |save| {
+        save["player"]["inventory"] = json!(["up_wing"])
+    });
+    command(&mut game, json!({"type":"use_item","item":"up_wing"}));
+    assert_eq!(
+        (game.player().floor, game.player().x, game.player().y),
+        (50, 5, 5)
+    );
     let before = game.save_json();
-    step(&mut game, "left");
+    step(&mut game, "up");
     assert_eq!(
         game.snapshot()["pending_interaction"]["text"],
         "Ah!, we meet again! Thank goodness you're alive!"
@@ -370,7 +383,7 @@ fn original_floor_50_thief_speaks_his_actual_dialogue_without_changing_the_world
     game = original();
     game.load_json(&saved).unwrap();
     command(&mut game, json!({"type":"choose","choice":"leave"}));
-    assert_eq!(game.tile_at(50, 4, 8), Some(21));
+    assert_eq!(game.tile_at(50, 5, 4), Some(21));
     let before: Value = serde_json::from_str(&before).unwrap();
     let after: Value = serde_json::from_str(&game.save_json()).unwrap();
     assert_eq!(after["player"], before["player"]);

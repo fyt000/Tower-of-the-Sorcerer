@@ -53,14 +53,12 @@
     "x": 2,
     "y": 6,
     "name": "Thief",
-    "text": "Talk to the thief to continue.",
+    "text": "What a relief you're okay! You were caught and thrown into this prison by the Magic Sergeant. You were unconscious when you got here. Nevertheless, you are so lucky that you just woke up. I've finished the escape tunnel. Let's break out.",
     "offers": [],
     "effects": [],
     "disappear": false,
     "dialogue_ids": [
-      3,
-      4,
-      57
+      3
     ],
     "source": "Original TTSW10.touzoku 0x465900; map effects live in events.json"
   },
@@ -328,7 +326,7 @@
     "x": 8,
     "y": 0,
     "name": "Thief",
-    "text": "Talk to the thief to continue.",
+    "text": "Ah! Are you all right? The Big Octopus which lives in here was blocking my progress. Now a loophole has completed at last. You had better put off beating him. See ya later!",
     "offers": [],
     "effects": [],
     "disappear": false,
@@ -447,14 +445,14 @@
     "x": 5,
     "y": 5,
     "name": "Princess",
-    "text": "Speak to the princess.",
+    "text": "Now is the time. You were chosen. If you aren't afraid of Death, you should go through the gate of Time and Space, and come to me.",
     "offers": [],
     "effects": [],
     "disappear": false,
     "dialogue_ids": [
-      25
+      24
     ],
-    "source": "Original princess case TTSW10.handan 0x445397; dialogue/map effects live in events.json"
+    "source": "Original princess case TTSW10.handan 0x445397; second speech and conditional gate writes live in events.json"
   },
   {
     "floor": 27,
@@ -515,14 +513,12 @@
     "x": 5,
     "y": 3,
     "name": "Thief",
-    "text": "Talk to the thief to continue.",
+    "text": "The tunnel has not been completed yet. You should have waited a little longer, and you should not have used items. I had a bug in the program. There! Don't worry!",
     "offers": [],
     "effects": [],
     "disappear": false,
     "dialogue_ids": [
-      26,
-      27,
-      28
+      26
     ],
     "source": "Original TTSW10.touzoku 0x465900; map effects live in events.json"
   },
@@ -1038,9 +1034,98 @@
     "source": "Original fairy 0x478F0C clears fairy on continue; score/rank overlay replaced by modern acknowledgement"
   },
   {
-    "floor": 50,
+    "floor": 2,
+    "x": 0,
+    "y": 7,
+    "name": "Thief",
+    "text": "O.K. Well, excuse my going first. Your weapon and shield were stolen by the guards. It's not wise to wander about without them. I believe there is a sword on the 5th floor and a shield on the 9th, you had better get them first of all. See you later!",
+    "dialogue_ids": [
+      4,
+      57
+    ],
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "source": "Original touzoku prison departure at 0x465B2D; Continue stage 15 marches the Thief out"
+  },
+  {
+    "floor": 2,
+    "x": 10,
+    "y": 10,
+    "name": "Thief",
+    "text": "Ah, we meet again! Thank you. You beat the Gate-Keeper of this area. I was defeated and imprisoned again. Such a small prison this time. I'm making a secret tunnel in front of the Dragon. Go up to 35th floor and wait for me, while I complete the tunnel.",
+    "dialogue_ids": [
+      5,
+      6
+    ],
+    "after_text": {
+      "flag": "floor_35_thief_tunnel_started",
+      "text": "Don't worry, I'll be there."
+    },
+    "offers": [],
+    "effects": [],
+    "disappear": false,
+    "source": "Original touzoku 0x465B97; Continue stage 16 at 0x44DF94 opens F35 (3,8) and places the Thief at (4,9)"
+  },
+  {
+    "floor": 29,
+    "x": 6,
+    "y": 1,
+    "name": "Thief",
+    "text": "Oh, I have finished the tunnel. Wha? It's you again. You came at a good time. I have openned a tunnel, and you may use it freely.",
+    "dialogue_ids": [
+      27,
+      28
+    ],
+    "after_text": {
+      "flag": "floor_29_thief_met",
+      "text": "The last boss and the captured princess must be in this area. Hmm, I wonder if we should wait before fighting him."
+    },
+    "offers": [],
+    "effects": [
+      {
+        "type": "flag",
+        "flag": "floor_29_thief_met"
+      }
+    ],
+    "disappear": false,
+    "source": "Original touzoku 0x465EEE reads 0x4B8860; Continue stage 38 sets it, without any F23-wall prerequisite"
+  },
+  {
+    "floor": 35,
     "x": 4,
-    "y": 8,
+    "y": 9,
+    "name": "Thief",
+    "text": "There you are. I have just finished the tunnel. As you go through it, you will get to the Dragon. And then you should go up.",
+    "dialogue_ids": [
+      31,
+      32
+    ],
+    "after_text": {
+      "flag": "floor_35_thief_met",
+      "text": "The Golden Knight (who is the boss of this area) has a strong attitude in spite of being weak. It is for this reason that he is disliked by the Magic Sergeant, Zeno, who is the sub commander of this tower."
+    },
+    "offers": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 2,
+        "x": 10,
+        "y": 10,
+        "tile": 6
+      },
+      {
+        "type": "flag",
+        "flag": "floor_35_thief_met"
+      }
+    ],
+    "disappear": false,
+    "source": "Original touzoku 0x465FD3 clears F2 Thief and reads 0x4B8870; Continue stage 42 sets that flag"
+  },
+  {
+    "floor": 50,
+    "x": 5,
+    "y": 4,
     "name": "Thief",
     "text": "Ah!, we meet again! Thank goodness you're alive!",
     "dialogue_ids": [

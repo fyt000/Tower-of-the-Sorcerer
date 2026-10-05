@@ -31,11 +31,14 @@ def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presenta
     for address,value in globals:u.mem_write(address,struct.pack('<I',value))
     initial=bytes(u.mem_read(MAP,len(RAW)))
     initial_monsters=bytes(u.mem_read(0x489910,528))
-    read=set(); skipped=set();followed=set();cache={}
+    read=set();written=set(); skipped=set();followed=set();cache={};stopped=False
     def mem(uc,access,a,size,value,data):
         if MAP<=a<MAP+6273:read.add(a-MAP)
+    def write(uc,access,a,size,value,data):
+        written.update(offset-MAP for offset in range(max(a,MAP),min(a+size,MAP+len(RAW))))
     def hook(uc,a,size,data):
-        if a==end or a==0x6ffff0:uc.emu_stop();return
+        nonlocal stopped
+        if a==end or a==0x6ffff0:stopped=True;uc.emu_stop();return
         ins=cache.setdefault(a,next(md.disasm(bytes(uc.mem_read(a,size)),a),None))
         if ins and ins.mnemonic=='call':
             target=ins.op_str
@@ -43,15 +46,28 @@ def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presenta
                 followed.add(target)
                 return
             skipped.add(target)
+            # Delphi's multi-string concatenation pops EDX arguments. Leaving
+            # them on the stack corrupts a followed helper's return address.
+            if target=='0x403710':
+                uc.reg_write(UC_X86_REG_ESP,uc.reg_read(UC_X86_REG_ESP)+4*uc.reg_read(UC_X86_REG_EDX))
+            elif target in ['0x40923c','0x417e44','0x41a5b8']:
+                # Verified Delphi callee cleanup: Rect and Draw use RET 8;
+                # CopyRect uses RET 4. Their pixels are still not emulated.
+                cleanup=4 if target=='0x41a5b8' else 8
+                uc.reg_write(UC_X86_REG_ESP,uc.reg_read(UC_X86_REG_ESP)+cleanup)
             uc.reg_write(UC_X86_REG_EIP,a+size)
     u.hook_add(unicorn.UC_HOOK_CODE,hook)
     u.hook_add(unicorn.UC_HOOK_MEM_READ,mem)
+    u.hook_add(unicorn.UC_HOOK_MEM_WRITE,write)
     u.emu_start(addr,0x6ffff0,count=200000)
+    if not stopped and u.reg_read(UC_X86_REG_EIP) not in [end,0x6ffff0]:
+        raise RuntimeError(f'Probe {addr:#x} did not reach its stop address; instruction budget exhausted at {u.reg_read(UC_X86_REG_EIP):#x}')
     count=struct.unpack('<I',u.mem_read(0x48c5ac,4))[0]
     if count>10000:raise RuntimeError(count)
     queue=[struct.unpack('<HHH',u.mem_read(0x48c74c+i*6,6)) for i in range(count,0,-1)]
     changed=[(f,(i-2)%11,(i-2)//11,new) for off,(old,new) in enumerate(zip(initial,bytes(u.mem_read(MAP,len(RAW))))) if old!=new for f,i in [divmod(off,123)]]
     return {'queue':[list(q) for q in queue if include_presentation or q[0] not in [0,1,2,8,9]],'changed':changed,
+            'direct_map_writes':[(f,(i-2)%11,(i-2)//11,int(u.mem_read(MAP+offset,1)[0])) for offset in sorted(written) for f,i in [divmod(offset,123)] if i>=2],
             'reads':[(f,(i-2)%11,(i-2)//11,int(u.mem_read(MAP+offset,1)[0])) for offset in sorted(read) for f,i in [divmod(offset,123)]],
             'monster_changes':[(i,list(struct.unpack('<4I',u.mem_read(0x489910+i*16,16)))) for i in range(33) if bytes(u.mem_read(0x489910+i*16,16))!=initial_monsters[i*16:i*16+16]],
             'stat_slots':list(struct.unpack('<32I',u.mem_read(0x4b8688,128))),

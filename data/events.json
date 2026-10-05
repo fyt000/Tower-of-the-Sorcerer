@@ -272,6 +272,10 @@
         "cue": "open"
       },
       {
+        "type": "wait",
+        "ms": 25
+      },
+      {
         "type": "cinematic",
         "kind": "tile_reveal",
         "style": "wall_collapse",
@@ -282,7 +286,25 @@
         "tile": 6,
         "duration_ms": 400,
         "original_mode": 7,
-        "original_steps": 16
+        "original_steps": 16,
+        "original_frames": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
       },
       {
         "type": "set_tile",
@@ -292,19 +314,150 @@
         "tile": 6
       },
       {
+        "type": "wait",
+        "ms": 50
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
+        "type": "move_tile",
+        "floor": 2,
+        "from_x": 2,
+        "from_y": 6,
+        "x": 1,
+        "y": 6,
+        "tile": 21,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
+        "type": "move_tile",
+        "floor": 2,
+        "from_x": 1,
+        "from_y": 6,
+        "x": 0,
+        "y": 6,
+        "tile": 21,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
+        "type": "move_tile",
+        "floor": 2,
+        "from_x": 0,
+        "from_y": 6,
+        "x": 0,
+        "y": 7,
+        "tile": 21,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      }
+    ],
+    "source": "Original touzoku 0x465900 wall opening + dialogue Continue stage 14 at 0x44DCAC; three departure moves to (0,7)"
+  },
+  {
+    "id": "thief_leaves_prison",
+    "once": true,
+    "trigger": {
+      "type": "interact",
+      "floor": 2,
+      "x": 0,
+      "y": 7
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "move_tile",
+        "floor": 2,
+        "from_x": 0,
+        "from_y": 7,
+        "x": 0,
+        "y": 8,
+        "tile": 21,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
+        "type": "move_tile",
+        "floor": 2,
+        "from_x": 0,
+        "from_y": 8,
+        "x": 0,
+        "y": 9,
+        "tile": 21,
+        "duration_ms": 130
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
+        "type": "sound",
+        "cue": "get"
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
         "type": "set_tile",
         "floor": 2,
-        "x": 2,
-        "y": 6,
+        "x": 0,
+        "y": 9,
         "tile": 6
       },
       {
-        "type": "message",
-        "text": "O.K. Well, excuse my going first. Your weapon and shield were stolen by the guards. It's not wise to wander about without them. I believe there is a sword on the 5th floor and a shield on the 9th, you had better get them first of all. See you later!",
-        "dialogue_id": 4
+        "type": "wait",
+        "ms": 25
       }
     ],
-    "source": "Original touzoku 0x465900: door record (13,67,7)"
+    "source": "Original touzoku 0x465B2D dialogue 5 + dialogue Continue stage 15 at 0x44DDF4; two moves and removal"
+  },
+  {
+    "id": "thief_opens_floor_35_tunnel",
+    "once": true,
+    "trigger": {
+      "type": "interact",
+      "floor": 2,
+      "x": 10,
+      "y": 10
+    },
+    "conditions": [],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 35,
+        "x": 3,
+        "y": 8,
+        "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 35,
+        "x": 4,
+        "y": 9,
+        "tile": 21
+      },
+      {
+        "type": "flag",
+        "flag": "floor_35_thief_tunnel_started"
+      }
+    ],
+    "source": "Original dialogue Continue stage 16 at 0x44DF94: F35 tunnel and Thief placement; sets 0x4B8808"
   },
   {
     "id": "floor_12_scripted_wall_reveal",
@@ -448,12 +601,6 @@
       {
         "type": "wait",
         "ms": 25
-      },
-      {
-        "type": "message",
-        "text": "Ah! Are you all right? The Big Octopus which lives in here was blocking my progress. Now a loophole has completed at last. You had better put off beating him. See ya later!",
-        "dialogue_id": 17,
-        "original_queue_id": 18
       },
       {
         "type": "wait",
@@ -2867,6 +3014,198 @@
         "x": 5,
         "y": 6,
         "tile": 6
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 1,
+        "y": 1,
+        "tile": 137,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 40,
+            "x": 1,
+            "y": 1,
+            "tile": 6
+          }
+        ]
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 2,
+        "y": 1,
+        "tile": 137,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 40,
+            "x": 2,
+            "y": 1,
+            "tile": 6
+          }
+        ]
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 1,
+        "tile": 137,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 40,
+            "x": 3,
+            "y": 1,
+            "tile": 6
+          }
+        ]
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 1,
+        "tile": 135,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 40,
+            "x": 7,
+            "y": 1,
+            "tile": 6
+          }
+        ]
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 8,
+        "y": 1,
+        "tile": 135,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 40,
+            "x": 8,
+            "y": 1,
+            "tile": 6
+          }
+        ]
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 9,
+        "y": 1,
+        "tile": 135,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 40,
+            "x": 9,
+            "y": 1,
+            "tile": 6
+          }
+        ]
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 2,
+        "y": 3,
+        "tile": 141,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 40,
+            "x": 2,
+            "y": 3,
+            "tile": 6
+          }
+        ]
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 3,
+        "y": 3,
+        "tile": 141,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 40,
+            "x": 3,
+            "y": 3,
+            "tile": 6
+          }
+        ]
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 4,
+        "y": 3,
+        "tile": 141,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 40,
+            "x": 4,
+            "y": 3,
+            "tile": 6
+          }
+        ]
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 6,
+        "y": 3,
+        "tile": 139,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 40,
+            "x": 6,
+            "y": 3,
+            "tile": 6
+          }
+        ]
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 7,
+        "y": 3,
+        "tile": 139,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 40,
+            "x": 7,
+            "y": 3,
+            "tile": 6
+          }
+        ]
+      },
+      {
+        "type": "set_tile",
+        "floor": 40,
+        "x": 8,
+        "y": 3,
+        "tile": 139,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 40,
+            "x": 8,
+            "y": 3,
+            "tile": 6
+          }
+        ]
       },
       {
         "type": "wait",
@@ -5607,6 +5946,13 @@
             "y": 7
           }
         ]
+      },
+      {
+        "type": "set_tile",
+        "floor": 35,
+        "x": 4,
+        "y": 9,
+        "tile": 6
       },
       {
         "type": "wait",
@@ -11096,84 +11442,149 @@
   },
   {
     "id": "princess_doll_unlocks_time_gate",
-    "once": true,
+    "once": false,
     "trigger": {
       "type": "interact",
       "floor": 26,
       "x": 5,
       "y": 5
     },
-    "conditions": [
-      {
-        "type": "tile",
-        "floor": 25,
-        "x": 5,
-        "y": 5,
-        "tile": 6
-      }
-    ],
+    "conditions": [],
     "effects": [
-      {
-        "type": "message",
-        "text": "Oh! What? This is a doll!",
-        "dialogue_id": 25
-      },
-      {
-        "type": "message",
-        "text": "Now is the time. You were chosen. If you aren't afraid of Death, you should go through the gate of Time and Space, and come to me.",
-        "dialogue_id": 24
-      },
       {
         "type": "set_tile",
         "floor": 24,
         "x": 4,
         "y": 0,
-        "tile": 8
+        "tile": 8,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 25,
+            "x": 5,
+            "y": 5,
+            "tile": 6
+          }
+        ]
+      },
+      {
+        "type": "set_tile",
+        "floor": 24,
+        "x": 5,
+        "y": 0,
+        "tile": 7,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 25,
+            "x": 5,
+            "y": 5,
+            "tile": 6
+          }
+        ]
       },
       {
         "type": "set_tile",
         "floor": 24,
         "x": 6,
         "y": 0,
-        "tile": 8
+        "tile": 8,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 25,
+            "x": 5,
+            "y": 5,
+            "tile": 6
+          }
+        ]
       },
       {
         "type": "set_tile",
         "floor": 24,
         "x": 5,
         "y": 1,
-        "tile": 6
+        "tile": 6,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 25,
+            "x": 5,
+            "y": 5,
+            "tile": 6
+          }
+        ]
       },
       {
         "type": "set_tile",
         "floor": 24,
         "x": 5,
         "y": 2,
-        "tile": 6
+        "tile": 6,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 25,
+            "x": 5,
+            "y": 5,
+            "tile": 6
+          }
+        ]
       },
       {
         "type": "set_tile",
         "floor": 24,
         "x": 5,
         "y": 3,
-        "tile": 6
-      },
-      {
-        "type": "set_tile",
-        "floor": 24,
-        "x": 5,
-        "y": 0,
-        "tile": 7
+        "tile": 6,
+        "conditions": [
+          {
+            "type": "tile",
+            "floor": 25,
+            "x": 5,
+            "y": 5,
+            "tile": 6
+          }
+        ]
       },
       {
         "type": "set_tile",
         "floor": 50,
-        "x": 4,
-        "y": 8,
+        "x": 5,
+        "y": 4,
         "tile": 21
+      },
+      {
+        "type": "wait",
+        "ms": 50
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
+        "type": "message",
+        "text": "Oh! What? This is a doll!",
+        "dialogue_id": 25,
+        "original_queue_id": 26
+      },
+      {
+        "type": "wait",
+        "ms": 25
+      },
+      {
+        "type": "set_tile",
+        "floor": 26,
+        "x": 5,
+        "y": 5,
+        "tile": 27
+      },
+      {
+        "type": "wait",
+        "ms": 25
       }
     ],
-    "source": "Original handan princess branch 0x445397"
+    "source": "Original handan princess branch 0x445397: unconditional speeches/Thief at F50 (5,4); only F24 gate requires F25 boss cell road"
   },
   {
     "id": "time_gate_to_floor_50",

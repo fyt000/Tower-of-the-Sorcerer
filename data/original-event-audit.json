@@ -2,7 +2,7 @@
   "source": "Installed English Tower of the Sorcerer Windows v1.2; isolated executable emulation",
   "executable_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
   "floors_reviewed": 51,
-  "configured_event_count": 103,
+  "configured_event_count": 105,
   "initialized_special_road_sites": 56,
   "direct_handler_callers": {
     "mevent": {
@@ -76,7 +76,7 @@
     {
       "floor": 2,
       "special_road_sites": [],
-      "configured_event_count": 2
+      "configured_event_count": 4
     },
     {
       "floor": 3,

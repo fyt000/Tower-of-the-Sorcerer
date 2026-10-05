@@ -120,7 +120,7 @@ def main():
         assert forced == ([[11, 10, 71]] if cycle == 2 else [])
         zeno.append({'cycle': cycle, 'normalized_stats': stats, 'moves': moves, 'forced_battles': forced})
 
-    thief = probe(0x465900, 50, 4, 8, changes=[(50, 4, 8, 21)], include_presentation=True)
+    thief = probe(0x465900, 50, 5, 5, changes=[(50, 5, 4, 21)], include_presentation=True)
     assert thief['queue'] == [[10, 264, 0], [0, 0, 0]]
 
     original_dir = Path(os.environ.get('TOS_ORIGINAL_EXE', r'D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe')).parent
@@ -146,7 +146,7 @@ def main():
     assert campaign['rules']['magician_retreat']['bounds'] == 'corrected'
     portal = next(e for e in events if e['id'] == 'time_gate_to_floor_50')
     assert any(e['type'] == 'battle_at' and e['y'] == 6 and e['first_strike'] for e in portal['effects'])
-    speech = next(i for i in campaign['interactions'] if i['floor'] == 50 and i['x'] == 4 and i['y'] == 8)
+    speech = next(i for i in campaign['interactions'] if i['floor'] == 50 and i['x'] == 5 and i['y'] == 4)
     assert speech['text'] == "Ah!, we meet again! Thank goodness you're alive!"
     assert speech['dialogue_ids'] == [263] and speech['effects'] == []
 

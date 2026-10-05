@@ -166,8 +166,10 @@ fn floor_32_lethal_first_strike_stops_before_retreat_gold_and_thief_relocation()
 #[test]
 fn floor_42_stair_scene_materializes_zeno_and_four_guards_then_executes_the_knight() {
     let mut game = original();
+    edit_save(&mut game, |save| save["floors"]["35"][103] = json!(21));
     let before = (game.player().hp, game.player().gold);
     climb_to(&mut game, 42);
+    assert_eq!(game.tile_at(35, 4, 9), Some(6)); // Original builder removes the tunnel Thief.
     assert_eq!(
         (game.player().floor, game.player().x, game.player().y),
         (42, 5, 9)
@@ -639,7 +641,8 @@ fn princess_time_gate_runs_the_first_cycle_scene_on_floor_50() {
         .unwrap();
     assert_eq!(game.tile_at(24, 5, 0), Some(7));
     assert_eq!(game.tile_at(24, 5, 1), Some(6));
-    assert_eq!(game.tile_at(50, 4, 8), Some(21));
+    assert_eq!(game.tile_at(50, 5, 4), Some(21));
+    assert_eq!(game.tile_at(50, 4, 8), Some(14));
     let ready = game.save_json();
     let mut restored = original();
     restored.load_json(&ready).unwrap();
