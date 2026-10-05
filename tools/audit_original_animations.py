@@ -125,7 +125,7 @@ def main():
                         include_presentation=True)
         queued_modes = sorted(set((q[1], q[2]) for q in cleared['queue'] if q[0] == 13))
         if guards:
-            configured = [e for e in events if (e['trigger']['type'] == 'enemy_defeated'
+            configured = [e for e in events if (e['trigger']['type'] in ['enemy_defeated', 'post_combat']
                           or floor == 40 and e['trigger']['type'] == 'step')
                           and e['trigger'].get('floor') == floor]
             assert configured, ('Missing post-combat floor', floor)

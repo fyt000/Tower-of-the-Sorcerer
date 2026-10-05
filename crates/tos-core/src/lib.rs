@@ -339,7 +339,9 @@ impl Engine {
                 .matches(TriggerKind::Bump, floor, x, y, Some(tile))
                 && self.conditions_pass(&event.conditions)
                 && event.effects.iter().any(|effect| {
-                    matches!(&effect.operation, Effect::SetEnemy { enemy, .. } if enemy == key)
+                    matches!(&effect.operation,
+                        Effect::SetEnemy { enemy, .. } | Effect::MultiplyEnemy { enemy, .. }
+                        if enemy == key)
                         && self.conditions_pass(&effect.conditions)
                 })
         });

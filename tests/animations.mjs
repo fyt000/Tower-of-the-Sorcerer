@@ -96,7 +96,7 @@ try {
   await page.goto(process.env.TOS_URL || 'http://127.0.0.1:8080');
   await waitFor(() => window.tower && JSON.parse(window.tower.ui_json()).sprites_loaded);
   await test('Previously published campaign and save migrate together', async () => {
-    for (const [commit, fingerprint] of [['bbc5dd7', 'ad358ec82db8b9ef'], ['4c0ae3f', 'abd9d284f2e9b303'], ['2e0f15e', '689db6b6a00a3400'], ['2767a0c', '3a59316f31dbcd22']]) {
+    for (const [commit, fingerprint] of [['bbc5dd7', 'ad358ec82db8b9ef'], ['4c0ae3f', 'abd9d284f2e9b303'], ['2e0f15e', '689db6b6a00a3400'], ['2767a0c', '3a59316f31dbcd22'], ['942e5b4', '928eb19f7c6a7a71']]) {
       const oldCampaign = execFileSync('git', ['show', `${commit}:data/campaign.json`], { cwd: root, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024 });
       // Real previously shipped campaigns must upgrade with their progress.
       const saved = JSON.parse(await page.evaluate(() => window.tower.save_json()));
@@ -141,6 +141,32 @@ try {
       await waitFor(() => JSON.parse(window.tower.ui_json()).animation === 'tile');
       assert.equal((await ui()).visual_tiles[13], 6, 'Opening must not flash the closed door again');
       await idle(); assert.equal((await state()).player.x, 3);
+      assert.equal((await ui()).audio.effects_played - soundBefore, 1);
+    }
+  });
+  await test('39F no-key door attempt reveals the Staff without opening or moving', async () => {
+    for (const [first, second] of [[14, 38], [38, 14]]) {
+      await load(original);
+      const contact = index => index === 14 ? { x: 4, y: 1, direction: 'left' } : { x: 4, y: 3, direction: 'right' };
+      const a = contact(first), b = contact(second);
+      await editSave(saved => {
+        saved.player.floor = 39; saved.player.x = a.x; saved.player.y = a.y;
+        saved.player.keys.yellow = 1;
+      });
+      await command({ type: 'move', direction: a.direction }); await idle();
+      await editSave(saved => { saved.player.x = b.x; saved.player.y = b.y; });
+      const soundBefore = (await ui()).audio.effects_played;
+      await command({ type: 'move', direction: b.direction });
+      await idle();
+      const current = await state();
+      assert.equal(current.last_action.ok, false);
+      assert.equal(current.tiles[second], 1);
+      assert.equal(current.tiles[36], 43);
+      assert.deepEqual([current.player.x, current.player.y, current.player.keys.yellow], [b.x, b.y, 0]);
+      assert.equal((await ui()).visual_tiles[36], 43);
+      assert.equal((await ui()).audio.effects_played - soundBefore, 1);
+      await capture(`clock-one-key-${first}-first`, [3, 3]);
+      await command({ type: 'move', direction: b.direction }); await idle();
       assert.equal((await ui()).audio.effects_played - soundBefore, 1);
     }
   });

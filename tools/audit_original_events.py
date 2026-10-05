@@ -33,6 +33,7 @@ def main():
                   0x463fcb,0x46401f],
         0x4664e4:[0x4533eb],
         0x44c5c4:[0x44c258,0x44c298,0x44c2d7,0x44c318],
+        0x47beac:[0x44468f],
     }
     callers={target:[] for target in expected_callers}
     decoder=capstone.Cs(capstone.CS_ARCH_X86,capstone.CS_MODE_32)
@@ -157,6 +158,8 @@ def main():
                 'entry_paths':['successful battle completion']},
             'mazyutu1':{'helper':'0x44c5c4','call_sites':[hex(site) for site in callers[0x44c5c4]],
                 'entry_paths':['four ordinary movement neighbor checks']},
+            'doorcheck':{'helper':'0x47beac','call_sites':[hex(site) for site in callers[0x47beac]],
+                'entry_paths':['keyed-door attempts, including refusal without a key']},
         },
         'floors':floors,
         'capture_opening2':{'builder':'0x464048',**summary(capture),

@@ -107,7 +107,7 @@ An event includes optional `id`, `trigger`, optional `conditions`, required orde
 ```json
 {
   "id": "open_guarded_gate",
-  "trigger": {"type":"enemy_defeated","floor":8},
+  "trigger": {"type":"post_combat","floor":8},
   "conditions": [
     {"type":"tile","floor":8,"x":8,"y":4,"tile":6},
     {"type":"tile","floor":8,"x":10,"y":4,"tile":6}
@@ -119,7 +119,11 @@ An event includes optional `id`, `trigger`, optional `conditions`, required orde
 }
 ```
 
-Triggers: `step`, `bump`, `door_opened`, `enter_floor`, `stairs_up`, `enemy_defeated`, and `interact`. Optional `floor`, `x`, `y`, and `tile` restrict the trigger. `bump` runs at the intended destination before collision handling, enabling scripted walls and concealed encounters. `door_opened` runs after a colored door consumes its key. `enter_floor` runs after stair or Flight Orb travel. `stairs_up` follows it only for upward stair travel; it excludes flight, descending stairs, and scripted teleports. `interact` occurs when the player acknowledges an NPC conversation. Events run in file order; an event is marked as executed before its effects, preventing recursive forced battles from repeating it.
+Triggers: `step`, `bump`, `door_opened`, `door_attempted`, `enter_floor`, `stairs_up`, `enemy_defeated`, `post_combat`, and `interact`. Optional `floor`, `x`, `y`, and `tile` restrict the trigger. `bump` runs at the intended destination before collision handling, enabling scripted walls and concealed encounters. After the key decision and any opening, `door_attempted` runs for every colored-door contact, including a zero-key refusal, before movement. On success, `door_opened` follows it. Both door triggers receive the original contacted door tile. Successful door presentation precedes any attempted-door reward. This models the original clock shortcut without floor-specific logic in the engine.
+
+`enemy_defeated` runs for each defeated target. `post_combat` runs after a successful ordinary or forced battle, and once after a complete Bomb use, including a use with no victims. Bomb clears all eligible neighbors, awards all gold and consumes the item before either callback stage. Use `post_combat` for floor-wide progression checks; use `enemy_defeated` for a particular victim. A Bomb's post-combat context is the hero's square, without a victim tile.
+
+`enter_floor` runs after stair or Flight Orb travel. `stairs_up` follows it only for upward stair travel; it excludes flight, descending stairs, and scripted teleports. `interact` occurs when the player acknowledges an NPC conversation. Events run in file order; an event is marked as executed before its effects, preventing recursive forced battles from repeating it.
 
 A trigger may use `positions: [{"x":9,"y":4},{"x":9,"y":6}]` instead of `x` or `y`. This nonempty array matches any listed position, with one shared event ID and once count. Each coordinate must lie within the map. Combining `positions` with either `x` or `y`, an empty array, or malformed entries is an import error. The floor-33 trap uses this to cover both entrances without separate once flags.
 
@@ -143,6 +147,7 @@ Effects:
 | `set_highest_stair_floor` | `floor`: set Flight's original stair upper bound; the original capture resets it to 2 |
 | `teleport` | `floor`, `x`, `y` |
 | `set_enemy` | `enemy`, any of `hp`, `attack`, `defense`, `gold` |
+| `multiply_enemy` | `enemy`, integer `numerator`, positive integer `denominator`: multiply current normalized HP/ATK/DEF with integer truncation; gold is unchanged |
 | `battle_at` | `floor`, `x`, `y`, optional Boolean `first_strike` |
 | `win` | No extra properties |
 | `next_cycle` | Reset maps, flags, shops and keys using `rules.backside`; preserve combat stats when configured |
@@ -151,7 +156,7 @@ Effects:
 | `cinematic` | `kind`, `duration_ms`, optional original instruction metadata |
 | `move_tile` | `floor`, `from_x`, `from_y`, `x`, `y`, optional `tile`, `duration_ms`: move one original sprite cell |
 
-Statistics are `hp`, `attack`, `defense`, `gold`, `yellow`, `blue`, and `red`. Forced battles can give the enemy an initial attack, matching original ambush sequences. Runtime enemy changes are session state and survive save/load. Any failed campaign validation reports an error before replacing a running browser session.
+Statistics are `hp`, `attack`, `defense`, `gold`, `yellow`, `blue`, and `red`. Forced battles can give the enemy an initial attack, matching original ambush sequences. Runtime enemy changes are session state and survive save/load. `multiply_enemy` reads the current override or authored row, changes its combat stats within the simulation bounds, and stores a normalized override. Cycle scaling is applied once when resolving an encounter. The original 49F seal and 24F time gate use conditional division/multiplication of this shared row rather than fixed replacements. Any failed campaign validation reports an error before replacing a running browser session.
 
 For a `tile_reveal` cinematic, `floor`, `x`, `y`, `tile` and `from_tile` are compiled coordinates/tile IDs. At execution, `from_tile` is resolved from the current map, so a gate closed dynamically by an earlier event opens from its actual closed appearance. Other cinematic artwork fields remain extensible renderer metadata. The engine emits a typed ordered presentation timeline and serializes it for clients; animations never write gameplay state back into the engine.
 

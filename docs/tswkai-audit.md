@@ -62,7 +62,7 @@ using its addresses. GUI tests require the rebuilt game served on port 8080;
 | 47F Magician A retreat | Real coordinate defect. `0x44C5C4` uses a hero-row test for horizontal moves and linear indices that wrap across columns. Probes reproduce both row wrapping directions and suppressed top-row retreat. | Restore retreat with independent x/y bounds, after hazard damage. Sacred Shield suppresses damage but preserves retreat. An optional original-bounds rule retains the historical valid-board behavior. |
 | 49F extra appearance event | Real queue defect. The extra cursor increment at `0x4637DD` matches upstream's original bytes. Since records are reused, the cursor can expose an old record. | Extract explicit ordered effects into a fresh bounded action timeline; no reused stack pointer or phantom slot. Existing materialization tests cover the intended eight Sorcerers. |
 | Battles around 2500 rounds | Real capacity defect in the fixed original event buffer. The number depends on records queued, including sound and animation records. | Store one battle presentation with strike counts rather than allocating records per round. A 3000-strike regression verifies exact damage, reward, and bounded presentation size. |
-| 50F repeated backside scaling | Real stat-restoration defect. `0x455B78` includes the cycle-factor calculation in global-row restoration, although battle calculation already scales its temporary row. | Persist normalized enemy overrides. Resolve the multiplier once; repeated save/load and sealed-decoy restoration remain stable. Restore the distinct second- and third-cycle rows. |
+| 50F repeated backside scaling | Real save/load stat-restoration defect. `0x455B78` includes the cycle-factor calculation in global-row restoration, although battle calculation already scales its temporary row. This is separate from the intentional gate reversal of the 49F seal. | Persist normalized enemy overrides and resolve cycle scaling once. Retain shared-row seal/gate arithmetic and its order-dependent weaker later-cycle 50F route; cycle 2 assigns its distinct fixed row. |
 | Lucky Gold first-strike reward text | Real display defect. The original display branch at `0x47FF54` matches upstream's correction signature; it does not establish a missing actual reward. | The same resolved reward drives player gold, activity text, battle presentation and history. A full 13-fight 40F ambush with Lucky Gold verifies all 1400 gold and each displayed reward. |
 | 40F yellow-door completion prompt | Real display defect; original bytes at `0x4740BE` match the identified prompt branch. | Report the actual ambush outcomes and scripted continuation rather than an unrelated door message. |
 | Magician A mask displaced one pixel | Real artwork defect. The original masks for cells 151/152 exactly match upstream's corrected artwork when shifted right one pixel. | Correct only the recognized original mask signatures at load. A unit test compares independent packed silhouettes and corrected hashes, verifies idempotence, and preserves custom/already-corrected artwork. |
@@ -81,23 +81,32 @@ rejected movement, Sacred Shield, and a later lower shield replacing its visible
 slot. Magician neighbor damage remains additive and scales with the backside
 multiplier.
 
-The 39F three-o'clock yellow-door pattern is already an original hidden event.
-Opening only the top and right clock doors, in either order, reveals Warp Staff
-at `(3,3)`. Its three charges can resemble the remembered wing reward, but the
-executable/map-derived reward is tile 43, Warp Staff. The regression saves after
-the first door, restores, opens the second, collects three charges, verifies no
-duplicate, and rejects an extra opened clock door.
+The 39F three-o'clock yellow-door pattern is an original hidden event.
+The EXE calls `doorcheck` on refused openings too: opening either hand with the
+last key and bumping the other with zero keys reveals Warp Staff at `(3,3)`.
+The second door remains closed and the hero stays outside. The ordinary
+two-key solution still works in both orders. The reward is tile 43 with three
+charges. Original-derived scenarios cover both routes, save/restore, absence
+of duplicates and invalid extra clock openings. The same handler also arms
+43F's trap on a no-key contact; its next road entry activates the trap.
 
 The comparison uncovered a missing **second-cycle 50F ambush** in this remake.
 With legitimate portal and cycle flags, the original queue moves Zeno
 `(5,4) → (5,5) → (5,6)` and queues an enemy-first battle at the final square.
 The translated event now preserves that branch and its ending trigger. His
 normalized second-cycle HP/ATK/DEF are `1000/625/125`, resolved as
-`44000/27500/5500`. Third and later cycles use `8000/5000/1000`, resolved as
-`352000/220000/44000`; they retain ordinary contact combat. The previous remake
-mistakenly kept the weaker second-cycle row in all later cycles. Tests cover
-portal movement/order, first-strike damage, the lethal HP boundary, victory,
-cycles 3/4, old encounter counts and repeated restoration after the 49F seal.
+`44000/27500/5500`. Third and later cycles retain ordinary contact combat and
+the current shared row, normally `8000/5000/1000`, resolved as
+`352000/220000/44000`. Our earlier fixed-row contact preparation incorrectly
+erased a seal applied after the gate. The 49F handler actually divides current
+stats once per active seal; the gate clears the flag and multiplies them back.
+Gate → seal → wing return therefore keeps `800/500/100` in later cycles.
+Seventy-two chained EXE scenarios and gameplay routes cover the two orders,
+resealing after gate restoration, cycles 1–4, truncation, and save/restore.
+This includes delaying the actual 49F decoy fight until after gate entry:
+the original seal arithmetic precedes corner removal for loot, while the
+reward queue replaces the seal speech. Those callbacks now share the same
+floor-check stage so reward cleanup cannot erase that re-seal.
 
 Dynamic gates exposed an independent animation issue: an extracted tile-reveal
 record could say its starting tile was road even after an earlier event closed
@@ -111,8 +120,8 @@ The original event audit checks all 51 initialized floor records and every one
 of the 56 initialized special-road sites. All have configured events. It also
 enumerates direct callers of the event dispatcher, scene builder, post-combat
 handler and movement hazard helper, so stairs and ordinary movement are visible
-as separate entry paths. The campaign has 103 events and retains all 100
-previous event IDs. Coverage includes the restored 32F/42F stair scenes,
+as separate entry paths. The campaign now has 106 events and retains previous
+event IDs. Coverage includes the restored 32F/42F stair scenes,
 guarded rewards, capture, thief branches, staged bosses, 23F closing walls,
 30F/33F traps, all thirteen
 40F forced battles, clock doors, hidden NPCs, caster gates, 49F sealing/decoy,

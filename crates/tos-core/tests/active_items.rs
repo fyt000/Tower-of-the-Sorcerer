@@ -68,6 +68,85 @@ fn bomb_excludes_diagonal_and_distant_enemies_and_keeps_raw_rewards() {
 }
 
 #[test]
+fn original_bomb_eligibility_matches_every_defined_original_tile_and_animation_frame() {
+    let evidence: Value =
+        serde_json::from_str(include_str!("../../../data/original-door-bomb-audit.json")).unwrap();
+    let original = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
+    for (id, definition) in &original.campaign().tiles {
+        let tile = id.parse::<usize>().unwrap();
+        let allowed = evidence["tile_classifier"][tile]["kind"] == 2;
+        let mut engine = original.clone();
+        let mut saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
+        saved["player"]["floor"] = json!(1);
+        saved["player"]["x"] = json!(5);
+        saved["player"]["y"] = json!(5);
+        saved["player"]["gold"] = json!(1000);
+        saved["player"]["inventory"] = json!(["bomb", "lucky_gold"]);
+        saved["cycle"] = json!(3);
+        saved["floors"]["1"] = json!(vec![6; 121]);
+        saved["floors"]["1"][49] = json!(tile);
+        saved["floors"]["1"][72] = json!(61); // Diagonal control
+        engine.load_json(&saved.to_string()).unwrap();
+        use_item(&mut engine, "bomb");
+        assert_eq!(
+            engine.tile_at(1, 5, 4),
+            Some(if allowed { 6 } else { tile as u16 }),
+            "tile {tile}: {}",
+            definition.name
+        );
+        let reward = if allowed {
+            original.campaign().enemies[definition.enemy.as_ref().unwrap()].gold
+        } else {
+            0
+        };
+        assert_eq!(engine.player().gold, 1000 + reward, "tile {tile}");
+        assert_eq!(engine.tile_at(1, 6, 6), Some(61));
+        assert_eq!(engine.player().inventory, vec!["lucky_gold"]);
+    }
+}
+
+#[test]
+fn original_bomb_boundaries_match_all_121_executable_coordinate_cases() {
+    let evidence: Value =
+        serde_json::from_str(include_str!("../../../data/original-door-bomb-audit.json")).unwrap();
+    let original = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
+    for case in evidence["bomb_coordinate_cases"].as_array().unwrap() {
+        let (x, y) = (
+            case["x"].as_u64().unwrap() as usize,
+            case["y"].as_u64().unwrap() as usize,
+        );
+        let mut engine = original.clone();
+        let mut saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
+        saved["player"]["floor"] = json!(1);
+        saved["player"]["x"] = json!(x);
+        saved["player"]["y"] = json!(y);
+        saved["player"]["gold"] = json!(1000);
+        saved["player"]["inventory"] = json!(["bomb"]);
+        saved["floors"]["1"] = json!(vec![61; 121]);
+        saved["floors"]["1"][y * 11 + x] = json!(6);
+        engine.load_json(&saved.to_string()).unwrap();
+        use_item(&mut engine, "bomb");
+        for index in 0..121 {
+            let removed = case["removed_indices"]
+                .as_array()
+                .unwrap()
+                .contains(&json!(index));
+            let expected = if removed || index == y * 11 + x {
+                6
+            } else {
+                61
+            };
+            assert_eq!(
+                engine.tile_at(1, index % 11, index / 11),
+                Some(expected),
+                "Bomb at ({x},{y}), tile {index}"
+            );
+        }
+        assert_eq!(json!(engine.player().gold), case["gold_after"]);
+    }
+}
+
+#[test]
 fn snow_crystal_cools_only_immediate_neighbors_and_remains_reusable() {
     let mut value = fixture("snow_crystal");
     for (x, y) in [(2, 1), (3, 2), (2, 3), (1, 2), (3, 3), (4, 2)] {

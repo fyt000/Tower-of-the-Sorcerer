@@ -1298,9 +1298,11 @@ impl CampaignEditor {
                         "step",
                         "bump",
                         "door_opened",
+                        "door_attempted",
                         "enter_floor",
                         "stairs_up",
                         "enemy_defeated",
+                        "post_combat",
                         "interact",
                     ],
                 );
@@ -1617,6 +1619,7 @@ fn initialize_record(record: &mut Value, effect: bool) {
         "set_charges" => json!({"item":"warp_staff","charges":3}),
         "set_visited" => json!({"floors":[1]}),
         "set_enemy" => json!({"enemy":"green_slime"}),
+        "multiply_enemy" => json!({"enemy":"green_slime","numerator":1,"denominator":1}),
         "wait" => json!({"ms":120}),
         "sound" => json!({"cue":"open"}),
         "cinematic" => json!({"kind":"magic","duration_ms":650}),
@@ -1848,6 +1851,7 @@ fn effects_ui(ui: &mut Ui, locale: &str, value: &mut Value) {
                                     "set_visited",
                                     "teleport",
                                     "set_enemy",
+                                    "multiply_enemy",
                                     "battle_at",
                                     "wait",
                                     "sound",
@@ -1974,6 +1978,17 @@ fn effects_ui(ui: &mut Ui, locale: &str, value: &mut Value) {
                                     for key in ["hp", "attack", "defense", "gold"] {
                                         optional_number(ui, locale, key, &mut effect[key]);
                                     }
+                                }
+                                "multiply_enemy" => {
+                                    text(ui, locale, "enemy", &mut effect["enemy"], false);
+                                    number(ui, locale, "numerator", &mut effect["numerator"], 1);
+                                    number(
+                                        ui,
+                                        locale,
+                                        "denominator",
+                                        &mut effect["denominator"],
+                                        1,
+                                    );
                                 }
                                 _ => {}
                             }

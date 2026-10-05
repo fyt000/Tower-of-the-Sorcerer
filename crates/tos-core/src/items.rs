@@ -313,10 +313,13 @@ impl Engine {
             "bomb" => {
                 let mut count = 0;
                 let mut reward = 0;
+                let mut defeated = Vec::new();
+                // The original builds south/east/west/north records on a
+                // stack, so their animations play north/west/east/south.
                 for (nx, ny) in [
+                    (x, y.wrapping_sub(1)),
                     (x.wrapping_sub(1), y),
                     (x + 1, y),
-                    (x, y.wrapping_sub(1)),
                     (x, y + 1),
                 ] {
                     if let Some(id) = self.tile_at(floor, nx, ny)
@@ -337,11 +340,22 @@ impl Engine {
                             self.present_bomb(floor, nx, ny);
                             self.clear(floor, nx, ny);
                             count += 1;
-                            self.run_events(TriggerKind::EnemyDefeated, floor, nx, ny, Some(id));
+                            defeated.push((nx, ny, id));
                         }
                     }
                 }
                 self.add_stat(Stat::Gold, reward);
+                self.state.player.remove_item(item);
+                consume = false;
+                // The queued moncheck callback sees every victim removed
+                // and the complete reward, after all dissolution graphics.
+                let cycle = self.state.cycle;
+                for (nx, ny, id) in defeated {
+                    self.run_events(TriggerKind::EnemyDefeated, floor, nx, ny, Some(id));
+                }
+                if self.state.cycle == cycle {
+                    self.run_events(TriggerKind::PostCombat, floor, x, y, None);
+                }
                 self.log(format!(
                     "The bomb destroyed {count} enemies: +{reward} gold."
                 ));

@@ -436,6 +436,7 @@ fn sealed_zeno_stats_survive_repeated_restores_then_the_portal_restores_the_corr
             save["player"]["inventory"] = json!(["hero_orb"]);
             save["enemy_overrides"]["zeno"] =
                 json!({"name":"Zeno","hp":800,"attack":500,"defense":100,"gold":500});
+            save["flags"] = json!(["floor_49_zeno_sealed"]);
         });
         for _ in 0..4 {
             let before = game.save_json();
@@ -507,6 +508,225 @@ fn sealed_zeno_stats_survive_repeated_restores_then_the_portal_restores_the_corr
             assert_eq!(game.snapshot()["cycle"], cycle + 1);
             assert_eq!(game.player().gold, 507);
         }
+    }
+}
+
+#[test]
+fn visiting_floor50_before_the_floor49_seal_preserves_the_weaker_shared_zeno_row() {
+    for cycle in [1, 3, 4] {
+        for seal_before_gate in [false, true] {
+            let mut game = original();
+            edit(&mut game, |save| {
+                save["cycle"] = json!(cycle);
+                place(save, 49, 5, 4);
+                save["player"]["hp"] = json!(1_000_000);
+                save["player"]["attack"] = json!(100_000);
+                save["player"]["defense"] = json!(500_000);
+                save["player"]["inventory"] =
+                    json!(["hero_orb", "sacred_shield", "up_wing", "down_wing"]);
+                save["floors"]["49"] = json!(vec![6; 121]);
+                for index in [15, 17, 37, 39, 38] {
+                    save["floors"]["49"][index] = json!(93);
+                }
+                save["floors"]["49"][27] = json!(91);
+                save["floors"]["49"][71] = json!(4);
+                // An unrelated fight can recheck the still-valid dice pattern.
+                save["floors"]["49"][59] = json!(61);
+            });
+            if seal_before_gate {
+                step(&mut game, "up");
+                let saved: Value = serde_json::from_str(&game.save_json()).unwrap();
+                assert_eq!(saved["enemy_overrides"]["zeno"]["hp"], 800);
+            }
+            edit(&mut game, |save| {
+                place(save, 24, 5, 1);
+                save["floors"]["24"][5] = json!(7);
+            });
+            step(&mut game, "up");
+            assert_eq!(game.player().floor, 50);
+            let factor = if cycle == 1 { 1 } else { 44 };
+            let saved: Value = serde_json::from_str(&game.save_json()).unwrap();
+            if cycle == 1 {
+                assert_eq!(
+                    saved["enemy_overrides"]["zeno"]["hp"]
+                        .as_i64()
+                        .unwrap_or(game.campaign().enemies["zeno"].hp),
+                    8000
+                );
+            } else {
+                assert_eq!(game.inspect(5, 4)["enemy"]["hp"], 8000 * factor);
+            }
+            assert!(
+                !saved["flags"]
+                    .as_array()
+                    .unwrap()
+                    .contains(&json!("floor_49_zeno_sealed"))
+            );
+            // Use the actual wings to return, leaving 49F Zeno alive.
+            // The scenario gate lands at (5,6); (5,5) is road on both floors.
+            step(&mut game, "up");
+            assert_eq!((game.player().x, game.player().y), (5, 5));
+            game.command(json!({"type":"use_item","item":"down_wing"}))
+                .unwrap();
+            assert_eq!(game.player().floor, 49);
+            if seal_before_gate {
+                step(&mut game, "left");
+            } else {
+                step(&mut game, "up");
+                step(&mut game, "up");
+            }
+            let saved: Value = serde_json::from_str(&game.save_json()).unwrap();
+            assert_eq!(saved["enemy_overrides"]["zeno"]["hp"], 800);
+            assert_eq!(
+                saved["event_counts"]["floor_49_dice_seal"],
+                if seal_before_gate { 2 } else { 1 }
+            );
+            assert!(
+                saved["flags"]
+                    .as_array()
+                    .unwrap()
+                    .contains(&json!("floor_49_zeno_sealed"))
+            );
+            assert_eq!(game.tile_at(49, 5, 2), Some(91));
+            if !seal_before_gate {
+                step(&mut game, "down");
+                step(&mut game, "down"); // (5,5), road inside the 50F room
+            }
+            game.command(json!({"type":"use_item","item":"up_wing"}))
+                .unwrap();
+            assert_eq!(game.player().floor, 50);
+            // Save/restore and inspection must not undo or reapply the seal.
+            let before = game.save_json();
+            let mut restored = original();
+            restored.load_json(&before).unwrap();
+            game = restored;
+            let preview = game.inspect(5, 4)["enemy"].clone();
+            if cycle == 1 {
+                assert!(preview.is_null());
+            } else {
+                assert_eq!(
+                    (
+                        preview["hp"].as_i64(),
+                        preview["attack"].as_i64(),
+                        preview["defense"].as_i64()
+                    ),
+                    (Some(800 * factor), Some(500 * factor), Some(100 * factor))
+                );
+            }
+            assert_eq!(game.save_json(), before);
+            if seal_before_gate {
+                step(&mut game, "up"); // (4,4)
+                step(&mut game, "right");
+            } else {
+                step(&mut game, "up");
+            }
+            let state = game.snapshot();
+            let battle = state["last_action"]["presentation"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|e| e["type"] == "battle");
+            if cycle == 1 {
+                assert!(
+                    battle.is_none(),
+                    "Original first ending does not fight Zeno"
+                );
+            } else {
+                assert_eq!(battle.unwrap()["enemy_hp"], 800 * factor);
+            }
+            assert_eq!(state["cycle"], cycle + 1);
+        }
+    }
+}
+
+#[test]
+fn defeating_the_49f_decoy_after_the_gate_reseals_zeno_before_clearing_the_corners() {
+    for cycle in [1, 3, 4] {
+        let mut game = original();
+        edit(&mut game, |save| {
+            save["cycle"] = json!(cycle);
+            place(save, 49, 5, 4);
+            save["player"]["hp"] = json!(1_000_000);
+            save["player"]["attack"] = json!(100_000);
+            save["player"]["defense"] = json!(500_000);
+            save["player"]["inventory"] =
+                json!(["hero_orb", "sacred_shield", "up_wing", "down_wing"]);
+            for index in [16, 26, 28, 49, 60] {
+                save["floors"]["49"][index] = json!(6);
+            }
+            for index in [15, 17, 37, 39, 38] {
+                save["floors"]["49"][index] = json!(93);
+            }
+            save["floors"]["49"][27] = json!(91);
+            save["floors"]["49"][71] = json!(4);
+        });
+        step(&mut game, "up"); // Last edge kill seals the live decoy.
+        assert_eq!(
+            game.inspect(5, 2)["enemy"]["hp"],
+            if cycle == 1 { 800 } else { 35200 }
+        );
+        edit(&mut game, |save| {
+            place(save, 24, 5, 1);
+            save["floors"]["24"][5] = json!(7);
+        });
+        step(&mut game, "up"); // Gate reverses the seal and reveals F50 Zeno.
+        assert_eq!(game.player().floor, 50);
+        step(&mut game, "up"); // (5,5), road on both floors.
+        game.command(json!({"type":"use_item","item":"down_wing"}))
+            .unwrap();
+        assert_eq!(game.player().floor, 49);
+        step(&mut game, "up");
+        step(&mut game, "up");
+        step(&mut game, "up"); // Defeat the now-full decoy at (5,2).
+        let action = game.snapshot();
+        let timeline = action["last_action"]["presentation"].as_array().unwrap();
+        let battle = timeline.iter().find(|fx| fx["type"] == "battle").unwrap();
+        assert_eq!(battle["enemy_hp"], if cycle == 1 { 8000 } else { 352000 });
+        let saved: Value = serde_json::from_str(&game.save_json()).unwrap();
+        assert_eq!(saved["enemy_overrides"]["zeno"]["hp"], 800);
+        assert_eq!(saved["enemy_overrides"]["zeno"]["attack"], 500);
+        assert_eq!(saved["enemy_overrides"]["zeno"]["defense"], 100);
+        assert!(
+            saved["flags"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("floor_49_zeno_sealed"))
+        );
+        assert_eq!(saved["event_counts"]["floor_49_dice_seal"], 2);
+        assert_eq!(saved["event_counts"]["floor_49_decoy_zeno_defeated"], 1);
+        assert!(
+            !timeline.iter().any(|fx| fx["dialogue_id"] == 45),
+            "Original reward builder overwrites the otherwise queued seal speech"
+        );
+        assert_eq!(game.tile_at(49, 5, 2), Some(6));
+        assert_eq!(game.tile_at(49, 5, 1), Some(23));
+        for index in [37, 39] {
+            assert_eq!(game.tile_at(49, index % 11, index / 11), Some(6));
+        }
+        for _ in 0..3 {
+            step(&mut game, "down");
+        }
+        game.command(json!({"type":"use_item","item":"up_wing"}))
+            .unwrap();
+        assert_eq!(game.player().floor, 50);
+        let saved = game.save_json();
+        game.load_json(&saved).unwrap();
+        if cycle > 1 {
+            assert_eq!(game.inspect(5, 4)["enemy"]["hp"], 35200);
+        }
+        step(&mut game, "up");
+        let action = game.snapshot();
+        let battle = action["last_action"]["presentation"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|fx| fx["type"] == "battle");
+        if cycle == 1 {
+            assert!(battle.is_none());
+        } else {
+            assert_eq!(battle.unwrap()["enemy_hp"], 35200);
+        }
+        assert_eq!(action["cycle"], cycle + 1);
     }
 }
 

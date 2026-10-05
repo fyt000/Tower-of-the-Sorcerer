@@ -1,0 +1,5581 @@
+{
+  "executable_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "shared_zeno_row": [
+    "0x489A00",
+    "0x489A04",
+    "0x489A08"
+  ],
+  "seal_flag": "0x4B88F8",
+  "scenarios": [
+    {
+      "cycle": 1,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "portal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "contact",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "contact",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "decoy_defeated",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "decoy_defeated",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4660d0"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            620,
+            120
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1000,
+            620,
+            120
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            620,
+            120
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "portal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            620,
+            120
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            620,
+            120
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "contact",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "contact",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "decoy_defeated",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            620,
+            120
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "decoy_defeated",
+          "stats_before": [
+            1000,
+            620,
+            120
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4660d0"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "portal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "contact",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "contact",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 1,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "decoy_defeated",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "decoy_defeated",
+          "stats_before": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4660d0"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x4135d4",
+            "0x42c454",
+            "0x44bc0c"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "portal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "contact",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "contact",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "decoy_defeated",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "decoy_defeated",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4660d0"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "portal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "contact",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "contact",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "decoy_defeated",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "decoy_defeated",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4660d0"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "portal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "contact",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "contact",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "decoy_defeated",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "decoy_defeated",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4660d0"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "portal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "contact",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "contact",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "decoy_defeated",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "decoy_defeated",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4660d0"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            620,
+            120
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1000,
+            620,
+            120
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            620,
+            120
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "portal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            620,
+            120
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            620,
+            120
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "contact",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "contact",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "decoy_defeated",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            620,
+            120
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "decoy_defeated",
+          "stats_before": [
+            1000,
+            620,
+            120
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4660d0"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "portal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "contact",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "contact",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "decoy_defeated",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "decoy_defeated",
+          "stats_before": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4660d0"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "portal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "contact",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "contact",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        8000,
+        5000,
+        1000
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "decoy_defeated",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "decoy_defeated",
+          "stats_before": [
+            8000,
+            5000,
+            1000
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4660d0"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            800,
+            500,
+            100
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            800,
+            500,
+            100
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            620,
+            120
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1000,
+            620,
+            120
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            620,
+            120
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "portal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            620,
+            120
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            620,
+            120
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "contact",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "contact",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1000,
+            625,
+            125
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        1000,
+        625,
+        125
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "decoy_defeated",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            1000,
+            625,
+            125
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1000,
+            620,
+            120
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "decoy_defeated",
+          "stats_before": [
+            1000,
+            620,
+            120
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4660d0"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            100,
+            62,
+            12
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            100,
+            62,
+            12
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "portal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "contact",
+        "seal",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "contact",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        },
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "initial_stats": [
+        12345,
+        5678,
+        999
+      ],
+      "order": [
+        "seal",
+        "portal",
+        "decoy_defeated",
+        "contact"
+      ],
+      "steps": [
+        {
+          "handler": "seal",
+          "stats_before": [
+            12345,
+            5678,
+            999
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": []
+        },
+        {
+          "handler": "portal",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_after": 0,
+          "skipped_calls": [
+            "0x4034dc",
+            "0x4135d4",
+            "0x44bc0c"
+          ]
+        },
+        {
+          "handler": "decoy_defeated",
+          "stats_before": [
+            12340,
+            5670,
+            990
+          ],
+          "seal_before": 0,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4660d0"
+          ]
+        },
+        {
+          "handler": "contact",
+          "stats_before": [
+            1234,
+            567,
+            99
+          ],
+          "seal_before": 1,
+          "stats_after": [
+            1234,
+            567,
+            99
+          ],
+          "seal_after": 1,
+          "skipped_calls": [
+            "0x4034fc",
+            "0x44a480"
+          ]
+        }
+      ]
+    }
+  ],
+  "invalid_pattern_unchanged": true,
+  "decoy_death": {
+    "seal_before_corner_removal": true,
+    "reward_builder_overwrites_seal_dialogue": true
+  },
+  "stat_write_sites": [
+    "0x4463B3",
+    "0x4463BD",
+    "0x4463C7",
+    "0x455B58",
+    "0x455B62",
+    "0x455B6C",
+    "0x455B85",
+    "0x455B91",
+    "0x455B9A",
+    "0x46B573",
+    "0x46B585",
+    "0x46B597",
+    "0x470520",
+    "0x47052F",
+    "0x47053E",
+    "0x47055D",
+    "0x470567",
+    "0x470571"
+  ],
+  "disassembly": {
+    "0x46b4db..0x46b59c": [
+      "0x46b4db: imul eax, dword ptr [ebp + 0x10], 0x7b",
+      "0x46b4df: movzx eax, byte ptr [eax + 0x4b8946]",
+      "0x46b4e6: imul edx, dword ptr [ebp + 0x10], 0x7b",
+      "0x46b4ea: movzx edx, byte ptr [edx + 0x4b8950]",
+      "0x46b4f1: add eax, edx",
+      "0x46b4f3: imul edx, dword ptr [ebp + 0x10], 0x7b",
+      "0x46b4f7: movzx edx, byte ptr [edx + 0x4b8952]",
+      "0x46b4fe: add eax, edx",
+      "0x46b500: imul edx, dword ptr [ebp + 0x10], 0x7b",
+      "0x46b504: movzx edx, byte ptr [edx + 0x4b895c]",
+      "0x46b50b: add eax, edx",
+      "0x46b50d: cmp eax, 0x18",
+      "0x46b510: jne 0x46b6d6",
+      "0x46b516: imul eax, dword ptr [ebp + 0x10], 0x7b",
+      "0x46b51a: movzx eax, byte ptr [eax + 0x4b8945]",
+      "0x46b521: imul edx, dword ptr [ebp + 0x10], 0x7b",
+      "0x46b525: movzx edx, byte ptr [edx + 0x4b8947]",
+      "0x46b52c: add eax, edx",
+      "0x46b52e: imul edx, dword ptr [ebp + 0x10], 0x7b",
+      "0x46b532: movzx edx, byte ptr [edx + 0x4b895b]",
+      "0x46b539: add eax, edx",
+      "0x46b53b: imul edx, dword ptr [ebp + 0x10], 0x7b",
+      "0x46b53f: movzx edx, byte ptr [edx + 0x4b895d]",
+      "0x46b546: add eax, edx",
+      "0x46b548: cmp eax, 0x174",
+      "0x46b54d: jne 0x46b6d6",
+      "0x46b553: cmp dword ptr [ebp + 0x270], 0",
+      "0x46b55a: jne 0x46b59c",
+      "0x46b55c: mov dword ptr [ebp + 0x270], 1",
+      "0x46b566: mov eax, dword ptr [0x489a00]",
+      "0x46b56b: mov ecx, 0xa",
+      "0x46b570: cdq ",
+      "0x46b571: idiv ecx",
+      "0x46b573: mov dword ptr [0x489a00], eax",
+      "0x46b578: mov eax, dword ptr [0x489a04]",
+      "0x46b57d: mov ecx, 0xa",
+      "0x46b582: cdq ",
+      "0x46b583: idiv ecx",
+      "0x46b585: mov dword ptr [0x489a04], eax",
+      "0x46b58a: mov eax, dword ptr [0x489a08]",
+      "0x46b58f: mov ecx, 0xa",
+      "0x46b594: cdq ",
+      "0x46b595: idiv ecx",
+      "0x46b597: mov dword ptr [0x489a08], eax"
+    ],
+    "0x470506..0x47057b": [
+      "0x470506: cmp dword ptr [0x4b88f8], 1",
+      "0x47050d: jne 0x470543",
+      "0x47050f: xor eax, eax",
+      "0x470511: mov dword ptr [0x4b88f8], eax",
+      "0x470516: mov eax, dword ptr [0x489a00]",
+      "0x47051b: add eax, eax",
+      "0x47051d: lea eax, [eax + eax*4]",
+      "0x470520: mov dword ptr [0x489a00], eax",
+      "0x470525: mov eax, dword ptr [0x489a04]",
+      "0x47052a: add eax, eax",
+      "0x47052c: lea eax, [eax + eax*4]",
+      "0x47052f: mov dword ptr [0x489a04], eax",
+      "0x470534: mov eax, dword ptr [0x489a08]",
+      "0x470539: add eax, eax",
+      "0x47053b: lea eax, [eax + eax*4]",
+      "0x47053e: mov dword ptr [0x489a08], eax",
+      "0x470543: cmp dword ptr [0x4b8904], 0",
+      "0x47054a: je 0x470781",
+      "0x470550: cmp dword ptr [0x4b8908], 0",
+      "0x470557: jne 0x470781",
+      "0x47055d: mov dword ptr [0x489a00], 0x3e8",
+      "0x470567: mov dword ptr [0x489a04], 0x271",
+      "0x470571: mov dword ptr [0x489a08], 0x7d"
+    ],
+    "0x4463a1..0x4463de": [
+      "0x4463a1: cmp dword ptr [0x4b8904], 0",
+      "0x4463a8: je 0x4463de",
+      "0x4463aa: cmp dword ptr [0x4b8908], 0",
+      "0x4463b1: jne 0x4463d1",
+      "0x4463b3: mov dword ptr [0x489a00], 0x3e8",
+      "0x4463bd: mov dword ptr [0x489a04], 0x271",
+      "0x4463c7: mov dword ptr [0x489a08], 0x7d",
+      "0x4463d1: mov eax, dword ptr [ebp - 4]",
+      "0x4463d4: call 0x44a480",
+      "0x4463d9: jmp 0x448fbc"
+    ]
+  },
+  "limits": [
+    "Chains carry actual stat/flag writes between isolated handlers; they are not natural full-tower routes.",
+    "Drawing, normal combat arithmetic and queue playback are skipped in these probes.",
+    "Original save/load row reconstruction has separately documented cycle double-scaling; the Rust engine keeps normalized rows.",
+    "C++ is reviewable source, with no standalone executable or alternate engine."
+  ]
+}

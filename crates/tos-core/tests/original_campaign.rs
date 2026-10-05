@@ -330,6 +330,118 @@ fn an_extra_open_clock_door_prevents_the_three_oclock_reward() {
 }
 
 #[test]
+fn original_clock_shortcut_uses_one_key_and_keeps_the_second_door_closed() {
+    for doors in [
+        [(4, 1, "left", 14), (4, 3, "right", 38)],
+        [(4, 3, "right", 38), (4, 1, "left", 14)],
+    ] {
+        let mut game = original();
+        edit_save(&mut game, |save| {
+            save["player"]["keys"]["yellow"] = json!(1)
+        });
+        place(&mut game, 39, doors[0].0, doors[0].1);
+        step(&mut game, doors[0].2);
+        assert_eq!(game.player().keys.yellow, 0);
+        let before = game.save_json();
+        game = original();
+        game.load_json(&before).unwrap();
+        place(&mut game, 39, doors[1].0, doors[1].1);
+        let steps = game.snapshot()["steps"].clone();
+        step(&mut game, doors[1].2);
+        assert_eq!(game.snapshot()["last_action"]["ok"], false);
+        assert_eq!((game.player().x, game.player().y), (doors[1].0, doors[1].1));
+        assert_eq!(game.snapshot()["steps"], steps);
+        assert_eq!(game.tile_at(39, doors[1].3 % 11, doors[1].3 / 11), Some(1));
+        assert_eq!(game.tile_at(39, 3, 3), Some(43));
+        let effects = game.snapshot()["last_action"]["presentation"].clone();
+        assert!(
+            effects
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|e| e["type"] == "audio" && e["name"] == "get")
+        );
+        assert!(
+            !effects
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|e| e["style"] == "door_open" || e["type"] == "move")
+        );
+        let saved = game.save_json();
+        game.load_json(&saved).unwrap();
+        step(&mut game, doors[1].2);
+        assert_eq!(game.tile_at(39, 3, 3), Some(43));
+        place(&mut game, 39, 4, 3);
+        step(&mut game, "left");
+        assert_eq!(game.player().item_charges["warp_staff"], 3);
+        assert_eq!(game.player().keys.yellow, 0);
+    }
+}
+
+#[test]
+fn clock_attempts_match_original_executable_branch_oracles() {
+    let evidence: Value =
+        serde_json::from_str(include_str!("../../../data/original-door-bomb-audit.json")).unwrap();
+    for case in evidence["clock_runtime_cases"].as_array().unwrap() {
+        let target = case["target"].as_u64().unwrap() as usize;
+        let (x, y, direction) = if target == 14 {
+            (4, 1, "left")
+        } else {
+            (4, 3, "right")
+        };
+        let mut game = original();
+        edit_save(&mut game, |save| {
+            save["player"]["floor"] = json!(39);
+            save["player"]["x"] = json!(x);
+            save["player"]["y"] = json!(y);
+            save["player"]["keys"]["yellow"] = case["yellow_keys"].clone();
+            for index in case["opened_indices"].as_array().unwrap() {
+                save["floors"]["39"][index.as_u64().unwrap() as usize] = json!(6);
+            }
+            save["floors"]["39"][36] = case["center_tile"].clone();
+        });
+        step(&mut game, direction);
+        assert_eq!(
+            json!(game.player().keys.yellow),
+            case["yellow_keys_after"],
+            "{case}"
+        );
+        let center = if case["reveals_staff"] == true {
+            43
+        } else {
+            case["center_tile"].as_u64().unwrap() as u16
+        };
+        assert_eq!(game.tile_at(39, 3, 3), Some(center), "{case}");
+        let sound = game.snapshot()["last_action"]["presentation"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|e| e["type"] == "audio" && e["name"] == "get");
+        assert_eq!(sound, case["reveals_staff"].as_bool().unwrap(), "{case}");
+    }
+}
+
+#[test]
+fn original_no_key_floor43_contact_arms_the_trap_for_the_next_step() {
+    let mut game = original();
+    place(&mut game, 43, 6, 0);
+    edit_save(&mut game, |save| {
+        save["player"]["keys"]["yellow"] = json!(0)
+    });
+    step(&mut game, "right");
+    assert_eq!((game.player().x, game.player().y), (6, 0));
+    assert_eq!(game.tile_at(43, 7, 0), Some(7));
+    assert_eq!(game.snapshot()["last_action"]["ok"], false);
+    let saved = game.save_json();
+    game.load_json(&saved).unwrap();
+    step(&mut game, "right");
+    assert_eq!(game.player().keys.yellow, 0);
+    let saved: Value = serde_json::from_str(&game.save_json()).unwrap();
+    assert_eq!(saved["event_counts"]["floor_43_magician_trap"], 1);
+}
+
+#[test]
 fn original_fairy_acknowledgement_clears_spawned_npc_without_changing_stats() {
     let mut game = original();
     place(&mut game, 10, 5, 3);

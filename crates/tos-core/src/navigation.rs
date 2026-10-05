@@ -120,11 +120,16 @@ impl Engine {
                 let key = def.key.unwrap_or(KeyColor::Yellow);
                 let count = self.key_mut(key);
                 if *count <= 0 {
+                    // Original handan calls doorcheck even on the no-key
+                    // branch. Door events can therefore change the world
+                    // while the contacted door and player stay in place.
+                    self.run_events(TriggerKind::DoorAttempted, floor, x, y, Some(id));
                     return self.block(&format!("You need a {key} key."));
                 }
                 *count -= 1;
                 self.clear(floor, x, y);
                 self.log(format!("Opened the {key} door."));
+                self.run_events(TriggerKind::DoorAttempted, floor, x, y, Some(id));
                 self.run_events(TriggerKind::DoorOpened, floor, x, y, Some(id));
             }
             TileKind::SpecialDoor => return self.block("This gate opens through a floor event."),
@@ -175,6 +180,9 @@ impl Engine {
                 ));
                 self.record_battle_log(battle_record);
                 self.run_events(TriggerKind::EnemyDefeated, floor, x, y, Some(id));
+                if self.state.cycle == cycle {
+                    self.run_events(TriggerKind::PostCombat, floor, x, y, None);
+                }
                 entered = false;
             }
             TileKind::Potion

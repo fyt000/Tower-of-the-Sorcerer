@@ -6088,7 +6088,7 @@
     "id": "floor_2_guards_0",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 2
     },
     "conditions": [
@@ -6395,7 +6395,7 @@
     "id": "floor_8_guards_0",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 8
     },
     "conditions": [
@@ -6472,7 +6472,7 @@
     "id": "floor_11_guards_0",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 11
     },
     "conditions": [
@@ -6549,7 +6549,7 @@
     "id": "floor_14_guards_0",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 14
     },
     "conditions": [
@@ -6606,7 +6606,7 @@
     "id": "floor_17_guards_0",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 17
     },
     "conditions": [
@@ -6683,7 +6683,7 @@
     "id": "floor_17_guards_1",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 17
     },
     "conditions": [
@@ -6760,7 +6760,7 @@
     "id": "floor_17_guards_2",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 17
     },
     "conditions": [
@@ -6837,7 +6837,7 @@
     "id": "floor_17_guards_3",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 17
     },
     "conditions": [
@@ -6914,7 +6914,7 @@
     "id": "floor_32_guards_0",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 32
     },
     "conditions": [
@@ -6991,7 +6991,7 @@
     "id": "floor_34_guards_0",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 34
     },
     "conditions": [
@@ -7159,7 +7159,7 @@
     "id": "floor_35_guards_0",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 35
     },
     "conditions": [
@@ -7305,7 +7305,7 @@
     "id": "floor_38_guards_0",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 38
     },
     "conditions": [
@@ -7339,7 +7339,7 @@
     "id": "floor_44_guards_0",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 44
     },
     "conditions": [
@@ -7416,7 +7416,7 @@
     "id": "floor_45_guards_0",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 45
     },
     "conditions": [
@@ -7493,7 +7493,7 @@
     "id": "floor_45_guards_1",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 45
     },
     "conditions": [
@@ -7570,7 +7570,7 @@
     "id": "floor_10_guards_defeated",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 10
     },
     "conditions": [
@@ -8164,7 +8164,7 @@
     "id": "floor_15_boss_defeated",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 15
     },
     "conditions": [
@@ -8313,7 +8313,7 @@
     "id": "floor_20_boss_defeated",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 20
     },
     "conditions": [
@@ -8775,7 +8775,7 @@
     "id": "floor_25_boss_defeated",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 25
     },
     "conditions": [
@@ -8966,7 +8966,7 @@
     "id": "floor_30_boss_defeated",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 30
     },
     "conditions": [
@@ -9150,7 +9150,7 @@
     "id": "floor_33_four_guards_defeated",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 33
     },
     "conditions": [
@@ -9294,7 +9294,7 @@
     "id": "floor_39_clock_door_14",
     "once": true,
     "trigger": {
-      "type": "step",
+      "type": "door_attempted",
       "floor": 39,
       "x": 3,
       "y": 1,
@@ -9371,13 +9371,13 @@
         "tile": 43
       }
     ],
-    "source": "Original doorcheck 0x47BEAC"
+    "source": "Original handan 0x44468C calls doorcheck 0x47BEAC even without a key"
   },
   {
     "id": "floor_39_clock_door_38",
     "once": true,
     "trigger": {
-      "type": "step",
+      "type": "door_attempted",
       "floor": 39,
       "x": 5,
       "y": 3,
@@ -9454,7 +9454,7 @@
         "tile": 43
       }
     ],
-    "source": "Original doorcheck 0x47BEAC"
+    "source": "Original handan 0x44468C calls doorcheck 0x47BEAC even without a key"
   },
   {
     "id": "floor_41_reveal_hidden_magician",
@@ -9494,7 +9494,7 @@
     "id": "floor_41_two_magicians_defeated",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 41
     },
     "conditions": [
@@ -9636,14 +9636,50 @@
     "source": "Original moncheck floor-41 branch"
   },
   {
+    "id": "floor_43_door_arms_trap",
+    "once": true,
+    "trigger": {
+      "type": "door_attempted",
+      "floor": 43,
+      "x": 7,
+      "y": 0,
+      "tile": 1
+    },
+    "conditions": [
+      {
+        "type": "tile",
+        "floor": 43,
+        "x": 7,
+        "y": 0,
+        "tile": 1
+      },
+      {
+        "type": "tile",
+        "floor": 43,
+        "x": 8,
+        "y": 0,
+        "tile": 93
+      }
+    ],
+    "effects": [
+      {
+        "type": "set_tile",
+        "floor": 43,
+        "x": 7,
+        "y": 0,
+        "tile": 7
+      }
+    ],
+    "source": "Original doorcheck 0x47C1C8: no-key attempt converts the closed door to special road"
+  },
+  {
     "id": "floor_43_magician_trap",
     "once": true,
     "trigger": {
       "type": "step",
       "floor": 43,
       "x": 7,
-      "y": 0,
-      "tile": 1
+      "y": 0
     },
     "conditions": [
       {
@@ -9810,10 +9846,8 @@
     "id": "floor_48_caster_defeated",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
-      "floor": 48,
-      "x": 0,
-      "y": 0
+      "type": "post_combat",
+      "floor": 48
     },
     "conditions": [
       {
@@ -9844,9 +9878,9 @@
   },
   {
     "id": "floor_49_dice_seal",
-    "once": true,
+    "once": false,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 49
     },
     "conditions": [
@@ -9905,57 +9939,134 @@
         "x": 6,
         "y": 3,
         "tile": 93
-      },
-      {
-        "type": "tile",
-        "floor": 49,
-        "x": 5,
-        "y": 2,
-        "tile": 91
       }
     ],
     "effects": [
       {
         "type": "wait",
-        "ms": 50
+        "ms": 50,
+        "conditions": [
+          {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "tile",
+                "floor": 49,
+                "x": 5,
+                "y": 2,
+                "tile": 91
+              },
+              {
+                "type": "tile",
+                "floor": 49,
+                "x": 5,
+                "y": 2,
+                "tile": 92
+              }
+            ]
+          }
+        ]
       },
       {
         "type": "message",
         "text": "The Magic Sergeant, Zeno \"Alas...\"",
         "dialogue_id": 45,
-        "original_queue_id": 46
+        "original_queue_id": 46,
+        "conditions": [
+          {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "tile",
+                "floor": 49,
+                "x": 5,
+                "y": 2,
+                "tile": 91
+              },
+              {
+                "type": "tile",
+                "floor": 49,
+                "x": 5,
+                "y": 2,
+                "tile": 92
+              }
+            ]
+          }
+        ]
       },
       {
         "type": "wait",
-        "ms": 25
+        "ms": 25,
+        "conditions": [
+          {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "tile",
+                "floor": 49,
+                "x": 5,
+                "y": 2,
+                "tile": 91
+              },
+              {
+                "type": "tile",
+                "floor": 49,
+                "x": 5,
+                "y": 2,
+                "tile": 92
+              }
+            ]
+          }
+        ]
       },
       {
-        "type": "set_enemy",
+        "type": "multiply_enemy",
         "enemy": "zeno",
-        "hp": 800,
-        "attack": 500,
-        "defense": 100,
-        "gold": 500
+        "numerator": 1,
+        "denominator": 10,
+        "conditions": [
+          {
+            "type": "flag",
+            "flag": "floor_49_zeno_sealed",
+            "value": false
+          }
+        ]
+      },
+      {
+        "type": "flag",
+        "flag": "floor_49_zeno_sealed"
       }
     ],
-    "source": "Original moncheck floor-49 branch; directly observed table mutation 8000/5000/1000 -> 800/500/100"
+    "source": "Original moncheck 0x46B553..0x46B597: shared Zeno HP/ATK/DEF /= 10 when seal flag 0x4B88F8 is clear"
   },
   {
     "id": "floor_49_decoy_zeno_defeated",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
-      "floor": 49,
-      "x": 5,
-      "y": 2
+      "type": "post_combat",
+      "floor": 49
     },
     "conditions": [
       {
         "type": "tile",
         "floor": 49,
         "x": 5,
+        "y": 2,
+        "tile": 6
+      },
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 5,
         "y": 6,
         "tile": 4
+      },
+      {
+        "type": "tile",
+        "floor": 49,
+        "x": 5,
+        "y": 5,
+        "tile": 6
       }
     ],
     "effects": [
@@ -10270,13 +10381,13 @@
         "flag": "decoy_zeno_defeated"
       }
     ],
-    "source": "Original moncheck floor-49 Zeno victory branch"
+    "source": "Original moncheck floor-49: seal arithmetic precedes decoy loot; reward builder overwrites seal dialogue"
   },
   {
     "id": "floor_49_guard_gate_0",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 49
     },
     "conditions": [
@@ -10310,7 +10421,7 @@
     "id": "floor_49_guard_gate_1",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 49
     },
     "conditions": [
@@ -11606,18 +11717,21 @@
         "tile": 6
       },
       {
-        "type": "set_enemy",
+        "type": "multiply_enemy",
         "enemy": "zeno",
-        "hp": 8000,
-        "attack": 5000,
-        "defense": 1000,
-        "gold": 500,
+        "numerator": 10,
+        "denominator": 1,
         "conditions": [
           {
-            "type": "cycle_at_least",
-            "amount": 3
+            "type": "flag",
+            "flag": "floor_49_zeno_sealed"
           }
         ]
+      },
+      {
+        "type": "flag",
+        "flag": "floor_49_zeno_sealed",
+        "value": false
       },
       {
         "type": "set_enemy",
@@ -11625,7 +11739,6 @@
         "hp": 1000,
         "attack": 625,
         "defense": 125,
-        "gold": 500,
         "conditions": [
           {
             "type": "cycle_at_least",
@@ -12490,7 +12603,7 @@
         ]
       }
     ],
-    "source": "Original ichicheck floor-24 time gate; cycle-specific normalized Zeno row and second-cycle march/forced first-strike battle"
+    "source": "Original ichicheck 0x470506..0x470571: conditional seal reversal, then second-cycle fixed row and march/forced first-strike battle"
   },
   {
     "id": "floor_50_first_cycle_completion_91",
@@ -12539,6 +12652,10 @@
       {
         "type": "cycle_at_least",
         "amount": 2
+      },
+      {
+        "type": "cycle_at_most",
+        "amount": 2
       }
     ],
     "effects": [
@@ -12555,23 +12672,9 @@
             "amount": 2
           }
         ]
-      },
-      {
-        "type": "set_enemy",
-        "enemy": "zeno",
-        "hp": 8000,
-        "attack": 5000,
-        "defense": 1000,
-        "gold": 500,
-        "conditions": [
-          {
-            "type": "cycle_at_least",
-            "amount": 3
-          }
-        ]
       }
     ],
-    "source": "Original handan 0x4463B3: second-cycle 1000/625/125; ichicheck portal restores 8000/5000/1000 in later cycles; scaling occurs once at encounter resolution"
+    "source": "Original handan 0x4463AA..0x4463D1: only the second cycle overwrites the shared row; later cycles retain it"
   },
   {
     "id": "floor_50_first_cycle_completion_92",
@@ -12620,6 +12723,10 @@
       {
         "type": "cycle_at_least",
         "amount": 2
+      },
+      {
+        "type": "cycle_at_most",
+        "amount": 2
       }
     ],
     "effects": [
@@ -12636,29 +12743,15 @@
             "amount": 2
           }
         ]
-      },
-      {
-        "type": "set_enemy",
-        "enemy": "zeno",
-        "hp": 8000,
-        "attack": 5000,
-        "defense": 1000,
-        "gold": 500,
-        "conditions": [
-          {
-            "type": "cycle_at_least",
-            "amount": 3
-          }
-        ]
       }
     ],
-    "source": "Original handan 0x4463B3: second-cycle 1000/625/125; ichicheck portal restores 8000/5000/1000 in later cycles; scaling occurs once at encounter resolution"
+    "source": "Original handan 0x4463AA..0x4463D1: only the second cycle overwrites the shared row; later cycles retain it"
   },
   {
     "id": "floor_50_backside_completion",
     "once": true,
     "trigger": {
-      "type": "enemy_defeated",
+      "type": "post_combat",
       "floor": 50
     },
     "conditions": [

@@ -2,7 +2,7 @@
   "source": "Installed English Tower of the Sorcerer Windows v1.2; isolated executable emulation",
   "executable_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
   "floors_reviewed": 51,
-  "configured_event_count": 105,
+  "configured_event_count": 106,
   "initialized_special_road_sites": 56,
   "direct_handler_callers": {
     "mevent": {
@@ -59,6 +59,15 @@
       ],
       "entry_paths": [
         "four ordinary movement neighbor checks"
+      ]
+    },
+    "doorcheck": {
+      "helper": "0x47beac",
+      "call_sites": [
+        "0x44468f"
+      ],
+      "entry_paths": [
+        "keyed-door attempts, including refusal without a key"
       ]
     }
   },
@@ -1384,7 +1393,7 @@
     {
       "floor": 43,
       "special_road_sites": [],
-      "configured_event_count": 1
+      "configured_event_count": 2
     },
     {
       "floor": 44,

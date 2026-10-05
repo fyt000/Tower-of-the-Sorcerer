@@ -275,6 +275,45 @@ fn bomb_dissolves_enemies_before_the_guard_gate_animation_and_rewards() {
 }
 
 #[test]
+fn bomb_finishes_all_dissolves_before_one_floor_callback_even_when_empty() {
+    for enemies_present in [false, true] {
+        let mut campaign = room();
+        campaign["start"]["inventory"] = json!(["bomb"]);
+        let attack = campaign["start"]["attack"].as_i64().unwrap();
+        for index in [7, 11, 13, 17] {
+            campaign["floors"][0]["tiles"][index] = json!(if enemies_present { 61 } else { 6 });
+        }
+        campaign["events"] = json!([
+            {"id":"floor_check","once":false,"trigger":{"type":"post_combat","floor":1},
+             "conditions":[{"type":"stat_at_least","stat":"gold","amount":if enemies_present {4} else {0}}],
+             "effects":[{"type":"add_stat","stat":"attack","amount":1}]},
+            {"id":"bomb_should_already_be_consumed","trigger":{"type":"post_combat"},
+             "conditions":[{"type":"has_item","item":"bomb"}],
+             "effects":[{"type":"add_stat","stat":"attack","amount":100}]}
+        ]);
+        let mut engine = game(&campaign);
+        let effects = command(&mut engine, json!({"type":"use_item","item":"bomb"}));
+        let locations: Vec<_> = effects
+            .iter()
+            .filter(|e| e["style"] == "dissolve")
+            .map(|e| (e["x"].as_u64().unwrap(), e["y"].as_u64().unwrap()))
+            .collect();
+        assert_eq!(
+            locations,
+            if enemies_present {
+                vec![(2, 1), (1, 2), (3, 2), (2, 3)]
+            } else {
+                vec![]
+            }
+        );
+        assert_eq!(engine.player().attack, attack + 1);
+        let saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
+        assert_eq!(saved["event_counts"]["floor_check"], 1);
+        assert!(saved["event_counts"]["bomb_should_already_be_consumed"].is_null());
+    }
+}
+
+#[test]
 fn magic_field_shows_the_damage_pose_after_walking_and_respects_the_shield() {
     let mut campaign = room();
     campaign["floors"][0]["tiles"][8] = json!(151); // Magician beside destination.

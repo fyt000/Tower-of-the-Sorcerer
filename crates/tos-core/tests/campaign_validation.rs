@@ -250,5 +250,5 @@ fn typed_campaign_preserves_the_published_save_fingerprint() {
     // item, animation and hidden-event fidelity rules revise the bundled
     // campaign. The GUI keeps known previous revisions recoverable through
     // its tested migration.
-    assert_eq!(saved["campaign_fingerprint"], "928eb19f7c6a7a71");
+    assert_eq!(saved["campaign_fingerprint"], "d9a0b5fbcfa6805b");
 }

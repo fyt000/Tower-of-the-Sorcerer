@@ -35,7 +35,12 @@ pub enum TriggerKind {
     EnterFloor,
     StairsUp,
     EnemyDefeated,
+    /// Floor-state callback after a completed battle or one entire Bomb use.
+    PostCombat,
     Interact,
+    /// A keyed door was contacted, including an attempt without a key.
+    /// Runs after resolving the key/opening and before entering the square.
+    DoorAttempted,
     DoorOpened,
 }
 
@@ -238,6 +243,12 @@ pub enum Effect {
         defense: Option<i64>,
         gold: Option<i64>,
     },
+    /// Scale the current shared HP/ATK/DEF row; gold is unchanged.
+    MultiplyEnemy {
+        enemy: String,
+        numerator: i64,
+        denominator: i64,
+    },
     BattleAt {
         floor: Option<i32>,
         x: usize,
@@ -280,6 +291,7 @@ impl Effect {
             Self::SetVisited { .. } => &["floors"],
             Self::SetHighestStairFloor { .. } => &["floor"],
             Self::SetEnemy { .. } => &["enemy", "hp", "attack", "defense", "gold"],
+            Self::MultiplyEnemy { .. } => &["enemy", "numerator", "denominator"],
             Self::BattleAt { .. } => &["floor", "x", "y", "first_strike"],
             Self::Teleport { .. } => &["floor", "x", "y", "transition", "duration_ms"],
         })
@@ -797,7 +809,19 @@ fn validate_typed_effects(
                 numerator,
                 denominator,
                 ..
+            }
+            | Effect::MultiplyEnemy {
+                numerator,
+                denominator,
+                ..
             } => {
+                if let Effect::MultiplyEnemy { enemy, .. } = &effect.operation
+                    && !campaign.enemies.contains_key(enemy)
+                {
+                    return Err(format!(
+                        "{path}.enemy: references undefined enemy {enemy:?}"
+                    ));
+                }
                 validate_amount(*numerator, false, &format!("{path}.numerator"))?;
                 if !(1..=MAX_STAT).contains(denominator) {
                     return Err(format!(
@@ -1061,6 +1085,28 @@ impl Engine {
                     }
                     self.state.enemy_overrides.insert(key.clone(), enemy);
                 }
+                Effect::MultiplyEnemy {
+                    enemy: key,
+                    numerator,
+                    denominator,
+                } => {
+                    // Work on the shared, unscaled row. Encounter resolution
+                    // applies the cycle multiplier once, after this operation.
+                    let mut enemy = self
+                        .state
+                        .enemy_overrides
+                        .get(key)
+                        .or_else(|| self.campaign.enemies.get(key))
+                        .expect("compiled multiply_enemy references a validated enemy")
+                        .clone();
+                    let scale = |value: i64| {
+                        (value.saturating_mul(*numerator) / *denominator).clamp(0, MAX_STAT)
+                    };
+                    enemy.hp = scale(enemy.hp).max(1);
+                    enemy.attack = scale(enemy.attack);
+                    enemy.defense = scale(enemy.defense);
+                    self.state.enemy_overrides.insert(key.clone(), enemy);
+                }
                 Effect::BattleAt {
                     floor,
                     x,
@@ -1135,6 +1181,10 @@ impl Engine {
             enemy.name
         ));
         self.record_battle_log(battle_record);
+        let cycle = self.state.cycle;
         self.run_events(TriggerKind::EnemyDefeated, floor, x, y, Some(id));
+        if self.state.cycle == cycle {
+            self.run_events(TriggerKind::PostCombat, floor, x, y, None);
+        }
     }
 }

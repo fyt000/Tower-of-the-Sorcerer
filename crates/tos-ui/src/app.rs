@@ -4555,6 +4555,8 @@ fn original_campaign_upgrade(source: &str) -> Option<&'static str> {
             "abd9d284f2e9b303",
             "689db6b6a00a3400",
             "3a59316f31dbcd22",
+            "928eb19f7c6a7a71",
+            "1bf37f1cb87a24c9",
         ]
         .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
         {
@@ -4589,6 +4591,8 @@ fn restore_journey(engine: &mut Engine, source: &str) -> Result<Option<String>, 
         "abd9d284f2e9b303",
         "689db6b6a00a3400",
         "3a59316f31dbcd22",
+        "928eb19f7c6a7a71",
+        "1bf37f1cb87a24c9",
     ]
     .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
     {
@@ -4601,6 +4605,21 @@ fn restore_journey(engine: &mut Engine, source: &str) -> Result<Option<String>, 
         return Err(original_error);
     }
     saved["campaign_fingerprint"] = expected["campaign_fingerprint"].clone();
+    // Older campaigns recorded a fixed weakened row but no shared seal flag.
+    // Recover the pending restoration from that saved row, without resetting
+    // Zeno or guessing an event order the older save did not record.
+    if saved["enemy_overrides"]["zeno"]["hp"] == 800
+        && saved["enemy_overrides"]["zeno"]["attack"] == 500
+        && saved["enemy_overrides"]["zeno"]["defense"] == 100
+        && saved["event_counts"]["floor_49_dice_seal"]
+            .as_u64()
+            .unwrap_or(0)
+            > 0
+        && let Some(flags) = saved["flags"].as_array_mut()
+        && !flags.contains(&json!("floor_49_zeno_sealed"))
+    {
+        flags.push(json!("floor_49_zeno_sealed"));
+    }
     // Earlier campaigns put a second Thief in the F50 border. The original
     // doll places him at (5,4), later transformed by the time gate. Preserve
     // an existing Zeno encounter and remove only that misplaced NPC.
@@ -5304,6 +5323,43 @@ mod migration_tests {
             assert!(restored["pending_interaction"].is_null());
             assert_eq!(restored["steps"], 512);
             assert_eq!(engine.player().hp, 8123);
+        }
+    }
+    #[test]
+    fn shared_zeno_revision_recovers_the_old_seal_without_changing_progress() {
+        for (weak_row, seal_count) in [(true, 1), (true, 0), (false, 1)] {
+            let mut engine =
+                Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
+            let mut saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
+            let fingerprint = saved["campaign_fingerprint"].clone();
+            saved["campaign_fingerprint"] = json!("928eb19f7c6a7a71");
+            saved["cycle"] = json!(3);
+            saved["player"]["hp"] = json!(8123);
+            saved["steps"] = json!(512);
+            saved["flags"] = json!(["backside", "captured"]);
+            saved["event_counts"]["floor_49_dice_seal"] = json!(seal_count);
+            saved["enemy_overrides"]["zeno"] = if weak_row {
+                json!({"name":"Zeno","hp":800,"attack":500,"defense":100,"gold":500,"special":"boss"})
+            } else {
+                json!({"name":"Zeno","hp":8000,"attack":5000,"defense":1000,"gold":500,"special":"boss"})
+            };
+            assert!(
+                restore_journey(&mut engine, &saved.to_string())
+                    .unwrap()
+                    .is_some()
+            );
+            saved["campaign_fingerprint"] = fingerprint;
+            if weak_row && seal_count > 0 {
+                saved["flags"]
+                    .as_array_mut()
+                    .unwrap()
+                    .push(json!("floor_49_zeno_sealed"));
+            }
+            assert_eq!(
+                serde_json::from_str::<Value>(&engine.save_json()).unwrap(),
+                saved,
+                "only the fingerprint and recoverable seal flag change"
+            );
         }
     }
     #[test]

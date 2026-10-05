@@ -362,13 +362,14 @@ if __name__=='__main__':
         [tile_condition(33,y*11+x,6) for x,y in [(8,4),(10,4),(8,6),(10,6)]]+[tile_condition(33,42,4)],
         source='Original moncheck floor-33 trap')
 
-    # Floor 39 clock puzzle: precisely two yellow doors open, seven untouched.
+    # doorcheck runs on both accepted and refused keyed-door attempts. The
+    # other hand must already be road; the contacted door need not open.
     clock_remaining=[12,16,34,36,56,58,60]
     for index,other in [(14,38),(38,14)]:
-        add(f'floor_39_clock_door_{index}',{'type':'step','floor':39,'x':index%11,'y':index//11,'tile':1},
+        add(f'floor_39_clock_door_{index}',{'type':'door_attempted','floor':39,'x':index%11,'y':index//11,'tile':1},
             [{'type':'sound','cue':'get'},tile_effect(39,36,43)],
             [tile_condition(39,i,1) for i in clock_remaining]+[tile_condition(39,other,6)],
-            source='Original doorcheck 0x47BEAC')
+            source='Original handan 0x44468C calls doorcheck 0x47BEAC even without a key')
 
     add('floor_41_reveal_hidden_magician',{'type':'bump','floor':41,'x':9,'y':1,'tile':10},
         [{'type':'sound','cue':'get'},tile_effect(41,20,151)],[tile_condition(41,12,6)],source='Original handan secret-wall branch')
@@ -379,7 +380,10 @@ if __name__=='__main__':
 
     p=probe(0x46cb1c,43,7,0)
     effects,_,unknown=convert(p,43)
-    add('floor_43_magician_trap',{'type':'step','floor':43,'x':7,'y':0,'tile':1},effects,
+    add('floor_43_door_arms_trap',{'type':'door_attempted','floor':43,'x':7,'y':0,'tile':1},
+        [tile_effect(43,7,7)],[tile_condition(43,7,1),tile_condition(43,8,93)],
+        source='Original doorcheck 0x47C1C8: no-key attempt converts the closed door to special road')
+    add('floor_43_magician_trap',{'type':'step','floor':43,'x':7,'y':0},effects,
         [tile_condition(43,8,93)],source='Original doorcheck + ichicheck floor-43 branch')
 
     add('floor_48_caster_defeated',{'type':'enemy_defeated','floor':48,'x':0,'y':0},
@@ -387,21 +391,34 @@ if __name__=='__main__':
         source='Original moncheck floor-48 branch: tile[0] + tile[84] == 10')
 
     # The decoy Zeno seal is the five dots on a die: four corner sorcerers
-    # remain, the four middle sorcerers are defeated, and Zeno is in the center.
+    # remain and the four middle sorcerers are defeated. The EXE does not test
+    # the center tile; it divides the current shared row once per seal flag.
     stage=list(INITIAL_STAGES[49])
     for i in [16,26,28,38]:stage[49*123+2+i]=6
     p=probe(0x4664e4,49,changes=differences(RAW,stage))
     effects,_,unknown=convert(p,49,stage)
-    effects.append({'type':'set_enemy','enemy':'zeno','hp':800,'attack':500,'defense':100,'gold':500})
+    # The decoy-death builder overwrites the seal speech queue but leaves
+    # these direct stat/flag writes intact. Suppress that speech on death.
+    for effect in effects:
+        effect['conditions']=[{'type':'any','conditions':[
+            tile_condition(49,27,91),tile_condition(49,27,92)]}]
+    effects.extend([
+        {'type':'multiply_enemy','enemy':'zeno','numerator':1,'denominator':10,
+         'conditions':[{'type':'flag','flag':'floor_49_zeno_sealed','value':False}]},
+        {'type':'flag','flag':'floor_49_zeno_sealed'}])
     add('floor_49_dice_seal',{'type':'enemy_defeated','floor':49},effects,
-        [tile_condition(49,i,6) for i in [16,26,28,38]]+[tile_condition(49,i,93) for i in [15,17,37,39]]+[tile_condition(49,27,91)],
-        source='Original moncheck floor-49 branch; directly observed table mutation 8000/5000/1000 -> 800/500/100')
+        [tile_condition(49,i,6) for i in [16,26,28,38]]+[tile_condition(49,i,93) for i in [15,17,37,39]],
+        source='Original moncheck 0x46B553..0x46B597: shared Zeno HP/ATK/DEF /= 10 when seal flag 0x4B88F8 is clear')
+    EVENTS[-1]['once']=False
     stage[49*123+2+27]=6
     p=probe(0x4664e4,49,changes=differences(RAW,stage))
     effects,_,unknown=convert(p,49,stage)
     effects.append({'type':'flag','flag':'decoy_zeno_defeated'})
-    add('floor_49_decoy_zeno_defeated',{'type':'enemy_defeated','floor':49,'x':5,'y':2},effects,
-        [tile_condition(49,71,4)],source='Original moncheck floor-49 Zeno victory branch')
+    # Run after the seal in the same floor-state stage. A per-victim callback
+    # would clear the corners first and prevent the original post-gate reseal.
+    add('floor_49_decoy_zeno_defeated',{'type':'post_combat','floor':49},effects,
+        [tile_condition(49,27,6),tile_condition(49,71,4),tile_condition(49,60,6)],
+        source='Original moncheck floor-49: seal arithmetic precedes decoy loot; reward builder overwrites seal dialogue')
     for n,(gate,guards) in enumerate([(71,[81,83]),(93,[103,105])]):
         add(f'floor_49_guard_gate_{n}',{'type':'enemy_defeated','floor':49},[tile_effect(49,gate,6)],
             [tile_condition(49,i,6) for i in guards],source='Original moncheck floor-49 guard predicates')
@@ -424,14 +441,14 @@ if __name__=='__main__':
     p=probe(0x46cb1c,24,5,0)
     effects,_,unknown=convert(p,24)
     effects.insert(0,tile_effect(24,5,6))
-    # The second cycle shares the speeches but ends with Zeno moving down to
-    # the hero and forcing an enemy-first battle. Later cycles restore the
-    # full normalized row, rather than retaining the weakened 49F decoy.
-    for cycle,stats in [(2,(1000,625,125)),(3,(8000,5000,1000))]:
-        condition=[{'type':'cycle_at_least','amount':cycle}]
-        if cycle==2:condition.append({'type':'cycle_at_most','amount':2})
-        effects.insert(1,{'type':'set_enemy','enemy':'zeno','hp':stats[0],
-            'attack':stats[1],'defense':stats[2],'gold':500,'conditions':condition})
+    # The portal reverses a seal only when the shared seal flag is set.
+    # Going to 50F first, then sealing on 49F, bypasses this restoration.
+    effects[1:1]=[
+        {'type':'multiply_enemy','enemy':'zeno','numerator':10,'denominator':1,
+         'conditions':[{'type':'flag','flag':'floor_49_zeno_sealed'}]},
+        {'type':'flag','flag':'floor_49_zeno_sealed','value':False},
+        {'type':'set_enemy','enemy':'zeno','hp':1000,'attack':625,'defense':125,
+         'conditions':[{'type':'cycle_at_least','amount':2},{'type':'cycle_at_most','amount':2}]}]
     second=probe(0x46cb1c,24,5,0,globals=[(0x4b8904,43),(0x4b8908,0)])
     second_effects,_,second_unknown=convert(second,24)
     first_effects,_,_=convert(p,24)
@@ -448,7 +465,7 @@ if __name__=='__main__':
         effect['conditions']=[{'type':'cycle_at_least','amount':2},{'type':'cycle_at_most','amount':2}]
         effects.append(effect)
     add('time_gate_to_floor_50',{'type':'step','floor':24,'x':5,'y':0,'tile':7},effects,
-        source='Original ichicheck floor-24 time gate; cycle-specific normalized Zeno row and second-cycle march/forced first-strike battle',unknown=unknown+second_unknown)
+        source='Original ichicheck 0x470506..0x470571: conditional seal reversal, then second-cycle fixed row and march/forced first-strike battle',unknown=unknown+second_unknown)
     for tile in [91,92]:
         add(f'floor_50_first_cycle_completion_{tile}',{'type':'bump','floor':50,'tile':tile},
             [{'type':'cinematic','kind':'victory','duration_ms':800},
@@ -458,19 +475,25 @@ if __name__=='__main__':
             source='Original handan 0x4463A1..0x446473; first cycle has no battle, ending then opcode11/sub6 replay reset')
         add(f'floor_50_backside_zeno_stats_{tile}',{'type':'bump','floor':50,'tile':tile},
             [{'type':'set_enemy','enemy':'zeno','hp':1000,'attack':625,'defense':125,'gold':500,
-              'conditions':[{'type':'cycle_at_most','amount':2}]},
-             {'type':'set_enemy','enemy':'zeno','hp':8000,'attack':5000,'defense':1000,'gold':500,
-              'conditions':[{'type':'cycle_at_least','amount':3}]}],
-            [{'type':'cycle_at_least','amount':2}],
-            source='Original handan 0x4463B3: second-cycle 1000/625/125; ichicheck portal restores 8000/5000/1000 in later cycles; scaling occurs once at encounter resolution')
-        # Encounter preparation also runs after a blocked attack or an older
-        # save's encounter count, and never compounds a previously scaled row.
+              'conditions':[{'type':'cycle_at_most','amount':2}]}],
+            [{'type':'cycle_at_least','amount':2},{'type':'cycle_at_most','amount':2}],
+            source='Original handan 0x4463AA..0x4463D1: only the second cycle overwrites the shared row; later cycles retain it')
+        # Only the second-cycle branch resets the row after a refused attack.
         EVENTS[-1]['once']=False
     p=probe(0x4664e4,50,5,4,changes=[(50,5,4,6)],globals=[(0x4b8904,43)])
     effects,_,unknown=convert(p,50)
     add('floor_50_backside_completion',{'type':'enemy_defeated','floor':50},effects,
         [{'type':'cycle_at_least','amount':2},{'type':'no_enemies','floor':50}],
         source='Original moncheck floor50 0x46BFA8; both second-cycle ambush at (5,6) and later battle at (5,4) invoke ending and opcode11/sub6 replay reset',unknown=unknown)
+
+    # moncheck observes floor state once after a battle or the entire Bomb
+    # stack. Per-victim notifications remain available to authored campaigns.
+    for event in EVENTS:
+        trigger=event['trigger']
+        if trigger['type']=='enemy_defeated' and not any(key in trigger for key in ['x','y','tile']):
+            trigger['type']='post_combat'
+        if event['id']=='floor_48_caster_defeated':
+            event['trigger']={'type':'post_combat','floor':48}
 
     assert len({e['id'] for e in EVENTS}) == len(EVENTS), 'Duplicate event IDs'
     assert not any(e.get('untranslated_original_instructions') for e in EVENTS), 'Untranslated gameplay instruction'
