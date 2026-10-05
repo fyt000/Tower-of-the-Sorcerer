@@ -1,0 +1,377 @@
+{
+  "executable_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "upstream_commit": "08e5af7c8f3e4d1696ccd5725d745e87b989bff6",
+  "wiki_commit": "9d5fd2f0b3589835a7c9e870bc232d80d0a8cf55",
+  "matching_upstream_signatures": [
+    {
+      "issue": "49F phantom event increment",
+      "address": "0x4637dd",
+      "upstream_original_bytes_match": true,
+      "original_hex": "ff03"
+    },
+    {
+      "issue": "40F incorrect door prompt",
+      "address": "0x4740be",
+      "upstream_original_bytes_match": true,
+      "original_hex": "66c7"
+    },
+    {
+      "issue": "33F missing lower trigger setup",
+      "address": "0x454e0b",
+      "upstream_original_bytes_match": true,
+      "original_hex": "33d28b83cc010000e8e8e6fbff33d28b83d0010000e8dbe6fbff33d28b83d4010000"
+    },
+    {
+      "issue": "33F two entrance trigger cleanup",
+      "address": "0x473723",
+      "upstream_original_bytes_match": true,
+      "original_hex": "66c7044600008b038d044066c744460200008b038d044066c74446"
+    },
+    {
+      "issue": "Lucky Gold first-strike reward display",
+      "address": "0x47ff54",
+      "upstream_original_bytes_match": true,
+      "original_hex": "ff570cff75f4687c0248008d55f0a1b8c5480003c08b04c51c994800e8f75bf8ffff75f08d4dec8b45fc8b804c0400008b8000010000"
+    }
+  ],
+  "half_hp_handler": "0x4541ce..0x4541df",
+  "half_hp_cases": [
+    {
+      "before_hp": 1000,
+      "after_hp": 500
+    },
+    {
+      "before_hp": 1001,
+      "after_hp": 500
+    },
+    {
+      "before_hp": 1,
+      "after_hp": 0
+    }
+  ],
+  "pincer_opcode": [
+    19,
+    0,
+    0
+  ],
+  "original_retreat_boundary_cases": [
+    {
+      "hero": [
+        5,
+        0
+      ],
+      "target_delta": 2,
+      "original_moves": []
+    },
+    {
+      "hero": [
+        9,
+        5
+      ],
+      "target_delta": 2,
+      "original_moves": [
+        [
+          12,
+          65,
+          66
+        ]
+      ]
+    },
+    {
+      "hero": [
+        1,
+        5
+      ],
+      "target_delta": -2,
+      "original_moves": [
+        [
+          12,
+          55,
+          54
+        ]
+      ]
+    },
+    {
+      "hero": [
+        5,
+        5
+      ],
+      "target_delta": 2,
+      "original_moves": [
+        [
+          12,
+          61,
+          62
+        ]
+      ]
+    }
+  ],
+  "retreat_unprotected_queue": [
+    [
+      1,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      9,
+      60,
+      208
+    ],
+    [
+      0,
+      6,
+      207
+    ],
+    [
+      2,
+      110,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      16,
+      65336,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      2,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      12,
+      61,
+      62
+    ],
+    [
+      0,
+      0,
+      0
+    ]
+  ],
+  "retreat_protected_queue": [
+    [
+      1,
+      2,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      12,
+      61,
+      62
+    ],
+    [
+      0,
+      0,
+      0
+    ]
+  ],
+  "original_floor_33": {
+    "upper_entrance_tile": 7,
+    "lower_entrance_tile": 6,
+    "after_guard_deaths_gate_closures": [
+      [
+        13,
+        42,
+        5
+      ],
+      [
+        13,
+        86,
+        5
+      ]
+    ]
+  },
+  "floor_50_portal_variants": [
+    {
+      "cycle": 1,
+      "normalized_stats": [
+        8000,
+        5000,
+        1000,
+        500
+      ],
+      "moves": [],
+      "forced_battles": []
+    },
+    {
+      "cycle": 2,
+      "normalized_stats": [
+        1000,
+        625,
+        125,
+        500
+      ],
+      "moves": [
+        [
+          12,
+          49,
+          60
+        ],
+        [
+          12,
+          60,
+          71
+        ]
+      ],
+      "forced_battles": [
+        [
+          11,
+          10,
+          71
+        ]
+      ]
+    },
+    {
+      "cycle": 3,
+      "normalized_stats": [
+        8000,
+        5000,
+        1000,
+        500
+      ],
+      "moves": [],
+      "forced_battles": []
+    }
+  ],
+  "floor_50_thief_queue": [
+    [
+      10,
+      264,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ]
+  ],
+  "magician_masks": [
+    {
+      "tile": 151,
+      "original_rgba_fnv": "2d913d1bcdfcfa04",
+      "corrected_rgba_fnv": "a5b70ed963d74ebc",
+      "correction": "shift_right_1px",
+      "original_black_rows": [
+        "0000000000",
+        "0000000000",
+        "0000f80000",
+        "0001fc0000",
+        "0001fe0000",
+        "0001fe0000",
+        "0007ff0000",
+        "0fdfff0000",
+        "1fffff8000",
+        "3fffff8000",
+        "7ffffff000",
+        "7fffffff00",
+        "7fffffff80",
+        "7fffffff80",
+        "3fffffff80",
+        "1fffffff00",
+        "0ffffffe00",
+        "03fffff800",
+        "01fffffc00",
+        "01fffffc00",
+        "03fffffc00",
+        "03ffffff00",
+        "03ffffff00",
+        "07ffffff00",
+        "07ffffff00",
+        "07ffffff00",
+        "07ffffff80",
+        "0fffffff80",
+        "1fffffffc0",
+        "1fffffffc0",
+        "7fffffffe0",
+        "fffffffff8",
+        "fffffffffc",
+        "fffffffffc",
+        "7ffffffffc",
+        "1ffffffff8",
+        "0ffffffff0",
+        "01ffffffc0",
+        "0007ffff00",
+        "0000000000"
+      ]
+    },
+    {
+      "tile": 152,
+      "original_rgba_fnv": "71cda8cb38f62bec",
+      "corrected_rgba_fnv": "f3fb4c4d19d7b224",
+      "correction": "shift_right_1px",
+      "original_black_rows": [
+        "0000000000",
+        "0000fc0000",
+        "0001fe0000",
+        "0001fe0000",
+        "0001fe0000",
+        "0007ff0000",
+        "001fff0000",
+        "007fff8000",
+        "0fffffe000",
+        "1ffffff000",
+        "3fffffff00",
+        "7fffffff80",
+        "7fffffff80",
+        "7fffffff80",
+        "7fffffff00",
+        "3ffffff000",
+        "1ffffff800",
+        "0ffffff800",
+        "01fffffc00",
+        "01fffffc00",
+        "03fffffc00",
+        "03ffffff00",
+        "03ffffff00",
+        "07ffffff00",
+        "07ffffff00",
+        "07ffffff00",
+        "07ffffff80",
+        "0fffffff80",
+        "1fffffffc0",
+        "1fffffffc0",
+        "3fffffffc0",
+        "7fffffffe0",
+        "7ffffffff0",
+        "7ffffffff8",
+        "3ffffffff8",
+        "1fffffffe0",
+        "0fffffffe0",
+        "01ffffffc0",
+        "0007ffff00",
+        "0000000000"
+      ]
+    }
+  ],
+  "boundaries": [
+    "Queue builders skip GUI/audio calls; no upstream executable or patch is launched.",
+    "Half-HP calculation is executed directly; full walking and protection combinations are covered by native engine scenarios.",
+    "Mask corrections are compared with pinned upstream artwork; remaining atlas differences are not silently imported.",
+    "These controlled branches do not prove all reachable map states or a natural complete playthrough."
+  ]
+}

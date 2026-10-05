@@ -7,7 +7,8 @@ use crate::campaign::MAX_STAT;
 use crate::domain::GameStatus;
 use crate::domain::Stat;
 use crate::persistence::MAX_CYCLE;
-use crate::{Campaign, Engine, forecast_with_rules};
+use crate::presentation::{Cinematic, CinematicKind, Presentation};
+use crate::{Campaign, Engine, Position, forecast_with_rules};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::collections::BTreeMap;
@@ -46,6 +47,8 @@ pub struct Trigger {
     pub x: Option<usize>,
     pub y: Option<usize>,
     pub tile: Option<u16>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub positions: Option<Vec<Position>>,
 }
 
 impl Trigger {
@@ -62,6 +65,11 @@ impl Trigger {
             && self.x.is_none_or(|v| v == x)
             && self.y.is_none_or(|v| v == y)
             && self.tile.is_none_or(|v| Some(v) == tile)
+            && self.positions.as_ref().is_none_or(|positions| {
+                positions
+                    .iter()
+                    .any(|position| position.x == x && position.y == y)
+            })
     }
 }
 
@@ -168,9 +176,8 @@ pub enum Effect {
         cue: String,
     },
     Cinematic {
-        kind: String,
         #[serde(flatten)]
-        payload: BTreeMap<String, Value>,
+        scene: Cinematic,
     },
     MoveTile {
         floor: Option<i32>,
@@ -326,6 +333,20 @@ struct InteractionScript {
     y: usize,
     effects: Option<Vec<ConditionalEffect>>,
     offers: Option<Vec<Offer>>,
+    #[serde(flatten)]
+    view: crate::content::InteractionOverrides,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub(crate) struct CustomItem {
+    #[serde(default)]
+    pub effects: Vec<ConditionalEffect>,
+    #[serde(default = "consumable_item")]
+    pub consumable: bool,
+}
+
+fn consumable_item() -> bool {
+    true
 }
 
 /// Derived, validated gameplay data. The original Campaign remains the wire
@@ -335,8 +356,9 @@ pub(crate) struct CompiledScripts {
     pub events: Vec<Event>,
     tile_effects: BTreeMap<u16, Vec<ConditionalEffect>>,
     tile_offers: BTreeMap<u16, Vec<Offer>>,
+    tile_behaviors: BTreeMap<u16, crate::content::TileBehavior>,
     interactions: Vec<InteractionScript>,
-    pub item_effects: BTreeMap<String, Vec<ConditionalEffect>>,
+    pub items: BTreeMap<String, CustomItem>,
     pub floor_travel_callbacks: Vec<crate::flight::FloorTravelCallback>,
 }
 
@@ -358,6 +380,11 @@ impl CompiledScripts {
         }
         for (id, tile) in &campaign.tiles {
             let id_number = id.parse::<u16>().map_err(|e| format!("tiles.{id}: {e}"))?;
+            let behavior = decode(
+                serde_json::to_value(&tile.extra).expect("JSON metadata"),
+                &format!("tiles.{id}"),
+            )?;
+            result.tile_behaviors.insert(id_number, behavior);
             let effects = parse_effects(campaign, &tile.effects, &format!("tiles.{id}.effects"))?;
             let offers = parse_offers(campaign, &tile.offers, &format!("tiles.{id}.offers"))?;
             result.tile_effects.insert(id_number, effects);
@@ -384,15 +411,10 @@ impl CompiledScripts {
             result.interactions.push(interaction);
         }
         for (id, value) in &campaign.items {
-            if let Some(effects) = value.get("effects") {
-                let path = format!("items.{id}.effects");
-                let effects = effects
-                    .as_array()
-                    .ok_or_else(|| format!("{path}: expected an array"))?;
-                result
-                    .item_effects
-                    .insert(id.clone(), parse_effects(campaign, effects, &path)?);
-            }
+            let path = format!("items.{id}");
+            let item: CustomItem = decode(value.clone(), &path)?;
+            validate_typed_effects(campaign, &item.effects, &format!("{path}.effects"))?;
+            result.items.insert(id.clone(), item);
         }
         Ok(result)
     }
@@ -402,6 +424,26 @@ impl CompiledScripts {
             .get(&tile)
             .map(Vec::as_slice)
             .unwrap_or(&[])
+    }
+
+    pub fn tile_behavior(&self, tile: u16) -> &crate::content::TileBehavior {
+        &self.tile_behaviors[&tile]
+    }
+
+    pub fn interaction_view(
+        &self,
+        floor: i32,
+        x: usize,
+        y: usize,
+        tile: u16,
+        base: &crate::TileDef,
+    ) -> crate::content::InteractionView {
+        self.interactions
+            .iter()
+            .find(|entry| entry.floor == floor && entry.x == x && entry.y == y)
+            .map(|entry| entry.view.clone())
+            .unwrap_or_default()
+            .resolve(base, self.tile_behavior(tile))
     }
 
     /// Location overrides replace only explicitly supplied fields, just as the
@@ -535,6 +577,22 @@ impl Event {
         )?;
         if let Some(tile) = self.trigger.tile {
             validate_tile(campaign, tile, &format!("{path}.trigger.tile"))?;
+        }
+        if let Some(positions) = &self.trigger.positions {
+            if positions.is_empty() || self.trigger.x.is_some() || self.trigger.y.is_some() {
+                return Err(format!(
+                    "{path}.trigger.positions: provide nonempty positions instead of x/y"
+                ));
+            }
+            for (index, position) in positions.iter().enumerate() {
+                validate_position(
+                    campaign,
+                    self.trigger.floor,
+                    Some(position.x),
+                    Some(position.y),
+                    &format!("{path}.trigger.positions[{index}]"),
+                )?;
+            }
         }
         validate_typed_conditions(campaign, &self.conditions, &format!("{path}.conditions"))?;
         validate_typed_effects(campaign, &self.effects, &format!("{path}.effects"))
@@ -802,9 +860,10 @@ fn validate_typed_effects(
                 }
             }
             Effect::Sound { cue } => validate_name(cue, &format!("{path}.cue"))?,
-            Effect::Cinematic { kind, payload } => {
-                validate_name(kind, &format!("{path}.kind"))?;
-                validate_cinematic(campaign, payload, &path)?;
+            Effect::Cinematic { scene } => {
+                validate_name(scene.kind.as_str(), &format!("{path}.kind"))?;
+                let payload = serde_json::from_value(json!(scene)).expect("cinematic object");
+                validate_cinematic(campaign, &payload, &path)?;
             }
             Effect::ClearInventory | Effect::NextCycle | Effect::Win => (),
         }
@@ -896,15 +955,29 @@ impl Engine {
                     duration_ms,
                 } => {
                     self.log(text);
-                    self.present(json!({"type":"dialogue","text":text,"dialogue_id":dialogue_id,"duration_ms":duration_ms,"log_id":self.latest_log_id(),"activity":text}));
+                    self.present(Presentation::Dialogue {
+                        text: text.clone(),
+                        dialogue_id: *dialogue_id,
+                        duration_ms: *duration_ms,
+                        log_id: self.latest_log_id(),
+                        activity: text.clone(),
+                    });
                 }
-                Effect::Wait { ms } => self.present(json!({"type":"wait","duration_ms":ms})),
-                Effect::Sound { cue } => self.present(json!({"type":"audio","name":cue})),
-                Effect::Cinematic { kind, payload } => {
-                    let mut scene = json!(payload);
-                    scene["type"] = json!("cinematic");
-                    scene["kind"] = json!(kind);
-                    self.present(scene);
+                Effect::Wait { ms } => self.present(Presentation::Wait { duration_ms: *ms }),
+                Effect::Sound { cue } => self.present(Presentation::Audio { name: cue.clone() }),
+                Effect::Cinematic { scene } => {
+                    let mut scene = scene.clone();
+                    if scene.kind == CinematicKind::TileReveal
+                        && let (Some(x), Some(y)) = (scene.x, scene.y)
+                    {
+                        let floor = scene.floor.unwrap_or(self.state.player.floor);
+                        scene.floor = Some(floor);
+                        // Gates created by an earlier trigger are absent in the
+                        // initial map. Animate the current gate, never its old
+                        // extraction-time road sprite.
+                        scene.from_tile = self.tile_at(floor, x, y);
+                    }
+                    self.present(Presentation::Cinematic(scene));
                 }
                 Effect::MoveTile {
                     floor,
@@ -915,21 +988,10 @@ impl Engine {
                     duration_ms,
                 } => {
                     let floor = floor.unwrap_or(self.state.player.floor);
-                    let tile = self
-                        .tile_at(floor, *from_x, *from_y)
-                        .expect("compiled move_tile source is within a validated floor");
                     // One move presentation owns both writes. Emitting
                     // separate tile effects would reveal the destination
                     // before the movement animation has arrived there.
-                    let empty = self.empty_tile();
-                    let tiles = self
-                        .state
-                        .floors
-                        .get_mut(&floor)
-                        .expect("save validation preserves every campaign floor");
-                    tiles[from_y * self.campaign.width + from_x] = empty;
-                    tiles[y * self.campaign.width + x] = tile;
-                    self.present(json!({"type":"move_tile","floor":floor,"from_x":from_x,"from_y":from_y,"x":x,"y":y,"tile":tile,"duration_ms":duration_ms}));
+                    self.move_tile(floor, (*from_x, *from_y), (*x, *y), *duration_ms);
                 }
                 Effect::NextCycle => self.next_cycle(),
                 Effect::Flag { flag, value } => {
@@ -1041,22 +1103,16 @@ impl Engine {
             .enemy_for_tile(key, id)
             .expect("validated enemy tile references a defined enemy");
         self.record_enemy_encounter(&enemy, floor, x, y, id);
-        let result = forecast_with_rules(&self.state.player, &enemy, &self.campaign.rules);
+        let result = forecast_with_rules(&self.state.player, &enemy, &self.rules);
         let battle_record = self.present_battle(&enemy, &result, floor, x, y, first_strike);
         let damage = result
             .damage
             .unwrap_or(self.state.player.hp)
-            .saturating_add(
-                if first_strike
-                    && self.campaign.rules["hero_attacks_first"]
-                        .as_bool()
-                        .unwrap_or(true)
-                {
-                    (enemy.attack - self.state.player.defense).max(0)
-                } else {
-                    0
-                },
-            );
+            .saturating_add(if first_strike && self.rules.hero_attacks_first {
+                (enemy.attack - self.state.player.defense).max(0)
+            } else {
+                0
+            });
         if damage >= self.state.player.hp {
             self.state.player.hp = 0;
             self.state.status = GameStatus::Lost;
@@ -1070,8 +1126,8 @@ impl Engine {
         let gold = result.gold;
         self.set_stat(Stat::Gold, self.state.player.gold.saturating_add(gold));
         self.clear(floor, x, y);
-        if def.extra.contains_key("footprint") {
-            self.clear_large_monster(floor, &def, x, y);
+        if let Some(footprint) = self.scripts.tile_behavior(id).footprint.clone() {
+            self.clear_large_monster(floor, &footprint, x, y);
         }
         self.log(format!(
             "Ambush: defeated {} (−{damage} HP, +{gold} gold).",

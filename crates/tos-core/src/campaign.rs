@@ -563,6 +563,12 @@ impl Campaign {
         for key in ["cross_multiplier", "dragon_slayer_multiplier"] {
             integer_range(rules, key, "rules", 1, MAX_MULTIPLIER)?;
         }
+        if let Some(value) = rules.get("magician_retreat") {
+            let retreat: crate::rules::MagicianRetreat = decode(value, "rules.magician_retreat")?;
+            if !self.floors.iter().any(|floor| floor.id == retreat.floor) {
+                return Err("rules.magician_retreat.floor: references unknown floor".into());
+            }
+        }
         if let Some(item) = optional::<String>(rules, "forecast_requires_item", "rules")? {
             validate_name(&item, "rules.forecast_requires_item")?;
         }

@@ -251,24 +251,82 @@ fn original_stairs_skip_hidden_floor_44_in_both_directions() {
 
 #[test]
 fn original_three_oclock_door_pattern_reveals_the_warp_staff() {
+    for doors in [
+        [(4, 1, "left"), (4, 3, "right")],
+        [(4, 3, "right"), (4, 1, "left")],
+    ] {
+        let mut game = original();
+        edit_save(&mut game, |save| {
+            save["player"]["keys"]["yellow"] = json!(2)
+        });
+        place(&mut game, 39, doors[0].0, doors[0].1);
+        step(&mut game, doors[0].2);
+        assert_eq!(game.tile_at(39, 3, 3), Some(1));
+        // Remember the first opened hand of the clock across a restore.
+        let saved = game.save_json();
+        game = original();
+        game.load_json(&saved).unwrap();
+        place(&mut game, 39, doors[1].0, doors[1].1);
+        step(&mut game, doors[1].2);
+        assert_eq!(game.tile_at(39, 3, 3), Some(43));
+        assert_eq!(
+            game.snapshot()["last_action"]["presentation"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter(|effect| effect["type"] == "audio" && effect["name"] == "get")
+                .count(),
+            1
+        );
+        assert_eq!(game.player().keys.yellow, 0);
+        for index in [12, 16, 34, 36, 56, 58, 60] {
+            assert_eq!(
+                game.tile_at(39, index % 11, index / 11),
+                Some(if index == 36 { 43 } else { 1 })
+            );
+        }
+        place(&mut game, 39, 4, 3);
+        step(&mut game, "left");
+        assert!(
+            game.player()
+                .inventory
+                .iter()
+                .any(|item| item == "warp_staff")
+        );
+        assert_eq!(game.player().item_charges["warp_staff"], 3);
+        assert_eq!(game.tile_at(39, 3, 3), Some(6));
+        step(&mut game, "right");
+        step(&mut game, "left");
+        assert_eq!(game.player().item_charges["warp_staff"], 3);
+        assert!(
+            !game.snapshot()["last_action"]["presentation"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|effect| effect["type"] == "audio" && effect["name"] == "get")
+        );
+    }
+}
+
+#[test]
+fn an_extra_open_clock_door_prevents_the_three_oclock_reward() {
     let mut game = original();
     edit_save(&mut game, |save| {
-        save["player"]["keys"]["yellow"] = json!(2)
+        save["player"]["keys"]["yellow"] = json!(3)
     });
-    place(&mut game, 39, 4, 1);
-    step(&mut game, "left");
-    assert_eq!(game.tile_at(39, 3, 3), Some(1));
-    place(&mut game, 39, 4, 3);
-    step(&mut game, "right");
-    assert_eq!(game.tile_at(39, 3, 3), Some(43));
-    assert!(
-        game.snapshot()["last_action"]["presentation"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .any(|effect| effect["type"] == "audio" && effect["name"] == "get")
-    );
+    for (x, y, direction) in [(2, 1, "left"), (4, 1, "left"), (4, 3, "right")] {
+        place(&mut game, 39, x, y);
+        step(&mut game, direction);
+    }
     assert_eq!(game.player().keys.yellow, 0);
+    assert_eq!(game.tile_at(39, 3, 3), Some(1));
+    assert!(
+        !game
+            .player()
+            .inventory
+            .iter()
+            .any(|item| item == "warp_staff")
+    );
 }
 
 #[test]
@@ -293,6 +351,31 @@ fn original_fairy_acknowledgement_clears_spawned_npc_without_changing_stats() {
         ),
         stats
     );
+}
+
+#[test]
+fn original_floor_50_thief_speaks_his_actual_dialogue_without_changing_the_world() {
+    let mut game = original();
+    place(&mut game, 50, 5, 8);
+    // The ending sequence spawns him; he is absent from the initial map.
+    edit_save(&mut game, |save| save["floors"]["50"][92] = json!(21));
+    let before = game.save_json();
+    step(&mut game, "left");
+    assert_eq!(
+        game.snapshot()["pending_interaction"]["text"],
+        "Ah!, we meet again! Thank goodness you're alive!"
+    );
+    assert!(has_choice(&game, "leave"));
+    let saved = game.save_json();
+    game = original();
+    game.load_json(&saved).unwrap();
+    command(&mut game, json!({"type":"choose","choice":"leave"}));
+    assert_eq!(game.tile_at(50, 4, 8), Some(21));
+    let before: Value = serde_json::from_str(&before).unwrap();
+    let after: Value = serde_json::from_str(&game.save_json()).unwrap();
+    assert_eq!(after["player"], before["player"]);
+    assert_eq!(after["floors"], before["floors"]);
+    assert!(game.snapshot()["pending_interaction"].is_null());
 }
 
 #[test]

@@ -145,6 +145,28 @@ fn typed_nested_conditions_control_world_mutations() {
 }
 
 #[test]
+fn alternative_trigger_positions_share_one_persistent_event_count() {
+    let mut value = campaign();
+    value["events"] = json!([{"id":"two_entrances","trigger":{"type":"step","floor":1,
+        "positions":[{"x":1,"y":0},{"x":0,"y":1}]},
+        "effects":[{"type":"add_stat","stat":"attack","amount":3}]}]);
+    let mut engine = Engine::from_json(&value.to_string()).unwrap();
+    for direction in ["right", "left"] {
+        engine
+            .command(json!({"type":"move","direction":direction}))
+            .unwrap();
+    }
+    let saved = engine.save_json();
+    engine.load_json(&saved).unwrap();
+    engine
+        .command(json!({"type":"move","direction":"down"}))
+        .unwrap();
+    assert_eq!(engine.player().attack, 13);
+    let saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
+    assert_eq!(saved["event_counts"]["two_entrances"], 1);
+}
+
+#[test]
 fn quest_tags_and_renderer_payloads_remain_extensible() {
     let mut value = campaign();
     value["events"] = json!([event(json!([

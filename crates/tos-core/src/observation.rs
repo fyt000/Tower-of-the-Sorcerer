@@ -181,7 +181,7 @@ impl Engine {
             | TileKind::Stat
             | TileKind::Equipment
             | TileKind::Gold => {
-                let (stat, amount) = self.player_pickup(def);
+                let (stat, amount) = self.player_pickup(def, id);
                 result["stat"] = json!(stat);
                 result["amount"] = json!(amount);
                 if let Some(item) = &def.item {
@@ -198,19 +198,14 @@ impl Engine {
         result
     }
 
-    fn player_pickup(&self, def: &TileDef) -> (Stat, i64) {
+    fn player_pickup(&self, def: &TileDef, id: u16) -> (Stat, i64) {
         let stat = def.stat.unwrap_or(match def.kind {
             TileKind::Potion => Stat::Hp,
             TileKind::Gold => Stat::Gold,
             _ => Stat::Attack,
         });
         let mut amount = def.amount;
-        if def
-            .extra
-            .get("scaled")
-            .and_then(Value::as_bool)
-            .unwrap_or(false)
-        {
+        if self.scripts.tile_behavior(id).scaled {
             amount = amount.saturating_mul(self.area_multiplier(self.state.player.floor));
         }
         if stat != Stat::Gold {
@@ -242,8 +237,11 @@ impl Engine {
     }
 
     fn player_last_action(&self) -> Value {
-        let mut action = public_fields(&self.last_action, &["ok", "type", "message"]);
-        let timeline = self.last_action["presentation"].as_array();
+        // JSON projection belongs at the player-observation boundary. The
+        // simulation retains typed outcomes and presentation records.
+        let encoded = json!(self.last_action);
+        let mut action = public_fields(&encoded, &["ok", "type", "message"]);
+        let timeline = encoded["presentation"].as_array();
         let mut visible_floor = timeline
             .into_iter()
             .flatten()
@@ -267,6 +265,7 @@ impl Engine {
                 "tile" => &["type", "floor", "x", "y", "duration_ms"],
                 "move_tile" => &["type", "floor", "from_x", "from_y", "x", "y", "duration_ms"],
                 "battle" => &["type", "enemy_name", "floor", "x", "y", "duration_ms"],
+                "damage" => &["type", "floor", "x", "y", "duration_ms"],
                 "cinematic" => &["type", "text", "x", "y", "duration_ms"],
                 "audio" => &["type", "name"],
                 "wait" => &["type", "duration_ms"],

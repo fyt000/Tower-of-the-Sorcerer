@@ -4,6 +4,7 @@ mod battle_log;
 mod campaign;
 mod combat;
 mod command;
+mod content;
 mod domain;
 mod events;
 mod flight;
@@ -14,6 +15,7 @@ mod observation;
 mod original;
 mod persistence;
 mod presentation;
+mod rules;
 mod stats;
 use persistence::{Encounter, JournalEntry, MAX_CYCLE, SAVE_VERSION, Save, fingerprint};
 
@@ -26,15 +28,18 @@ use domain::GameStatus;
 pub use domain::{EnemySpecial, KeyColor, Stat, TileKind};
 use events::{CompiledScripts, Effect, TriggerKind};
 use original::*;
+use presentation::{ActionResult, CinematicKind, Presentation};
+use rules::Rules;
 use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Clone)]
 pub struct Engine {
     campaign: Campaign,
+    rules: Rules,
     scripts: CompiledScripts,
     state: Save,
-    last_action: Value,
+    last_action: ActionResult,
 }
 
 impl Engine {
@@ -47,6 +52,7 @@ impl Engine {
     /// Validate authored input before constructing any playable state.
     pub fn new(campaign: Campaign) -> Result<Self, String> {
         campaign.validate()?;
+        let rules = Rules::compile(&campaign.rules)?;
         let scripts = CompiledScripts::compile(&campaign)?;
         let source = serde_json::to_string(&campaign)
             .expect("Campaign fields have an infallible JSON representation");
@@ -65,9 +71,10 @@ impl Engine {
         let state = Self::initial_state(&campaign, fingerprint);
         Ok(Self {
             campaign,
+            rules,
             scripts,
             state,
-            last_action: json!({"ok":true,"message":"Journey started"}),
+            last_action: ActionResult::message("Journey started"),
         })
     }
 
@@ -141,9 +148,8 @@ impl Engine {
                     i / self.campaign.width,
                     *id,
                 )?;
-                let mut value =
-                    serde_json::to_value(forecast_with_rules(p, &enemy, &self.campaign.rules))
-                        .expect("Forecast fields have an infallible JSON representation");
+                let mut value = serde_json::to_value(forecast_with_rules(p, &enemy, &self.rules))
+                    .expect("Forecast fields have an infallible JSON representation");
                 value["x"] = json!(i % self.campaign.width);
                 value["y"] = json!(i / self.campaign.width);
                 value["id"] = json!(id);
@@ -229,7 +235,7 @@ impl Engine {
             .as_ref()
             .and_then(|key| self.encounter_enemy(key, self.state.player.floor, x, y, id))
             .filter(|_| !noncombat && self.forecasts_unlocked())
-            .map(|e| forecast_with_rules(&self.state.player, &e, &self.campaign.rules));
+            .map(|e| forecast_with_rules(&self.state.player, &e, &self.rules));
         let concealed = def.kind == TileKind::HiddenWall;
         let encountered_enemy = self.state.last_encounter.as_ref().filter(|encounter| {
             !noncombat
@@ -269,12 +275,12 @@ impl Engine {
     /// A valid but blocked action returns Ok and sets last_action.ok to false.
     pub fn execute(&mut self, command: Command) -> Result<(), String> {
         command.validate().map_err(|error| error.to_string())?;
-        self.last_action = json!({"ok":true,"type":command.kind(),"presentation":[]});
+        self.last_action = ActionResult::command(command.kind());
         match command {
             Command::NewGame => {
                 self.state =
                     Self::initial_state(&self.campaign, self.state.campaign_fingerprint.clone());
-                self.last_action = json!({"ok":true,"message":"Journey started"});
+                self.last_action = ActionResult::message("Journey started");
                 Ok(())
             }
             Command::Cancel => {
@@ -298,8 +304,8 @@ impl Engine {
     }
 
     fn block(&mut self, message: &str) -> Result<(), String> {
-        self.last_action["ok"] = json!(false);
-        self.last_action["message"] = json!(message);
+        self.last_action.ok = false;
+        self.last_action.message = Some(message.into());
         Ok(())
     }
 
@@ -348,8 +354,9 @@ impl Engine {
     }
 
     pub fn forecasts_unlocked(&self) -> bool {
-        self.campaign.rules["forecast_requires_item"]
-            .as_str()
+        self.rules
+            .forecast_requires_item
+            .as_deref()
             .is_none_or(|item| {
                 self.state
                     .player
@@ -361,10 +368,7 @@ impl Engine {
 
     pub fn cycle_multiplier(&self) -> i64 {
         if self.state.cycle > 1 {
-            self.campaign.rules["backside"]["multiplier"]
-                .as_i64()
-                .unwrap_or(BACKSIDE_MULTIPLIER)
-                .clamp(1, 1000)
+            self.rules.backside.multiplier
         } else {
             1
         }
@@ -372,7 +376,7 @@ impl Engine {
 
     fn log(&mut self, text: impl Into<String>) {
         let text = text.into();
-        self.last_action["message"] = json!(text);
+        self.last_action.message = Some(text.clone());
         self.state.log.push(text);
         let trimmed = self.state.log.len().saturating_sub(100);
         if trimmed > 0 {
@@ -402,13 +406,10 @@ impl Engine {
     }
 
     fn wisdom_clue_id(&self, dialogue_id: Option<u32>) -> bool {
-        let Some(range) = self.campaign.rules["wisdom_dialogue_range"].as_array() else {
+        let Some([minimum, maximum]) = self.rules.wisdom_dialogue_range else {
             return true;
         };
-        dialogue_id.is_some_and(|id| {
-            range[0].as_u64().is_some_and(|min| u64::from(id) >= min)
-                && range[1].as_u64().is_some_and(|max| u64::from(id) <= max)
-        })
+        dialogue_id.is_some_and(|id| (minimum..=maximum).contains(&id))
     }
 
     /// Only public clue text is exposed; source dialogue IDs stay in the save.
@@ -446,7 +447,7 @@ impl Engine {
         if !self.wisdom_clue_id(dialogue_id) {
             return;
         }
-        let heard_key = if self.campaign.rules["wisdom_dialogue_range"].is_array() {
+        let heard_key = if self.rules.wisdom_dialogue_range.is_some() {
             format!(
                 "wisdom_heard:{}",
                 dialogue_id.expect("original clue ID was checked")
@@ -473,7 +474,7 @@ impl Engine {
         };
         if !self.state.journal.contains(&entry) {
             self.state.journal.push(entry);
-            if self.campaign.rules["wisdom_dialogue_range"].is_array() {
+            if self.rules.wisdom_dialogue_range.is_some() {
                 self.state.journal.sort_by_key(|entry| entry.dialogue_id);
             }
         }
@@ -493,12 +494,45 @@ impl Engine {
     /// Custom campaigns default to tile 0; the extracted original sets tile 6.
     /// Campaign validation guarantees this ID is defined and numeric.
     fn empty_tile(&self) -> u16 {
-        self.campaign.rules["empty_tile"].as_u64().unwrap_or(0) as u16
+        self.rules.empty_tile
     }
 
     fn clear(&mut self, floor: i32, x: usize, y: usize) {
         let empty = self.empty_tile();
         self.set_tile(floor, x, y, empty);
+    }
+
+    fn move_tile(
+        &mut self,
+        floor: i32,
+        from: (usize, usize),
+        to: (usize, usize),
+        duration_ms: u64,
+    ) {
+        let tile = self
+            .tile_at(floor, from.0, from.1)
+            .expect("validated tile move source");
+        assert!(
+            self.tile_at(floor, to.0, to.1).is_some(),
+            "validated tile move destination"
+        );
+        let empty = self.empty_tile();
+        let tiles = self
+            .state
+            .floors
+            .get_mut(&floor)
+            .expect("validated tile move floor");
+        tiles[from.1 * self.campaign.width + from.0] = empty;
+        tiles[to.1 * self.campaign.width + to.0] = tile;
+        self.present(Presentation::MoveTile {
+            floor,
+            from_x: from.0,
+            from_y: from.1,
+            x: to.0,
+            y: to.1,
+            tile,
+            duration_ms,
+        });
     }
 
     fn set_tile(&mut self, floor: i32, x: usize, y: usize, tile: u16) {
@@ -518,16 +552,16 @@ impl Engine {
             .expect("validated campaign/save tile");
         // Explicit script cinematics own their transition and sound. Ordinary
         // actions and final-write-only scripts use the same presentation path.
-        let scripted_transition = self.last_action["presentation"]
-            .as_array()
+        let scripted_transition = self
+            .last_action
+            .presentation
+            .as_ref()
             .and_then(|effects| effects.last())
             .is_some_and(|effect| {
-                effect["type"] == "cinematic"
-                    && effect["kind"] == "tile_reveal"
-                    && effect["floor"] == floor
-                    && effect["x"] == x
-                    && effect["y"] == y
-                    && effect["tile"] == tile
+                matches!(effect, Presentation::Cinematic(scene)
+                    if scene.kind == CinematicKind::TileReveal
+                        && scene.floor == Some(floor) && scene.x == Some(x)
+                        && scene.y == Some(y) && scene.tile == Some(tile))
             });
         if from_tile != tile && !scripted_transition {
             let from_kind = self.campaign.tiles[&from_tile.to_string()].kind;
@@ -555,22 +589,21 @@ impl Engine {
             .get_mut(&floor)
             .expect("validated campaign/save floor");
         tiles[y * self.campaign.width + x] = tile;
-        self.present(json!({"type":"tile","floor":floor,"x":x,"y":y,"tile":tile,"duration_ms":60}));
+        self.present(Presentation::Tile {
+            floor,
+            x,
+            y,
+            tile,
+            duration_ms: 60,
+        });
     }
 
     fn area_multiplier(&self, floor: i32) -> i64 {
-        self.campaign.rules["area_scaling"]
-            .as_array()
-            .and_then(|entries| {
-                entries.iter().find(|entry| {
-                    floor
-                        <= entry["max_floor"]
-                            .as_i64()
-                            .expect("area threshold was validated")
-                            as i32
-                })
-            })
-            .and_then(|v| v["multiplier"].as_i64())
+        self.rules
+            .area_scaling
+            .iter()
+            .find(|entry| floor <= entry.max_floor)
+            .map(|entry| entry.multiplier)
             .unwrap_or(((floor.max(1) - 1) / FLOORS_PER_AREA + 1) as i64)
     }
 
@@ -578,34 +611,24 @@ impl Engine {
         self.state.player.grant_item(item, &self.campaign);
     }
 
-    fn clear_large_monster(&mut self, floor: i32, def: &TileDef, x: usize, y: usize) {
-        let Some(footprint) = def.extra.get("footprint") else {
+    fn clear_large_monster(
+        &mut self,
+        floor: i32,
+        footprint: &content::Footprint,
+        x: usize,
+        y: usize,
+    ) {
+        let Some(left) = x.checked_sub(footprint.offset_x) else {
             return;
         };
-        let Some(left) = x.checked_sub(footprint["offset_x"].as_u64().unwrap_or(0) as usize) else {
+        let Some(top) = y.checked_sub(footprint.offset_y) else {
             return;
         };
-        let Some(top) = y.checked_sub(footprint["offset_y"].as_u64().unwrap_or(0) as usize) else {
-            return;
-        };
-        let width = footprint["width"]
-            .as_u64()
-            .unwrap_or(1)
-            .min(self.campaign.width as u64) as usize;
-        let height = footprint["height"]
-            .as_u64()
-            .unwrap_or(1)
-            .min(self.campaign.height as u64) as usize;
-        for ny in top..top + height {
-            for nx in left..left + width {
+        for ny in top..top + footprint.height {
+            for nx in left..left + footprint.width {
                 if let Some(id) = self.tile_at(floor, nx, ny)
                     && id != self.empty_tile()
-                    && (footprint["clear_all"].as_bool() == Some(true)
-                        || footprint["tiles"].as_array().is_some_and(|tiles| {
-                            tiles
-                                .iter()
-                                .any(|tile| tile.as_u64() == Some(u64::from(id)))
-                        }))
+                    && (footprint.clear_all || footprint.tiles.contains(&id))
                 {
                     self.clear(floor, nx, ny);
                 }
@@ -614,10 +637,7 @@ impl Engine {
     }
 
     fn next_cycle(&mut self) {
-        if !self.campaign.rules["backside"]["enabled"]
-            .as_bool()
-            .unwrap_or(false)
-        {
+        if !self.rules.backside.enabled {
             self.state.status = GameStatus::Won;
             self.log("You conquered the Tower of the Sorcerer.");
             return;
@@ -627,19 +647,12 @@ impl Engine {
         let mut fresh =
             Self::initial_state(&self.campaign, self.state.campaign_fingerprint.clone());
         fresh.cycle = cycle;
-        if self.campaign.rules["backside"]["carry_stats"]
-            .as_bool()
-            .unwrap_or(true)
-        {
+        if self.rules.backside.carry_stats {
             fresh.player.hp = player.hp;
             fresh.player.attack = player.attack;
             fresh.player.defense = player.defense;
         }
-        if cycle > 2
-            || !self.campaign.rules["backside"]["reset_gold"]
-                .as_bool()
-                .unwrap_or(true)
-        {
+        if cycle > 2 || !self.rules.backside.reset_gold {
             fresh.player.gold = player.gold;
         }
         if cycle > 2 {
@@ -656,7 +669,7 @@ impl Engine {
         fresh.battle_log = self.state.battle_log.clone();
         fresh.steps = self.state.steps;
         self.state = fresh;
-        self.present(json!({"type":"floor","from":player.floor,"to":self.state.player.floor,"x":self.state.player.x,"y":self.state.player.y,"player":self.state.player,"tiles":self.state.floors.get(&self.state.player.floor),"style":"fade","sound":"none","direction":"down","duration_ms":900}));
+        self.present_floor(player.floor, "fade", Some(900));
         self.log(format!(
             "Entered the backside tower, cycle {cycle}. Monster and treasure statistics are ×{}.",
             self.cycle_multiplier()

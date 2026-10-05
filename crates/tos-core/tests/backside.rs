@@ -420,3 +420,145 @@ fn backside_zeno_inspection_previews_encounter_stats_without_mutation() {
         100_000 - preview["damage"].as_i64().unwrap()
     );
 }
+
+#[test]
+fn sealed_zeno_stats_survive_repeated_restores_then_the_portal_restores_the_correct_cycle() {
+    for cycle in [2, 3, 4] {
+        let mut game = original();
+        edit(&mut game, |save| {
+            save["cycle"] = json!(cycle);
+            place(save, 49, 5, 4);
+            save["floors"]["49"][27] = json!(91);
+            save["player"]["hp"] = json!(100_000);
+            save["player"]["attack"] = json!(if cycle == 2 { 50_000 } else { 500_000 });
+            save["player"]["defense"] = json!(if cycle == 2 { 5_000 } else { 500_000 });
+            save["player"]["gold"] = json!(7);
+            save["player"]["inventory"] = json!(["hero_orb"]);
+            save["enemy_overrides"]["zeno"] =
+                json!({"name":"Zeno","hp":800,"attack":500,"defense":100,"gold":500});
+        });
+        for _ in 0..4 {
+            let before = game.save_json();
+            let mut restored = original();
+            restored.load_json(&before).unwrap();
+            assert_eq!(restored.save_json(), before);
+            let enemy = &restored.inspect(5, 2)["enemy"];
+            assert_eq!(
+                (
+                    enemy["hp"].as_i64(),
+                    enemy["attack"].as_i64(),
+                    enemy["defense"].as_i64()
+                ),
+                (Some(35_200), Some(22_000), Some(4_400))
+            );
+            game = restored;
+        }
+        edit(&mut game, |save| {
+            place(save, 24, 5, 1);
+            save["floors"]["24"][5] = json!(7);
+        });
+        step(&mut game, "up");
+        let snapshot = game.snapshot();
+        let timeline = snapshot["last_action"]["presentation"].as_array().unwrap();
+        if cycle == 2 {
+            let moves: Vec<_> = timeline
+                .iter()
+                .filter(|cue| cue["type"] == "move_tile")
+                .collect();
+            assert_eq!(moves.len(), 2);
+            assert_eq!(
+                (
+                    moves[0]["from_y"].as_u64(),
+                    moves[0]["y"].as_u64(),
+                    moves[1]["y"].as_u64()
+                ),
+                (Some(4), Some(5), Some(6))
+            );
+            let battle = timeline.iter().find(|cue| cue["type"] == "battle").unwrap();
+            assert_eq!(battle["enemy_first"], true);
+            assert_eq!(battle["enemy_hp"], 44_000);
+            assert_eq!(battle["enemy_attack"], 27_500);
+            assert_eq!(battle["damage"], 22_500);
+            assert_eq!(game.player().hp, 77_500);
+            assert_eq!(game.player().gold, 507);
+            assert_eq!(game.player().floor, 1);
+            assert_eq!(snapshot["cycle"], 3);
+        } else {
+            assert!(
+                !timeline
+                    .iter()
+                    .any(|cue| cue["type"] == "move_tile" || cue["type"] == "battle")
+            );
+            assert_eq!(game.player().floor, 50);
+            let enemy = &game.inspect(5, 4)["enemy"];
+            assert_eq!(
+                (
+                    enemy["hp"].as_i64(),
+                    enemy["attack"].as_i64(),
+                    enemy["defense"].as_i64()
+                ),
+                (Some(352_000), Some(220_000), Some(44_000))
+            );
+            let saved = game.save_json();
+            game.load_json(&saved).unwrap();
+            assert_eq!(game.inspect(5, 4)["enemy"], *enemy);
+            step(&mut game, "up");
+            step(&mut game, "up");
+            assert_eq!(game.snapshot()["cycle"], cycle + 1);
+            assert_eq!(game.player().gold, 507);
+        }
+    }
+}
+
+#[test]
+fn second_cycle_zeno_ambush_can_be_lethal_before_the_replay_rewards() {
+    let mut game = original();
+    edit(&mut game, |save| {
+        save["cycle"] = json!(2);
+        place(save, 24, 5, 1);
+        save["floors"]["24"][5] = json!(7);
+        save["player"]["hp"] = json!(22_500);
+        save["player"]["attack"] = json!(50_000);
+        save["player"]["defense"] = json!(5_000);
+        save["player"]["gold"] = json!(7);
+    });
+    step(&mut game, "up");
+    assert_eq!(game.snapshot()["status"], "lost");
+    assert_eq!(game.snapshot()["cycle"], 2);
+    assert_eq!(game.player().hp, 0);
+    assert_eq!(game.player().gold, 7);
+    assert_eq!(game.tile_at(50, 5, 6), Some(91));
+}
+
+#[test]
+fn floor_45_merchant_preserves_the_original_unscaled_trade() {
+    for cycle in [1, 2, 3] {
+        let mut game = original();
+        let merchant = game
+            .campaign()
+            .interactions
+            .iter()
+            .find(|npc| npc["floor"] == 45 && npc["name"] == "Merchant")
+            .unwrap()
+            .clone();
+        let x = merchant["x"].as_u64().unwrap() as usize;
+        let y = merchant["y"].as_u64().unwrap() as usize;
+        edit(&mut game, |save| {
+            save["cycle"] = json!(cycle);
+            place(save, 45, x, y + 1);
+            save["player"]["hp"] = json!(1000);
+            save["player"]["gold"] = json!(2000);
+        });
+        step(&mut game, "up");
+        let snapshot = game.snapshot();
+        let offer = snapshot["pending_interaction"]["choices"][0]["id"]
+            .as_str()
+            .unwrap();
+        choose(&mut game, offer);
+        assert_eq!(game.player().hp, 3000);
+        assert_eq!(game.player().gold, 1000);
+        choose(&mut game, offer);
+        assert_eq!(game.player().hp, 3000);
+        assert_eq!(game.player().gold, 1000);
+    }
+}

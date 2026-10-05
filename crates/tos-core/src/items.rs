@@ -2,6 +2,7 @@
 //! Item IDs are authored resource identifiers, unlike closed operation tags.
 use crate::{
     Engine, KeyColor, Stat, TileKind, events::TriggerKind, flight::FloorTravel, original::*,
+    presentation::Presentation,
 };
 use serde_json::{Value, json};
 
@@ -12,8 +13,10 @@ impl Engine {
     pub(crate) fn item_usage(&self, item: &str) -> Value {
         let mut usage = match item {
             "hero_orb" | "monster_book" => {
-                let description = if self.campaign.rules["forecast_requires_item"]
-                    .as_str()
+                let description = if self
+                    .rules
+                    .forecast_requires_item
+                    .as_deref()
                     .is_none_or(|required| required == item)
                 {
                     "Enemy statistics and battle forecasts are available in inspection."
@@ -21,7 +24,7 @@ impl Engine {
                     "Passive reference item; this campaign's enemy forecasts require a different item."
                 };
                 let mut usage = passive_usage(description);
-                if item == "hero_orb" && self.campaign.rules["save_requires_hero_orb"] == true {
+                if item == "hero_orb" && self.rules.save_requires_hero_orb {
                     usage["description"] = json!(format!(
                         "{description} Also enables manual save checkpoints."
                     ));
@@ -35,26 +38,15 @@ impl Engine {
                 &["Earlier conversations are not added retroactively. Only recorded hints appear."],
             ),
             "cross" | "dragon_slayer" => {
-                let (rule, default, enemies) = if item == "cross" {
-                    ("cross_multiplier", CROSS_MULTIPLIER, "undead")
+                let (multiplier, enemies) = if item == "cross" {
+                    (self.rules.cross_multiplier, "undead")
                 } else {
-                    (
-                        "dragon_slayer_multiplier",
-                        DRAGON_SLAYER_MULTIPLIER,
-                        "dragons",
-                    )
+                    (self.rules.dragon_slayer_multiplier, "dragons")
                 };
-                let multiplier = self.campaign.rules[rule]
-                    .as_i64()
-                    .unwrap_or(default)
-                    .clamp(1, 1000);
                 let mut usage = passive_usage(&format!(
                     "Multiplies attack by {multiplier} against {enemies} during combat."
                 ));
-                if self.campaign.rules["base_attack_guard"]
-                    .as_bool()
-                    .unwrap_or(true)
-                {
+                if self.rules.base_attack_guard {
                     usage["restrictions"] =
                         json!(["Base attack must still exceed the enemy's defense."]);
                 }
@@ -67,9 +59,7 @@ impl Engine {
                 "Prevents magical field damage from movement near magicians and sorcerers.",
             ),
             "orb_of_flying" | "floor_wand" | "flying_orb" => {
-                let original_selection = self.campaign.rules["flying_original_selection"]
-                    .as_bool()
-                    .unwrap_or(false);
+                let original_selection = self.rules.flying_original_selection;
                 let mut usage = active_usage(
                     item,
                     if original_selection {
@@ -104,10 +94,7 @@ impl Engine {
                 } else {
                     "visited_floor"
                 });
-                if self.campaign.rules["flying_requires_stairs"]
-                    .as_bool()
-                    .unwrap_or(true)
-                {
+                if self.rules.flying_requires_stairs {
                     usage["restrictions"].as_array_mut().unwrap().push(json!(
                         "Stand on or orthogonally beside an up/down staircase."
                     ));
@@ -194,21 +181,16 @@ impl Engine {
                         .unwrap_or_else(|| {
                             if self
                                 .scripts
-                                .item_effects
+                                .items
                                 .get(item)
-                                .is_some_and(|effects| !effects.is_empty())
+                                .is_some_and(|definition| !definition.effects.is_empty())
                             {
                                 "Use this item's configured ability."
                             } else {
                                 "Using this item has no configured effect."
                             }
                         });
-                    active_usage(
-                        item,
-                        description,
-                        definition["consumable"].as_bool().unwrap_or(true),
-                        &[],
-                    )
+                    active_usage(item, description, self.scripts.items[item].consumable, &[])
                 } else if self.campaign.tiles.values().any(|tile| {
                     tile.kind == TileKind::Equipment && tile.item.as_deref() == Some(item)
                 }) {
@@ -243,7 +225,9 @@ impl Engine {
         match item {
             "wisdom_orb" => {
                 consume = false;
-                self.present(json!({"type":"journal","entries":self.player_journal()}));
+                self.present(Presentation::Journal {
+                    entries: self.player_journal(),
+                });
                 self.log("Reviewed the Orb of Wisdom's recorded hints.");
             }
             "hero_orb" | "monster_book" | "cross" | "dragon_slayer" | "lucky_gold"
@@ -253,9 +237,7 @@ impl Engine {
             }
             "orb_of_flying" | "floor_wand" | "flying_orb" => {
                 let target = target_floor.ok_or("Choose a destination floor")?;
-                let original_selection = self.campaign.rules["flying_original_selection"]
-                    .as_bool()
-                    .unwrap_or(false);
+                let original_selection = self.rules.flying_original_selection;
                 if !self.flying_destinations().contains(&target) {
                     return self.block(if original_selection {
                         "That floor is unavailable in the Orb of Flying's selector."
@@ -279,11 +261,7 @@ impl Engine {
                         )
                     })
                 });
-                if self.campaign.rules["flying_requires_stairs"]
-                    .as_bool()
-                    .unwrap_or(true)
-                    && !adjacent_stairs
-                {
+                if self.rules.flying_requires_stairs && !adjacent_stairs {
                     return self.block("Stand beside a staircase to use the Orb of Flying.");
                 }
                 if original_selection && target == floor {
@@ -344,19 +322,11 @@ impl Engine {
                     if let Some(id) = self.tile_at(floor, nx, ny)
                         && self.campaign.tiles[&id.to_string()].kind == TileKind::Enemy
                     {
-                        let allowed = self.campaign.rules["bomb_tile_ranges"]
-                            .as_array()
-                            .map(|ranges| {
-                                ranges.iter().any(|range| {
-                                    range[0].as_u64().is_some_and(|v| u64::from(id) >= v)
-                                        && range[1].as_u64().is_some_and(|v| u64::from(id) <= v)
-                                })
-                            })
-                            .unwrap_or(
-                                BOMB_TILE_RANGES
-                                    .iter()
-                                    .any(|(first, last)| (*first..=*last).contains(&id)),
-                            );
+                        let allowed = self
+                            .rules
+                            .bomb_tile_ranges
+                            .iter()
+                            .any(|[first, last]| (*first..=*last).contains(&id));
                         if allowed {
                             reward += self.campaign.tiles[&id.to_string()]
                                 .enemy
@@ -471,19 +441,13 @@ impl Engine {
                 self.log(format!("The Snow Crystal cooled {count} lava tiles."));
             }
             _ => {
-                let Some(def) = self.campaign.items.get(item).cloned() else {
+                let Some(def) = self.scripts.items.get(item).cloned() else {
                     return self.block(&format!(
                         "Item {item} is passive or has no configured action"
                     ));
                 };
-                let effects = self
-                    .scripts
-                    .item_effects
-                    .get(item)
-                    .cloned()
-                    .unwrap_or_default();
-                self.apply_effects(&effects);
-                consume = def["consumable"].as_bool().unwrap_or(true);
+                self.apply_effects(&def.effects);
+                consume = def.consumable;
             }
         }
         if consume {
@@ -494,25 +458,19 @@ impl Engine {
 
     fn item_breaks_wall(&self, id: u16) -> bool {
         self.campaign.tiles[&id.to_string()].kind == TileKind::Wall
-            && self.campaign.rules["wall_break_tile_ranges"]
-                .as_array()
+            && self
+                .rules
+                .wall_break_tile_ranges
+                .as_ref()
                 .is_none_or(|ranges| {
-                    ranges.iter().any(|range| {
-                        range[0]
-                            .as_u64()
-                            .is_some_and(|minimum| u64::from(id) >= minimum)
-                            && range[1]
-                                .as_u64()
-                                .is_some_and(|maximum| u64::from(id) <= maximum)
-                    })
+                    ranges
+                        .iter()
+                        .any(|[minimum, maximum]| (*minimum..=*maximum).contains(&id))
                 })
     }
 
     pub(crate) fn flying_destinations(&self) -> Vec<i32> {
-        if self.campaign.rules["flying_original_selection"]
-            .as_bool()
-            .unwrap_or(false)
-        {
+        if self.rules.flying_original_selection {
             let highest = self.highest_stair_floor();
             let mut floors: Vec<_> = self
                 .campaign

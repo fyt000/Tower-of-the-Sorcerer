@@ -1042,13 +1042,13 @@
     "x": 4,
     "y": 8,
     "name": "Thief",
-    "text": "Talk to the thief to continue.",
+    "text": "Ah!, we meet again! Thank goodness you're alive!",
     "dialogue_ids": [
       263
     ],
     "offers": [],
     "effects": [],
     "disappear": false,
-    "source": "Original touzoku floor-50 branch; dialogue/map effects live in events.json"
+    "source": "Original touzoku 0x465900 floor-50 branch queues dialogue 264 (zero-based 263), no map/stat effects"
   }
 ]

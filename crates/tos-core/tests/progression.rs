@@ -174,6 +174,46 @@ fn floor_40_all_thirteen_first_strike_fights_have_exact_damage_and_gold() {
 }
 
 #[test]
+fn floor_40_lucky_gold_matches_first_strike_rewards_in_stats_text_and_presentation() {
+    let mut game = original();
+    edit_save(&mut game, |save| {
+        save["player"]["hp"] = json!(10000);
+        save["player"]["attack"] = json!(300);
+        save["player"]["defense"] = json!(100);
+        save["player"]["gold"] = json!(0);
+        save["player"]["inventory"] = json!(["lucky_gold"]);
+    });
+    place(&mut game, 40, 5, 7);
+    step(&mut game, "up");
+    assert_eq!(game.player().gold, 1400);
+    assert_eq!(game.player().hp, 7280);
+    let snapshot = game.snapshot();
+    let battles: Vec<_> = snapshot["last_action"]["presentation"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|effect| effect["type"] == "battle")
+        .collect();
+    assert_eq!(battles.len(), 13);
+    for (battle, expected) in battles
+        .iter()
+        .zip([70, 70, 70, 90, 90, 90, 110, 110, 110, 130, 130, 130, 200])
+    {
+        assert_eq!(battle["enemy_first"], true);
+        assert_eq!(battle["gold"], expected);
+        assert_eq!(battle["reward"], expected);
+        assert_eq!(battle["battle_log"]["reward"], expected);
+        assert!(
+            battle["activity"]
+                .as_str()
+                .unwrap()
+                .contains(&format!("+{expected} gold"))
+        );
+    }
+    assert!(!log_contains(&game, "Opened yellow door"));
+}
+
+#[test]
 fn floor_40_lethal_wave_stops_before_later_fights_and_rewards() {
     let mut game = original();
     edit_save(&mut game, |save| {
@@ -191,6 +231,83 @@ fn floor_40_lethal_wave_stops_before_later_fights_and_rewards() {
     assert_eq!(game.tile_at(40, 5, 7), Some(4));
     assert_ne!(game.tile_at(40, 5, 0), Some(11));
     assert_ne!(game.tile_at(40, 5, 5), Some(23));
+}
+
+#[test]
+fn floor_33_both_entrances_share_one_trap_and_all_four_guards_release_both_gates() {
+    for entrance in ["up", "down"] {
+        let mut game = original();
+        edit_save(&mut game, |save| {
+            save["player"]["attack"] = json!(2000);
+            save["player"]["defense"] = json!(2000);
+            save["player"]["gold"] = json!(0);
+        });
+        place(&mut game, 33, 9, 5);
+        step(&mut game, entrance);
+        for y in [3, 7] {
+            assert_eq!(game.tile_at(33, 9, y), Some(4));
+        }
+        for y in [4, 6] {
+            assert_eq!(game.tile_at(33, 9, y), Some(6));
+        }
+        let guards = [(8, 4), (10, 4), (8, 6), (10, 6)];
+        for (number, (x, y)) in guards.into_iter().enumerate() {
+            fight_from_below(&mut game, 33, x, y);
+            if number < 3 {
+                assert_eq!(game.tile_at(33, 9, 3), Some(4));
+                assert_eq!(game.tile_at(33, 9, 7), Some(4));
+            }
+            if number == 1 {
+                let saved = game.save_json();
+                game = original();
+                game.load_json(&saved).unwrap();
+                // Entering through the other side cannot reset the trap.
+                place(&mut game, 33, 9, 5);
+                step(&mut game, if entrance == "up" { "down" } else { "up" });
+                let saved: Value = serde_json::from_str(&game.save_json()).unwrap();
+                assert_eq!(saved["event_counts"]["floor_33_encounter_53"], 1);
+            }
+        }
+        for y in [3, 7] {
+            assert_eq!(game.tile_at(33, 9, y), Some(6));
+        }
+        let snapshot = game.snapshot();
+        let gate_motion: Vec<_> = snapshot["last_action"]["presentation"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|cue| cue["kind"] == "tile_reveal" && cue["style"] == "gate_open")
+            .collect();
+        assert_eq!(gate_motion.len(), 2);
+        assert!(gate_motion.iter().all(|cue| cue["from_tile"] == 4));
+        place(&mut game, 33, 9, 5);
+        step(&mut game, entrance);
+        assert_eq!(game.tile_at(33, 9, 3), Some(6));
+        assert_eq!(game.tile_at(33, 9, 7), Some(6));
+        let saved: Value = serde_json::from_str(&game.save_json()).unwrap();
+        assert_eq!(saved["event_counts"]["floor_33_encounter_53"], 1);
+    }
+}
+
+#[test]
+fn floor_33_untriggered_room_with_previously_defeated_guards_does_not_seal_itself() {
+    let mut game = original();
+    edit_save(&mut game, |save| {
+        for (x, y) in [(8, 4), (10, 4), (8, 6), (10, 6)] {
+            save["floors"]["33"][y * 11 + x] = json!(6);
+        }
+    });
+    place(&mut game, 33, 9, 5);
+    step(&mut game, "down");
+    assert_eq!(game.tile_at(33, 9, 3), Some(6));
+    assert_eq!(game.tile_at(33, 9, 7), Some(6));
+    assert!(
+        !game.snapshot()["last_action"]["presentation"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|cue| cue["style"] == "gate_close")
+    );
 }
 
 fn stage_zeno(game: &mut Engine) {

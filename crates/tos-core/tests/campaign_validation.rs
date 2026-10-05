@@ -85,6 +85,10 @@ fn nested_rule_types_ranges_and_references_are_checked() {
         json!({"empty_tile":6,"bomb_tile_ranges":[[61,"96"]]}),
         json!({"empty_tile":6,"bomb_tile_ranges":[[96,61]]}),
         json!({"empty_tile":6,"presentation":{"combat_strike_ms":"450"}}),
+        json!({"empty_tile":6,"magician_retreat":{"floor":2,"special":"magician_a"}}),
+        json!({"empty_tile":6,"magician_retreat":{"floor":1,"special":"magician_a","bounds":"wrap"}}),
+        json!({"empty_tile":6,"magician_retreat":{"floor":1,"special":"unknown"}}),
+        json!({"empty_tile":6,"magician_retreat":{"floor":1,"special":"magician_a","bound":"corrected"}}),
         json!({"empty_tile":6,"audio":{"floor_music":[{"min_floor":5,"max_floor":1,"file":"theme"}]}}),
     ] {
         let mut value = fixture();
@@ -187,6 +191,10 @@ fn triggers_and_nested_effect_conditions_are_validated_recursively() {
         json!({"trigger":{"type":"step","tile":999},"effects":[]}),
         json!({"trigger":{"type":"step"},"once":"false","effects":[]}),
         json!({"trigger":{"type":"step"},"effects":null}),
+        json!({"trigger":{"type":"step","positions":[]},"effects":[]}),
+        json!({"trigger":{"type":"step","x":0,"positions":[{"x":1,"y":0}]},"effects":[]}),
+        json!({"trigger":{"type":"step","positions":[{"x":2,"y":0}]},"effects":[]}),
+        json!({"trigger":{"type":"step","positions":[{"x":0,"y":"1"}]},"effects":[]}),
         json!({"trigger":{"type":"step"},"effects":[{"type":"flag","flag":"ready","conditions":{}}]}),
         json!({"trigger":{"type":"step"},"effects":[{"type":"flag","flag":"ready","conditions":[{"type":"any","conditions":[{"type":"tile","x":0,"y":0,"tile":"6"}]}]}]}),
     ] {
@@ -241,5 +249,5 @@ fn typed_campaign_preserves_the_published_save_fingerprint() {
     // Behavior enums must preserve their canonical JSON spellings. Explicit
     // item and animation fidelity rules revise the bundled campaign. The GUI keeps
     // known previous revisions recoverable through its tested migration.
-    assert_eq!(saved["campaign_fingerprint"], "abd9d284f2e9b303");
+    assert_eq!(saved["campaign_fingerprint"], "689db6b6a00a3400");
 }

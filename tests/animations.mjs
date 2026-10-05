@@ -63,23 +63,25 @@ try {
   await page.goto(process.env.TOS_URL || 'http://127.0.0.1:8080');
   await waitFor(() => window.tower && JSON.parse(window.tower.ui_json()).sprites_loaded);
   await test('Previously published campaign and save migrate together', async () => {
-    const oldCampaign = execFileSync('git', ['show', 'bbc5dd7:data/campaign.json'], { cwd: root, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024 });
-    // The previous shipped campaign's identity is a tested migration fixture.
-    const saved = JSON.parse(await page.evaluate(() => window.tower.save_json()));
-    saved.campaign_fingerprint = 'ad358ec82db8b9ef';
-    saved.cycle = 2; saved.steps = 432; saved.player.hp = 8123;
-    saved.flags = ['captured']; saved.event_counts = { capture_on_floor_3: 1 };
-    await page.evaluate(({ campaign, saved }) => {
-      localStorage.setItem('tos-rust:campaign:v1', campaign);
-      localStorage.setItem('tos-rust:save:v1', JSON.stringify(saved));
-    }, { campaign: oldCampaign, saved });
-    await page.reload();
-    await waitFor(() => window.tower && JSON.parse(window.tower.ui_json()).sprites_loaded);
-    const current = await state();
-    assert.deepEqual([current.cycle, current.steps, current.player.hp], [2, 432, 8123]);
-    const migrated = JSON.parse(await page.evaluate(() => window.tower.save_json()));
-    assert.deepEqual(migrated.event_counts, { capture_on_floor_3: 1 });
-    assert(await page.evaluate(() => localStorage.getItem('tos-rust:save:recovery')));
+    for (const [commit, fingerprint] of [['bbc5dd7', 'ad358ec82db8b9ef'], ['4c0ae3f', 'abd9d284f2e9b303']]) {
+      const oldCampaign = execFileSync('git', ['show', `${commit}:data/campaign.json`], { cwd: root, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024 });
+      // Real previously shipped campaigns must upgrade with their progress.
+      const saved = JSON.parse(await page.evaluate(() => window.tower.save_json()));
+      saved.campaign_fingerprint = fingerprint;
+      saved.cycle = 2; saved.steps = 432; saved.player.hp = 8123;
+      saved.flags = ['captured']; saved.event_counts = { capture_on_floor_3: 1 };
+      await page.evaluate(({ campaign, saved }) => {
+        localStorage.setItem('tos-rust:campaign:v1', campaign);
+        localStorage.setItem('tos-rust:save:v1', JSON.stringify(saved));
+      }, { campaign: oldCampaign, saved });
+      await page.reload();
+      await waitFor(() => window.tower && JSON.parse(window.tower.ui_json()).sprites_loaded);
+      const current = await state();
+      assert.deepEqual([current.cycle, current.steps, current.player.hp], [2, 432, 8123]);
+      const migrated = JSON.parse(await page.evaluate(() => window.tower.save_json()));
+      assert.deepEqual(migrated.event_counts, { capture_on_floor_3: 1 });
+      assert(await page.evaluate(() => localStorage.getItem('tos-rust:save:recovery')));
+    }
   });
   await test('Altar eye pixels blink while its body stays still', async () => {
     const campaign = room(); campaign.floors[0].tiles[0] = 16; campaign.floors[0].tiles[5] = 15;
@@ -121,11 +123,28 @@ try {
   await test('Sealed gate closes with four quadrants and opens with the same geometry', async () => {
     const campaign = room();
     campaign.events = [{ id: 'close', trigger: { type: 'step', floor: 1, x: 3, y: 2 }, effects: [{ type: 'set_tile', floor: 1, x: 0, y: 0, tile: 4 }] },
-      { id: 'open', trigger: { type: 'step', floor: 1, x: 4, y: 2 }, effects: [{ type: 'set_tile', floor: 1, x: 0, y: 0, tile: 6 }] }];
+      { id: 'open', trigger: { type: 'step', floor: 1, x: 4, y: 2 }, effects: [
+        { type: 'cinematic', kind: 'tile_reveal', style: 'gate_open', floor: 1, x: 0, y: 0, from_tile: 6, tile: 6, duration_ms: 1200 },
+        { type: 'set_tile', floor: 1, x: 0, y: 0, tile: 6 }] }];
     await load(campaign); await capture('gate-road', [0, 0]);
     await command({ type: 'move', direction: 'right' }); await phase('gate_close'); await capture('gate-closing', [0, 0]); await idle(); await capture('gate-closed', [0, 0]);
     await command({ type: 'move', direction: 'right' }); await phase('gate_open'); await capture('gate-opening', [0, 0]); await idle();
     assert.equal((await state()).tiles[0], 6);
+  });
+  await test('Retreating magician moves once, including when Sacred Shield suppresses its hit', async () => {
+    for (const protectedByShield of [false, true]) {
+      const campaign = room(); campaign.start.y = 3;
+      campaign.start.inventory = protectedByShield ? ['sacred_shield'] : [];
+      campaign.floors[0].tiles[13] = 151;
+      campaign.rules.magician_retreat = { floor: 1, special: 'magician_a', bounds: 'corrected' };
+      await load(campaign); await command({ type: 'move', direction: 'up' });
+      await waitFor(() => JSON.parse(window.tower.ui_json()).animation === 'move_tile');
+      const moving = (await ui()).animation_effect;
+      assert.deepEqual([moving.from_x, moving.x, moving.tile], [3, 4, 151]);
+      await idle(); const finished = await state();
+      assert.deepEqual([finished.tiles[13], finished.tiles[14], finished.player.hp], [6, 151, protectedByShield ? 10000 : 9800]);
+      assert.equal((await ui()).visual_tiles[14], 151);
+    }
   });
   await test('Every hero and enemy strike has clean, impact and clean phases', async () => {
     const campaign = room(); campaign.floors[0].tiles[13] = 61;

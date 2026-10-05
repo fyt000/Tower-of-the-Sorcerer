@@ -1,7 +1,6 @@
 //! Combat forecasting; one calculation shared by inspection and execution.
-use crate::{Enemy, EnemySpecial, Engine, Player, original::*};
+use crate::{Enemy, EnemySpecial, Engine, Player, rules::Rules};
 use serde::Serialize;
-use serde_json::Value;
 
 #[derive(Clone, Debug, Serialize)]
 pub struct Forecast {
@@ -29,36 +28,24 @@ impl Engine {
 
 /// Hero strikes first; the last strike never receives a counterattack.
 pub fn forecast(player: &Player, enemy: &Enemy) -> Forecast {
-    forecast_with_rules(player, enemy, &Value::Null)
+    forecast_with_rules(player, enemy, &Rules::default())
 }
 
-pub(crate) fn forecast_with_rules(player: &Player, enemy: &Enemy, rules: &Value) -> Forecast {
+pub(crate) fn forecast_with_rules(player: &Player, enemy: &Enemy, rules: &Rules) -> Forecast {
     let base_damage = player.attack - enemy.defense;
     let multiplier = match enemy.special {
         EnemySpecial::Undead if player.inventory.iter().any(|s| s == "cross") => {
-            rules["cross_multiplier"]
-                .as_i64()
-                .unwrap_or(CROSS_MULTIPLIER)
-                .clamp(1, 1000)
+            rules.cross_multiplier
         }
         EnemySpecial::Dragon if player.inventory.iter().any(|s| s == "dragon_slayer") => {
-            rules["dragon_slayer_multiplier"]
-                .as_i64()
-                .unwrap_or(DRAGON_SLAYER_MULTIPLIER)
-                .clamp(1, 1000)
+            rules.dragon_slayer_multiplier
         }
         _ => 1,
     };
     let hit = player.attack.saturating_mul(multiplier) - enemy.defense;
-    let can_attack =
-        hit > 0 && (base_damage > 0 || !rules["base_attack_guard"].as_bool().unwrap_or(true));
+    let can_attack = hit > 0 && (base_damage > 0 || !rules.base_attack_guard);
     let rounds = if can_attack {
-        (enemy.hp - 1) / hit
-            + if rules["hero_attacks_first"].as_bool().unwrap_or(true) {
-                0
-            } else {
-                1
-            }
+        (enemy.hp - 1) / hit + if rules.hero_attacks_first { 0 } else { 1 }
     } else {
         0
     };

@@ -4,7 +4,7 @@ use crate::campaign::{MAX_STAT, validate_player};
 use crate::domain::GameStatus;
 use crate::{Enemy, Engine, Player};
 use serde::{Deserialize, Serialize};
-use serde_json::{Value, json};
+use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
 
 /// Version 1 is the shipped save wire format. Change this only with migration.
@@ -89,16 +89,14 @@ fn first_cycle() -> u32 {
 struct RuntimeCheckpoint {
     version: u32,
     save: String,
-    last_action: Value,
+    last_action: crate::presentation::ActionResult,
 }
 
 impl Engine {
     /// The original Hero Orb unlocks player-created save points. Internal
     /// autosaves and worker replacement still serialize their state directly.
     pub fn save_unlocked(&self) -> bool {
-        !self.campaign.rules["save_requires_hero_orb"]
-            .as_bool()
-            .unwrap_or(false)
+        !self.rules.save_requires_hero_orb
             || self
                 .state
                 .player
@@ -129,7 +127,7 @@ impl Engine {
     pub fn restore_runtime_checkpoint_json(&mut self, source: &str) -> Result<(), String> {
         let checkpoint: RuntimeCheckpoint = serde_json::from_str(source)
             .map_err(|error| format!("Invalid runtime checkpoint: {error}"))?;
-        if checkpoint.version != 1 || !checkpoint.last_action.is_object() {
+        if checkpoint.version != 1 {
             return Err("Unsupported runtime checkpoint".into());
         }
         let mut restored = self.clone();
@@ -263,7 +261,7 @@ impl Engine {
         }
         // Rejected data leaves both the world and the last action unchanged.
         self.state = save;
-        self.last_action = json!({"ok":true,"message":"Save loaded"});
+        self.last_action = crate::presentation::ActionResult::message("Save loaded");
         Ok(())
     }
 }

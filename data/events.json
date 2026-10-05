@@ -2259,8 +2259,16 @@
     "trigger": {
       "type": "step",
       "floor": 33,
-      "x": 9,
-      "y": 4
+      "positions": [
+        {
+          "x": 9,
+          "y": 4
+        },
+        {
+          "x": 9,
+          "y": 6
+        }
+      ]
     },
     "conditions": [],
     "effects": [
@@ -2272,16 +2280,128 @@
         "tile": 6
       },
       {
+        "type": "set_tile",
+        "floor": 33,
+        "x": 9,
+        "y": 6,
+        "tile": 6
+      },
+      {
         "type": "wait",
-        "ms": 50
+        "ms": 50,
+        "conditions": [
+          {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 6,
+                "tile": 139
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 6,
+                "tile": 139
+              }
+            ]
+          }
+        ]
       },
       {
         "type": "sound",
-        "cue": "open"
+        "cue": "open",
+        "conditions": [
+          {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 6,
+                "tile": 139
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 6,
+                "tile": 139
+              }
+            ]
+          }
+        ]
       },
       {
         "type": "wait",
-        "ms": 25
+        "ms": 25,
+        "conditions": [
+          {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 6,
+                "tile": 139
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 6,
+                "tile": 139
+              }
+            ]
+          }
+        ]
       },
       {
         "type": "cinematic",
@@ -2312,6 +2432,41 @@
           14,
           15,
           16
+        ],
+        "conditions": [
+          {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 6,
+                "tile": 139
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 6,
+                "tile": 139
+              }
+            ]
+          }
         ]
       },
       {
@@ -2319,15 +2474,120 @@
         "floor": 33,
         "x": 9,
         "y": 3,
-        "tile": 4
+        "tile": 4,
+        "conditions": [
+          {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 6,
+                "tile": 139
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 6,
+                "tile": 139
+              }
+            ]
+          }
+        ]
       },
       {
         "type": "sound",
-        "cue": "open"
+        "cue": "open",
+        "conditions": [
+          {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 6,
+                "tile": 139
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 6,
+                "tile": 139
+              }
+            ]
+          }
+        ]
       },
       {
         "type": "wait",
-        "ms": 25
+        "ms": 25,
+        "conditions": [
+          {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 6,
+                "tile": 139
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 6,
+                "tile": 139
+              }
+            ]
+          }
+        ]
       },
       {
         "type": "cinematic",
@@ -2358,6 +2618,41 @@
           14,
           15,
           16
+        ],
+        "conditions": [
+          {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 6,
+                "tile": 139
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 6,
+                "tile": 139
+              }
+            ]
+          }
         ]
       },
       {
@@ -2365,10 +2660,45 @@
         "floor": 33,
         "x": 9,
         "y": 7,
-        "tile": 4
+        "tile": 4,
+        "conditions": [
+          {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 4,
+                "tile": 141
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 8,
+                "y": 6,
+                "tile": 139
+              },
+              {
+                "type": "tile",
+                "floor": 33,
+                "x": 10,
+                "y": 6,
+                "tile": 139
+              }
+            ]
+          }
+        ]
       }
     ],
-    "source": "Original ichicheck 0x46CB1C; ordered tile motion, sound and waits retained"
+    "source": "Original ichicheck 0x46CB1C; ordered tile motion, sound and waits retained; tswKai Rev8: both entrances trigger once; already-cleared guard rooms stay open"
   },
   {
     "id": "floor_33_encounter_107",
@@ -10112,6 +10442,38 @@
         "tile": 6
       },
       {
+        "type": "set_enemy",
+        "enemy": "zeno",
+        "hp": 8000,
+        "attack": 5000,
+        "defense": 1000,
+        "gold": 500,
+        "conditions": [
+          {
+            "type": "cycle_at_least",
+            "amount": 3
+          }
+        ]
+      },
+      {
+        "type": "set_enemy",
+        "enemy": "zeno",
+        "hp": 1000,
+        "attack": 625,
+        "defense": 125,
+        "gold": 500,
+        "conditions": [
+          {
+            "type": "cycle_at_least",
+            "amount": 2
+          },
+          {
+            "type": "cycle_at_most",
+            "amount": 2
+          }
+        ]
+      },
+      {
         "type": "wait",
         "ms": 50
       },
@@ -10777,10 +11139,194 @@
       },
       {
         "type": "wait",
-        "ms": 75
+        "ms": 75,
+        "conditions": [
+          {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "cycle_at_most",
+                "amount": 1
+              },
+              {
+                "type": "cycle_at_least",
+                "amount": 3
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "wait",
+        "ms": 75,
+        "conditions": [
+          {
+            "type": "cycle_at_least",
+            "amount": 2
+          },
+          {
+            "type": "cycle_at_most",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "type": "sound",
+        "cue": "get",
+        "conditions": [
+          {
+            "type": "cycle_at_least",
+            "amount": 2
+          },
+          {
+            "type": "cycle_at_most",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "type": "wait",
+        "ms": 25,
+        "conditions": [
+          {
+            "type": "cycle_at_least",
+            "amount": 2
+          },
+          {
+            "type": "cycle_at_most",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "type": "move_tile",
+        "floor": 50,
+        "from_x": 5,
+        "from_y": 4,
+        "x": 5,
+        "y": 5,
+        "tile": 91,
+        "duration_ms": 130,
+        "conditions": [
+          {
+            "type": "cycle_at_least",
+            "amount": 2
+          },
+          {
+            "type": "cycle_at_most",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "type": "wait",
+        "ms": 75,
+        "conditions": [
+          {
+            "type": "cycle_at_least",
+            "amount": 2
+          },
+          {
+            "type": "cycle_at_most",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "type": "sound",
+        "cue": "get",
+        "conditions": [
+          {
+            "type": "cycle_at_least",
+            "amount": 2
+          },
+          {
+            "type": "cycle_at_most",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "type": "wait",
+        "ms": 25,
+        "conditions": [
+          {
+            "type": "cycle_at_least",
+            "amount": 2
+          },
+          {
+            "type": "cycle_at_most",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "type": "move_tile",
+        "floor": 50,
+        "from_x": 5,
+        "from_y": 5,
+        "x": 5,
+        "y": 6,
+        "tile": 91,
+        "duration_ms": 130,
+        "conditions": [
+          {
+            "type": "cycle_at_least",
+            "amount": 2
+          },
+          {
+            "type": "cycle_at_most",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "type": "wait",
+        "ms": 75,
+        "conditions": [
+          {
+            "type": "cycle_at_least",
+            "amount": 2
+          },
+          {
+            "type": "cycle_at_most",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "type": "battle_at",
+        "floor": 50,
+        "x": 5,
+        "y": 6,
+        "first_strike": true,
+        "conditions": [
+          {
+            "type": "cycle_at_least",
+            "amount": 2
+          },
+          {
+            "type": "cycle_at_most",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "type": "wait",
+        "ms": 25,
+        "conditions": [
+          {
+            "type": "cycle_at_least",
+            "amount": 2
+          },
+          {
+            "type": "cycle_at_most",
+            "amount": 2
+          }
+        ]
       }
     ],
-    "source": "Original ichicheck floor-24 time gate; narrative scene before final Zeno interaction"
+    "source": "Original ichicheck floor-24 time gate; cycle-specific normalized Zeno row and second-cycle march/forced first-strike battle"
   },
   {
     "id": "floor_50_first_cycle_completion_91",
@@ -10819,7 +11365,7 @@
   },
   {
     "id": "floor_50_backside_zeno_stats_91",
-    "once": true,
+    "once": false,
     "trigger": {
       "type": "bump",
       "floor": 50,
@@ -10838,10 +11384,30 @@
         "hp": 1000,
         "attack": 625,
         "defense": 125,
-        "gold": 500
+        "gold": 500,
+        "conditions": [
+          {
+            "type": "cycle_at_most",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "type": "set_enemy",
+        "enemy": "zeno",
+        "hp": 8000,
+        "attack": 5000,
+        "defense": 1000,
+        "gold": 500,
+        "conditions": [
+          {
+            "type": "cycle_at_least",
+            "amount": 3
+          }
+        ]
       }
     ],
-    "source": "Original handan 0x4463B3 sets normalized 1000/625/125 before second-cycle combat; retain stable base on later cycles to correct original double-scaling bug"
+    "source": "Original handan 0x4463B3: second-cycle 1000/625/125; ichicheck portal restores 8000/5000/1000 in later cycles; scaling occurs once at encounter resolution"
   },
   {
     "id": "floor_50_first_cycle_completion_92",
@@ -10880,7 +11446,7 @@
   },
   {
     "id": "floor_50_backside_zeno_stats_92",
-    "once": true,
+    "once": false,
     "trigger": {
       "type": "bump",
       "floor": 50,
@@ -10899,24 +11465,46 @@
         "hp": 1000,
         "attack": 625,
         "defense": 125,
-        "gold": 500
+        "gold": 500,
+        "conditions": [
+          {
+            "type": "cycle_at_most",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "type": "set_enemy",
+        "enemy": "zeno",
+        "hp": 8000,
+        "attack": 5000,
+        "defense": 1000,
+        "gold": 500,
+        "conditions": [
+          {
+            "type": "cycle_at_least",
+            "amount": 3
+          }
+        ]
       }
     ],
-    "source": "Original handan 0x4463B3 sets normalized 1000/625/125 before second-cycle combat; retain stable base on later cycles to correct original double-scaling bug"
+    "source": "Original handan 0x4463B3: second-cycle 1000/625/125; ichicheck portal restores 8000/5000/1000 in later cycles; scaling occurs once at encounter resolution"
   },
   {
     "id": "floor_50_backside_completion",
     "once": true,
     "trigger": {
       "type": "enemy_defeated",
-      "floor": 50,
-      "x": 5,
-      "y": 4
+      "floor": 50
     },
     "conditions": [
       {
         "type": "cycle_at_least",
         "amount": 2
+      },
+      {
+        "type": "no_enemies",
+        "floor": 50
       }
     ],
     "effects": [
@@ -11210,6 +11798,6 @@
         "ms": 25
       }
     ],
-    "source": "Original moncheck floor50 0x46BFA8; combat victory ending and opcode11/sub6 replay reset"
+    "source": "Original moncheck floor50 0x46BFA8; both second-cycle ambush at (5,6) and later battle at (5,4) invoke ending and opcode11/sub6 replay reset"
   }
 ]

@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 const root = resolve(import.meta.dirname, '..'), output = resolve(root, 'test-results');
 mkdirSync(output, { recursive: true });
 const original = JSON.parse(readFileSync(resolve(root, 'data/campaign.json'), 'utf8'));
+const { magician_retreat: _retreat, ...roomRules } = original.rules;
 const itemIds = Object.values(original.tiles).filter(tile => tile.kind === 'item').map(tile => tile.item);
 assert.equal(itemIds.length, 15);
 const specialTiles = Object.fromEntries(Object.entries(original.tiles).filter(([, tile]) =>
@@ -15,7 +16,7 @@ function fixture(inventory, extras = {}, originalSlots = true) {
     id: 'inventory-layout-regression', title: 'Inventory layout test', width: 11, height: 11,
     start: { floor: 1, x: 5, y: 5, hp: 100, attack: 10, defense: 5, gold: 0,
       inventory: ['sword_5', 'sacred_shield', ...inventory] },
-    rules: { ...original.rules, stair_links: {}, floor_travel_callbacks: [],
+    rules: { ...roomRules, stair_links: {}, floor_travel_callbacks: [],
       flying_original_selection: originalSlots },
     floors: [{ id: 1, title: 'Inventory room', tiles: Array(121).fill(6) }],
     tiles: { ...specialTiles, ...extras }, enemies: {}, events: []

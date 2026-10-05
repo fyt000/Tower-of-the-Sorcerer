@@ -7,12 +7,13 @@ const root = resolve(import.meta.dirname, '..');
 const output = resolve(root, 'test-results');
 mkdirSync(output, { recursive: true });
 const original = JSON.parse(readFileSync(resolve(root, 'data/campaign.json'), 'utf8'));
+const { magician_retreat: _retreat, ...roomRules } = original.rules;
 const dialogue = JSON.parse(readFileSync(resolve(root, 'data/locales/en.json'), 'utf8')).dialogue;
 const fixture = JSON.stringify({
   id: 'journal-layout-regression', title: 'Journal layout test', width: 11, height: 11,
   start: { floor: 1, x: 5, y: 5, hp: 100, attack: 10, defense: 5, gold: 0,
     inventory: ['wisdom_orb'] },
-  rules: { ...original.rules, stair_links: {}, floor_travel_callbacks: [] },
+  rules: { ...roomRules, stair_links: {}, floor_travel_callbacks: [] },
   floors: [{ id: 1, title: 'Journal room', tiles: Array(121).fill(6) }],
   tiles: { 6: original.tiles['6'], 8: original.tiles['8'], 37: original.tiles['37'] },
   enemies: {}, events: []

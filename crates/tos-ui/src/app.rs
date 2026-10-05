@@ -4552,6 +4552,7 @@ fn original_campaign_upgrade(source: &str) -> Option<&'static str> {
             "0ababefe999bbdfb",
             "ad358ec82db8b9ef",
             "c3e406503a26e7f9",
+            "abd9d284f2e9b303",
         ]
         .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
         {
@@ -4583,6 +4584,7 @@ fn restore_journey(engine: &mut Engine, source: &str) -> Result<Option<String>, 
         "0ababefe999bbdfb",
         "ad358ec82db8b9ef",
         "c3e406503a26e7f9",
+        "abd9d284f2e9b303",
     ]
     .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
     {
@@ -5168,11 +5170,11 @@ mod migration_tests {
         assert_eq!(engine.snapshot()["journal"], json!([]));
     }
     #[test]
-    fn animation_revision_migrates_the_previous_campaign_and_complete_save() {
+    fn mechanics_revision_migrates_the_previous_campaign_and_complete_save() {
         let mut engine = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
         let mut saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
         let fingerprint = saved["campaign_fingerprint"].clone();
-        saved["campaign_fingerprint"] = json!("ad358ec82db8b9ef");
+        saved["campaign_fingerprint"] = json!("abd9d284f2e9b303");
         saved["cycle"] = json!(2);
         saved["player"]["hp"] = json!(8123);
         saved["player"]["inventory"] = json!(["mattock", "hero_orb"]);

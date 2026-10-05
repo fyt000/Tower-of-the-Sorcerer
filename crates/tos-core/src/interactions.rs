@@ -2,58 +2,47 @@
 use crate::{
     Engine, Stat, TileDef, TileKind,
     events::{Effect, Offer, TriggerKind},
-    original::*,
 };
 use serde_json::{Value, json};
 
 impl Engine {
-    fn interaction_def(&self, floor: i32, x: usize, y: usize, def: &TileDef) -> TileDef {
-        let mut value =
-            serde_json::to_value(def).expect("TileDef contains JSON-serializable fields");
-        if let Some(local) = self.campaign.interactions.iter().find(|v| {
-            v["floor"].as_i64() == Some(i64::from(floor))
-                && v["x"].as_u64() == Some(x as u64)
-                && v["y"].as_u64() == Some(y as u64)
-        }) && let Some(object) = local.as_object()
-        {
-            for (key, entry) in object {
-                if !["floor", "x", "y"].contains(&key.as_str()) {
-                    value[key] = entry.clone();
-                }
-            }
-        }
-        // Import validates both the override and its merged tile definition;
-        // callers cannot mutate the campaign after Engine construction.
-        serde_json::from_value(value).expect("interaction override was validated at import")
+    fn interaction_def(
+        &self,
+        floor: i32,
+        x: usize,
+        y: usize,
+        def: &TileDef,
+    ) -> crate::content::InteractionView {
+        let tile = self
+            .tile_at(floor, x, y)
+            .expect("validated interaction location");
+        self.scripts.interaction_view(floor, x, y, tile, def)
     }
 
     fn altar_offers(&self, floor: i32) -> Vec<Offer> {
         let visits = self.state.shop_visits.get("altar").copied().unwrap_or(0);
         // Original quadratic pricing: base × (n² + n + 2).
-        let cost = self.campaign.rules["altar_base_cost"]
-            .as_i64()
-            .unwrap_or(ALTAR_BASE_COST)
-            .saturating_mul(
-                visits
-                    .saturating_mul(visits)
-                    .saturating_add(visits)
-                    .saturating_add(2),
-            );
+        let cost = self.rules.altar_base_cost.saturating_mul(
+            visits
+                .saturating_mul(visits)
+                .saturating_add(visits)
+                .saturating_add(2),
+        );
         let area = self.area_multiplier(floor);
         let cycle = self.cycle_multiplier();
-        let hp = self.campaign.rules["altar_hp_gain"]
-            .as_i64()
-            .unwrap_or(ALTAR_HP_GAIN)
+        let hp = self
+            .rules
+            .altar_hp_gain
             .saturating_mul(visits.saturating_add(1))
             .saturating_mul(cycle);
-        let attack = self.campaign.rules["altar_attack_gain"]
-            .as_i64()
-            .unwrap_or(ALTAR_ATTACK_GAIN)
+        let attack = self
+            .rules
+            .altar_attack_gain
             .saturating_mul(area)
             .saturating_mul(cycle);
-        let defense = self.campaign.rules["altar_defense_gain"]
-            .as_i64()
-            .unwrap_or(ALTAR_DEFENSE_GAIN)
+        let defense = self
+            .rules
+            .altar_defense_gain
             .saturating_mul(area)
             .saturating_mul(cycle);
         [
@@ -99,32 +88,17 @@ impl Engine {
                 json!({"id":offer.id_at(index),"label":format!("{} · {} gold",offer.label,cost),"cost":cost})
             }).chain(std::iter::once(json!({"id":"leave","label":"Continue"}))).collect();
         let after_text = def
-            .extra
-            .get("after_text")
-            .filter(|entry| {
-                entry["flag"]
-                    .as_str()
-                    .is_some_and(|flag| self.state.flags.contains(flag))
-            })
-            .and_then(|entry| entry["text"].as_str());
-        let text = after_text.unwrap_or(if def.text.is_empty() {
-            &def.description
+            .after_text
+            .as_ref()
+            .filter(|entry| self.state.flags.contains(&entry.flag))
+            .map(|entry| entry.text.as_str());
+        let text = after_text.unwrap_or(&def.text);
+        let dialogue_id = if after_text.is_some() {
+            def.dialogue_ids.last()
         } else {
-            &def.text
-        });
-        let dialogue_id = def
-            .extra
-            .get("dialogue_ids")
-            .and_then(Value::as_array)
-            .and_then(|ids| {
-                if after_text.is_some() {
-                    ids.last()
-                } else {
-                    ids.first()
-                }
-            })
-            .and_then(Value::as_u64)
-            .and_then(|id| u32::try_from(id).ok());
+            def.dialogue_ids.first()
+        }
+        .copied();
         self.record_journal(floor, x, y, &def.name, text, dialogue_id);
         self.state.pending_interaction =
             Some(json!({"title":def.name,"text":text,"choices":choices}));
@@ -145,12 +119,7 @@ impl Engine {
             if scripted_offers.is_empty() {
                 self.apply_effects(&effects);
                 self.run_events(TriggerKind::Interact, floor, x, y, Some(id));
-                if def
-                    .extra
-                    .get("disappear")
-                    .and_then(Value::as_bool)
-                    .unwrap_or(false)
-                {
+                if def.disappear {
                     self.clear(floor, x, y);
                 }
             }

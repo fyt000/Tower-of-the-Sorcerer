@@ -201,8 +201,18 @@ for f in [10,15,20,25,30,33,38,40,48,49]:
         p=probe(0x46cb1c,f,i%11,i//11)
         effects,stage,unknown=convert(p,f)
         stage[f*123+2+i]=6;effects.insert(0,tile_effect(f,i,6))
-        add(f'floor_{f}_encounter_{i}',{'type':'step','floor':f,'x':i%11,'y':i//11},effects,
-            source='Original ichicheck 0x46CB1C; ordered tile motion, sound and waits retained',unknown=unknown)
+        trigger={'type':'step','floor':f,'x':i%11,'y':i//11}
+        source='Original ichicheck 0x46CB1C; ordered tile motion, sound and waits retained'
+        if f==33 and i==53:
+            # tswKai Rev8 fixes the lower entrance softlock. Keep one event ID
+            # and once count for both entrances, and clear both trigger cells.
+            trigger={'type':'step','floor':f,'positions':[{'x':9,'y':4},{'x':9,'y':6}]}
+            guards=[(8,4),(10,4),(8,6),(10,6)]
+            remain={'type':'any','conditions':[tile_condition(f,y*11+x,RAW[f*123+2+y*11+x]) for x,y in guards]}
+            for effect in effects[1:]:effect['conditions']=[remain]
+            effects.insert(1,tile_effect(f,75,6))
+            source+='; tswKai Rev8: both entrances trigger once; already-cleared guard rooms stay open'
+        add(f'floor_{f}_encounter_{i}',trigger,effects,source=source,unknown=unknown)
         INITIAL_STAGES[f]=stage
 
 if __name__=='__main__':
@@ -340,8 +350,31 @@ if __name__=='__main__':
     p=probe(0x46cb1c,24,5,0)
     effects,_,unknown=convert(p,24)
     effects.insert(0,tile_effect(24,5,6))
+    # The second cycle shares the speeches but ends with Zeno moving down to
+    # the hero and forcing an enemy-first battle. Later cycles restore the
+    # full normalized row, rather than retaining the weakened 49F decoy.
+    for cycle,stats in [(2,(1000,625,125)),(3,(8000,5000,1000))]:
+        condition=[{'type':'cycle_at_least','amount':cycle}]
+        if cycle==2:condition.append({'type':'cycle_at_most','amount':2})
+        effects.insert(1,{'type':'set_enemy','enemy':'zeno','hp':stats[0],
+            'attack':stats[1],'defense':stats[2],'gold':500,'conditions':condition})
+    second=probe(0x46cb1c,24,5,0,globals=[(0x4b8904,43),(0x4b8908,0)])
+    second_effects,_,second_unknown=convert(second,24)
+    first_effects,_,_=convert(p,24)
+    # The extra retreat starts after the common narrative. A trailing wait
+    # can merge into the next wait, so compare through the final speech.
+    last_speech=max(i for i,e in enumerate(first_effects) if e['type']=='message')
+    assert second_effects[:last_speech+1]==first_effects[:last_speech+1]
+    effects.pop()  # Use the cycle-specific wait after the final speech below.
+    for effect in first_effects[last_speech+1:]:
+        effect['conditions']=[{'type':'any','conditions':[
+            {'type':'cycle_at_most','amount':1},{'type':'cycle_at_least','amount':3}]}]
+        effects.append(effect)
+    for effect in second_effects[last_speech+1:]:
+        effect['conditions']=[{'type':'cycle_at_least','amount':2},{'type':'cycle_at_most','amount':2}]
+        effects.append(effect)
     add('time_gate_to_floor_50',{'type':'step','floor':24,'x':5,'y':0,'tile':7},effects,
-        source='Original ichicheck floor-24 time gate; narrative scene before final Zeno interaction',unknown=unknown)
+        source='Original ichicheck floor-24 time gate; cycle-specific normalized Zeno row and second-cycle march/forced first-strike battle',unknown=unknown+second_unknown)
     for tile in [91,92]:
         add(f'floor_50_first_cycle_completion_{tile}',{'type':'bump','floor':50,'tile':tile},
             [{'type':'cinematic','kind':'victory','duration_ms':800},
@@ -350,13 +383,20 @@ if __name__=='__main__':
              {'type':'next_cycle'}],[{'type':'cycle_at_most','amount':1}],
             source='Original handan 0x4463A1..0x446473; first cycle has no battle, ending then opcode11/sub6 replay reset')
         add(f'floor_50_backside_zeno_stats_{tile}',{'type':'bump','floor':50,'tile':tile},
-            [{'type':'set_enemy','enemy':'zeno','hp':1000,'attack':625,'defense':125,'gold':500}],
+            [{'type':'set_enemy','enemy':'zeno','hp':1000,'attack':625,'defense':125,'gold':500,
+              'conditions':[{'type':'cycle_at_most','amount':2}]},
+             {'type':'set_enemy','enemy':'zeno','hp':8000,'attack':5000,'defense':1000,'gold':500,
+              'conditions':[{'type':'cycle_at_least','amount':3}]}],
             [{'type':'cycle_at_least','amount':2}],
-            source='Original handan 0x4463B3 sets normalized 1000/625/125 before second-cycle combat; retain stable base on later cycles to correct original double-scaling bug')
+            source='Original handan 0x4463B3: second-cycle 1000/625/125; ichicheck portal restores 8000/5000/1000 in later cycles; scaling occurs once at encounter resolution')
+        # Encounter preparation also runs after a blocked attack or an older
+        # save's encounter count, and never compounds a previously scaled row.
+        EVENTS[-1]['once']=False
     p=probe(0x4664e4,50,5,4,changes=[(50,5,4,6)],globals=[(0x4b8904,43)])
     effects,_,unknown=convert(p,50)
-    add('floor_50_backside_completion',{'type':'enemy_defeated','floor':50,'x':5,'y':4},effects,
-        [{'type':'cycle_at_least','amount':2}],source='Original moncheck floor50 0x46BFA8; combat victory ending and opcode11/sub6 replay reset',unknown=unknown)
+    add('floor_50_backside_completion',{'type':'enemy_defeated','floor':50},effects,
+        [{'type':'cycle_at_least','amount':2},{'type':'no_enemies','floor':50}],
+        source='Original moncheck floor50 0x46BFA8; both second-cycle ambush at (5,6) and later battle at (5,4) invoke ending and opcode11/sub6 replay reset',unknown=unknown)
 
     assert len({e['id'] for e in EVENTS}) == len(EVENTS), 'Duplicate event IDs'
     assert not any(e.get('untranslated_original_instructions') for e in EVENTS), 'Untranslated gameplay instruction'

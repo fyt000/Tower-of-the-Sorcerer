@@ -318,6 +318,71 @@ fn magic_hazards_apply_only_on_steps_and_sacred_shield_protects() {
 }
 
 #[test]
+fn sorcerer_pincers_halve_current_hp_only_between_opposing_cardinal_neighbors() {
+    for (neighbors, start, direction, halves) in [
+        (vec![(1, 2), (3, 2)], (2, 3), "up", true),
+        (vec![(2, 1), (2, 3)], (1, 2), "right", true),
+        (vec![(1, 2)], (2, 3), "up", false),
+        (vec![(1, 2), (2, 1)], (2, 3), "up", false),
+        (vec![(1, 1), (3, 3)], (2, 3), "up", false),
+    ] {
+        for hp in [1000, 1001, 1] {
+            for protected in [false, true] {
+                let mut value = fixture();
+                value["floors"][0]["tiles"] = json!(vec![6; 25]);
+                for &(x, y) in &neighbors {
+                    value["floors"][0]["tiles"][y * 5 + x] = json!(61);
+                }
+                value["enemies"]["slime"]["special"] = json!("sorcerer");
+                value["start"]["hp"] = json!(hp);
+                value["start"]["x"] = json!(start.0);
+                value["start"]["y"] = json!(start.1);
+                // A later, lower shield display must not remove protection.
+                value["start"]["inventory"] = if protected {
+                    json!(["sacred_shield", "shield_1"])
+                } else {
+                    json!([])
+                };
+                let mut engine = game(&value);
+                move_to(&mut engine, direction);
+                let expected = if halves && !protected { hp / 2 } else { hp };
+                assert_eq!(
+                    engine.player().hp,
+                    expected,
+                    "{neighbors:?} HP={hp} shield={protected}"
+                );
+                assert_eq!((engine.player().x, engine.player().y), (2, 2));
+                assert_eq!(
+                    engine.snapshot()["status"],
+                    if expected == 0 { "lost" } else { "playing" }
+                );
+                if protected {
+                    assert_eq!(engine.player().shield.as_deref(), Some("shield_1"));
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn rejected_move_into_a_pincer_never_applies_the_field_damage() {
+    let mut value = fixture();
+    value["floors"][0]["tiles"] = json!(vec![6; 25]);
+    for index in [11, 13] {
+        value["floors"][0]["tiles"][index] = json!(61);
+    }
+    value["floors"][0]["tiles"][12] = json!(8);
+    value["enemies"]["slime"]["special"] = json!("sorcerer");
+    value["start"]["x"] = json!(2);
+    value["start"]["y"] = json!(3);
+    let mut engine = game(&value);
+    let before = engine.save_json();
+    move_to(&mut engine, "up");
+    assert_eq!(engine.save_json(), before);
+    assert_eq!(engine.snapshot()["last_action"]["ok"], false);
+}
+
+#[test]
 fn noncombat_completion_is_inspected_as_a_character_and_never_fights() {
     let mut value = fixture();
     value["events"] = json!([{"id":"completion","trigger":{"type":"bump","floor":1,"x":3,"y":0,"tile":61},"effects":[{"type":"win"}]}]);

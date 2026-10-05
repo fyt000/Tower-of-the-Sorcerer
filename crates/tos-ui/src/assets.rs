@@ -164,7 +164,7 @@ impl Art {
     /// Install Chtableb's foreground silhouettes, including items, equipment,
     /// keys, NPCs and enemies. Both atlases use the same cell coordinates.
     pub fn install_background(&mut self, _ctx: &egui::Context, bytes: &[u8]) -> Result<(), String> {
-        let masks = image::load_from_memory(bytes)
+        let mut masks = image::load_from_memory(bytes)
             .map_err(|error| error.to_string())?
             .to_rgba8();
         if masks.width() < 440 || masks.height() < 40 {
@@ -172,6 +172,7 @@ impl Art {
                 "Original foreground mask atlas must contain 11 columns of 40px cells".into(),
             );
         }
+        correct_original_magician_masks(&mut masks);
         self.foreground_masks = Some(masks);
         self.foregrounds.clear();
         Ok(())
@@ -553,9 +554,47 @@ fn foreground_pixels(
     Some(pixels)
 }
 
+/// Original Data3/Chtableb.oz places both Magician A silhouettes one pixel
+/// left of their color cells. tswKai's patched atlas independently establishes
+/// the corrected positions. Match the original cells before shifting so a
+/// corrected or custom atlas cannot receive the offset twice.
+fn correct_original_magician_masks(masks: &mut image::RgbaImage) {
+    if masks.width() < 440 || masks.height() < 560 {
+        return;
+    }
+    for (tile, original_hash) in [(151, 0x2d913d1bcdfcfa04), (152, 0x71cda8cb38f62bec)] {
+        let (x, y) = ((tile - 1) % 11 * 40, (tile - 1) / 11 * 40);
+        if mask_fingerprint(masks, (x, y, 40, 40)) != original_hash {
+            continue;
+        }
+        for dy in 0..40 {
+            for dx in (1..40).rev() {
+                let pixel = *masks.get_pixel(x + dx - 1, y + dy);
+                masks.put_pixel(x + dx, y + dy, pixel);
+            }
+            masks.put_pixel(x, y + dy, image::Rgba([255; 4]));
+        }
+    }
+}
+
+fn mask_fingerprint(image: &image::RgbaImage, (x, y, w, h): (u32, u32, u32, u32)) -> u64 {
+    let mut hash: u64 = 0xcbf29ce484222325;
+    for dy in 0..h {
+        for dx in 0..w {
+            for byte in image.get_pixel(x + dx, y + dy).0 {
+                hash = (hash ^ u64::from(byte)).wrapping_mul(0x100000001b3);
+            }
+        }
+    }
+    hash
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{Art, foreground_pixels, stair_wipe_order, transition_pieces};
+    use super::{
+        Art, correct_original_magician_masks, foreground_pixels, mask_fingerprint,
+        stair_wipe_order, transition_pieces,
+    };
     use eframe::egui;
     use serde_json::json;
 
@@ -584,6 +623,59 @@ mod tests {
             ]
         );
         assert!(foreground_pixels(&colors, &masks, (0, 0, 3, 2)).is_none());
+    }
+
+    #[test]
+    fn original_magician_masks_match_upstream_artwork_after_correction_exactly_once() {
+        // Small bit-packed original silhouettes, independently recovered and
+        // compared with pinned tswKai artwork by audit_original_mechanics.py.
+        let evidence: serde_json::Value =
+            serde_json::from_str(include_str!("../../../data/original-mechanics-audit.json"))
+                .unwrap();
+        let mut masks = image::RgbaImage::from_pixel(440, 600, image::Rgba([255; 4]));
+        for entry in evidence["magician_masks"].as_array().unwrap() {
+            let tile = entry["tile"].as_u64().unwrap() as u32;
+            let (x, y) = ((tile - 1) % 11 * 40, (tile - 1) / 11 * 40);
+            for (dy, row) in entry["original_black_rows"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .enumerate()
+            {
+                let bits = u64::from_str_radix(row.as_str().unwrap(), 16).unwrap();
+                for dx in 0..40 {
+                    if bits & (1 << (39 - dx)) != 0 {
+                        masks.put_pixel(x + dx, y + dy as u32, image::Rgba([0, 0, 0, 255]));
+                    }
+                }
+            }
+            assert_eq!(
+                format!("{:016x}", mask_fingerprint(&masks, (x, y, 40, 40))),
+                entry["original_rgba_fnv"]
+            );
+        }
+        let original = masks.clone();
+        correct_original_magician_masks(&mut masks);
+        for entry in evidence["magician_masks"].as_array().unwrap() {
+            let tile = entry["tile"].as_u64().unwrap() as u32;
+            let (x, y) = ((tile - 1) % 11 * 40, (tile - 1) / 11 * 40);
+            assert_eq!(
+                format!("{:016x}", mask_fingerprint(&masks, (x, y, 40, 40))),
+                entry["corrected_rgba_fnv"]
+            );
+        }
+        let corrected = masks.clone();
+        correct_original_magician_masks(&mut masks);
+        assert_eq!(masks, corrected);
+        // A customized silhouette at a known cell must keep its own geometry.
+        let mut custom = original;
+        custom.put_pixel(280, 520, image::Rgba([128, 0, 0, 255]));
+        let before = image::imageops::crop_imm(&custom, 280, 520, 40, 40).to_image();
+        correct_original_magician_masks(&mut custom);
+        assert_eq!(
+            image::imageops::crop_imm(&custom, 280, 520, 40, 40).to_image(),
+            before
+        );
     }
 
     #[test]

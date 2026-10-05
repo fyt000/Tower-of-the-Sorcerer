@@ -144,11 +144,7 @@ pub(crate) fn validate_callbacks(campaign: &Campaign) -> Result<(), String> {
 
 impl Engine {
     pub(crate) fn apply_floor_travel_callbacks(&mut self, from: i32, to: i32, travel: FloorTravel) {
-        if from == to
-            || !self.campaign.rules["flying_original_selection"]
-                .as_bool()
-                .unwrap_or(false)
-        {
+        if from == to || !self.rules.flying_original_selection {
             return;
         }
         let highest = self.highest_stair_floor();

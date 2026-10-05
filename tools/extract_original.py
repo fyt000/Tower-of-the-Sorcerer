@@ -311,9 +311,9 @@ def original_interactions(map_bytes: bytes, dialogue: list[dict]) -> list[dict]:
         interactions.append({"floor": floor, "x": x, "y": y, "name": "Fairy",
                              "text": text[227], "dialogue_ids": [227], "offers": [], "effects": [], "disappear": True,
                              "source": "Original fairy 0x478F0C clears fairy on continue; score/rank overlay replaced by modern acknowledgement"})
-    interactions.append({"floor": 50, "x": 4, "y": 8, "name": "Thief", "text": "Talk to the thief to continue.",
+    interactions.append({"floor": 50, "x": 4, "y": 8, "name": "Thief", "text": text[263],
                          "dialogue_ids": [263], "offers": [], "effects": [], "disappear": False,
-                         "source": "Original touzoku floor-50 branch; dialogue/map effects live in events.json"})
+                         "source": "Original touzoku 0x465900 floor-50 branch queues dialogue 264 (zero-based 263), no map/stat effects"})
     return interactions
 
 
@@ -362,6 +362,7 @@ def build_campaign(map_bytes: bytes, monsters: list[dict], source_hash: str) -> 
                   "altar_hp_gain": 100, "lava_damage": 0, "cross_multiplier": 2, "dragon_slayer_multiplier": 2,
                   "flying_requires_stairs": True, "save_requires_hero_orb": True,
                   "flying_original_selection": True,
+                  "magician_retreat": {"floor": 47, "special": "magician_a", "bounds": "corrected"},
                   "floor_travel_callbacks": original_floor_travel_callbacks(),
                   "wall_break_tile_ranges": [[8, 8]],
                   "wisdom_dialogue_range": [62, 85],

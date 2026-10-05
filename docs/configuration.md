@@ -8,7 +8,7 @@ Required properties are `id`, `title`, `width`, `height`, `start`, `floors`, `ti
 
 `start` has `floor`, `x`, `y`, `hp`, `attack`, `defense`, `gold`, `keys: {yellow, blue, red}`, and `inventory: [item IDs]`. Optional `item_charges` is an object mapping item IDs to charge counts. Coordinates start at zero at the top left.
 
-Both `Engine::from_json` and the Rust constructor `Engine::new(Campaign)` validate the complete campaign before creating a session. JSON imports first decode the typed fields, then check geometry, references, rules, offers and scripts. Events, conditions and effects are compiled into Rust enums once; gameplay dispatches those enums. Browser, native, CLI and MCP use this same boundary.
+Both `Engine::from_json` and the Rust constructor `Engine::new(Campaign)` validate the complete campaign before creating a session. JSON imports first decode the typed fields, then check geometry, references, rules, offers and scripts. Supported rules, tile behavior, interaction overrides, events, conditions, effects and custom items compile once into Rust types. Gameplay consumes those compiled values. The authored JSON retains extension metadata and its stable fingerprint representation. Browser, native, CLI and MCP use this same boundary.
 
 Omitting a field with a documented default uses that default. Supplying a malformed value fails validation: `"hero_attacks_first": "false"` is a string and cannot become the Boolean default `true`; `"conditions": {}` cannot become an empty condition list. Integer fields require JSON integers, Boolean fields require `true` or `false`, and lists require arrays. Nullable optional references such as `target_floor` can use `null` to mean absent. Omitted `rules` is represented internally as `null`; supplied known properties inside a rules object must have their documented types.
 
@@ -67,6 +67,10 @@ Optional Boolean `footprint.clear_all` defaults to false. When true it clears ev
 
 The event engine is shared across browser, CLI, and MCP. Rules which describe presentation convenience or original evidence but are not consumed by the engine are metadata; do not assume that adding an arbitrary rule key changes behavior.
 
+`magician_retreat` is an optional object with required `floor` and `special`, and optional `bounds: "corrected" | "original"` (default `"corrected"`). Its floor must exist and `special` must be a supported `EnemySpecial` value. After a committed move, each adjacent matching enemy on that floor retreats one cell farther from the hero when the destination is the configured empty tile. Magic damage resolves first; Sacred Shield suppresses damage without suppressing retreat. The bundled setting is `{"floor":47,"special":"magician_a","bounds":"corrected"}`. Corrected bounds check x and y independently. Original bounds reproduce the historical row test and horizontal wrapping, while excluding any address outside the board. Omitting this rule disables retreat in custom campaigns.
+
+`presentation` can set integer `tile_transition_ms` and `combat_strike_ms` from 60 through 3000, and `floor_transition_ms` from 30 through 10000. These millisecond durations affect renderer messages without changing gameplay. The GUI also consumes its own optional `ambient_frame_ms` artwork setting, from 60 through 1000.
+
 ## NPCs and offers
 
 Tile definitions can include `text`, `description`, `offers`, `effects`, and `disappear`. Use `interactions` to override a particular NPC instance by position; this avoids changing every merchant that shares one original sprite.
@@ -117,6 +121,8 @@ An event includes optional `id`, `trigger`, optional `conditions`, required orde
 
 Triggers: `step`, `bump`, `door_opened`, `enter_floor`, `enemy_defeated`, and `interact`. Optional `floor`, `x`, `y`, and `tile` restrict the trigger. `bump` runs at the intended destination before collision handling, enabling scripted walls and concealed encounters. `door_opened` runs after a colored door consumes its key. `interact` occurs when the player acknowledges an NPC conversation. Events run in file order; an event is marked as executed before its effects, preventing recursive forced battles from repeating it.
 
+A trigger may use `positions: [{"x":9,"y":4},{"x":9,"y":6}]` instead of `x` or `y`. This nonempty array matches any listed position, with one shared event ID and once count. Each coordinate must lie within the map. Combining `positions` with either `x` or `y`, an empty array, or malformed entries is an import error. The floor-33 trap uses this to cover both entrances without separate once flags.
+
 Conditions are ANDed. Supported conditions are `flag` (with optional Boolean `value`, default true), `has_item`, `tile`, `no_enemies`, `stat_at_least` and `stat_at_most` (with `stat` and `amount`), `cycle_at_least` and `cycle_at_most` (with `amount`), and `any` (with an array of alternative `conditions`). A condition must match before the event's counter changes. Individual effects can also have a `conditions` array; this is used to preserve combat stats during the backside capture. Offers whose conditions fail are omitted; direct attempts to purchase them also fail. Purchased merchants can provide a different clue through `after_text: {flag, text}`.
 
 Trigger and condition objects have closed schemas: unknown fields are errors. Nested `any` conditions receive the same recursive type, coordinate and reference validation as top-level conditions. Cycle conditions accept `cycle` or its legacy alias `amount`, between 1 and 1000. Omitted condition lists mean no restrictions; supplied lists must be arrays, including at every nested level.
@@ -146,6 +152,8 @@ Effects:
 | `move_tile` | `floor`, `from_x`, `from_y`, `x`, `y`, optional `tile`, `duration_ms`: move one original sprite cell |
 
 Statistics are `hp`, `attack`, `defense`, `gold`, `yellow`, `blue`, and `red`. Forced battles can give the enemy an initial attack, matching original ambush sequences. Runtime enemy changes are session state and survive save/load. Any failed campaign validation reports an error before replacing a running browser session.
+
+For a `tile_reveal` cinematic, `floor`, `x`, `y`, `tile` and `from_tile` are compiled coordinates/tile IDs. At execution, `from_tile` is resolved from the current map, so a gate closed dynamically by an earlier event opens from its actual closed appearance. Other cinematic artwork fields remain extensible renderer metadata. The engine emits a typed ordered presentation timeline and serializes it for clients; animations never write gameplay state back into the engine.
 
 State-changing effect objects have closed operation fields, so misspellings such as `condition` or `vale` are rejected. `source` and `original_queue_id` remain accepted provenance fields. Numeric effect amounts are checked against the simulation bounds; multiply denominators must be positive, floor/tile/enemy references must exist, and positions must lie inside the map. A missing effect `floor` means the hero's current floor. A forced battle requires explicit `x` and `y` coordinates.
 

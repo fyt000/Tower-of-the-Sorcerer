@@ -81,8 +81,10 @@ Campaign construction has a similar boundary. `Engine::from_json` decodes the
 authored document; both it and `Engine::new(Campaign)` validate it before
 creating a playable session. `Campaign::validate` checks geometry, references,
 known rule types, bounds, merged interaction overrides and script fields.
-`CompiledScripts::compile` produces typed events, conditions, effects and
-offers. Gameplay matches those enums, along with `TileKind`, `EnemySpecial`,
+`Rules::compile` resolves supported options and defaults into typed runtime
+rules. `CompiledScripts::compile` produces typed events, conditions, effects,
+offers, custom items, tile behavior and location-specific conversation overrides.
+Gameplay matches those types, along with `TileKind`, `EnemySpecial`,
 `Stat`, `KeyColor` and the internal game status. The engine's campaign is private
 and available through a shared accessor. Editing constructs a new validated
 engine, keeping compiled behavior consistent with its source.
@@ -93,6 +95,8 @@ The source files follow these responsibilities:
 | --- | --- |
 | `tos-core/src/lib.rs` | Engine construction, command orchestration, inspection and tower cycles |
 | `campaign.rs` / `domain.rs` | Authored content, validation and closed gameplay vocabularies |
+| `rules.rs` | Compile combat, hazards, altar, item gates, travel, scaling and timing options once |
+| `content.rs` | Typed tile footprints, pickup scaling, stair direction and conversation overrides |
 | `command.rs` | Command decoding, validation, error type and MCP schema |
 | `observation.rs` | Player observations that preserve hidden-passage and puzzle discovery |
 | `events.rs` | Typed script representation, compilation, validation and execution |
@@ -100,23 +104,37 @@ The source files follow these responsibilities:
 | `interactions.rs` / `items.rs` | Conversations, purchases, original tools and custom item effects |
 | `stats.rs` | Exhaustive access and saturating mutation of player statistics |
 | `persistence.rs` | Save schema, atomic load validation and stable campaign fingerprint |
-| `presentation.rs` | Renderer messages describing committed gameplay results |
+| `presentation.rs` | Typed action results and ordered renderer messages for committed gameplay |
 | `original.rs` | Named, documented compatibility defaults from the original mechanics |
 
 JSON remains intentional for campaign authoring and editor round trips,
-extension metadata, save interchange, snapshots and presentation payloads.
+extension metadata, save interchange and observations. The original authored
+`Campaign.rules` and tile extensions remain intact for editing and campaign
+fingerprints. Runtime mechanics consume their compiled equivalents: there are
+no rule-key lookups during combat, movement, item use or purchases. Conversations
+resolve typed overrides instead of serializing, merging and reparsing a tile.
+
+`ActionResult` and the tagged `Presentation` enum cover dialogue, waits, audio,
+journal updates, movement, tile writes, floor changes, battles, magic damage and
+cinematics. Battle parameters and their resolved log facts use concrete types.
+Private runtime checkpoints retain these types; JSON is serialized at client
+and checkpoint boundaries. Version-1 save/checkpoint interchange stays compatible.
+The pending-conversation display envelope and journal entries still use JSON;
+their gameplay choices and effects execute compiled offers and scripts.
 Item IDs and flags remain strings so campaigns can define new resources and
 quest tags. Original built-in tools are selected by their existing item IDs;
-custom tools execute compiled effects. Cinematic payloads remain extensible
-because the renderer owns their extra fields; known fields still receive input
-validation. This avoids building a generic schema/plugin framework around a
-small game while removing dynamic decoding from gameplay script execution.
+custom tools execute compiled effects. Cinematic headers and tile-transition
+coordinates are typed; additional artwork fields remain renderer extensions.
+Sprite definitions, audio configuration and player-facing item descriptions are
+also presentation metadata. This keeps campaign extensions editable while
+removing dynamic decoding from gameplay execution. It is a content compiler and
+deterministic engine boundary, rather than a general-purpose plugin system.
 
 An omitted configurable rule may use its documented default. A supplied
 malformed rule fails import; for example, a condition object cannot become an
-empty list and silently pass. Core runtime code has no bare `unwrap()` calls.
-Remaining `expect`/assertions document internal invariants established by input
-validation or JSON-serializable concrete types. They do not recover by silently
+empty list and silently pass. Internal `expect`/assertions and observation
+envelope access document invariants established by input validation or
+JSON-serializable concrete types. They do not recover by silently
 discarding effects or replacing a bad interaction. Invalid cached/custom
 campaigns are preserved in recovery storage and reported by the UI before it
 loads the bundled fallback.

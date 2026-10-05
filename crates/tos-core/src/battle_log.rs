@@ -1,7 +1,6 @@
 //! Historical facts from resolved battles, associated with retained activities.
-use crate::{Engine, campaign::MAX_STAT, domain::GameStatus};
+use crate::{Engine, campaign::MAX_STAT, domain::GameStatus, presentation::Presentation};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -64,16 +63,18 @@ impl Engine {
         };
         // A self-contained effect lets animated views add only this battle's
         // completed record without copying future activities from the snapshot.
-        if let Some(effect) = self.last_action["presentation"]
-            .as_array_mut()
-            .and_then(|effects| effects.iter_mut().rev().find(|e| e["type"] == "battle"))
-        {
-            effect["log_id"] = json!(entry.log_id);
-            effect["damage"] = json!(entry.damage);
-            effect["reward"] = json!(entry.reward);
-            effect["hero_after_hp"] = json!(entry.hero_after_hp);
-            effect["activity"] = json!(self.state.log.last());
-            effect["battle_log"] = json!(entry);
+        if let Some(effect) = self.last_action.presentation.as_mut().and_then(|effects| {
+            effects.iter_mut().rev().find_map(|effect| match effect {
+                Presentation::Battle(battle) => Some(battle),
+                _ => None,
+            })
+        }) {
+            effect.log_id = Some(entry.log_id);
+            effect.damage = Some(entry.damage);
+            effect.reward = Some(entry.reward);
+            effect.hero_after_hp = Some(entry.hero_after_hp);
+            effect.activity = self.state.log.last().cloned();
+            effect.battle_log = Some(entry.clone());
         }
         self.state.battle_log.push(entry);
     }

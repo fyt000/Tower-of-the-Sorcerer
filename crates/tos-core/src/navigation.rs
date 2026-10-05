@@ -2,9 +2,8 @@
 use crate::domain::GameStatus;
 use crate::{
     EnemySpecial, Engine, KeyColor, Stat, TileKind, events::TriggerKind, forecast_with_rules,
-    original::*,
+    original::*, presentation::Presentation,
 };
-use serde_json::{Value, json};
 use std::collections::{BTreeMap, VecDeque};
 
 impl Engine {
@@ -142,7 +141,7 @@ impl Engine {
                     .enemy_for_tile(def.enemy.as_deref().ok_or("Enemy tile has no enemy")?, id)
                     .ok_or("Unknown enemy")?;
                 self.record_enemy_encounter(&enemy, floor, x, y, id);
-                let battle = forecast_with_rules(&self.state.player, &enemy, &self.campaign.rules);
+                let battle = forecast_with_rules(&self.state.player, &enemy, &self.rules);
                 let Some(damage) = battle.damage else {
                     return self.block(&battle.reason);
                 };
@@ -167,8 +166,8 @@ impl Engine {
                 let reward = battle.gold;
                 self.add_stat(Stat::Gold, reward);
                 self.clear(floor, x, y);
-                if def.extra.contains_key("footprint") {
-                    self.clear_large_monster(floor, &def, x, y);
+                if let Some(footprint) = self.scripts.tile_behavior(id).footprint.clone() {
+                    self.clear_large_monster(floor, &footprint, x, y);
                 }
                 self.log(format!(
                     "Defeated {}: −{} HP, +{} gold.",
@@ -189,12 +188,7 @@ impl Engine {
                     _ => Stat::Attack,
                 });
                 let mut amount = def.amount;
-                if def
-                    .extra
-                    .get("scaled")
-                    .and_then(Value::as_bool)
-                    .unwrap_or(false)
-                {
+                if self.scripts.tile_behavior(id).scaled {
                     amount = amount.saturating_mul(self.area_multiplier(floor));
                 }
                 if stat != "gold" {
@@ -220,15 +214,11 @@ impl Engine {
             }
             TileKind::StairsUp | TileKind::StairsDown | TileKind::Stairs => {
                 let up = def.kind == TileKind::StairsUp
-                    || def.extra.get("direction").and_then(Value::as_str) == Some("up");
-                let link = format!("{floor}:{}", if up { "up" } else { "down" });
+                    || self.scripts.tile_behavior(id).direction
+                        == Some(crate::content::StairDirection::Up);
                 let target = def
                     .target_floor
-                    .or_else(|| {
-                        self.campaign.rules["stair_links"][link]
-                            .as_i64()
-                            .map(|v| v as i32)
-                    })
+                    .or_else(|| self.rules.stair_links.get(&(floor, up)).copied())
                     .or_else(|| floor.checked_add(if up { 1 } else { -1 }));
                 let Some(target) = target else {
                     return self.block("The stairway goes no further.");
@@ -306,7 +296,7 @@ impl Engine {
                 | TileKind::Gold
                 | TileKind::Item
         ) {
-            self.present(json!({"type":"audio","name":"get"}));
+            self.present(Presentation::Audio { name: "get".into() });
         }
         self.run_events(
             TriggerKind::Step,
@@ -382,9 +372,7 @@ impl Engine {
             return;
         }
         let p = self.state.player.clone();
-        if p.inventory.iter().any(|s| s == "sacred_shield") {
-            return;
-        }
+        let protected = p.inventory.iter().any(|s| s == "sacred_shield");
         let special_at = |x: usize, y: usize| {
             self.tile_at(p.floor, x, y)
                 .and_then(|id| self.campaign.tiles[&id.to_string()].enemy.as_ref())
@@ -392,27 +380,25 @@ impl Engine {
                 .map(|e| e.special)
                 .unwrap_or_default()
         };
+        let neighbors: Vec<_> = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+            .into_iter()
+            .filter_map(|(dx, dy)| {
+                let (Some(x), Some(y)) = (p.x.checked_add_signed(dx), p.y.checked_add_signed(dy))
+                else {
+                    return None;
+                };
+                self.tile_at(p.floor, x, y)
+                    .map(|_| (x, y, dx, dy, special_at(x, y)))
+            })
+            .collect();
         let mut damage = 0;
-        for (x, y) in [
-            (p.x.wrapping_sub(1), p.y),
-            (p.x + 1, p.y),
-            (p.x, p.y.wrapping_sub(1)),
-            (p.x, p.y + 1),
-        ] {
-            damage += match special_at(x, y) {
+        for &(_, _, _, _, special) in &neighbors {
+            damage += match special {
                 EnemySpecial::MagicianA => {
-                    self.campaign.rules["magician_a_damage"]
-                        .as_i64()
-                        .unwrap_or(MAGICIAN_A_DAMAGE)
-                        .max(0)
-                        * self.cycle_multiplier()
+                    self.rules.magician_a_damage.max(0) * self.cycle_multiplier()
                 }
                 EnemySpecial::MagicianB => {
-                    self.campaign.rules["magician_b_damage"]
-                        .as_i64()
-                        .unwrap_or(MAGICIAN_B_DAMAGE)
-                        .max(0)
-                        * self.cycle_multiplier()
+                    self.rules.magician_b_damage.max(0) * self.cycle_multiplier()
                 }
                 _ => 0,
             };
@@ -424,6 +410,9 @@ impl Engine {
         {
             damage += (p.hp + 1) / 2;
         }
+        if protected {
+            damage = 0;
+        }
         if damage > 0 {
             self.present_magic_damage(p.floor, p.x, p.y, damage);
             self.state.player.hp = (self.state.player.hp - damage).max(0);
@@ -431,6 +420,43 @@ impl Engine {
         }
         if self.state.player.hp == 0 {
             self.state.status = GameStatus::Lost;
+            return;
+        }
+        // mazyutu1 (0x44c5c4): retreat follows the damage beat; the Sacred
+        // Shield suppresses damage, but its check occurs after retreat setup.
+        if let Some(retreat) = self.rules.magician_retreat.clone()
+            && retreat.floor == p.floor
+        {
+            for (x, y, dx, dy, special) in neighbors {
+                if special != retreat.special {
+                    continue;
+                }
+                let target = match retreat.bounds {
+                    crate::rules::RetreatBounds::Corrected => {
+                        p.x.checked_add_signed(dx * 2)
+                            .zip(p.y.checked_add_signed(dy * 2))
+                    }
+                    crate::rules::RetreatBounds::Original => {
+                        // Optional historical row wrapping, within the valid
+                        // board. Never reproduce writes past the map allocation.
+                        if p.y == 0 || p.y + 1 >= self.campaign.height {
+                            continue;
+                        }
+                        (p.y * self.campaign.width + p.x)
+                            .checked_add_signed(dx * 2 + dy * 2 * self.campaign.width as isize)
+                            .filter(|index| *index < self.campaign.width * self.campaign.height)
+                            .map(|index| (index % self.campaign.width, index / self.campaign.width))
+                    }
+                };
+                if let Some((tx, ty)) = target
+                    && self.tile_at(p.floor, tx, ty) == Some(self.empty_tile())
+                {
+                    self.present(Presentation::Audio { name: "get".into() });
+                    self.present(Presentation::Wait { duration_ms: 25 });
+                    self.move_tile(p.floor, (x, y), (tx, ty), 120);
+                    self.present(Presentation::Wait { duration_ms: 25 });
+                }
+            }
         }
     }
 }

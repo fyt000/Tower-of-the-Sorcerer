@@ -30,7 +30,8 @@ def main():
             x,y=index%11,index//11
             matches=[e['id'] for e in events if e['trigger']['type']=='step'
                      and e['trigger'].get('floor')==floor
-                     and e['trigger'].get('x')==x and e['trigger'].get('y')==y]
+                     and ((e['trigger'].get('x')==x and e['trigger'].get('y')==y)
+                          or {'x':x,'y':y} in e['trigger'].get('positions',[]))]
             assert matches,(floor,x,y,'Unconfigured original special road')
             address=0x46397c if floor in [3,23] else 0x46cb1c
             original=probe(address,floor,x,y,include_presentation=True)
