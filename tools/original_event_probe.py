@@ -1,8 +1,8 @@
 """Probe original v1.2 event builders without running the Windows UI.
 
 Requires pefile, capstone, and unicorn. Set TOS_ORIGINAL_EXE to override
-where the installed executable is read. This research tool skips calls;
-it reports every skipped target so helper semantics can be audited.
+where the installed executable is read. Calls are skipped unless explicitly
+whitelisted through follow_calls; followed and skipped targets are reported.
 """
 import json, struct, pathlib, sys, os
 import capstone, pefile, unicorn
@@ -14,7 +14,7 @@ md=capstone.Cs(capstone.CS_ARCH_X86,capstone.CS_MODE_32)
 MAP=0x4b8934
 RAW=(ROOT/'data/original-map-bytes.bin').read_bytes()
 
-def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presentation=False,registers=()):
+def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presentation=False,registers=(),follow_calls=()):
     u=unicorn.Uc(unicorn.UC_ARCH_X86,unicorn.UC_MODE_32)
     u.mem_map(0,0x300000); u.mem_map(0x400000,0x300000)
     u.mem_write(0x400000,pe.get_memory_mapped_image())
@@ -31,7 +31,7 @@ def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presenta
     for address,value in globals:u.mem_write(address,struct.pack('<I',value))
     initial=bytes(u.mem_read(MAP,len(RAW)))
     initial_monsters=bytes(u.mem_read(0x489910,528))
-    read=set(); skipped=set();cache={}
+    read=set(); skipped=set();followed=set();cache={}
     def mem(uc,access,a,size,value,data):
         if MAP<=a<MAP+6273:read.add(a-MAP)
     def hook(uc,a,size,data):
@@ -39,6 +39,9 @@ def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presenta
         ins=cache.setdefault(a,next(md.disasm(bytes(uc.mem_read(a,size)),a),None))
         if ins and ins.mnemonic=='call':
             target=ins.op_str
+            if target.startswith('0x') and int(target,16) in follow_calls:
+                followed.add(target)
+                return
             skipped.add(target)
             uc.reg_write(UC_X86_REG_EIP,a+size)
     u.hook_add(unicorn.UC_HOOK_CODE,hook)
@@ -54,7 +57,7 @@ def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presenta
             'stat_slots':list(struct.unpack('<32I',u.mem_read(0x4b8688,128))),
             'cycle_factor_minus_one':struct.unpack('<I',u.mem_read(0x4b8904,4))[0],
             'later_cycle_flag':struct.unpack('<I',u.mem_read(0x4b8908,4))[0],
-            'calls':sorted(skipped)}
+            'calls':sorted(skipped),'followed_calls':sorted(followed)}
 
 if __name__=='__main__':
     addr=int(sys.argv[1],0); f=int(sys.argv[2]);x=int(sys.argv[3]) if len(sys.argv)>3 else 0;y=int(sys.argv[4]) if len(sys.argv)>4 else 0

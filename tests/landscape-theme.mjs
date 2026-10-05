@@ -283,6 +283,27 @@ try {
           // A usable inventory cell can dispatch only its item action.
           bounds = (await ui(page)).bounds;
           await activate(page, bounds['item:super_mattock'], touch);
+          // The restored Super Mattock plays every wall's collapse. This is
+          // an inventory/layout test: verify the animation begins, then use
+          // the real Skip control rather than waiting for the whole floor.
+          await page.waitForFunction(() => {
+            const u = JSON.parse(window.tower.ui_json());
+            return u.animation_effect?.style === 'wall_collapse' && u.bounds.skip;
+          }, undefined, { timeout: 10000 });
+          if (!landscape) await revealBoard(page, context, viewport, touch);
+          for (let attempt = 0; attempt < 3 && !inside((await ui(page)).bounds.skip, viewport); attempt++) {
+            if (touch) {
+              const cdp = await context.newCDPSession(page);
+              await touchDrag(cdp, { x: 12, y: viewport.height - 90 }, { x: 12, y: viewport.height - 240 });
+              await cdp.detach();
+            } else {
+              await page.mouse.move(12, viewport.height - 80);
+              await page.mouse.wheel(0, 160);
+            }
+            await page.waitForTimeout(150);
+          }
+          assert(inside((await ui(page)).bounds.skip, viewport), 'Skip for the restored wall sequence stays reachable');
+          await activate(page, (await ui(page)).bounds.skip, touch);
           await idle(page);
           snapshot = await state(page);
           assert(!snapshot.player.inventory.includes('super_mattock'), 'Visible consumable can be activated');

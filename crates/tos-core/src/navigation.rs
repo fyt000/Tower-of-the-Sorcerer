@@ -307,8 +307,6 @@ impl Engine {
                 | TileKind::Item
         ) {
             self.present(json!({"type":"audio","name":"get"}));
-        } else if def.kind == TileKind::Door {
-            self.present(json!({"type":"audio","name":"open"}));
         }
         self.run_events(
             TriggerKind::Step,
@@ -427,6 +425,7 @@ impl Engine {
             damage += (p.hp + 1) / 2;
         }
         if damage > 0 {
+            self.present_magic_damage(p.floor, p.x, p.y, damage);
             self.state.player.hp = (self.state.player.hp - damage).max(0);
             self.log(format!("Magic field: −{damage} HP."));
         }

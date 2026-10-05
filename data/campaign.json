@@ -9555,6 +9555,23 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "wall_collapse",
+          "floor": 2,
+          "x": 1,
+          "y": 6,
+          "from_tile": 8,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 7,
+          "original_steps": 16
+        },
+        {
           "type": "set_tile",
           "floor": 2,
           "x": 1,
@@ -9589,6 +9606,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "get"
+        },
+        {
           "type": "set_tile",
           "floor": 12,
           "x": 10,
@@ -9611,6 +9632,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "get"
+        },
+        {
           "type": "set_tile",
           "floor": 16,
           "x": 10,
@@ -9632,6 +9657,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "get"
+        },
         {
           "type": "set_tile",
           "floor": 19,
@@ -9668,13 +9697,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "wall_collapse",
           "floor": 15,
           "x": 7,
           "y": 0,
           "from_tile": 8,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 7,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -9866,13 +9915,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_close",
           "floor": 10,
           "x": 5,
           "y": 2,
           "from_tile": 6,
           "tile": 4,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 5,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -9892,13 +9961,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_close",
           "floor": 10,
           "x": 5,
           "y": 6,
           "from_tile": 6,
           "tile": 4,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 5,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -9918,13 +10007,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 10,
           "x": 3,
           "y": 3,
           "from_tile": 4,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -9944,13 +10053,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 10,
           "x": 7,
           "y": 3,
           "from_tile": 4,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -10850,13 +10979,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_close",
           "floor": 10,
           "x": 3,
           "y": 3,
           "from_tile": 6,
           "tile": 4,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 5,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -10876,13 +11025,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_close",
           "floor": 10,
           "x": 7,
           "y": 3,
           "from_tile": 6,
           "tile": 4,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 5,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -10927,13 +11096,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_close",
           "floor": 15,
           "x": 5,
           "y": 8,
           "from_tile": 6,
           "tile": 4,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 5,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -10978,13 +11167,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_close",
           "floor": 20,
           "x": 5,
           "y": 8,
           "from_tile": 3,
           "tile": 4,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 5,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -11166,13 +11375,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_close",
           "floor": 25,
           "x": 5,
           "y": 9,
           "from_tile": 3,
           "tile": 4,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 5,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -11227,13 +11456,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_close",
           "floor": 30,
           "x": 5,
           "y": 3,
           "from_tile": 6,
           "tile": 4,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 5,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -11253,13 +11502,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_close",
           "floor": 30,
           "x": 5,
           "y": 6,
           "from_tile": 6,
           "tile": 4,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 5,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -11304,13 +11573,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_close",
           "floor": 33,
           "x": 9,
           "y": 3,
           "from_tile": 6,
           "tile": 4,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 5,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -11330,13 +11619,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_close",
           "floor": 33,
           "x": 9,
           "y": 7,
           "from_tile": 6,
           "tile": 4,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 5,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -11381,13 +11690,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "wall_rise",
           "floor": 33,
           "x": 7,
           "y": 9,
           "from_tile": 6,
           "tile": 8,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 8,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -11436,13 +11765,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "wall_rise",
           "floor": 38,
           "x": 1,
           "y": 4,
           "from_tile": 6,
           "tile": 8,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 8,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -11491,13 +11840,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_close",
           "floor": 40,
           "x": 5,
           "y": 7,
           "from_tile": 3,
           "tile": 4,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 5,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -12872,13 +13241,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 40,
           "x": 5,
           "y": 7,
           "from_tile": 4,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -13347,13 +13736,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_close",
           "floor": 49,
           "x": 5,
           "y": 6,
           "from_tile": 4,
           "tile": 4,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 5,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -13558,11 +13967,93 @@
       ],
       "effects": [
         {
+          "type": "wait",
+          "ms": 50
+        },
+        {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "prison_open",
+          "floor": 2,
+          "x": 4,
+          "y": 4,
+          "from_tile": 5,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 6,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
           "type": "set_tile",
           "floor": 2,
           "x": 4,
           "y": 4,
           "tile": 6
+        },
+        {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "prison_open",
+          "floor": 2,
+          "x": 8,
+          "y": 4,
+          "from_tile": 5,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 6,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -13572,6 +14063,45 @@
           "tile": 6
         },
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "prison_open",
+          "floor": 2,
+          "x": 4,
+          "y": 7,
+          "from_tile": 5,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 6,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
           "type": "set_tile",
           "floor": 2,
           "x": 4,
@@ -13579,11 +14109,89 @@
           "tile": 6
         },
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "prison_open",
+          "floor": 2,
+          "x": 8,
+          "y": 7,
+          "from_tile": 5,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 6,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
           "type": "set_tile",
           "floor": 2,
           "x": 8,
           "y": 7,
           "tile": 6
+        },
+        {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "prison_open",
+          "floor": 2,
+          "x": 4,
+          "y": 10,
+          "from_tile": 5,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 6,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -13591,6 +14199,45 @@
           "x": 4,
           "y": 10,
           "tile": 6
+        },
+        {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "prison_open",
+          "floor": 2,
+          "x": 8,
+          "y": 10,
+          "from_tile": 5,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 6,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -13600,7 +14247,7 @@
           "tile": 6
         }
       ],
-      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation"
     },
     {
       "id": "floor_8_guards_0",
@@ -13627,6 +14274,49 @@
       ],
       "effects": [
         {
+          "type": "wait",
+          "ms": 50
+        },
+        {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "gate_open",
+          "floor": 8,
+          "x": 9,
+          "y": 3,
+          "from_tile": 4,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
           "type": "set_tile",
           "floor": 8,
           "x": 9,
@@ -13634,7 +14324,7 @@
           "tile": 6
         }
       ],
-      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation"
     },
     {
       "id": "floor_11_guards_0",
@@ -13661,6 +14351,49 @@
       ],
       "effects": [
         {
+          "type": "wait",
+          "ms": 50
+        },
+        {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "gate_open",
+          "floor": 11,
+          "x": 1,
+          "y": 3,
+          "from_tile": 4,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
           "type": "set_tile",
           "floor": 11,
           "x": 1,
@@ -13668,7 +14401,7 @@
           "tile": 6
         }
       ],
-      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation"
     },
     {
       "id": "floor_14_guards_0",
@@ -13702,14 +14435,30 @@
       ],
       "effects": [
         {
+          "type": "wait",
+          "ms": 50
+        },
+        {
+          "type": "sound",
+          "cue": "get"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
           "type": "set_tile",
           "floor": 14,
           "x": 0,
           "y": 2,
           "tile": 30
+        },
+        {
+          "type": "wait",
+          "ms": 25
         }
       ],
-      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation"
     },
     {
       "id": "floor_17_guards_0",
@@ -13736,6 +14485,49 @@
       ],
       "effects": [
         {
+          "type": "wait",
+          "ms": 50
+        },
+        {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "gate_open",
+          "floor": 17,
+          "x": 1,
+          "y": 3,
+          "from_tile": 4,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
           "type": "set_tile",
           "floor": 17,
           "x": 1,
@@ -13743,7 +14535,7 @@
           "tile": 6
         }
       ],
-      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation"
     },
     {
       "id": "floor_17_guards_1",
@@ -13770,6 +14562,49 @@
       ],
       "effects": [
         {
+          "type": "wait",
+          "ms": 50
+        },
+        {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "gate_open",
+          "floor": 17,
+          "x": 9,
+          "y": 3,
+          "from_tile": 4,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
           "type": "set_tile",
           "floor": 17,
           "x": 9,
@@ -13777,7 +14612,7 @@
           "tile": 6
         }
       ],
-      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation"
     },
     {
       "id": "floor_17_guards_2",
@@ -13804,6 +14639,49 @@
       ],
       "effects": [
         {
+          "type": "wait",
+          "ms": 50
+        },
+        {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "gate_open",
+          "floor": 17,
+          "x": 1,
+          "y": 6,
+          "from_tile": 4,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
           "type": "set_tile",
           "floor": 17,
           "x": 1,
@@ -13811,7 +14689,7 @@
           "tile": 6
         }
       ],
-      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation"
     },
     {
       "id": "floor_17_guards_3",
@@ -13838,6 +14716,49 @@
       ],
       "effects": [
         {
+          "type": "wait",
+          "ms": 50
+        },
+        {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "gate_open",
+          "floor": 17,
+          "x": 9,
+          "y": 6,
+          "from_tile": 4,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
           "type": "set_tile",
           "floor": 17,
           "x": 9,
@@ -13845,7 +14766,7 @@
           "tile": 6
         }
       ],
-      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation"
     },
     {
       "id": "floor_32_guards_0",
@@ -13872,6 +14793,49 @@
       ],
       "effects": [
         {
+          "type": "wait",
+          "ms": 50
+        },
+        {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "gate_open",
+          "floor": 32,
+          "x": 1,
+          "y": 8,
+          "from_tile": 4,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
           "type": "set_tile",
           "floor": 32,
           "x": 1,
@@ -13879,7 +14843,7 @@
           "tile": 6
         }
       ],
-      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation"
     },
     {
       "id": "floor_34_guards_0",
@@ -13948,6 +14912,18 @@
       ],
       "effects": [
         {
+          "type": "wait",
+          "ms": 50
+        },
+        {
+          "type": "sound",
+          "cue": "get"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
           "type": "set_tile",
           "floor": 34,
           "x": 1,
@@ -13955,11 +14931,35 @@
           "tile": 30
         },
         {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "sound",
+          "cue": "get"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
           "type": "set_tile",
           "floor": 34,
           "x": 0,
           "y": 4,
           "tile": 29
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "sound",
+          "cue": "get"
+        },
+        {
+          "type": "wait",
+          "ms": 25
         },
         {
           "type": "set_tile",
@@ -13969,6 +14969,18 @@
           "tile": 29
         },
         {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "sound",
+          "cue": "get"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
           "type": "set_tile",
           "floor": 34,
           "x": 0,
@@ -13976,14 +14988,30 @@
           "tile": 29
         },
         {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "sound",
+          "cue": "get"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
           "type": "set_tile",
           "floor": 34,
           "x": 2,
           "y": 6,
           "tile": 29
+        },
+        {
+          "type": "wait",
+          "ms": 25
         }
       ],
-      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation"
     },
     {
       "id": "floor_35_guards_0",
@@ -14003,11 +15031,62 @@
       ],
       "effects": [
         {
+          "type": "wait",
+          "ms": 50
+        },
+        {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "gate_open",
+          "floor": 35,
+          "x": 5,
+          "y": 2,
+          "from_tile": 4,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
           "type": "set_tile",
           "floor": 35,
           "x": 5,
           "y": 2,
           "tile": 6
+        },
+        {
+          "type": "sound",
+          "cue": "get"
+        },
+        {
+          "type": "wait",
+          "ms": 25
         },
         {
           "type": "set_tile",
@@ -14017,11 +15096,35 @@
           "tile": 47
         },
         {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "sound",
+          "cue": "get"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
           "type": "set_tile",
           "floor": 35,
           "x": 4,
           "y": 4,
           "tile": 33
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "sound",
+          "cue": "get"
+        },
+        {
+          "type": "wait",
+          "ms": 25
         },
         {
           "type": "set_tile",
@@ -14031,14 +15134,30 @@
           "tile": 33
         },
         {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "sound",
+          "cue": "get"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
           "type": "set_tile",
           "floor": 35,
           "x": 6,
           "y": 4,
           "tile": 33
+        },
+        {
+          "type": "wait",
+          "ms": 25
         }
       ],
-      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation"
     },
     {
       "id": "floor_38_guards_0",
@@ -14072,7 +15191,7 @@
           "tile": 9
         }
       ],
-      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation"
     },
     {
       "id": "floor_44_guards_0",
@@ -14099,6 +15218,49 @@
       ],
       "effects": [
         {
+          "type": "wait",
+          "ms": 50
+        },
+        {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "gate_open",
+          "floor": 44,
+          "x": 5,
+          "y": 7,
+          "from_tile": 4,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
           "type": "set_tile",
           "floor": 44,
           "x": 5,
@@ -14106,7 +15268,7 @@
           "tile": 6
         }
       ],
-      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation"
     },
     {
       "id": "floor_45_guards_0",
@@ -14133,6 +15295,49 @@
       ],
       "effects": [
         {
+          "type": "wait",
+          "ms": 50
+        },
+        {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "gate_open",
+          "floor": 45,
+          "x": 3,
+          "y": 9,
+          "from_tile": 4,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
           "type": "set_tile",
           "floor": 45,
           "x": 3,
@@ -14140,7 +15345,7 @@
           "tile": 6
         }
       ],
-      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation"
     },
     {
       "id": "floor_45_guards_1",
@@ -14167,6 +15372,49 @@
       ],
       "effects": [
         {
+          "type": "wait",
+          "ms": 50
+        },
+        {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
+          "type": "wait",
+          "ms": 25
+        },
+        {
+          "type": "cinematic",
+          "kind": "tile_reveal",
+          "style": "gate_open",
+          "floor": 45,
+          "x": 6,
+          "y": 9,
+          "from_tile": 4,
+          "tile": 6,
+          "duration_ms": 400,
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
           "type": "set_tile",
           "floor": 45,
           "x": 6,
@@ -14174,7 +15422,7 @@
           "tile": 6
         }
       ],
-      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation"
+      "source": "Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation"
     },
     {
       "id": "floor_10_guards_defeated",
@@ -14274,13 +15522,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 10,
           "x": 5,
           "y": 2,
           "from_tile": 4,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -14343,13 +15611,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 10,
           "x": 3,
           "y": 3,
           "from_tile": 4,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -14369,13 +15657,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 10,
           "x": 7,
           "y": 3,
           "from_tile": 4,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -14395,13 +15703,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 10,
           "x": 5,
           "y": 6,
           "from_tile": 4,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -14736,13 +16064,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 15,
           "x": 5,
           "y": 2,
           "from_tile": 4,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -14762,13 +16110,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 15,
           "x": 5,
           "y": 8,
           "from_tile": 4,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -14901,13 +16269,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 20,
           "x": 5,
           "y": 2,
           "from_tile": 4,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -14927,13 +16315,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 20,
           "x": 5,
           "y": 8,
           "from_tile": 4,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -15260,13 +16668,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 25,
           "x": 5,
           "y": 9,
           "from_tile": 4,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -15473,13 +16901,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 30,
           "x": 5,
           "y": 3,
           "from_tile": 4,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -15499,13 +16947,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 30,
           "x": 5,
           "y": 6,
           "from_tile": 4,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -15596,13 +17064,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 33,
           "x": 9,
           "y": 3,
           "from_tile": 6,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -15622,13 +17110,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 33,
           "x": 9,
           "y": 7,
           "from_tile": 6,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -15710,6 +17218,10 @@
       ],
       "effects": [
         {
+          "type": "sound",
+          "cue": "get"
+        },
+        {
           "type": "set_tile",
           "floor": 39,
           "x": 3,
@@ -15789,6 +17301,10 @@
       ],
       "effects": [
         {
+          "type": "sound",
+          "cue": "get"
+        },
+        {
           "type": "set_tile",
           "floor": 39,
           "x": 3,
@@ -15818,6 +17334,10 @@
         }
       ],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "get"
+        },
         {
           "type": "set_tile",
           "floor": 41,
@@ -16052,13 +17572,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "wall_rise",
           "floor": 43,
           "x": 6,
           "y": 0,
           "from_tile": 1,
           "tile": 8,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 8,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -16082,13 +17622,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "wall_rise",
           "floor": 43,
           "x": 9,
           "y": 0,
           "from_tile": 6,
           "tile": 8,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 8,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -16300,13 +17860,33 @@
         {
           "type": "cinematic",
           "kind": "tile_reveal",
+          "style": "gate_open",
           "floor": 49,
           "x": 5,
           "y": 6,
           "from_tile": 4,
           "tile": 6,
           "duration_ms": 400,
-          "original_steps": 16
+          "original_mode": 4,
+          "original_steps": 16,
+          "original_frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
         },
         {
           "type": "set_tile",
@@ -16630,6 +18210,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 1,
@@ -16650,6 +18234,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -16672,6 +18260,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 3,
@@ -16692,6 +18284,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -16714,6 +18310,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 1,
@@ -16734,6 +18334,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -16756,6 +18360,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 3,
@@ -16776,6 +18384,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -16798,6 +18410,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 7,
@@ -16818,6 +18434,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -16840,6 +18460,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 9,
@@ -16860,6 +18484,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -16882,6 +18510,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 4,
@@ -16902,6 +18534,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -16924,6 +18560,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 9,
@@ -16944,6 +18584,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -16966,6 +18610,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 2,
@@ -16986,6 +18634,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -17008,6 +18660,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 4,
@@ -17028,6 +18684,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -17050,6 +18710,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 8,
@@ -17070,6 +18734,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -17092,6 +18760,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 1,
@@ -17112,6 +18784,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -17134,6 +18810,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 3,
@@ -17154,6 +18834,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -17176,6 +18860,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 6,
@@ -17196,6 +18884,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -17218,6 +18910,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 8,
@@ -17238,6 +18934,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -17260,6 +18960,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 1,
@@ -17280,6 +18984,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -17302,6 +19010,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 6,
@@ -17322,6 +19034,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -17344,6 +19060,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 4,
@@ -17364,6 +19084,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -17386,6 +19110,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 7,
@@ -17406,6 +19134,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -17428,6 +19160,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 1,
@@ -17448,6 +19184,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -17470,6 +19210,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 3,
@@ -17490,6 +19234,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,
@@ -17512,6 +19260,10 @@
       "conditions": [],
       "effects": [
         {
+          "type": "sound",
+          "cue": "open"
+        },
+        {
           "type": "set_tile",
           "floor": 23,
           "x": 6,
@@ -17532,6 +19284,10 @@
       },
       "conditions": [],
       "effects": [
+        {
+          "type": "sound",
+          "cue": "open"
+        },
         {
           "type": "set_tile",
           "floor": 23,

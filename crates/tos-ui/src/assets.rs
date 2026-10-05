@@ -279,6 +279,8 @@ impl Art {
         };
         let phase = (frame % 2) as u64;
         let selected = match tile {
+            // imagework only animates the eye half of the two-cell altar.
+            16 | 18 => 16 + phase * 2,
             13 | 160 => {
                 if phase == 0 {
                     13
@@ -335,6 +337,133 @@ impl Art {
         );
         painter.image(atlas.id(), rect, uv, tint);
         true
+    }
+
+    /// Opcode 13's original copy-rectangle movements. Splitting a door into
+    /// halves, a sealed gate into quadrants, and moving brick vertically avoids
+    /// treating every operation in the misleadingly named dooropen as a door.
+    pub fn tile_transition(
+        &self,
+        painter: &egui::Painter,
+        rect: egui::Rect,
+        from: &serde_json::Value,
+        to: &serde_json::Value,
+        style: &str,
+        progress: f32,
+    ) {
+        let closing = matches!(
+            style,
+            "gate_close"
+                | "wall_rise"
+                | "lava_open_up"
+                | "lava_open_down"
+                | "lava_open_left"
+                | "lava_open_right"
+        );
+        self.tile(
+            painter,
+            rect,
+            if closing { from } else { to },
+            egui::Color32::WHITE,
+        );
+        for (clip, offset) in transition_pieces(rect, style, progress) {
+            if clip.is_positive() {
+                self.tile(
+                    &painter.with_clip_rect(clip.intersect(painter.clip_rect())),
+                    rect.translate(offset),
+                    if closing { to } else { from },
+                    egui::Color32::WHITE,
+                );
+            }
+        }
+    }
+}
+
+fn transition_pieces(
+    rect: egui::Rect,
+    style: &str,
+    progress: f32,
+) -> Vec<(egui::Rect, egui::Vec2)> {
+    let amount = (progress.clamp(0.0, 1.0) * 16.0).floor() / 16.0;
+    let amount = if matches!(style, "gate_close" | "wall_rise") {
+        1.0 - amount
+    } else {
+        amount
+    };
+    let piece =
+        |source: egui::Rect, offset: egui::Vec2| (source.translate(offset).intersect(rect), offset);
+    match style {
+        "gate_open" | "gate_close" => [-1.0, 1.0]
+            .into_iter()
+            .flat_map(|horizontal| {
+                [-1.0, 1.0].into_iter().map(move |vertical| {
+                    let min = egui::pos2(
+                        if horizontal < 0.0 {
+                            rect.min.x
+                        } else {
+                            rect.center().x
+                        },
+                        if vertical < 0.0 {
+                            rect.min.y
+                        } else {
+                            rect.center().y
+                        },
+                    );
+                    piece(
+                        egui::Rect::from_min_size(min, rect.size() * 0.5),
+                        egui::vec2(
+                            horizontal * rect.width() * amount * 0.5,
+                            vertical * rect.height() * amount * 0.5,
+                        ),
+                    )
+                })
+            })
+            .collect(),
+        "wall_collapse" | "wall_rise" => {
+            vec![piece(rect, egui::vec2(0.0, rect.height() * amount))]
+        }
+        "prison_open" => {
+            vec![piece(rect, egui::vec2(0.0, -rect.height() * amount))]
+        }
+        "lava_open_right" => vec![piece(rect, egui::vec2(rect.width() * (1.0 - amount), 0.0))],
+        "lava_open_left" => vec![(
+            egui::Rect::from_min_max(
+                rect.min,
+                egui::pos2(rect.min.x + rect.width() * amount, rect.max.y),
+            ),
+            egui::Vec2::ZERO,
+        )],
+        "lava_open_up" => vec![(
+            egui::Rect::from_min_max(
+                rect.min,
+                egui::pos2(rect.max.x, rect.min.y + rect.height() * amount),
+            ),
+            egui::Vec2::ZERO,
+        )],
+        "lava_open_down" => vec![(
+            egui::Rect::from_min_max(
+                egui::pos2(rect.min.x, rect.max.y - rect.height() * amount),
+                rect.max,
+            ),
+            egui::Vec2::ZERO,
+        )],
+        _ => [-1.0, 1.0]
+            .into_iter()
+            .map(|horizontal| {
+                let min = egui::pos2(
+                    if horizontal < 0.0 {
+                        rect.min.x
+                    } else {
+                        rect.center().x
+                    },
+                    rect.min.y,
+                );
+                piece(
+                    egui::Rect::from_min_size(min, egui::vec2(rect.width() * 0.5, rect.height())),
+                    egui::vec2(horizontal * rect.width() * amount * 0.5, 0.0),
+                )
+            })
+            .collect(),
     }
 }
 
@@ -426,7 +555,8 @@ fn foreground_pixels(
 
 #[cfg(test)]
 mod tests {
-    use super::{Art, foreground_pixels, stair_wipe_order};
+    use super::{Art, foreground_pixels, stair_wipe_order, transition_pieces};
+    use eframe::egui;
     use serde_json::json;
 
     #[test]
@@ -473,7 +603,14 @@ mod tests {
 
     #[test]
     fn original_animation_selects_frames_without_replacing_custom_artwork() {
-        for (first, second) in [(19, 20), (61, 62), (97, 106), (122, 131), (157, 158)] {
+        for (first, second) in [
+            (16, 18),
+            (19, 20),
+            (61, 62),
+            (97, 106),
+            (122, 131),
+            (157, 158),
+        ] {
             assert_eq!(Art::animated_sprite(&json!(first), 1), json!(second));
             assert_eq!(Art::animated_sprite(&json!(second), 0), json!(first));
         }
@@ -484,5 +621,77 @@ mod tests {
         );
         let custom = json!({"x":12,"y":12,"w":48,"h":48});
         assert_eq!(Art::animated_sprite(&custom, 1), custom);
+        assert_eq!(Art::animated_sprite(&json!(15), 1), json!(15));
+        assert_eq!(Art::animated_sprite(&json!(17), 1), json!(17));
+        assert_eq!(
+            Art::animated_sprite(&json!({"x":160,"y":40,"w":40,"h":40}), 1),
+            json!({"x":240,"y":40,"w":40,"h":40})
+        );
+    }
+
+    #[test]
+    fn original_tile_transitions_reveal_the_center_or_move_brick_vertically() {
+        let rect = egui::Rect::from_min_size(egui::pos2(10.0, 20.0), egui::vec2(40.0, 40.0));
+        for style in ["door_open", "gate_open", "prison_open", "wall_collapse"] {
+            let start = transition_pieces(rect, style, 0.0);
+            assert_eq!(
+                start.iter().map(|(clip, _)| clip.area()).sum::<f32>(),
+                rect.area()
+            );
+            assert!(
+                transition_pieces(rect, style, 1.0)
+                    .iter()
+                    .all(|(clip, _)| !clip.is_positive())
+            );
+        }
+        let door = transition_pieces(rect, "door_open", 0.5);
+        assert_eq!(door.len(), 2);
+        assert_eq!(door[0].0.max.x, 20.0);
+        assert_eq!(door[1].0.min.x, 40.0);
+        let gate = transition_pieces(rect, "gate_open", 0.5);
+        assert_eq!(gate.len(), 4);
+        assert_eq!(gate.iter().map(|(clip, _)| clip.area()).sum::<f32>(), 400.0);
+        let wall = transition_pieces(rect, "wall_collapse", 0.5);
+        assert_eq!(wall[0].0.min.y, 40.0);
+        assert_eq!(wall[0].1, egui::vec2(0.0, 20.0));
+        for style in ["gate_close", "wall_rise"] {
+            assert!(
+                transition_pieces(rect, style, 0.0)
+                    .iter()
+                    .all(|(clip, _)| !clip.is_positive())
+            );
+            assert_eq!(
+                transition_pieces(rect, style, 1.0)
+                    .iter()
+                    .map(|(clip, _)| clip.area())
+                    .sum::<f32>(),
+                rect.area()
+            );
+        }
+        for style in [
+            "lava_open_right",
+            "lava_open_left",
+            "lava_open_up",
+            "lava_open_down",
+        ] {
+            assert!(!transition_pieces(rect, style, 0.0)[0].0.is_positive());
+            assert_eq!(transition_pieces(rect, style, 1.0)[0].0, rect);
+        }
+        assert_eq!(
+            transition_pieces(rect, "lava_open_right", 0.5)[0].0.min.x,
+            30.0
+        );
+        assert_eq!(
+            transition_pieces(rect, "lava_open_left", 0.5)[0].0.max.x,
+            30.0
+        );
+        assert_eq!(
+            transition_pieces(rect, "lava_open_up", 0.5)[0].0.max.y,
+            40.0
+        );
+        assert_eq!(
+            transition_pieces(rect, "lava_open_down", 0.5)[0].0.min.y,
+            40.0
+        );
     }
 }

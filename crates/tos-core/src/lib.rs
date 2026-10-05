@@ -513,6 +513,42 @@ impl Engine {
             self.campaign.tiles.contains_key(&tile.to_string()),
             "validated tile ID"
         );
+        let from_tile = self
+            .tile_at(floor, x, y)
+            .expect("validated campaign/save tile");
+        // Explicit script cinematics own their transition and sound. Ordinary
+        // actions and final-write-only scripts use the same presentation path.
+        let scripted_transition = self.last_action["presentation"]
+            .as_array()
+            .and_then(|effects| effects.last())
+            .is_some_and(|effect| {
+                effect["type"] == "cinematic"
+                    && effect["kind"] == "tile_reveal"
+                    && effect["floor"] == floor
+                    && effect["x"] == x
+                    && effect["y"] == y
+                    && effect["tile"] == tile
+            });
+        if from_tile != tile && !scripted_transition {
+            let from_kind = self.campaign.tiles[&from_tile.to_string()].kind;
+            let to_kind = self.campaign.tiles[&tile.to_string()].kind;
+            let style = if tile == self.empty_tile() {
+                match from_kind {
+                    TileKind::Door => Some("door_open"),
+                    TileKind::SpecialDoor if from_tile == 5 => Some("prison_open"),
+                    TileKind::SpecialDoor => Some("gate_open"),
+                    TileKind::HiddenWall => Some("wall_collapse"),
+                    _ => None,
+                }
+            } else if to_kind == TileKind::SpecialDoor {
+                Some("gate_close")
+            } else {
+                None
+            };
+            if let Some(style) = style {
+                self.present_tile_transition(floor, x, y, tile, style);
+            }
+        }
         let tiles = self
             .state
             .floors

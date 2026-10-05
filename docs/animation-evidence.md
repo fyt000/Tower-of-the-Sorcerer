@@ -23,6 +23,7 @@ sine-wave displacement, or board-cell movement implements this animation.
 
 | Initial original atlas cells | Alternate frame |
 | --- | --- |
+| Altar eyes 16 (the other altar half, 15, is static) | Eye blink 18, +2 |
 | Merchant/NPC first poses 19, 21, 23, 25, 27 | Next cell, +1 |
 | Ordinary enemy first poses 61, 63, …, 95 | Next cell, +1 |
 | Giant Octopus footprint 97–105 | Corresponding cell 106–114, +9 |
@@ -138,10 +139,75 @@ The replacement remains visible after the HP calculation. Opcode 9 installs
 road plus the hit image in both ambient buffers (`0x453008`, `0x453145`);
 opcodes 4 and 5 only update the HP labels (`0x452b2a..0x452c95`). The previous
 strike's image therefore remains through the next sound beat until the next
-overlay replaces it. The shared renderer uses this persistent replacement and
-animates entry into an encounter before the first strike, including fatal
-fights. Both original and remake retain the source only when attack cannot
-penetrate enemy defense.
+overlay replaces it. This is executable evidence about the original, rather
+than the desired current presentation. The remake intentionally pulses each
+impact during the middle third of its strike, clearing it at the damage beat
+and throughout the following strike's sound beat. `overlay_phase` and
+`overlay_end_phase` describe that visible window. Sound, damage calculation,
+strike count, encounter entry, and fatal fights retain their original ordering.
+Both original and remake retain the source only when attack cannot penetrate
+enemy defense.
+
+## Door, gate and wall movement
+
+`doorstackin` at `0x4660d0` expands an opcode-13 request into sixteen
+opcode/operand pairs. The following opcode-0 record's B value is a frame number
+1–16, not an additional wait. `dooropen` at `0x4770e0..0x478f03` dispatches on
+the operation's B mode; its name does not mean every operation slides a door.
+
+| Mode | Presentation | Final tile |
+| --- | --- | --- |
+| 1–3 | Colored door halves slide outward horizontally | Road 6 |
+| 4 | Sealed gate quadrants move diagonally outward | Road 6 |
+| 5 | Sealed gate quadrants assemble inward | Gate 4 |
+| 6 | Prison bars retract upward | Road 6 |
+| 7 | Brick/secret wall slides downward | Road 6 |
+| 8 | Brick rises from the bottom | Wall 8 |
+| 9–12 | Directional lava-to-road copy operations | Road 6 |
+
+The shared UI retains these distinct movements, clipping every copy to its
+own square. Ordinary keyed doors animate before the hero enters. The Mattock
+and Super Mattock animate each permitted wall; Magic Key uses the ordinary
+door movement. Secret passages and the thief's prison tunnel use wall collapse.
+Guard victories keep their original gate movement and sound. A visual tile
+commits at the end of its transition, so the subsequent deterministic tile
+message cannot briefly redraw the old closed door.
+
+The former event extractor filtered guard outcomes down to final tile writes,
+discarding cinematics, sounds and waits. It now probes each minimal defeated
+guard set again and retains the complete relevant presentation. Following only
+the isolated `doorstackin` helper recovers its original frame operands without
+launching Delphi graphics or audio. All 100 event IDs, once flags and original
+guard predicates remain stable, allowing existing event counts to migrate.
+
+## Bomb and field damage
+
+`toroad2` at `0x44bc34` draws road color cell 6 through inverse masks
+166, 170, 174, 178 and 182 over the old enemy. Five `open.wav` records accompany
+those frames, followed by opcode 17 clearing the tile. The remake now preserves
+that dissolve before the defeated-guard callback, rather than deleting enemies
+instantly. Rewards and the original cardinal-neighbor restriction are unchanged.
+
+`madoushi1` at `0x44c464` queues `open.wav`, a directional damaged hero/mask
+pair at the entered square, then the displayed HP update. For upward facing
+the pair is color 215/mask 216, as in combat. Movement hazards now show this
+temporary damaged pose after travel and update visible HP on their damage
+beat. The Sacred Shield suppresses both the damage and its presentation.
+
+`tools/audit_original_animations.py` reproduces the altar offsets, all twelve
+tile mode writes, all sixteen expanded wall frames, Bomb and field-damage
+queues, post-combat guard branches on all 51 initialized floors, and all four
+initialized scripted-wall sites. Its checked evidence is in
+`data/original-animation-audit.json`. The existing staged boss and special-road
+audit remains complementary; these probes do not enumerate all reachable
+campaign states or measure a live Windows timer.
+
+The audit also checks the conditional floor-41 hidden magician and both orders
+of the floor-39 clock puzzle against `handan`/`doorcheck`. These branches queue
+`get.wav` before revealing the magician or Warp Staff; their discovery cues
+are now retained alongside the existing predicates. Copy-rectangle argument
+probes distinguish the four directional lava modes: road enters from the right,
+left, top and bottom for modes 9, 10, 11 and 12 respectively.
 
 ## Stairs: spiral cover and reveal
 

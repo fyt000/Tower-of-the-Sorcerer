@@ -312,7 +312,7 @@ impl Engine {
                     if let Some(id) = self.tile_at(floor, nx, ny)
                         && self.item_breaks_wall(id)
                     {
-                        self.clear(floor, nx, ny);
+                        self.break_wall(floor, nx, ny);
                         count += 1;
                     }
                 }
@@ -364,6 +364,7 @@ impl Engine {
                                 .and_then(|e| self.enemy(e))
                                 .map(|e| e.gold)
                                 .unwrap_or(0);
+                            self.present_bomb(floor, nx, ny);
                             self.clear(floor, nx, ny);
                             count += 1;
                             self.run_events(TriggerKind::EnemyDefeated, floor, nx, ny, Some(id));
@@ -441,7 +442,7 @@ impl Engine {
                 let mut count = 0;
                 for (i, id) in tiles.iter().enumerate() {
                     if self.item_breaks_wall(*id) {
-                        self.clear(floor, i % self.campaign.width, i / self.campaign.width);
+                        self.break_wall(floor, i % self.campaign.width, i / self.campaign.width);
                         count += 1;
                     }
                 }

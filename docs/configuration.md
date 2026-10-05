@@ -221,7 +221,12 @@ the durations approximate the original timer-driven scenes.
 
 `rules.presentation.ambient_frame_ms` defaults to 150 ms and accepts integer values from 60–1000 ms.
 It controls stationary enemy/NPC pose swaps and the hero's walking cadence and
-brief return-to-idle delay. Custom sprite rectangles retain their authored art.
+brief return-to-idle delay, including the altar's eye blink. Custom sprite rectangles retain their authored art.
+
+`rules.presentation.tile_transition_ms` defaults to 400 ms and accepts integer
+values from 60–3000 ms. It controls ordinary doors, automatic gate transitions,
+secret walls and pickaxe collapses. Explicit scripted `tile_reveal` durations
+remain authored in their cinematic payloads.
 
 `rules.presentation.floor_transition_ms` defaults to 450 ms for stairs and
 wings. Their presentation includes `style: "original_spiral"`, the direction,
@@ -230,7 +235,9 @@ and `sound: "kai"`. Scripted teleport effects can supply `transition` and
 `"time_gate"` with a short span for each intermediate floor.
 `rules.presentation.combat_strike_ms` defaults to 450 ms per actual strike
 (the original High setting). Battle events expose `hit_sound`, `strike_ms`,
-and sound/overlay/damage phases; their durations cover the complete alternating
+and sound/overlay/damage phases. `overlay_end_phase` clears the impact before
+the next strike; by default only the middle third of each strike shows its hit
+image. Their durations cover the complete alternating
 turn count instead of compressing every long fight into six seconds.
 
 Configured floor transitions accept 30–10,000 ms and combat strikes accept
@@ -251,8 +258,11 @@ The original campaign uses these additional cinematic fields:
   `from_tiles`, target `tile`, and `original_frames`. Floor 20 retains the
   Vampire's nine-cell body and original 32 bat-convergence frames. The extracted
   background atlas supplies transparent masks while the bats move.
-- `tile_reveal`: `floor`, coordinates, `from_tile`, target `tile`, and
-  `original_steps`. A following `set_tile` commits the same deterministic
+- `tile_reveal`: `floor`, coordinates, `from_tile`, target `tile`, `style`, and
+  `original_steps`. Styles include `door_open`, `gate_open`, `gate_close`,
+  `prison_open`, `wall_collapse`, and `wall_rise`; omitted style preserves the
+  legacy horizontal-door reveal. `original_mode` and `original_frames` retain
+  opcode-13 evidence. A following `set_tile` commits the same deterministic
   outcome for browser, native, headless, and MCP consumers.
 
 `original_frames` and `original_steps` record extraction evidence; durations

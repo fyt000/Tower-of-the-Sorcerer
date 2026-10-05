@@ -635,6 +635,7 @@ fn validate_cinematic(
         "text",
         "translation_key",
         "sound_cue",
+        "style",
     ] {
         if let Some(value) = payload.get(name) {
             decode::<String>(value.clone(), &field(name))?;

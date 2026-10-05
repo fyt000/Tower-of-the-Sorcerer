@@ -261,6 +261,13 @@ fn original_three_oclock_door_pattern_reveals_the_warp_staff() {
     place(&mut game, 39, 4, 3);
     step(&mut game, "right");
     assert_eq!(game.tile_at(39, 3, 3), Some(43));
+    assert!(
+        game.snapshot()["last_action"]["presentation"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|effect| effect["type"] == "audio" && effect["name"] == "get")
+    );
     assert_eq!(game.player().keys.yellow, 0);
 }
 

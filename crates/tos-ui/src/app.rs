@@ -36,6 +36,23 @@ struct BattleProgress {
     phase: f32,
 }
 
+fn battle_impact(effect: &Value, progress: &BattleProgress) -> Option<bool> {
+    let start = effect["overlay_phase"].as_f64().unwrap_or(1.0 / 3.0) as f32;
+    let end = effect["overlay_end_phase"].as_f64().unwrap_or(2.0 / 3.0) as f32;
+    // Each strike has a clean approach, a short impact, then a clean damage
+    // calculation. Never carry the previous strike's image into a new beat.
+    (progress.phase >= start && progress.phase < end).then_some(progress.hero_turn)
+}
+
+fn presentation_sprite(visual: &Value, tile: &Value) -> Value {
+    let sprite = &visual["tile_defs"][tile.to_string()]["sprite"];
+    if sprite.is_null() {
+        tile.clone()
+    } else {
+        sprite.clone()
+    }
+}
+
 struct FloorEnemyGroup {
     name: String,
     inspection: Value,
@@ -386,7 +403,7 @@ impl TowerApp {
     }
 
     pub fn debug_json(&self) -> Value {
-        json!({"ready":true,"landscape":self.landscape,"ui_scale":theme::scale(&self.context),"palette":{"bg":theme::colors(&self.context).bg.to_array(),"surface":theme::colors(&self.context).surface.to_array(),"accent":theme::colors(&self.context).accent.to_array(),"metal":theme::colors(&self.context).metal.to_array(),"reverse":self.visual["cycle"].as_u64().unwrap_or(1)>1},"notice":self.toast.as_ref().map(|(message,_)|message),"locale":self.locale,"visual_floor":self.visual["floor"],"visual_player":self.visual["player"],"visual_log":self.visual["log"],"editor_open":self.editor_open,"editor":self.editor.debug_json(),"bounds":self.bounds,"animation":self.active.as_ref().map(|a|a.effect["type"].clone()),"presentation_remaining":self.queue.len(),"path_remaining":self.route.len(),"animations_seen":self.animation_history,"animation_details":self.animation_details,"hero_pose":if self.active.as_ref().is_some_and(|a|a.effect["type"]=="move")||self.now()<self.hero_idle_at{"walking"}else{"idle"},"facing":self.facing,"battle":self.battle_progress(self.now()).map(|b|json!({"hero_hp":b.hero_hp,"enemy_hp":b.enemy_hp,"hero_turn":b.hero_turn,"completed":b.completed,"phase":b.phase})),"audio":{"unlocked":self.audio.unlocked,"enabled":self.audio.enabled,"effects_played":self.audio.effects_played,"music":self.audio.music_name,"error":self.audio.error},"sprites_loaded":self.assets.atlas.is_some()})
+        json!({"ready":true,"landscape":self.landscape,"ui_scale":theme::scale(&self.context),"palette":{"bg":theme::colors(&self.context).bg.to_array(),"surface":theme::colors(&self.context).surface.to_array(),"accent":theme::colors(&self.context).accent.to_array(),"metal":theme::colors(&self.context).metal.to_array(),"reverse":self.visual["cycle"].as_u64().unwrap_or(1)>1},"notice":self.toast.as_ref().map(|(message,_)|message),"locale":self.locale,"visual_floor":self.visual["floor"],"visual_tiles":self.visual["tiles"],"visual_player":self.visual["player"],"visual_log":self.visual["log"],"editor_open":self.editor_open,"editor":self.editor.debug_json(),"bounds":self.bounds,"animation":self.active.as_ref().map(|a|a.effect["type"].clone()),"animation_effect":self.active.as_ref().map(|a|a.effect.clone()),"animation_progress":self.active.as_ref().map(|a|((self.now()-a.start)/a.duration).clamp(0.0,1.0)),"ambient_frame":(self.now()/self.ambient_interval()) as usize%2,"presentation_remaining":self.queue.len(),"path_remaining":self.route.len(),"animations_seen":self.animation_history,"animation_details":self.animation_details,"hero_pose":if self.active.as_ref().is_some_and(|a|a.effect["type"]=="move")||self.now()<self.hero_idle_at{"walking"}else{"idle"},"facing":self.facing,"battle":self.battle_progress(self.now()).map(|b|json!({"hero_hp":b.hero_hp,"enemy_hp":b.enemy_hp,"hero_turn":b.hero_turn,"completed":b.completed,"strike":b.strike,"phase":b.phase,"impact_visible":self.active.as_ref().and_then(|a|battle_impact(&a.effect,&b)).is_some()})),"audio":{"unlocked":self.audio.unlocked,"enabled":self.audio.enabled,"effects_played":self.audio.effects_played,"music":self.audio.music_name,"error":self.audio.error},"sprites_loaded":self.assets.atlas.is_some()})
     }
 
     pub fn editor_campaign_json(&self) -> String {
@@ -485,35 +502,36 @@ impl TowerApp {
         }
         if let Some(active) = &mut self.active {
             let elapsed_ms = (now - active.start) * 1000.0 * f64::from(self.speed);
-            let (cue, due) = if active.effect["type"] == "battle" {
-                let total = active.effect["hero_strikes"].as_u64().unwrap_or(1)
-                    + active.effect["enemy_strikes"].as_u64().unwrap_or(0);
-                let interval = active.effect["strike_ms"]
-                    .as_f64()
-                    .unwrap_or(450.0)
-                    .max(1.0);
-                (
-                    active.effect["hit_sound"]
-                        .as_str()
-                        .unwrap_or("taisen")
-                        .to_owned(),
-                    ((elapsed_ms / interval).floor() as usize + 1).min(total as usize),
-                )
-            } else {
-                let due = active.effect["sound_offsets_ms"]
-                    .as_array()
-                    .map(|offsets| {
-                        offsets
-                            .iter()
-                            .take_while(|v| v.as_f64().unwrap_or(0.0) <= elapsed_ms)
-                            .count()
-                    })
-                    .unwrap_or(0);
-                (
-                    active.effect["sound_cue"].as_str().unwrap_or("").to_owned(),
-                    due,
-                )
-            };
+            let (cue, due) =
+                if active.effect["type"] == "battle" || active.effect["type"] == "damage" {
+                    let total = active.effect["hero_strikes"].as_u64().unwrap_or(1)
+                        + active.effect["enemy_strikes"].as_u64().unwrap_or(0);
+                    let interval = active.effect["strike_ms"]
+                        .as_f64()
+                        .unwrap_or(450.0)
+                        .max(1.0);
+                    (
+                        active.effect["hit_sound"]
+                            .as_str()
+                            .unwrap_or("taisen")
+                            .to_owned(),
+                        ((elapsed_ms / interval).floor() as usize + 1).min(total as usize),
+                    )
+                } else {
+                    let due = active.effect["sound_offsets_ms"]
+                        .as_array()
+                        .map(|offsets| {
+                            offsets
+                                .iter()
+                                .take_while(|v| v.as_f64().unwrap_or(0.0) <= elapsed_ms)
+                                .count()
+                        })
+                        .unwrap_or(0);
+                    (
+                        active.effect["sound_cue"].as_str().unwrap_or("").to_owned(),
+                        due,
+                    )
+                };
             while active.sounds_played < due {
                 self.audio.play(&format!("assets/wav/{cue}.wav"), false);
                 active.sounds_played += 1;
@@ -612,24 +630,20 @@ impl TowerApp {
             let e = &active.effect;
             match e["type"].as_str().unwrap_or("") {
                 "tile" => {
-                    if e["floor"] == self.visual["floor"] {
-                        let width = self.visual["width"].as_u64().unwrap_or(11) as usize;
-                        let index = e["y"].as_u64().unwrap_or(0) as usize * width
-                            + e["x"].as_u64().unwrap_or(0) as usize;
-                        if let Some(tile) = self.visual["tiles"]
-                            .as_array_mut()
-                            .and_then(|v| v.get_mut(index))
-                        {
-                            *tile = e["tile"].clone();
-                        }
-                    }
+                    self.tile_visual(e);
+                }
+                "cinematic" if e["kind"] == "tile_reveal" || e["style"] == "dissolve" => {
+                    // Commit the visual target as the transition ends. The
+                    // following tile write must never flash the old door or
+                    // enemy back onto the board for its final 60ms hold.
+                    self.tile_visual(e);
                 }
                 "move" => {
                     self.hero_idle_at = self.now() + self.ambient_interval();
                     self.visual["player"]["x"] = e["to"]["x"].clone();
                     self.visual["player"]["y"] = e["to"]["y"].clone();
                 }
-                "battle" => {
+                "battle" | "damage" => {
                     let strikes = e["enemy_strikes"]
                         .as_i64()
                         .unwrap_or_else(|| e["rounds"].as_i64().unwrap_or(0));
@@ -728,6 +742,20 @@ impl TowerApp {
         };
     }
 
+    fn tile_visual(&mut self, effect: &Value) {
+        if effect["floor"] == self.visual["floor"] {
+            let width = self.visual["width"].as_u64().unwrap_or(11) as usize;
+            let index = effect["y"].as_u64().unwrap_or(0) as usize * width
+                + effect["x"].as_u64().unwrap_or(0) as usize;
+            if let Some(tile) = self.visual["tiles"]
+                .as_array_mut()
+                .and_then(|tiles| tiles.get_mut(index))
+            {
+                *tile = effect["tile"].clone();
+            }
+        }
+    }
+
     fn busy(&self) -> bool {
         self.active.is_some() || !self.queue.is_empty()
     }
@@ -752,7 +780,7 @@ impl TowerApp {
         let active = self
             .active
             .as_ref()
-            .filter(|a| a.effect["type"] == "battle")?;
+            .filter(|a| a.effect["type"] == "battle" || a.effect["type"] == "damage")?;
         let e = &active.effect;
         let hero_strikes = e["hero_strikes"].as_i64().unwrap_or(1);
         let enemy_strikes = e["enemy_strikes"].as_i64().unwrap_or(0);
@@ -2614,7 +2642,7 @@ impl TowerApp {
         let battle = self
             .active
             .as_ref()
-            .filter(|a| a.effect["type"] == "battle");
+            .filter(|a| a.effect["type"] == "battle" || a.effect["type"] == "damage");
         let mut hover = None;
         let touch_input = ui.input(|input| {
             input.any_touches()
@@ -2721,13 +2749,8 @@ impl TowerApp {
             })
             .unwrap_or(Color32::WHITE);
         let battle_overlay = battle.and_then(|b| {
-            self.battle_progress(now).and_then(|progress| {
-                let overlay = b.effect["overlay_phase"].as_f64().unwrap_or(1.0 / 3.0) as f32;
-                let strike = progress.strike - i64::from(progress.phase < overlay);
-                (strike >= 0).then_some(
-                    (strike % 2 == 0) != b.effect["enemy_first"].as_bool().unwrap_or(false),
-                )
-            })
+            self.battle_progress(now)
+                .and_then(|progress| battle_impact(&b.effect, &progress))
         });
         let replace_hero = battle_overlay.is_some()
             && battle.is_some_and(|b| {
@@ -2803,7 +2826,7 @@ impl TowerApp {
             let e = a.effect.clone();
             let kind = e["kind"].as_str().unwrap_or("");
             match kind {
-                "magic" => {
+                "magic" if e["floor"].is_null() || e["floor"] == self.visual["floor"] => {
                     let targets = e["targets"]
                         .as_array()
                         .filter(|v| !v.is_empty())
@@ -2857,43 +2880,21 @@ impl TowerApp {
                         );
                     }
                 }
-                "tile_reveal" => {
+                "tile_reveal" if e["floor"].is_null() || e["floor"] == self.visual["floor"] => {
                     let x = e["x"].as_u64().unwrap_or(0) as f32;
                     let y = e["y"].as_u64().unwrap_or(0) as f32;
                     let at = Rect::from_min_size(
                         rect.min + Vec2::new(x * cell, y * cell),
                         Vec2::splat(cell),
                     );
-                    self.assets.tile(&painter, at, &e["tile"], Color32::WHITE);
-                    let amount = (p * 16.0).floor() / 16.0;
-                    // Original door-open helper retracts the two sides in 16 steps.
-                    for left in [true, false] {
-                        let clip = if left {
-                            Rect::from_min_max(
-                                at.min,
-                                egui::pos2(at.center().x - cell * amount * 0.5, at.max.y),
-                            )
-                        } else {
-                            Rect::from_min_max(
-                                egui::pos2(at.center().x + cell * amount * 0.5, at.min.y),
-                                at.max,
-                            )
-                        };
-                        let shifted = at.translate(Vec2::new(
-                            if left {
-                                -cell * amount * 0.5
-                            } else {
-                                cell * amount * 0.5
-                            },
-                            0.0,
-                        ));
-                        self.assets.tile(
-                            &painter.with_clip_rect(clip),
-                            shifted,
-                            &e["from_tile"],
-                            Color32::WHITE,
-                        );
-                    }
+                    self.assets.tile_transition(
+                        &painter,
+                        at,
+                        &presentation_sprite(&self.visual, &e["from_tile"]),
+                        &presentation_sprite(&self.visual, &e["tile"]),
+                        e["style"].as_str().unwrap_or("door_open"),
+                        p,
+                    );
                 }
                 "title" | "scan" => {
                     painter.rect_filled(rect, 0.0, Color32::BLACK);
@@ -4549,6 +4550,8 @@ fn original_campaign_upgrade(source: &str) -> Option<&'static str> {
             "800993184d7842ca",
             "70293e17a4e914ca",
             "0ababefe999bbdfb",
+            "ad358ec82db8b9ef",
+            "c3e406503a26e7f9",
         ]
         .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
         {
@@ -4578,6 +4581,8 @@ fn restore_journey(engine: &mut Engine, source: &str) -> Result<Option<String>, 
         "800993184d7842ca",
         "70293e17a4e914ca",
         "0ababefe999bbdfb",
+        "ad358ec82db8b9ef",
+        "c3e406503a26e7f9",
     ]
     .contains(&saved["campaign_fingerprint"].as_str().unwrap_or(""))
     {
@@ -5161,6 +5166,30 @@ mod migration_tests {
             "every old progress field survives migration"
         );
         assert_eq!(engine.snapshot()["journal"], json!([]));
+    }
+    #[test]
+    fn animation_revision_migrates_the_previous_campaign_and_complete_save() {
+        let mut engine = Engine::from_json(include_str!("../../../data/campaign.json")).unwrap();
+        let mut saved: Value = serde_json::from_str(&engine.save_json()).unwrap();
+        let fingerprint = saved["campaign_fingerprint"].clone();
+        saved["campaign_fingerprint"] = json!("ad358ec82db8b9ef");
+        saved["cycle"] = json!(2);
+        saved["player"]["hp"] = json!(8123);
+        saved["player"]["inventory"] = json!(["mattock", "hero_orb"]);
+        saved["flags"] = json!(["captured"]);
+        saved["event_counts"] = json!({"capture_on_floor_3":1});
+        saved["floors"]["1"][0] = json!(6);
+        saved["steps"] = json!(932);
+        assert!(
+            restore_journey(&mut engine, &saved.to_string())
+                .unwrap()
+                .is_some()
+        );
+        saved["campaign_fingerprint"] = fingerprint;
+        assert_eq!(
+            serde_json::from_str::<Value>(&engine.save_json()).unwrap(),
+            saved
+        );
     }
     #[test]
     fn custom_campaign_and_unknown_save_are_not_migrated() {

@@ -7,11 +7,12 @@ Campaign integration is deliberately a separate regeneration step.
 """
 import json,pathlib
 from original_event_probe import probe as original_probe, RAW, ROOT
+from original_animation import tile_transition
 
 def probe(*args, **kwargs):
     # Presentation is part of the evidence, even though headless play applies
     # the resulting deterministic state changes without waiting in real time.
-    return original_probe(*args, include_presentation=True, **kwargs)
+    return original_probe(*args, include_presentation=True, follow_calls=[0x4660d0], **kwargs)
 
 DIALOGUES={s['id']:s['text'] for s in json.loads((ROOT/'data/original-dialogue.json').read_text(encoding='utf-8'))}
 TILES=list(RAW)
@@ -73,11 +74,18 @@ def convert(p,f,tiles=None):
                 effects.append({'type':'message','text':text,'dialogue_id':a-1,'original_queue_id':a})
             else:effects.append({'type':'cinematic','kind':'fairy','duration_ms':450})
         elif opcode in [6,13]:
-            t=b if opcode==6 else (4 if b==5 else 8 if b==8 else 6)
+            t=b
             if opcode==13:
-                effects.append({'type':'cinematic','kind':'tile_reveal','floor':f,
-                    'x':a%11,'y':a//11,'from_tile':tiles[f*123+2+a],
-                    'tile':t,'duration_ms':400,'original_steps':16})
+                scene=tile_transition(f,a,tiles[f*123+2+a],b)
+                # doorstackin expands one operation into sixteen frame/operand
+                # pairs. The operand records are frame numbers, not waits.
+                frames=[]
+                while cursor<len(queue) and queue[cursor][0]==0 and 1<=queue[cursor][2]<=16:
+                    frames.append(queue[cursor][2]);cursor+=1
+                    if cursor<len(queue) and queue[cursor]==[13,a,b]:cursor+=1
+                    else:break
+                if frames:scene['original_frames']=frames
+                effects.append(scene);t=scene['tile']
             tiles[f*123+2+a]=t;effects.append(tile_effect(f,a,t))
         elif opcode==12:
             t=tiles[f*123+2+a];tiles[f*123+2+a]=6;tiles[f*123+2+b]=t
@@ -171,13 +179,14 @@ add('capture_on_floor_3',{'type':'step','floor':3,'x':4,'y':8},[
     *[{'type':'message','text':DIALOGUES[i],'dialogue_id':i} for i in [0,1,2,3]]],
     source='Original mevent 0x463A2C + magic 0x461A0C + opening2 0x464048 title/scan + opening31 0x4653B8; compact original stages with configurable durations')
 add('thief_opens_prison_tunnel',{'type':'interact','floor':2,'x':2,'y':6},[
+    {'type':'sound','cue':'open'},tile_transition(2,67,RAW[2*123+2+67],7),
     tile_effect(2,67,6),tile_effect(2,68,6),{'type':'message','text':DIALOGUES[4]+' '+DIALOGUES[57],'dialogue_id':4}],
     source='Original touzoku 0x465900: door record (13,67,7)')
 
 for floor,index,tile in [(12,10,19),(16,120,25),(19,27,39)]:
     add(f'floor_{floor}_scripted_wall_reveal',
         {'type':'bump','floor':floor,'x':index%11,'y':index//11,'tile':10},
-        [tile_effect(floor,index,tile)],source='Original handan scripted-wall cases 0x4448CE..0x444BE0')
+        [{'type':'sound','cue':'get'},tile_effect(floor,index,tile)],source='Original handan scripted-wall cases 0x4448CE..0x444BE0')
 
 # The F15 thief opens the bypass of the octopus and leaves along the tunnel.
 p=probe(0x465900,15,8,0)
@@ -215,10 +224,20 @@ if __name__=='__main__':
                 if previous is None or len(dead)<len(previous[0]):outcomes[key]=(dead,e)
         grouped={}
         for dead,e in outcomes.values():grouped.setdefault(dead,[]).append(e)
-        for n,(dead,effects) in enumerate(grouped.items()):
+        for n,(dead,writes) in enumerate(grouped.items()):
+            # Recover the complete minimal branch again: selecting only its
+            # final writes discarded gate movement, treasure cues and waits.
+            p=probe(0x4664e4,f,changes=[(f,i%11,i//11,6) for i in dead])
+            branch,_,unknown=convert(p,f)
+            keys={json.dumps(e,sort_keys=True) for e in writes}
+            targets={(e['floor'],e['x'],e['y']) for e in writes if e['type']=='set_tile'}
+            effects=[e for e in branch if
+                e['type'] in ['wait','sound'] or
+                (e['type']=='cinematic' and (e.get('floor'),e.get('x'),e.get('y')) in targets) or
+                json.dumps(e,sort_keys=True) in keys]
             conditions=[tile_condition(f,i,6) for i in dead]
             add(f'floor_{f}_guards_{n}',{'type':'enemy_defeated','floor':f},effects,conditions,
-                source='Original moncheck 0x4664E4; minimal defeated-guard predicates recovered by executable emulation')
+                source='Original moncheck 0x4664E4; minimal defeated-guard predicates and ordered presentation recovered by executable emulation',unknown=unknown)
 
     # Floor ten has two distinct post-combat stages: guards, then the boss.
     stage=INITIAL_STAGES[10]
@@ -268,12 +287,12 @@ if __name__=='__main__':
     clock_remaining=[12,16,34,36,56,58,60]
     for index,other in [(14,38),(38,14)]:
         add(f'floor_39_clock_door_{index}',{'type':'step','floor':39,'x':index%11,'y':index//11,'tile':1},
-            [tile_effect(39,36,43)],
+            [{'type':'sound','cue':'get'},tile_effect(39,36,43)],
             [tile_condition(39,i,1) for i in clock_remaining]+[tile_condition(39,other,6)],
             source='Original doorcheck 0x47BEAC')
 
     add('floor_41_reveal_hidden_magician',{'type':'bump','floor':41,'x':9,'y':1,'tile':10},
-        [tile_effect(41,20,151)],[tile_condition(41,12,6)],source='Original handan secret-wall branch')
+        [{'type':'sound','cue':'get'},tile_effect(41,20,151)],[tile_condition(41,12,6)],source='Original handan secret-wall branch')
     p=probe(0x4664e4,41,changes=[(41,1,1,6),(41,9,1,6)])
     effects,_,unknown=convert(p,41)
     add('floor_41_two_magicians_defeated',{'type':'enemy_defeated','floor':41},effects,
@@ -310,7 +329,7 @@ if __name__=='__main__':
 
     # Floor 23 writes a wall behind the hero on its special road cells.
     for i,t in enumerate(RAW[23*123+2:24*123]):
-        if t==7:add(f'floor_23_wall_{i}',{'type':'step','floor':23,'x':i%11,'y':i//11},[tile_effect(23,i,8)],source='Original mevent 0x463C9B')
+        if t==7:add(f'floor_23_wall_{i}',{'type':'step','floor':23,'x':i%11,'y':i//11},[{'type':'sound','cue':'open'},tile_effect(23,i,8)],source='Original mevent 0x463C9B')
 
     portal_effects=[{'type':'message','text':DIALOGUES[25],'dialogue_id':25},
         {'type':'message','text':DIALOGUES[24],'dialogue_id':24}]

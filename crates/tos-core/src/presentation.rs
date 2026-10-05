@@ -43,6 +43,53 @@ impl Engine {
         self.present(json!({"type":"move","from":{"floor":from.floor,"x":from.x,"y":from.y},"to":{"floor":from.floor,"x":x,"y":y},"direction":if dx>0{"right"}else if dx<0{"left"}else if dy>0{"down"}else{"up"},"duration_ms":WALK_STEP_MS}));
     }
 
+    pub(crate) fn present_tile_transition(
+        &mut self,
+        floor: i32,
+        x: usize,
+        y: usize,
+        tile: u16,
+        style: &str,
+    ) {
+        let from_tile = self
+            .tile_at(floor, x, y)
+            .expect("validated transition tile");
+        let duration_ms = self.campaign.rules["presentation"]["tile_transition_ms"]
+            .as_u64()
+            .unwrap_or(400)
+            .clamp(60, 3_000);
+        self.present(
+            json!({"type":"cinematic","kind":"tile_reveal","style":style,
+            "floor":floor,"x":x,"y":y,"from_tile":from_tile,"tile":tile,
+            "original_steps":16,"duration_ms":duration_ms,
+            "sound_cue":"open","sound_offsets_ms":[0]}),
+        );
+    }
+
+    pub(crate) fn break_wall(&mut self, floor: i32, x: usize, y: usize) {
+        self.present_tile_transition(floor, x, y, self.empty_tile(), "wall_collapse");
+        self.clear(floor, x, y);
+    }
+
+    pub(crate) fn present_bomb(&mut self, floor: i32, x: usize, y: usize) {
+        // toroad2 (0x44bc34): five inverse-mask frames replace the enemy
+        // with road. The original repeats open.wav at every mask frame.
+        self.present(json!({"type":"cinematic","kind":"magic","style":"dissolve",
+            "floor":floor,"x":x,"y":y,"underlying_tile":self.tile_at(floor,x,y),
+            "color_tile":self.empty_tile(),"tile":self.empty_tile(),"frames":[166,170,174,178,182],
+            "duration_ms":750,"sound_cue":"open","sound_offsets_ms":[0,150,300,450,600]}));
+    }
+
+    pub(crate) fn present_magic_damage(&mut self, floor: i32, x: usize, y: usize, damage: i64) {
+        // madoushi1 (0x44c464) queues open.wav, the directional damaged
+        // hero/mask pair, and the HP display update at the entered square.
+        self.present(json!({"type":"damage","floor":floor,"x":x,"y":y,
+            "hero_hp":self.state.player.hp,"enemy_hp":0,"hero_hit":0,"enemy_hit":damage,
+            "hero_strikes":0,"enemy_strikes":1,"enemy_first":true,
+            "strike_ms":450,"hit_sound":"open","overlay_phase":1.0/3.0,
+            "overlay_end_phase":2.0/3.0,"damage_phase":2.0/3.0,"duration_ms":450}));
+    }
+
     pub(crate) fn present_floor(&mut self, from: i32, transition: &str, duration_ms: Option<u64>) {
         let target = self.state.player.floor;
         self.present(json!({"type":"floor","from":from,"to":target,
@@ -110,7 +157,7 @@ impl Engine {
         let duration_ms =
             (hero_strikes.saturating_add(enemy_strikes).max(1) as u64).saturating_mul(strike_ms);
         self.present(json!({"type":"battle","enemy_name":enemy_name,"enemy_hp":enemy.hp,"enemy_attack":enemy.attack,"enemy_defense":enemy.defense,"gold":battle.gold,"hero_hp":self.state.player.hp,"hero_hit":hero_hit,"enemy_hit":enemy_hit,"rounds":battle.rounds,"hero_strikes":hero_strikes,"enemy_strikes":enemy_strikes,"enemy_first":first,"floor":floor,"x":x,"y":y,
-            "strike_ms":strike_ms,"hit_sound":"taisen","sound_phase":0.0,"overlay_phase":1.0/3.0,"damage_phase":2.0/3.0,"duration_ms":duration_ms}));
+            "strike_ms":strike_ms,"hit_sound":"taisen","sound_phase":0.0,"overlay_phase":1.0/3.0,"overlay_end_phase":2.0/3.0,"damage_phase":2.0/3.0,"duration_ms":duration_ms}));
         BattleLogEntry {
             log_id: 0,
             cycle: self.state.cycle,

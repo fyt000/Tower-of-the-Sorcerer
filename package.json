@@ -15,6 +15,7 @@
     "test:native": "node tests/native.mjs",
     "test:browser": "node tests/browser.mjs && node tests/inventory-layout.mjs && node tests/journal-layout.mjs && node tests/battle-journal.mjs && node tests/desktop-modal-scale.mjs && node tests/inspection.mjs && node tests/enemy-list.mjs && node tests/landscape-theme.mjs && node tests/desktop-layout.mjs",
     "test:desktop": "node tests/desktop-layout.mjs",
+    "test:animations": "node tests/animations.mjs",
     "test:mcp": "node tests/mcp.mjs && node tests/mcp-reload.mjs"
   },
   "devDependencies": {

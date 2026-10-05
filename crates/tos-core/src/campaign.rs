@@ -638,6 +638,7 @@ impl Campaign {
             // 60–3000 ms, floor wipe 30–10000 ms. Reject bad imports explicitly.
             for (key, minimum, maximum) in [
                 ("ambient_frame_ms", 60, 1000),
+                ("tile_transition_ms", 60, 3000),
                 ("combat_strike_ms", 60, 3000),
                 ("floor_transition_ms", 30, 10_000),
             ] {

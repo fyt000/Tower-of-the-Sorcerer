@@ -97,6 +97,10 @@ animation speed. Browser audio starts after the first input. Original WAV
 effects play directly; extracted MIDI is synthesized in Rust, with approximate
 instrument timbres. Battles play `taisen.wav` on each actual hero or enemy strike,
 with the impact pose and displayed HP calculation following that strike's phases.
+Each hit flashes briefly, then clears before the next strike. Colored doors
+slide open before travel, altar eyes blink, and the Mattock and Super Mattock
+show collapsing walls. Secret passages, guard gates, Magic Key, Bomb dissolves
+and magic-field damage also retain their recovered animation and sound cues.
 The hero alternates the original walking poses while moving and returns to the
 distinct standing pose after the next ambient tick. Monsters and NPCs alternate
 their original sprite poses in the same cell. Stairs cover the outgoing floor
