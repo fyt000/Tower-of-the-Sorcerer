@@ -60,6 +60,7 @@ python baseline/tools/verify_interactions.py --probe baseline/build-vs/Release/t
 python baseline/tools/verify_callbacks.py --probe baseline/build-vs/Release/tos_baseline_probe.exe
 python baseline/tools/verify_items.py --probe baseline/build-vs/Release/tos_baseline_probe.exe
 python baseline/tools/verify_saves.py --probe baseline/build-vs/Release/tos_baseline_probe.exe
+python baseline/tools/verify_quirks.py --probe baseline/build-vs/Release/tos_baseline_probe.exe
 ```
 
 Add complete playback tests for interactions between builders and callbacks.

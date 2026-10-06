@@ -1,0 +1,56 @@
+{
+  "original_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "scenarios": 246,
+  "passed": 246,
+  "groups": {
+    "33F-trap": 4,
+    "47F-retreat": 232,
+    "45F-merchant": 3,
+    "40F-prompt": 1,
+    "50F-thief": 1,
+    "backside-magic": 2,
+    "Lucky-Gold": 2,
+    "49F-safety": 1
+  },
+  "failures": [],
+  "safety_exceptions": [
+    {
+      "scenario": "49F-safety/poisoned-stale-record",
+      "original_unwritten_command": [
+        7,
+        777,
+        0
+      ],
+      "original_records": 129,
+      "valid_records": 128
+    }
+  ],
+  "skipped_original_calls": [
+    "0x4034dc",
+    "0x4034fc",
+    "0x403710",
+    "0x405b6c",
+    "0x40923c",
+    "0x413500",
+    "0x41353c",
+    "0x4135d4",
+    "0x41a5b8",
+    "0x421a54",
+    "0x4433a4",
+    "0x443808",
+    "0x44b6f4",
+    "0x44b78c",
+    "0x44bc0c",
+    "0x44cb34",
+    "0x450758",
+    "dword ptr [ebx + 0xc]",
+    "dword ptr [ecx + 0x28]",
+    "dword ptr [ecx + 0x2c]",
+    "dword ptr [edi + 0xc]",
+    "dword ptr [edx + 0x1c]",
+    "dword ptr [edx + 0x20]",
+    "dword ptr [edx + 0x80]",
+    "dword ptr [esi + 0xc]"
+  ],
+  "limits": "Isolated original builders/state writes. VCL text layout and audio are not emulated. Zeno load behavior is covered by save-report.json; full trap playback and overflow-length combat by core_tests.cpp. 49F compares only the written commands, explicitly excluding the reproduced unsafe ghost."
+}

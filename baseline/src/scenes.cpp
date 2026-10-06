@@ -1020,6 +1020,7 @@ void Game::summon_four_guards(int north, int south, int west, int east) {
 }
 void Game::summon_guards() {
     // 0x462560 writes all eight 49F guards before their materialization stack.
+    // Omit the stray INC at 0x4637DD: it exposes an unwritten, stale command.
     constexpr std::array<int, 8> Guards{26, 37, 38, 39, 28, 17, 16, 15};
     for (int index : Guards)
         tile(hero.floor, index) = Sorcerer;

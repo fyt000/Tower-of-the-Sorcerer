@@ -16,25 +16,33 @@ the translation; [retained rules](../docs/mechanics.md) identifies important bra
 | NPCs, continuations, stairs, hazards, capture/ending and Fairy scoring | 426 |
 | Items, cardinal bounds, wings and Flight | 2,067 |
 | Save bytes, checksums, import/rewrite and Zeno load reconstruction | 145 |
-| Total | 4,361 |
+| Correction-log triggers, border retreats and explicit 49F safety exception | 246 |
+| Total | 4,607 |
 
 These execute isolated original x86 handlers and compare their output with the
 compiled C++ probe. Reports list skipped calls. Unread stale `b` operands in
 HeroStrike/Reward are normalized; other compared operands and orders are retained.
 
-The **88 core checks** execute complete command stacks, bounded long fights,
+The **107 core checks** execute complete command stacks, bounded long fights,
 fatal cancellation, dialogue aliases, Fairy restores, all eight save slots,
 replacement backups, shared original slot paths, cycle carry/reset rules and
-the 50F gate/seal/wing branches.
-The core has also passed an MSVC AddressSanitizer Release run.
+the 50F gate/seal/wing branches. They reproduce the 33F lower-entry softlock
+through walking and combat, and finish the original 4,500-round Archsorcerer
+and 7,920-round backside Gateman fights with every strike and bounded memory.
+The core, renderer, asset loading, complete MIDI synthesis and audio-device
+checks have passed MSVC AddressSanitizer Release runs.
 
 The **131 presentation checks** cover original standing/walking poses, all twelve
 door/wall/lava modes, both stair phases, all 32 Vampire frames, capture and ending
 playback, red panels, Zeno variants and overlays. They run with both original
 and extracted media. The **71 asset checks** establish pixel equality for all
 31 loaded images, unchanged bytes for 17 MIDI tracks and eight WAV effects,
-WAV decoding, embedded media and selection/error handling. All 17 tracks also
-produce finite, nonzero stereo synthesis through the selected bank.
+WAV decoding, embedded media and selection/error handling. Audio checks render
+all 17 complete MIDI tracks, dispatch all 35,343 parsed messages across varied
+callback block sizes, verify looping and produce finite, nonzero stereo synthesis.
+A WASAPI device check exercises overlapping effects, bounded bursts, the sample
+clock and all cached track selections; it does not establish audible equivalence
+or uninterrupted playback on every device.
 
 Desktop smoke checks cover command pause/resume, numbered saves, Fairy
 checkpoints and the ending at the installed high-DPI setting. The replacement
@@ -47,6 +55,33 @@ import/rewrite, edits, opaque-word retention, frontside/backside seal states,
 all directions, earlier C++ import, corrupt/truncated records and bounds checks.
 File I/O and VCL UI calls are mocked. Fixtures come from the original writer;
 the installed `Savedat/` folder had no historical player files to test.
+
+## Correction-log policy
+
+The [tswKai correction log](https://github.com/Z-H-Sun/tswKai/wiki/1.1-%E2%80%90-Run-TSW-Game#corrections-log)
+and [patch descriptions](https://github.com/Z-H-Sun/tswKai/wiki/1.2.1-%E2%80%90-Patch-Config#features)
+identify triggers to investigate. The pinned unpatched EXE remains the oracle.
+Gameplay quirks stay in the baseline; memory corruption and audio scheduling
+faults do not. `tools/verify_quirks.py` records the additional machine comparisons.
+
+| Case | Baseline behavior |
+|---|---|
+| 33F trap | Only the upper cell triggers it. Clearing the guards first from below, then touching that cell, still seals the exits. |
+| 47F Magician A | The hero-row guard and horizontal wrapping within the flat floor array remain. Out-of-floor memory access is rejected. |
+| Backside 45F Merchant | Pays the original unscaled 2,000 HP for 1,000 gold. |
+| Sealed Zeno after load | Retains the shared-row reconstruction and extra backside scaling documented above. |
+| Lucky Gold and enemy-first combat | Actual income doubles. The modern completion text omits the amount, so Delphi's wrong displayed amount is not reproduced. |
+| 40F boss prompt | The original yellow-door message command remains. |
+| 50F Thief / backside magic text | Original speech/message IDs remain. VCL text positioning is outside the modern overlay's fidelity scope. |
+| Magician A mask | The original bitmap pixels remain unchanged; no one-pixel asset correction is applied. |
+| 49F summon ghost | Exactly 128 written commands execute. The stray cursor increment at `0x4637DD` is omitted; the report explicitly reproduces and excludes the unsafe 129th record. |
+| Combat buffer overflow | Every round executes incrementally; no legacy fixed event buffer is used. |
+| Closely spaced effects / BGM stalls | Preloaded WAV voice aliases overlap. Parsed MIDI tracks are cached; selection performs no disk reads, parsing or message freeing under the callback lock. |
+
+Prologue options, translations, shortcuts, fonts, window placement, loading during
+events and sound preferences belong to the modern UI/settings scope. The runtime
+mute option persists across loads, independently of saved gameplay music state.
+No optional gameplay fixes from tswKai are enabled by this audit.
 
 ## Deliberate differences and remaining work
 

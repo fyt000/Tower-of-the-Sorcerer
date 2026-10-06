@@ -64,10 +64,12 @@ The replacement embeds the two original form pictures and GeneralUser GS bank
 as PE resources. `embedded_media.cpp` reads them through standard file I/O,
 without direct Windows API calls. Assets are read during loading, not per frame.
 
-`audio.cpp` parses MIDI outside the audio callback's lock and synthesizes it
-through TinySoundFont. The callback uses preallocated synth voices and sample
-progress, independent of command speed. Original WAV effects are decoded from
-memory. Fonts use installed Segoe UI when available and raylib's fallback
+`audio.cpp` parses and caches the MIDI tracks at startup, then synthesizes them
+through TinySoundFont. Track selection performs no file I/O or parsing. The
+callback uses preallocated synth voices and sample progress, independent of
+command speed. Original WAV effects are decoded once; a bounded pool of raylib
+aliases shares their samples and lets repeated effects overlap. Fonts use
+installed Segoe UI when available and raylib's fallback
 otherwise; system fonts are not distributed.
 
 Saves contain the original floor records and 171-word hero record. Monster rows

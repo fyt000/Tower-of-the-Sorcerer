@@ -112,8 +112,9 @@ executable's filename does not affect saving or loading.
 
 ## Validate and package
 
-CTest covers the core and original-media renderer. When the extracted PNGs are
-available, it also compares both asset layouts and runs the renderer with PNGs.
+CTest covers the core, complete MIDI synthesis and original-media renderer. When
+the extracted PNGs are available, it also compares both asset layouts and runs
+the renderer with PNGs.
 [The research workflow](../docs/reverse-engineering.md) describes the original
 executable comparisons. Useful desktop checks include:
 
@@ -121,11 +122,12 @@ executable comparisons. Useful desktop checks include:
 ./build-vs/Release/tos_baseline.exe --smoke ending --save-dir build-vs/smoke-saves
 ./build-vs/Release/tos_baseline.exe --smoke slots --save-dir build-vs/smoke-saves
 ./build-vs/Release/tos_baseline.exe --audio-test --screenshot build-vs/midi-test.wav
+./build-vs/Release/tos_baseline.exe --audio-device-test
 python tools/package.py --original-dir "D:/Program Files (x86)/Tower of the Sorcerer"
 ```
 
-Packaging creates `dist/tos-original-baseline-0.4-windows-x64/TSW.exe` and a ZIP
+Packaging creates `dist/tos-original-baseline-0.5-windows-x64/TSW.exe` and a ZIP
 with the original media layout, licenses and validation reports. The packaged
 EXE can also be copied alone into an existing original installation. The smaller
-`dist/tos-original-baseline-0.4-drop-in.zip` contains the EXE, usage notes and
+`dist/tos-original-baseline-0.5-drop-in.zip` contains the EXE, usage notes and
 licenses for that deployment.

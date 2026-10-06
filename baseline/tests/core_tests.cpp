@@ -20,6 +20,11 @@ Game room(int floor = 1) {
     game.floors[floor].tiles.fill(Road);
     return game;
 }
+std::filesystem::path temporary_save(const char* name) {
+    return std::filesystem::temp_directory_path() /
+           (std::string(name) + "-" +
+            std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + ".save");
+}
 int main() try {
     {
         auto g = room();
@@ -85,6 +90,56 @@ int main() try {
         g.finish_commands();
         require(g.tile(47, cell(5, 2)) == MagicianA && g.hero.hp == 1000,
                 "Shield protects; magician still retreats");
+    }
+    {
+        Game g;
+        g.hero.floor = 33;
+        g.hero.x = 9;
+        g.hero.y = 7;
+        g.hero.attack = g.hero.defense = 10000;
+        const auto walk = [&](Direction direction) {
+            g.move(direction);
+            g.finish_commands();
+        };
+        walk(Direction::Up);
+        require(g.hero.y == 6 && g.tile_at(33, 9, 4) == SpecialRoad && g.tile_at(33, 9, 3) == Road &&
+                    g.tile_at(33, 9, 7) == Road,
+                "Original 33F lower entrance does not trigger the trap");
+        for (auto direction :
+             {Direction::Up, Direction::Left, Direction::Up, Direction::Down, Direction::Right,
+              Direction::Right, Direction::Up, Direction::Down, Direction::Down, Direction::Left,
+              Direction::Left, Direction::Right, Direction::Up})
+            walk(direction);
+        require(g.hero.x == 9 && g.hero.y == 5 && g.hero.gold == 160 && g.tile_at(33, 8, 4) == Road &&
+                    g.tile_at(33, 10, 4) == Road && g.tile_at(33, 8, 6) == Road &&
+                    g.tile_at(33, 10, 6) == Road,
+                "All four 33F guards can be defeated before touching the upper trigger");
+        walk(Direction::Up);
+        require(g.tile_at(33, 9, 3) == SealedGate && g.tile_at(33, 9, 7) == SealedGate && !g.busy(),
+                "The late 33F trigger seals both exits with no remaining guard to reopen them");
+        walk(Direction::Up);
+        require(g.hero.y == 4, "The original 33F softlock remains in the baseline");
+    }
+    for (int cycle : {0, 43}) {
+        auto g = room(45);
+        g.hero.cycle_factor_minus_one = cycle;
+        g.hero.gold = 1000;
+        g.tile_at(45, 5, 4) = Merchant;
+        g.move(Direction::Up);
+        require(g.dialogue && g.dialogue->shop && g.choose(0), "45F Merchant accepts the original offer");
+        g.finish_commands();
+        require(g.hero.hp == 3000 && g.hero.gold == 0 && g.hero.merchant_used[10],
+                "45F Merchant adds an unscaled 2000 HP on both sides");
+    }
+    for (bool enemy_first : {false, true}) {
+        auto g = room();
+        g.hero.attack = g.hero.defense = 10000;
+        g.inventory(Item::LuckyGold) = 1;
+        g.contact_index = cell(5, 4);
+        g.tile(1, g.contact_index) = GreenSlime;
+        g.battle(enemy_first);
+        g.finish_commands();
+        require(g.hero.gold == 2, "Lucky Gold doubles the actual reward, including enemy-first combat");
     }
     {
         auto g = room();
@@ -153,17 +208,44 @@ int main() try {
         g.hero.attack = 100;
         require(g.forecast(85, true).damage >= g.forecast(85).damage, "Forced combat ignores Cross");
     }
-    {
+    for (const auto [enemy_tile, cycle] : {std::pair<int, int>{GreatMagicMaster, 0}, {GateKeeperA, 43}}) {
         auto g = room();
         g.hero.hp = 100000;
-        g.hero.attack = 1;
-        g.monsters[0] = {10000, 0, 0, 1};
-        g.tile(1, cell(5, 4)) = GreenSlime;
+        g.hero.cycle_factor_minus_one = cycle;
+        const auto enemy = g.monsters[Game::monster_for_tile(enemy_tile)];
+        g.hero.attack = enemy.defense * (cycle + 1) + 1;
+        g.hero.defense = enemy.attack * (cycle + 1);
+        g.tile(1, cell(5, 4)) = std::uint8_t(enemy_tile);
+        const auto forecast = g.forecast(enemy_tile);
+        require(forecast.hero_hits >= 2500, "Exercise an actual original overflow-triggering fight");
         g.move(Direction::Up);
         std::size_t maximum = 0;
-        for (int n = 0; n < 200000 && g.run_one(); ++n)
+        std::int64_t hero_strikes = 0;
+        Command executed;
+        for (int n = 0; n < 200000 && g.run_one(&executed); ++n) {
             maximum = std::max(maximum, g.commands.size());
-        require(maximum < 20 && g.hero.gold == 1, "Long fights keep a bounded command queue");
+            hero_strikes += executed.op == Op::HeroStrike;
+        }
+        require(maximum < 20 && hero_strikes == forecast.hero_hits && !g.busy(),
+                "Long fights retain every round with bounded command memory");
+        require(g.hero.hp == 100000 && g.hero.gold == enemy.gold && g.tile_at(1, 5, 4) == Road,
+                "Overflow-length fights finish without corrupting hero or map state");
+    }
+    for (bool longer_event : {false, true}) {
+        auto g = room(49);
+        if (longer_event) {
+            g.commands.assign(600, {Op::Wait, 0, 0});
+            g.finish_commands();
+        }
+        g.push(Op::Callback, Callback::SummonGuards);
+        g.run_one();
+        require(g.commands.size() == 128 && g.commands.back().op == Op::Overlay &&
+                    g.commands.back().a == 15 && g.commands.back().b == 167,
+                "49F materialization starts with the first written command, never a ghost record");
+        g.finish_commands();
+        require(g.hero.hp == 1000 && g.hero.gold == 0 && !g.busy() &&
+                    std::count(g.floors[49].tiles.begin(), g.floors[49].tiles.end(), Sorcerer) == 8,
+                "49F materialization has the same safe outcome after a longer preceding event");
     }
     {
         auto g = room();
@@ -207,7 +289,7 @@ int main() try {
                 "Fairy score and default rank retain disabled music");
         g.finish_commands(true);
         require(!g.busy() && g.tile(10, 27) == Road, "Fairy checkpoint becomes saveable after her scene");
-        const auto path = std::filesystem::temp_directory_path() / "tos-baseline-fairy-test.save";
+        const auto path = temporary_save("tos-baseline-fairy-test");
         g.save(path);
         Game restored;
         restored.load(path);
@@ -237,7 +319,7 @@ int main() try {
         auto g = room(49);
         g.hero.zeno_sealed = true;
         g.monsters[15] = {800, 500, 100, 500};
-        const auto path = std::filesystem::temp_directory_path() / "tos-baseline-test-save.bin";
+        const auto path = temporary_save("tos-baseline-test-save");
         g.save(path);
         Game restored;
         restored.load(path);

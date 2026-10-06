@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(tos_original_baseline VERSION 0.4 LANGUAGES C CXX)
+project(tos_original_baseline VERSION 0.5 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -84,6 +84,9 @@ if(BASELINE_GUI)
     add_test(NAME original_presentation COMMAND tos_baseline --assets "${presentation_assets}"
         --presentation-test "${CMAKE_CURRENT_BINARY_DIR}/presentation-checks")
     set_tests_properties(original_presentation PROPERTIES TIMEOUT 60)
+    add_test(NAME original_audio COMMAND tos_baseline --assets "${presentation_assets}"
+        --audio-test --screenshot "${CMAKE_CURRENT_BINARY_DIR}/midi-test.wav")
+    set_tests_properties(original_audio PROPERTIES TIMEOUT 180)
     if(WIN32 AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../web/assets/original-atlas.png")
         add_test(NAME original_assets COMMAND tos_baseline --assets "${original_directory}"
             --compare-assets "${CMAKE_CURRENT_SOURCE_DIR}/../web/assets"

@@ -9,7 +9,7 @@ import shutil
 import zipfile
 
 BASELINE = Path(__file__).resolve().parents[1]
-NAME = 'tos-original-baseline-0.4-windows-x64'
+NAME = 'tos-original-baseline-0.5-windows-x64'
 
 
 def main():
@@ -54,7 +54,7 @@ def main():
     (output / 'FIDELITY.md').write_text(fidelity, encoding='utf-8')
     validation = output / 'validation'
     validation.mkdir(exist_ok=True)
-    for name in ('differential', 'interaction', 'callback', 'item', 'save'):
+    for name in ('differential', 'interaction', 'callback', 'item', 'save', 'quirk'):
         source = BASELINE / f'{name}-report.json'
         report = json.loads(source.read_text(encoding='utf-8'))
         if report['passed'] != report['scenarios'] or report['failures']:
@@ -90,9 +90,9 @@ def main():
     hashes = {file.relative_to(output).as_posix(): hashlib.sha256(file.read_bytes()).hexdigest()
               for file in sorted(output.rglob('*')) if file.is_file() and file.name != 'package-manifest.json'}
     (output / 'package-manifest.json').write_text(
-        json.dumps({'version': '0.4', 'layout': 'original', 'files': hashes}, indent=2) + '\n', encoding='utf-8')
+        json.dumps({'version': '0.5', 'layout': 'original', 'files': hashes}, indent=2) + '\n', encoding='utf-8')
     archive = shutil.make_archive(str(output), 'zip', root_dir=output.parent, base_dir=output.name)
-    drop_in = output.parent / 'tos-original-baseline-0.4-drop-in.zip'
+    drop_in = output.parent / 'tos-original-baseline-0.5-drop-in.zip'
     with zipfile.ZipFile(drop_in, 'w', compression=zipfile.ZIP_DEFLATED) as package:
         for file in sorted(output.rglob('*')):
             relative = file.relative_to(output)

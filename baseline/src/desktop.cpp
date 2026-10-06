@@ -258,7 +258,7 @@ int main(int argc, char** argv) try {
     std::filesystem::path screenshot, presentation_test, asset_test, compare_assets = BASELINE_ASSETS;
     std::filesystem::path load_file, export_original;
     std::string smoke;
-    bool audio_test = false, visible_smoke = false;
+    bool audio_test = false, audio_device_test = false, visible_smoke = false;
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
         if (arg == "--assets" && i + 1 < argc)
@@ -281,6 +281,8 @@ int main(int argc, char** argv) try {
             smoke = argv[++i];
         else if (arg == "--audio-test")
             audio_test = true;
+        else if (arg == "--audio-device-test")
+            audio_device_test = true;
         else if (arg == "--visible-smoke")
             visible_smoke = true;
         else if (arg == "--help") {
@@ -289,7 +291,7 @@ int main(int argc, char** argv) try {
                          "F6 / F7: eight save / load slots. F5 / F9: quick save / restore.\n"
                          "F8: Fairy checkpoint. F2: new game. M: mute.\n"
                          "Saves: Savedat/save1.dat through save8.dat beside this executable.\n"
-                         "--assets DIR --save-dir DIR --screenshot FILE --audio-test\n"
+                         "--assets DIR --save-dir DIR --screenshot FILE --audio-test --audio-device-test\n"
                          "--load FILE --export-original FILE\n"
                          "--smoke "
                          "initial|capture|stairs|fight|floor10|fairy|items|inventory|item|shop|flight|help|"
@@ -315,6 +317,8 @@ int main(int argc, char** argv) try {
     std::cout << "Saves: " << save_directory << '\n';
     if (!asset_test.empty())
         return verify_assets(assets, Assets(compare_assets, executable_file), executable_file, asset_test);
+    if (audio_device_test)
+        return Audio::verify_playback(assets) ? 0 : 1;
     if (audio_test) {
         const auto output = screenshot.empty() ? executable / "midi-test.wav" : screenshot;
         const bool passed = Audio::verify_tracks(assets) && Audio::render_test(assets, "b_067xgw", output);

@@ -187,7 +187,10 @@ int main() {
                     game.special_road();
                 else if (name == "capture")
                     game.capture();
-                else if (name == "cycle")
+                else if (name == "summon") {
+                    game.push(Op::Callback, Callback::SummonGuards);
+                    game.run_one();
+                } else if (name == "cycle")
                     game.next_cycle();
                 else if (name == "battle") {
                     input >> a;
