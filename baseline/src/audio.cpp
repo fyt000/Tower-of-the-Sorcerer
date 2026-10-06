@@ -22,8 +22,8 @@ struct Synth {
     tsf* font{};
     tml_message *song{}, *next{};
     std::uint64_t sample{}, ending_sample{};
-    explicit Synth(const std::filesystem::path& file) {
-        font = tsf_load_filename(file.string().c_str());
+    explicit Synth(const std::vector<unsigned char>& bytes) {
+        font = tsf_load_memory(bytes.data(), int(bytes.size()));
         if (font) {
             tsf_set_output(font, TSF_STEREO_INTERLEAVED, SampleRate, -8);
             tsf_set_max_voices(font, 256);
@@ -57,8 +57,8 @@ struct Synth {
         }
         return font && song;
     }
-    bool load(const std::filesystem::path& file) {
-        return set_song(tml_load_filename(file.string().c_str()));
+    bool load(const std::vector<unsigned char>& bytes) {
+        return set_song(tml_load_memory(bytes.data(), int(bytes.size())));
     }
     void event(const tml_message& message) {
         switch (message.type) {
@@ -116,13 +116,18 @@ struct Audio::Impl {
     static Impl* active;
     std::mutex mutex;
     Synth synth;
-    std::filesystem::path assets;
+    const Assets& assets;
     AudioStream stream{};
     std::array<Sound, 11> effects{};
     bool device{}, music_playing = true;
     int track = -1;
-    Impl(const std::filesystem::path& folder, const std::filesystem::path& font)
-        : synth(font), assets(folder) {
+    explicit Impl(const Assets& source) : synth(source.soundfont()), assets(source) {
+        constexpr std::array<const char*, 11> Files{nullptr, "open", "get", "taisen", "zeno", nullptr,
+                                                    nullptr, "3f",   "20f", "kai",    "kai2"};
+        std::array<std::vector<unsigned char>, 11> effect_bytes;
+        for (int i = 1; i < int(Files.size()); ++i)
+            if (Files[i])
+                effect_bytes[i] = assets.wave(Files[i]);
         InitAudioDevice();
         device = IsAudioDeviceReady();
         if (!device)
@@ -133,11 +138,13 @@ struct Audio::Impl {
         SetAudioStreamCallback(stream, callback);
         SetAudioStreamVolume(stream, 0.5f);
         PlayAudioStream(stream);
-        constexpr std::array<const char*, 11> Files{nullptr, "open", "get", "taisen", "zeno", nullptr,
-                                                    nullptr, "3f",   "20f", "kai",    "kai2"};
         for (int i = 1; i < 11; ++i)
-            if (Files[i])
-                effects[i] = LoadSound((assets / "wav" / (std::string(Files[i]) + ".wav")).string().c_str());
+            if (Files[i]) {
+                const auto& bytes = effect_bytes[i];
+                auto wave = LoadWaveFromMemory(".wav", bytes.data(), int(bytes.size()));
+                effects[i] = LoadSoundFromWave(wave);
+                UnloadWave(wave);
+            }
     }
     ~Impl() {
         if (!device)
@@ -164,8 +171,7 @@ struct Audio::Impl {
     }
 };
 Audio::Impl* Audio::Impl::active = nullptr;
-Audio::Audio(const std::filesystem::path& assets, const std::filesystem::path& font)
-    : impl_(std::make_unique<Impl>(assets, font)) {}
+Audio::Audio(const Assets& assets) : impl_(std::make_unique<Impl>(assets)) {}
 Audio::~Audio() = default;
 bool Audio::available() const {
     return impl_->device && impl_->synth.font;
@@ -199,11 +205,11 @@ void Audio::update(Game& game) {
     const int track = track_for_scene(game);
     if (track != impl_->track) {
         // Parse MIDI before taking the callback's lock, so disk reads cannot starve audio.
-        tml_message* loaded =
-            track >= 5 && track < int(Tracks.size())
-                ? tml_load_filename(
-                      (impl_->assets / "midi" / (std::string(Tracks[track]) + ".mid")).string().c_str())
-                : nullptr;
+        tml_message* loaded = nullptr;
+        if (track >= 5 && track < int(Tracks.size())) {
+            const auto bytes = impl_->assets.midi(Tracks[track]);
+            loaded = tml_load_memory(bytes.data(), int(bytes.size()));
+        }
         std::lock_guard lock(impl_->mutex);
         impl_->track = track;
         if (loaded)
@@ -220,13 +226,13 @@ void Audio::update(Game& game) {
     }
     game.sounds.clear();
 }
-bool Audio::verify_tracks(const std::filesystem::path& assets, const std::filesystem::path& font) {
-    Synth synth(font);
+bool Audio::verify_tracks(const Assets& assets) {
+    Synth synth(assets.soundfont());
     if (!synth.font)
         return false;
     std::vector<float> block(SampleRate * 2);
     for (int track = 5; track < int(Tracks.size()); ++track) {
-        if (!synth.load(assets / "midi" / (std::string(Tracks[track]) + ".mid")))
+        if (!synth.load(assets.midi(Tracks[track])))
             return false;
         for (auto* message = synth.song; message; message = message->next)
             if (message->type == TML_PROGRAM_CHANGE &&
@@ -250,10 +256,9 @@ bool Audio::verify_tracks(const std::filesystem::path& assets, const std::filesy
     std::cout << "17 MIDI tracks: programs available; finite, nonzero stereo synthesis\n";
     return true;
 }
-bool Audio::render_test(const std::filesystem::path& midi, const std::filesystem::path& font,
-                        const std::filesystem::path& output) {
-    Synth synth(font);
-    if (!synth.load(midi))
+bool Audio::render_test(const Assets& assets, std::string_view midi, const std::filesystem::path& output) {
+    Synth synth(assets.soundfont());
+    if (!synth.load(assets.midi(midi)))
         return false;
     std::vector<float> samples(SampleRate * 2 * 6);
     synth.render(samples.data(), SampleRate * 6);

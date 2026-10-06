@@ -1,96 +1,104 @@
-"""Package the static Windows build and local original media for portable play."""
+"""Package a self-contained Windows replacement with the original media layout."""
 from pathlib import Path
 import argparse
 import hashlib
 import json
+import os
+import re
 import shutil
+import zipfile
 
 BASELINE = Path(__file__).resolve().parents[1]
-ROOT = BASELINE.parent
-NAME = 'tos-original-baseline-0.1-windows-x64'
+NAME = 'tos-original-baseline-0.2-windows-x64'
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--build-dir', type=Path, default=BASELINE / 'build-vs')
     parser.add_argument('--configuration', default='Release', choices=['Debug', 'Release'])
-    parser.add_argument('--assets', type=Path, default=ROOT / 'web/assets')
+    parser.add_argument('--original-dir', type=Path, default=Path(os.environ.get(
+        'TOS_ORIGINAL_EXE', r'D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe')).parent)
     parser.add_argument('--output', type=Path, default=BASELINE / 'dist' / NAME)
     args = parser.parse_args()
-    binaries = args.build_dir.resolve() / args.configuration
-    output = args.output.resolve()
-    assets = args.assets.resolve()
-    required = ['tos_baseline.exe', 'tos_baseline_probe.exe', 'baseline_tests.exe', 'music.sf2',
+    build = args.build_dir.resolve()
+    binaries, original, output = build / args.configuration, args.original_dir.resolve(), args.output.resolve()
+    if output == original or output.is_relative_to(original):
+        raise RuntimeError('Package output must be separate from the original installation')
+    required = ['tos_baseline.exe', 'tos_baseline_probe.exe', 'baseline_tests.exe',
                 'GeneralUser-GS-LICENSE.txt', 'TinySoundFont-LICENSE.txt', 'raylib-LICENSE.txt']
     for name in required:
         if not (binaries / name).is_file():
             raise RuntimeError(f'Build output missing: {binaries / name}')
-    required_assets = ['original-atlas.png', 'original-background-atlas.png',
-                       'hero-down.png', 'hero-left.png', 'hero-right.png', 'hero-up.png']
-    required_assets += [f'data3-{name}.png' for name in ('left', 'leftr', 'center', 'right', 'rightr',
-                        'title05', 'title05r', 'open0', 'open1', 'open2')]
-    required_assets += [f'data2-end{number:02}.png' for number in (*range(5, 21), 26)]
-    required_assets += ['data-exe-ending-story.png', 'data-exe-ending-card.png']
-    for name in required_assets:
-        if not (assets / name).is_file():
-            raise RuntimeError(f'Original asset missing: {assets / name}')
-    if len(list((assets / 'midi').glob('*.mid'))) != 17 or len(list((assets / 'wav').glob('*.wav'))) != 8:
-        raise RuntimeError('Expected the original 17 MIDI tracks and 8 WAV effects')
+    for folder in ('Data3', 'Data2', 'Midi', 'Wav'):
+        if not (original / folder).is_dir():
+            raise RuntimeError(f'Original media directory missing: {original / folder}')
     output.mkdir(parents=True, exist_ok=True)
     for name in required:
-        shutil.copy2(binaries / name, output / name)
-    for file in assets.rglob('*'):
-        if file.is_file() and file.suffix.lower() in ('.png', '.wav', '.mid'):
-            target = output / 'assets' / file.relative_to(assets)
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(file, target)
-    licenses = args.build_dir.resolve() / 'vcpkg_installed/x64-windows-static/share'
+        shutil.copy2(binaries / name, output / ('TSW.exe' if name == 'tos_baseline.exe' else name))
+    for folder in ('Data', 'Data3', 'Data2', 'Midi', 'Wav'):
+        if not (original / folder).is_dir():
+            continue
+        for file in (original / folder).iterdir():
+            if file.is_file() and file.suffix.lower() in ('.bmp', '.oz', '.wav', '.mid'):
+                target = output / folder / file.name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(file, target)
+    licenses = build / 'vcpkg_installed/x64-windows-static/share'
     for file in licenses.glob('*/copyright'):
         target = output / 'licenses' / (file.parent.name + '.txt')
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(file, target)
-    for name in ('FIDELITY.md', 'THIRD_PARTY.md'):
-        shutil.copy2(BASELINE / name, output / name)
-    (output / 'validation').mkdir(exist_ok=True)
-    for name in ('differential-report.json', 'interaction-report.json', 'callback-report.json', 'item-report.json'):
-        report = json.loads((BASELINE / name).read_text(encoding='utf-8'))
+    shutil.copy2(BASELINE / 'THIRD_PARTY.md', output / 'THIRD_PARTY.md')
+    fidelity = (BASELINE / 'FIDELITY.md').read_text(encoding='utf-8')
+    fidelity = re.sub(r'\[([^]]+)\]\(\.\./docs/[^)]+\)', r'\1', fidelity)
+    (output / 'FIDELITY.md').write_text(fidelity, encoding='utf-8')
+    validation = output / 'validation'
+    validation.mkdir(exist_ok=True)
+    for name in ('differential', 'interaction', 'callback', 'item'):
+        source = BASELINE / f'{name}-report.json'
+        report = json.loads(source.read_text(encoding='utf-8'))
         if report['passed'] != report['scenarios'] or report['failures']:
-            raise RuntimeError(f'Unresolved fidelity comparisons in {name}')
-        shutil.copy2(BASELINE / name, output / 'validation' / name)
-    presentation_path = args.build_dir.resolve() / 'presentation-checks/presentation-report.json'
-    presentation = json.loads(presentation_path.read_text(encoding='utf-8'))
-    if presentation['passed'] != len(presentation['checks']) or presentation['passed'] < 131:
-        raise RuntimeError('Unresolved presentation checks; run CTest before packaging')
-    shutil.copy2(presentation_path, output / 'validation/presentation-report.json')
+            raise RuntimeError(f'Unresolved fidelity comparisons in {source.name}')
+        shutil.copy2(source, validation / source.name)
+    for folder, name, minimum in [('presentation-checks', 'presentation-report.json', 131),
+                                   ('asset-checks', 'asset-report.json', 71)]:
+        source = build / folder / name
+        report = json.loads(source.read_text(encoding='utf-8'))
+        if report['passed'] < minimum or ('checks' in report and report['passed'] != len(report['checks'])):
+            raise RuntimeError(f'Unresolved {name}; run CTest before packaging')
+        shutil.copy2(source, validation / name)
     (output / 'PLAY.txt').write_text(
-        'Tower of the Sorcerer 1.2 - readable original baseline\n'
-        'Start tos_baseline.exe. Keep assets/ and music.sf2 beside the executable.\n\n'
-        'Arrow keys / WASD: move. Enter / Space: continue dialogue.\n'
-        'Enter / Space or Continue: leave the ending card and start the backside tower.\n'
-        'Left item sprites: inspect an item, then click Use or press Enter. I: inventory overlay.\n'
-        'Up/Down + Enter: Orb of Flight. Esc: cancel or close an overlay.\n'
-        'F6: eight save slots. F7: eight load slots. Also available from the Game menu.\n'
-        'Save/load picker: 1-8 or arrows to select, Enter to save/replace/load, Esc to close.\n'
-        'F5: quick save. F9: quick restore. F8: last Fairy checkpoint.\n'
-        'F2: new game. M: mute. Options menu: 1x / 3x / 10x walking and animation speed.\n'
-        'Hero Orb: View enemies for this floor\'s stats and damage forecasts. Scroll or use Up/Down.\n'
-        'The bottom-right panel retains the last defeated enemy while you walk.\n'
-        'Fairy checkpoints are saved automatically after her dialogue and animation finish.\n\n'
-        'Eight independent manual files: slot-1.save through slot-8.save.\n'
-        'Quick save and Fairy checkpoint are separate; replacing a file keeps its previous .bak.\n'
-        'The load picker pauses pending commands. Empty/damaged slots cannot be loaded.\n'
-        'Backside uses the original red panels and cycle-specific 50F Zeno branches.\n\n'
-        'Default saves: %APPDATA%/TosOriginalBaseline on Windows.\n'
-        'Optional command line: tos_baseline.exe --save-dir DIRECTORY\n'
-        'Run baseline_tests.exe for the core regression checks.\n'
-        'See FIDELITY.md for tested coverage and presentation/save differences.\n'
-        'Original game/artwork: Oz & Kenichi / Shigemasa Ozawa.\n', encoding='utf-8')
-    hashes = {str(file.relative_to(output)).replace('\\', '/'): hashlib.sha256(file.read_bytes()).hexdigest()
+        'Tower of the Sorcerer 1.2 - faithful C++ baseline\n'
+        'Start TSW.exe beside Data3/, Data2/, Midi/ and Wav/.\n'
+        'The original BMP/OZ/MIDI/WAV files keep their names and formats.\n'
+        'Ending pictures and the MIDI soundfont are embedded; no extra runtime is needed.\n\n'
+        'For an existing installation, keep the old EXE as TSW.original.exe, then copy the new TSW.exe.\n'
+        'The replacement does not import original .dat saves, rankings or preferences.\n\n'
+        'Arrows / WASD: walk. Enter / Space: continue dialogue and the ending card.\n'
+        'Click owned items or press I for inventory. Flight: Up/Down, Enter to travel, Esc to cancel.\n'
+        'F6 / F7: eight save / load slots. 1-8 or arrows: select. Enter: confirm. Esc: close.\n'
+        'F5 / F9: quick save / restore. F8: completed Fairy checkpoint.\n'
+        'F2: new game. M: mute. Options: 1x / 3x / 10x walking and animation speed.\n'
+        'Saves: %APPDATA%/TosOriginalBaseline. Replace keeps a .bak.\n'
+        'Optional: --assets DIRECTORY (original or PNG layout), --save-dir DIRECTORY.\n\n'
+        'See FIDELITY.md for evidence and limits, THIRD_PARTY.md and the license files for attribution.\n',
+        encoding='utf-8')
+    hashes = {file.relative_to(output).as_posix(): hashlib.sha256(file.read_bytes()).hexdigest()
               for file in sorted(output.rglob('*')) if file.is_file() and file.name != 'package-manifest.json'}
-    (output / 'package-manifest.json').write_text(json.dumps({'version': '0.1', 'files': hashes}, indent=2) + '\n', encoding='utf-8')
+    (output / 'package-manifest.json').write_text(
+        json.dumps({'version': '0.2', 'layout': 'original', 'files': hashes}, indent=2) + '\n', encoding='utf-8')
     archive = shutil.make_archive(str(output), 'zip', root_dir=output.parent, base_dir=output.name)
-    print(f'Portable game: {output / "tos_baseline.exe"}')
-    print(f'Archive: {archive}')
+    drop_in = output.parent / 'tos-original-baseline-0.2-drop-in.zip'
+    with zipfile.ZipFile(drop_in, 'w', compression=zipfile.ZIP_DEFLATED) as package:
+        for file in sorted(output.rglob('*')):
+            relative = file.relative_to(output)
+            if file.is_file() and (len(relative.parts) == 1 and file.name not in
+                                   ('baseline_tests.exe', 'tos_baseline_probe.exe', 'package-manifest.json')
+                                   or relative.parts[0] == 'licenses'):
+                package.write(file, relative.as_posix())
+    print(f'Replacement EXE: {output / "TSW.exe"}')
+    print(f'Original-layout package: {archive}')
+    print(f'EXE and licenses only: {drop_in}')
     print(f'{len(hashes)} files; ZIP SHA-256 {hashlib.sha256(Path(archive).read_bytes()).hexdigest()}')
 
 

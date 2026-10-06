@@ -1,0 +1,31 @@
+# Original form pictures must survive replacement of TSW.exe; MIDI synthesis needs its bank too.
+if(WIN32)
+    enable_language(RC)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    set(original_exe "$ENV{TOS_ORIGINAL_EXE}")
+    if(NOT original_exe)
+        set(original_exe "D:/Program Files (x86)/Tower of the Sorcerer/TSW.exe")
+    endif()
+    set(BASELINE_ORIGINAL_EXE "${original_exe}" CACHE FILEPATH "Original English Tower of the Sorcerer 1.2 EXE")
+    if(NOT EXISTS "${BASELINE_ORIGINAL_EXE}")
+        message(FATAL_ERROR "Set BASELINE_ORIGINAL_EXE to the original TSW.exe to embed its ending pictures")
+    endif()
+    set(EMBEDDED_ROOT "${CMAKE_CURRENT_BINARY_DIR}/embedded")
+    file(MAKE_DIRECTORY "${EMBEDDED_ROOT}")
+    add_custom_command(OUTPUT "${EMBEDDED_ROOT}/ending-story.bmp" "${EMBEDDED_ROOT}/ending-card.bmp"
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/extract_ui.py"
+            --exe "${BASELINE_ORIGINAL_EXE}" --binary-output "${EMBEDDED_ROOT}"
+        DEPENDS "${BASELINE_ORIGINAL_EXE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/extract_ui.py"
+        VERBATIM)
+    add_custom_target(baseline_embedded_media DEPENDS
+        "${EMBEDDED_ROOT}/ending-story.bmp" "${EMBEDDED_ROOT}/ending-card.bmp")
+    configure_file(cmake/media.rc.in "${EMBEDDED_ROOT}/media.rc" @ONLY)
+    set_source_files_properties("${EMBEDDED_ROOT}/media.rc" PROPERTIES OBJECT_DEPENDS
+        "${EMBEDDED_ROOT}/ending-story.bmp;${EMBEDDED_ROOT}/ending-card.bmp;${SOUNDFONT_ROOT}/music.sf2")
+    target_sources(tos_baseline PRIVATE "${EMBEDDED_ROOT}/media.rc")
+    add_dependencies(tos_baseline baseline_embedded_media)
+    get_filename_component(original_directory "${BASELINE_ORIGINAL_EXE}" DIRECTORY)
+    target_compile_definitions(tos_baseline PRIVATE BASELINE_ORIGINAL_ASSETS="${original_directory}")
+else()
+    target_compile_definitions(tos_baseline PRIVATE BASELINE_ORIGINAL_ASSETS="")
+endif()

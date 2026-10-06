@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(tos_original_baseline VERSION 0.1 LANGUAGES C CXX)
+project(tos_original_baseline VERSION 0.2 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -67,10 +67,31 @@ if(BASELINE_GUI)
         DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
     FetchContent_MakeAvailable(tinysoundfont)
     include(cmake/Soundfont.cmake)
-    add_executable(tos_baseline src/desktop.cpp src/presentation.cpp src/presentation_checks.cpp src/audio.cpp)
-    add_test(NAME original_presentation COMMAND tos_baseline
+    add_executable(tos_baseline src/desktop.cpp src/presentation.cpp src/presentation_checks.cpp src/audio.cpp
+        src/assets.cpp src/embedded_media.cpp src/asset_checks.cpp)
+    include(cmake/EmbeddedMedia.cmake)
+    if(raylib_FOUND)
+        find_path(BASELINE_STB_INCLUDE_DIR NAMES stb_image.h REQUIRED)
+    else()
+        set(BASELINE_STB_INCLUDE_DIR "${raylib_SOURCE_DIR}/src/external")
+    endif()
+    target_include_directories(tos_baseline SYSTEM PRIVATE "${BASELINE_STB_INCLUDE_DIR}")
+    if(WIN32)
+        set(presentation_assets "${original_directory}")
+    else()
+        set(presentation_assets "${CMAKE_CURRENT_SOURCE_DIR}/../web/assets")
+    endif()
+    add_test(NAME original_presentation COMMAND tos_baseline --assets "${presentation_assets}"
         --presentation-test "${CMAKE_CURRENT_BINARY_DIR}/presentation-checks")
     set_tests_properties(original_presentation PROPERTIES TIMEOUT 60)
+    if(WIN32 AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../web/assets/original-atlas.png")
+        add_test(NAME original_assets COMMAND tos_baseline --assets "${original_directory}"
+            --compare-assets "${CMAKE_CURRENT_SOURCE_DIR}/../web/assets"
+            --asset-test "${CMAKE_CURRENT_BINARY_DIR}/asset-checks")
+        add_test(NAME extracted_presentation COMMAND tos_baseline --assets "${CMAKE_CURRENT_SOURCE_DIR}/../web/assets"
+            --presentation-test "${CMAKE_CURRENT_BINARY_DIR}/extracted-presentation-checks")
+        set_tests_properties(original_assets extracted_presentation PROPERTIES TIMEOUT 60)
+    endif()
     target_include_directories(tos_baseline SYSTEM PRIVATE ${tinysoundfont_SOURCE_DIR})
     target_link_libraries(tos_baseline PRIVATE baseline_core raylib)
     if(raylib_FOUND)
@@ -87,10 +108,13 @@ if(BASELINE_GUI)
         target_compile_options(tos_baseline PRIVATE -Wall -Wextra -Wpedantic)
     endif()
     add_custom_command(TARGET tos_baseline POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SOUNDFONT_ROOT}/music.sf2 $<TARGET_FILE_DIR:tos_baseline>/music.sf2
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SOUNDFONT_ROOT}/LICENSE.txt $<TARGET_FILE_DIR:tos_baseline>/GeneralUser-GS-LICENSE.txt
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${tinysoundfont_SOURCE_DIR}/LICENSE $<TARGET_FILE_DIR:tos_baseline>/TinySoundFont-LICENSE.txt
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${RAYLIB_LICENSE} $<TARGET_FILE_DIR:tos_baseline>/raylib-LICENSE.txt)
+    if(NOT WIN32)
+        add_custom_command(TARGET tos_baseline POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${SOUNDFONT_ROOT}/music.sf2 $<TARGET_FILE_DIR:tos_baseline>/music.sf2)
+    endif()
     if(MINGW)
         target_link_options(tos_baseline PRIVATE -static-libgcc -static-libstdc++)
         target_link_options(tos_baseline_probe PRIVATE -static-libgcc -static-libstdc++)

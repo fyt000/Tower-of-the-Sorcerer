@@ -145,21 +145,21 @@ struct Presentation::Art {
     Texture2D atlas{};
     std::unordered_map<int, Texture2D> masked, icons;
     std::unordered_map<std::string, Texture2D> scenes;
-    explicit Art(const std::filesystem::path& assets) {
-        atlas_image = LoadImage((assets / "original-atlas.png").string().c_str());
-        background_image = LoadImage((assets / "original-background-atlas.png").string().c_str());
-        if (!IsImageValid(atlas_image) || !IsImageValid(background_image))
-            throw std::runtime_error("Original color and mask atlases are required.");
+    explicit Art(const Assets& assets) {
+        atlas_image = assets.image("original-atlas");
+        background_image = assets.image("original-background-atlas");
+        if (atlas_image.width != 440 || atlas_image.height != 800 || background_image.width != 440 ||
+            background_image.height != 600)
+            throw std::runtime_error("Original color and mask atlases have unexpected dimensions.");
         atlas = LoadTextureFromImage(atlas_image);
-        for (const auto& entry : std::filesystem::directory_iterator(assets))
-            if (entry.path().extension() == ".png" && entry.path().filename().string().starts_with("data"))
-                scenes.emplace(entry.path().stem().string(), LoadTexture(entry.path().string().c_str()));
-        for (const char* name :
-             {"data3-left", "data3-leftr", "data3-center", "data3-right", "data3-rightr", "data3-title05",
-              "data3-title05r", "data3-open0", "data3-open1", "data3-open2", "data2-end05", "data2-end20",
-              "data2-end26", "data-exe-ending-story", "data-exe-ending-card"})
-            if (!scenes.contains(name) || !IsTextureValid(scenes.at(name)))
-                throw std::runtime_error(std::string("Original scene artwork missing: ") + name);
+        for (const auto name : SceneImageNames) {
+            auto image = assets.image(name);
+            auto texture = LoadTextureFromImage(image);
+            UnloadImage(image);
+            if (!IsTextureValid(texture))
+                throw std::runtime_error("Unable to upload original scene artwork: " + std::string(name));
+            scenes.emplace(std::string(name), texture);
+        }
     }
     ~Art() {
         for (auto [key, texture] : masked)
@@ -214,7 +214,7 @@ struct Presentation::Art {
     }
 };
 
-Presentation::Presentation(const std::filesystem::path& assets) : art_(std::make_unique<Art>(assets)) {
+Presentation::Presentation(const Assets& assets) : art_(std::make_unique<Art>(assets)) {
     canvas_ = LoadRenderTexture(CanvasWidth, CanvasHeight);
     scene_cache_ = LoadRenderTexture(CanvasWidth, ContentHeight);
     SetTextureFilter(canvas_.texture, TEXTURE_FILTER_POINT);

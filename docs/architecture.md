@@ -1,239 +1,90 @@
-# Shared Rust interface and platform boundaries
+# Game architecture
 
-`tos-core` owns the complete deterministic simulation: movement, path planning,
-combat, shops, items, event predicates, tower cycles, inspection gates and save
-validation. It has no graphics, audio, browser, filesystem or wall-clock dependency.
-The CLI, JSONL headless runner and stdio MCP server all use this engine directly.
+The repository separates a faithful C++ baseline from the existing Rust rewrite.
+They share original content and research evidence, but do not share gameplay
+implementations or save formats. The C++ baseline is the reference for checking
+future changes; replay, TUI and other experiments can be developed separately.
 
-Resolved battles retain factual records alongside their activity text. A stable
-`log_start` offset associates each `battle_log` record with its retained activity
-ID; trimming the 100-entry log prunes matching records. Saves preserve these
-facts and default to an empty battle history for older files. Records contain
-encountered enemy stats, actual damage/rewards and resolved strikes, with no
-authored quest or acquisition data. Presentation effects carry the matching ID
-and record so the UI publishes them when that battle finishes, while later
-events remain outside the visible activity history.
+## C++ core
 
-The hot-reload MCP entry point is `tools/mcp-server.mjs`: a persistent Node
-stdio bridge supervising the native Rust MCP worker. `tools/build-mcp.mjs`
-builds only the CLI, and `tools/mcp-deployment.mjs` smoke-tests and publishes an
-immutable executable before atomically replacing `dist/mcp/current.json`.
-The full build publishes through the same deployment function. Workers run
-versioned copies, avoiding Windows locks on Cargo's output.
+`baseline_core` owns hero state, 51 floors, 33 shared monster rows, inventory,
+dialogue continuations and pending original commands. It has no graphics, audio
+or Windows dependency. Maps, monster constants and dialogue are compiled into
+`src/original_constants.hpp` from the supported executable.
 
-Before forwarding a request after activation, the bridge asks the active
-worker to write a private file checkpoint containing the complete engine,
-latest action timeline, opaque player checkpoints and their ID counter. The
-candidate worker validates its campaign and restores that file before the old
-worker is stopped. Failed restoration keeps the existing process untouched;
-that activation is skipped until a different activation is published. The
-bridge never reads the checkpoint payload. Migration methods are unavailable
-on the public bridge and require the private worker startup flag natively.
-Requests share one ordered queue, and a failed or timed-out action is never
-automatically retried. Connection shutdown closes workers and removes the
-temporary session checkpoint; this is hot reload, not durable crash recovery.
-
-Player MCP uses `Engine::player_observation` / `inspect_player_tile` from
-`observation.rs`, separate from diagnostic `snapshot` / `inspect`. This
-projection exposes current appearances, played consequences and dialogue
-choices without secret behavior IDs, future maps or script bookkeeping.
-Explicit `--developer` access exposes diagnostic snapshots, simulations and
-the campaign resource for offline research. Both use the same simulation.
-The later [original item audit](original-item-audit.md) describes corrected
-item rules and GUI migrations for known earlier bundled campaign revisions.
-
-`tos-ui` implements the game interface and campaign editor in Rust using
-[eframe/egui](https://docs.rs/eframe/0.36.2/eframe/). Desktop runs a native window
-with OpenGL; WebAssembly uses WebGL in a single canvas. The same Rust code handles
-layout, keyboard/touch/pointer input, tile painting, sprite animation, battle
-turns, conversations, journal, settings, language switching and the visual editor.
-The browser's handwritten JavaScript only initializes the generated WebAssembly
-module. There is no native WebView or second game UI to keep synchronized.
-
-## Input and responsibility boundaries
-
-Commands follow one path across all clients:
+A player action follows this path:
 
 ```text
-JSON / MCP arguments → Command deserialization + validation
-                    → Engine::execute(Command)
-                    → game state + ordered presentation messages
+Desktop input → Game::move / use / choose
+              → contact, item, NPC or floor branches
+              → immediate state writes + original command records
+              → Game::run_one()
+              → state, presentation state and sound cues
 ```
 
-`command.rs` owns the closed command schema and `Direction`. It rejects missing
-arguments, wrong types, unknown fields, unknown directions, blank identifiers,
-floors outside `i32`, and flying-item commands without a destination. Its MCP
-schema describes the same variants. `Engine::command_json` and the compatibility
-`Engine::command(Value)` wrapper decode before execution. `Engine::execute`
-checks invariants again for directly constructed Rust commands. The UI also
-validates before changing facing, audio, active animation or queued movement.
+The command record is three 16-bit words: opcode and two operands. `push()`
+appends a record; `commands.back()` executes first, matching the Delphi stack.
+Callbacks remain named enum values dispatched through an explicit switch.
+They can insert further commands, preserving the original continuation order.
+`run_one()` executes one record per call without recursively invoking a timer.
 
-Malformed input returns an error without changing the save or `last_action`.
-A correctly formed move into a wall or an unavailable shop choice is a normal
-game outcome: execution returns `Ok(())`, with `last_action.ok = false` and an
-explanation. An owned quest tag without a usable action is also blocked without
-consuming it. Item ownership,
-visited floors, gold and conversation state are gameplay decisions, so those
-checks belong in the engine rather than in the JSON parser. The CLI and MCP
-adapters handle their own transport envelopes and use this shared command type.
+Combat emits one strike at a time with bounded queue memory while retaining
+ordinary/forced attack order, fatal truncation, rewards and post-combat checks.
+The original shared monster rows remain shared: Zeno's gate/seal arithmetic
+changes that row rather than creating independent enemy instances.
 
-Campaign construction has a similar boundary. `Engine::from_json` decodes the
-authored document; both it and `Engine::new(Campaign)` validate it before
-creating a playable session. `Campaign::validate` checks geometry, references,
-known rule types, bounds, merged interaction overrides and script fields.
-`Rules::compile` resolves supported options and defaults into typed runtime
-rules. `CompiledScripts::compile` produces typed events, conditions, effects,
-offers, custom items, tile behavior and location-specific conversation overrides.
-Gameplay matches those types, along with `TileKind`, `EnemySpecial`,
-`Stat`, `KeyColor` and the internal game status. The engine's campaign is private
-and available through a shared accessor. Editing constructs a new validated
-engine, keeping compiled behavior consistent with its source.
+| Core file | Responsibility |
+|---|---|
+| `include/baseline/game.hpp` | Named state, tile/item/command IDs and core API |
+| `src/game.cpp` | Initialization, movement, command interpreter and cycles |
+| `src/contact.cpp` | Tile contact, doors, stairs, hazards and floor music |
+| `src/combat.cpp` | Forecasts, strike generation and victory records |
+| `src/items.cpp`, `src/npcs.cpp` | Item loops, Flight, shops and dialogue continuations |
+| `src/floor_checks.cpp`, `src/scenes.cpp` | Explicit floor predicates, scripts and cutscenes |
+| `src/save.cpp`, `src/save_slots.cpp` | Validated saves and eight independent manual slots |
 
-The source files follow these responsibilities:
+Original tile IDs, flag aliases, numeric puzzle sums and script coordinates are
+retained where changing them would obscure source comparison. Named enums and
+constants describe their meaning; concise comments identify source addresses
+and ordering constraints. RAII, fixed arrays and checked arithmetic replace
+unsafe memory access while the branch structure remains recognizable.
 
-| File | Responsibility |
-| --- | --- |
-| `tos-core/src/lib.rs` | Engine construction, command orchestration, inspection and tower cycles |
-| `campaign.rs` / `domain.rs` | Authored content, validation and closed gameplay vocabularies |
-| `rules.rs` | Compile combat, hazards, altar, item gates, travel, scaling and timing options once |
-| `content.rs` | Typed tile footprints, pickup scaling, stair direction and conversation overrides |
-| `command.rs` | Command decoding, validation, error type and MCP schema |
-| `observation.rs` | Player observations that preserve hidden-passage and puzzle discovery |
-| `events.rs` | Typed script representation, compilation, validation and execution |
-| `navigation.rs` / `combat.rs` | Paths, movement, hazards, stairs and shared combat calculation |
-| `interactions.rs` / `items.rs` | Conversations, purchases, original tools and custom item effects |
-| `stats.rs` | Exhaustive access and saturating mutation of player statistics |
-| `persistence.rs` | Save schema, atomic load validation and stable campaign fingerprint |
-| `presentation.rs` | Typed action results and ordered renderer messages for committed gameplay |
-| `original.rs` | Named, documented compatibility defaults from the original mechanics |
+## Desktop and media
 
-JSON remains intentional for campaign authoring and editor round trips,
-extension metadata, save interchange and observations. The original authored
-`Campaign.rules` and tile extensions remain intact for editing and campaign
-fingerprints. Runtime mechanics consume their compiled equivalents: there are
-no rule-key lookups during combat, movement, item use or purchases. Conversations
-resolve typed overrides instead of serializing, merging and reparsing a tile.
+`desktop.cpp` translates keyboard/mouse actions and advances commands on a
+scaled clock. `presentation.cpp` owns raylib textures, the 11×11 board and
+original 800×500 content proportions, panel artwork and scene compositor.
+Walking input and animation use the same selected clock. Dialogue, items,
+shops, enemy forecasts and saves use overlays.
 
-`ActionResult` and the tagged `Presentation` enum cover dialogue, waits, audio,
-journal updates, movement, tile writes, floor changes, battles, magic damage and
-cinematics. Battle parameters and their resolved log facts use concrete types.
-Private runtime checkpoints retain these types; JSON is serialized at client
-and checkpoint boundaries. Version-1 save/checkpoint interchange stays compatible.
-The pending-conversation display envelope and journal entries still use JSON;
-their gameplay choices and effects execute compiled offers and scripts.
-Item IDs and flags remain strings so campaigns can define new resources and
-quest tags. Original built-in tools are selected by their existing item IDs;
-custom tools execute compiled effects. Cinematic headers and tile-transition
-coordinates are typed; additional artwork fields remain renderer extensions.
-Sprite definitions, audio configuration and player-facing item descriptions are
-also presentation metadata. This keeps campaign extensions editable while
-removing dynamic decoding from gameplay execution. It is a content compiler and
-deterministic engine boundary, rather than a general-purpose plugin system.
+`assets.cpp` reads either the original `Data3/Data2/Midi/Wav` layout or the
+older extracted PNG layout. `.oz` sprite sheets are decoded as BMPs using
+`stb_image`; raylib uploads the resulting images and applies the original masks.
+The replacement embeds the two original form pictures and GeneralUser GS bank
+as PE resources. `embedded_media.cpp` reads them through standard file I/O,
+without direct Windows API calls. Assets are read during loading, not per frame.
 
-An omitted configurable rule may use its documented default. A supplied
-malformed rule fails import; for example, a condition object cannot become an
-empty list and silently pass. Internal `expect`/assertions and observation
-envelope access document invariants established by input validation or
-JSON-serializable concrete types. They do not recover by silently
-discarding effects or replacing a bad interaction. Invalid cached/custom
-campaigns are preserved in recovery storage and reported by the UI before it
-loads the bundled fallback.
+`audio.cpp` parses MIDI outside the audio callback's lock and synthesizes it
+through TinySoundFont. The callback uses preallocated synth voices and sample
+progress, independent of command speed. Original WAV effects are decoded from
+memory. Fonts use installed Segoe UI when available and raylib's fallback
+otherwise; system fonts are not distributed.
 
-Original mechanics such as the backside ×44 multiplier, ten-floor scaling,
-elixir attack ×10 + defense ×5, three Warp Staff charges and bomb tile families
-are named in `original.rs`. Import limits (map sides 64, floors 256, stats one
-billion), save limits and standard FNV hash constants are documented separately.
-The save wire version stays at 1 and added state fields have legacy defaults.
-Changed campaign rules intentionally change its fingerprint; the GUI migrates
-known bundled revisions with recovery copies, while unknown/custom revisions
-remain strictly checked. The current canonical fingerprint is regression-tested.
+Save files capture completed gameplay state, including normalized shared monster
+rows. They omit pending commands and presentation snapshots. Loading parses
+into a temporary `Game`, validates it, then replaces the live state. The Fairy
+checkpoint is written after her dialogue and animation finish.
 
-## Simulation and presentation
+## Existing Rust implementation
 
-Each command commits the deterministic result immediately and emits an ordered
-`last_action.presentation` timeline. This timeline contains movement, combat
-parameters, tile changes, original dialogue, waits, sound cues and cinematics.
-The graphical client retains the previous visual state and plays those events
-in order before accepting the next gameplay input. An AI/headless client can
-ignore their duration and continue immediately. Animations never apply damage,
-grant items or rewrite the saved map: those effects belong to the engine.
+`tos-core` is a deterministic engine with configurable campaign rules, scripts,
+commands and observations. `tos-ui` provides the shared egui desktop/browser UI
+and campaign editor. CLI, headless and MCP adapters call that engine; Node scripts
+build and launch its clients. This architecture is retained. The C++ baseline
+uses explicit original branches instead of importing Rust event definitions.
 
-Combat events include the starting HP, damage per strike, retaliation count and
-first-strike order. This lets the GUI display alternating hits and the arithmetic
-without recalculating a separate combat rule. Original event extraction retains
-ordered guard movements, dialogue and audio cues rather than collapsing them to
-a final map. Original wait records do not encode a portable number of milliseconds;
-the remake's presentation durations remain tunable approximations.
-
-Click routes use `Engine::path_to`. Only clear road can be an intermediate square.
-A selected enemy, door, pickup, NPC or staircase can be the final action. An
-unreachable target yields the clear-road prefix nearest that square; it cannot
-make the hero cross an intervening enemy or door. Floor changes and conversations
-interrupt a queued route. MCP's `plan_path` exposes the same read-only planner.
-
-## Native functionality
-
-The native `tos-ui` executable provides the full graphical game and editor,
-including original textures, both hero walking frames, enemy animation, scripted
-events, dialogue, sound effects, music, language switching and resizable/DPI-aware
-layout. It uses local asset files and Rodio for sound output. It embeds the default
-campaign but loads art, music and fonts at runtime, keeping original media out of
-the executable and the source repository. `--campaign`, `--assets-root` and
-`--editor` support alternate content and direct editor launch.
-
-Native saves use the same portable JSON as browser/CLI/MCP. They are stored in
-the user's application-data directory under `tos-rust`; `TOS_STORAGE_DIR` can
-redirect that location for tests or portable deployments. Browser saves use
-`localStorage`. Checkpoints and autosaves are separate. A campaign fingerprint
-rejects an incompatible save before any state is mutated.
-
-The shared state also stores Wisdom's recorded hints and first-hearing flags.
-Original clue IDs remain private persistence metadata; the renderer and player
-observation receive encountered text/location records only while Wisdom is
-owned. Original clues follow source order and reset on a new tower cycle.
-`save_unlocked` enforces the Hero Orb rule for manual player saves; recovery
-autosave and private MCP runtime serialization remain available throughout.
-Flight's original stair upper bound is persisted separately from visited maps.
-
-The small `platform` module handles byte loading, persistence and JSON export.
-The audio module decodes the extracted WAV files and synthesizes MIDI to PCM in
-Rust. WebAudio and Rodio play the same PCM. The synthesizer retains score notes,
-timing and instrument programs, but its oscillator timbres approximate the old
-hardware MIDI sound bank. The current synthesizer ignores MIDI controllers,
-including sustain and expression, and pitch bend; it renders at most 180 seconds
-per score into mono PCM. It is a portable music implementation rather than an
-exact emulation of Windows MIDI output. Original WAV effects are used directly.
-
-## What an Android build would require
-
-There is no Android package in this pass. The Rust simulation, presentation,
-editor, localization, sprite processing and MIDI synthesis are already reusable.
-[Eframe 0.36.2 exposes Android activity backends](https://docs.rs/eframe/0.36.2/eframe/#feature-flags)
-through `android-game-activity` and `android-native-activity`; its
-[Android-only `NativeOptions.android_app` field](https://docs.rs/eframe/0.36.2/src/eframe/epi.rs.html#394-402)
-passes the activity handle to the event loop. This gives the project a concrete
-platform port path. No Android entry point, package, or device behavior is
-implemented or verified here.
-
-The remaining Android work is concrete:
-
-1. Add an `android_main` activity entry point, a `cdylib` build target, and the
-   chosen Eframe/Winit activity feature; pass the received activity handle to
-   `NativeOptions.android_app`. Configure the NDK, Android targets, manifest and
-   APK/AAB build. [Winit's Android integration guide](https://docs.rs/winit/0.30.13/winit/platform/android/)
-   documents the matching activity glue version and the different packaging
-   requirements of NativeActivity and GameActivity.
-2. Load extracted assets and the Chinese font from Android assets instead of
-   desktop paths, and map persistence/export/import to Android app storage and
-   the document picker. Do not package proprietary assets into a public release
-   by default.
-3. Connect audio to the Android-supported output backend and handle activity
-   pause/resume, audio focus and interrupted playback.
-4. Test touch input, portrait layout, safe areas, high DPI, virtual keyboards,
-   back navigation, and background/resume save behavior on actual devices.
-5. Profile GPU usage, memory used by PCM/font caches and startup time on mobile;
-   adjust loading and synthesis as necessary before shipping.
-
-Desktop and browser verification does not establish those Android lifecycle and
-device behaviors. The platform boundary keeps that future work contained while
-the game and editor remain a single Rust implementation.
+The comparison tools execute original x86 handlers and a compiled C++ probe.
+Core tests execute command playback; presentation tests check frames and scenes;
+asset tests compare original decoded pixels and audio bytes with the extracted
+versions. [Fidelity notes](../baseline/FIDELITY.md) state what this evidence proves
+and what remains unverified.

@@ -22,6 +22,7 @@ def main():
     parser.add_argument('--exe', type=Path, default=Path(os.environ.get(
         'TOS_ORIGINAL_EXE', r'D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe')))
     parser.add_argument('--output', type=Path, default=ROOT / 'web/assets')
+    parser.add_argument('--binary-output', type=Path, help='Write original BMP resources for embedding, without PNG conversion')
     args = parser.parse_args()
     raw = args.exe.read_bytes()
     if hashlib.sha256(raw).hexdigest() != ORIGINAL_HASH:
@@ -37,6 +38,18 @@ def main():
                 form = pe.get_data(data.OffsetToData, data.Size)
     if form is None or not form.startswith(b'TPF0'):
         raise RuntimeError('Original Delphi main form was not found')
+    if args.binary_output:
+        args.binary_output.mkdir(parents=True, exist_ok=True)
+        for name, (component, offset) in PICTURES.items():
+            if form[offset:offset + 2] != b'BM' or component.encode() not in form[offset - 120:offset]:
+                raise RuntimeError(f'Unexpected picture header for {component}')
+            length = struct.unpack_from('<I', form, offset + 2)[0]
+            bitmap = form[offset:offset + length]
+            if len(bitmap) != length or struct.unpack_from('<ii', bitmap, 18) != (640, 400):
+                raise RuntimeError(f'Unexpected embedded picture size for {component}')
+            (args.binary_output / f'{name}.bmp').write_bytes(bitmap)
+        print('Prepared the two original ending BMP resources for the replacement executable')
+        return
     slots = []
     for number in range(1, 9):
         entry = dict(number=number, caption=f'Data &{number}')

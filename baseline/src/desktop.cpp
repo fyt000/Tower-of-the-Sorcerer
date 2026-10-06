@@ -9,8 +9,9 @@
 
 using namespace baseline;
 namespace baseline {
-int verify_presentation(Presentation&, const std::filesystem::path&, const std::filesystem::path&);
-}
+int verify_presentation(Presentation&, const std::filesystem::path&, const Assets&);
+int verify_assets(const Assets&, const Assets&, const std::filesystem::path&, const std::filesystem::path&);
+} // namespace baseline
 namespace {
 std::filesystem::path saves() {
     if (const char* appdata = std::getenv("APPDATA"))
@@ -256,24 +257,31 @@ void apply(UiAction action, Game& game, DesktopUi& ui, Presentation& renderer, A
 } // namespace
 
 int main(int argc, char** argv) try {
-    const std::filesystem::path executable = std::filesystem::absolute(argv[0]).parent_path();
-    auto assets = std::filesystem::exists(executable / "assets/original-atlas.png")
-                      ? executable / "assets"
-                      : std::filesystem::path(BASELINE_ASSETS);
+    const std::filesystem::path executable = GetApplicationDirectory();
+    auto executable_file = executable / std::filesystem::path(argv[0]).filename();
+#ifdef _WIN32
+    if (!std::filesystem::exists(executable_file))
+        executable_file += ".exe";
+#endif
+    std::filesystem::path requested_assets;
     auto save_directory = saves();
-    std::filesystem::path screenshot, presentation_test;
+    std::filesystem::path screenshot, presentation_test, asset_test, compare_assets = BASELINE_ASSETS;
     std::string smoke;
     bool audio_test = false, visible_smoke = false;
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
         if (arg == "--assets" && i + 1 < argc)
-            assets = argv[++i];
+            requested_assets = argv[++i];
         else if (arg == "--save-dir" && i + 1 < argc)
             save_directory = argv[++i];
         else if (arg == "--screenshot" && i + 1 < argc)
             screenshot = argv[++i];
         else if (arg == "--presentation-test" && i + 1 < argc)
             presentation_test = argv[++i];
+        else if (arg == "--asset-test" && i + 1 < argc)
+            asset_test = argv[++i];
+        else if (arg == "--compare-assets" && i + 1 < argc)
+            compare_assets = argv[++i];
         else if (arg == "--smoke" && i + 1 < argc)
             smoke = argv[++i];
         else if (arg == "--audio-test")
@@ -289,18 +297,21 @@ int main(int argc, char** argv) try {
                          "--smoke "
                          "initial|capture|stairs|fight|floor10|fairy|items|inventory|item|shop|flight|help|"
                          "backside|ending|enemies|slots\n"
-                         "--visible-smoke --presentation-test DIR\n";
+                         "--visible-smoke --presentation-test DIR\n"
+                         "--asset-test DIR --compare-assets EXTRACTED_DIR\n";
             return 0;
         } else
             throw std::runtime_error("Unknown argument: " + arg);
     }
-    if (!std::filesystem::exists(assets / "original-atlas.png"))
-        throw std::runtime_error("Original assets missing. Run tools/extract_original.py or pass --assets.");
+    Assets assets(Assets::select(executable, requested_assets, BASELINE_ORIGINAL_ASSETS, BASELINE_ASSETS),
+                  executable_file);
+    std::cout << "Assets: " << assets.root()
+              << (assets.original_layout() ? " (original layout)\n" : " (PNG layout)\n");
+    if (!asset_test.empty())
+        return verify_assets(assets, Assets(compare_assets, executable_file), executable_file, asset_test);
     if (audio_test) {
         const auto output = screenshot.empty() ? executable / "midi-test.wav" : screenshot;
-        const bool passed =
-            Audio::verify_tracks(assets, executable / "music.sf2") &&
-            Audio::render_test(assets / "midi/b_067xgw.mid", executable / "music.sf2", output);
+        const bool passed = Audio::verify_tracks(assets) && Audio::render_test(assets, "b_067xgw", output);
         std::cout << (passed ? "MIDI synthesis passed: " : "MIDI synthesis failed: ") << output << '\n';
         return passed ? 0 : 1;
     }
@@ -318,7 +329,7 @@ int main(int argc, char** argv) try {
         if (!presentation_test.empty())
             result = verify_presentation(renderer, presentation_test, assets);
         else {
-            Audio audio(assets, executable / "music.sf2");
+            Audio audio(assets);
             Game game;
             DesktopUi ui;
             fixture(game, ui, smoke);

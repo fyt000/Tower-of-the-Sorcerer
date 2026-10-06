@@ -2,8 +2,10 @@
 
 Original game and artwork: **Oz & Kenichi / Shigemasa Ozawa**, English Windows
 Tower of the Sorcerer 1.2. Maps, dialogue, sprite/scene images, WAV effects and
-MIDI tracks are extracted from the local installation. Original media and the
-generated local distribution are excluded from Git.
+MIDI tracks are read from the local installation. The replacement embeds the
+original form's two ending pictures; external BMP/OZ/MIDI/WAV files keep their
+original formats. Original media and generated local distributions are excluded
+from Git.
 
 The C++ implementation is separate from the original author's Delphi source.
 Its readable translation and probe scripts are in this repository; generated
@@ -12,13 +14,14 @@ Ghidra files are marked as decompiler inspection output.
 | Dependency | Pin | License shipped in package |
 |---|---|---|
 | raylib | 5.5, vcpkg port revision 1 | `raylib-LICENSE.txt`; dependency notices under `licenses/` |
+| stb_image | 2024-07-29, vcpkg port revision 1 | `licenses/stb.txt` |
 | vcpkg catalog | `b5d1a94fb7f88fd835e360fd23a45a09ceedbf48` | Build tool, not distributed with game |
 | TinySoundFont / TinyMidiLoader | `853a0a171759f1ddba0de1442133a75912bbeffa` | `TinySoundFont-LICENSE.txt` |
 | GeneralUser GS | 2.0.3; `684543d5e5efaef08d02be50dcda8d552478fa60` | `GeneralUser-GS-LICENSE.txt` |
 
 GeneralUser GS is by **S. Christian Collins**. The package includes the complete
-soundfont and its license. It supplies the GM programs and drums needed by all
-17 original tracks. Dependency source/downloads live under ignored build/vendor
+soundfont embedded in the executable and its license. It supplies the GM programs
+and drums needed by all 17 original tracks. Dependency source/downloads live under ignored build/vendor
 directories, and CMake verifies their pinned download hashes.
 
 The raylib fallback archive has SHA-256

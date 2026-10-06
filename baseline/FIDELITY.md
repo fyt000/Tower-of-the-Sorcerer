@@ -1,173 +1,57 @@
-# Fidelity and source evidence
+# Fidelity scope
 
-The target is the installed English Windows **Tower of the Sorcerer 1.2**.
-Its executable SHA-256 is:
+The C++ baseline aims to preserve the supported English **Tower of the Sorcerer
+1.2** core decisions, state writes and command order. Its source comes from the
+original Delphi executable, reviewed Ghidra output and assembly, independently
+of the Rust campaign. [Source recovery](../docs/reverse-engineering.md) identifies
+the executable hash and workflow; [architecture](../docs/architecture.md) explains
+the translation; [retained rules](../docs/mechanics.md) identifies important branches.
 
-`41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779`
+## Current evidence
 
-All source addresses below are virtual addresses at image base `0x400000`.
-The original installation is read only. The C++ baseline was translated from
-Ghidra's C-like export and reviewed machine-code fragments, independently of
-the Rust campaign/event definitions.
+| Original-machine comparison | Passing scenarios |
+|---|---:|
+| Floor/guard/door builders and altered-state predicates | 731 |
+| Contact and ordinary/forced combat | 992 |
+| NPCs, continuations, stairs, hazards, capture/ending and Fairy scoring | 426 |
+| Items, cardinal bounds, wings and Flight | 2,067 |
+| Total | 4,216 |
 
-## What is preserved
+These execute isolated original x86 handlers and compare their output with the
+compiled C++ probe. Reports list skipped calls. Unread stale `b` operands in
+HeroStrike/Reward are normalized; other compared operands and orders are retained.
 
-- The original 51 floor records, their two landing-header bytes and 121 map
-  cells, 33 shared monster rows and 268 dialogue/status strings.
-- Explicit contact, item, NPC, arrival and post-combat floor decisions,
-  including altered-state numeric-sum predicates.
-- The original three-word command format and reversed insertion/playback order.
-  Summons, door/wall/lava animation records, movement, speech, callbacks and
-  combat beats retain their builder order.
-- Attack penetration before Cross/Slayer bonuses, forced fights without those
-  bonuses, fatal truncation, raw Bomb rewards, Lucky Gold victory rewards,
-  large-monster body clearing and per-cell Octopus rewards.
-- Item consumption/refusal, cardinal bounds, floor 44 being skipped by stairs
-  and Flight but reachable by wings, normal-stair travel ceiling, last matching
-  stair facing, Flight cleanup and the upward 35F preview side effect.
-- Old-man gifts and hearing flags, merchant purchases/repeated clues, altar
-  pricing/scaling, thief continuations, default Fairy scores/ranking ties and
-  checkpoints, capture, scripted encounters and later cycles.
-- Shared Zeno seal/gate arithmetic and the second-cycle special row. The core
-  does not replace this with independent per-instance monster definitions.
+The **80 core checks** execute complete command stacks, bounded long fights,
+fatal cancellation, dialogue aliases, Fairy restores, all eight save slots,
+replacement backups, cycle carry/reset rules and the 50F gate/seal/wing branches.
+The core has also passed an MSVC AddressSanitizer Release run.
 
-50F Zeno uses these combat values after the backside factor is applied:
+The **131 presentation checks** cover original standing/walking poses, all twelve
+door/wall/lava modes, both stair phases, all 32 Vampire frames, capture and ending
+playback, red panels, Zeno variants and overlays. They run with both original
+and extracted media. The **71 asset checks** establish pixel equality for all
+31 loaded images, unchanged bytes for 17 MIDI tracks and eight WAV effects,
+WAV decoding, embedded media and selection/error handling. All 17 tracks also
+produce finite, nonzero stereo synthesis through the selected bank.
 
-| State | HP | Attack | Defense | Behavior |
-|---|---:|---:|---:|---|
-| Frontside | — | — | — | Contact starts the original ending sequence |
-| Backside cycle 2 | 44,000 | 27,500 | 5,500 | Fixed shared row; gate sequence forces an enemy-first fight |
-| Backside cycle 3+, restored row | 352,000 | 220,000 | 44,000 | Ordinary contact fights the current shared row |
-| Backside cycle 3+, re-sealed row | 35,200 | 22,000 | 4,400 | A new 49F seal after gate entry remains effective on 50F contact |
+Desktop smoke checks cover command pause/resume, numbered saves, Fairy
+checkpoints and the ending at the installed high-DPI setting. The replacement
+is also tested as `TSW.exe` beside only copied original media folders, without
+an external soundfont, extracted PNGs or original EXE.
 
-The 24F gate sequence removes an existing seal by multiplying the shared row
-by ten, then installs the fixed row only in cycle 2. Later cycles keep the
-restored row. Backside victories play their closing scene and initialize the
-next cycle. Saves retain normalized rows and both cycle flags.
+## Deliberate differences and remaining work
 
-Two aliases matter: the 2F stat gift is continuation slot 18, and the 16F
-Elixir gift is slot 29. The 42F arrival flag is continuation slot 51. Separate
-duplicates would change later branches. Equipment acquisition flags are 0/1;
-the original odd Holy Sword `== 35` check is still present. A clue first heard
-without Wisdom stays unrecorded on later visits, even after acquiring Wisdom.
+- Command execution is iterative and combat memory is bounded; legacy recursive
+  timers and fixed stack buffers are replaced while command order is preserved.
+- raylib provides rendering, input and audio. Original board proportions, assets,
+  masks and scene stages remain; GUI overlays, fonts, settings and timing are modern.
+- MIDI uses TinySoundFont/GeneralUser GS, so instrument timbre differs from a
+  Windows MIDI device. Uninterrupted audio on every device is not established.
+- Saves are versioned and validated, with backups and independent manual/quick/Fairy
+  files. Legacy `.dat` saves, preferences and custom rankings are not imported.
+- Tests establish agreement for sampled states and isolated handlers. They do not
+  prove every possible branch, pixel-exact Delphi compositing, exact legacy timer
+  durations or a full natural tower playthrough.
 
-## Executable comparisons
-
-Reports are generated by executing isolated original x86 handlers with Unicorn
-and comparing them to the **compiled C++ probe**. The scripts pin the original
-hash and list skipped calls. They follow reviewed gameplay helpers; VCL/RTL
-rendering, string, file and device operations are not emulated.
-
-| Report | Scenarios | Compared |
-|---|---:|---|
-| `differential-report.json` | 731 | Floor/guard/door builders across all 51 floors, all-road and altered maps, read-dependent mutations, flags, maps and shared monster writes |
-| `interaction-report.json` | 992 | Contact/stat writes and exact ordinary/forced combat records, wins, deaths, cycles, Cross/Slayer, large monsters |
-| `callback-report.json` | 426 | Old men, trades, altar choices, continuations, stairs, hazards, capture/ending and default Fairy score/rank/music branches |
-| `item-report.json` | 2,067 | Active item builders, all byte tile inputs for cardinal items, all board coordinates, wings, whole-floor tools, Flight confirmation/preview |
-
-All 4,216 comparisons pass for the delivered Release build. For combat, the
-unread `b` fields of HeroStrike and Reward records are normalized; some original
-builders leave stale buffer contents there. All other compared operands and
-orders are retained. Flight preview selects a GUI floor in modern UI state;
-its cleanup writes/direction are compared while the hero remains on the source
-floor until confirmation.
-
-The 80 core regression checks additionally execute complete command stacks, long
-fights with bounded queue memory, death cancelling pending rewards, 42F flag
-aliasing, repeated hearing, normalized save round trips, malformed save
-rejection and completed Fairy checkpoint restores. They cover all eight manual
-slots, replacement backups, independent quick/Fairy files, cycle carry/reset rules,
-the second-cycle gate's forced fight, later-cycle gate/seal/wing return, and
-complete restored 50F fights for each backside variant. The core also passes an
-MSVC AddressSanitizer Release run. Desktop smoke scenarios exercise startup,
-stairs, combat, capture, 10F, Fairy autosave/load and numbered save/load actions at the installed high-DPI
-setting. All 17 MIDI tracks have their requested presets and produce finite,
-nonzero stereo synthesis.
-
-The desktop uses the original Data3 panel/frame images and 800×500 content
-proportions. Presentation checks execute all 12 door/wall/lava modes and compare
-the final rendered cell to the committed map tile. They also check both stair
-phases, all 32 Vampire transformation frames, capture's 16 dissolve callbacks
-and 308 wipe callbacks, and the ending's tower/collapse/story/closing-card stages.
-The final capture dissolve matches the fully revealed opening image. UI snapshots
-cover all 15 item detail views, inventory, shops, Flight, Help, large stat
-values, enemy inspection and scrolling Wisdom. Capture/closing MIDI selection is
-retained in the desktop audio layer. The 131 checks include image exports; they
-do not compare raylib pixels against a running Delphi renderer. A desktop ending
-smoke verifies that the closing card pauses with the next-cycle commands pending,
-then continues to the backside tower.
-Idle and both walking frames are checked against original atlas images in all
-four directions, allowing one channel level for CPU/GPU blend rounding. Walking
-input and command animations share the selected 1x/3x/10x clock. The enemy panel
-retains a snapshot of the last defeated enemy, independent of hovering or later
-shared-row mutations. Hero Orb forecasts use their own overlay.
-Backside side-panel edges are compared with the recovered red Data3 images;
-the center frame retains its original colors. Slot-picker snapshots cover
-frontside, second/later backside cycles, empty slots, damaged saves and replacement,
-including opening the load picker over paused dialogue. A desktop smoke writes
-all eight files, verifies that the picker pauses pending commands, then restores
-the eighth slot through the same action handler used by keyboard and mouse.
-
-These checks establish agreement for the sampled inputs and isolated handlers.
-They do **not** prove every possible state or branch, a full natural tower
-playthrough, pixel-exact Delphi rendering, exact legacy timer durations or
-uninterrupted audio on every device. There is no measured audio-underrun claim.
-
-## Intentional changes
-
-| Area | Difference |
-|---|---|
-| Timer/stack | `run_one()` is iterative; long fights emit one strike at a time. No nested Windows timer calls or fixed legacy stack buffer. |
-| Desktop | Original Data3 panels/frame and 11×11 map; raylib menus and item/dialogue/Hero Orb overlays, scalable window and shared walking/animation speed controls. Larger Segoe UI Semibold/Bold fonts are optional. The last defeated enemy panel persists during play; saves omit this presentation snapshot. |
-| Animation/compositing | Original records execute in order. Split doors, quarter gates, sliding walls, directional lava wipes, masks, stair spiral and converging-bat transformation follow the recovered routines. Capture/ending use their original artwork and wide proportions; ending story/card images are recovered from the original form. Timer/pixel equivalence is not claimed. |
-| Music | MIDI synthesized through TinySoundFont/GeneralUser rather than Windows MIDI. Timing is independent of gameplay; instrument timbre differs. |
-| Saves | Eight manual slots as in the original form, with floor/mode/stat summaries; separate quick save and Fairy checkpoint. Versioned, hash-pinned, validated format, temporary-file replacement with a `.bak`, no legacy `.dat` compatibility. Zeno is restored without the old repeated-load double-scaling bug. |
-| Fairy rankings | Original default temporary tables and tie logic; user-customized legacy ranking files are not imported. Completed checkpoints save to the modern format. |
-| Initialization/settings | Music enabled by default; a new game enters the map. Original title artwork remains in the scripted capture sequence. No original preferences dialog. |
-
-## Source map
-
-| Original entry | C++ responsibility |
-|---|---|
-| `0x455CB8` | `Game::initialize_cycle`, generated original map constants |
-| `0x444490` | `Game::contact` |
-| `0x44C04C`, `0x44C5C4`, `0x44C9F0` | Movement, magician and pincer hazards |
-| `0x442DC8`, `0x442F80`, `0x443050` | Stairs and arrival facing |
-| `0x44A480`, `0x47F7D4`, `0x48028C`, `0x4802FC`, `0x480340` | Combat/forecast and forced combat |
-| `0x4526C0` | `Game::run_one`, command interpreter |
-| `0x443120`, `0x443808` | Separate standing and walking sprite selection in `presentation.cpp` |
-| `0x44B78C` | Persistent encounter information panel; `combat.cpp` captures defeated-enemy stats |
-| `0x4660D0` | `Game::expand_door` |
-| `0x44BC34`, `0x451B98`, `0x451D3C` | Bomb dissolve, Mattock wall and Crystal lava builders |
-| `0x450BC5`, `0x451C20` | Item switch and classifier |
-| `0x44EAF4`, `0x44ED1C`, `0x44ED94` | Flight confirmation and preview |
-| `0x449014`, `0x44E1CC` | Merchant speech and accepting captured offers |
-| `0x449708`, `0x465900`, `0x44DA10` | Old man, thief and dialogue continuation |
-| `0x451E1C`, `0x4520B4`, `0x452360` | Altar HP/attack/defense callbacks |
-| `0x478F0C` | Fairy score, default rank and speech/checkpoint |
-| `0x4664E4`, `0x47BEAC` | Post-combat and door checks |
-| `0x46397C`, `0x46CB1C` | Special-road dispatch and recovered arrival switch |
-| `0x464048`, `0x461A0C`, `0x461EF4` | Capture and scene helper builders |
-| `0x4770E0`, `0x47C978`, `0x482E60` | Door/wall/lava drawing, Vampire convergence and scene compositor in `presentation.cpp` |
-
-`RecoverArrival.java` repairs Ghidra's missed two-level computed jump at
-`0x46CB1C`. `RecoverCallbacks.java` exports Delphi UI callbacks and item helpers
-that initial direct-call analysis missed. Their exports supplement the initial
-106-function corpus; `reference/original/decompiled/INDEX.md` indexes both.
-
-C-like decompiler output is an inspection aid, not the author's source. In
-Ghidra, `_140_4_` means **decimal byte offset 140**, while `field_0x140` means
-hexadecimal offset 320. Register arguments, indirect calls and string cleanup
-must be checked against assembly. The executable comparisons helped catch
-precisely these kinds of interpretation errors.
-
-The embedded `TTSW10` form contains Image21 (ending story) and Image33 (closing
-card). `tools/extract_ui.py` recovers their original 640-by-400 bitmaps from the
-hash-pinned executable. `ui-extraction-manifest.json` records offsets and image
-hashes; the media remains excluded from Git.
-The same form has eight paired Save/Load menu items, captioned `Data &1` through
-`Data &8`: `Save11`–`Save81` at form offsets 561430–561906, and
-`Load11`–`Load81` at 560829–561305, each spaced 68 bytes apart. The extraction
-script verifies the component/caption bytes and records every offset in the
-manifest. The Fairy handler `0x478F0C` separately references `save0.dat`; its
-modern counterpart is `fairy.save`.
+Machine-readable reports remain in `baseline/*-report.json`, with renderer and
+asset reports generated in the build tree. Packages carry copies of this evidence.

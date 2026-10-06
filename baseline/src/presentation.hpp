@@ -1,4 +1,5 @@
 #pragma once
+#include "assets.hpp"
 #include "baseline/game.hpp"
 #include "baseline/save_slots.hpp"
 #include "raylib.h"
@@ -69,7 +70,7 @@ struct WalkRepeat {
 // Owns raylib resources. Gameplay and save files never depend on this class.
 class Presentation {
   public:
-    explicit Presentation(const std::filesystem::path& assets);
+    explicit Presentation(const Assets& assets);
     ~Presentation();
     Presentation(const Presentation&) = delete;
     Presentation& operator=(const Presentation&) = delete;

@@ -63,8 +63,7 @@ constexpr Rectangle BoardArea{BoardX, BoardY, BoardPixels, BoardPixels};
 constexpr Rectangle ContentArea{0, MenuHeight, CanvasWidth, ContentHeight};
 } // namespace
 
-int verify_presentation(Presentation& renderer, const std::filesystem::path& output,
-                        const std::filesystem::path& assets) {
+int verify_presentation(Presentation& renderer, const std::filesystem::path& output, const Assets& assets) {
     std::filesystem::create_directories(output);
     std::vector<std::string> checks;
     const auto require = [&](bool condition, const std::string& description) {
@@ -80,7 +79,7 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
 
     {
         // Independent sprite expectations from 0x443120 (idle) and 0x443808 (walk).
-        Image atlas = LoadImage((assets / "original-atlas.png").string().c_str());
+        Image atlas = assets.image("original-atlas");
         constexpr std::array<int, 4> IdleTiles{189, 197, 205, 213}, WalkingTiles{185, 193, 201, 209};
         for (int facing = 1; facing <= 4; ++facing) {
             renderer.reset();
@@ -382,8 +381,8 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         snapshot("frontside-panels");
         game.next_cycle();
         draw(game);
-        Image original_left = LoadImage((assets / "data3-leftr.png").string().c_str());
-        Image original_right = LoadImage((assets / "data3-rightr.png").string().c_str());
+        Image original_left = assets.image("data3-leftr");
+        Image original_right = assets.image("data3-rightr");
         require(left != fingerprint(renderer, LeftEdge) && right != fingerprint(renderer, RightEdge),
                 "Backside switches both side panels to the original red palette");
         require(fingerprint(renderer, LeftEdge) == fingerprint(original_left, {1, 2, 12, 496}) &&

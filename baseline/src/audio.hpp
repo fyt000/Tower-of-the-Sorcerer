@@ -1,4 +1,5 @@
 #pragma once
+#include "assets.hpp"
 #include "baseline/game.hpp"
 #include "raylib.h"
 #include <memory>
@@ -6,7 +7,7 @@
 namespace baseline {
 class Audio {
   public:
-    Audio(const std::filesystem::path& assets, const std::filesystem::path& soundfont);
+    explicit Audio(const Assets& assets);
     ~Audio();
     Audio(const Audio&) = delete;
     Audio& operator=(const Audio&) = delete;
@@ -14,9 +15,8 @@ class Audio {
     void mute(bool muted);
     bool available() const;
     static int track_for_scene(const Game&);
-    static bool verify_tracks(const std::filesystem::path& assets, const std::filesystem::path& soundfont);
-    static bool render_test(const std::filesystem::path& midi, const std::filesystem::path& soundfont,
-                            const std::filesystem::path& output);
+    static bool verify_tracks(const Assets& assets);
+    static bool render_test(const Assets& assets, std::string_view midi, const std::filesystem::path& output);
 
   private:
     struct Impl;
