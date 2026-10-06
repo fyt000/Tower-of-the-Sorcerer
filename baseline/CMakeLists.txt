@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(tos_original_baseline VERSION 0.3 LANGUAGES C CXX)
+project(tos_original_baseline VERSION 0.4 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

@@ -1,7 +1,6 @@
 #include "audio.hpp"
 #include "presentation.hpp"
 #include <algorithm>
-#include <cstdlib>
 #include <filesystem>
 #include <iostream>
 #include <string>
@@ -13,15 +12,6 @@ int verify_presentation(Presentation&, const std::filesystem::path&, const Asset
 int verify_assets(const Assets&, const Assets&, const std::filesystem::path&, const std::filesystem::path&);
 } // namespace baseline
 namespace {
-std::filesystem::path saves() {
-    if (const char* appdata = std::getenv("APPDATA"))
-        return std::filesystem::path(appdata) / "TosOriginalBaseline";
-    if (const char* data = std::getenv("XDG_DATA_HOME"))
-        return std::filesystem::path(data) / "tos-original-baseline";
-    if (const char* home = std::getenv("HOME"))
-        return std::filesystem::path(home) / ".local/share/tos-original-baseline";
-    return std::filesystem::current_path() / "baseline-saves";
-}
 void fixture(Game& game, DesktopUi& ui, const std::string& smoke) {
     if (smoke == "capture") {
         game.hero.floor = 3;
@@ -157,7 +147,7 @@ UiAction keyboard(const Game& game, DesktopUi& ui) {
     return {};
 }
 void apply(UiAction action, Game& game, DesktopUi& ui, Presentation& renderer, Audio& audio,
-           const std::filesystem::path& save_directory, const std::filesystem::path& original_directory) {
+           const std::filesystem::path& save_directory) {
     switch (action.kind) {
     case Action::NewGame:
         game.new_game();
@@ -174,7 +164,7 @@ void apply(UiAction action, Game& game, DesktopUi& ui, Presentation& renderer, A
     case Action::OpenLoadSlots:
         if (action.kind == Action::OpenSaveSlots && game.busy())
             throw std::runtime_error("Finish the current action before saving");
-        ui.save_slots = inspect_save_slots(save_directory, original_directory);
+        ui.save_slots = inspect_save_slots(save_directory);
         ui.close_overlays();
         ui.save_picker = action.kind == Action::OpenSaveSlots ? SavePicker::Save : SavePicker::Load;
         if (ui.save_picker == SavePicker::Load &&
@@ -195,7 +185,7 @@ void apply(UiAction action, Game& game, DesktopUi& ui, Presentation& renderer, A
     case Action::FairyCheckpoint:
     case Action::LoadSlot:
         game.load(action.kind == Action::LoadSlot
-                      ? load_slot_path(save_directory, action.value, original_directory)
+                      ? save_slot_path(save_directory, action.value)
                       : save_directory / (action.kind == Action::Load ? "quick.save" : "fairy.save"));
         renderer.reset();
         ui.close_overlays();
@@ -264,7 +254,7 @@ int main(int argc, char** argv) try {
         executable_file += ".exe";
 #endif
     std::filesystem::path requested_assets;
-    auto save_directory = saves();
+    auto save_directory = executable / "Savedat";
     std::filesystem::path screenshot, presentation_test, asset_test, compare_assets = BASELINE_ASSETS;
     std::filesystem::path load_file, export_original;
     std::string smoke;
@@ -298,6 +288,7 @@ int main(int argc, char** argv) try {
                          "Arrows / WASD: move. Enter: continue. I: inventory.\n"
                          "F6 / F7: eight save / load slots. F5 / F9: quick save / restore.\n"
                          "F8: Fairy checkpoint. F2: new game. M: mute.\n"
+                         "Saves: Savedat/save1.dat through save8.dat beside this executable.\n"
                          "--assets DIR --save-dir DIR --screenshot FILE --audio-test\n"
                          "--load FILE --export-original FILE\n"
                          "--smoke "
@@ -321,7 +312,7 @@ int main(int argc, char** argv) try {
                   executable_file);
     std::cout << "Assets: " << assets.root()
               << (assets.original_layout() ? " (original layout)\n" : " (PNG layout)\n");
-    const auto original_save_directory = assets.original_layout() ? assets.root() : executable;
+    std::cout << "Saves: " << save_directory << '\n';
     if (!asset_test.empty())
         return verify_assets(assets, Assets(compare_assets, executable_file), executable_file, asset_test);
     if (audio_test) {
@@ -357,7 +348,7 @@ int main(int argc, char** argv) try {
             const auto dispatch = [&](UiAction action) {
                 const auto before = game.hero;
                 try {
-                    apply(action, game, ui, renderer, audio, save_directory, original_save_directory);
+                    apply(action, game, ui, renderer, audio, save_directory);
                 } catch (const std::exception& error) {
                     game.status = error.what();
                 }

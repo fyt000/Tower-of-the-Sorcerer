@@ -476,33 +476,36 @@ int main() try {
                     fight.hero.hp == 10000000 - damage && fight.hero.gold == 500,
                 "Each restored Zeno variant plays its strikes, reward and next-cycle scene to completion");
         }
-        const auto installation = directory / "original";
-        const auto local = directory / "local";
-        const auto historical = installation / "Savedat" / "save1.dat";
+        const auto shared = directory / "game" / "Savedat";
+        const auto slot = shared / "save1.dat";
         auto old = room(31);
         old.hero.hp = 12345;
-        old.save(historical);
-        const auto original_write_time = std::filesystem::last_write_time(historical);
-        slots = inspect_save_slots(local, installation);
-        require(slots[0].state == SaveSlotState::Ready && slots[0].original_location &&
-                    slots[0].floor == 31 && slots[0].hp == 12345 && !std::filesystem::exists(local),
-                "Original Savedat slots are discovered without creating a modern save directory");
-        restored.load(load_slot_path(local, 1, installation));
+        old.save(slot);
+        require(save_slot_path(shared, 1) == slot && save_slot_path(shared, 8) == shared / "save8.dat",
+                "Manual slot names match the original save1.dat through save8.dat");
+        slots = inspect_save_slots(shared);
+        require(slots[0].state == SaveSlotState::Ready && slots[0].floor == 31 && slots[0].hp == 12345,
+                "An existing original record is an ordinary save slot");
+        restored.load(save_slot_path(shared, 1));
         require(restored.hero.floor == 31 && restored.hero.hp == 12345,
-                "The picker loads the discovered original record");
+                "Reading a slot uses the original file directly");
         restored.hero.hp = 54321;
-        restored.save(save_slot_path(local, 1));
-        slots = inspect_save_slots(local, installation);
-        require(slots[0].hp == 54321 && !slots[0].original_location &&
-                    load_slot_path(local, 1, installation) == save_slot_path(local, 1),
-                "A replacement in the user save folder takes precedence over its historical slot");
-        old.load(historical);
-        require(old.hero.hp == 12345 && std::filesystem::last_write_time(historical) == original_write_time,
-                "Loading and saving a discovered slot leave the original file unchanged");
-        old.save(local / "save2.dat");
-        require(inspect_save_slots(local)[1].state == SaveSlotState::Ready &&
-                    load_slot_path(local, 2) == local / "save2.dat",
-                "An original record can also be loaded from the chosen save directory");
+        restored.save(save_slot_path(shared, 1));
+        old.load(slot);
+        require(old.hero.hp == 54321 && inspect_save_slots(shared)[0].hp == 54321,
+                "Writing the slot updates the same file that the original executable reads");
+        old.load(shared / "save1.dat.bak");
+        require(old.hero.hp == 12345, "Replacing a shared slot retains its previous bytes in the backup");
+        old.save(shared / "slot-2.save");
+        old.save(shared / "Savedat" / "save2.dat");
+        old.save(directory / "AppData" / "slot-2.save");
+        require(inspect_save_slots(shared)[1].state == SaveSlotState::Empty &&
+                    !std::filesystem::exists(save_slot_path(shared, 2)),
+                "Slot inspection does not search old names, nested directories or another save folder");
+        old.hero.hp = 33333;
+        old.save(save_slot_path(shared, 2));
+        require(inspect_save_slots(shared)[1].hp == 33333,
+                "Only the selected directory's save2.dat supplies slot 2");
         std::filesystem::remove_all(directory);
     }
     std::cout << checks << " core checks passed\n";

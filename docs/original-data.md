@@ -69,8 +69,10 @@ row that the original itself discards on loading.
 
 New manual, quick and Fairy files use these original records. Earlier `TOSB` v1
 C++ snapshots remain readable and use the original monster reconstruction on
-import; saving converts them to the original layout. F7 discovers historical
-slots without rewriting them. See [controls and import/export](../baseline/README.md).
+import; saving converts them to the original layout. Numbered saves read and
+write the same `Savedat/save1.dat` through `save8.dat` files beside the executable.
+The slot picker uses only that directory (or an explicit `--save-dir`), with no
+search for other locations or earlier C++ names. See [controls and saves](../baseline/README.md).
 
 ## Original MIDI playback
 

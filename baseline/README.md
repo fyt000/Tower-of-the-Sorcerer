@@ -81,15 +81,16 @@ Shop choices are clickable; Esc cancels a shop. Long dialogue and Wisdom clues
 scroll with the mouse wheel. Hero Orb forecasts have their own overlay. The
 bottom-right panel retains the last defeated enemy's encounter-time stats.
 
-Saves use `%APPDATA%/TosOriginalBaseline`; `--save-dir DIRECTORY` overrides it.
+Saves use `Savedat/` beside the executable; `--save-dir DIRECTORY` overrides it.
 Save after the current action finishes. Eight manual files, `quick.save` and
 `fairy.save` are independent. Replacement keeps a `.bak`, restores validate
 before changing the live game, and the load picker pauses pending commands.
 
-F7 also discovers `Savedat/save1.dat` through `save8.dat` beside the original
-media, and `.dat` files in your chosen save directory. Your own slot file takes
-precedence when both exist. Loading leaves the original file untouched; saving
-that slot writes to your user save folder.
+F6 and F7 write and read the same `save1.dat` through `save8.dat` files in that
+directory. Replacing the original EXE therefore shares its existing slots
+directly. There is no separate slot type, import step, AppData search or lookup
+of older C++ filenames. Reading a slot leaves it unchanged; saving replaces that
+file and retains its previous contents as a `.bak`.
 
 New files use the exact original **6,957-byte format**, including its checksums.
 No monster table or extension is added. Loading rebuilds the shared Zeno row
@@ -98,16 +99,16 @@ Earlier C++ `TOSB` v1 saves also import, with the same monster reconstruction;
 the next save writes original records. [Save layout and behavior](../docs/original-data.md)
 describe the fields and validation limits.
 
-Open an arbitrary historical file, or convert an earlier C++ file for the old game:
+Open a specific save file, or explicitly convert an earlier C++ file:
 
 ```powershell
 ./build-vs/Release/tos_baseline.exe --load "D:/saved-games/save3.dat"
 ./build-vs/Release/tos_baseline.exe --load "D:/saved-games/quick.save" --export-original "D:/saved-games/save1.dat"
 ```
 
-The export command exits without opening the GUI. To use a new save with the old
-EXE, copy it into the original `Savedat/` folder as `save1.dat` through `save8.dat`.
-Its file extension and the replacement executable's filename do not affect decoding.
+The export command exits without opening the GUI. Normal numbered saves already
+have the format, filename and location the original EXE expects. The replacement
+executable's filename does not affect saving or loading.
 
 ## Validate and package
 
@@ -123,8 +124,8 @@ executable comparisons. Useful desktop checks include:
 python tools/package.py --original-dir "D:/Program Files (x86)/Tower of the Sorcerer"
 ```
 
-Packaging creates `dist/tos-original-baseline-0.3-windows-x64/TSW.exe` and a ZIP
+Packaging creates `dist/tos-original-baseline-0.4-windows-x64/TSW.exe` and a ZIP
 with the original media layout, licenses and validation reports. The packaged
 EXE can also be copied alone into an existing original installation. The smaller
-`dist/tos-original-baseline-0.3-drop-in.zip` contains the EXE, usage notes and
+`dist/tos-original-baseline-0.4-drop-in.zip` contains the EXE, usage notes and
 licenses for that deployment.

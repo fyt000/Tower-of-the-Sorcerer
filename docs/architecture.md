@@ -79,6 +79,10 @@ Earlier C++ saves have a compatibility reader. The Fairy checkpoint is written
 after her dialogue and animation finish. [Original data](original-data.md)
 records the byte layout and load-time scaling quirk.
 
+Manual slots read and write `Savedat/save1.dat` through `save8.dat` beside the
+executable. The same path is used regardless of which executable created a save.
+`--save-dir` selects a different directory explicitly; slot lookup stays within it.
+
 ## Existing Rust implementation
 
 `tos-core` is a deterministic engine with configurable campaign rules, scripts,

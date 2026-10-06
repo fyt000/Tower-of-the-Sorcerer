@@ -782,10 +782,8 @@ UiAction Presentation::draw_save_slots(const Game& game, DesktopUi& ui, Vector2 
         if (clicked(card, mouse))
             ui.selected_slot = i + 1;
     }
-    art_->text.draw(ui.save_slots[ui.selected_slot - 1].original_location
-                        ? "Original .dat found. Saving keeps it and writes to your save folder."
-                        : "1-8 or arrows: select a slot. Enter: confirm. Esc: close.",
-                    int(rect.x + 18), int(rect.y + 404), 16, Muted);
+    art_->text.draw("1-8 or arrows: select a slot. Enter: confirm. Esc: close.", int(rect.x + 18),
+                    int(rect.y + 404), 16, Muted);
     const auto& selected = ui.save_slots[ui.selected_slot - 1];
     const std::string label =
         saving ? (selected.state == SaveSlotState::Empty ? "Save to slot " : "Replace slot ") : "Load slot ";
