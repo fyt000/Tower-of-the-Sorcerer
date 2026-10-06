@@ -1,4 +1,5 @@
 #include "baseline/game.hpp"
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -124,11 +125,11 @@ void set(Game& game, const std::string& name, int value) {
 int main() {
     Game game;
     std::string line;
-    while (std::getline(std::cin, line))
+    while (std::getline(std::cin, line)) {
+        std::istringstream input(line);
+        std::string command;
+        input >> command;
         try {
-            std::istringstream input(line);
-            std::string command;
-            input >> command;
             int a = 0, b = 0, c = 0, d = 0;
             if (command == "reset")
                 game.new_game();
@@ -231,6 +232,13 @@ int main() {
                         break;
                 }
                 std::cout << "]\n" << std::flush;
+            } else if (command == "load" || command == "save") {
+                std::string path;
+                input >> std::quoted(path);
+                if (command == "load")
+                    game.load(path);
+                else
+                    game.save(path);
             } else if (command == "snapshot")
                 snapshot(game);
             else if (command == "forecast") {
@@ -243,6 +251,8 @@ int main() {
                 throw std::runtime_error("Unknown probe command");
         } catch (const std::exception& e) {
             std::cout << "{\"error\":\"" << e.what() << "\"}\n" << std::flush;
-            return 1;
+            if (command != "load")
+                return 1;
         }
+    }
 }

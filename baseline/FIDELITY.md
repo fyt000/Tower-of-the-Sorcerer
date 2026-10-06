@@ -15,15 +15,17 @@ the translation; [retained rules](../docs/mechanics.md) identifies important bra
 | Contact and ordinary/forced combat | 992 |
 | NPCs, continuations, stairs, hazards, capture/ending and Fairy scoring | 426 |
 | Items, cardinal bounds, wings and Flight | 2,067 |
-| Total | 4,216 |
+| Save bytes, checksums, import/rewrite and Zeno load reconstruction | 145 |
+| Total | 4,361 |
 
 These execute isolated original x86 handlers and compare their output with the
 compiled C++ probe. Reports list skipped calls. Unread stale `b` operands in
 HeroStrike/Reward are normalized; other compared operands and orders are retained.
 
-The **80 core checks** execute complete command stacks, bounded long fights,
+The **86 core checks** execute complete command stacks, bounded long fights,
 fatal cancellation, dialogue aliases, Fairy restores, all eight save slots,
-replacement backups, cycle carry/reset rules and the 50F gate/seal/wing branches.
+replacement backups, historical-slot discovery, cycle carry/reset rules and
+the 50F gate/seal/wing branches.
 The core has also passed an MSVC AddressSanitizer Release run.
 
 The **131 presentation checks** cover original standing/walking poses, all twelve
@@ -39,6 +41,13 @@ checkpoints and the ending at the installed high-DPI setting. The replacement
 is also tested as `TSW.exe` beside only copied original media folders, without
 an external soundfont, extracted PNGs or original EXE.
 
+Save checks execute the original writer's wrapping checksum loops, its loader's
+acceptance path and the Zeno reconstruction instructions. They cover byte-exact
+import/rewrite, edits, opaque-word retention, frontside/backside seal states,
+all directions, earlier C++ import, corrupt/truncated records and bounds checks.
+File I/O and VCL UI calls are mocked. Fixtures come from the original writer;
+the installed `Savedat/` folder had no historical player files to test.
+
 ## Deliberate differences and remaining work
 
 - Command execution is iterative and combat memory is bounded; legacy recursive
@@ -47,8 +56,11 @@ an external soundfont, extracted PNGs or original EXE.
   masks and scene stages remain; GUI overlays, fonts, settings and timing are modern.
 - MIDI uses TinySoundFont/GeneralUser GS, so instrument timbre differs from a
   Windows MIDI device. Uninterrupted audio on every device is not established.
-- Saves are versioned and validated, with backups and independent manual/quick/Fairy
-  files. Legacy `.dat` saves, preferences and custom rankings are not imported.
+- Saves use the original 6,957-byte records and shared-Zeno load reconstruction,
+  including legacy backside scaling. Earlier C++ `TOSB` v1 files import. Bounds
+  validation, backups and independent manual/quick/Fairy files are modern;
+  original settings and custom rankings are not imported. Original checksums
+  do not protect map bytes or the final hero words; no extension is added.
 - Tests establish agreement for sampled states and isolated handlers. They do not
   prove every possible branch, pixel-exact Delphi compositing, exact legacy timer
   durations or a full natural tower playthrough.

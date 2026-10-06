@@ -1,5 +1,6 @@
 #include "baseline/game.hpp"
 #include "original_constants.hpp"
+#include "save_internal.hpp"
 #include <fstream>
 #include <stdexcept>
 #include <tuple>
@@ -50,19 +51,16 @@ std::uint32_t checksum(const std::vector<std::uint8_t>& bytes) {
     }
     return value;
 }
-void word(std::vector<std::uint8_t>& bytes, std::uint32_t value) {
-    for (int i = 0; i < 4; ++i)
-        bytes.push_back(static_cast<std::uint8_t>(value >> (8 * i)));
-}
 std::uint32_t read_word(const std::vector<std::uint8_t>& bytes, std::size_t& cursor) {
-    if (bytes.size() - cursor < 4)
+    if (cursor > bytes.size() || bytes.size() - cursor < 4)
         throw std::runtime_error("Truncated baseline save");
     std::uint32_t value = 0;
     for (int i = 0; i < 4; ++i)
         value |= std::uint32_t(bytes[cursor++]) << (8 * i);
     return value;
 }
-void validate(const Game& game) {
+} // namespace
+void save_detail::validate(const Game& game) {
     const auto& h = game.hero;
     constexpr int MaxSavedValue = 100000000;
     if (h.floor < 0 || h.floor >= FloorCount || h.x < 0 || h.x >= 11 || h.y < 0 || h.y >= 11 ||
@@ -110,19 +108,7 @@ void validate(const Game& game) {
     if (h.merchant2_heard < 0 || h.merchant2_heard > 2)
         throw std::runtime_error("Invalid merchant clue flag");
 }
-} // namespace
-void Game::save(const std::filesystem::path& path) const {
-    if (busy())
-        throw std::runtime_error("Finish the current action before saving");
-    validate(*this);
-    Game snapshot = *this;
-    std::vector<std::uint8_t> bytes{'T', 'O', 'S', 'B'};
-    word(bytes, 1);
-    for (char c : original::ImageHash)
-        bytes.push_back(static_cast<std::uint8_t>(c));
-    auto writer = [&](const auto& value) { word(bytes, static_cast<std::uint32_t>(value)); };
-    fields(writer, snapshot);
-    word(bytes, checksum(bytes));
+void save_detail::write_file(const std::filesystem::path& path, const std::vector<std::uint8_t>& bytes) {
     if (!path.parent_path().empty())
         std::filesystem::create_directories(path.parent_path());
     auto temporary = path;
@@ -149,6 +135,11 @@ void Game::save(const std::filesystem::path& path) const {
         throw;
     }
 }
+void Game::save(const std::filesystem::path& path) const {
+    const auto bytes =
+        save_detail::encode_original(*this, original_save_record_ ? &*original_save_record_ : nullptr);
+    save_detail::write_file(path, bytes);
+}
 void Game::load(const std::filesystem::path& path) {
     std::ifstream input(path, std::ios::binary);
     if (!input)
@@ -160,6 +151,17 @@ void Game::load(const std::filesystem::path& path) {
     input.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
     if (!input)
         throw std::runtime_error("Unable to read baseline save");
+    const bool baseline_header = std::string(bytes.begin(), bytes.begin() + 4) == "TOSB";
+    if (!baseline_header && bytes.size() >= save_detail::OriginalSaveBytes) {
+        save_detail::OriginalRecord record;
+        // Original BlockRead consumes just these two fixed records, ignoring trailing data.
+        const std::vector<std::uint8_t> original_bytes(bytes.begin(),
+                                                       bytes.begin() + save_detail::OriginalSaveBytes);
+        Game restored = save_detail::decode_original(original_bytes, record);
+        restored.original_save_record_ = record;
+        *this = std::move(restored);
+        return;
+    }
     std::size_t cursor = bytes.size() - 4;
     const auto expected = read_word(bytes, cursor);
     bytes.resize(bytes.size() - 4);
@@ -188,7 +190,10 @@ void Game::load(const std::filesystem::path& path) {
     fields(reader, restored);
     if (cursor != bytes.size())
         throw std::runtime_error("Unexpected baseline save data");
-    validate(restored);
+    save_detail::validate(restored);
+    // Import earlier C++ snapshots using the same monster reconstruction as original .dat files.
+    save_detail::reconstruct_monsters(restored);
+    restored.contact_index = cell(restored.hero.x, restored.hero.y);
     restored.status = "Baseline save restored.";
     *this = std::move(restored); // A malformed file never partially changes the live game.
 }

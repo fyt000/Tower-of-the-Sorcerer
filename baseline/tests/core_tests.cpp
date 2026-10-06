@@ -242,7 +242,9 @@ int main() try {
         Game restored;
         restored.load(path);
         require(restored.monsters[15].hp == 800 && restored.hero.zeno_sealed && restored.hero.floor == 49,
-                "Save preserves normalized shared Zeno row");
+                "Original save reconstructs frontside sealed Zeno");
+        require(std::filesystem::file_size(path) == FloorCount * (CellCount + 2) + 171 * 4,
+                "New saves use the exact original record size without a monster table or extension");
         restored.save(path);
         restored.load(path);
         require(restored.monsters[15].hp == 800, "Repeated restore does not scale Zeno again");
@@ -258,7 +260,7 @@ int main() try {
         require(restored.monsters[15].hp == 800, "Rejected save leaves the previous file intact");
         {
             std::fstream corrupt(path, std::ios::in | std::ios::out | std::ios::binary);
-            corrupt.seekp(90);
+            corrupt.seekp(FloorCount * (CellCount + 2)); // HP is covered by the original checksums.
             corrupt.put('X');
         }
         bool rejected = false;
@@ -438,30 +440,31 @@ int main() try {
             auto fight = room(50);
             fight.hero.highest_floor = 50;
             fight.hero.hp = 10000000;
-            fight.hero.attack = 100000;
+            fight.hero.attack = 1000000;
             fight.hero.defense = 0;
             fight.hero.cycle_factor_minus_one = 43;
             fight.hero.later_cycle = variant != 0;
-            fight.hero.zeno_sealed = variant != 1;
-            fight.monsters[ZenoRow] =
-                variant == 1 ? Monster{8000, 5000, 1000, 500} : Monster{800, 500, 100, 500};
+            fight.hero.zeno_sealed = variant == 2;
+            fight.monsters[ZenoRow] = variant == 0   ? Monster{1000, 625, 125, 500}
+                                      : variant == 1 ? Monster{8000, 5000, 1000, 500}
+                                                     : Monster{800, 500, 100, 500};
             fight.tile(50, cell(5, 4)) = Zeno;
             const auto path = save_slot_path(directory, variant + 1);
             fight.save(path);
             fight.load(path);
             fight.save(path);
             fight.load(path);
-            const int row_hp = variant == 1 ? 8000 : 800;
+            const int row_hp = variant == 2 ? 800 * BacksideFactor : 8000;
             require(fight.monsters[ZenoRow].hp == row_hp && fight.hero.later_cycle == int(variant != 0) &&
-                        fight.hero.zeno_sealed == (variant != 1),
-                    "Repeated slot restores preserve cycle flags, seals and the normalized Zeno row");
+                        fight.hero.zeno_sealed == (variant == 2),
+                    "Repeated slot restores rebuild the shared Zeno row exactly as original loading does");
             slots = inspect_save_slots(directory);
             require(slots[variant].backside && slots[variant].later_cycle == (variant != 0),
                     "Slot summaries distinguish the second and later backside cycles");
             fight.move(Direction::Up);
             const Monster expected = variant == 0   ? Monster{44000, 27500, 5500, 500}
                                      : variant == 1 ? Monster{352000, 220000, 44000, 500}
-                                                    : Monster{35200, 22000, 4400, 500};
+                                                    : Monster{1548800, 968000, 193600, 500};
             const auto& enemy = fight.visual.battle_enemy.stats;
             require(fight.visual.battle && !fight.visual.enemy_first && enemy.hp == expected.hp &&
                         enemy.attack == expected.attack && enemy.defense == expected.defense,
@@ -473,9 +476,34 @@ int main() try {
                     fight.hero.hp == 10000000 - damage && fight.hero.gold == 500,
                 "Each restored Zeno variant plays its strikes, reward and next-cycle scene to completion");
         }
-        for (const auto& file : std::filesystem::directory_iterator(directory))
-            std::filesystem::remove(file.path());
-        std::filesystem::remove(directory);
+        const auto installation = directory / "original";
+        const auto local = directory / "local";
+        const auto historical = installation / "Savedat" / "save1.dat";
+        auto old = room(31);
+        old.hero.hp = 12345;
+        old.save(historical);
+        const auto original_write_time = std::filesystem::last_write_time(historical);
+        slots = inspect_save_slots(local, installation);
+        require(slots[0].state == SaveSlotState::Ready && slots[0].original_location &&
+                    slots[0].floor == 31 && slots[0].hp == 12345 && !std::filesystem::exists(local),
+                "Original Savedat slots are discovered without creating a modern save directory");
+        restored.load(load_slot_path(local, 1, installation));
+        require(restored.hero.floor == 31 && restored.hero.hp == 12345,
+                "The picker loads the discovered original record");
+        restored.hero.hp = 54321;
+        restored.save(save_slot_path(local, 1));
+        slots = inspect_save_slots(local, installation);
+        require(slots[0].hp == 54321 && !slots[0].original_location &&
+                    load_slot_path(local, 1, installation) == save_slot_path(local, 1),
+                "A replacement in the user save folder takes precedence over its historical slot");
+        old.load(historical);
+        require(old.hero.hp == 12345 && std::filesystem::last_write_time(historical) == original_write_time,
+                "Loading and saving a discovered slot leave the original file unchanged");
+        old.save(local / "save2.dat");
+        require(inspect_save_slots(local)[1].state == SaveSlotState::Ready &&
+                    load_slot_path(local, 2) == local / "save2.dat",
+                "An original record can also be loaded from the chosen save directory");
+        std::filesystem::remove_all(directory);
     }
     std::cout << checks << " core checks passed\n";
     return 0;

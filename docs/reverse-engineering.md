@@ -22,6 +22,8 @@ For example, `_140_4_` is decimal byte offset 140; `field_0x140` is hexadecimal.
 The initial export covers 106 detected functions entering `0x440000..0x488FFF`.
 `RecoverCallbacks.java` adds ten indirect callbacks/item helpers, and
 `RecoverArrival.java` repairs a missed two-level switch at `0x46CB1C`.
+`RecoverSaves.java` adds the shared writer, eight save callbacks and seven
+previously missed load callbacks (16 functions); the shared loader was already exported.
 [The source index](../reference/original/decompiled/INDEX.md) and
 [call map](../reference/original/decompiled/CALLS.md) locate the evidence.
 Small reviewed door, Bomb and Zeno translations remain under `reference/original/`.
@@ -32,6 +34,7 @@ Use Ghidra's headless launcher with `tools/ghidra` as its script directory:
 analyzeHeadless PROJECT_DIR original-tsw -import ORIGINAL_DIR/TSW.exe -scriptPath tools/ghidra -postScript ExportOriginal.java reference/original/decompiled
 analyzeHeadless PROJECT_DIR original-tsw -process TSW.exe -noanalysis -scriptPath tools/ghidra -postScript RecoverArrival.java reference/original/decompiled/0046cb1c_arrival_recovered.c
 analyzeHeadless PROJECT_DIR original-tsw -process TSW.exe -noanalysis -scriptPath tools/ghidra -postScript RecoverCallbacks.java reference/original/decompiled
+analyzeHeadless PROJECT_DIR original-tsw -process TSW.exe -noanalysis -scriptPath tools/ghidra -postScript RecoverSaves.java reference/original/decompiled
 ```
 
 Use absolute paths when invoking the launcher from another working directory.
@@ -56,6 +59,7 @@ python baseline/tools/differential.py --probe baseline/build-vs/Release/tos_base
 python baseline/tools/verify_interactions.py --probe baseline/build-vs/Release/tos_baseline_probe.exe
 python baseline/tools/verify_callbacks.py --probe baseline/build-vs/Release/tos_baseline_probe.exe
 python baseline/tools/verify_items.py --probe baseline/build-vs/Release/tos_baseline_probe.exe
+python baseline/tools/verify_saves.py --probe baseline/build-vs/Release/tos_baseline_probe.exe
 ```
 
 Add complete playback tests for interactions between builders and callbacks.

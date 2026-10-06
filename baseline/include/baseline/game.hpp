@@ -12,6 +12,7 @@ inline constexpr int BoardWidth = 11;
 inline constexpr int CellCount = BoardWidth * BoardWidth;
 inline constexpr int FloorCount = 51;
 inline constexpr int BacksideFactor = 44;
+inline constexpr std::size_t OriginalHeroWordCount = 171; // Delphi's 684-byte persisted state record.
 constexpr int cell(int x, int y) {
     return y * BoardWidth + x;
 }
@@ -337,6 +338,8 @@ class Game {
     int contact_index{}, scratch_index{}, neighbor_index{}, message_code{}, door_opened{};
 
   private:
+    // Keep unmapped Delphi fields when reading and rewriting original saves.
+    std::optional<std::array<std::uint32_t, OriginalHeroWordCount>> original_save_record_;
     struct Fight {
         int target{}, enemy{}, hero_hits{}, enemy_hits{}, turn{}, underlying{};
         bool fatal{}, enemy_first{};

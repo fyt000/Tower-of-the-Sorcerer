@@ -46,6 +46,12 @@ Later cycles leave Zeno for ordinary contact. A new 49F seal after gate entry
 remains effective when returning to 50F with a wing. Backside victory plays its
 closing commands before starting the next cycle.
 
-Modern saves retain normalized shared rows, so repeated restoring does not
-reapply legacy scaling. Fairy checkpoints are saved after their completed scene;
-custom original ranking files are not imported.
+Saving does not serialize monster rows. As in the original load routine,
+unsealed Zeno is rebuilt as `8000/5000/1000`; sealed Zeno is rebuilt as
+`800/500/100 × (cycle_factor_minus_one + 1)`. Combat then applies its usual
+cycle factor again. This legacy backside load quirk is retained; repeated loads
+reconstruct from flags rather than multiplying the already loaded row. The
+cycle-2 50F contact branch reinstalls its fixed `1000/625/125` row before combat.
+The table above describes live gate/seal gameplay without that intervening load.
+Fairy checkpoints are saved after their completed scene; custom original ranking
+files are not imported.

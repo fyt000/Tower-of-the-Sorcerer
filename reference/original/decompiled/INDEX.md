@@ -5,7 +5,7 @@ Source SHA-256: `41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d277
 C-like decompiler output for every detected function entering 0x440000..0x488FFF. This is an inspection corpus, not compilable game source or proof that each branch is verified. Unknown fields and helper names remain explicit. Reviewed routines and probe evidence are indexed in ../README.md.
 
 The initial 106-function export is supplemented by ten recovered callbacks/item
-helpers below. The repaired `0x46CB1C` export recovers the two-level arrival
+helpers and 16 save routines below. The repaired `0x46CB1C` export recovers the two-level arrival
 switch missed by initial analysis. The runnable readable C++ implementation is
 in [baseline](../../../baseline/README.md), with [fidelity evidence](../../../baseline/FIDELITY.md).
 
@@ -127,8 +127,29 @@ in [baseline](../../../baseline/README.md), with [fidelity evidence](../../../ba
 | `0x00484DE8` | `FUN_00484de8` | [00484de8_FUN_00484de8.c](00484de8_FUN_00484de8.c) | Exported |
 | `0x00484F48` | `FUN_00484f48` | [00484f48_FUN_00484f48.c](00484f48_FUN_00484f48.c) | Exported |
 | `0x00488D50` | `entry` | [00488d50_entry.c](00488d50_entry.c) | Exported |
+| `0x0047DB94` | `load_slot_2` | [0047db94_load_slot_2.c](0047db94_load_slot_2.c) | Recovered save routine |
+| `0x0047DD54` | `load_slot_3` | [0047dd54_load_slot_3.c](0047dd54_load_slot_3.c) | Recovered save routine |
+| `0x0047DF14` | `load_slot_4` | [0047df14_load_slot_4.c](0047df14_load_slot_4.c) | Recovered save routine |
+| `0x0047E0D4` | `load_slot_5` | [0047e0d4_load_slot_5.c](0047e0d4_load_slot_5.c) | Recovered save routine |
+| `0x0047E294` | `load_slot_6` | [0047e294_load_slot_6.c](0047e294_load_slot_6.c) | Recovered save routine |
+| `0x0047E454` | `load_slot_7` | [0047e454_load_slot_7.c](0047e454_load_slot_7.c) | Recovered save routine |
+| `0x0047E614` | `load_slot_8` | [0047e614_load_slot_8.c](0047e614_load_slot_8.c) | Recovered save routine |
+| `0x0047EADC` | `write_original_save` | [0047eadc_write_original_save.c](0047eadc_write_original_save.c) | Recovered save routine |
+| `0x0047ECC4` | `save_slot_1` | [0047ecc4_save_slot_1.c](0047ecc4_save_slot_1.c) | Recovered save routine |
+| `0x0047EDB8` | `save_slot_2` | [0047edb8_save_slot_2.c](0047edb8_save_slot_2.c) | Recovered save routine |
+| `0x0047EEAC` | `save_slot_3` | [0047eeac_save_slot_3.c](0047eeac_save_slot_3.c) | Recovered save routine |
+| `0x0047EFA0` | `save_slot_4` | [0047efa0_save_slot_4.c](0047efa0_save_slot_4.c) | Recovered save routine |
+| `0x0047F094` | `save_slot_5` | [0047f094_save_slot_5.c](0047f094_save_slot_5.c) | Recovered save routine |
+| `0x0047F188` | `save_slot_6` | [0047f188_save_slot_6.c](0047f188_save_slot_6.c) | Recovered save routine |
+| `0x0047F27C` | `save_slot_7` | [0047f27c_save_slot_7.c](0047f27c_save_slot_7.c) | Recovered save routine |
+| `0x0047F370` | `save_slot_8` | [0047f370_save_slot_8.c](0047f370_save_slot_8.c) | Recovered save routine |
 
 Exported 106 detected functions; failed 0.
 
 Supplement: ten recovered callbacks/helpers; repaired arrival export. Recovery
 scripts are `tools/ghidra/RecoverCallbacks.java` and `RecoverArrival.java`.
+
+Save supplement: the shared writer, eight save callbacks and seven load
+callbacks were recovered by `tools/ghidra/RecoverSaves.java`. The shared
+loader `0x47E7D4` was already exported. `baseline/tools/verify_saves.py`
+checks original writer bytes, checksum acceptance and Zeno reconstruction.

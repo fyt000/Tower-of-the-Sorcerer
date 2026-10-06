@@ -47,7 +47,7 @@ ctest --test-dir baseline/build-headless -C Release --output-on-failure
 
 ## Original folder compatibility
 
-The Windows executable can be renamed to `TSW.exe` and placed beside the
+The Windows executable can keep any filename, including `TSW.exe`, and run beside the
 original `Data3/`, `Data2/`, `Midi/` and `Wav/` folders. It loads the original
 BMP and `.oz` files directly, preserving their filenames and masks. The ending
 pictures and MIDI soundfont are embedded, so no conversion, `assets/` directory,
@@ -55,8 +55,8 @@ external soundfont or original EXE is needed at runtime.
 
 Keep the original EXE as `TSW.original.exe` if replacing it; it remains the
 input for decompilation and future builds. Development and tests do not overwrite
-the installed game. This compatibility covers media and folder layout. Legacy
-Delphi save files, rankings and settings are not imported.
+the installed game. Compatibility covers media, folder layout and original
+`.dat` game saves. Original rankings and settings are not imported.
 
 The extracted PNG layout is also supported: place it in `assets/` beside the
 executable, or use `--assets DIRECTORY` with either layout. Selection checks the
@@ -86,6 +86,29 @@ Save after the current action finishes. Eight manual files, `quick.save` and
 `fairy.save` are independent. Replacement keeps a `.bak`, restores validate
 before changing the live game, and the load picker pauses pending commands.
 
+F7 also discovers `Savedat/save1.dat` through `save8.dat` beside the original
+media, and `.dat` files in your chosen save directory. Your own slot file takes
+precedence when both exist. Loading leaves the original file untouched; saving
+that slot writes to your user save folder.
+
+New files use the exact original **6,957-byte format**, including its checksums.
+No monster table or extension is added. Loading rebuilds the shared Zeno row
+using the original seal/cycle rules, including the legacy backside scaling quirk.
+Earlier C++ `TOSB` v1 saves also import, with the same monster reconstruction;
+the next save writes original records. [Save layout and behavior](../docs/original-data.md)
+describe the fields and validation limits.
+
+Open an arbitrary historical file, or convert an earlier C++ file for the old game:
+
+```powershell
+./build-vs/Release/tos_baseline.exe --load "D:/saved-games/save3.dat"
+./build-vs/Release/tos_baseline.exe --load "D:/saved-games/quick.save" --export-original "D:/saved-games/save1.dat"
+```
+
+The export command exits without opening the GUI. To use a new save with the old
+EXE, copy it into the original `Savedat/` folder as `save1.dat` through `save8.dat`.
+Its file extension and the replacement executable's filename do not affect decoding.
+
 ## Validate and package
 
 CTest covers the core and original-media renderer. When the extracted PNGs are
@@ -100,8 +123,8 @@ executable comparisons. Useful desktop checks include:
 python tools/package.py --original-dir "D:/Program Files (x86)/Tower of the Sorcerer"
 ```
 
-Packaging creates `dist/tos-original-baseline-0.2-windows-x64/TSW.exe` and a ZIP
+Packaging creates `dist/tos-original-baseline-0.3-windows-x64/TSW.exe` and a ZIP
 with the original media layout, licenses and validation reports. The packaged
 EXE can also be copied alone into an existing original installation. The smaller
-`dist/tos-original-baseline-0.2-drop-in.zip` contains the EXE, usage notes and
+`dist/tos-original-baseline-0.3-drop-in.zip` contains the EXE, usage notes and
 licenses for that deployment.

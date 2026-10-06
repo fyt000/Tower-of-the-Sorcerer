@@ -9,7 +9,7 @@ import shutil
 import zipfile
 
 BASELINE = Path(__file__).resolve().parents[1]
-NAME = 'tos-original-baseline-0.2-windows-x64'
+NAME = 'tos-original-baseline-0.3-windows-x64'
 
 
 def main():
@@ -54,7 +54,7 @@ def main():
     (output / 'FIDELITY.md').write_text(fidelity, encoding='utf-8')
     validation = output / 'validation'
     validation.mkdir(exist_ok=True)
-    for name in ('differential', 'interaction', 'callback', 'item'):
+    for name in ('differential', 'interaction', 'callback', 'item', 'save'):
         source = BASELINE / f'{name}-report.json'
         report = json.loads(source.read_text(encoding='utf-8'))
         if report['passed'] != report['scenarios'] or report['failures']:
@@ -73,22 +73,26 @@ def main():
         'The original BMP/OZ/MIDI/WAV files keep their names and formats.\n'
         'Ending pictures and the MIDI soundfont are embedded; no extra runtime is needed.\n\n'
         'For an existing installation, keep the old EXE as TSW.original.exe, then copy the new TSW.exe.\n'
-        'The replacement does not import original .dat saves, rankings or preferences.\n\n'
+        'F7 discovers Savedat/save1.dat through save8.dat; originals are kept untouched.\n'
+        'New saves use the original 6957-byte records and original shared-Zeno load rules.\n'
+        'Original preferences and rankings are not imported.\n\n'
         'Arrows / WASD: walk. Enter / Space: continue dialogue and the ending card.\n'
         'Click owned items or press I for inventory. Flight: Up/Down, Enter to travel, Esc to cancel.\n'
         'F6 / F7: eight save / load slots. 1-8 or arrows: select. Enter: confirm. Esc: close.\n'
         'F5 / F9: quick save / restore. F8: completed Fairy checkpoint.\n'
         'F2: new game. M: mute. Options: 1x / 3x / 10x walking and animation speed.\n'
         'Saves: %APPDATA%/TosOriginalBaseline. Replace keeps a .bak.\n'
-        'Optional: --assets DIRECTORY (original or PNG layout), --save-dir DIRECTORY.\n\n'
+        'Optional: --assets DIRECTORY (original or PNG layout), --save-dir DIRECTORY, --load FILE.\n'
+        'Export or convert: TSW.exe --load OLD_FILE --export-original save1.dat\n'
+        'To load in the old game, put the exported file in its Savedat folder as save1.dat..save8.dat.\n\n'
         'See FIDELITY.md for evidence and limits, THIRD_PARTY.md and the license files for attribution.\n',
         encoding='utf-8')
     hashes = {file.relative_to(output).as_posix(): hashlib.sha256(file.read_bytes()).hexdigest()
               for file in sorted(output.rglob('*')) if file.is_file() and file.name != 'package-manifest.json'}
     (output / 'package-manifest.json').write_text(
-        json.dumps({'version': '0.2', 'layout': 'original', 'files': hashes}, indent=2) + '\n', encoding='utf-8')
+        json.dumps({'version': '0.3', 'layout': 'original', 'files': hashes}, indent=2) + '\n', encoding='utf-8')
     archive = shutil.make_archive(str(output), 'zip', root_dir=output.parent, base_dir=output.name)
-    drop_in = output.parent / 'tos-original-baseline-0.2-drop-in.zip'
+    drop_in = output.parent / 'tos-original-baseline-0.3-drop-in.zip'
     with zipfile.ZipFile(drop_in, 'w', compression=zipfile.ZIP_DEFLATED) as package:
         for file in sorted(output.rglob('*')):
             relative = file.relative_to(output)

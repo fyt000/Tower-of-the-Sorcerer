@@ -41,7 +41,7 @@ changes that row rather than creating independent enemy instances.
 | `src/combat.cpp` | Forecasts, strike generation and victory records |
 | `src/items.cpp`, `src/npcs.cpp` | Item loops, Flight, shops and dialogue continuations |
 | `src/floor_checks.cpp`, `src/scenes.cpp` | Explicit floor predicates, scripts and cutscenes |
-| `src/save.cpp`, `src/save_slots.cpp` | Validated saves and eight independent manual slots |
+| `src/original_save.cpp`, `src/save.cpp`, `src/save_slots.cpp` | Original save records, earlier C++ imports and eight independent slots |
 
 Original tile IDs, flag aliases, numeric puzzle sums and script coordinates are
 retained where changing them would obscure source comparison. Named enums and
@@ -70,10 +70,14 @@ progress, independent of command speed. Original WAV effects are decoded from
 memory. Fonts use installed Segoe UI when available and raylib's fallback
 otherwise; system fonts are not distributed.
 
-Save files capture completed gameplay state, including normalized shared monster
-rows. They omit pending commands and presentation snapshots. Loading parses
-into a temporary `Game`, validates it, then replaces the live state. The Fairy
-checkpoint is written after her dialogue and animation finish.
+Saves contain the original floor records and 171-word hero record. Monster rows
+are reconstructed from constants and seal/cycle flags as in `0x454DE8`; Zeno
+remains one shared mutable row. Unmapped original words survive import and
+rewriting. Pending commands and presentation snapshots are omitted. Loading
+parses into a temporary `Game`, validates it, then replaces the live state.
+Earlier C++ saves have a compatibility reader. The Fairy checkpoint is written
+after her dialogue and animation finish. [Original data](original-data.md)
+records the byte layout and load-time scaling quirk.
 
 ## Existing Rust implementation
 

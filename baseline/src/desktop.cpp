@@ -157,7 +157,7 @@ UiAction keyboard(const Game& game, DesktopUi& ui) {
     return {};
 }
 void apply(UiAction action, Game& game, DesktopUi& ui, Presentation& renderer, Audio& audio,
-           const std::filesystem::path& save_directory) {
+           const std::filesystem::path& save_directory, const std::filesystem::path& original_directory) {
     switch (action.kind) {
     case Action::NewGame:
         game.new_game();
@@ -174,7 +174,7 @@ void apply(UiAction action, Game& game, DesktopUi& ui, Presentation& renderer, A
     case Action::OpenLoadSlots:
         if (action.kind == Action::OpenSaveSlots && game.busy())
             throw std::runtime_error("Finish the current action before saving");
-        ui.save_slots = inspect_save_slots(save_directory);
+        ui.save_slots = inspect_save_slots(save_directory, original_directory);
         ui.close_overlays();
         ui.save_picker = action.kind == Action::OpenSaveSlots ? SavePicker::Save : SavePicker::Load;
         if (ui.save_picker == SavePicker::Load &&
@@ -195,7 +195,7 @@ void apply(UiAction action, Game& game, DesktopUi& ui, Presentation& renderer, A
     case Action::FairyCheckpoint:
     case Action::LoadSlot:
         game.load(action.kind == Action::LoadSlot
-                      ? save_slot_path(save_directory, action.value)
+                      ? load_slot_path(save_directory, action.value, original_directory)
                       : save_directory / (action.kind == Action::Load ? "quick.save" : "fairy.save"));
         renderer.reset();
         ui.close_overlays();
@@ -266,6 +266,7 @@ int main(int argc, char** argv) try {
     std::filesystem::path requested_assets;
     auto save_directory = saves();
     std::filesystem::path screenshot, presentation_test, asset_test, compare_assets = BASELINE_ASSETS;
+    std::filesystem::path load_file, export_original;
     std::string smoke;
     bool audio_test = false, visible_smoke = false;
     for (int i = 1; i < argc; ++i) {
@@ -274,6 +275,10 @@ int main(int argc, char** argv) try {
             requested_assets = argv[++i];
         else if (arg == "--save-dir" && i + 1 < argc)
             save_directory = argv[++i];
+        else if (arg == "--load" && i + 1 < argc)
+            load_file = argv[++i];
+        else if (arg == "--export-original" && i + 1 < argc)
+            export_original = argv[++i];
         else if (arg == "--screenshot" && i + 1 < argc)
             screenshot = argv[++i];
         else if (arg == "--presentation-test" && i + 1 < argc)
@@ -294,6 +299,7 @@ int main(int argc, char** argv) try {
                          "F6 / F7: eight save / load slots. F5 / F9: quick save / restore.\n"
                          "F8: Fairy checkpoint. F2: new game. M: mute.\n"
                          "--assets DIR --save-dir DIR --screenshot FILE --audio-test\n"
+                         "--load FILE --export-original FILE\n"
                          "--smoke "
                          "initial|capture|stairs|fight|floor10|fairy|items|inventory|item|shop|flight|help|"
                          "backside|ending|enemies|slots\n"
@@ -303,10 +309,19 @@ int main(int argc, char** argv) try {
         } else
             throw std::runtime_error("Unknown argument: " + arg);
     }
+    Game initial_game;
+    if (!load_file.empty())
+        initial_game.load(load_file);
+    if (!export_original.empty()) {
+        initial_game.save(export_original);
+        std::cout << "Original-format save exported: " << export_original << '\n';
+        return 0;
+    }
     Assets assets(Assets::select(executable, requested_assets, BASELINE_ORIGINAL_ASSETS, BASELINE_ASSETS),
                   executable_file);
     std::cout << "Assets: " << assets.root()
               << (assets.original_layout() ? " (original layout)\n" : " (PNG layout)\n");
+    const auto original_save_directory = assets.original_layout() ? assets.root() : executable;
     if (!asset_test.empty())
         return verify_assets(assets, Assets(compare_assets, executable_file), executable_file, asset_test);
     if (audio_test) {
@@ -330,7 +345,7 @@ int main(int argc, char** argv) try {
             result = verify_presentation(renderer, presentation_test, assets);
         else {
             Audio audio(assets);
-            Game game;
+            Game game = std::move(initial_game);
             DesktopUi ui;
             fixture(game, ui, smoke);
             float accumulator = 0;
@@ -342,7 +357,7 @@ int main(int argc, char** argv) try {
             const auto dispatch = [&](UiAction action) {
                 const auto before = game.hero;
                 try {
-                    apply(action, game, ui, renderer, audio, save_directory);
+                    apply(action, game, ui, renderer, audio, save_directory, original_save_directory);
                 } catch (const std::exception& error) {
                     game.status = error.what();
                 }

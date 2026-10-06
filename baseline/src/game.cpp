@@ -36,6 +36,7 @@ Game::Game() {
     new_game();
 }
 void Game::new_game() {
+    original_save_record_.reset();
     hero = Hero{};
     floors = original::Maps;
     monsters = original::Monsters;
