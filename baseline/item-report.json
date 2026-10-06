@@ -1,0 +1,41 @@
+{
+  "original_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "scenarios": 2067,
+  "passed": 2067,
+  "groups": {
+    "item-5": 377,
+    "item-6": 381,
+    "item-11": 377,
+    "item-4": 6,
+    "item-7": 242,
+    "item-8": 102,
+    "item-9": 102,
+    "item-12": 4,
+    "item-13": 4,
+    "flight-confirm": 468,
+    "flight-preview": 4
+  },
+  "failures": [],
+  "skipped_original_calls": [
+    "0x40369c",
+    "0x403710",
+    "0x405b6c",
+    "0x413500",
+    "0x41353c",
+    "0x417e44",
+    "0x41a5b8",
+    "0x41dad8",
+    "0x421a54",
+    "0x442c38",
+    "0x4433a4",
+    "0x44bc0c",
+    "0x44cb34",
+    "0x450880",
+    "0x454c10",
+    "0x47c2bc",
+    "dword ptr [ebx + 0xc]",
+    "dword ptr [edi + 0xc]",
+    "dword ptr [esi + 0xc]"
+  ],
+  "limits": "Isolated item fragments and Flight callbacks. VCL drawing/string calls skipped. Preview floor stays in modern UI state; command playback and natural routes are separate checks."
+}

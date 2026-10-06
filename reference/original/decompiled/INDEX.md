@@ -4,6 +4,11 @@ Source SHA-256: `41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d277
 
 C-like decompiler output for every detected function entering 0x440000..0x488FFF. This is an inspection corpus, not compilable game source or proof that each branch is verified. Unknown fields and helper names remain explicit. Reviewed routines and probe evidence are indexed in ../README.md.
 
+The initial 106-function export is supplemented by ten recovered callbacks/item
+helpers below. The repaired `0x46CB1C` export recovers the two-level arrival
+switch missed by initial analysis. The runnable readable C++ implementation is
+in [baseline](../../../baseline/README.md), with [fidelity evidence](../../../baseline/FIDELITY.md).
+
 | Entry | Function | Source | Result |
 |---|---|---|---|
 | `0x004402B0` | `FUN_004402b0` | [004402b0_FUN_004402b0.c](004402b0_FUN_004402b0.c) | Exported |
@@ -37,6 +42,11 @@ C-like decompiler output for every detected function entering 0x440000..0x488FFF
 | `0x0044CB34` | `FUN_0044cb34` | [0044cb34_FUN_0044cb34.c](0044cb34_FUN_0044cb34.c) | Exported |
 | `0x0044CCD8` | `FUN_0044ccd8` | [0044ccd8_FUN_0044ccd8.c](0044ccd8_FUN_0044ccd8.c) | Exported |
 | `0x0044DA10` | `dialogue_continue` | [0044da10_dialogue_continue.c](0044da10_dialogue_continue.c) | Exported |
+| `0x0044E1CC` | `accept_merchant_or_altar` | [0044e1cc_accept_merchant_or_altar.c](0044e1cc_accept_merchant_or_altar.c) | Recovered callback |
+| `0x0044EAF4` | `confirm_flight` | [0044eaf4_confirm_flight.c](0044eaf4_confirm_flight.c) | Recovered callback |
+| `0x0044ED1C` | `preview_flight_down` | [0044ed1c_preview_flight_down.c](0044ed1c_preview_flight_down.c) | Recovered callback |
+| `0x0044ED94` | `preview_flight_up` | [0044ed94_preview_flight_up.c](0044ed94_preview_flight_up.c) | Recovered callback |
+| `0x0044F0E8` | `close_wisdom` | [0044f0e8_close_wisdom.c](0044f0e8_close_wisdom.c) | Recovered callback |
 | `0x0044F26C` | `FUN_0044f26c` | [0044f26c_FUN_0044f26c.c](0044f26c_FUN_0044f26c.c) | Exported |
 | `0x0044FF0C` | `FUN_0044ff0c` | [0044ff0c_FUN_0044ff0c.c](0044ff0c_FUN_0044ff0c.c) | Exported |
 | `0x00450064` | `FUN_00450064` | [00450064_FUN_00450064.c](00450064_FUN_00450064.c) | Exported |
@@ -48,7 +58,12 @@ C-like decompiler output for every detected function entering 0x440000..0x488FFF
 | `0x00450758` | `FUN_00450758` | [00450758_FUN_00450758.c](00450758_FUN_00450758.c) | Exported |
 | `0x00450880` | `FUN_00450880` | [00450880_FUN_00450880.c](00450880_FUN_00450880.c) | Exported |
 | `0x00450BC5` | `use_selected_item` | [00450bc5_use_selected_item.c](00450bc5_use_selected_item.c) | Exported |
+| `0x00451B98` | `mattock_wall` | [00451b98_mattock_wall.c](00451b98_mattock_wall.c) | Recovered helper |
 | `0x00451C20` | `classify_neighbor` | [00451c20_classify_neighbor.c](00451c20_classify_neighbor.c) | Exported |
+| `0x00451D3C` | `crystal_lava` | [00451d3c_crystal_lava.c](00451d3c_crystal_lava.c) | Recovered helper |
+| `0x00451E1C` | `altar_health` | [00451e1c_altar_health.c](00451e1c_altar_health.c) | Recovered callback |
+| `0x004520B4` | `altar_attack` | [004520b4_altar_attack.c](004520b4_altar_attack.c) | Recovered callback |
+| `0x00452360` | `altar_defense` | [00452360_altar_defense.c](00452360_altar_defense.c) | Recovered callback |
 | `0x004526C0` | `FUN_004526c0` | [004526c0_FUN_004526c0.c](004526c0_FUN_004526c0.c) | Exported |
 | `0x004548A0` | `FUN_004548a0` | [004548a0_FUN_004548a0.c](004548a0_FUN_004548a0.c) | Exported |
 | `0x00454A58` | `FUN_00454a58` | [00454a58_FUN_00454a58.c](00454a58_FUN_00454a58.c) | Exported |
@@ -70,7 +85,7 @@ C-like decompiler output for every detected function entering 0x440000..0x488FFF
 | `0x00465900` | `touzoku` | [00465900_touzoku.c](00465900_touzoku.c) | Exported |
 | `0x004660D0` | `doorstackin` | [004660d0_doorstackin.c](004660d0_doorstackin.c) | Exported |
 | `0x004664E4` | `moncheck` | [004664e4_moncheck.c](004664e4_moncheck.c) | Exported |
-| `0x0046CB1C` | `ichicheck` | [0046cb1c_ichicheck.c](0046cb1c_ichicheck.c) | Exported |
+| `0x0046CB1C` | `ichicheck` | [0046cb1c_arrival_recovered.c](0046cb1c_arrival_recovered.c) | Recovered two-level switch; initial [incomplete export](0046cb1c_ichicheck.c) retained |
 | `0x004770E0` | `FUN_004770e0` | [004770e0_FUN_004770e0.c](004770e0_FUN_004770e0.c) | Exported |
 | `0x00478F0C` | `FUN_00478f0c` | [00478f0c_FUN_00478f0c.c](00478f0c_FUN_00478f0c.c) | Exported |
 | `0x0047BEAC` | `doorcheck` | [0047beac_doorcheck.c](0047beac_doorcheck.c) | Exported |
@@ -114,3 +129,6 @@ C-like decompiler output for every detected function entering 0x440000..0x488FFF
 | `0x00488D50` | `entry` | [00488d50_entry.c](00488d50_entry.c) | Exported |
 
 Exported 106 detected functions; failed 0.
+
+Supplement: ten recovered callbacks/helpers; repaired arrival export. Recovery
+scripts are `tools/ghidra/RecoverCallbacks.java` and `RecoverArrival.java`.

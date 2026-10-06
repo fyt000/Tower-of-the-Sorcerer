@@ -1,8 +1,10 @@
 # Original interaction source reference
 
-This directory holds source for reviewing the installed **English Windows
-Tower of the Sorcerer 1.2**. The Rust engine remains the game implementation.
-No separate C++ executable, driver or alternate runtime is included.
+This directory holds source evidence for reviewing the installed **English
+Windows Tower of the Sorcerer 1.2**. The separate, runnable C++20 original-game
+baseline is in [baseline](../../baseline/README.md), with executable comparison
+results and limits in [its fidelity notes](../../baseline/FIDELITY.md). The Rust
+rewrite remains independent and its architecture is unchanged.
 
 The original image has SHA-256
 `41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779`.
@@ -13,6 +15,7 @@ Analysis reads that image without modifying it.
 
 | Source | What it makes explicit | Verified original behavior |
 |---|---|---|
+| [C++ baseline](../../baseline/README.md) | Readable complete core, iterative command interpreter and raylib desktop | 4,216 isolated original-machine comparisons; regression, sanitizer and desktop checks described in its fidelity notes |
 | [doors.cpp](doors.cpp) | Key decision, unconditional door callback, reversed queue order | 39F one-key clock shortcut; both hand orders; ordinary opening/refusal; 43F no-key trap arming |
 | [bomb.cpp](bomb.cpp) | Tile classifier, cardinal bounds, gold, consumption, dissolve records, deferred floor check | Immune and susceptible tile families; all 256 tile inputs; all 121 hero coordinates; raw rewards; one callback after a complete use |
 | [zeno.cpp](zeno.cpp) | Shared row, seal flag, division, gate restoration and cycle-specific contact | 49F `/= 10`; time gate `*= 10`; gate-before-seal route; resealing after restoration; second-cycle fixed-row exception |
@@ -28,8 +31,9 @@ literal numeric-sum checks where present; the Rust clock event expresses the
 equivalent predicate for reachable original clock states. Synthetic balanced
 non-door sums are recorded separately in the executable audit.
 
-The generated C-like files contain **106 detected functions** entering
-`0x440000..0x488FFF`, with no decompilation failures, and preserve the wider
+The initial generated C-like corpus contains **106 detected functions** entering
+`0x440000..0x488FFF`, with no decompilation failures. Ten separately recovered
+callbacks/item helpers and a repaired arrival-switch export supplement it and preserve the wider
 control flow and unresolved helpers. Ghidra infers signatures and types from
 Borland Delphi machine code. Register arguments, dynamic strings, unknown
 globals and casts still need
@@ -104,8 +108,11 @@ The probes stop before Delphi timer playback and disclose skipped calls.
 The Zeno cases carry actual stat/flag writes between isolated handlers;
 they do not simulate natural full-tower routes. Source export, branch probes,
 Rust scenarios and a natural playthrough are separate kinds of evidence.
-Remaining limits include a complete altered-state branch inventory, Fairy
-score/checkpoint fidelity, exact ending artwork and a full natural tower route.
+The separate C++ checks also cover default Fairy score/ranking and completed
+checkpoint saves. Remaining limits include a complete altered-state branch
+inventory, custom legacy ranking files, exact compositor timing and a full
+natural tower route. Source and executable comparisons do not prove 100% of
+all possible behavior.
 
 ## Regenerating the broader source export
 
@@ -129,3 +136,23 @@ replace `-import … -analysisTimeoutPerFile 300` with
 `-process TSW.exe -noanalysis`. The exporter pins the hash, names verified
 state addresses and handlers, lists its function-address scope in the index,
 and reports decompilation failures explicitly.
+
+The initial arrival export missed a two-level computed jump. Recover it and the
+indirect Delphi callbacks in the same analysis project:
+
+```powershell
+& '<Ghidra>/support/analyzeHeadless.bat' `
+  'tools/research/ghidra-project' original-tsw -process TSW.exe -noanalysis `
+  -scriptPath 'tools/ghidra' -postScript RecoverArrival.java `
+  'reference/original/decompiled/0046cb1c_arrival_recovered.c'
+& '<Ghidra>/support/analyzeHeadless.bat' `
+  'tools/research/ghidra-project' original-tsw -process TSW.exe -noanalysis `
+  -scriptPath 'tools/ghidra' -postScript RecoverCallbacks.java `
+  'reference/original/decompiled'
+```
+
+The recovered arrival file supersedes the incomplete `0046cb1c_ichicheck.c` for
+reviewing floor-specific branches. The original is Borland Delphi/VCL. Changing
+the decompiler's display language to C++ would not recover the author's Pascal
+source; the compilable modern implementation is the separately reviewed C++
+translation.

@@ -1,0 +1,28 @@
+{
+  "original_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "scenarios": 992,
+  "passed": 992,
+  "groups": {
+    "contact": 216,
+    "battle": 404,
+    "forced": 372
+  },
+  "failures": [],
+  "skipped_original_calls": [
+    "0x4034fc",
+    "0x40352c",
+    "0x403710",
+    "0x405b6c",
+    "0x41a5b8",
+    "0x421a54",
+    "0x4433a4",
+    "0x443808",
+    "0x44b6f4",
+    "0x44b78c",
+    "0x44bc0c",
+    "0x44cb34",
+    "dword ptr [ebx + 0xc]",
+    "dword ptr [edi + 0xc]"
+  ],
+  "limits": "Contact direct hero writes and combat command playback only. Unread b operands of HeroStrike/Reward normalized. VCL calls skipped. No natural tower route asserted."
+}

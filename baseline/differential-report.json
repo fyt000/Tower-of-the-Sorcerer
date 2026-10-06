@@ -1,0 +1,19 @@
+{
+  "original_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "probe": "baseline\\build-vs\\Release\\tos_baseline_probe.exe",
+  "scenarios": 731,
+  "passed": 731,
+  "failures": [],
+  "skipped_original_calls": [
+    "0x4034dc",
+    "0x40923c",
+    "0x4135d4",
+    "0x44bc0c",
+    "dword ptr [ecx + 0x28]",
+    "dword ptr [ecx + 0x2c]",
+    "dword ptr [edi + 0xc]",
+    "dword ptr [edx + 0x1c]",
+    "dword ptr [edx + 0x20]"
+  ],
+  "limits": "Builder comparison only; rendering/Delphi helpers listed as skipped are not emulated. No complete natural playthrough is asserted."
+}

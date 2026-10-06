@@ -11,6 +11,12 @@ The original installation is read only. The user's Cocos2d-x project has not
 been copied into this implementation. The private development remote is
 [fyt000/tos-rust](https://github.com/fyt000/tos-rust).
 
+A separate [C++20 baseline of the original game](baseline/README.md) translates
+the decompiled Delphi logic into readable branches and command builders, with
+its own raylib desktop and executable comparison tests. It does not change the
+Rust rewrite's architecture. See [its fidelity notes](baseline/FIDELITY.md) for
+coverage and differences.
+
 ## Run
 
 The toolchain, local assets and test browser are already installed on this

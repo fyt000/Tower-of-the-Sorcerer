@@ -1,0 +1,143 @@
+{
+  "original_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "pictures": [
+    {
+      "component": "Image21",
+      "resource": "TTSW10",
+      "offset": 3098,
+      "bitmap_bytes": 257078,
+      "bitmap_sha256": "fd89032f3da8b2ccbe1d4043efd1e86e9aeeff8a832621af4f81371d607d5e84",
+      "output": "data-exe-ending-story.png",
+      "size": [
+        640,
+        400
+      ]
+    },
+    {
+      "component": "Image33",
+      "resource": "TTSW10",
+      "offset": 260264,
+      "bitmap_bytes": 257078,
+      "bitmap_sha256": "50fe40d0d7948790feeff0ffd2b2dc4f84042cfcf48e7d0d58902fd611bcf5a0",
+      "output": "data-exe-ending-card.png",
+      "size": [
+        640,
+        400
+      ]
+    }
+  ],
+  "manual_save_slots": [
+    {
+      "number": 1,
+      "caption": "Data &1",
+      "save": {
+        "component": "Save11",
+        "resource": "TTSW10",
+        "offset": 561430
+      },
+      "load": {
+        "component": "Load11",
+        "resource": "TTSW10",
+        "offset": 560829
+      }
+    },
+    {
+      "number": 2,
+      "caption": "Data &2",
+      "save": {
+        "component": "Save21",
+        "resource": "TTSW10",
+        "offset": 561498
+      },
+      "load": {
+        "component": "Load21",
+        "resource": "TTSW10",
+        "offset": 560897
+      }
+    },
+    {
+      "number": 3,
+      "caption": "Data &3",
+      "save": {
+        "component": "Save31",
+        "resource": "TTSW10",
+        "offset": 561566
+      },
+      "load": {
+        "component": "Load31",
+        "resource": "TTSW10",
+        "offset": 560965
+      }
+    },
+    {
+      "number": 4,
+      "caption": "Data &4",
+      "save": {
+        "component": "Save41",
+        "resource": "TTSW10",
+        "offset": 561634
+      },
+      "load": {
+        "component": "Load41",
+        "resource": "TTSW10",
+        "offset": 561033
+      }
+    },
+    {
+      "number": 5,
+      "caption": "Data &5",
+      "save": {
+        "component": "Save51",
+        "resource": "TTSW10",
+        "offset": 561702
+      },
+      "load": {
+        "component": "Load51",
+        "resource": "TTSW10",
+        "offset": 561101
+      }
+    },
+    {
+      "number": 6,
+      "caption": "Data &6",
+      "save": {
+        "component": "Save61",
+        "resource": "TTSW10",
+        "offset": 561770
+      },
+      "load": {
+        "component": "Load61",
+        "resource": "TTSW10",
+        "offset": 561169
+      }
+    },
+    {
+      "number": 7,
+      "caption": "Data &7",
+      "save": {
+        "component": "Save71",
+        "resource": "TTSW10",
+        "offset": 561838
+      },
+      "load": {
+        "component": "Load71",
+        "resource": "TTSW10",
+        "offset": 561237
+      }
+    },
+    {
+      "number": 8,
+      "caption": "Data &8",
+      "save": {
+        "component": "Save81",
+        "resource": "TTSW10",
+        "offset": 561906
+      },
+      "load": {
+        "component": "Load81",
+        "resource": "TTSW10",
+        "offset": 561305
+      }
+    }
+  ]
+}
