@@ -37,13 +37,16 @@ pins dependency versions and download hashes. To use another original EXE path
 after configuring, pass `-DBASELINE_ORIGINAL_EXE=PATH` when configuring again.
 The original must match the supported 1.2 executable hash.
 
-A headless core build needs only C++20 and CMake 3.25 or later:
+A headless core build needs C++20 and CMake 3.25 or later. Tests use Catch2 3.13;
+CMake fetches the pinned source when no installed Catch2 package is available:
 
 ```sh
 cmake -S baseline -B baseline/build-headless -DBASELINE_GUI=OFF
 cmake --build baseline/build-headless --config Release
 ctest --test-dir baseline/build-headless -C Release --output-on-failure
 ```
+
+Use `-DBUILD_TESTING=OFF` to build the core and research probe without Catch2.
 
 ## Original folder compatibility
 
@@ -112,9 +115,12 @@ executable's filename does not affect saving or loading.
 
 ## Validate and package
 
-CTest covers the core, complete MIDI synthesis and original-media renderer. When
-the extracted PNGs are available, it also compares both asset layouts and runs
-the renderer with PNGs.
+CTest discovers each named Catch2 core case and runs the MIDI, renderer and asset
+checks separately. The core cases use the actual `Game` API and complete command
+playback. When the extracted PNGs are available, CTest also compares both asset
+layouts and runs the renderer with PNGs. Run a subset directly with
+`./build-vs/Release/baseline_tests.exe "[combat]"`; the runner supports named tests,
+tags, expression/value diagnostics and standard report formats.
 [The research workflow](../docs/reverse-engineering.md) describes the original
 executable comparisons. Useful desktop checks include:
 
@@ -126,8 +132,17 @@ executable comparisons. Useful desktop checks include:
 python tools/package.py --original-dir "D:/Program Files (x86)/Tower of the Sorcerer"
 ```
 
-Packaging creates `dist/tos-original-baseline-0.5-windows-x64/TSW.exe` and a ZIP
+All C++ sources, headers and tests follow `baseline/.clang-format`, including the
+generated original constants. After regenerating constants, format that header
+again. From `baseline/`, format the complete C++ tree with:
+
+```powershell
+$formatter = 'C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/Llvm/x64/bin/clang-format.exe'
+rg --files src include tests -g '*.cpp' -g '*.hpp' | ForEach-Object { & $formatter -i --style=file $_ }
+```
+
+Packaging creates `dist/tos-original-baseline-0.6-windows-x64/TSW.exe` and a ZIP
 with the original media layout, licenses and validation reports. The packaged
 EXE can also be copied alone into an existing original installation. The smaller
-`dist/tos-original-baseline-0.5-drop-in.zip` contains the EXE, usage notes and
+`dist/tos-original-baseline-0.6-drop-in.zip` contains the EXE, usage notes and
 licenses for that deployment.

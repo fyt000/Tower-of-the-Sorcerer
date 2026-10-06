@@ -15,6 +15,7 @@ def main():
     lines = ['// Extracted from hash-pinned TSW 1.2; regenerate with tools/extract_constants.py.',
              '#pragma once', '#include "baseline/game.hpp"', 'namespace baseline::original {',
              f'inline constexpr std::string_view ImageHash = "{digest}";',
+             '// Keep one source row per 11-cell board row.', '// clang-format off',
              'inline constexpr std::array<Floor, FloorCount> Maps{{']
     for floor in range(51):
         record = raw[floor*123:(floor+1)*123]
@@ -23,7 +24,7 @@ def main():
         for y in range(11):
             lines.append('        '+', '.join(f'{t:3}' for t in record[2+y*11:2+(y+1)*11])+',')
         lines.append('    }}},')
-    lines += ['}};', 'inline constexpr std::array<Monster, 33> Monsters{{']
+    lines += ['}};', '// clang-format on', 'inline constexpr std::array<Monster, 33> Monsters{{']
     for i,(_,name,_) in enumerate(MONSTERS):
         stats = struct.unpack_from('<4i',exe,MONSTER_OFFSET+i*16)
         lines.append('    Monster{'+', '.join(map(str,stats))+'}, // '+name)

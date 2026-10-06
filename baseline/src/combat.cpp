@@ -146,6 +146,8 @@ void Game::battle_finished(const Fight& fight) {
         push(Op::WriteTile, position, Road);
     push(Op::Wait);
     push(Op::Callback, Callback::BattleEnd);
-    status = "Defeated " + std::string(monster_name(fight.enemy)) + ".";
+    const int earned = reward * (inventory(Item::LuckyGold) + 1);
+    status = "Defeated " + std::string(monster_name(fight.enemy)) + ". Received " + std::to_string(earned) +
+             " gold.";
 }
 } // namespace baseline

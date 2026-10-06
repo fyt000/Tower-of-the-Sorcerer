@@ -63,7 +63,15 @@ python baseline/tools/verify_saves.py --probe baseline/build-vs/Release/tos_base
 python baseline/tools/verify_quirks.py --probe baseline/build-vs/Release/tos_baseline_probe.exe
 ```
 
-Add complete playback tests for interactions between builders and callbacks.
+`baseline/src/probe.cpp` is a research-only stdin/stdout adapter linked to
+`baseline_core`. Commands such as `set`, `tile`, `call`, `step`, `trace` and
+`snapshot` let these scripts configure and observe the same state as the
+emulated original. The injected data lives in test instances and emulator
+memory; the installed EXE and media remain untouched. Some fixtures intentionally
+construct altered maps or extreme stats to expose a branch or unsafe access.
+Reports distinguish skipped calls and explicit safety exceptions.
+
+Catch2 core cases cover complete playback between builders and callbacks.
 Renderer checks and asset comparisons are separate from core logic comparisons;
 passing one does not establish the others. [Current coverage](../baseline/FIDELITY.md)
 records the limits, including the outstanding full natural tower playthrough.

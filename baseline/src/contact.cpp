@@ -215,6 +215,7 @@ void Game::hazard(int magician_cell, int retreat_cell) {
     const int t = tile(hero.floor, magician_cell);
     const bool magician_a = t == MagicianA || t == MagicianA + 1;
     // Preserve the original extra y guard even for a horizontal retreat on 47F.
+    // Index 121 would alias the next floor's stair metadata in the original 123-byte records.
     if (magician_a && hero.floor == 47 && hero.y > 0 && hero.y < 10 && retreat_cell >= 0 &&
         retreat_cell < CellCount && tile(hero.floor, retreat_cell) == Road) {
         push(Op::Wait);

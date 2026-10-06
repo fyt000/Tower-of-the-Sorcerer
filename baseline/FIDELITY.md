@@ -23,11 +23,12 @@ These execute isolated original x86 handlers and compare their output with the
 compiled C++ probe. Reports list skipped calls. Unread stale `b` operands in
 HeroStrike/Reward are normalized; other compared operands and orders are retained.
 
-The **107 core checks** execute complete command stacks, bounded long fights,
+The **26 Catch2 core cases / 126 assertions** execute complete command stacks, bounded long fights,
 fatal cancellation, dialogue aliases, Fairy restores, all eight save slots,
 replacement backups, shared original slot paths, cycle carry/reset rules and
 the 50F gate/seal/wing branches. They reproduce the 33F lower-entry softlock
-through walking and combat, and finish the original 4,500-round Archsorcerer
+through walking and combat, check gold completion text and safe 47F boundaries,
+and finish the original 4,500-round Archsorcerer
 and 7,920-round backside Gateman fights with every strike and bounded memory.
 The core, renderer, asset loading, complete MIDI synthesis and audio-device
 checks have passed MSVC AddressSanitizer Release runs.
@@ -67,14 +68,14 @@ faults do not. `tools/verify_quirks.py` records the additional machine compariso
 | Case | Baseline behavior |
 |---|---|
 | 33F trap | Only the upper cell triggers it. Clearing the guards first from below, then touching that cell, still seals the exits. |
-| 47F Magician A | The hero-row guard and horizontal wrapping within the flat floor array remain. Out-of-floor memory access is rejected. |
+| 47F Magician A | The hero-row guard and horizontal wrapping within the flat floor array remain. Index 121 is rejected: it aliases the next floor's stair landing byte in the original packed maps. |
 | Backside 45F Merchant | Pays the original unscaled 2,000 HP for 1,000 gold. |
 | Sealed Zeno after load | Retains the shared-row reconstruction and extra backside scaling documented above. |
-| Lucky Gold and enemy-first combat | Actual income doubles. The modern completion text omits the amount, so Delphi's wrong displayed amount is not reproduced. |
+| Lucky Gold and enemy-first combat | Actual income doubles, as in the original. The modern completion text includes the credited amount; Delphi's wrong enemy-first display of the undoubled amount is a presentation difference. |
 | 40F boss prompt | The original yellow-door message command remains. |
 | 50F Thief / backside magic text | Original speech/message IDs remain. VCL text positioning is outside the modern overlay's fidelity scope. |
 | Magician A mask | The original bitmap pixels remain unchanged; no one-pixel asset correction is applied. |
-| 49F summon ghost | Exactly 128 written commands execute. The stray cursor increment at `0x4637DD` is omitted; the report explicitly reproduces and excludes the unsafe 129th record. |
+| 49F summon ghost | Eight guards × eight animation stages × two records gives 128 written commands. The stray cursor increment at `0x4637DD` exposes an unwritten 129th record; the report reproduces that stale command and explicitly excludes it. |
 | Combat buffer overflow | Every round executes incrementally; no legacy fixed event buffer is used. |
 | Closely spaced effects / BGM stalls | Preloaded WAV voice aliases overlap. Parsed MIDI tracks are cached; selection performs no disk reads, parsing or message freeing under the callback lock. |
 

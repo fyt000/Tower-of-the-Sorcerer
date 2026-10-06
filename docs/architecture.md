@@ -68,7 +68,12 @@ without direct Windows API calls. Assets are read during loading, not per frame.
 through TinySoundFont. Track selection performs no file I/O or parsing. The
 callback uses preallocated synth voices and sample progress, independent of
 command speed. Original WAV effects are decoded once; a bounded pool of raylib
-aliases shares their samples and lets repeated effects overlap. Fonts use
+aliases shares their samples and lets repeated effects overlap. The cache holds
+MIDI messages and WAV samples; music is synthesized as it plays. Rendering the
+entire soundtrack up front would consume about 248 MiB of stereo float audio,
+so the baseline keeps the small MIDI cache and its live synth. Audio verification
+and WAV export helpers are also in `audio.cpp`; they are only called by test flags.
+Fonts use
 installed Segoe UI when available and raylib's fallback
 otherwise; system fonts are not distributed.
 
@@ -93,8 +98,25 @@ and campaign editor. CLI, headless and MCP adapters call that engine; Node scrip
 build and launch its clients. This architecture is retained. The C++ baseline
 uses explicit original branches instead of importing Rust event definitions.
 
-The comparison tools execute original x86 handlers and a compiled C++ probe.
-Core tests execute command playback; presentation tests check frames and scenes;
-asset tests compare original decoded pixels and audio bytes with the extracted
+## Verification
+
+Catch2 runs named core cases through the `Game` API, including complete command
+playback, save I/O and deliberately constructed edge states. CTest discovers
+each case so it can be run independently. The Python comparison tools execute
+original x86 handlers and the separate `tos_baseline_probe` research adapter.
+The adapter accepts state setup and handler commands, then prints state and
+command snapshots for comparison. It shares the same compiled core as the game.
+
+The original-machine tests inject matching hero, map and inventory states into
+an emulated copy of the original EXE. They bypass VCL/device calls and report
+what was skipped. These controlled cases expose branches without requiring a
+full tower playthrough; altered-map cases also exercise unusual bounds and
+numeric predicates. Desktop smoke fixtures check the modern window, input,
+scene timing and saves. A future gameplay CLI can call the same `Game` API;
+the research probe's raw state edits and internal handler calls remain research
+controls, and a public CLI design is still open.
+
+Presentation tests check frames and scenes; asset tests compare original decoded
+pixels and audio bytes with the extracted
 versions. [Fidelity notes](../baseline/FIDELITY.md) state what this evidence proves
 and what remains unverified.
