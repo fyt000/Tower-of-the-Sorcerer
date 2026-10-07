@@ -49,34 +49,35 @@ Keep meaningful original quirks in the core; document intentional safety or
 presentation changes. The Rust campaign is not an oracle for original behavior.
 
 The Python comparison tools run isolated original x86 handlers with Unicorn and
-compare them with `tos_baseline_probe.exe`. They pin the original hash and list
+compare them with `tsw_probe.exe`. They pin the original hash and list
 skipped VCL/RTL/device calls. From the repository root, after building C++:
 
 ```powershell
 python -m pip install pefile capstone unicorn pillow
 $env:TOS_ORIGINAL_EXE = 'D:/Program Files (x86)/Tower of the Sorcerer/TSW.exe'
-python baseline/tools/differential.py --probe baseline/build-vs/Release/tos_baseline_probe.exe
-python baseline/tools/verify_interactions.py --probe baseline/build-vs/Release/tos_baseline_probe.exe
-python baseline/tools/verify_callbacks.py --probe baseline/build-vs/Release/tos_baseline_probe.exe
-python baseline/tools/verify_items.py --probe baseline/build-vs/Release/tos_baseline_probe.exe
-python baseline/tools/verify_saves.py --probe baseline/build-vs/Release/tos_baseline_probe.exe
-python baseline/tools/verify_quirks.py --probe baseline/build-vs/Release/tos_baseline_probe.exe
+python cpp/tools/differential.py --probe build/cpp/vs/Release/tsw_probe.exe
+python cpp/tools/verify_interactions.py --probe build/cpp/vs/Release/tsw_probe.exe
+python cpp/tools/verify_callbacks.py --probe build/cpp/vs/Release/tsw_probe.exe
+python cpp/tools/verify_items.py --probe build/cpp/vs/Release/tsw_probe.exe
+python cpp/tools/verify_saves.py --probe build/cpp/vs/Release/tsw_probe.exe
+python cpp/tools/verify_quirks.py --probe build/cpp/vs/Release/tsw_probe.exe
 ```
 
-`baseline/src/probe.cpp` is a research-only stdin/stdout adapter linked to
-`baseline_core`. Commands such as `set`, `tile`, `call`, `step`, `trace` and
+`cpp/src/probe.cpp` is a research-only stdin/stdout adapter linked to
+`tsw_core`. Commands such as `set`, `tile`, `call`, `step`, `trace` and
 `snapshot` let these scripts configure and observe the same state as the
 emulated original. The injected data lives in test instances and emulator
 memory; the installed EXE and media remain untouched. Some fixtures intentionally
 construct altered maps or extreme stats to expose a branch or unsafe access.
 Reports distinguish skipped calls and explicit safety exceptions.
+Generated comparison reports and save fixtures stay under `build/cpp/`.
 
 Catch2 core cases cover complete playback between builders and callbacks.
 Renderer checks and asset comparisons are separate from core logic comparisons;
-passing one does not establish the others. [Current coverage](../baseline/FIDELITY.md)
+passing one does not establish the others. [Current coverage](../cpp/FIDELITY.md)
 records the limits, including the outstanding full natural tower playthrough.
 
 The generated maps/monster/dialogue constants can be refreshed with
-`python baseline/tools/extract_constants.py ORIGINAL_TSW.exe`. The build recovers
-the two embedded ending BMPs through `baseline/tools/extract_ui.py`; its manifest
+`python cpp/tools/extract_constants.py ORIGINAL_TSW.exe`. The build recovers
+the two embedded ending BMPs through `cpp/tools/extract_ui.py`; its manifest
 also records the original eight paired Save/Load menu items.

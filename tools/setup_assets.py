@@ -22,7 +22,7 @@ def main():
     if not args.font_only:
         subprocess.run([sys.executable, str(ROOT / "tools/extract_original.py"), "--source", args.source], check=True)
     if not args.skip_font:
-        fonts = ROOT / "web/fonts"
+        fonts = ROOT / "rust/web/fonts"
         fonts.mkdir(parents=True, exist_ok=True)
         for name, remote in [("NotoSansSC.ttf", "NotoSansSC%5Bwght%5D.ttf"), ("Noto-Sans-SC-LICENSE.txt", "OFL.txt")]:
             target = fonts / name

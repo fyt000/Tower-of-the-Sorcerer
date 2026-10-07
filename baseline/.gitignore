@@ -1,9 +1,0 @@
-/build*/
-/vendor/
-/assets/
-/vcpkg_installed/
-/dist/
-/artifacts/
-/CMakeUserPresets.json
-*.save
-*.png

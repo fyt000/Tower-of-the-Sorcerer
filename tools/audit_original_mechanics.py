@@ -1,6 +1,6 @@
 """Cross-check tswKai source claims against read-only original game evidence.
 
-Run after `gh repo clone Z-H-Sun/tswKai tools/research/tswKai` and the
+Run after `gh repo clone Z-H-Sun/tswKai build/research/tswKai` and the
 existing original extractors. Only isolated x86 helpers and local artwork are
 read; neither game nor upstream binaries are launched or patched on disk.
 Requires pefile, capstone, unicorn and Pillow, as the other extraction tools do.
@@ -19,7 +19,7 @@ from PIL import Image, ImageChops
 from original_event_probe import ROOT, RAW, pe, probe
 
 EXE_HASH = '41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779'
-UPSTREAM = ROOT / 'tools/research/tswKai'
+UPSTREAM = ROOT / 'build/research/tswKai'
 UPSTREAM_COMMIT = '08e5af7c8f3e4d1696ccd5725d745e87b989bff6'
 WIKI_COMMIT = '9d5fd2f0b3589835a7c9e870bc232d80d0a8cf55'
 
@@ -58,7 +58,7 @@ def main():
     assert digest == EXE_HASH, 'Review executable addresses before probing another version'
     commit = subprocess.check_output(['git', '-C', str(UPSTREAM), 'rev-parse', 'HEAD'], text=True).strip()
     assert commit == UPSTREAM_COMMIT, 'Review the upstream changes before updating the pinned comparison'
-    wiki = ROOT / 'tools/research/tswKai.wiki'
+    wiki = ROOT / 'build/research/tswKai.wiki'
     if wiki.exists():
         assert subprocess.check_output(['git', '-C', str(wiki), 'rev-parse', 'HEAD'], text=True).strip() == WIKI_COMMIT
     source = (UPSTREAM / 'tswMod.rb').read_text(encoding='utf-8')

@@ -1,5 +1,11 @@
 # Keep source diffs consistent between Windows and browser/native build hosts.
 *.rs text eol=lf
+*.cpp text eol=lf
+*.hpp text eol=lf
+*.cmake text eol=lf
+CMakeLists.txt text eol=lf
+.gitignore text eol=lf
+.clang-format text eol=lf
 *.json text eol=lf
 *.mjs text eol=lf
 *.py text eol=lf

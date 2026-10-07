@@ -159,7 +159,7 @@ def main():
     args = parser.parse_args()
     manual = json.loads((ROOT / "data/help/manual.json").read_text(encoding="utf-8"))
     for language, filename in PAGES.items():
-        output = ROOT / "web" / filename
+        output = ROOT / "rust/web" / filename
         rendered = render(manual, language)
         if args.check:
             if not output.exists() or output.read_text(encoding="utf-8") != rendered:

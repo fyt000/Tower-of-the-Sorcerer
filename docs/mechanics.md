@@ -2,7 +2,7 @@
 
 This is a compact guide to decisions that matter when checking original behavior.
 The implementation and decompiled source remain the detailed specification.
-See [fidelity coverage](../baseline/FIDELITY.md) for the tested limits.
+See [fidelity coverage](../cpp/FIDELITY.md) for the tested limits.
 
 ## Combat and items
 

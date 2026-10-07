@@ -27,7 +27,7 @@ From the repository root:
 ```powershell
 python -m pip install -r tools/requirements.txt
 python tools/extract_original.py --source "D:/Program Files (x86)/Tower of the Sorcerer"
-python baseline/tools/extract_ui.py --exe "D:/Program Files (x86)/Tower of the Sorcerer/TSW.exe"
+python cpp/tools/extract_ui.py --exe "D:/Program Files (x86)/Tower of the Sorcerer/TSW.exe"
 ```
 
 The first script refreshes extraction evidence and local media while preserving
@@ -72,7 +72,7 @@ C++ snapshots remain readable and use the original monster reconstruction on
 import; saving converts them to the original layout. Numbered saves read and
 write the same `Savedat/save1.dat` through `save8.dat` files beside the executable.
 The slot picker uses only that directory (or an explicit `--save-dir`), with no
-search for other locations or earlier C++ names. See [controls and saves](../baseline/README.md).
+search for other locations or earlier C++ names. See [controls and saves](../cpp/README.md).
 
 ## Original MIDI playback
 

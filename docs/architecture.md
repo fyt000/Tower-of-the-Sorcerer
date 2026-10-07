@@ -7,7 +7,7 @@ future changes; replay, TUI and other experiments can be developed separately.
 
 ## C++ core
 
-`baseline_core` owns hero state, 51 floors, 33 shared monster rows, inventory,
+`tsw_core` owns hero state, 51 floors, 33 shared monster rows, inventory,
 dialogue continuations and pending original commands. It has no graphics, audio
 or Windows dependency. Maps, monster constants and dialogue are compiled into
 `src/original_constants.hpp` from the supported executable.
@@ -35,7 +35,7 @@ changes that row rather than creating independent enemy instances.
 
 | Core file | Responsibility |
 |---|---|
-| `include/baseline/game.hpp` | Named state, tile/item/command IDs and core API |
+| `include/tsw/game.hpp` | Named state, tile/item/command IDs and core API |
 | `src/game.cpp` | Initialization, movement, command interpreter and cycles |
 | `src/contact.cpp` | Tile contact, doors, stairs, hazards and floor music |
 | `src/combat.cpp` | Forecasts, strike generation and victory records |
@@ -64,18 +64,25 @@ The replacement embeds the two original form pictures and GeneralUser GS bank
 as PE resources. `embedded_media.cpp` reads them through standard file I/O,
 without direct Windows API calls. Assets are read during loading, not per frame.
 
-`audio.cpp` parses and caches the MIDI tracks at startup, then synthesizes them
-through TinySoundFont. Track selection performs no file I/O or parsing. The
-callback uses preallocated synth voices and sample progress, independent of
-command speed. Original WAV effects are decoded once; a bounded pool of raylib
-aliases shares their samples and lets repeated effects overlap. The cache holds
-MIDI messages and WAV samples; music is synthesized as it plays. Rendering the
-entire soundtrack up front would consume about 248 MiB of stereo float audio,
-so the baseline keeps the small MIDI cache and its live synth. Audio verification
-and WAV export helpers are also in `audio.cpp`; they are only called by test flags.
-Fonts use
-installed Segoe UI when available and raylib's fallback
-otherwise; system fonts are not distributed.
+`audio.cpp` loads the original MIDI messages and decodes WAV effects before
+starting a miniaudio device. Its direct callback owns the TinySoundFont synth,
+MIDI cursor and all effect voices. The game thread publishes a packed
+track/play/mute/restart request through a lock-free atomic and writes effects to
+a fixed queue. The callback reads the request once per block; it takes no mutex,
+performs no I/O, and allocates or frees no memory. Raylib's audio mixer is bypassed.
+
+TSF's ordinary reset frees its channel array. The implementation instead uses its
+quick note release and restores initialized channel defaults in the same storage.
+All 256 synth voices, 16 MIDI channels and 16 voices per WAV are allocated before
+playback. Song changes, looping, pause/resume and muting have separate meanings;
+muting keeps the cursors advancing. Allocation hooks verify complete tracks and
+looping; device checks cover startup and restart behavior.
+
+`presentation.cpp` measures the GLFW window and framebuffer separately each frame
+and sets a logical projection over the full physical viewport. The same centered,
+aspect-preserving rectangle maps mouse input back onto the canvas. Tests compare
+actual framebuffer pixels after resizing, maximizing and restoring, including
+native DPI changes. Fonts use installed Segoe UI or raylib's bundled fallback.
 
 Saves contain the original floor records and 171-word hero record. Monster rows
 are reconstructed from constants and seal/cycle flags as in `0x454DE8`; Zeno
@@ -103,7 +110,7 @@ uses explicit original branches instead of importing Rust event definitions.
 Catch2 runs named core cases through the `Game` API, including complete command
 playback, save I/O and deliberately constructed edge states. CTest discovers
 each case so it can be run independently. The Python comparison tools execute
-original x86 handlers and the separate `tos_baseline_probe` research adapter.
+original x86 handlers and the separate `tsw_probe` research adapter.
 The adapter accepts state setup and handler commands, then prints state and
 command snapshots for comparison. It shares the same compiled core as the game.
 
@@ -118,5 +125,5 @@ controls, and a public CLI design is still open.
 
 Presentation tests check frames and scenes; asset tests compare original decoded
 pixels and audio bytes with the extracted
-versions. [Fidelity notes](../baseline/FIDELITY.md) state what this evidence proves
+versions. [Fidelity notes](../cpp/FIDELITY.md) state what this evidence proves
 and what remains unverified.

@@ -1,64 +1,57 @@
 # Tower of the Sorcerer
 
-This repository has two independent implementations of the English **Tower of the
-Sorcerer for Windows 1.2** by Oz & Kenichi.
+This repository recovers and reimplements the English **Tower of the Sorcerer
+for Windows 1.2** by Oz & Kenichi.
 
-Our current goal is a readable, reliable baseline of the original game. The
-**C++20 implementation in `baseline/`** translates the decompiled Delphi logic,
-keeps its branches and command order, and checks the result against the original
-executable. It is the reference for future changes and features.
+The current goal is a readable, faithful C++ implementation of the original
+Delphi game. Its core retains the original branches, loops, shared monster
+state, callbacks and command order, with named types and constants. Decompiled
+code and the unpatched original executable are the evidence. Gameplay quirks
+are preserved; unsafe memory access and audio/rendering engine problems are
+fixed. Future features can build on this reference.
 
-The **Rust implementation in `crates/`** is an earlier independent rewrite. Its
-architecture remains in place for experiments such as replay and terminal play.
-Agreement with the C++ baseline must be established through comparisons; Rust
-campaign definitions are not the specification for the original game.
+The earlier Rust rewrite remains an independent implementation. Its architecture
+is available for replay, terminal play and other experiments. It is not the
+specification for the C++ game.
 
-## Start here
-
-- [Build, run and use the C++ game](baseline/README.md)
-- [Game architecture and implementation boundaries](docs/architecture.md)
-- [Decompilation target, source recovery and comparison workflow](docs/reverse-engineering.md)
-- [Original data and asset formats](docs/original-data.md)
-- [Preserved game rules](docs/mechanics.md)
-- [Fidelity coverage and deliberate differences](baseline/FIDELITY.md)
-- [Attribution and dependencies](THIRD_PARTY.md)
-
-## Repository layout
-
-| Path | Purpose |
+| Directory | Contents |
 |---|---|
-| `baseline/` | Faithful C++ core, raylib desktop, tests and packaging |
-| `reference/original/decompiled/` | C-like Ghidra exports, source index and call map |
-| `reference/original/*.cpp` | Small reviewed examples of doors, Bomb and shared Zeno state |
-| `tools/ghidra/` | Export and recovery scripts for the original executable |
-| `tools/extract_original.py`, `data/` | Original constants and extraction evidence; Rust campaign data |
-| `crates/` | Independent Rust engine and UI |
-| `web/` | Rust browser launcher, local media and player help |
-| `docs/` | Current architecture, original data, rules and research workflow |
+| `cpp/` | C++20 game, `tsw` namespace, raylib graphics, miniaudio device, TSF/TML music, Catch2 tests |
+| `rust/` | Rust workspace, browser/native UI, Node tools and integration tests |
+| `reference/original/` | Ghidra exports, source index, reviewed translations and recovered UI evidence |
+| `data/` | Shared extraction evidence and Rust campaign/localization data |
+| `tools/` | Original executable/data extraction and Ghidra research tools |
+| `docs/` | Game architecture, original formats, mechanics and research workflow |
+| `build/` | Ignored C++/Rust builds, downloaded dependencies, reports, test output and packages |
 
-The original installation is read only during development. Extracted media,
-dependency downloads, build trees and distributions are local generated files
-and are excluded from Git. Decompiled evidence is retained alongside the
-compilable C++ implementation; it is not the original author's source code.
+Start with the [C++ build and controls](cpp/README.md),
+[architecture](docs/architecture.md),
+[decompilation and comparison workflow](docs/reverse-engineering.md), and
+[fidelity coverage](cpp/FIDELITY.md).
+[Original data](docs/original-data.md), [game rules](docs/mechanics.md), and
+[attribution](THIRD_PARTY.md) cover the supporting details.
 
-## Existing Rust setup
+The original installation is read only during development and tests. Decompiled
+exports are inspection evidence, not the author's original source. Local media
+and packages are excluded from Git.
 
-The Rust application remains available through the existing Node build scripts.
-It requires Rust, Node.js and the WebAssembly target; the build scripts manage
-the matching `wasm-bindgen` tool. From the repository root:
+## Rust setup
+
+Rust, Node.js and Python are needed for the earlier rewrite. From the repository root:
 
 ```powershell
+python -m pip install -r tools/requirements.txt
+python tools/setup_assets.py --source "D:/Program Files (x86)/Tower of the Sorcerer"
+Set-Location rust
 npm ci
 rustup target add wasm32-unknown-unknown
-python -m pip install -r tools/requirements.txt
-python tools/extract_original.py --source "D:/Program Files (x86)/Tower of the Sorcerer"
-python tools/setup_assets.py
 npm run build
 npm run start:native
-# Browser: npm start, then open http://127.0.0.1:8080/
+# Browser: npm start, then http://127.0.0.1:8080/
 ```
 
-`npm run editor` starts its campaign editor. `npm run check` runs the Rust checks;
-`npm run test:browser` and `npm run test:mcp` cover the browser and MCP clients.
-The Rust engine, editor and configurable campaign are separate from the C++
-baseline's hard-coded original logic.
+`npm run editor` opens the campaign editor. `npm run check` runs Rust tests and
+Clippy; `npm run test:browser`, `npm run test:native` and `npm run test:mcp` run
+integration checks. Cargo output is in `build/rust/target/`; Node tools put
+reports and packages in `build/rust/`. Extracted Rust media stays in
+`rust/web/assets/`, and Node's installed dependencies stay in `rust/node_modules/`.

@@ -415,7 +415,7 @@ def main() -> None:
     source = args.source.resolve()
     executable = (source / "TSW.exe").read_bytes()
     executable_hash = hashlib.sha256(executable).hexdigest()
-    data_dir, asset_dir = ROOT / "data", ROOT / "web" / "assets"
+    data_dir, asset_dir = ROOT / "data", ROOT / "rust/web" / "assets"
     data_dir.mkdir(parents=True, exist_ok=True)
     asset_dir.mkdir(parents=True, exist_ok=True)
 
@@ -446,14 +446,14 @@ def main() -> None:
             with Image.open(path) as bitmap:
                 bitmap.convert("RGB").save(target, optimize=True)
                 size = list(bitmap.size)
-            extraction.append({"source": f"{subfolder}/{path.name}", "output": f"web/assets/{target_name}", "size": size, "source_sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+            extraction.append({"source": f"{subfolder}/{path.name}", "output": f"rust/web/assets/{target_name}", "size": size, "source_sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
     for folder in ("Wav", "Midi"):
         target_dir = asset_dir / folder.lower()
         target_dir.mkdir(exist_ok=True)
         for path in sorted((source / folder).glob("*")):
             if path.is_file():
                 shutil.copyfile(path, target_dir / path.name.lower())
-                extraction.append({"source": f"{folder}/{path.name}", "output": f"web/assets/{folder.lower()}/{path.name.lower()}", "source_sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+                extraction.append({"source": f"{folder}/{path.name}", "output": f"rust/web/assets/{folder.lower()}/{path.name.lower()}", "source_sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
     hero_directions = {}
     with Image.open(asset_dir / "original-atlas.png") as atlas:
         for direction, tile in {"down": 185, "left": 193, "right": 201, "up": 209}.items():
@@ -463,7 +463,7 @@ def main() -> None:
             hero.putalpha(ImageOps.invert(mask))
             hero.save(asset_dir / f"hero-{direction}.png")
             hero_directions[direction] = {"source": f"assets/hero-{direction}.png", "x": 0, "y": 0, "w": 40, "h": 40}
-            extraction.append({"source": "Data3/Chtable.oz", "output": f"web/assets/hero-{direction}.png", "color_tile": tile, "mask_tile": tile + 1, "size": [40, 40]})
+            extraction.append({"source": "Data3/Chtable.oz", "output": f"rust/web/assets/hero-{direction}.png", "color_tile": tile, "mask_tile": tile + 1, "size": [40, 40]})
     write_json(asset_dir / "manifest.json", {"atlas": "assets/original-atlas.png", "tile_size": 40, "columns": 11, "hero": hero_directions["down"], "hero_directions": hero_directions, "hero_frames": {"down": [sprite(185), sprite(187)], "left": [sprite(193), sprite(195)], "right": [sprite(201), sprite(203)], "up": [sprite(209), sprite(211)]}, "floor": sprite(6), "tiles": {str(n): sprite(n) for n in range(1, 221)}, "credits": "Original artwork: Oz & Kenichi / Shigemasa Ozawa"})
     write_json(data_dir / "extraction-manifest.json", {"source_directory": str(source), "executable_sha256": executable_hash, "map_count": 51, "map_record_bytes": 123, "monster_count": 33, "dialogue_count": 268, "assets": extraction})
     campaign_path = data_dir / "campaign.json"

@@ -1,4 +1,0 @@
-# Rust's bundled LLD avoids GCC quoting failures in Windows home paths with spaces.
-[target.x86_64-pc-windows-gnu]
-linker = "rust-lld"
-rustflags = ["-Clink-self-contained=yes"]
