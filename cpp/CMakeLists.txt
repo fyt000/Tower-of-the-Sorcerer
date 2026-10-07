@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(tower_of_the_sorcerer VERSION 0.7 LANGUAGES C CXX)
+project(tower_of_the_sorcerer VERSION 0.8 LANGUAGES C CXX)
 set(TSW_BUILD_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../build")
 set(FETCHCONTENT_BASE_DIR "${CMAKE_CURRENT_BINARY_DIR}/_deps" CACHE PATH "Dependency build directory")
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)

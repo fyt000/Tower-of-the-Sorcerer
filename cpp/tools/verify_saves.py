@@ -55,7 +55,7 @@ class Original:
         machine.mem_write(0x6ff000, pack_words([STOP]))
         return machine
 
-    def run(self, entry, maps=None, hero=None, file=None):
+    def run(self, entry, maps=None, hero=None, file=None, stop_at=None):
         machine = self.memory()
         if maps is not None:
             machine.mem_write(MAP, maps)
@@ -66,6 +66,11 @@ class Original:
         def hook(uc, address, size, _):
             nonlocal position, accepted, stopped
             if address == STOP:
+                stopped = True
+                uc.emu_stop()
+                return
+            if address == stop_at:
+                accepted = file is not None
                 stopped = True
                 uc.emu_stop()
                 return
@@ -132,6 +137,14 @@ class Original:
     def load(self, file):
         return self.run(0x47e7d4, file=file)
 
+    def write_checkpoint(self, maps, hero):
+        # Fairy's two BlockWrites, after score/rank updates and before its UI message.
+        return self.run(0x47ade1, maps, hero, stop_at=0x47ae26)
+
+    def load_checkpoint(self, file):
+        # The original raw save0 read used for recovery, without slot checksum validation.
+        return self.run(0x47e948, file=file, stop_at=0x47e98b)
+
 
 class Cpp:
     def __init__(self, exe):
@@ -178,26 +191,6 @@ def expected_snapshot(record, original):
         'maps': [list(record[123*i + 2:123*(i+1)]) for i in range(51)],
         'monsters': original['monsters'], 'queue': [], 'dialogue': -1,
     }
-
-
-def old_baseline_file(snapshot):
-    """One fixture of the previously released TOSB v1 field order."""
-    hero = snapshot['hero']
-    cycle, fairy = snapshot['cycle'], snapshot['fairy']
-    values = hero[:12] + hero[14:17] + snapshot['reward_flags'] + [0, cycle[2]]
-    values += cycle[:2] + [snapshot['flight'][2], snapshot['music']] + fairy[:3] + snapshot['flight'][:2]
-    for key in ('items', 'equipment', 'flags', 'hints', 'merchant_used', 'old_man_heard'):
-        values += snapshot[key]
-    values += [0]  # merchant2_heard
-    for floor in range(51):
-        values += [0, 0] + snapshot['maps'][floor]
-    for row in snapshot['monsters']:
-        values += row
-    file = b'TOSB' + pack_words([1]) + HASH.encode('ascii') + pack_words(values)
-    checksum = 2166136261
-    for byte in file:
-        checksum = ((checksum ^ byte) * 16777619) & 0xffffffff
-    return file + pack_words([checksum])
 
 
 def main():
@@ -270,27 +263,34 @@ def main():
                     check(name + '/edited-writer-matches', output.read_bytes() ==
                           original.write(bytes(edited_maps), pack_words(edited_hero)))
 
-        # The released baseline format stays readable, then converts to original records.
-        actual = cpp.run('reset')
-        legacy = directory / 'baseline-v1.save'
-        legacy.write_bytes(old_baseline_file(actual))
-        loaded = cpp.run(f'load "{legacy.as_posix()}"')
-        check('baseline-v1-readable', all(loaded[key] == actual[key] for key in actual))
-        converted = directory / 'converted.dat'
-        cpp.run(f'save "{converted.as_posix()}"')
-        check('baseline-v1-converts-to-original', len(converted.read_bytes()) == SAVE_BYTES and
-              original.load(converted.read_bytes()) is not None)
-        old_state = cpp.run('reset', 'set cycle 43', 'set later 1', 'set sealed 1',
-                            'monster 15 800 500 100 500', 'monster 0 999 99 9 1')
-        legacy.write_bytes(old_baseline_file(old_state))
-        loaded = cpp.run(f'load "{legacy.as_posix()}"', f'save "{converted.as_posix()}"')
-        check('baseline-v1-import-reconstructs-shared-rows',
-              loaded['monsters'] == original.load(converted.read_bytes())['monsters'])
-        check('baseline-v1-import-retains-progress',
-              all(loaded[key] == old_state[key] for key in old_state if key != 'monsters'))
+        # Fairy keeps the same records and their existing checksum words in save0.dat.
+        manual_file = directory / 'manual.dat'
+        cpp.run('reset', f'save "{manual_file.as_posix()}"')
+        manual = manual_file.read_bytes()
+        edited = list(struct.unpack('<171I', manual[MAP_BYTES:]))
+        edited[0] = 4567
+        edited[636 // 4], edited[640 // 4], edited[624 // 4] = 43, 1, 1
+        expected = original.write_checkpoint(manual[:MAP_BYTES], pack_words(edited))
+        checkpoint = directory / 'save0.dat'
+        cpp.run('set hp 4567', 'set cycle 43', 'set later 1', 'set sealed 1',
+                f'save-checkpoint "{checkpoint.as_posix()}"')
+        check('Fairy/writer-matches-original', checkpoint.read_bytes() == expected)
+        check('Fairy/checksum-words-preserved', checkpoint.read_bytes()[MAP_BYTES + 656:MAP_BYTES + 664] ==
+              manual[MAP_BYTES + 656:MAP_BYTES + 664])
+        check('Fairy/raw-record-is-not-a-checksummed-slot', original.load(expected) is None)
+        loaded = cpp.run('reset', f'load-checkpoint "{checkpoint.as_posix()}"')
+        recovered = original.load_checkpoint(expected)
+        expected_state = expected_snapshot(expected, recovered)
+        check('Fairy/original-raw-reader', recovered is not None and recovered['consumed'] == SAVE_BYTES)
+        check('Fairy/all-restored-fields', all(loaded[key] == value for key, value in expected_state.items()))
+        rejected, unchanged = cpp.rejected(checkpoint)
+        check('Fairy/slot-loader-stays-strict', rejected and unchanged == loaded)
+        cpp.run(f'save "{manual_file.as_posix()}"')
+        check('Fairy/manual-save-refreshes-checksums', manual_file.read_bytes() ==
+              original.write(expected[:MAP_BYTES], expected[MAP_BYTES:]))
 
-        file = converted.read_bytes()
-        before = cpp.run(f'load "{converted.as_posix()}"')
+        file = manual_file.read_bytes()
+        before = cpp.run(f'load "{manual_file.as_posix()}"')
         for name, offset, value in (('sentinel', MAP_BYTES + 628, 0), ('sum', MAP_BYTES + 656, 0),
                                     ('alternating-sum', MAP_BYTES + 660, 0), ('hero-tamper', MAP_BYTES, 1)):
             corrupt = bytearray(file)

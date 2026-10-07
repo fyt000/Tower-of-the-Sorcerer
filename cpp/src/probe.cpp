@@ -235,13 +235,14 @@ int main() {
                         break;
                 }
                 std::cout << "]\n" << std::flush;
-            } else if (command == "load" || command == "save") {
+            } else if (command == "load" || command == "save" || command == "load-checkpoint" ||
+                       command == "save-checkpoint") {
                 std::string path;
                 input >> std::quoted(path);
-                if (command == "load")
-                    game.load(path);
+                if (command == "load" || command == "load-checkpoint")
+                    game.load(path, command == "load-checkpoint" ? SaveKind::Checkpoint : SaveKind::Slot);
                 else
-                    game.save(path);
+                    game.save(path, command == "save-checkpoint" ? SaveKind::Checkpoint : SaveKind::Slot);
             } else if (command == "snapshot")
                 snapshot(game);
             else if (command == "forecast") {
@@ -254,7 +255,7 @@ int main() {
                 throw std::runtime_error("Unknown probe command");
         } catch (const std::exception& e) {
             std::cout << "{\"error\":\"" << e.what() << "\"}\n" << std::flush;
-            if (command != "load")
+            if (command != "load" && command != "load-checkpoint")
                 return 1;
         }
     }

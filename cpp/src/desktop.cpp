@@ -188,7 +188,8 @@ void apply(UiAction action, Game& game, DesktopUi& ui, Presentation& renderer, A
     case Action::LoadSlot:
         game.load(action.kind == Action::LoadSlot
                       ? save_slot_path(save_directory, action.value)
-                      : save_directory / (action.kind == Action::Load ? "quick.save" : "fairy.save"));
+                      : save_directory / (action.kind == Action::Load ? "quick.save" : "save0.dat"),
+                  action.kind == Action::FairyCheckpoint ? SaveKind::Checkpoint : SaveKind::Slot);
         renderer.reset();
         ui.close_overlays();
         ui.flight = -1;
@@ -259,7 +260,7 @@ int main(int argc, char** argv) try {
     std::filesystem::path requested_assets;
     auto save_directory = executable / "Savedat";
     std::filesystem::path screenshot, presentation_test, window_test, asset_test, compare_assets = TSW_ASSETS;
-    std::filesystem::path load_file, export_original;
+    std::filesystem::path load_file;
     std::string smoke;
     bool audio_test = false, audio_device_test = false, visible_smoke = false;
     for (int i = 1; i < argc; ++i) {
@@ -270,8 +271,6 @@ int main(int argc, char** argv) try {
             save_directory = argv[++i];
         else if (arg == "--load" && i + 1 < argc)
             load_file = argv[++i];
-        else if (arg == "--export-original" && i + 1 < argc)
-            export_original = argv[++i];
         else if (arg == "--screenshot" && i + 1 < argc)
             screenshot = argv[++i];
         else if (arg == "--presentation-test" && i + 1 < argc)
@@ -297,7 +296,7 @@ int main(int argc, char** argv) try {
                          "F8: Fairy checkpoint. F2: new game. M: mute.\n"
                          "Saves: Savedat/save1.dat through save8.dat beside this executable.\n"
                          "--assets DIR --save-dir DIR --screenshot FILE --audio-test --audio-device-test\n"
-                         "--load FILE --export-original FILE\n"
+                         "--load FILE\n"
                          "--smoke "
                          "initial|capture|stairs|fight|floor10|fairy|items|inventory|item|shop|flight|help|"
                          "backside|ending|enemies|slots\n"
@@ -310,11 +309,6 @@ int main(int argc, char** argv) try {
     Game initial_game;
     if (!load_file.empty())
         initial_game.load(load_file);
-    if (!export_original.empty()) {
-        initial_game.save(export_original);
-        std::cout << "Original-format save exported: " << export_original << '\n';
-        return 0;
-    }
     Assets assets(Assets::select(executable, requested_assets, TSW_ORIGINAL_ASSETS, TSW_ASSETS),
                   executable_file);
     std::cout << "Assets: " << assets.root()
@@ -446,7 +440,7 @@ int main(int argc, char** argv) try {
                 if (game.checkpoint_requested && !game.busy()) {
                     game.checkpoint_requested = false;
                     try {
-                        game.save(save_directory / "fairy.save");
+                        game.save(save_directory / "save0.dat", SaveKind::Checkpoint);
                     } catch (const std::exception& error) {
                         game.status = error.what();
                     }
@@ -473,7 +467,7 @@ int main(int argc, char** argv) try {
                     if (smoke == "fairy") {
                         try {
                             Game checkpoint;
-                            checkpoint.load(save_directory / "fairy.save");
+                            checkpoint.load(save_directory / "save0.dat", SaveKind::Checkpoint);
                             if (checkpoint.hero.fairy_visits != 1 || checkpoint.hero.fairy_score != 415 ||
                                 checkpoint.tile(10, 27) != Road)
                                 result = 1;

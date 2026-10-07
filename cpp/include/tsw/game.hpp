@@ -13,6 +13,7 @@ inline constexpr int CellCount = BoardWidth * BoardWidth;
 inline constexpr int FloorCount = 51;
 inline constexpr int BacksideFactor = 44;
 inline constexpr std::size_t OriginalHeroWordCount = 171; // Delphi's 684-byte persisted state record.
+enum class SaveKind { Slot, Checkpoint }; // Original checksummed slots and raw save0 snapshots.
 constexpr int cell(int x, int y) {
     return y * BoardWidth + x;
 }
@@ -331,15 +332,15 @@ class Game {
     void battle(bool enemy_first = false);
     void capture();
     void next_cycle();
-    void save(const std::filesystem::path&) const;
-    void load(const std::filesystem::path&);
+    void save(const std::filesystem::path&, SaveKind = SaveKind::Slot) const;
+    void load(const std::filesystem::path&, SaveKind = SaveKind::Slot);
     bool flight_preview(int destination_floor, int direction = 1);
     // Exposed state inputs for original-machine differential probes.
     int contact_index{}, scratch_index{}, neighbor_index{}, message_code{}, door_opened{};
 
   private:
-    // Keep unmapped Delphi fields when reading and rewriting original saves.
-    std::optional<std::array<std::uint32_t, OriginalHeroWordCount>> original_save_record_;
+    // Preserve unmapped Delphi fields and the manual writer's live checksum words.
+    mutable std::optional<std::array<std::uint32_t, OriginalHeroWordCount>> original_save_record_;
     struct Fight {
         int target{}, enemy{}, hero_hits{}, enemy_hits{}, turn{}, underlying{};
         bool fatal{}, enemy_first{};

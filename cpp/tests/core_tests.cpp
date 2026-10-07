@@ -372,9 +372,9 @@ TEST_CASE("Fairy checkpoint follows dialogue and scene completion", "[saves]") {
     UNSCOPED_INFO("Fairy checkpoint becomes saveable after her scene");
     REQUIRE((!g.busy() && g.tile(10, 27) == Road));
     const auto path = temporary_save("tos-baseline-fairy-test");
-    g.save(path);
+    g.save(path, SaveKind::Checkpoint);
     Game restored;
-    restored.load(path);
+    restored.load(path, SaveKind::Checkpoint);
     UNSCOPED_INFO("Fairy checkpoint restores completed gameplay state");
     REQUIRE((restored.hero.fairy_score == 415 && restored.hero.fairy_visits == 1 &&
              restored.tile(10, 27) == Road));
@@ -397,6 +397,52 @@ TEST_CASE("Capture and new game retain original reset rules", "[scenes]") {
     g.finish_commands(true);
     UNSCOPED_INFO("Backside capture preserves stats and clears specials");
     REQUIRE((g.hero.hp == 321 && !g.inventory(Item::Bomb)));
+}
+
+TEST_CASE("Fairy snapshots keep the original raw records and validate bounds", "[saves]") {
+    constexpr std::size_t MapBytes = 6273, SaveBytes = 6957;
+    const auto manual = temporary_save("manual-record");
+    const auto checkpoint = temporary_save("fairy-record");
+    const auto read = [](const std::filesystem::path& path) {
+        std::ifstream input(path, std::ios::binary);
+        return std::vector<unsigned char>(std::istreambuf_iterator<char>(input), {});
+    };
+    auto game = room(10);
+    game.save(manual);
+    const auto previous = read(manual);
+    game.hero.hp = 1234;
+    game.hero.fairy_visits = 1;
+    game.hero.fairy_score = 415;
+    game.hero.fairy_rank = game.hero.fairy_category = 1;
+    game.save(checkpoint, SaveKind::Checkpoint);
+    const auto bytes = read(checkpoint);
+    REQUIRE(bytes.size() == SaveBytes);
+    REQUIRE(std::equal(bytes.begin(), bytes.begin() + MapBytes, previous.begin()));
+    REQUIRE(std::equal(bytes.begin() + MapBytes + 656, bytes.begin() + MapBytes + 664,
+                       previous.begin() + MapBytes + 656));
+    Game restored;
+    REQUIRE_THROWS_AS(restored.load(checkpoint), std::runtime_error);
+    restored.load(checkpoint, SaveKind::Checkpoint);
+    REQUIRE(restored.hero.hp == 1234);
+    REQUIRE(restored.hero.fairy_visits == 1);
+    REQUIRE(restored.hero.fairy_score == 415);
+    restored.save(manual);
+    Game slot;
+    slot.load(manual);
+    REQUIRE(slot.hero.fairy_score == 415);
+    // Raw checkpoint reading skips only the original checksum gate, never field validation.
+    {
+        std::fstream corrupt(checkpoint, std::ios::binary | std::ios::in | std::ios::out);
+        corrupt.seekp(MapBytes + 16);
+        const char invalid_floor[4]{51, 0, 0, 0};
+        corrupt.write(invalid_floor, sizeof invalid_floor);
+    }
+    REQUIRE_THROWS_AS(restored.load(checkpoint, SaveKind::Checkpoint), std::runtime_error);
+    REQUIRE(restored.hero.floor == 10);
+    REQUIRE(restored.hero.hp == 1234);
+    std::filesystem::remove(checkpoint);
+    std::filesystem::remove(manual);
+    std::filesystem::remove(manual.string() + ".bak");
 }
 
 TEST_CASE("Original saves preserve shared Zeno and reject invalid records", "[saves]") {
@@ -577,7 +623,7 @@ TEST_CASE("Eight save slots share original paths and keep independent backups", 
     REQUIRE((restored.hero.floor == 8 && restored.hero.hp == 1008));
     g.save(directory / "quick.save");
     g.hero.hp = 5432;
-    g.save(directory / "fairy.save");
+    g.save(directory / "save0.dat", SaveKind::Checkpoint);
     restored.load(save_slot_path(directory, 8));
     UNSCOPED_INFO("Quick save and Fairy checkpoint do not overwrite manual slots");
     REQUIRE(restored.hero.hp == 4321);

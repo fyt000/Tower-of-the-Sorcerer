@@ -92,8 +92,9 @@ class Presentation {
     UiAction draw(const Game&, DesktopUi&, Vector2 mouse);
     void present() const;
     bool screenshot(const std::filesystem::path&) const;
-    Image capture_canvas() const; // Logical pixels, independent of desktop DPI.
-    Image capture_window() const; // Actual framebuffer, including letterboxing.
+    Image capture_canvas() const;        // Logical pixels, independent of desktop DPI.
+    Image capture_native_canvas() const; // Canvas rasterized at the displayed pixel resolution.
+    Image capture_window() const;        // Actual framebuffer, including letterboxing.
 
   private:
     struct Art;
@@ -108,6 +109,7 @@ class Presentation {
     void draw_transformation(const Game&, int animation);
     void draw_scene(const Game&);
     void cache_scene();
+    void resize_canvas(const CanvasViewport&);
     UiAction draw_panels(const Game&, DesktopUi&, Vector2 mouse);
     UiAction draw_dialogue(const Game&, DesktopUi&, Vector2 mouse);
     UiAction draw_inventory(const Game&, DesktopUi&, Vector2 mouse);

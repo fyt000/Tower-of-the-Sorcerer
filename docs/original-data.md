@@ -37,7 +37,7 @@ form manifest records bitmap hashes and reviewed offsets. Extracted media and
 the original executable are excluded from Git.
 
 Original `TSW.txt` and `Tsw.hlp` also supply the Rust player help under `data/help`
-and `web/help*.html`. `tools/extract_help.py` maintains that help separately from
+and `rust/web/help*.html`. `tools/extract_help.py` maintains that help separately from
 the C++ core. Attribution and dependency licenses are in [THIRD_PARTY.md](../THIRD_PARTY.md).
 
 ## Original saves
@@ -67,9 +67,14 @@ scaling again, including the original backside load quirk. Other monster rows
 come from constants. Core fidelity takes precedence over preserving a runtime
 row that the original itself discards on loading.
 
-New manual, quick and Fairy files use these original records. Earlier `TOSB` v1
-C++ snapshots remain readable and use the original monster reconstruction on
-import; saving converts them to the original layout. Numbered saves read and
+Manual and quick saves use these checksummed original records. The Fairy routine's
+two direct writes at `0x47ADE1..0x47AE21` store the same map and hero records in
+`Savedat/save0.dat`, without updating the checksum words. The original recovery
+read at `0x47E948..0x47E986` also reads those records without a checksum gate.
+The C++ Fairy checkpoint uses that raw format and path, retaining existing checksum
+words. F8 restores it with field and bounds validation; manual slot loads continue
+to require valid checksums. The checkpoint is written after the Fairy scene finishes.
+Numbered saves read and
 write the same `Savedat/save1.dat` through `save8.dat` files beside the executable.
 The slot picker uses only that directory (or an explicit `--save-dir`), with no
 search for other locations or earlier C++ names. See [controls and saves](../cpp/README.md).

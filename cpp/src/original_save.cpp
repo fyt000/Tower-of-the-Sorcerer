@@ -96,18 +96,25 @@ void reconstruct_monsters(Game& game) {
     }
 }
 
-Game decode_original(const std::vector<std::uint8_t>& bytes, OriginalRecord& record) {
+OriginalRecord hero_record(const std::vector<std::uint8_t>& bytes) {
     if (bytes.size() != OriginalSaveBytes)
         throw std::runtime_error("Original save must contain exactly 6957 bytes");
+    OriginalRecord record;
     for (std::size_t i = 0; i < record.size(); ++i) {
         const auto offset = OriginalMapBytes + i * 4;
         record[i] = std::uint32_t(bytes[offset]) | std::uint32_t(bytes[offset + 1]) << 8 |
                     std::uint32_t(bytes[offset + 2]) << 16 | std::uint32_t(bytes[offset + 3]) << 24;
     }
-    const auto [sum, alternating] = sums(record);
-    if (record[Sentinel / 4] != OriginalSentinel || record[Sum / 4] != sum ||
-        record[AlternatingSum / 4] != alternating)
-        throw std::runtime_error("Original save sentinel or checksum mismatch");
+    return record;
+}
+Game decode_original(const std::vector<std::uint8_t>& bytes, OriginalRecord& record, SaveKind kind) {
+    record = hero_record(bytes);
+    if (kind == SaveKind::Slot) {
+        const auto [sum, alternating] = sums(record);
+        if (record[Sentinel / 4] != OriginalSentinel || record[Sum / 4] != sum ||
+            record[AlternatingSum / 4] != alternating)
+            throw std::runtime_error("Original save sentinel or checksum mismatch");
+    }
     Game game;
     std::size_t cursor{};
     for (auto& floor : game.floors) {
@@ -130,11 +137,11 @@ Game decode_original(const std::vector<std::uint8_t>& bytes, OriginalRecord& rec
     reconstruct_monsters(game);
     validate(game);
     game.contact_index = cell(game.hero.x, game.hero.y);
-    game.status = "Original save restored.";
+    game.status = kind == SaveKind::Checkpoint ? "Fairy checkpoint restored." : "Original save restored.";
     return game;
 }
 
-std::vector<std::uint8_t> encode_original(const Game& game, const OriginalRecord* preserved) {
+std::vector<std::uint8_t> encode_original(const Game& game, const OriginalRecord* preserved, SaveKind kind) {
     if (game.busy())
         throw std::runtime_error("Finish the current action before saving");
     validate(game);
@@ -144,10 +151,14 @@ std::vector<std::uint8_t> encode_original(const Game& game, const OriginalRecord
         record[offset / 4] = static_cast<std::uint32_t>(value);
     };
     fields(writer, hero);
-    record[Sentinel / 4] = OriginalSentinel;
-    const auto [sum, alternating] = sums(record);
-    record[Sum / 4] = sum;
-    record[AlternatingSum / 4] = alternating;
+    if (!preserved || kind == SaveKind::Slot)
+        record[Sentinel / 4] = OriginalSentinel;
+    // 0x47ADE1: Fairy writes the two records directly, without refreshing checksum words.
+    if (kind == SaveKind::Slot) {
+        const auto [sum, alternating] = sums(record);
+        record[Sum / 4] = sum;
+        record[AlternatingSum / 4] = alternating;
+    }
     std::vector<std::uint8_t> bytes;
     bytes.reserve(OriginalSaveBytes);
     for (const auto& floor : game.floors) {

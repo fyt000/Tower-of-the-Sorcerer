@@ -2,7 +2,7 @@
 
 Hash-pinned, read-only original executable. Each handler receives the previous
 handler's stat/flag writes; drawing and combat are skipped and disclosed.
-Readable source is reference/original/zeno.cpp. Rust tests exercise the item
+Readable game logic is in cpp/src/scenes.cpp and cpp/src/contact.cpp. Rust tests exercise the item
 and floor-event paths against these branch observations.
 """
 import hashlib

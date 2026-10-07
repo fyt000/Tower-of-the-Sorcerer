@@ -1,8 +1,8 @@
 {
   "executable_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
   "reference_sources": [
-    "reference/original/doors.cpp",
-    "reference/original/bomb.cpp"
+    "reference/original/decompiled/0047beac_doorcheck.c",
+    "reference/original/decompiled/00450bc5_use_selected_item.c"
   ],
   "executable_probe_scenarios": 2362,
   "entry_paths": {

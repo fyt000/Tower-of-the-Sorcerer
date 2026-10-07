@@ -556,8 +556,28 @@ int verify_window(Presentation& renderer, const std::filesystem::path& output) {
         if (std::abs(mapped.x - target.x) > .01f || std::abs(mapped.y - target.y) > .01f)
             throw std::runtime_error("Window pointer mapping differs from canvas scaling");
         Image canvas = renderer.capture_canvas(), window = renderer.capture_window();
+        Image native = renderer.capture_native_canvas();
+        const int expected_width = int(std::round(area.width * view.framebuffer_width / view.window_width));
+        const int expected_height =
+            int(std::round(area.height * view.framebuffer_height / view.window_height));
+        if (native.width != expected_width || native.height != expected_height)
+            throw std::runtime_error("Canvas was not rasterized at the display resolution");
         auto* expected = LoadImageColors(canvas);
         auto* actual = LoadImageColors(window);
+        auto* native_pixels = LoadImageColors(native);
+        int text_detail = 0;
+        // Enlarged text must contain detail within each old logical pixel. A stretched
+        // 800x558 canvas cannot pass this check, even if its window viewport is correct.
+        const float sx = native.width / float(CanvasWidth), sy = native.height / float(CanvasHeight);
+        for (int y = int(5 * sy); y < int(22 * sy); ++y)
+            for (int x = int(8 * sx); x < int(61 * sx); ++x) {
+                const auto value = native_pixels[y * native.width + x];
+                const auto coarse = expected[int(y / sy) * CanvasWidth + int(x / sx)];
+                if (value.r > 150 && value.g > 140 && value.b > 130)
+                    text_detail += std::abs(int(value.r) - coarse.r) > 8;
+            }
+        if (sx > 2 && sy > 2 && text_detail < 40)
+            throw std::runtime_error("Enlarged menu text has no native-resolution glyph detail");
         bool pixels_match = true;
         int compared = 0;
         // Compare flat neighborhoods throughout the logical canvas. This checks the
@@ -587,8 +607,10 @@ int verify_window(Presentation& renderer, const std::filesystem::path& output) {
         ExportImage(window, (output / (std::string(name) + ".png")).string().c_str());
         UnloadImageColors(expected);
         UnloadImageColors(actual);
+        UnloadImageColors(native_pixels);
         UnloadImage(canvas);
         UnloadImage(window);
+        UnloadImage(native);
         if (!pixels_match || compared < 20)
             throw std::runtime_error(std::string("Framebuffer does not match canvas after ") + name);
         if (!first)
@@ -596,7 +618,9 @@ int verify_window(Presentation& renderer, const std::filesystem::path& output) {
         first = false;
         report << "    {\"name\": \"" << name << "\", \"window\": [" << view.window_width << ','
                << view.window_height << "], \"framebuffer\": [" << view.framebuffer_width << ','
-               << view.framebuffer_height << "], \"pixels_compared\": " << compared << '}';
+               << view.framebuffer_height << "], \"canvas\": [" << expected_width << ',' << expected_height
+               << "], \"native_text_detail\": " << text_detail << ", \"pixels_compared\": " << compared
+               << '}';
         return view;
     };
     SetWindowSize(CanvasWidth, CanvasHeight);

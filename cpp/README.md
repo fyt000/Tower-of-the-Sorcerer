@@ -84,8 +84,11 @@ roughly three seconds of silence before its first notes. A save with music track
 zero retains the original disabled-music setting. M mutes both music and effects.
 
 The 800×558 logical canvas fits the window while retaining its proportions.
-Rendering queries logical window and physical framebuffer sizes independently on
-every frame; maximize, restore and DPI changes share the same mapping as mouse input.
+Its render target uses the displayed physical pixel resolution. Fonts are
+rasterized at the required pixel size and positioned on pixel boundaries; they
+remain sharp when the canvas grows or shrinks. Original artwork retains point
+filtering. Rendering queries window and framebuffer sizes every frame; maximize,
+restore and DPI changes share the same mapping as mouse input.
 
 ## Controls and saves
 
@@ -107,7 +110,7 @@ bottom-right panel retains the last defeated enemy's encounter-time stats.
 
 Saves use `Savedat/` beside the executable; `--save-dir DIRECTORY` overrides it.
 Save after the current action finishes. Eight manual files, `quick.save` and
-`fairy.save` are independent. Replacement keeps a `.bak`, restores validate
+the original Fairy `save0.dat` are independent. Replacement keeps a `.bak`, restores validate
 before changing the live game, and the load picker pauses pending commands.
 
 F6 and F7 write and read the same `save1.dat` through `save8.dat` files in that
@@ -116,22 +119,21 @@ directly. There is no separate slot type, import step, AppData search or lookup
 of older C++ filenames. Reading a slot leaves it unchanged; saving replaces that
 file and retains its previous contents as a `.bak`.
 
-New files use the exact original **6,957-byte format**, including its checksums.
+Manual and quick files use the exact original **6,957-byte format**, including its checksums.
 No monster table or extension is added. Loading rebuilds the shared Zeno row
 using the original seal/cycle rules, including the legacy backside scaling quirk.
-Earlier C++ `TOSB` v1 saves also import, with the same monster reconstruction;
-the next save writes original records. [Save layout and behavior](../docs/original-data.md)
-describe the fields and validation limits.
+Fairy checkpoints use the same two records in `Savedat/save0.dat`, written
+without refreshing the checksum words, as in the original. F8 reads that raw
+checkpoint with bounds validation. [Save layout and behavior](../docs/original-data.md)
+describe both record uses and validation limits.
 
-Open a specific save file, or explicitly convert an earlier C++ file:
+Open a specific manual or quick save file:
 
 ```powershell
 ../build/cpp/vs/Release/tsw_game.exe --load "D:/saved-games/save3.dat"
-../build/cpp/vs/Release/tsw_game.exe --load "D:/saved-games/quick.save" --export-original "D:/saved-games/save1.dat"
 ```
 
-The export command exits without opening the GUI. Normal numbered saves already
-have the format, filename and location the original EXE expects. The replacement
+Numbered saves have the format, filename and location the original EXE expects. The replacement
 executable's filename does not affect saving or loading.
 
 ## Validate and package
@@ -163,10 +165,10 @@ $formatter = 'C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/Llv
 rg --files src include tests -g '*.cpp' -g '*.hpp' | ForEach-Object { & $formatter -i --style=file $_ }
 ```
 
-Packaging creates `build/packages/tower-of-the-sorcerer-0.7-windows-x64/TSW.exe` and a ZIP
+Packaging creates `build/packages/tower-of-the-sorcerer-0.8-windows-x64/TSW.exe` and a ZIP
 with the original media layout, licenses and validation reports. The packaged
 EXE can also be copied alone into an existing original installation. The smaller
-`build/packages/tower-of-the-sorcerer-0.7-drop-in.zip` contains the EXE, usage notes and
+`build/packages/tower-of-the-sorcerer-0.8-drop-in.zip` contains the EXE, usage notes and
 licenses for that deployment.
 
 Packaging requires the original comparisons from the research workflow in

@@ -192,7 +192,8 @@ def main():
               (0x450f31, 0x45112c), (0x451c20, 0x451d3a)]
     report = {
         'executable_sha256': EXE_HASH,
-        'reference_sources': ['reference/original/doors.cpp', 'reference/original/bomb.cpp'],
+        'reference_sources': ['reference/original/decompiled/0047beac_doorcheck.c',
+                              'reference/original/decompiled/00450bc5_use_selected_item.c'],
         'executable_probe_scenarios': len(labels),
         'entry_paths': {
             'keyed_doors': {'dispatch': '0x444490', 'key_decision': '0x444601..0x44468B',

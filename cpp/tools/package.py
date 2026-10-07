@@ -10,7 +10,7 @@ import zipfile
 
 CPP = Path(__file__).resolve().parents[1]
 ROOT = CPP.parent
-NAME = 'tower-of-the-sorcerer-0.7-windows-x64'
+NAME = 'tower-of-the-sorcerer-0.8-windows-x64'
 
 
 def main():
@@ -74,13 +74,14 @@ def main():
             raise RuntimeError(f'Unresolved {name}; run CTest before packaging')
         shutil.copy2(source, validation / name)
     (output / 'PLAY.txt').write_text(
-        'Tower of the Sorcerer 1.2 - faithful C++ cpp\n'
+        'Tower of the Sorcerer 1.2 - faithful C++ implementation\n'
         'Start TSW.exe beside Data3/, Data2/, Midi/ and Wav/.\n'
         'The original BMP/OZ/MIDI/WAV files keep their names and formats.\n'
         'Ending pictures and the MIDI soundfont are embedded; no extra runtime is needed.\n\n'
         'For an existing installation, keep the old EXE as TSW.original.exe, then copy the new TSW.exe.\n'
         'F6/F7 write and read the same Savedat/save1.dat through save8.dat files.\n'
         'New saves use the original 6957-byte records and original shared-Zeno load rules.\n'
+        'Fairy snapshots use Savedat/save0.dat and retain the original raw checksum words.\n'
         'Original preferences and rankings are not imported.\n\n'
         'Arrows / WASD: walk. Enter / Space: continue dialogue and the ending card.\n'
         'Click owned items or press I for inventory. Flight: Up/Down, Enter to travel, Esc to cancel.\n'
@@ -89,16 +90,15 @@ def main():
         'F2: new game. M: mute. Options: 1x / 3x / 10x walking and animation speed.\n'
         'Saves: Savedat/ beside the EXE. Replace keeps a .bak. No other folders are searched.\n'
         'Optional: --assets DIRECTORY (original or PNG layout), --save-dir DIRECTORY, --load FILE.\n'
-        'Export or convert: TSW.exe --load OLD_FILE --export-original save1.dat\n'
         'Normal numbered saves already use the original format, filenames and folder.\n\n'
         'See FIDELITY.md for evidence and limits, THIRD_PARTY.md and the license files for attribution.\n',
         encoding='utf-8')
     hashes = {file.relative_to(output).as_posix(): hashlib.sha256(file.read_bytes()).hexdigest()
               for file in sorted(output.rglob('*')) if file.is_file() and file.name != 'package-manifest.json'}
     (output / 'package-manifest.json').write_text(
-        json.dumps({'version': '0.7', 'layout': 'original', 'files': hashes}, indent=2) + '\n', encoding='utf-8')
+        json.dumps({'version': '0.8', 'layout': 'original', 'files': hashes}, indent=2) + '\n', encoding='utf-8')
     archive = shutil.make_archive(str(output), 'zip', root_dir=output.parent, base_dir=output.name)
-    drop_in = output.parent / 'tower-of-the-sorcerer-0.7-drop-in.zip'
+    drop_in = output.parent / 'tower-of-the-sorcerer-0.8-drop-in.zip'
     with zipfile.ZipFile(drop_in, 'w', compression=zipfile.ZIP_DEFLATED) as package:
         for file in sorted(output.rglob('*')):
             relative = file.relative_to(output)

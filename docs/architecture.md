@@ -82,15 +82,23 @@ looping; device checks cover startup and restart behavior.
 and sets a logical projection over the full physical viewport. The same centered,
 aspect-preserving rectangle maps mouse input back onto the canvas. Tests compare
 actual framebuffer pixels after resizing, maximizing and restoring, including
-native DPI changes. Fonts use installed Segoe UI or raylib's bundled fallback.
+native DPI changes. The canvas render target matches its displayed physical pixel
+size, while layout and gameplay stay in 800×558 logical coordinates. Installed
+Segoe UI fonts are rasterized at each requested size for the current scale. The
+font bytes are read once; each logical size retains one atlas that is replaced
+when its required pixel size changes. Text positions and clipping align to physical
+pixels, and glyph coverage supplies antialiasing without bilinear atlas filtering.
+Raylib's bundled font remains the fallback when Segoe UI is unavailable.
 
 Saves contain the original floor records and 171-word hero record. Monster rows
 are reconstructed from constants and seal/cycle flags as in `0x454DE8`; Zeno
 remains one shared mutable row. Unmapped original words survive import and
 rewriting. Pending commands and presentation snapshots are omitted. Loading
 parses into a temporary `Game`, validates it, then replaces the live state.
-Earlier C++ saves have a compatibility reader. The Fairy checkpoint is written
-after her dialogue and animation finish. [Original data](original-data.md)
+Fairy checkpoints use the original raw `save0.dat` record layout, preserving
+existing checksum words rather than refreshing them. Their explicit restore path
+checks gameplay fields and bounds; manual slots also verify the original checksums.
+The Fairy checkpoint is written after her dialogue and animation finish. [Original data](original-data.md)
 records the byte layout and load-time scaling quirk.
 
 Manual slots read and write `Savedat/save1.dat` through `save8.dat` beside the

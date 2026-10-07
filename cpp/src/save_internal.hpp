@@ -8,6 +8,7 @@ using OriginalRecord = std::array<std::uint32_t, OriginalHeroWordCount>;
 void validate(const Game&);
 void reconstruct_monsters(Game&);
 void write_file(const std::filesystem::path&, const std::vector<std::uint8_t>&);
-Game decode_original(const std::vector<std::uint8_t>&, OriginalRecord&);
-std::vector<std::uint8_t> encode_original(const Game&, const OriginalRecord*);
+OriginalRecord hero_record(const std::vector<std::uint8_t>&);
+Game decode_original(const std::vector<std::uint8_t>&, OriginalRecord&, SaveKind);
+std::vector<std::uint8_t> encode_original(const Game&, const OriginalRecord*, SaveKind);
 } // namespace tsw::save_detail
