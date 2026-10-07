@@ -1,6 +1,8 @@
-#include "assets.hpp"
-#include "audio.hpp"
+#include "audio_backend.hpp"
+#include "desktop_checks.hpp"
 #include "embedded_media.hpp"
+#include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -8,6 +10,19 @@
 
 namespace tsw {
 namespace {
+bool decodes_wave(const std::vector<unsigned char>& bytes) {
+    auto config = ma_decoder_config_init(ma_format_f32, 2, 44100);
+    ma_uint64 frames{};
+    void* decoded{};
+    if (ma_decode_memory(bytes.data(), bytes.size(), &config, &frames, &decoded) != MA_SUCCESS)
+        return false;
+    const auto* samples = static_cast<float*>(decoded);
+    const bool valid = frames && std::all_of(samples, samples + frames * 2,
+                                             [](float sample) { return std::isfinite(sample); });
+    ma_free(decoded, nullptr);
+    return valid;
+}
+
 bool same_pixels(Image left, Image right) {
     if (left.width != right.width || left.height != right.height)
         return false;
@@ -21,6 +36,7 @@ bool same_pixels(Image left, Image right) {
     return same;
 }
 } // namespace
+
 int verify_assets(const Assets& original, const Assets& extracted, const std::filesystem::path& executable,
                   const std::filesystem::path& output) {
     std::filesystem::create_directories(output);
@@ -53,7 +69,7 @@ int verify_assets(const Assets& original, const Assets& extracted, const std::fi
     for (const auto name : {"open", "get", "taisen", "zeno", "3f", "20f", "kai", "kai2"}) {
         const auto bytes = original.wave(name);
         require(bytes == extracted.wave(name), "Original WAV bytes are unchanged: " + std::string(name));
-        require(Audio::verify_wave(bytes), "Original WAV decodes: " + std::string(name));
+        require(decodes_wave(bytes), "Original WAV decodes: " + std::string(name));
     }
     require(original.soundfont() == read_embedded_media(executable, EmbeddedMedia::Soundfont),
             "Embedded soundfont matches the soundfont selected by the runtime");

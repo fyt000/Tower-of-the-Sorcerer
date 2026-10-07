@@ -1,4 +1,5 @@
 #include "tsw/game.hpp"
+
 namespace tsw {
 // Direct translation of 0x4664E4. Numeric sums intentionally preserve altered-state behavior.
 void Game::check_guards() {

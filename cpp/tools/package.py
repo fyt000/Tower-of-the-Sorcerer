@@ -10,7 +10,7 @@ import zipfile
 
 CPP = Path(__file__).resolve().parents[1]
 ROOT = CPP.parent
-NAME = 'tower-of-the-sorcerer-0.8-windows-x64'
+NAME = 'tower-of-the-sorcerer-0.9-windows-x64'
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
     binaries, original, output = build / args.configuration, args.original_dir.resolve(), args.output.resolve()
     if output == original or output.is_relative_to(original):
         raise RuntimeError('Package output must be separate from the original installation')
-    required = ['tsw_game.exe', 'tsw_probe.exe', 'tsw_tests.exe',
+    required = ['tsw_game.exe', 'tsw_probe.exe', 'tsw_tests.exe', 'tsw_audio_tests.exe', 'tsw_verify.exe',
                 'GeneralUser-GS-LICENSE.txt', 'TinySoundFont-LICENSE.txt', 'raylib-LICENSE.txt', 'miniaudio-LICENSE.txt']
     for name in required:
         if not (binaries / name).is_file():
@@ -96,14 +96,14 @@ def main():
     hashes = {file.relative_to(output).as_posix(): hashlib.sha256(file.read_bytes()).hexdigest()
               for file in sorted(output.rglob('*')) if file.is_file() and file.name != 'package-manifest.json'}
     (output / 'package-manifest.json').write_text(
-        json.dumps({'version': '0.8', 'layout': 'original', 'files': hashes}, indent=2) + '\n', encoding='utf-8')
+        json.dumps({'version': '0.9', 'layout': 'original', 'files': hashes}, indent=2) + '\n', encoding='utf-8')
     archive = shutil.make_archive(str(output), 'zip', root_dir=output.parent, base_dir=output.name)
-    drop_in = output.parent / 'tower-of-the-sorcerer-0.8-drop-in.zip'
+    drop_in = output.parent / 'tower-of-the-sorcerer-0.9-drop-in.zip'
     with zipfile.ZipFile(drop_in, 'w', compression=zipfile.ZIP_DEFLATED) as package:
         for file in sorted(output.rglob('*')):
             relative = file.relative_to(output)
             if file.is_file() and (len(relative.parts) == 1 and file.name not in
-                                   ('tsw_tests.exe', 'tsw_probe.exe', 'package-manifest.json')
+                                   ('tsw_tests.exe', 'tsw_probe.exe', 'tsw_audio_tests.exe', 'tsw_verify.exe', 'package-manifest.json')
                                    or relative.parts[0] == 'licenses'):
                 package.write(file, relative.as_posix())
     print(f'Replacement EXE: {output / "TSW.exe"}')

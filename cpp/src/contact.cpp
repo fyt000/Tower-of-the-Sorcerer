@@ -211,6 +211,7 @@ void Game::walk_to_contact() {
         push(Op::Sound, SoundCue::Open);
     }
 }
+
 void Game::hazard(int magician_cell, int retreat_cell) {
     const int t = tile(hero.floor, magician_cell);
     const bool magician_a = t == MagicianA || t == MagicianA + 1;
@@ -233,6 +234,7 @@ void Game::hazard(int magician_cell, int retreat_cell) {
         push(Op::Sound, SoundCue::Open);
     }
 }
+
 void Game::stair(bool up) {
     const int source = hero.floor;
     const int destination = up ? (source == 43 ? 45 : source + 1) : (source == 45 ? 43 : source - 1);
@@ -285,6 +287,7 @@ void Game::stair(bool up) {
     push(Op::Wait);
     push(Op::Sound, SoundCue::Stairs);
 }
+
 void Game::face_away_from_stair(bool climbed) {
     // 0x442F80 / 0x443050: the last adjacent matching stair sets facing.
     const Tile stair_tile = climbed ? StairsDown : StairsUp;
@@ -295,6 +298,7 @@ void Game::face_away_from_stair(bool climbed) {
             hero.facing = static_cast<Direction>(facing);
     }
 }
+
 void Game::check_door() {
     // doorcheck, 0x47BEAC: numeric sums also define behavior on altered maps.
     if (hero.floor == 39) {
@@ -311,6 +315,7 @@ void Game::check_door() {
     } else if (hero.floor == 43 && contact_index == 7 && tile(43, 8) == Sorcerer)
         push(Op::SetTile, 7, SpecialRoad);
 }
+
 void Game::special_road() {
     // mevent, 0x46397C. 23F is a blocked attempt; other scenes commit the step.
     switch (hero.floor) {
@@ -366,6 +371,7 @@ void Game::special_road() {
         break;
     }
 }
+
 void Game::change_music_for_floor() {
     if (!hero.music_track)
         return;

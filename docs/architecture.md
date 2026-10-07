@@ -41,7 +41,7 @@ changes that row rather than creating independent enemy instances.
 | `src/combat.cpp` | Forecasts, strike generation and victory records |
 | `src/items.cpp`, `src/npcs.cpp` | Item loops, Flight, shops and dialogue continuations |
 | `src/floor_checks.cpp`, `src/scenes.cpp` | Explicit floor predicates, scripts and cutscenes |
-| `src/original_save.cpp`, `src/save.cpp`, `src/save_slots.cpp` | Original save records, earlier C++ imports and eight independent slots |
+| `src/original_save.cpp`, `src/save.cpp`, `src/save_slots.cpp` | Original save records, raw Fairy checkpoints and eight independent slots |
 
 Original tile IDs, flag aliases, numeric puzzle sums and script coordinates are
 retained where changing them would obscure source comparison. Named enums and
@@ -51,8 +51,9 @@ unsafe memory access while the branch structure remains recognizable.
 
 ## Desktop and media
 
-`desktop.cpp` translates keyboard/mouse actions and advances commands on a
-scaled clock. `presentation.cpp` owns raylib textures, the 11×11 board and
+`desktop.cpp` polls keyboard input and runs the native window loop.
+`DesktopSession` applies UI actions, advances commands on a scaled clock and
+writes completed Fairy checkpoints. `presentation.cpp` owns raylib textures, the 11×11 board and
 original 800×500 content proportions, panel artwork and scene compositor.
 Walking input and animation use the same selected clock. Dialogue, items,
 shops, enemy forecasts and saves use overlays.
@@ -64,8 +65,8 @@ The replacement embeds the two original form pictures and GeneralUser GS bank
 as PE resources. `embedded_media.cpp` reads them through standard file I/O,
 without direct Windows API calls. Assets are read during loading, not per frame.
 
-`audio.cpp` loads the original MIDI messages and decodes WAV effects before
-starting a miniaudio device. Its direct callback owns the TinySoundFont synth,
+`audio_mixer.cpp` loads the original MIDI messages and decodes WAV effects before
+`audio.cpp` starts a miniaudio device. Its direct callback owns the TinySoundFont synth,
 MIDI cursor and all effect voices. The game thread publishes a packed
 track/play/mute/restart request through a lock-free atomic and writes effects to
 a fixed queue. The callback reads the request once per block; it takes no mutex,
@@ -75,8 +76,11 @@ TSF's ordinary reset frees its channel array. The implementation instead uses it
 quick note release and restores initialized channel defaults in the same storage.
 All 256 synth voices, 16 MIDI channels and 16 voices per WAV are allocated before
 playback. Song changes, looping, pause/resume and muting have separate meanings;
-muting keeps the cursors advancing. Allocation hooks verify complete tracks and
-looping; device checks cover startup and restart behavior.
+muting keeps the cursors advancing. The mixer has no verification counters or
+diagnostic snapshots. Catch2 tests render its output directly without opening a
+device. MSVC Debug tests install a CRT heap hook around prepared rendering; the
+hook and its counters exist only in `tests/audio_tests.cpp`. The native device
+case checks initialization, control changes and shutdown.
 
 `presentation.cpp` measures the GLFW window and framebuffer separately each frame
 and sets a logical projection over the full physical viewport. The same centered,
@@ -115,7 +119,7 @@ uses explicit original branches instead of importing Rust event definitions.
 
 ## Verification
 
-Catch2 runs named core cases through the `Game` API, including complete command
+`tsw_tests` runs named Catch2 core cases through the `Game` API, including complete command
 playback, save I/O and deliberately constructed edge states. CTest discovers
 each case so it can be run independently. The Python comparison tools execute
 original x86 handlers and the separate `tsw_probe` research adapter.
@@ -131,7 +135,11 @@ scene timing and saves. A future gameplay CLI can call the same `Game` API;
 the research probe's raw state edits and internal handler calls remain research
 controls, and a public CLI design is still open.
 
-Presentation tests check frames and scenes; asset tests compare original decoded
-pixels and audio bytes with the extracted
-versions. [Fidelity notes](../cpp/FIDELITY.md) state what this evidence proves
+`tsw_audio_tests` drives the production mixer for offline functional and Debug
+heap checks. `tsw_verify` owns all injected desktop fixtures, renderer/window
+checks, asset comparisons and report generation. Both are optional test targets;
+the game executable has no verification entry points. Desktop scenarios call the
+same `DesktopSession` used by the window loop rather than duplicating its actions
+or scheduler. Presentation tests check frames and scenes; asset tests compare
+original decoded pixels and audio bytes with the extracted versions. [Fidelity notes](../cpp/FIDELITY.md) state what this evidence proves
 and what remains unverified.

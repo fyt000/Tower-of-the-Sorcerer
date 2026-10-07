@@ -15,15 +15,18 @@ inline constexpr int BoardX = 180, BoardY = MenuHeight + 30;
 struct CanvasViewport {
     int window_width{}, window_height{}, framebuffer_width{}, framebuffer_height{};
     Rectangle area{};
+
     Vector2 canvas_point(Vector2 point) const {
         return {(point.x - area.x) * CanvasWidth / area.width,
                 (point.y - area.y) * CanvasHeight / area.height};
     }
 };
+
 CanvasViewport window_viewport();
 
 enum class Menu { None, Game, Options };
 enum class SavePicker { None, Save, Load };
+
 struct DesktopUi {
     int flight = -1, selected_item = -1, speed_index{}, enemy_first_row{};
     int selected_slot = 1;
@@ -32,10 +35,12 @@ struct DesktopUi {
     bool inventory{}, enemies{}, help{}, muted{}, ending_wait{};
     Menu menu = Menu::None;
     float dialogue_scroll{};
+
     bool modal() const {
         return inventory || enemies || help || selected_item >= 0 || menu != Menu::None ||
                save_picker != SavePicker::None;
     }
+
     void close_overlays() {
         inventory = enemies = help = false;
         selected_item = -1;
@@ -64,16 +69,22 @@ enum class Action {
     Mute,
     Speed
 };
+
 struct UiAction {
     Action kind = Action::None;
     int value{};
 };
+
 inline constexpr std::array<float, 3> GameSpeeds{1, 3, 10};
 inline constexpr float WalkRepeatSeconds = .14f, WalkAnimationSeconds = .12f;
+
 struct WalkRepeat {
     float remaining{};
+
     void advance(float seconds) { remaining -= seconds; }
+
     bool ready(bool pressed, bool held) const { return pressed || (held && remaining <= 0); }
+
     void stepped() { remaining = WalkRepeatSeconds; }
 };
 
@@ -119,5 +130,6 @@ class Presentation {
     UiAction draw_save_slots(const Game&, DesktopUi&, Vector2 mouse);
     void draw_help(DesktopUi&, Vector2 mouse);
 };
+
 float command_interval(const Game&);
 } // namespace tsw

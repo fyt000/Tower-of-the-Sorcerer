@@ -18,17 +18,20 @@ class PeFile {
         if (!file_)
             throw std::runtime_error("Unable to read embedded media resource");
     }
+
     std::uint16_t u16(std::uint64_t offset) {
         std::array<unsigned char, 2> bytes{};
         read(offset, bytes.data(), bytes.size());
         return std::uint16_t(bytes[0] | bytes[1] << 8);
     }
+
     std::uint32_t u32(std::uint64_t offset) {
         std::array<unsigned char, 4> bytes{};
         read(offset, bytes.data(), bytes.size());
         return std::uint32_t(bytes[0]) | std::uint32_t(bytes[1]) << 8 | std::uint32_t(bytes[2]) << 16 |
                std::uint32_t(bytes[3]) << 24;
     }
+
     std::uint32_t file_offset(std::uint32_t rva, std::uint32_t length = 1) {
         const auto pe = u32(0x3c);
         const auto sections = u16(pe + 6), optional_size = u16(pe + 20);
@@ -40,11 +43,13 @@ class PeFile {
         }
         throw std::runtime_error("Embedded media points outside the executable's sections");
     }
+
     std::uint64_t resource_offset(std::uint32_t offset, unsigned length) const {
         if (offset > resource_size_ || length > resource_size_ - offset)
             throw std::runtime_error("Invalid embedded media directory");
         return std::uint64_t(resource_base_) + offset;
     }
+
     std::uint32_t entry(std::uint32_t directory, int id) {
         const auto header = resource_offset(directory, 16);
         const unsigned count = unsigned(u16(header + 12)) + u16(header + 14);
@@ -77,6 +82,7 @@ class PeFile {
         resource_size_ = u32(data_directory + 20);
         resource_base_ = file_offset(rva, resource_size_);
     }
+
     std::vector<unsigned char> media(int id) {
         constexpr std::uint32_t DirectoryFlag = 0x80000000u;
         auto directory = entry(0, 10); // RT_RCDATA.
@@ -98,6 +104,7 @@ class PeFile {
     }
 };
 } // namespace
+
 std::vector<unsigned char> read_embedded_media(const std::filesystem::path& executable, EmbeddedMedia media) {
     return PeFile(executable).media(int(media));
 }

@@ -14,6 +14,7 @@ inline constexpr int FloorCount = 51;
 inline constexpr int BacksideFactor = 44;
 inline constexpr std::size_t OriginalHeroWordCount = 171; // Delphi's 684-byte persisted state record.
 enum class SaveKind { Slot, Checkpoint }; // Original checksummed slots and raw save0 snapshots.
+
 constexpr int cell(int x, int y) {
     return y * BoardWidth + x;
 }
@@ -118,6 +119,7 @@ enum Tile : std::uint8_t {
     GateKeeperA = 157,
     StairCover = 159
 };
+
 inline constexpr int HeroHitMask = 183, HeroHitColor = 184;
 inline constexpr int DownDamageColor = 191, FacingSpriteStride = 8;
 inline constexpr int DissolveFirstMask = 166, DissolveLastMask = 182;
@@ -212,23 +214,28 @@ enum class SoundCue : int {
     Stairs,
     Stairs2
 };
+
 struct Command {
     Op op{};
     std::uint16_t a{}, b{};
     friend bool operator==(const Command&, const Command&) = default;
 };
+
 struct Monster {
     std::int32_t hp{}, attack{}, defense{}, gold{};
 };
+
 struct EnemyInfo {
     int row = -1, tile{};
     Monster stats; // Encounter-time values, including the current cycle's scaling.
     std::int64_t damage{};
 };
+
 struct Floor {
     std::uint8_t up_landing{}, down_landing{};
     std::array<std::uint8_t, CellCount> tiles{};
 };
+
 struct Hero {
     std::int32_t hp = 1000, attack = 100, defense = 100, gold = 0;
     int floor = 1, highest_floor = 1, x = 5, y = 10;
@@ -250,16 +257,19 @@ struct Hero {
     int flight_direction{}, highest_floor_stair{};
     int fairy_score{}, fairy_rank{}, fairy_category{};
 };
+
 struct Dialogue {
     std::string text;
     int continuation{};
     bool shop{};
     std::array<std::string, 3> choices{};
 };
+
 struct Visual {
     struct Layer {
         int mask{}, color{}, underlying = -1;
     };
+
     std::array<Layer, CellCount> layers{};
     int overlay_cell = -1, mask{}, color{}, underlying = Road;
     int door_cell = -1, door_mode{}, door_frame{}, door_tile{};
@@ -275,6 +285,7 @@ struct Visual {
     bool stair_revealing{};
     Floor stair_source{};
 };
+
 struct Forecast {
     bool penetrates{};
     std::int64_t damage{};
@@ -302,12 +313,19 @@ class Game {
     bool run_one(Command* executed = nullptr); // One command, never a recursive timer call.
     void finish_commands(bool continue_speech = false);
     bool busy() const;
+
     int& inventory(Item item) { return hero.items.at(static_cast<int>(item)); }
+
     int inventory(Item item) const { return hero.items.at(static_cast<int>(item)); }
+
     std::uint8_t& tile(int floor, int index) { return floors.at(floor).tiles.at(index); }
+
     std::uint8_t tile(int floor, int index) const { return floors.at(floor).tiles.at(index); }
+
     std::uint8_t& tile_at(int floor, int x, int y) { return tile(floor, cell(x, y)); }
+
     std::uint8_t tile_at(int floor, int x, int y) const { return tile(floor, cell(x, y)); }
+
     Forecast forecast(int tile_id, bool enemy_first = false) const;
     static int monster_for_tile(int tile_id);
     static TileClass classify_tile(int tile_id);
@@ -316,13 +334,18 @@ class Game {
     static std::string_view monster_name(int index);
     static std::string_view original_dialogue(int id);
     void push(Op op, int a = 0, int b = 0);
+
     void push(Op op, Callback a, int b = 0) { push(op, static_cast<int>(a), b); }
+
     void push(Op op, SoundCue a, int b = 0) { push(op, static_cast<int>(a), b); }
+
     void push(Op op, int a, DoorMotion b) { push(op, a, static_cast<int>(b)); }
+
     void waits(int count) {
         for (int i = 0; i < count; ++i)
             push(Op::Wait);
     }
+
     void expand_door();
     void check_guards(); // 0x4664E4, including original numeric-sum predicates.
     void check_floor();  // 0x46CB1C, recovered two-level switch.
@@ -341,11 +364,13 @@ class Game {
   private:
     // Preserve unmapped Delphi fields and the manual writer's live checksum words.
     mutable std::optional<std::array<std::uint32_t, OriginalHeroWordCount>> original_save_record_;
+
     struct Fight {
         int target{}, enemy{}, hero_hits{}, enemy_hits{}, turn{}, underlying{};
         bool fatal{}, enemy_first{};
         std::size_t base_commands{};
     };
+
     std::optional<Fight> fight_;
     int shop_kind_{}, shop_cost_{}, shop_hint_{}, shop_id_{}, shop_npc_cell_{};
     bool stopped_{};

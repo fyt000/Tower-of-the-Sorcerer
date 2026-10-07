@@ -25,6 +25,7 @@ CanvasViewport window_viewport() {
                  (view.window_height - CanvasHeight * scale) / 2, CanvasWidth * scale, CanvasHeight * scale};
     return view;
 }
+
 namespace {
 constexpr int SideWidth = 156, FrameWidth = 488, RightX = SideWidth + FrameWidth;
 constexpr int DoorFrames = 16, TransformationFrames = 32, FirstHeroWalkingColor = 185;
@@ -38,13 +39,16 @@ constexpr Rectangle EndingArea{80, MenuHeight + 50, 640, 400};
 Rectangle sprite(int tile) {
     return {float((tile - 1) % 11 * TileSize), float((tile - 1) / 11 * TileSize), TileSize, TileSize};
 }
+
 bool clicked(Rectangle rect, Vector2 mouse) {
     return CheckCollisionPointRec(mouse, rect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 }
+
 struct Typography {
     struct Typeface {
         std::vector<unsigned char> bytes;
         mutable std::unordered_map<int, Font> sizes;
+
         void load(const std::filesystem::path& path) {
             if (!std::filesystem::exists(path))
                 return;
@@ -54,11 +58,13 @@ struct Typography {
                 UnloadFileData(data);
             }
         }
+
         ~Typeface() {
             for (const auto& [size, font] : sizes)
                 if (font.texture.id != GetFontDefault().texture.id)
                     UnloadFont(font);
         }
+
         Font at(int size, float scale) const {
             if (bytes.empty())
                 return GetFontDefault();
@@ -74,8 +80,10 @@ struct Typography {
             return font;
         }
     };
+
     Typeface body, numbers;
     Vector2 scale{1, 1};
+
     Typography() {
         // Use installed Windows fonts when available; no fonts or Windows APIs are bundled.
         if (const char* windows = std::getenv("WINDIR")) {
@@ -84,22 +92,28 @@ struct Typography {
             numbers.load(directory / "segoeuib.ttf");
         }
     }
+
     Font font(int size, bool bold = false) const { return (bold ? numbers : body).at(size, scale.y); }
+
     float font_size(Font face, int size) const {
         return face.texture.id == GetFontDefault().texture.id ? float(size) : face.baseSize / scale.y;
     }
+
     Vector2 position(float x, float y) const {
         return {std::round(x * scale.x) / scale.x, std::round(y * scale.y) / scale.y};
     }
+
     void clip(Rectangle rect) const {
         const int x = int(std::floor(rect.x * scale.x)), y = int(std::floor(rect.y * scale.y));
         BeginScissorMode(x, y, int(std::ceil((rect.x + rect.width) * scale.x)) - x,
                          int(std::ceil((rect.y + rect.height) * scale.y)) - y);
     }
+
     int width(const std::string& value, int size, bool bold = false) const {
         const auto face = font(size, bold);
         return int(std::ceil(MeasureTextEx(face, value.c_str(), font_size(face, size), 0).x));
     }
+
     void draw(const std::string& value, int x, int y, int size, Color color = Ink) const {
         const auto face = font(size);
         std::istringstream lines(value);
@@ -109,6 +123,7 @@ struct Typography {
             y += std::max(22, size + 2);
         }
     }
+
     std::string wrap(const std::string& text, int limit, int size) const {
         std::istringstream paragraphs(text);
         std::string paragraph, result;
@@ -127,6 +142,7 @@ struct Typography {
         }
         return result;
     }
+
     void fit(const std::string& text, Rectangle rect, int size, Color color = Ink, bool right = false,
              bool bold = false) const {
         while (size > 10 && width(text, size, bold) > rect.width - 6)
@@ -140,6 +156,7 @@ struct Typography {
                    font_size(face, size), 0, color);
         EndScissorMode();
     }
+
     bool button(Rectangle rect, const std::string& label, Vector2 mouse, bool enabled = true) const {
         const bool hover = enabled && CheckCollisionPointRec(mouse, rect);
         DrawRectangleRec(rect, hover ? Color{89, 78, 75, 255} : Panel);
@@ -147,6 +164,7 @@ struct Typography {
         fit(label, rect, 18, enabled ? Ink : Color{145, 140, 143, 255});
         return enabled && clicked(rect, mouse);
     }
+
     void modal(Rectangle rect, const std::string& title) const {
         DrawRectangleRec(MapArea, Color{0, 0, 0, 130});
         DrawRectangle(int(rect.x + 4), int(rect.y + 5), int(rect.width), int(rect.height),
@@ -157,9 +175,11 @@ struct Typography {
         DrawLine(int(rect.x + 18), int(rect.y + 45), int(rect.x + rect.width - 18), int(rect.y + 45), Border);
     }
 };
+
 bool passive(Item item) {
     return item == Item::Cross || item == Item::DragonSlayer || item == Item::LuckyGold;
 }
+
 constexpr std::array<const char*, 15> ItemDescriptions{
     "Inspect enemy statistics and predicted battle damage for this floor. The battle panel keeps the last "
     "defeated enemy.",
@@ -201,6 +221,7 @@ struct Presentation::Art {
     Texture2D atlas{};
     std::unordered_map<int, Texture2D> masked, icons;
     std::unordered_map<std::string, Texture2D> scenes;
+
     explicit Art(const Assets& assets) {
         atlas_image = assets.image("original-atlas");
         background_image = assets.image("original-background-atlas");
@@ -217,6 +238,7 @@ struct Presentation::Art {
             scenes.emplace(std::string(name), texture);
         }
     }
+
     ~Art() {
         for (auto [key, texture] : masked)
             UnloadTexture(texture);
@@ -228,12 +250,14 @@ struct Presentation::Art {
         UnloadImage(atlas_image);
         UnloadImage(background_image);
     }
+
     void tile(int value, int x, int y) const {
         if (value > 0 && value <= 220)
             DrawTextureRec(atlas, sprite(value), {float(x), float(y)}, WHITE);
         else
             DrawRectangle(x, y, TileSize, TileSize, BLACK);
     }
+
     void part(int value, Rectangle source, int x, int y) const {
         if (source.width <= 0 || source.height <= 0)
             return;
@@ -242,6 +266,7 @@ struct Presentation::Art {
         source.y += origin.y;
         DrawTextureRec(atlas, source, {float(x), float(y)}, WHITE);
     }
+
     Texture2D transparent(int color, int mask, bool background = false) {
         auto& textures = background ? icons : masked;
         const int key = color * 256 + mask;
@@ -257,9 +282,11 @@ struct Presentation::Art {
         textures.emplace(key, texture);
         return texture;
     }
+
     void icon(int value, Rectangle target, Color tint = WHITE) {
         DrawTexturePro(transparent(value, value, true), {0, 0, TileSize, TileSize}, target, {0, 0}, 0, tint);
     }
+
     void scene(const std::string& name, Rectangle target) const {
         const auto found = scenes.find(name);
         if (found == scenes.end())
@@ -282,6 +309,7 @@ Presentation::Presentation(const Assets& assets) : art_(std::make_unique<Art>(as
     ClearBackground(BLACK);
     EndTextureMode();
 }
+
 void Presentation::resize_canvas(const CanvasViewport& view) {
     const int width =
         std::max(1, int(std::round(view.area.width * view.framebuffer_width / view.window_width)));
@@ -304,23 +332,28 @@ void Presentation::resize_canvas(const CanvasViewport& view) {
     canvas_ = resized;
     art_->text.scale = {width / float(CanvasWidth), height / float(CanvasHeight)};
 }
+
 Presentation::~Presentation() {
     UnloadShader(dissolve_);
     UnloadRenderTexture(scene_cache_);
     UnloadRenderTexture(canvas_);
 }
+
 void Presentation::reset() {
     hide_panels_ = cache_requested_ = cache_valid_ = false;
     previous_raster_ = -1;
     walking_remaining_ = 0;
 }
+
 void Presentation::moved(const Hero& before, const Hero& after) {
     if (before.floor == after.floor && (before.x != after.x || before.y != after.y))
         walking_remaining_ = WalkAnimationSeconds;
 }
+
 void Presentation::advance(float seconds) {
     walking_remaining_ = std::max(0.f, walking_remaining_ - seconds);
 }
+
 void Presentation::command(const Command& command) {
     if (command.op != Op::Callback)
         return;
@@ -341,6 +374,7 @@ void Presentation::command(const Command& command) {
         break;
     }
 }
+
 void Presentation::cache_scene() {
     const int width = canvas_.texture.width;
     const int height = std::max(1, int(std::round(ContentHeight * art_->text.scale.y)));
@@ -361,6 +395,7 @@ void Presentation::cache_scene() {
     cache_requested_ = false;
     cache_valid_ = true;
 }
+
 void Presentation::draw_door(const Visual& visual, int x, int y) {
     // 0x4770E0: 16 steps cover half a 40-pixel tile, then a complete tile for walls/lava.
     const int half = TileSize / 2, opened = std::clamp(visual.door_frame * half / DoorFrames, 0, half);
@@ -417,6 +452,7 @@ void Presentation::draw_door(const Visual& visual, int x, int y) {
     }
     }
 }
+
 void Presentation::draw_transformation(const Game& game, int animation) {
     // 0x47C978: nine bats converge on the center while the Vampire materializes.
     const int progress = game.visual.raster_frame * TileSize / TransformationFrames;
@@ -433,6 +469,7 @@ void Presentation::draw_transformation(const Game& game, int animation) {
                                                           DissolveFirstMask, DissolveLastMask)),
         BoardX + 5 * TileSize, BoardY + 5 * TileSize, WHITE);
 }
+
 void Presentation::draw_board(const Game& game, int floor, bool animated) {
     const auto& v = game.visual;
     const int animation = animated ? int(GetTime() * 2) % 2 : 0;
@@ -471,6 +508,7 @@ void Presentation::draw_board(const Game& game, int floor, bool animated) {
     if (active && v.raster_mode == 10)
         draw_transformation(game, animation);
 }
+
 void Presentation::draw_scene(const Game& game) {
     const int mode = game.visual.raster_mode, frame = game.visual.raster_frame;
     if (mode == 9) {
@@ -973,6 +1011,7 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
 Vector2 Presentation::mouse_position() const {
     return window_viewport().canvas_point(GetMousePosition());
 }
+
 void Presentation::present() const {
     const auto view = window_viewport();
     BeginDrawing();
@@ -989,16 +1028,19 @@ void Presentation::present() const {
                    view.area, {0, 0}, 0, WHITE);
     EndDrawing();
 }
+
 Image Presentation::capture_window() const {
     const auto view = window_viewport();
     return {rlReadScreenPixels(view.framebuffer_width, view.framebuffer_height), view.framebuffer_width,
             view.framebuffer_height, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
 }
+
 Image Presentation::capture_native_canvas() const {
     Image image = LoadImageFromTexture(canvas_.texture);
     ImageFlipVertical(&image);
     return image;
 }
+
 Image Presentation::capture_canvas() const {
     auto image = capture_native_canvas();
     if (image.width == CanvasWidth && image.height == CanvasHeight)
@@ -1017,6 +1059,7 @@ Image Presentation::capture_canvas() const {
     UnloadImage(image);
     return logical;
 }
+
 bool Presentation::screenshot(const std::filesystem::path& path) const {
     Image capture = capture_canvas();
     const bool result = ExportImage(capture, path.string().c_str());

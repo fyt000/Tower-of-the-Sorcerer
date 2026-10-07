@@ -34,6 +34,7 @@ enum Field : std::size_t {
     AlternatingSum = 660,
     HighestStair = 664
 };
+
 constexpr std::uint32_t OriginalSentinel = std::uint32_t(-4);
 constexpr std::array<std::size_t, 24> ClueOffsets{272, 276, 220, 224, 228, 236, 280, 288, 292, 296, 300, 244,
                                                   304, 308, 312, 248, 316, 252, 320, 324, 256, 328, 260, 332};
@@ -47,6 +48,7 @@ std::pair<std::uint32_t, std::uint32_t> sums(const OriginalRecord& words) {
     }
     return {sum, alternating};
 }
+
 template <class Archive> void fields(Archive& archive, Hero& h) {
     auto scalars = std::tie(h.hp, h.attack, h.defense, h.gold, h.floor, h.highest_floor, h.x, h.y,
                             h.yellow_keys, h.red_keys, h.blue_keys, h.altar_purchases);
@@ -107,6 +109,7 @@ OriginalRecord hero_record(const std::vector<std::uint8_t>& bytes) {
     }
     return record;
 }
+
 Game decode_original(const std::vector<std::uint8_t>& bytes, OriginalRecord& record, SaveKind kind) {
     record = hero_record(bytes);
     if (kind == SaveKind::Slot) {

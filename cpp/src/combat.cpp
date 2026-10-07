@@ -8,6 +8,7 @@ namespace {
 constexpr int ForcedFatalOperand = 250;
 constexpr int ForcedVictoryOperand = 193;
 } // namespace
+
 int Game::monster_for_tile(int t) {
     if (t >= GreenSlime && t <= Vampire + 1)
         return (t - GreenSlime) / 2;
@@ -19,6 +20,7 @@ int Game::monster_for_tile(int t) {
         return (t - Sorcerer) / 2;
     return -1;
 }
+
 int Game::attack_multiplier(int enemy, bool enemy_first) const {
     if (enemy_first)
         return 1;
@@ -28,6 +30,7 @@ int Game::attack_multiplier(int enemy, bool enemy_first) const {
         return 2;
     return 1;
 }
+
 Forecast Game::forecast(int t, bool enemy_first) const {
     const int enemy = monster_for_tile(t);
     if (enemy < 0)
@@ -43,11 +46,13 @@ Forecast Game::forecast(int t, bool enemy_first) const {
     const int enemy_hit = std::max(0, row.attack * scale - hero.defense);
     return {true, enemy_hit * (hits - (enemy_first ? 0 : 1)), hits, static_cast<int>(hero_hit), enemy_hit};
 }
+
 void Game::damage_pose(int index, int underlying) {
     const int color = DownDamageColor + (static_cast<int>(hero.facing) - 1) * FacingSpriteStride;
     push(Op::Wait, underlying < 0 ? tile(hero.floor, cell(hero.x, hero.y)) : underlying, color);
     push(Op::Overlay, index, color + 1);
 }
+
 void Game::battle(bool enemy_first) {
     const int t = tile(hero.floor, contact_index), enemy = monster_for_tile(t);
     if (enemy < 0)
@@ -77,6 +82,7 @@ void Game::battle(bool enemy_first) {
                    enemy_turns,   0,           tile(hero.floor, cell(hero.x, hero.y)),
                    fatal,         enemy_first, commands.size()};
 }
+
 void Game::battle_step() {
     if (!fight_)
         return;
@@ -117,6 +123,7 @@ void Game::battle_step() {
     push(Op::Wait);
     push(Op::Sound, SoundCue::Strike);
 }
+
 void Game::battle_finished(const Fight& fight) {
     if (fight.fatal) {
         if (fight.enemy_first)

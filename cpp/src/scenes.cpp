@@ -1,4 +1,5 @@
 #include "tsw/game.hpp"
+
 namespace tsw {
 // 0x46CB1C, switch targets recovered by RecoverArrival.java.
 void Game::check_floor() {
@@ -999,6 +1000,7 @@ void Game::check_floor() {
     }
     return;
 }
+
 void Game::summon(int index, int color) {
     // 0x461A0C. Insertion descends, playback materializes from mask 166 to 182.
     for (int mask = DissolveLastMask; mask >= DissolveFirstMask; --mask) {
@@ -1008,6 +1010,7 @@ void Game::summon(int index, int color) {
     push(Op::Wait);
     push(Op::Sound, SoundCue::Floor3);
 }
+
 void Game::summon_four_guards(int north, int south, int west, int east) {
     // 0x461EF4, used for the four temporary guards in the 42F speech.
     for (int mask : {182, 175, 171, 169, 167})
@@ -1018,6 +1021,7 @@ void Game::summon_four_guards(int north, int south, int west, int east) {
     push(Op::Wait);
     push(Op::Sound, SoundCue::Floor3);
 }
+
 void Game::summon_guards() {
     // 0x462560 writes all eight 49F guards before their materialization stack.
     // Omit the stray INC at 0x4637DD: it exposes an unwritten, stale command.
@@ -1030,12 +1034,14 @@ void Game::summon_guards() {
             push(Op::Overlay, index, mask);
         }
 }
+
 void Game::transform_vampire() {
     // Gameplay writes precede the original 32 rendering frames in check_floor.
     visual.raster_mode = 10;
     if (visual.raster_frame == 32)
         visual.raster_mode = -1;
 }
+
 void Game::capture() {
     // opening2, 0x464048. Select its original 40-pixel canvas branch.
     push(Op::Callback, Callback::Capture);
@@ -1072,6 +1078,7 @@ void Game::capture() {
     push(Op::Dialogue, 11);
     summon_four_guards(81, 103, 91, 93);
 }
+
 void Game::ending() {
     // handan's first-cycle Zeno contact: preserve the original stack of raster callbacks.
     push(Op::Wait);

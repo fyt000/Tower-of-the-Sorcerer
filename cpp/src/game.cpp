@@ -9,6 +9,7 @@ constexpr std::array<std::string_view, 15> ItemNames{
     "Orb of the Hero", "Orb of Wisdom", "Orb of Flight", "Cross",         "Elixir",
     "Mattock",         "Bomb",          "Warp Staff",    "Ascent Wing",   "Descent Wing",
     "Dragon Slayer",   "Snow Crystal",  "Magic Key",     "Super Mattock", "Lucky Gold"};
+
 constexpr std::array<int, CellCount> spiral() {
     std::array<int, CellCount> result{};
     int n = 0;
@@ -27,14 +28,18 @@ constexpr std::array<int, CellCount> spiral() {
     }
     return result;
 }
+
 constexpr auto StairOrder = spiral();
+
 int signed_word(std::uint16_t value) {
     return value < 32768 ? value : int(value) - 65536;
 }
 } // namespace
+
 Game::Game() {
     new_game();
 }
+
 void Game::new_game() {
     original_save_record_.reset();
     hero = Hero{};
@@ -52,6 +57,7 @@ void Game::new_game() {
     scratch_index = neighbor_index = message_code = door_opened = 0;
     status = "Find the princess at the top of the tower.";
 }
+
 void Game::initialize_cycle() {
     // 0x455CB8: cycle 2 resets gold/items; cycle 3 and later preserve them.
     const Hero carried = hero;
@@ -71,6 +77,7 @@ void Game::initialize_cycle() {
         hero.equipment_found = carried.equipment_found;
     }
 }
+
 void Game::next_cycle() {
     if (!hero.cycle_factor_minus_one)
         hero.cycle_factor_minus_one = BacksideFactor - 1;
@@ -79,21 +86,27 @@ void Game::next_cycle() {
     initialize_cycle();
     status = "The backside tower begins.";
 }
+
 std::string_view Game::item_name(Item item) {
     return ItemNames.at(static_cast<int>(item));
 }
+
 std::string_view Game::monster_name(int index) {
     return original::MonsterNames.at(index);
 }
+
 std::string_view Game::original_dialogue(int id) {
     return original::Dialogue.at(id);
 }
+
 void Game::push(Op op, int a, int b) {
     commands.push_back({op, static_cast<std::uint16_t>(a), static_cast<std::uint16_t>(b)});
 }
+
 bool Game::busy() const {
     return dialogue.has_value() || fight_.has_value() || !commands.empty() || stopped_ || hero.hp <= 0;
 }
+
 bool Game::move(Direction direction) {
     if (busy())
         return false;
@@ -119,6 +132,7 @@ bool Game::move(Direction direction) {
     contact();
     return true;
 }
+
 void Game::expand_door() {
     if (commands.empty() || commands.back().op != Op::DoorFrame)
         throw std::logic_error("Door expansion without a door request");
@@ -130,16 +144,19 @@ void Game::expand_door() {
         push(Op::DoorFrame, request.a, request.b);
     }
 }
+
 void Game::update_status(int code) {
     message_code = code;
     if (code > 1 && code + 127 < int(original::Dialogue.size()))
         status = original::Dialogue[code + 127];
 }
+
 void Game::show_dialogue(int id) {
     if (id < 1 || id > int(original::Dialogue.size()))
         throw std::runtime_error("Invalid original speech ID");
     dialogue = Dialogue{std::string(original::Dialogue[id - 1]), id + 10, false, {}};
 }
+
 bool Game::continue_dialogue() {
     if (!dialogue || dialogue->shop)
         return false;
@@ -148,6 +165,7 @@ bool Game::continue_dialogue() {
     continue_original(stage);
     return true;
 }
+
 void Game::finish_commands(bool continue_speech) {
     // A finite guard detects accidental endless command production in tests/loaders.
     for (std::size_t count = 0; count < 10000000; ++count) {
@@ -162,6 +180,7 @@ void Game::finish_commands(bool continue_speech) {
     }
     throw std::runtime_error("Command drain exceeded ten million operations");
 }
+
 bool Game::run_one(Command* executed) {
     if (dialogue || stopped_)
         return false;
@@ -387,6 +406,7 @@ bool Game::run_one(Command* executed) {
     }
     return true;
 }
+
 void Game::queue_death() {
     commands.clear();
     fight_.reset();
@@ -394,6 +414,7 @@ void Game::queue_death() {
     push(Op::Wait);
     push(Op::DeathScene);
 }
+
 int Game::animation_offset(int t) {
     if (t == Lava || t == StarVoid)
         return 147;

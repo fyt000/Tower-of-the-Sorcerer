@@ -1,6 +1,7 @@
 // Extracted from hash-pinned TSW 1.2; regenerate with tools/extract_constants.py.
 #pragma once
 #include "tsw/game.hpp"
+
 namespace tsw::original {
 inline constexpr std::string_view ImageHash =
     "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779";

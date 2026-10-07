@@ -52,6 +52,7 @@ void save_detail::validate(const Game& game) {
     if (h.merchant2_heard < 0 || h.merchant2_heard > 2)
         throw std::runtime_error("Invalid merchant clue flag");
 }
+
 void save_detail::write_file(const std::filesystem::path& path, const std::vector<std::uint8_t>& bytes) {
     if (!path.parent_path().empty())
         std::filesystem::create_directories(path.parent_path());
@@ -79,6 +80,7 @@ void save_detail::write_file(const std::filesystem::path& path, const std::vecto
         throw;
     }
 }
+
 void Game::save(const std::filesystem::path& path, SaveKind kind) const {
     const auto bytes =
         save_detail::encode_original(*this, original_save_record_ ? &*original_save_record_ : nullptr, kind);
@@ -86,6 +88,7 @@ void Game::save(const std::filesystem::path& path, SaveKind kind) const {
     // The original manual writer updates the live checksum words before a later Fairy snapshot.
     original_save_record_ = save_detail::hero_record(bytes);
 }
+
 void Game::load(const std::filesystem::path& path, SaveKind kind) {
     std::ifstream input(path, std::ios::binary);
     if (!input)

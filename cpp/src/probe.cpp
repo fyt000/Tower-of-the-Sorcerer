@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 using namespace tsw;
+
 namespace {
 template <class Range> void array(const Range& range) {
     std::cout << '[';
@@ -17,6 +18,7 @@ template <class Range> void array(const Range& range) {
     }
     std::cout << ']';
 }
+
 void snapshot(const Game& game) {
     const auto& h = game.hero;
     std::cout << "{\"hero\":";
@@ -68,6 +70,7 @@ void snapshot(const Game& game) {
     std::cout << "],\"dialogue\":" << (game.dialogue ? game.dialogue->continuation : -1) << "}\n"
               << std::flush;
 }
+
 void set(Game& game, const std::string& name, int value) {
     auto& h = game.hero;
     if (name == "hp")
@@ -122,6 +125,7 @@ void set(Game& game, const std::string& name, int value) {
         throw std::runtime_error("Unknown probe field: " + name);
 }
 } // namespace
+
 int main() {
     Game game;
     std::string line;

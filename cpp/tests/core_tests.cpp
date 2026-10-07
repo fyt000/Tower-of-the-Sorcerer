@@ -7,6 +7,7 @@
 #include <stdexcept>
 
 using namespace tsw;
+
 Game room(int floor = 1) {
     Game game;
     game.hero.floor = floor;
@@ -14,11 +15,13 @@ Game room(int floor = 1) {
     game.floors[floor].tiles.fill(Road);
     return game;
 }
+
 std::filesystem::path temporary_save(const char* name) {
     return std::filesystem::path(TSW_TEST_TEMP) /
            (std::string(name) + "-" +
             std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + ".save");
 }
+
 TEST_CASE("Defeated enemy panel retains encounter statistics", "[combat]") {
     auto g = room();
     g.tile(1, cell(5, 4)) = GreenSlime;

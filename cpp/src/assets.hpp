@@ -13,12 +13,16 @@ inline constexpr std::array<std::string_view, 29> SceneImageNames{
     "data2-end10",   "data2-end11",    "data2-end12",           "data2-end13",         "data2-end14",
     "data2-end15",   "data2-end16",    "data2-end17",           "data2-end18",         "data2-end19",
     "data2-end20",   "data2-end26",    "data-exe-ending-story", "data-exe-ending-card"};
+
 // One source directory, in either the original layout or the older extracted PNG layout.
 class Assets {
   public:
     Assets(const std::filesystem::path& root, const std::filesystem::path& executable);
+
     bool original_layout() const { return original_; }
+
     const std::filesystem::path& root() const { return root_; }
+
     Image image(std::string_view name) const; // Caller owns the raylib image.
     std::vector<unsigned char> midi(std::string_view name) const;
     std::vector<unsigned char> wave(std::string_view name) const;

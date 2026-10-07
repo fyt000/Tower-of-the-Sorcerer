@@ -38,12 +38,17 @@ door/wall/lava modes, both stair phases, all 32 Vampire frames, capture and endi
 playback, red panels, Zeno variants and overlays. They run with both original
 and extracted media. The **71 asset checks** establish pixel equality for all
 31 loaded images, unchanged bytes for 17 MIDI tracks and eight WAV effects,
-WAV decoding, embedded media and selection/error handling. Audio checks render
-all 17 complete MIDI tracks, dispatch all 35,343 parsed messages across varied
-callback block sizes, verify looping and produce finite, nonzero stereo synthesis.
-A WASAPI device check exercises overlapping effects, bounded bursts, the sample
-clock and all cached track selections; it does not establish audible equivalence
-or uninterrupted playback on every device.
+WAV decoding, embedded media and selection/error handling. Catch2 audio cases
+check that the bank supplies every MIDI program used by the 35,343 parsed messages,
+render all 17 complete tracks across varied callback sizes, and verify finite,
+nonzero output on playback and looping. Offline PCM checks cover the original
+startup lead-in, pause/resume, mute, same-track restart and sixteen overlapping
+voices per WAV. Queue cases exercise capacity, rollover and concurrent bursts.
+MSVC Debug tests use the CRT heap hook to require zero allocation, reallocation
+or free operations during complete prepared tracks, loops, switches and effect
+bursts. This instrumentation is confined to the test executable. The native-device
+case checks WASAPI initialization, cached track control and joined shutdown;
+it does not establish audible equivalence or uninterrupted playback on every device.
 
 Window checks verify six resize/maximize/restore layouts, including native canvas
 dimensions, physical framebuffer pixels and pointer mapping. Enlarged glyphs must

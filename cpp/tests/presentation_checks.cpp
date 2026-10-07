@@ -1,5 +1,5 @@
 #include "audio.hpp"
-#include "presentation.hpp"
+#include "desktop_checks.hpp"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -26,12 +26,14 @@ std::uint64_t fingerprint(const Image& image, Rectangle region) {
     UnloadImageColors(pixels);
     return hash;
 }
+
 std::uint64_t fingerprint(Presentation& renderer, Rectangle region) {
     Image image = renderer.capture_canvas();
     const auto hash = fingerprint(image, region);
     UnloadImage(image);
     return hash;
 }
+
 bool matches_original_hero(Presentation& renderer, Rectangle target, const Image& atlas, int tile) {
     const auto cell = [](int tile) -> Rectangle {
         return {float((tile - 1) % 11 * 40), float((tile - 1) / 11 * 40), 40, 40};
@@ -62,6 +64,7 @@ bool matches_original_hero(Presentation& renderer, Rectangle target, const Image
     UnloadImage(mask);
     return matches;
 }
+
 constexpr Rectangle BoardArea{BoardX, BoardY, BoardPixels, BoardPixels};
 constexpr Rectangle ContentArea{0, MenuHeight, CanvasWidth, ContentHeight};
 } // namespace
@@ -531,6 +534,7 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
     std::cout << checks.size() << " presentation checks passed; snapshots: " << output << '\n';
     return 0;
 }
+
 int verify_window(Presentation& renderer, const std::filesystem::path& output) {
     std::filesystem::create_directories(output);
     Game game;

@@ -2,6 +2,7 @@ BasedOnStyle: LLVM
 IndentWidth: 4
 ColumnLimit: 110
 AllowShortFunctionsOnASingleLine: Inline
+SeparateDefinitionBlocks: Always
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 IndentCaseLabels: false

@@ -6,6 +6,7 @@ namespace {
 struct MerchantOffer {
     int floor, cost, hint;
 };
+
 constexpr std::array<MerchantOffer, 12> Merchants{{{2, 0, 29},
                                                    {6, 50, 2},
                                                    {7, 50, 3},
@@ -19,6 +20,7 @@ constexpr std::array<MerchantOffer, 12> Merchants{{{2, 0, 29},
                                                    {45, 1000, 20},
                                                    {47, 4000, 22}}};
 } // namespace
+
 void Game::speak_merchant() {
     shop_id_ = -1;
     for (int i = 0; i < int(Merchants.size()); ++i) {
@@ -46,6 +48,7 @@ void Game::speak_merchant() {
     dialogue =
         Dialogue{std::string(original_dialogue(246 + shop_id_)), 0, true, {"Accept the trade", "", ""}};
 }
+
 bool Game::choose(int choice) {
     if (!dialogue || !dialogue->shop)
         return false;
@@ -140,6 +143,7 @@ bool Game::choose(int choice) {
     status = "Trade completed.";
     return true;
 }
+
 void Game::speak_old_man() {
     int hint = -1, message = 90;
     // roujin, 0x449708. First-hearing state never upgrades retrospectively.
@@ -255,6 +259,7 @@ void Game::speak_old_man() {
     }
     dialogue = Dialogue{std::string(original_dialogue(message)), 0, false, {}};
 }
+
 void Game::continue_original(int stage) {
     if (stage > 10 && stage < 68)
         hero.dialogue_seen[stage] = 1;
@@ -296,6 +301,7 @@ void Game::continue_original(int stage) {
         break;
     }
 }
+
 void Game::speak_thief() {
     // touzoku, 0x465900. Speaker position and hero position are distinct inputs.
     switch (hero.floor) {
@@ -352,6 +358,7 @@ void Game::speak_thief() {
         break;
     }
 }
+
 void Game::speak_fairy() {
     const int scale = hero.cycle_factor_minus_one + 1;
     const int keys = hero.yellow_keys + 2 * hero.blue_keys + 3 * hero.red_keys;

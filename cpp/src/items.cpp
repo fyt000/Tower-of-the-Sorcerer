@@ -13,6 +13,7 @@ TileClass Game::classify_tile(int tile_id) {
         return TileClass::BombTarget;
     return TileClass::Other;
 }
+
 void Game::bomb_dissolve(int index) {
     // toroad2, 0x44BC34. The colored image is an operand, not a tile write.
     const int underlying = tile(hero.floor, index);
@@ -24,6 +25,7 @@ void Game::bomb_dissolve(int index) {
         push(Op::Sound, SoundCue::Open);
     }
 }
+
 bool Game::flight_preview(int destination, int direction) {
     if (destination < 1 || destination > hero.highest_floor || destination == 44)
         return false;
@@ -32,6 +34,7 @@ bool Game::flight_preview(int destination, int direction) {
         tile(2, 120) = Road;
     return true;
 }
+
 bool Game::use(Item item, int destination) {
     if (busy() || inventory(item) <= 0)
         return false;

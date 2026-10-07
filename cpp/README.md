@@ -48,7 +48,8 @@ cmake --build build/cpp/core --config Release
 ctest --test-dir build/cpp/core -C Release --output-on-failure
 ```
 
-Use `-DBUILD_TESTING=OFF` to build the core and research probe without Catch2.
+Use `-DBUILD_TESTING=OFF` to omit Catch2 runners and the desktop verification executable.
+The game and its libraries contain no test fixtures or verification code.
 
 ## Original folder compatibility
 
@@ -138,37 +139,58 @@ executable's filename does not affect saving or loading.
 
 ## Validate and package
 
-CTest discovers each named Catch2 core case and runs the MIDI, renderer and asset
-checks separately. The core cases use the actual `Game` API and complete command
-playback. When the extracted PNGs are available, CTest also compares both asset
-layouts and runs the renderer with PNGs. Run a subset directly with
-`../build/cpp/vs/Release/tsw_tests.exe "[combat]"`; the runner supports named tests,
-tags, expression/value diagnostics and standard report formats.
-[The research workflow](../docs/reverse-engineering.md) describes the original
-executable comparisons. Useful desktop checks include:
+Catch2 runs core cases in `tsw_tests` and offline playback cases in `tsw_audio_tests`.
+The audio tests drive the same `AudioMixer` used by the native device callback:
+complete MIDI tracks and loops, startup, pause/resume, mute, same-track restart,
+WAV overlap and queue bursts. Queue tests also exercise concurrent producer/consumer
+use and unsigned index rollover. The MSVC Debug runner uses the CRT debug heap
+hook to check allocations, reallocations and frees during prepared rendering;
+that hook exists only in the test source. Release and ASan run the functional tests.
+The native-device case checks initialization, control changes and shutdown,
+without asserting audible output or adding diagnostic fields to playback.
+
+`tsw_verify` owns renderer, window, asset and desktop scenario checks. Its fixtures,
+assertions, reports and generated screenshots live under `tests/` and `build/`.
+Desktop scenarios use the same `DesktopSession` actions and command scheduling as
+the game, including save-picker and ending pauses and Fairy checkpoint writes.
+Both verification executables are built only with `BUILD_TESTING=ON`.
+
+CTest discovers each named Catch2 case and invokes the desktop checks separately.
+When the extracted PNGs are available, it also compares both asset layouts and
+runs the renderer with PNGs. The runners support named tests, tags, value diagnostics
+and standard report formats. Useful commands from `cpp/`:
 
 ```powershell
-../build/cpp/vs/Release/tsw_game.exe --smoke ending --save-dir ../build/cpp/vs/smoke-saves
-../build/cpp/vs/Release/tsw_game.exe --smoke slots --save-dir ../build/cpp/vs/smoke-saves
-../build/cpp/vs/Release/tsw_game.exe --audio-test --screenshot ../build/cpp/vs/midi-test.wav
-../build/cpp/vs/Release/tsw_game.exe --audio-device-test
-../build/cpp/vs/Release/tsw_game.exe --window-test ../build/cpp/vs/window-checks
+../build/cpp/vs/Release/tsw_tests.exe "[combat]"
+../build/cpp/vs/Release/tsw_audio_tests.exe "[playback]"
+../build/cpp/vs/Release/tsw_audio_tests.exe "[device]"
+& $cmake --build --preset debug -j 4
+../build/cpp/vs/Debug/tsw_audio_tests.exe "[allocation]"
+../build/cpp/vs/Release/tsw_verify.exe --smoke all --output ../build/cpp/vs/desktop-checks
+../build/cpp/vs/Release/tsw_verify.exe --window ../build/cpp/vs/window-checks
 python tools/package.py --original-dir "D:/Program Files (x86)/Tower of the Sorcerer"
 ```
 
+The game accepts ordinary asset/save/load options and `--screenshot FILE` to capture
+its initial frame. Verification flags and injected fixtures belong to `tsw_verify`.
+[The research workflow](../docs/reverse-engineering.md) describes the separate
+`tsw_probe` adapter and original executable comparisons.
+
 All C++ sources, headers and tests follow `cpp/.clang-format`, including the
-generated original constants. After regenerating constants, format that header
-again. From `cpp/`, format the complete C++ tree with:
+generated original constants. After a successful build, run clang-format across the complete C++ tree.
+`SeparateDefinitionBlocks: Always` inserts blank lines between definitions,
+including inline member functions; ordinary declarations retain compact spacing.
+Format generated constants after regenerating them as well. From `cpp/`, format the complete C++ tree with:
 
 ```powershell
 $formatter = 'C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/Llvm/x64/bin/clang-format.exe'
 rg --files src include tests -g '*.cpp' -g '*.hpp' | ForEach-Object { & $formatter -i --style=file $_ }
 ```
 
-Packaging creates `build/packages/tower-of-the-sorcerer-0.8-windows-x64/TSW.exe` and a ZIP
+Packaging creates `build/packages/tower-of-the-sorcerer-0.9-windows-x64/TSW.exe` and a ZIP
 with the original media layout, licenses and validation reports. The packaged
 EXE can also be copied alone into an existing original installation. The smaller
-`build/packages/tower-of-the-sorcerer-0.8-drop-in.zip` contains the EXE, usage notes and
+`build/packages/tower-of-the-sorcerer-0.9-drop-in.zip` contains the EXE, usage notes and
 licenses for that deployment.
 
 Packaging requires the original comparisons from the research workflow in

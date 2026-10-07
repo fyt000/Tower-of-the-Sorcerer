@@ -21,6 +21,7 @@ std::string lower(std::string text) {
                    [](unsigned char c) { return char(std::tolower(c)); });
     return text;
 }
+
 std::filesystem::path resolve(const std::filesystem::path& root, const std::filesystem::path& relative) {
     auto path = root;
     for (const auto& part : relative) {
@@ -42,6 +43,7 @@ std::filesystem::path resolve(const std::filesystem::path& root, const std::file
     }
     return path;
 }
+
 std::vector<unsigned char> read(const std::filesystem::path& path) {
     std::ifstream file(path, std::ios::binary);
     if (!file)
@@ -56,16 +58,19 @@ std::vector<unsigned char> read(const std::filesystem::path& path) {
     return bytes;
 }
 } // namespace
+
 bool Assets::exists(const std::filesystem::path& root) {
     return std::filesystem::is_regular_file(resolve(root, "Data3/Chtable.oz")) ||
            std::filesystem::is_regular_file(resolve(root, "original-atlas.png"));
 }
+
 Assets::Assets(const std::filesystem::path& root, const std::filesystem::path& executable)
     : root_(std::filesystem::absolute(root)), executable_(executable),
       original_(std::filesystem::is_regular_file(resolve(root, "Data3/Chtable.oz"))) {
     if (!exists(root_))
         throw std::runtime_error("Game assets not found in " + root_.string());
 }
+
 std::filesystem::path Assets::select(const std::filesystem::path& executable_directory,
                                      const std::filesystem::path& requested,
                                      const std::filesystem::path& development_original,
@@ -81,6 +86,7 @@ std::filesystem::path Assets::select(const std::filesystem::path& executable_dir
             return path;
     throw std::runtime_error("Place the executable beside Data3, Data2, Midi and Wav, or pass --assets DIR");
 }
+
 Image Assets::image(std::string_view name) const {
     std::filesystem::path relative;
     const char* format = original_ ? ".bmp" : ".png";
@@ -118,14 +124,17 @@ Image Assets::image(std::string_view name) const {
         throw std::runtime_error("Unable to decode game image: " + std::string(name));
     return image;
 }
+
 std::vector<unsigned char> Assets::midi(std::string_view name) const {
     return read(
         resolve(root_, std::filesystem::path(original_ ? "Midi" : "midi") / (std::string(name) + ".mid")));
 }
+
 std::vector<unsigned char> Assets::wave(std::string_view name) const {
     return read(
         resolve(root_, std::filesystem::path(original_ ? "Wav" : "wav") / (std::string(name) + ".wav")));
 }
+
 std::vector<unsigned char> Assets::soundfont() const {
     const auto external = executable_.parent_path() / "music.sf2";
     if (std::filesystem::is_regular_file(external))

@@ -7,6 +7,7 @@ std::filesystem::path save_slot_path(const std::filesystem::path& directory, int
         throw std::out_of_range("Save slot must be between 1 and 8");
     return directory / ("save" + std::to_string(number) + ".dat");
 }
+
 SaveSlots inspect_save_slots(const std::filesystem::path& directory) {
     SaveSlots slots;
     for (int number = 1; number <= ManualSaveSlotCount; ++number) {
