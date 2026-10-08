@@ -940,9 +940,9 @@ UiAction Presentation::draw_home(const DesktopUi& ui, Vector2 mouse) {
     constexpr std::array<Action, 5> actions{Action::ResumeGame, Action::NewGame, Action::OpenLoadSlots,
                                             Action::OpenReplays, Action::OpenSettings};
     const int first = ui.game_started ? 0 : 1;
-    const int top = ui.game_started ? 170 : 196;
+    constexpr int top = 48;
     for (int i = first; i < int(labels.size()); ++i) {
-        const Rectangle row{40, float(top + (i - first) * 52), 244, 44};
+        const Rectangle row{118, float(top + (i - first) * 52), 244, 44};
         const bool selected = ui.home_selection == i;
         const bool hover = CheckCollisionPointRec(mouse, row);
         const int x = int(row.x + 26), y = int(row.y + 8);
