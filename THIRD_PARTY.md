@@ -1,7 +1,7 @@
 # Attribution
 
 The C++ game uses raylib, miniaudio, stb_image, TinySoundFont/TinyMidiLoader,
-nlohmann/json for replay files and GeneralUser GS. [Its dependency notes](cpp/THIRD_PARTY.md) record versions,
+Glaze for replay files and GeneralUser GS. [Its dependency notes](cpp/THIRD_PARTY.md) record versions,
 hashes and packaged licenses. The original-media loader and embedded ending
 pictures use the same original-game attribution below.
 

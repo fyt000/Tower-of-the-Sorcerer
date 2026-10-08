@@ -45,8 +45,11 @@ def main():
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(file, target)
     licenses = ROOT / 'build/dependencies/vcpkg_installed/x64-windows-static/share'
-    dependencies = {'raylib', 'glfw3', 'stb', 'miniaudio', 'catch2', 'nlohmann-json', 'cgltf',
+    dependencies = {'raylib', 'glfw3', 'stb', 'miniaudio', 'catch2', 'glaze', 'cgltf',
                     'dirent', 'drlibs', 'mmx', 'nanosvg', 'qoi'}
+    for notice in (output / 'licenses').glob('*.txt'):
+        if notice.stem not in dependencies:
+            notice.unlink()
     for file in licenses.glob('*/copyright'):
         if file.parent.name not in dependencies:
             continue

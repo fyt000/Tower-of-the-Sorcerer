@@ -6,6 +6,12 @@ assets or audio. Rust remains independent; cross-engine comparison is later work
 The original executable and decompiled evidence remain the reference when a C++
 result is in doubt.
 
+Glaze automatically serializes replay records and CLI observations and parses
+commands from small C++ aggregates. These types stay in the replay implementation; the
+core and original binary saves have no JSON dependency. Commands are checked
+for required fields, unknown fields and valid player choices. Existing JSONL
+recordings remain readable regardless of object field order.
+
 ## Opt in and save
 
 Recording is off by default. Start a fresh game with `--record`, or enable

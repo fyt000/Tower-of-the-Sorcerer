@@ -1,18 +1,100 @@
 #include "tsw/replay.hpp"
 #include <algorithm>
 #include <charconv>
-#include <limits>
-#include <nlohmann/json.hpp>
+#include <glaze/json.hpp>
+#include <map>
 #include <sstream>
 #include <stdexcept>
 
 namespace tsw {
+namespace replay_json {
+// Glaze reflects these wire records; gameplay state keeps its native layout.
+struct InputType {
+    std::string type;
+};
+
+struct MoveInput {
+    std::string type;
+    std::string direction;
+};
+
+struct ItemInput {
+    std::string type;
+    std::string item;
+};
+
+struct FlightInput {
+    std::string type;
+    std::string item;
+    int floor;
+};
+
+struct ChoiceInput {
+    std::string type;
+    std::string choice;
+};
+
+struct SaveInput {
+    std::string type;
+    std::string kind;
+};
+
+struct HeroValues {
+    int floor, x, y;
+    std::int32_t hp, attack, defense, gold;
+    int highest_floor, yellow_keys, blue_keys, red_keys;
+};
+
+struct DialogueValues {
+    std::string_view text;
+    bool shop;
+    std::array<std::string_view, 3> choices;
+};
+
+struct GameplayValues {
+    HeroValues hero;
+    std::map<std::string_view, int> inventory;
+    int map_floor;
+    std::array<std::uint8_t, CellCount> map;
+    int flight;
+    std::optional<DialogueValues> dialogue;
+    bool dead;
+    std::string_view status;
+};
+} // namespace replay_json
+
 namespace {
-using Json = nlohmann::json;
+using namespace replay_json;
 constexpr std::array<std::string_view, 15> ItemIds{
     "hero_orb",      "wisdom_orb",   "flying_orb", "cross",         "elixir",
     "mattock",       "bomb",         "warp_staff", "ascent_wing",   "descent_wing",
     "dragon_slayer", "snow_crystal", "magic_key",  "super_mattock", "lucky_gold"};
+
+struct ReadOptions : glz::opts {
+    bool validate_skipped = true;
+    bool validate_trailing_whitespace = true;
+};
+
+template <typename T, bool AllowUnknown = false> T read_input(std::string_view source) {
+    constexpr auto options = [] {
+        ReadOptions result;
+        result.null_terminated = false;
+        result.error_on_missing_keys = true;
+        result.error_on_unknown_keys = !AllowUnknown;
+        return result;
+    }();
+    T input{};
+    if (const auto error = glz::read<options>(input, source))
+        throw std::runtime_error(glz::format_error(error, source));
+    return input;
+}
+
+template <typename T> std::string write_json(const T& value) {
+    std::string result;
+    if (const auto error = glz::write<glz::opts{.skip_null_members = false}>(value, result))
+        throw std::runtime_error(glz::format_error(error));
+    return result;
+}
 
 std::string_view direction_id(Direction direction) {
     switch (direction) {
@@ -28,20 +110,6 @@ std::string_view direction_id(Direction direction) {
     throw std::runtime_error("Unknown direction");
 }
 
-void fields(const Json& input, std::initializer_list<std::string_view> allowed) {
-    for (auto field = input.begin(); field != input.end(); ++field)
-        if (std::find(allowed.begin(), allowed.end(), field.key()) == allowed.end())
-            throw std::runtime_error("Unknown input field: " + field.key());
-}
-
-int integer(const Json& input, const char* name) {
-    const auto& value = input.at(name);
-    if (!value.is_number_integer() || value < std::numeric_limits<int>::min() ||
-        value > std::numeric_limits<int>::max())
-        throw std::runtime_error(std::string(name) + " must be an integer in range");
-    return value.get<int>();
-}
-
 void save_in_memory(Game& game, SaveKind kind, bool reload) {
     std::stringstream record(std::ios::in | std::ios::out | std::ios::binary);
     game.save(record, kind);
@@ -51,15 +119,12 @@ void save_in_memory(Game& game, SaveKind kind, bool reload) {
 } // namespace
 
 PlayerInput parse_input(std::string_view source) {
-    const auto input = Json::parse(source);
-    if (!input.is_object())
-        throw std::runtime_error("Player input must be a JSON object");
-    const auto type = input.at("type").get<std::string>();
+    // Read the discriminator first, then let the selected record enforce its fields.
+    const auto type = read_input<InputType, true>(source).type;
     PlayerInput action;
     if (type == "move") {
-        fields(input, {"type", "direction"});
         action.kind = InputKind::Move;
-        const auto direction = input.at("direction").get<std::string>();
+        const auto direction = read_input<MoveInput>(source).direction;
         if (direction == "up")
             action.direction = Direction::Up;
         else if (direction == "down")
@@ -71,25 +136,21 @@ PlayerInput parse_input(std::string_view source) {
         else
             throw std::runtime_error("Direction must be up, down, left or right");
     } else if (type == "use_item") {
-        fields(input, {"type", "item", "floor"});
         action.kind = InputKind::UseItem;
-        auto item = input.at("item").get<std::string>();
+        auto item = read_input<ItemInput, true>(source).item;
         if (item == "orb_of_flying")
             item = "flying_orb";
         const auto found = std::find(ItemIds.begin(), ItemIds.end(), item);
         if (found == ItemIds.end())
             throw std::runtime_error("Unknown item: " + item);
         action.item = static_cast<Item>(found - ItemIds.begin());
-        if (input.contains("floor"))
-            action.value = integer(input, "floor");
-        if (action.item == Item::FlightOrb && !input.contains("floor"))
-            throw std::runtime_error("Flying Orb requires a destination floor");
-        if (action.item != Item::FlightOrb && input.contains("floor"))
-            throw std::runtime_error("Only Flying Orb takes a destination floor");
+        if (action.item == Item::FlightOrb)
+            action.value = read_input<FlightInput>(source).floor;
+        else
+            read_input<ItemInput>(source);
     } else if (type == "choose") {
-        fields(input, {"type", "choice"});
         action.kind = InputKind::Choose;
-        const auto choice = input.at("choice").get<std::string>();
+        const auto choice = read_input<ChoiceInput>(source).choice;
         if (choice == "leave")
             action.value = -1;
         else if (choice == "hp" || choice == "accept")
@@ -106,15 +167,14 @@ PlayerInput parse_input(std::string_view source) {
                 throw std::runtime_error("Choice must be leave, hp, attack, defense, accept or 0..2");
         }
     } else if (type == "save" || type == "reload") {
-        fields(input, {"type", "kind"});
         action.kind = type == "save" ? InputKind::Save : InputKind::Reload;
-        const auto kind = input.at("kind").get<std::string>();
+        const auto kind = read_input<SaveInput>(source).kind;
         if (kind == "checkpoint")
             action.save_kind = SaveKind::Checkpoint;
         else if (kind != "slot")
             throw std::runtime_error("Save kind must be slot or checkpoint");
     } else {
-        fields(input, {"type"});
+        read_input<InputType>(source);
         if (type == "new_game")
             action.kind = InputKind::NewGame;
         else if (type == "flight_open")
@@ -134,44 +194,33 @@ PlayerInput parse_input(std::string_view source) {
 }
 
 std::string input_json(const PlayerInput& action) {
-    Json input;
     switch (action.kind) {
     case InputKind::NewGame:
-        input = {{"type", "new_game"}};
-        break;
+        return write_json(InputType{"new_game"});
     case InputKind::Move:
-        input = {{"type", "move"}, {"direction", direction_id(action.direction)}};
-        break;
+        return write_json(MoveInput{"move", std::string(direction_id(action.direction))});
     case InputKind::UseItem:
-        input = {{"type", "use_item"}, {"item", ItemIds.at(static_cast<int>(action.item))}};
         if (action.item == Item::FlightOrb)
-            input["floor"] = action.value;
-        break;
+            return write_json(FlightInput{"use_item", "flying_orb", action.value});
+        return write_json(ItemInput{"use_item", std::string(ItemIds.at(static_cast<int>(action.item)))});
     case InputKind::Choose:
-        input = {{"type", "choose"}, {"choice", action.value < 0 ? "leave" : std::to_string(action.value)}};
-        break;
+        return write_json(ChoiceInput{"choose", action.value < 0 ? "leave" : std::to_string(action.value)});
     case InputKind::OpenFlight:
-        input = {{"type", "flight_open"}};
-        break;
+        return write_json(InputType{"flight_open"});
     case InputKind::FlightUp:
-        input = {{"type", "flight_up"}};
-        break;
+        return write_json(InputType{"flight_up"});
     case InputKind::FlightDown:
-        input = {{"type", "flight_down"}};
-        break;
+        return write_json(InputType{"flight_down"});
     case InputKind::Travel:
-        input = {{"type", "flight_confirm"}};
-        break;
+        return write_json(InputType{"flight_confirm"});
     case InputKind::Cancel:
-        input = {{"type", "cancel"}};
-        break;
+        return write_json(InputType{"cancel"});
     case InputKind::Save:
     case InputKind::Reload:
-        input = {{"type", action.kind == InputKind::Save ? "save" : "reload"},
-                 {"kind", action.save_kind == SaveKind::Slot ? "slot" : "checkpoint"}};
-        break;
+        return write_json(SaveInput{action.kind == InputKind::Save ? "save" : "reload",
+                                    action.save_kind == SaveKind::Slot ? "slot" : "checkpoint"});
     }
-    return input.dump();
+    throw std::runtime_error("Unknown player input");
 }
 
 bool apply_input(Game& game, int& flight, const PlayerInput& input) {
@@ -256,34 +305,22 @@ std::string gameplay_json(const Game& game, int flight, int map_floor) {
     const auto& h = game.hero;
     if (map_floor < 0)
         map_floor = h.floor;
-    Json inventory = Json::object();
+    GameplayValues view{{h.floor, h.x, h.y, h.hp, h.attack, h.defense, h.gold, h.highest_floor, h.yellow_keys,
+                         h.blue_keys, h.red_keys},
+                        {},
+                        map_floor,
+                        game.floors.at(map_floor).tiles,
+                        flight,
+                        std::nullopt,
+                        h.hp <= 0 || game.visual.dead,
+                        game.status};
     for (std::size_t i = 0; i < ItemIds.size(); ++i)
-        inventory[ItemIds[i]] = h.items[i];
-    Json dialogue = nullptr;
-    if (game.dialogue)
-        dialogue = {{"text", game.dialogue->text},
-                    {"shop", game.dialogue->shop},
-                    {"choices", game.dialogue->choices}};
-    return Json{{"hero",
-                 {{"floor", h.floor},
-                  {"x", h.x},
-                  {"y", h.y},
-                  {"hp", h.hp},
-                  {"attack", h.attack},
-                  {"defense", h.defense},
-                  {"gold", h.gold},
-                  {"highest_floor", h.highest_floor},
-                  {"yellow_keys", h.yellow_keys},
-                  {"blue_keys", h.blue_keys},
-                  {"red_keys", h.red_keys}}},
-                {"inventory", inventory},
-                {"map_floor", map_floor},
-                {"map", game.floors.at(map_floor).tiles},
-                {"flight", flight},
-                {"dialogue", dialogue},
-                {"dead", h.hp <= 0 || game.visual.dead},
-                {"status", game.status}}
-        .dump();
+        view.inventory.emplace(ItemIds[i], h.items[i]);
+    if (game.dialogue) {
+        const auto& d = *game.dialogue;
+        view.dialogue = DialogueValues{d.text, d.shop, {d.choices[0], d.choices[1], d.choices[2]}};
+    }
+    return write_json(view);
 }
 
 std::vector<PlayerInput> read_replay(std::istream& stream) {

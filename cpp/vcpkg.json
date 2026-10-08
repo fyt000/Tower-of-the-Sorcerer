@@ -6,7 +6,7 @@
     "raylib",
     "stb",
     "catch2",
-    "nlohmann-json",
+    "glaze",
     "miniaudio"
   ]
 }

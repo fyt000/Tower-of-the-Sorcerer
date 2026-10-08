@@ -16,7 +16,7 @@ specification for the C++ game.
 
 | Directory | Contents |
 |---|---|
-| `cpp/` | C++20 game, `tsw` namespace, raylib graphics, miniaudio device, TSF/TML music, Catch2 tests |
+| `cpp/` | C++23 game, `tsw` namespace, Glaze replay serialization, raylib graphics, miniaudio device, TSF/TML music, Catch2 tests |
 | `rust/` | Rust workspace, browser/native UI, Node tools and integration tests |
 | `reference/original/` | Ghidra exports, source index and recovered UI evidence |
 | `data/` | Shared extraction evidence and Rust campaign/localization data |

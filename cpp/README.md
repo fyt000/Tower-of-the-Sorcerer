@@ -1,6 +1,6 @@
 # Original game baseline
 
-A separate C++20 translation of the original English **Tower of the Sorcerer
+A separate C++23 translation of the original English **Tower of the Sorcerer
 1.2**. The purpose is faithful, readable game logic that can serve as a baseline
 for later work. The original is Delphi/VCL; its C-like decompiler output and
 machine code supply the evidence for this implementation.
@@ -39,8 +39,9 @@ pins dependency versions and download hashes. To use another original EXE path
 after configuring, pass `-DTSW_ORIGINAL_EXE=PATH` when configuring again.
 The original must match the supported 1.2 executable hash.
 
-A headless core build needs C++20 and CMake 3.25 or later. Tests use Catch2 3.13;
-CMake fetches the pinned source when no installed Catch2 package is available:
+A full or headless build needs a C++23 compiler and CMake 3.25 or later.
+Replay serialization uses Glaze 7.2.2; tests use Catch2 3.13. CMake fetches
+pinned sources when installed packages are unavailable:
 
 ```sh
 cmake -S cpp -B build/cpp/core -DTSW_GUI=OFF

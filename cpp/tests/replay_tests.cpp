@@ -3,10 +3,34 @@
 #include <catch2/matchers/catch_matchers_string.hpp>
 #include <chrono>
 #include <fstream>
-#include <nlohmann/json.hpp>
+#include <glaze/json.hpp>
+#include <map>
 #include <sstream>
 
 using namespace tsw;
+
+namespace replay_test {
+struct HeroView {
+    int hp, floor, x;
+};
+
+struct DialogueView {
+    std::string text;
+    bool shop;
+    std::array<std::string, 3> choices;
+};
+
+struct Observation {
+    HeroView hero;
+    std::map<std::string, int> inventory;
+    int map_floor;
+    std::vector<int> map;
+    int flight;
+    std::optional<DialogueView> dialogue;
+    bool dead;
+    std::string status;
+};
+} // namespace replay_test
 
 namespace {
 struct ReplayDirectory {
@@ -62,22 +86,53 @@ TEST_CASE("Replay parser accepts player commands and rejects malformed inputs", 
           R"({"type":"choose","choice":"leave"})", R"({"type":"choose","choice":"attack"})",
           R"({"type":"flight_open"})", R"({"type":"flight_up"})", R"({"type":"flight_down"})",
           R"({"type":"flight_confirm"})", R"({"type":"cancel"})", R"({"type":"save","kind":"slot"})",
-          R"({"type":"reload","kind":"checkpoint"})"}) {
+          R"({"type":"reload","kind":"checkpoint"})", R"({"direction":"left","type":"move"})",
+          R"({"floor":35,"item":"orb_of_flying","type":"use_item"})", R"({"kind":"slot","type":"reload"})",
+          R"({"choice":"accept","type":"choose"})", R"({"type":"move","direction":"\u0075p"})"}) {
         INFO(source);
         const auto action = parse_input(source);
         REQUIRE(parse_input(input_json(action)) == action);
     }
-    for (const auto* source :
-         {"not json", "[]", "null", R"({"type":"walk"})", R"({"type":"move","direction":"north"})",
-          R"({"type":"new_game","extra":1})", R"({"type":"move"})", R"({"type":"use_item","item":"missing"})",
-          R"({"type":"use_item","item":"flying_orb"})", R"({"type":"use_item","item":"bomb","floor":1})",
-          R"({"type":"use_item","item":"flying_orb","floor":1.5})",
-          R"({"type":"use_item","item":"flying_orb","floor":4294967296})",
-          R"({"type":"choose","choice":"3"})", R"({"type":"choose","choice":""})",
-          R"({"type":"save","kind":"unknown"})"}) {
+    for (const auto* source : {"not json",
+                               "[]",
+                               "null",
+                               "{}",
+                               R"({"type":null})",
+                               R"({"type":1})",
+                               R"({"type":"walk"})",
+                               R"({"type":"move","direction":"north"})",
+                               R"({"type":"new_game","extra":1})",
+                               R"({"type":"move"})",
+                               R"({"type":"use_item","item":"missing"})",
+                               R"({"type":"move","direction":null})",
+                               R"({"type":"move","direction":1})",
+                               R"({"type":"move","direction":"up","extra":1})",
+                               R"({"type":"use_item"})",
+                               R"({"type":"use_item","item":"flying_orb"})",
+                               R"({"type":"use_item","item":"bomb","floor":1})",
+                               R"({"type":"use_item","item":"bomb","floor":null})",
+                               R"({"type":"use_item","item":"flying_orb","floor":null})",
+                               R"({"type":"use_item","item":"flying_orb","floor":"35"})",
+                               R"({"type":"use_item","item":"flying_orb","floor":true})",
+                               R"({"type":"use_item","item":"flying_orb","floor":1.5})",
+                               R"({"type":"use_item","item":"flying_orb","floor":1.0})",
+                               R"({"type":"use_item","item":"flying_orb","floor":4294967296})",
+                               R"({"type":"use_item","item":"flying_orb","floor":-2147483649})",
+                               R"({"type":"use_item","item":"flying_orb","floor":35,"extra":1})",
+                               R"({"type":"choose","choice":"3"})",
+                               R"({"type":"choose","choice":""})",
+                               R"({"type":"choose","choice":0})",
+                               R"({"type":"choose"})",
+                               R"({"type":"save","kind":"unknown"})",
+                               R"({"type":"save"})",
+                               R"({"type":"new_game"} trailing)",
+                               R"({"type":"new_game"}{"type":"cancel"})"}) {
         INFO(source);
         REQUIRE_THROWS(parse_input(source));
     }
+    const std::string padded = R"({"direction":"right","type":"move"}not part of the input)";
+    REQUIRE(parse_input(std::string_view(padded).substr(0, padded.find('}') + 1)).direction ==
+            Direction::Right);
     std::istringstream malformed("\n{\"type\":\"new_game\"}\nnot json\n");
     REQUIRE_THROWS_WITH(read_replay(malformed), Catch::Matchers::StartsWith("Line 3:"));
 }
@@ -194,15 +249,31 @@ TEST_CASE("Replay settling terminates after fatal combat", "[replay]") {
 }
 
 TEST_CASE("CLI observations use named values and can inspect a remote floor", "[replay]") {
+    constexpr auto options =
+        glz::opts{.error_on_unknown_keys = false, .skip_null_members = false, .error_on_missing_keys = true};
     Game game;
-    const auto view = nlohmann::json::parse(gameplay_json(game, -1, 35));
-    REQUIRE(view["hero"]["hp"] == 1000);
-    REQUIRE(view["hero"]["floor"] == 1);
-    REQUIRE(view["hero"]["x"] == 5);
-    REQUIRE(view["inventory"]["bomb"] == 0);
-    REQUIRE(view["map_floor"] == 35);
-    REQUIRE(view["map"].size() == CellCount);
-    REQUIRE(view["map"][91] == game.tile(35, 91));
+    replay_test::Observation view{};
+    REQUIRE_FALSE(glz::read<options>(view, gameplay_json(game, -1, 35)));
+    REQUIRE(view.hero.hp == 1000);
+    REQUIRE(view.hero.floor == 1);
+    REQUIRE(view.hero.x == 5);
+    REQUIRE(view.inventory.at("bomb") == 0);
+    REQUIRE(view.inventory.size() == game.hero.items.size());
+    REQUIRE(view.map_floor == 35);
+    REQUIRE(view.map.size() == CellCount);
+    REQUIRE(view.map[91] == game.tile(35, 91));
+    REQUIRE(view.flight == -1);
+    REQUIRE_FALSE(view.dialogue);
+    REQUIRE_FALSE(view.dead);
+    game.dialogue = Dialogue{"First line\n\"Quoted\" text", 0, true, {"HP", "Attack", "Leave"}};
+    game.status = "A\tmessage";
+    REQUIRE_FALSE(glz::read<options>(view, gameplay_json(game, 35)));
+    REQUIRE(view.dialogue);
+    REQUIRE(view.dialogue->text == game.dialogue->text);
+    REQUIRE(view.dialogue->shop);
+    REQUIRE(view.dialogue->choices == game.dialogue->choices);
+    REQUIRE(view.flight == 35);
+    REQUIRE(view.status == game.status);
     REQUIRE_THROWS(gameplay_json(game, -1, FloorCount));
 }
 
