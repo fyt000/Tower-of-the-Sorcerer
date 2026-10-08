@@ -131,9 +131,10 @@ an emulated copy of the original EXE. They bypass VCL/device calls and report
 what was skipped. These controlled cases expose branches without requiring a
 full tower playthrough; altered-map cases also exercise unusual bounds and
 numeric predicates. Desktop smoke fixtures check the modern window, input,
-scene timing and saves. A future gameplay CLI can call the same `Game` API;
-the research probe's raw state edits and internal handler calls remain research
-controls, and a public CLI design is still open.
+scene timing and saves. The [replay verification plan](replay-verification.md)
+proposes a gameplay CLI and compact recordings for checking the later Rust work
+against C++. The research probe's raw state edits and internal handler calls remain
+research controls.
 
 `tsw_audio_tests` drives the production mixer for offline functional and Debug
 heap checks. `tsw_verify` owns all injected desktop fixtures, renderer/window
