@@ -416,9 +416,32 @@ TEST_CASE("Prepared playback performs no heap operations", "[allocation]") {
         HeapCounter counter(operations);
         mixer.render(block.data(), 512);
     }
+    mixer.suspend(true);
+    {
+        HeapCounter counter(operations);
+        mixer.render(block.data(), 512);
+    }
+    mixer.suspend(false);
+    {
+        HeapCounter counter(operations);
+        mixer.render(block.data(), 512);
+    }
     REQUIRE(operations == 0);
 }
 #endif
+
+TEST_CASE("Replay suspension freezes both music and effect cursors", "[playback]") {
+    AudioMixer mixer(media()), reference(media());
+    Game game, expected;
+    game.sounds = expected.sounds = {SoundCue::Get};
+    mixer.restart(game);
+    reference.restart(expected);
+    require_same(render(mixer, 1024), render(reference, 1024));
+    mixer.suspend(true);
+    REQUIRE(energy(render(mixer, AudioSampleRate * 4)) == 0);
+    mixer.suspend(false);
+    require_same(render(mixer, AudioSampleRate * 4), render(reference, AudioSampleRate * 4));
+}
 
 int main(int argc, char** argv) try {
     Catch::Session session;

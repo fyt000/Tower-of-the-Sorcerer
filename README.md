@@ -30,9 +30,11 @@ Start with the [C++ build and controls](cpp/README.md),
 [fidelity coverage](cpp/FIDELITY.md).
 [Original data](docs/original-data.md), [game rules](docs/mechanics.md), and
 [attribution](THIRD_PARTY.md) cover the supporting details.
-The [replay recorder and CLI](docs/replay-verification.md) support recording
-C++ player actions and checking explicit gameplay values with a
-separate test script.
+The C++ startup menu offers New game, Load game, Play replay and persistent
+Settings using the original opening artwork. The
+[replay recorder, visual playback and CLI](docs/replay-verification.md) support
+recording C++ player actions, watching with pause/step/rewind/takeover controls
+and checking explicit gameplay values with a separate test script.
 
 The original installation is read only during development and tests. Decompiled
 exports are inspection evidence, not the author's original source. Local media

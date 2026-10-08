@@ -51,6 +51,10 @@ void Audio::mute(bool muted) {
     impl_->mixer.mute(muted);
 }
 
+void Audio::suspend(bool suspended) {
+    impl_->mixer.suspend(suspended);
+}
+
 void Audio::restart(Game& game) {
     impl_->mixer.restart(game);
 }

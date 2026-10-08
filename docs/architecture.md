@@ -3,7 +3,7 @@
 The repository separates a faithful C++ baseline from the existing Rust rewrite.
 They share original content and research evidence, but do not share gameplay
 implementations or save formats. The C++ baseline is the reference for checking
-future changes; replay, TUI and other experiments can be developed separately.
+future changes; its command recordings can support later Rust comparison and TUI work.
 
 ## C++ core
 
@@ -58,6 +58,20 @@ original 800×500 content proportions, panel artwork and scene compositor.
 Walking input and animation use the same selected clock. Dialogue, items,
 shops, enemy forecasts and saves use overlays.
 
+The startup menu uses the original opening/title images. Settings are small C++
+aggregates serialized automatically by Glaze to `Savedat/settings.json`. They
+select recording, mute and separate gameplay/replay speeds. Home and modal menus
+pause gameplay; returning home retains a live game or replay for Continue.
+
+`ReplayPlayer` owns the input list and consumed position. Animated playback leaves
+commands queued for `DesktopSession` to execute with the selected clock and existing
+renderer. The session delays automatic speech/ending acknowledgments and preserves
+recorded shop decisions. Pause freezes commands, sprites and audio. Previous/restart
+rebuild a prefix with real actions in a temporary `Game`; there is no snapshot cache
+or common state schema. Takeover retains the current queue and optionally hands the
+consumed prefix to the recorder. Save/reload inputs and automatic Fairy boundaries
+run through the original serializer in memory while watching.
+
 `assets.cpp` reads either the original `Data3/Data2/Midi/Wav` layout or the
 older extracted PNG layout. `.oz` sprite sheets are decoded as BMPs using
 `stb_image`; raylib uploads the resulting images and applies the original masks.
@@ -68,7 +82,7 @@ without direct Windows API calls. Assets are read during loading, not per frame.
 `audio_mixer.cpp` loads the original MIDI messages and decodes WAV effects before
 `audio.cpp` starts a miniaudio device. Its direct callback owns the TinySoundFont synth,
 MIDI cursor and all effect voices. The game thread publishes a packed
-track/play/mute/restart request through a lock-free atomic and writes effects to
+track/play/mute/suspend/restart request through a lock-free atomic and writes effects to
 a fixed queue. The callback reads the request once per block; it takes no mutex,
 performs no I/O, and allocates or frees no memory. Raylib's audio mixer is bypassed.
 
@@ -81,6 +95,10 @@ diagnostic snapshots. Catch2 tests render its output directly without opening a
 device. MSVC Debug tests install a CRT heap hook around prepared rendering; the
 hook and its counters exist only in `tests/audio_tests.cpp`. The native device
 case checks initialization, control changes and shutdown.
+
+Replay suspension silences a block before consuming cues or advancing music and
+effect cursors. It uses one bit in the existing atomic request and the same
+preallocated playback storage, keeping the callback free of locking and allocation.
 
 `presentation.cpp` measures the GLFW window and framebuffer separately each frame
 and sets a logical projection over the full physical viewport. The same centered,

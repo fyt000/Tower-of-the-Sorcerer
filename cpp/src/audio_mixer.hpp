@@ -16,6 +16,7 @@ class AudioMixer {
     void update(Game& game);
     void restart(Game& game);
     void mute(bool muted);
+    void suspend(bool suspended); // Freeze music and effects for visual replay pause.
     // Stereo floats. Called by one consumer; no allocation, I/O or mutex.
     void render(float* output, int frames);
     static int track_for_scene(const Game& game);

@@ -50,7 +50,8 @@ int main(int argc, char** argv) try {
                          "Choose one: --presentation DIR, --window DIR, --asset-check DIR, --smoke NAME.\n"
                          "Asset checks: --compare-assets EXTRACTED_DIR.\n"
                          "Smoke: all, initial, capture, stairs, fight, floor10, fairy, ending, slots,\n"
-                         "       items, inventory, item, shop, flight, help, backside, enemies, recording.\n"
+                         "       items, inventory, item, shop, flight, help, backside, enemies, recording, "
+                         "menus, replay.\n"
                          "--output DIR: smoke images and saves. --visible: show the test window.\n";
             return 0;
         } else
@@ -59,9 +60,10 @@ int main(int argc, char** argv) try {
     if (int(!presentation.empty()) + int(!window.empty()) + int(!asset_check.empty()) + int(!smoke.empty()) !=
         1)
         throw std::runtime_error("Choose one verification suite; use --help for options");
-    constexpr std::array<std::string_view, 18> SmokeNames{
-        "all",   "initial",   "capture", "stairs", "fight",  "floor10", "fairy",    "ending",  "slots",
-        "items", "inventory", "item",    "shop",   "flight", "help",    "backside", "enemies", "recording"};
+    constexpr std::array<std::string_view, 20> SmokeNames{
+        "all",    "initial",  "capture", "stairs",    "fight", "floor10", "fairy",
+        "ending", "slots",    "items",   "inventory", "item",  "shop",    "flight",
+        "help",   "backside", "enemies", "recording", "menus", "replay"};
     if (!smoke.empty() && std::find(SmokeNames.begin(), SmokeNames.end(), smoke) == SmokeNames.end())
         throw std::runtime_error("Unknown smoke scenario: " + smoke);
     const std::filesystem::path directory = GetApplicationDirectory();
@@ -89,8 +91,8 @@ int main(int argc, char** argv) try {
     };
     if (smoke != "all")
         return run(smoke);
-    for (const auto* name :
-         {"initial", "capture", "stairs", "fight", "floor10", "fairy", "ending", "slots", "recording"})
+    for (const auto* name : {"initial", "capture", "stairs", "fight", "floor10", "fairy", "ending", "slots",
+                             "recording", "menus", "replay"})
         if (run(name))
             return 1;
     return 0;

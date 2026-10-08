@@ -39,6 +39,23 @@ void Recorder::new_game() {
         history_ = std::vector<PlayerInput>{{InputKind::NewGame}};
 }
 
+void Recorder::stop() {
+    history_.reset();
+}
+
+void Recorder::resume(std::span<const PlayerInput> history) {
+    history_.reset();
+    if (!enabled_)
+        return;
+    if (history.empty()) {
+        new_game();
+        return;
+    }
+    if (history.front().kind != InputKind::NewGame)
+        throw std::runtime_error("A recording must begin with a new game command");
+    history_ = std::vector<PlayerInput>(history.begin(), history.end());
+}
+
 void Recorder::append(const PlayerInput& input) {
     if (history_)
         history_->push_back(input);

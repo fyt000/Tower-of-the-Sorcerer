@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "tsw/game.hpp"
 #include "tsw/save_slots.hpp"
+#include "tsw/settings.hpp"
 #include <filesystem>
 #include <memory>
 
@@ -34,12 +35,19 @@ struct DesktopUi {
     SaveSlots save_slots;
     bool inventory{}, enemies{}, help{}, muted{}, ending_wait{};
     bool recording_enabled{}, recording_active{};
+    bool home{}, game_started = true, replay_picker{}, replay_active{}, replay_paused{}, replay_in_progress{};
+    bool quick_available{}, fairy_available{};
+    int home_selection = 1, replay_speed_index = 2, replay_selected{}, replay_first_row{};
+    std::size_t replay_step{}, replay_count{};
+    std::vector<std::filesystem::path> replay_files;
+    std::string replay_path, replay_name, replay_error, notice;
+    bool replay_path_focus = true;
     Menu menu = Menu::None;
     float dialogue_scroll{};
 
     bool modal() const {
-        return inventory || enemies || help || selected_item >= 0 || menu != Menu::None ||
-               save_picker != SavePicker::None;
+        return home || replay_picker || inventory || enemies || help || selected_item >= 0 ||
+               menu != Menu::None || save_picker != SavePicker::None;
     }
 
     void close_overlays() {
@@ -47,6 +55,7 @@ struct DesktopUi {
         selected_item = -1;
         menu = Menu::None;
         save_picker = SavePicker::None;
+        replay_picker = false;
     }
 };
 enum class Action {
@@ -69,7 +78,18 @@ enum class Action {
     CancelFlight,
     Mute,
     Speed,
-    Recording
+    Recording,
+    MainMenu,
+    ResumeGame,
+    OpenSettings,
+    OpenReplays,
+    PlayReplay,
+    ReplayPause,
+    ReplayPrevious,
+    ReplayNext,
+    ReplayRestart,
+    ReplayTakeOver,
+    ReplaySpeed
 };
 
 struct UiAction {
@@ -77,7 +97,6 @@ struct UiAction {
     int value{};
 };
 
-inline constexpr std::array<float, 3> GameSpeeds{1, 3, 10};
 inline constexpr float WalkRepeatSeconds = .14f, WalkAnimationSeconds = .12f;
 
 struct WalkRepeat {
@@ -117,6 +136,7 @@ class Presentation {
     int dissolve_mask_location_{}, previous_raster_ = -1;
     bool hide_panels_{}, cache_requested_{}, cache_valid_{};
     float walking_remaining_{};
+    float animation_seconds_{};
     void draw_board(const Game&, int floor, bool animated);
     void draw_door(const Visual&, int x, int y);
     void draw_transformation(const Game&, int animation);
@@ -130,6 +150,9 @@ class Presentation {
     UiAction draw_item(const Game&, DesktopUi&, Vector2 mouse);
     UiAction draw_menu(const Game&, DesktopUi&, Vector2 mouse);
     UiAction draw_save_slots(const Game&, DesktopUi&, Vector2 mouse);
+    UiAction draw_home(const DesktopUi&, Vector2 mouse);
+    UiAction draw_replays(DesktopUi&, Vector2 mouse);
+    UiAction draw_replay_controls(const DesktopUi&, Vector2 mouse);
     void draw_help(DesktopUi&, Vector2 mouse);
 };
 

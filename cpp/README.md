@@ -92,7 +92,17 @@ remain sharp when the canvas grows or shrinks. Original artwork retains point
 filtering. Rendering queries window and framebuffer sizes every frame; maximize,
 restore and DPI changes share the same mapping as mouse input.
 
-## Controls and saves
+## Startup, controls and saves
+
+Startup shows the original opening background and title artwork with **New game**,
+**Load game**, **Play replay** and **Settings**. Use the mouse or Up/Down and Enter.
+Returning to the main menu pauses gameplay and adds **Continue game** or
+**Continue replay**. Load game shows the eight original slots plus Quick and Fairy
+restore buttons. `--load FILE` and `--replay FILE` enter their respective modes directly.
+
+Settings persist in `Savedat/settings.json`, or the directory selected by `--save-dir`.
+They cover walking/animation speed, replay/animation speed, recording and audio mute.
+These are replacement-game preferences; original settings are not imported.
 
 | Control | Action |
 |---|---|
@@ -104,7 +114,8 @@ restore and DPI changes share the same mapping as mouse input.
 | Slot picker: 1–8 or arrows, Enter, Esc | Select, save/replace/load, close |
 | F5 / F9 / F8 | Quick save / quick restore / Fairy checkpoint |
 | F2 / M | New game / mute music and effects |
-| Options menu | Game speed and opt-in recording for new games |
+| Esc | Main menu, or close/cancel the current overlay |
+| Options / Settings | Game speed, replay speed, audio and opt-in recording |
 
 Shop choices are clickable; Esc cancels a shop. Long dialogue and Wisdom clues
 scroll with the mouse wheel. Hero Orb forecasts have their own overlay. The
@@ -138,15 +149,48 @@ Open a specific manual or quick save file:
 Numbered saves have the format, filename and location the original EXE expects. The replacement
 executable's filename does not affect saving or loading.
 
-## Opt-in replay and headless CLI
+## Visual replay, recording and headless CLI
 
-Start with `--record` to record a fresh game, or enable **Options > Record new games**
-and press F2. While recording, manual, quick and Fairy saves each get a
+Enable **Settings > Record new games** before starting a game, or start with
+`--record` to override the stored preference for that launch. While recording,
+manual, quick and Fairy saves each get a
 `.replay.jsonl` companion. With the option enabled, loading that save resumes its
 saved history. Loading a save without a companion leaves that loaded game
 unrecorded, including later saves. Turning the option off stops recording immediately.
 Keep a save and its companion together when copying them. Original save bytes
 and raw Fairy handling remain unchanged.
+
+Choose **Play replay** to select a `.jsonl` recording from the save directory,
+paste/type its path, or drop it onto the window. Explorer's quoted paths work too.
+Playback uses the real command scheduler and original animations/cutscenes.
+Non-choice dialogue and the ending card continue after a short display delay;
+shops execute the choices recorded by the player. Watching runs save and reload
+boundaries in memory, preserving the original save behavior.
+
+| Replay control | Action |
+|---|---|
+| Space | Pause/resume commands, sprite animation and audio |
+| Left / Right | Previous command boundary / finish one command, then pause |
+| Home | Restart from the initial boundary, paused |
+| T | Take over the current game, including an animation in progress |
+| − / + | Change replay and animation speed |
+| O / Esc | Settings / main menu |
+
+The same controls appear in the top bar. Speeds are **0.25x, 0.5x, 1x, 2x, 3x,
+5x and 10x**. A step means one recorded input, including new-game and save/load
+boundaries; it is not one animation frame. Next finishes an input already in
+progress. Previous reconstructs the earlier prefix through real gameplay instead
+of storing snapshots, so long rewinds can take longer. A completed replay stays
+paused for inspection or takeover. Playback failures show the affected step.
+
+Takeover keeps the consumed prefix when recording is enabled; later saves write
+that prefix plus the new decisions. With recording off it continues unrecorded.
+Watching does not overwrite manual, Quick or Fairy saves. Rewinding restarts the
+selected music track rather than restoring its elapsed MIDI time.
+
+```powershell
+./build/cpp/vs/Release/tsw_game.exe --replay tests/replays/first-floor-door.jsonl
+```
 
 `tsw_cli` is a separate headless executable, built even with `TSW_GUI=OFF`. It needs
 no assets, soundfont or audio device. From the repository root:
@@ -179,7 +223,11 @@ without asserting audible output or adding diagnostic fields to playback.
 `tsw_verify` owns renderer, window, asset and desktop scenario checks. Its fixtures,
 assertions, reports and generated screenshots live under `tests/` and `build/`.
 Desktop scenarios use the same `DesktopSession` actions and command scheduling as
-the game, including save-picker and ending pauses and Fairy checkpoint writes.
+the game, including menus, persistent settings, replay stepping/rewind/takeover,
+death, shops, dialogue, ending pauses and Fairy checkpoint writes. Replay tests
+compare animated and headless observations, native save bytes after takeover,
+and save files before and after watching. Audio tests check that replay suspension
+freezes both music and effect cursors.
 Both verification executables are built only with `BUILD_TESTING=ON`.
 
 CTest discovers each named Catch2 case and invokes the desktop checks separately.

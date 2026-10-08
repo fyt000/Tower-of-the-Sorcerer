@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <format>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -343,6 +344,7 @@ void Presentation::reset() {
     hide_panels_ = cache_requested_ = cache_valid_ = false;
     previous_raster_ = -1;
     walking_remaining_ = 0;
+    animation_seconds_ = 0;
 }
 
 void Presentation::moved(const Hero& before, const Hero& after) {
@@ -352,6 +354,7 @@ void Presentation::moved(const Hero& before, const Hero& after) {
 
 void Presentation::advance(float seconds) {
     walking_remaining_ = std::max(0.f, walking_remaining_ - seconds);
+    animation_seconds_ += seconds;
 }
 
 void Presentation::command(const Command& command) {
@@ -438,7 +441,7 @@ void Presentation::draw_door(const Visual& visual, int x, int y) {
     case DoorMotion::RoadFromLeft:
     case DoorMotion::RoadFromTop:
     case DoorMotion::RoadFromBottom: {
-        art_->tile(Lava + int(GetTime() * 2) % 2 * Game::animation_offset(Lava), x, y);
+        art_->tile(Lava + int(animation_seconds_ * 2) % 2 * Game::animation_offset(Lava), x, y);
         const auto motion = static_cast<DoorMotion>(visual.door_mode);
         if (motion == DoorMotion::RoadFromRight)
             part(Road, TileSize - full, 0, full, TileSize, 0, 0);
@@ -472,7 +475,7 @@ void Presentation::draw_transformation(const Game& game, int animation) {
 
 void Presentation::draw_board(const Game& game, int floor, bool animated) {
     const auto& v = game.visual;
-    const int animation = animated ? int(GetTime() * 2) % 2 : 0;
+    const int animation = animated ? int(animation_seconds_ * 2) % 2 : 0;
     const bool active = floor == game.hero.floor && animated;
     const bool source_board = active && v.stair_source_floor >= 0 && !v.stair_revealing;
     for (int index = 0; index < CellCount; ++index) {
@@ -834,18 +837,16 @@ void Presentation::draw_help(DesktopUi& ui, Vector2 mouse) {
 
 UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse) {
     if (ui.menu == Menu::Game) {
-        constexpr Rectangle rect{6, MenuHeight, 214, 240};
+        constexpr Rectangle rect{6, MenuHeight, 214, 306};
         DrawRectangleRec(rect, Panel);
         DrawRectangleLinesEx(rect, 1, Border);
-        const std::array<const char*, 7> labels{"New game [F2]",
-                                                "Save slots [F6]",
-                                                "Load slots [F7]",
-                                                "Quick save [F5]",
-                                                "Quick restore [F9]",
-                                                "Fairy checkpoint [F8]",
-                                                "Close"};
-        const std::array<Action, 6> actions{Action::NewGame, Action::OpenSaveSlots, Action::OpenLoadSlots,
-                                            Action::Save,    Action::Load,          Action::FairyCheckpoint};
+        const std::array<const char*, 9> labels{
+            "New game [F2]",   "Save slots [F6]",    "Load slots [F7]",
+            "Quick save [F5]", "Quick restore [F9]", "Fairy checkpoint [F8]",
+            "Play replay",     "Main menu [Esc]",    "Close"};
+        const std::array<Action, 8> actions{
+            Action::NewGame, Action::OpenSaveSlots,   Action::OpenLoadSlots, Action::Save,
+            Action::Load,    Action::FairyCheckpoint, Action::OpenReplays,   Action::MainMenu};
         for (int i = 0; i < int(labels.size()); ++i)
             if (art_->text.button({rect.x + 6, rect.y + 6 + i * 33, rect.width - 12, 27}, labels[i], mouse,
                                   (i != 1 && i != 3) || !game.busy())) {
@@ -853,24 +854,30 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
                 return i < int(actions.size()) ? UiAction{actions[i]} : UiAction{};
             }
     } else if (ui.menu == Menu::Options) {
-        constexpr Rectangle rect{70, MenuHeight, 244, 191};
-        DrawRectangleRec(rect, Panel);
-        DrawRectangleLinesEx(rect, 1, Border);
-        if (art_->text.button({rect.x + 8, rect.y + 8, 228, 28},
+        constexpr Rectangle rect{182, 82, 436, 390};
+        art_->text.modal(rect, "Settings");
+        if (art_->text.button({rect.x + 18, rect.y + 60, 400, 34},
                               ui.muted ? "Enable music and effects [M]" : "Mute music and effects [M]",
                               mouse))
             return {Action::Mute};
-        art_->text.draw("Walking and animation speed", int(rect.x + 8), int(rect.y + 46), 17, Muted);
+        art_->text.draw("Walking and animation speed", int(rect.x + 18), int(rect.y + 112), 17, Muted);
         for (int i = 0; i < 3; ++i)
-            if (art_->text.button({rect.x + 8 + i * 78, rect.y + 67, 72, 26},
-                                  std::to_string(int(GameSpeeds[i])) + "x", mouse))
+            if (art_->text.button({rect.x + 18 + i * 135, rect.y + 138, 130, 30},
+                                  std::format("{}x{}", GameSpeeds[i], ui.speed_index == i ? " *" : ""),
+                                  mouse))
                 return {Action::Speed, i};
-        if (art_->text.button({rect.x + 8, rect.y + 101, 228, 28},
+        art_->text.draw("Replay and animation speed", int(rect.x + 18), int(rect.y + 188), 17, Muted);
+        for (int i = 0; i < int(ReplaySpeeds.size()); ++i)
+            if (art_->text.button(
+                    {rect.x + 18 + i * 57, rect.y + 214, 54, 30},
+                    std::format("{}x{}", ReplaySpeeds[i], ui.replay_speed_index == i ? " *" : ""), mouse))
+                return {Action::ReplaySpeed, i};
+        if (art_->text.button({rect.x + 18, rect.y + 264, 400, 34},
                               ui.recording_enabled ? "Record new games: on" : "Record new games: off", mouse))
             return {Action::Recording};
-        art_->text.draw(ui.recording_active ? "Recording this game" : "Starts on new game or recorded load",
-                        int(rect.x + 8), int(rect.y + 135), 13, Muted);
-        if (art_->text.button({rect.x + 8, rect.y + 160, 228, 24}, "Close", mouse))
+        art_->text.draw("New games, recorded loads and replay takeover.", int(rect.x + 18), int(rect.y + 308),
+                        15, Muted);
+        if (art_->text.button({rect.x + 18, rect.y + 346, 400, 30}, "Done [Esc]", mouse))
             ui.menu = Menu::None;
     }
     return {};
@@ -880,6 +887,12 @@ UiAction Presentation::draw_save_slots(const Game& game, DesktopUi& ui, Vector2 
     constexpr Rectangle rect{82, MenuHeight + 16, 636, 466};
     const bool saving = ui.save_picker == SavePicker::Save;
     art_->text.modal(rect, saving ? "Save game - eight slots" : "Load game - eight slots");
+    if (!saving) {
+        if (art_->text.button({rect.x + 344, rect.y + 14, 136, 28}, "Quick [F9]", mouse, ui.quick_available))
+            return {Action::Load};
+        if (art_->text.button({rect.x + 488, rect.y + 14, 130, 28}, "Fairy [F8]", mouse, ui.fairy_available))
+            return {Action::FairyCheckpoint};
+    }
     for (int i = 0; i < ManualSaveSlotCount; ++i) {
         const Rectangle card{rect.x + 18 + i % 2 * 306, rect.y + 64 + i / 2 * 84, 294, 76};
         const auto& info = ui.save_slots[i];
@@ -920,14 +933,111 @@ UiAction Presentation::draw_save_slots(const Game& game, DesktopUi& ui, Vector2 
     return {};
 }
 
+UiAction Presentation::draw_home(const DesktopUi& ui, Vector2 mouse) {
+    art_->scene("data3-open0", {0, 0, CanvasWidth, CanvasHeight});
+    art_->scene("data3-title05", {28, 48, 390, 400});
+    constexpr Rectangle rect{474, 80, 292, 366};
+    DrawRectangleRec(rect, Color{35, 34, 46, 235});
+    DrawRectangleLinesEx(rect, 2, Border);
+    art_->text.draw("Welcome to the tower", int(rect.x + 18), int(rect.y + 18), 21, Gold);
+    const std::array<std::string, 5> labels{ui.replay_active ? "Continue replay" : "Continue game",
+                                            "New game", "Load game", "Play replay", "Settings"};
+    constexpr std::array<Action, 5> actions{Action::ResumeGame, Action::NewGame, Action::OpenLoadSlots,
+                                            Action::OpenReplays, Action::OpenSettings};
+    for (int i = 0; i < int(labels.size()); ++i) {
+        const Rectangle button{rect.x + 18, rect.y + 60 + i * 55, rect.width - 36, 41};
+        if (art_->text.button(button, labels[i], mouse, i != 0 || ui.game_started))
+            return {actions[i]};
+        if (ui.home_selection == i)
+            DrawRectangleLinesEx(button, 2, Gold);
+    }
+    art_->text.fit("Arrows / Enter: select", {474, 460, 292, 28}, 17, Muted);
+    return {};
+}
+
+UiAction Presentation::draw_replays(DesktopUi& ui, Vector2 mouse) {
+    constexpr Rectangle rect{60, 54, 680, 440};
+    constexpr int Rows = 5;
+    art_->text.modal(rect, "Play a recording");
+    art_->text.draw("Saved recordings  /  scroll or use Up and Down", int(rect.x + 18), int(rect.y + 59), 16,
+                    Muted);
+    const int count = int(ui.replay_files.size());
+    if (CheckCollisionPointRec(mouse, {rect.x + 18, rect.y + 88, 644, 195}))
+        ui.replay_first_row -= int(GetMouseWheelMove());
+    ui.replay_first_row = std::clamp(ui.replay_first_row, 0, std::max(0, count - Rows));
+    for (int row = 0; row < Rows && row + ui.replay_first_row < count; ++row) {
+        const int index = row + ui.replay_first_row;
+        const Rectangle button{rect.x + 18, rect.y + 92 + row * 39, 644, 32};
+        const auto text = ui.replay_files[index].filename().u8string();
+        if (art_->text.button(button, std::string(text.begin(), text.end()), mouse)) {
+            ui.replay_selected = index;
+            const auto path = ui.replay_files[index].u8string();
+            ui.replay_path.assign(path.begin(), path.end());
+            ui.replay_path_focus = false;
+        }
+        if (ui.replay_selected == index)
+            DrawRectangleLinesEx(button, 2, Gold);
+    }
+    if (!count)
+        art_->text.draw(
+            "No recordings saved yet. Paste a file path below,\nor drop a .jsonl file on the window.",
+            int(rect.x + 26), int(rect.y + 116), 19, Muted);
+    art_->text.draw("Recording file  /  Ctrl+V to paste", int(rect.x + 18), int(rect.y + 292), 16, Muted);
+    const Rectangle field{rect.x + 18, rect.y + 318, 644, 34};
+    DrawRectangleRec(field, Color{31, 29, 36, 255});
+    DrawRectangleLinesEx(field, 1, ui.replay_path_focus ? Gold : Border);
+    if (clicked(field, mouse))
+        ui.replay_path_focus = true;
+    art_->text.clip(field);
+    const int offset = std::max(0, art_->text.width(ui.replay_path, 16) - int(field.width) + 24);
+    art_->text.draw(ui.replay_path, int(field.x + 8) - offset, int(field.y + 6), 16);
+    EndScissorMode();
+    if (art_->text.button({rect.x + 18, rect.y + 368, 314, 32}, "Play [Enter]", mouse,
+                          !ui.replay_path.empty()))
+        return {Action::PlayReplay};
+    if (art_->text.button({rect.x + 348, rect.y + 368, 314, 32}, "Cancel [Esc]", mouse))
+        ui.close_overlays();
+    art_->text.fit(ui.notice.empty() ? "Recordings are read only. Take over to continue playing." : ui.notice,
+                   {rect.x + 18, rect.y + 408, 644, 24}, 15, ui.notice.empty() ? Muted : Gold);
+    return {};
+}
+
+UiAction Presentation::draw_replay_controls(const DesktopUi& ui, Vector2 mouse) {
+    const bool ready = ui.replay_error.empty();
+    const bool remaining = ui.replay_step < ui.replay_count || ui.replay_in_progress;
+    if (art_->text.button({6, 3, 52, 22}, "Menu", mouse))
+        return {Action::MainMenu};
+    if (art_->text.button({64, 3, 78, 22}, "Previous", mouse, ui.replay_step > 0))
+        return {Action::ReplayPrevious};
+    if (art_->text.button({148, 3, 70, 22}, ui.replay_paused ? "Resume" : "Pause", mouse, ready && remaining))
+        return {Action::ReplayPause};
+    if (art_->text.button({224, 3, 52, 22}, "Next", mouse, ready && remaining))
+        return {Action::ReplayNext};
+    if (art_->text.button({282, 3, 70, 22}, "Restart", mouse))
+        return {Action::ReplayRestart};
+    if (art_->text.button({358, 3, 86, 22}, "Take over", mouse, ready))
+        return {Action::ReplayTakeOver};
+    if (art_->text.button({450, 3, 24, 22}, "-", mouse, ui.replay_speed_index > 0))
+        return {Action::ReplaySpeed, ui.replay_speed_index - 1};
+    art_->text.fit(std::format("{}x", ReplaySpeeds[ui.replay_speed_index]), {480, 3, 66, 22}, 17, Gold);
+    if (art_->text.button({552, 3, 24, 22}, "+", mouse, ui.replay_speed_index + 1 < int(ReplaySpeeds.size())))
+        return {Action::ReplaySpeed, ui.replay_speed_index + 1};
+    if (art_->text.button({584, 3, 76, 22}, "Settings", mouse))
+        return {Action::OpenSettings};
+    art_->text.fit(std::format("{} / {}", ui.replay_step, ui.replay_count), {666, 3, 128, 22}, 16, Muted);
+    return {};
+}
+
 UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
     resize_canvas(window_viewport());
     const int mode = game.visual.raster_mode;
-    if ((mode == 0 || mode == 2) && previous_raster_ != mode && !cache_valid_)
-        cache_requested_ = true;
-    if (cache_requested_)
-        cache_scene();
-    previous_raster_ = mode;
+    if (!ui.home) {
+        if ((mode == 0 || mode == 2) && previous_raster_ != mode && !cache_valid_)
+            cache_requested_ = true;
+        if (cache_requested_)
+            cache_scene();
+        previous_raster_ = mode;
+    }
     BeginTextureMode(canvas_);
     // Layout stays in original logical coordinates; rasterization uses the actual display pixels.
     rlMatrixMode(RL_PROJECTION);
@@ -935,6 +1045,20 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
     rlOrtho(0, CanvasWidth, CanvasHeight, 0, 0, 1);
     rlMatrixMode(RL_MODELVIEW);
     ClearBackground(Bar);
+    if (ui.home) {
+        const bool overlay = ui.save_picker != SavePicker::None || ui.replay_picker || ui.menu != Menu::None;
+        auto action = draw_home(ui, overlay ? Vector2{-1, -1} : mouse);
+        if (ui.save_picker != SavePicker::None)
+            action = draw_save_slots(game, ui, mouse);
+        else if (ui.replay_picker)
+            action = draw_replays(ui, mouse);
+        else if (ui.menu != Menu::None)
+            action = draw_menu(game, ui, mouse);
+        art_->text.fit(ui.notice.empty() ? "Start a new game, load a save or watch a recording." : ui.notice,
+                       {12, CanvasHeight - 36.f, CanvasWidth - 24.f, 30}, 17, Gold);
+        EndTextureMode();
+        return action;
+    }
     art_->scene(game.hero.cycle_factor_minus_one ? "data3-leftr" : "data3-left",
                 {0, MenuHeight, SideWidth, ContentHeight});
     art_->scene("data3-center", {SideWidth, MenuHeight, FrameWidth, ContentHeight});
@@ -943,20 +1067,23 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
     if (mode != 9)
         draw_board(game, ui.flight >= 0 ? ui.flight : game.hero.floor, ui.flight < 0);
     UiAction action;
+    const auto game_mouse = ui.replay_active ? Vector2{-1, -1} : mouse;
     if (!hide_panels_)
-        action = draw_panels(game, ui, mouse);
+        action = draw_panels(game, ui, game_mouse);
     if (mode == 9 || (mode >= 0 && mode <= 8))
         draw_scene(game);
     if (ui.save_picker != SavePicker::None)
         action = draw_save_slots(game, ui, mouse);
+    else if (ui.replay_picker)
+        action = draw_replays(ui, mouse);
     else if (game.dialogue && !ui.help && ui.menu == Menu::None) {
         ui.inventory = false;
         ui.selected_item = -1;
-        action = draw_dialogue(game, ui, mouse);
+        action = draw_dialogue(game, ui, game_mouse);
     } else if (ui.selected_item >= 0)
-        action = draw_item(game, ui, mouse);
+        action = draw_item(game, ui, game_mouse);
     else if (ui.inventory)
-        action = draw_inventory(game, ui, mouse);
+        action = draw_inventory(game, ui, game_mouse);
     else if (ui.enemies)
         draw_enemies(game, ui, mouse);
     if (ui.help)
@@ -964,25 +1091,31 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
 
     DrawRectangle(0, 0, CanvasWidth, MenuHeight, Bar);
     DrawLine(0, MenuHeight - 1, CanvasWidth, MenuHeight - 1, Border);
-    if (art_->text.button({6, 3, 58, 22}, "Game", mouse)) {
-        const bool opened = ui.menu == Menu::Game;
-        ui.close_overlays();
-        ui.menu = opened ? Menu::None : Menu::Game;
+    if (ui.replay_active) {
+        const auto control = draw_replay_controls(ui, ui.modal() ? Vector2{-1, -1} : mouse);
+        if (control.kind != Action::None)
+            action = control;
+    } else {
+        if (art_->text.button({6, 3, 58, 22}, "Game", mouse)) {
+            const bool opened = ui.menu == Menu::Game;
+            ui.close_overlays();
+            ui.menu = opened ? Menu::None : Menu::Game;
+        }
+        if (art_->text.button({70, 3, 78, 22}, "Options", mouse)) {
+            const bool opened = ui.menu == Menu::Options;
+            ui.close_overlays();
+            ui.menu = opened ? Menu::None : Menu::Options;
+        }
+        if (art_->text.button({154, 3, 58, 22}, "Help", mouse)) {
+            ui.close_overlays();
+            ui.help = true;
+        }
+        const std::string label = (game.hero.cycle_factor_minus_one ? "Backside  /  " : "") +
+                                  std::to_string(int(GameSpeeds[ui.speed_index])) + "x  /  " +
+                                  (ui.muted ? "Music off" : "Music on") +
+                                  (ui.recording_active ? "  /  Recording" : "");
+        art_->text.fit(label, {440, 3, 350, 22}, 17, Muted, true);
     }
-    if (art_->text.button({70, 3, 78, 22}, "Options", mouse)) {
-        const bool opened = ui.menu == Menu::Options;
-        ui.close_overlays();
-        ui.menu = opened ? Menu::None : Menu::Options;
-    }
-    if (art_->text.button({154, 3, 58, 22}, "Help", mouse)) {
-        ui.close_overlays();
-        ui.help = true;
-    }
-    const std::string label = (game.hero.cycle_factor_minus_one ? "Backside  /  " : "") +
-                              std::to_string(int(GameSpeeds[ui.speed_index])) + "x  /  " +
-                              (ui.muted ? "Music off" : "Music on") +
-                              (ui.recording_active ? "  /  Recording" : "");
-    art_->text.fit(label, {440, 3, 350, 22}, 17, Muted, true);
     if (ui.menu != Menu::None)
         action = draw_menu(game, ui, mouse);
 
@@ -993,7 +1126,15 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
                                         : game.status;
     if (ui.ending_wait)
         status = "The End. Press Enter / Space to continue to the backside tower.";
-    if (!ui.modal() && !game.dialogue && ui.flight < 0) {
+    if (ui.replay_active) {
+        const std::string state =
+            ui.replay_paused
+                ? (ui.replay_step == ui.replay_count && !ui.replay_in_progress ? "Finished" : "Paused")
+                : "Playing";
+        status = ui.replay_error.empty() ? state + "  /  " + ui.replay_name + "  /  " + game.status
+                                         : ui.replay_error;
+    }
+    if (!ui.replay_active && !ui.modal() && !game.dialogue && ui.flight < 0) {
         int owned = 0;
         for (int i = 0; i < 15; ++i)
             if (game.inventory(static_cast<Item>(i)) > 0) {
@@ -1007,8 +1148,9 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
         status,
         {7, MenuHeight + ContentHeight + 3, ui.ending_wait ? 643.f : CanvasWidth - 14.f, StatusHeight - 6},
         17);
-    if (ui.ending_wait && art_->text.button({658, MenuHeight + ContentHeight + 3, 135, StatusHeight - 6},
-                                            "Continue", mouse, !ui.modal()))
+    if (ui.ending_wait && !ui.replay_active &&
+        art_->text.button({658, MenuHeight + ContentHeight + 3, 135, StatusHeight - 6}, "Continue", mouse,
+                          !ui.modal()))
         action = {Action::ContinueEnding};
     EndTextureMode();
     return action;

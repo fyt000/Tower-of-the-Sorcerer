@@ -1,4 +1,5 @@
 #include "tsw/replay.hpp"
+#include "tsw/settings.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 #include <chrono>
@@ -275,6 +276,112 @@ TEST_CASE("CLI observations use named values and can inspect a remote floor", "[
     REQUIRE(view.flight == 35);
     REQUIRE(view.status == game.status);
     REQUIRE_THROWS(gameplay_json(game, -1, FloorCount));
+}
+
+TEST_CASE("Visual replay seeks real command boundaries without save snapshots", "[replay]") {
+    std::istringstream source(R"({"type":"new_game"}
+{"type":"move","direction":"up"}
+{"type":"move","direction":"up"}
+{"type":"move","direction":"left"}
+{"type":"move","direction":"right"}
+{"type":"move","direction":"up"}
+{"type":"move","direction":"up"}
+{"type":"save","kind":"slot"}
+{"type":"reload","kind":"slot"}
+)");
+    ReplayPlayer player(read_replay(source));
+    Game game;
+    int flight = -1;
+    REQUIRE(player.position() == 0);
+    player.seek(game, flight, 4);
+    REQUIRE(player.position() == 4);
+    REQUIRE(game.hero.x == 4);
+    REQUIRE(game.hero.y == 9);
+    REQUIRE(game.hero.yellow_keys == 1);
+    REQUIRE(game.tile(1, 93) == YellowDoor);
+    player.seek(game, flight, 5);
+    REQUIRE(player.next(game, flight));
+    REQUIRE(player.position() == 6);
+    REQUIRE(game.busy()); // Animation is left to the desktop scheduler.
+    settle_action(game);
+    REQUIRE(game.hero.y == 9);
+    REQUIRE(game.hero.yellow_keys == 0);
+    REQUIRE(game.tile(1, 93) == Road);
+    player.seek(game, flight, 5);
+    REQUIRE(game.tile(1, 93) == YellowDoor);
+    REQUIRE(game.hero.yellow_keys == 1);
+    player.seek(game, flight, player.size());
+    REQUIRE(player.finished());
+    REQUIRE_FALSE(player.next(game, flight));
+    REQUIRE(game.hero.y == 8);
+    const auto before = gameplay_json(game);
+    REQUIRE_THROWS(player.seek(game, flight, player.size() + 1));
+    REQUIRE(gameplay_json(game) == before);
+    player.seek(game, flight, 0);
+    REQUIRE(game.hero.y == 10);
+    REQUIRE(player.history().empty());
+}
+
+TEST_CASE("Failed replay reconstruction leaves the current game and position intact", "[replay]") {
+    REQUIRE_THROWS(ReplayPlayer({}));
+    REQUIRE_THROWS(ReplayPlayer({{InputKind::Move}}));
+    ReplayPlayer player({{InputKind::NewGame}, {InputKind::FlightUp}});
+    Game game;
+    game.hero.hp = 2345;
+    int flight = 35;
+    REQUIRE_THROWS(player.seek(game, flight, 2));
+    REQUIRE(game.hero.hp == 2345);
+    REQUIRE(flight == 35);
+    REQUIRE(player.position() == 0);
+}
+
+TEST_CASE("Replay takeover retains the played prefix only when recording is enabled", "[replay][saves]") {
+    ReplayDirectory directory;
+    ReplayPlayer player({{InputKind::NewGame},
+                         {InputKind::Move, Direction::Up},
+                         {InputKind::Move, Direction::Left},
+                         {InputKind::Move, Direction::Right}});
+    Game game;
+    int flight = -1;
+    player.seek(game, flight, 3);
+    Recorder recorder(true);
+    recorder.resume(player.history());
+    REQUIRE(recorder.active());
+    walk(game, recorder, Direction::Down);
+    const auto save = directory.path / "takeover.dat";
+    recorder.save(game, save);
+    matches_save(save);
+    std::ifstream recorded(recording_path(save));
+    const auto history = read_replay(recorded);
+    REQUIRE(history.size() == 5);
+    REQUIRE(history[3].direction == Direction::Down);
+    recorder.stop();
+    REQUIRE(recorder.enabled());
+    REQUIRE_FALSE(recorder.active());
+    recorder.enable(false);
+    recorder.resume(player.history());
+    REQUIRE_FALSE(recorder.active());
+}
+
+TEST_CASE("Desktop settings persist opt in audio and both speeds with bounds checks", "[settings]") {
+    ReplayDirectory directory;
+    const auto path = directory.path / "settings.json";
+    REQUIRE_FALSE(load_settings(path).recording);
+    REQUIRE(load_settings(path).replay_speed == 2);
+    save_settings(path, {2, 6, true, true});
+    const auto settings = load_settings(path);
+    REQUIRE(settings.game_speed == 2);
+    REQUIRE(settings.replay_speed == 6);
+    REQUIRE(settings.recording);
+    REQUIRE(settings.muted);
+    REQUIRE_THROWS(save_settings(path, {3, 0, false, false}));
+    for (const auto* source :
+         {R"({"game_speed":-1})", R"({"replay_speed":7})", R"({"recording":"true"})", "not json"}) {
+        std::ofstream output(path);
+        output << source;
+        output.close();
+        REQUIRE_THROWS(load_settings(path));
+    }
 }
 
 TEST_CASE("Recording is opt in and never begins midway through an unrecorded game", "[replay][saves]") {

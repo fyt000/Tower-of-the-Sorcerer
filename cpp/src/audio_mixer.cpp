@@ -15,7 +15,8 @@ namespace {
 constexpr int SampleRate = AudioSampleRate, MidiChannels = 16, SynthVoices = 256;
 constexpr std::size_t EffectVoiceCount = 16;
 constexpr std::uint64_t TrackMask = 0xff, PlayingBit = 1 << 8, MutedBit = 1 << 9;
-constexpr int RestartShift = 10;
+constexpr std::uint64_t SuspendedBit = 1 << 10;
+constexpr int RestartShift = 11;
 static_assert(std::atomic<std::uint64_t>::is_always_lock_free);
 static_assert(std::atomic<std::uint32_t>::is_always_lock_free);
 constexpr std::array<const char*, 22> Tracks{
@@ -192,7 +193,7 @@ struct AudioMixer::Impl {
     AudioCueQueue cues;
     // Only the game thread writes requested state. The callback owns all playback cursors.
     int requested_track = -1;
-    bool requested_playing{}, requested_muted{};
+    bool requested_playing{}, requested_muted{}, requested_suspended{};
     std::uint64_t restart_count{};
     std::atomic<std::uint64_t> request{};
     std::uint64_t previous_request{};
@@ -209,7 +210,8 @@ struct AudioMixer::Impl {
     void publish() {
         const auto value = (restart_count << RestartShift) |
                            std::uint64_t(valid_track(requested_track) ? requested_track : 0) |
-                           (requested_playing ? PlayingBit : 0) | (requested_muted ? MutedBit : 0);
+                           (requested_playing ? PlayingBit : 0) | (requested_muted ? MutedBit : 0) |
+                           (requested_suspended ? SuspendedBit : 0);
         request.store(value, std::memory_order_release);
     }
 
@@ -221,6 +223,10 @@ struct AudioMixer::Impl {
                 synth.set_song(tracks[track]);
         }
         previous_request = control;
+        if (control & SuspendedBit) {
+            std::fill_n(output, frames * 2, 0.f);
+            return;
+        }
         cues.consume([&](int cue) { effects[cue].play(); });
         if (control & PlayingBit) {
             synth.render(output, frames);
@@ -245,6 +251,11 @@ void AudioMixer::render(float* output, int frames) {
 
 void AudioMixer::mute(bool muted) {
     impl_->requested_muted = muted;
+    impl_->publish();
+}
+
+void AudioMixer::suspend(bool suspended) {
+    impl_->requested_suspended = suspended;
     impl_->publish();
 }
 

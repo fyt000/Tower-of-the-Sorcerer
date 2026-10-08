@@ -1,8 +1,10 @@
-# Replay recording and CLI
+# Replay recording, visual playback and CLI
 
 The C++ game can optionally record player commands alongside its original-format
 saves. `tsw_cli` plays those commands through the real core without a window,
 assets or audio. Rust remains independent; cross-engine comparison is later work.
+The desktop game also plays those same recordings with its original animations
+and cutscenes and a control bar above the canvas.
 The original executable and decompiled evidence remain the reference when a C++
 result is in doubt.
 
@@ -14,11 +16,13 @@ recordings remain readable regardless of object field order.
 
 ## Opt in and save
 
-Recording is off by default. Start a fresh game with `--record`, or enable
-**Options > Record new games** and press F2. Enabling the option during play waits
+Recording is off by default. Start with `--record`, or enable
+**Settings > Record new games** and choose New game. Enabling the option during play waits
 for a new game or a load with an existing recording, so a partial history is never
-presented as a complete run. Disabling it immediately stops recording. The option
-lasts for the current application session.
+presented as a complete run. Disabling it immediately stops recording. Settings
+persist beside the saves in `settings.json`, including recording, audio mute and
+separate gameplay/replay speed choices. `--record` overrides the stored preference
+for that launch; changing Settings saves the current preferences.
 
 ```powershell
 ./build/cpp/vs/Release/tsw_game.exe --record
@@ -68,7 +72,40 @@ Startup loading follows the same rules. For a raw Fairy file add `--checkpoint`:
 
 ## Replay and inspect
 
-From the repository root:
+The startup menu offers **Play replay**. It lists `.jsonl` files in the save
+directory and accepts a typed/pasted path or a file dropped on the window. A
+recording can be watched on its own; the companion save is not needed. Launch
+directly with `tsw_game --replay FILE`.
+
+| Visual control | Keyboard | Behavior |
+|---|---|---|
+| Pause / Resume | Space | Freeze/resume gameplay, sprite animation and audio |
+| Previous | Left | Reconstruct the boundary before the current input, then pause |
+| Next | Right | Finish one input and pause; finish the current input if already in progress |
+| Restart | Home | Reconstruct the fresh-game boundary and pause |
+| Take over | T | Continue playing from the displayed state and current command queue |
+| Speed − / + | − / + | Scale replay pacing and animations from 0.25x through 10x |
+| Settings / Menu | O / Esc | Open preferences / return to the startup menu |
+
+The speed choices are 0.25x, 0.5x, 1x, 2x, 3x, 5x and 10x. One step is one
+recorded command, including the initial `new_game` and save/reload boundaries.
+Playback drives the desktop's existing command queue; non-choice speech and the
+ending card remain visible for a scaled delay before continuing. Shops wait for
+their recorded choices. Live gameplay input is blocked until takeover.
+
+Previous and Restart rebuild a prefix in a temporary `Game` with normal actions
+and headless settling. A failed reconstruction leaves the displayed game intact.
+There are no snapshots, shared-state schemas or hashes. Reconstructing a long
+prefix takes proportionally longer and restarts the selected music track; MIDI
+elapsed time is not reconstructed. A finished recording remains paused.
+
+When recording is enabled, takeover keeps the played prefix and records later
+decisions, including takeover midway through a queued animation. With recording
+off it remains unrecorded. Watching reproduces save/reload effects in memory and
+does not write manual, Quick or Fairy files. An invalid command sequence pauses
+with the affected step and error; restart/previous can return to a valid prefix.
+
+For headless inspection, use the CLI from the repository root:
 
 ```powershell
 ./build/cpp/vs/Release/tsw_cli.exe state
@@ -116,7 +153,7 @@ normal monotonic selection route. Save boundaries use
 same kind. These C++ boundary commands and exact Flight inputs need corresponding
 Rust support before those traces can be compared.
 
-Replay drains the original automatic command queue without animation delays,
+Headless replay drains the original automatic command queue without animation delays,
 continues dialogue with no decision through its real callbacks and leaves shops
 for explicit choices. Death and stopped states terminate the drain; the existing
 command budget detects an endless queue. Automatic Fairy writes are reproduced
@@ -139,8 +176,13 @@ schema or state hash. Passing checks establishes those facts on that path, not
 equality of every hidden field.
 
 Catch2 covers action behavior, Flight writes, death, native save replay, recording
-opt-in, branch restoration, missing/stale companions and save failure recovery.
-Desktop checks exercise the real application scheduling and save controls.
+opt-in, prefix reconstruction, takeover, settings persistence, branch restoration,
+missing/stale companions and save failure recovery. Desktop checks exercise the
+real scheduling, startup menus, frozen animation, single stepping, rewind,
+takeover, shops, automatic speech, fatal combat and the ending/backside transition.
+They compare animated/headless observations, verify native save bytes after
+takeover and check that watching leaves Quick/Fairy files unchanged. Audio tests
+compare the resumed sample stream with an uninterrupted reference.
 CTest also runs the short door replay and its blocked prefix when Python is
 available. Fixtures live under `tests/replays/`; generated checks stay in `build/`.
 `tsw_probe` remains a separate research tool; raw state setters are not replay

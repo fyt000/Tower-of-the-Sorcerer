@@ -13,6 +13,7 @@ class Audio {
     void update(Game& game);
     void restart(Game& game); // Restart after new game/load, including the same track.
     void mute(bool muted);
+    void suspend(bool suspended);
     bool available() const;
     static int track_for_scene(const Game&);
 

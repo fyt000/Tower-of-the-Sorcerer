@@ -1,6 +1,7 @@
 #pragma once
 #include "tsw/game.hpp"
 #include <iosfwd>
+#include <span>
 
 namespace tsw {
 enum class InputKind {
@@ -35,6 +36,27 @@ std::string gameplay_json(const Game&, int flight = -1, int map_floor = -1);
 std::vector<PlayerInput> read_replay(std::istream&);
 std::filesystem::path recording_path(const std::filesystem::path& save);
 
+// Rewind reconstructs a prefix through real actions, without snapshots or a state schema.
+class ReplayPlayer {
+  public:
+    explicit ReplayPlayer(std::vector<PlayerInput> inputs);
+
+    std::size_t position() const { return position_; }
+
+    std::size_t size() const { return inputs_.size(); }
+
+    bool finished() const { return position_ == inputs_.size(); }
+
+    std::span<const PlayerInput> history() const { return {inputs_.data(), position_}; }
+
+    bool next(Game&, int& flight);
+    void seek(Game&, int& flight, std::size_t position);
+
+  private:
+    std::vector<PlayerInput> inputs_;
+    std::size_t position_{};
+};
+
 class Recorder {
   public:
     explicit Recorder(bool enabled = false);
@@ -45,6 +67,8 @@ class Recorder {
 
     void enable(bool);
     void new_game();
+    void stop();
+    void resume(std::span<const PlayerInput>);
     void append(const PlayerInput&);
     void save(Game&, const std::filesystem::path&, SaveKind = SaveKind::Slot);
     // Loading the game succeeds independently of a missing or malformed companion.
