@@ -58,7 +58,7 @@ original 800×500 content proportions, panel artwork and scene compositor.
 Walking input and animation use the same selected clock. Dialogue, items,
 shops, enemy forecasts and saves use overlays.
 
-The startup menu uses the original opening/title images. Settings are small C++
+The startup menu draws plain text over the original tower background. Settings are small C++
 aggregates serialized automatically by Glaze to `Savedat/settings.json`. They
 select recording, mute and separate gameplay/replay speeds. Home and modal menus
 pause gameplay; returning home retains a live game or replay for Continue.

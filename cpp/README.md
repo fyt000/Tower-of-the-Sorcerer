@@ -94,8 +94,8 @@ restore and DPI changes share the same mapping as mouse input.
 
 ## Startup, controls and saves
 
-Startup shows the original opening background and title artwork with **New game**,
-**Load game**, **Play replay** and **Settings**. Use the mouse or Up/Down and Enter.
+Startup shows the original tower background with a plain text menu on the left:
+**New game**, **Load game**, **Play replay** and **Settings**. Use the mouse or Up/Down and Enter.
 Returning to the main menu pauses gameplay and adds **Continue game** or
 **Continue replay**. Load game shows the eight original slots plus Quick and Fairy
 restore buttons. `--load FILE` and `--replay FILE` enter their respective modes directly.

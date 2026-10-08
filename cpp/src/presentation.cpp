@@ -935,23 +935,24 @@ UiAction Presentation::draw_save_slots(const Game& game, DesktopUi& ui, Vector2 
 
 UiAction Presentation::draw_home(const DesktopUi& ui, Vector2 mouse) {
     art_->scene("data3-open0", {0, 0, CanvasWidth, CanvasHeight});
-    art_->scene("data3-title05", {28, 48, 390, 400});
-    constexpr Rectangle rect{474, 80, 292, 366};
-    DrawRectangleRec(rect, Color{35, 34, 46, 235});
-    DrawRectangleLinesEx(rect, 2, Border);
-    art_->text.draw("Welcome to the tower", int(rect.x + 18), int(rect.y + 18), 21, Gold);
     const std::array<std::string, 5> labels{ui.replay_active ? "Continue replay" : "Continue game",
                                             "New game", "Load game", "Play replay", "Settings"};
     constexpr std::array<Action, 5> actions{Action::ResumeGame, Action::NewGame, Action::OpenLoadSlots,
                                             Action::OpenReplays, Action::OpenSettings};
-    for (int i = 0; i < int(labels.size()); ++i) {
-        const Rectangle button{rect.x + 18, rect.y + 60 + i * 55, rect.width - 36, 41};
-        if (art_->text.button(button, labels[i], mouse, i != 0 || ui.game_started))
+    const int first = ui.game_started ? 0 : 1;
+    const int top = ui.game_started ? 170 : 196;
+    for (int i = first; i < int(labels.size()); ++i) {
+        const Rectangle row{40, float(top + (i - first) * 52), 244, 44};
+        const bool selected = ui.home_selection == i;
+        const bool hover = CheckCollisionPointRec(mouse, row);
+        const int x = int(row.x + 26), y = int(row.y + 8);
+        art_->text.draw(labels[i], x + 1, y + 2, 26, Color{0, 0, 0, 190});
+        art_->text.draw(labels[i], x, y, 26, selected || hover ? Gold : Ink);
+        if (selected)
+            art_->text.draw(">", int(row.x), y, 26, Gold);
+        if (clicked(row, mouse))
             return {actions[i]};
-        if (ui.home_selection == i)
-            DrawRectangleLinesEx(button, 2, Gold);
     }
-    art_->text.fit("Arrows / Enter: select", {474, 460, 292, 28}, 17, Muted);
     return {};
 }
 
@@ -1054,8 +1055,8 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
             action = draw_replays(ui, mouse);
         else if (ui.menu != Menu::None)
             action = draw_menu(game, ui, mouse);
-        art_->text.fit(ui.notice.empty() ? "Start a new game, load a save or watch a recording." : ui.notice,
-                       {12, CanvasHeight - 36.f, CanvasWidth - 24.f, 30}, 17, Gold);
+        if (!ui.notice.empty())
+            art_->text.fit(ui.notice, {12, CanvasHeight - 36.f, CanvasWidth - 24.f, 30}, 17, Gold);
         EndTextureMode();
         return action;
     }
