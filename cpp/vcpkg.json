@@ -6,6 +6,7 @@
     "raylib",
     "stb",
     "catch2",
+    "nlohmann-json",
     "miniaudio"
   ]
 }

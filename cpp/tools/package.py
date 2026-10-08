@@ -25,7 +25,7 @@ def main():
     binaries, original, output = build / args.configuration, args.original_dir.resolve(), args.output.resolve()
     if output == original or output.is_relative_to(original):
         raise RuntimeError('Package output must be separate from the original installation')
-    required = ['tsw_game.exe', 'tsw_probe.exe', 'tsw_tests.exe', 'tsw_audio_tests.exe', 'tsw_verify.exe',
+    required = ['tsw_game.exe', 'tsw_cli.exe', 'tsw_probe.exe', 'tsw_tests.exe', 'tsw_audio_tests.exe', 'tsw_verify.exe',
                 'GeneralUser-GS-LICENSE.txt', 'TinySoundFont-LICENSE.txt', 'raylib-LICENSE.txt', 'miniaudio-LICENSE.txt']
     for name in required:
         if not (binaries / name).is_file():
@@ -45,7 +45,7 @@ def main():
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(file, target)
     licenses = ROOT / 'build/dependencies/vcpkg_installed/x64-windows-static/share'
-    dependencies = {'raylib', 'glfw3', 'stb', 'miniaudio', 'catch2', 'cgltf',
+    dependencies = {'raylib', 'glfw3', 'stb', 'miniaudio', 'catch2', 'nlohmann-json', 'cgltf',
                     'dirent', 'drlibs', 'mmx', 'nanosvg', 'qoi'}
     for file in licenses.glob('*/copyright'):
         if file.parent.name not in dependencies:
@@ -90,6 +90,9 @@ def main():
         'F2: new game. M: mute. Options: 1x / 3x / 10x walking and animation speed.\n'
         'Saves: Savedat/ beside the EXE. Replace keeps a .bak. No other folders are searched.\n'
         'Optional: --assets DIRECTORY (original or PNG layout), --save-dir DIRECTORY, --load FILE.\n'
+        'Opt-in replay: --record, or Options > Record new games, then F2.\n'
+        'Recorded saves have a .replay.jsonl companion; keep it together with its save.\n'
+        'A load without a recording continues unrecorded. Full-package replay: tsw_cli replay FILE.\n'
         'Normal numbered saves already use the original format, filenames and folder.\n\n'
         'See FIDELITY.md for evidence and limits, THIRD_PARTY.md and the license files for attribution.\n',
         encoding='utf-8')
@@ -103,7 +106,7 @@ def main():
         for file in sorted(output.rglob('*')):
             relative = file.relative_to(output)
             if file.is_file() and (len(relative.parts) == 1 and file.name not in
-                                   ('tsw_tests.exe', 'tsw_probe.exe', 'tsw_audio_tests.exe', 'tsw_verify.exe', 'package-manifest.json')
+                                   ('tsw_tests.exe', 'tsw_cli.exe', 'tsw_probe.exe', 'tsw_audio_tests.exe', 'tsw_verify.exe', 'package-manifest.json')
                                    or relative.parts[0] == 'licenses'):
                 package.write(file, relative.as_posix())
     print(f'Replacement EXE: {output / "TSW.exe"}')

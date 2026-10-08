@@ -33,6 +33,7 @@ struct DesktopUi {
     SavePicker save_picker = SavePicker::None;
     SaveSlots save_slots;
     bool inventory{}, enemies{}, help{}, muted{}, ending_wait{};
+    bool recording_enabled{}, recording_active{};
     Menu menu = Menu::None;
     float dialogue_scroll{};
 
@@ -67,7 +68,8 @@ enum class Action {
     Travel,
     CancelFlight,
     Mute,
-    Speed
+    Speed,
+    Recording
 };
 
 struct UiAction {

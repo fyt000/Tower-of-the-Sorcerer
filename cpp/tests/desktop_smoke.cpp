@@ -1,6 +1,8 @@
 #include "desktop_checks.hpp"
 #include <algorithm>
+#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 
 namespace tsw {
@@ -69,6 +71,65 @@ int verify_smoke(DesktopSession& session, const std::string& name, const std::fi
         if (!condition)
             throw std::runtime_error(name + ": " + description);
     };
+    if (name == "recording") {
+        const auto saves = output / "saves";
+        session.dispatch({Action::Recording});
+        require(ui.recording_enabled && !ui.recording_active, "Opt in must wait for a fresh game");
+        session.dispatch({Action::NewGame});
+        require(ui.recording_active, "New game must start recording after opting in");
+        const auto walk = [&](Direction direction) {
+            session.move(direction);
+            for (int i = 0; i < 200 && game.busy(); ++i) {
+                if (game.dialogue && !game.dialogue->shop)
+                    session.dispatch({Action::Continue});
+                session.advance_commands(1.f);
+            }
+            require(!game.busy(), "Recorded walk must finish through desktop scheduling");
+        };
+        walk(Direction::Up);
+        walk(Direction::Left);
+        session.dispatch({Action::SaveSlot, 1});
+        require(std::filesystem::exists(recording_path(saves / "save1.dat")),
+                "Manual save needs its companion");
+        walk(Direction::Right);
+        session.dispatch({Action::LoadSlot, 1});
+        require(ui.recording_active && game.hero.yellow_keys == 1 && game.hero.x == 4,
+                "Recorded load must restore and resume the saved branch");
+        // Exercise the application's automatic raw-checkpoint writer with a real reached state.
+        game.checkpoint_requested = true;
+        session.advance_commands(1.f);
+        require(std::filesystem::exists(recording_path(saves / "save0.dat")),
+                "Fairy save needs its companion");
+        session.dispatch({Action::FairyCheckpoint});
+        require(ui.recording_active, "Raw Fairy restore must resume recording");
+        walk(Direction::Down);
+        session.dispatch({Action::Save});
+        std::ifstream recording(recording_path(saves / "quick.save"));
+        Game replayed;
+        int flight = -1;
+        for (const auto& input : read_replay(recording)) {
+            apply_input(replayed, flight, input);
+            settle_action(replayed);
+        }
+        recording.close();
+        std::ostringstream expected(std::ios::out | std::ios::binary),
+            actual(std::ios::out | std::ios::binary);
+        game.save(expected);
+        replayed.save(actual);
+        require(expected.str() == actual.str(),
+                "Desktop recording must reproduce native save bytes headlessly");
+        std::filesystem::remove(recording_path(saves / "save1.dat"));
+        session.dispatch({Action::LoadSlot, 1});
+        require(!ui.recording_active, "A save without a companion must load without recording");
+        session.dispatch({Action::Save});
+        require(!std::filesystem::exists(recording_path(saves / "quick.save")),
+                "Unrecorded replacement must remove a stale companion");
+        session.dispatch({Action::NewGame});
+        require(ui.recording_active, "Recording preference must survive an unrecorded load");
+        session.dispatch({Action::Recording});
+        require(!ui.recording_enabled && !ui.recording_active, "Opt out must stop recording immediately");
+        ui.menu = Menu::Options;
+    }
     fixture(game, ui, name);
     session.audio.restart(game);
     bool ending_pause = false, slot_pause = false, slot_restore = false;

@@ -93,6 +93,19 @@ void Game::load(const std::filesystem::path& path, SaveKind kind) {
     std::ifstream input(path, std::ios::binary);
     if (!input)
         throw std::runtime_error("Unable to open save");
+    load(input, kind);
+}
+
+void Game::save(std::ostream& output, SaveKind kind) const {
+    const auto bytes =
+        save_detail::encode_original(*this, original_save_record_ ? &*original_save_record_ : nullptr, kind);
+    output.write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
+    if (!output)
+        throw std::runtime_error("Unable to write save");
+    original_save_record_ = save_detail::hero_record(bytes);
+}
+
+void Game::load(std::istream& input, SaveKind kind) {
     // Original BlockRead consumes two fixed records and ignores trailing data.
     std::vector<std::uint8_t> bytes(save_detail::OriginalSaveBytes);
     input.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));

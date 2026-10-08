@@ -19,6 +19,7 @@ Ghidra files are marked as decompiler inspection output.
 | vcpkg catalog | `b5d1a94fb7f88fd835e360fd23a45a09ceedbf48` | Build tool, not distributed with game |
 | TinySoundFont / TinyMidiLoader | `853a0a171759f1ddba0de1442133a75912bbeffa` | `TinySoundFont-LICENSE.txt` |
 | Catch2 (test runner only) | 3.13.0, vcpkg port revision 1 | `licenses/catch2.txt` |
+| nlohmann/json (replay input/output) | 3.12.0, vcpkg port revision 2 | `licenses/nlohmann-json.txt` |
 | GeneralUser GS | 2.0.3; `684543d5e5efaef08d02be50dcda8d552478fa60` | `GeneralUser-GS-LICENSE.txt` |
 
 GeneralUser GS is by **S. Christian Collins**. The package includes the complete
@@ -30,6 +31,8 @@ The raylib fallback archive has SHA-256
 `aea98ecf5bc5c5e0b789a76de0083a21a70457050ea4cc2aec7566935f5e258e`.
 The TinySoundFont source archive has SHA-256
 `76c356df524f71f2a34f67fa0cb2cb946036fe7a65d2930a849569c5e742fa57`.
+The nlohmann/json fallback archive has SHA-256
+`4b92eb0c06d10683f7447ce9406cb97cd4b453be18d7279320f7b2f025c10187`.
 The GeneralUser SF2 has SHA-256
 `9575028c7a1f589f5770fccc8cff2734566af40cd26ed836944e9a5152688cfe`.
 

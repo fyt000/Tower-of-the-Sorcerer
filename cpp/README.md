@@ -103,7 +103,7 @@ restore and DPI changes share the same mapping as mouse input.
 | Slot picker: 1–8 or arrows, Enter, Esc | Select, save/replace/load, close |
 | F5 / F9 / F8 | Quick save / quick restore / Fairy checkpoint |
 | F2 / M | New game / mute music and effects |
-| Options menu | 1×, 3× or 10× walking and animation speed |
+| Options menu | Game speed and opt-in recording for new games |
 
 Shop choices are clickable; Esc cancels a shop. Long dialogue and Wisdom clues
 scroll with the mouse wheel. Hero Orb forecasts have their own overlay. The
@@ -136,6 +136,32 @@ Open a specific manual or quick save file:
 
 Numbered saves have the format, filename and location the original EXE expects. The replacement
 executable's filename does not affect saving or loading.
+
+## Opt-in replay and headless CLI
+
+Start with `--record` to record a fresh game, or enable **Options > Record new games**
+and press F2. While recording, manual, quick and Fairy saves each get a
+`.replay.jsonl` companion. With the option enabled, loading that save resumes its
+saved history. Loading a save without a companion leaves that loaded game
+unrecorded, including later saves. Turning the option off stops recording immediately.
+Keep a save and its companion together when copying them. Original save bytes
+and raw Fairy handling remain unchanged.
+
+`tsw_cli` is a separate headless executable, built even with `TSW_GUI=OFF`. It needs
+no assets, soundfont or audio device. From the repository root:
+
+```powershell
+./build/cpp/vs/Release/tsw_cli.exe state
+./build/cpp/vs/Release/tsw_cli.exe replay ./build/cpp/vs/Release/Savedat/save1.dat.replay.jsonl
+./build/cpp/vs/Release/tsw_cli.exe replay tests/replays/first-floor-door.jsonl --limit 3
+```
+
+The CLI prints readable JSON values and can inspect remote map tiles with
+`--map-floor N`. Its `headless` mode accepts commands on stdin and prints values
+after each one. [Recording behavior, commands and focused checks](../docs/replay-verification.md)
+describe save branching, original reload behavior and the external assertion tool.
+The Rust comparison adapter is later work; the C++ recorder does not impose a
+common internal representation on either engine.
 
 ## Validate and package
 

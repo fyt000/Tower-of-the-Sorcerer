@@ -100,6 +100,8 @@ int main(int argc, char** argv) try {
 #endif
     std::filesystem::path requested_assets, load_file, screenshot;
     auto save_directory = executable / "Savedat";
+    bool record = false;
+    SaveKind load_kind = SaveKind::Slot;
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
         if (arg == "--assets" && i + 1 < argc)
@@ -110,6 +112,10 @@ int main(int argc, char** argv) try {
             load_file = argv[++i];
         else if (arg == "--screenshot" && i + 1 < argc)
             screenshot = argv[++i];
+        else if (arg == "--record")
+            record = true;
+        else if (arg == "--checkpoint")
+            load_kind = SaveKind::Checkpoint;
         else if (arg == "--help") {
             std::cout << "Tower of the Sorcerer original cpp\n"
                          "Arrows / WASD: move. Enter: continue. I: inventory.\n"
@@ -117,14 +123,15 @@ int main(int argc, char** argv) try {
                          "F8: Fairy checkpoint. F2: new game. M: mute.\n"
                          "Saves: Savedat/save1.dat through save8.dat beside this executable.\n"
                          "--assets DIR --save-dir DIR --load FILE\n"
+                         "--record: opt in to save companion replay recordings.\n"
+                         "--checkpoint: use raw Fairy format with --load.\n"
                          "--screenshot FILE: capture the initial frame and exit.\n";
             return 0;
         } else
             throw std::runtime_error("Unknown argument: " + arg);
     }
-    Game initial_game;
-    if (!load_file.empty())
-        initial_game.load(load_file);
+    if (load_kind == SaveKind::Checkpoint && load_file.empty())
+        throw std::runtime_error("--checkpoint requires --load FILE");
     Assets assets(Assets::select(executable, requested_assets, TSW_ORIGINAL_ASSETS, TSW_ASSETS),
                   executable_file);
     std::cout << "Assets: " << assets.root()
@@ -140,7 +147,9 @@ int main(int argc, char** argv) try {
     SetTargetFPS(hidden ? 0 : 60);
     int result = 0;
     {
-        DesktopSession session(assets, save_directory, std::move(initial_game));
+        DesktopSession session(assets, save_directory, {}, record);
+        if (!load_file.empty())
+            session.load(load_file, load_kind);
         auto& game = session.game;
         auto& ui = session.ui;
         auto& renderer = session.renderer;

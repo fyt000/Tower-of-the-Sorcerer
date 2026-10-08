@@ -4,8 +4,11 @@
 
 namespace tsw {
 DesktopSession::DesktopSession(const Assets& assets, const std::filesystem::path& save_directory,
-                               Game initial)
-    : game(std::move(initial)), renderer(assets), audio(assets), save_directory_(save_directory) {
+                               Game initial, bool record)
+    : game(std::move(initial)), renderer(assets), audio(assets), save_directory_(save_directory),
+      recorder_(record) {
+    recorder_.new_game();
+    recording_status();
     audio.restart(game);
 }
 
@@ -17,12 +20,39 @@ void DesktopSession::dispatch(UiAction action) {
         game.status = error.what();
     }
     renderer.moved(before, game.hero);
+    recording_status();
 }
 
 void DesktopSession::move(Direction direction) {
     const auto before = game.hero;
-    game.move(direction);
+    play({InputKind::Move, direction});
     renderer.moved(before, game.hero);
+}
+
+bool DesktopSession::play(const PlayerInput& input) {
+    // Busy movement/item input has no effects and is not a gameplay decision.
+    if (game.busy() && (input.kind == InputKind::Move || input.kind == InputKind::UseItem ||
+                        input.kind == InputKind::OpenFlight))
+        return false;
+    const bool result = apply_input(game, ui.flight, input);
+    recorder_.append(input);
+    return result;
+}
+
+void DesktopSession::recording_status() {
+    ui.recording_enabled = recorder_.enabled();
+    ui.recording_active = recorder_.active();
+}
+
+void DesktopSession::load(const std::filesystem::path& path, SaveKind kind) {
+    recorder_.load(game, path, kind);
+    renderer.reset();
+    ui.close_overlays();
+    ui.flight = -1;
+    ui.ending_wait = false;
+    accumulator_ = 0;
+    audio.restart(game);
+    recording_status();
 }
 
 void DesktopSession::advance_commands(float seconds) {
@@ -52,11 +82,12 @@ void DesktopSession::advance_commands(float seconds) {
     if (game.checkpoint_requested && !game.busy()) {
         game.checkpoint_requested = false;
         try {
-            game.save(save_directory_ / "save0.dat", SaveKind::Checkpoint);
+            recorder_.save(game, save_directory_ / "save0.dat", SaveKind::Checkpoint);
         } catch (const std::exception& error) {
             game.status = error.what();
         }
     }
+    recording_status();
     const auto dialogue = game.dialogue ? game.dialogue->text : std::string();
     if (dialogue != previous_dialogue_) {
         ui.dialogue_scroll = 0;
@@ -68,6 +99,7 @@ void DesktopSession::apply(UiAction action) {
     switch (action.kind) {
     case Action::NewGame:
         game.new_game();
+        recorder_.new_game();
         renderer.reset();
         audio.restart(game);
         ui.close_overlays();
@@ -75,7 +107,7 @@ void DesktopSession::apply(UiAction action) {
         ui.ending_wait = false;
         break;
     case Action::Save:
-        game.save(save_directory_ / "quick.save");
+        recorder_.save(game, save_directory_ / "quick.save");
         game.status = "Quick save written.";
         break;
     case Action::OpenSaveSlots:
@@ -94,7 +126,7 @@ void DesktopSession::apply(UiAction action) {
                 }
         break;
     case Action::SaveSlot:
-        game.save(save_slot_path(save_directory_, action.value));
+        recorder_.save(game, save_slot_path(save_directory_, action.value));
         ui.selected_slot = action.value;
         ui.close_overlays();
         game.status = "Saved to slot " + std::to_string(action.value) + ".";
@@ -102,19 +134,14 @@ void DesktopSession::apply(UiAction action) {
     case Action::Load:
     case Action::FairyCheckpoint:
     case Action::LoadSlot:
-        game.load(action.kind == Action::LoadSlot
-                      ? save_slot_path(save_directory_, action.value)
-                      : save_directory_ / (action.kind == Action::Load ? "quick.save" : "save0.dat"),
-                  action.kind == Action::FairyCheckpoint ? SaveKind::Checkpoint : SaveKind::Slot);
-        renderer.reset();
-        ui.close_overlays();
-        ui.flight = -1;
-        ui.ending_wait = false;
+        load(action.kind == Action::LoadSlot
+                 ? save_slot_path(save_directory_, action.value)
+                 : save_directory_ / (action.kind == Action::Load ? "quick.save" : "save0.dat"),
+             action.kind == Action::FairyCheckpoint ? SaveKind::Checkpoint : SaveKind::Slot);
         if (action.kind == Action::LoadSlot) {
             ui.selected_slot = action.value;
-            game.status = "Restored slot " + std::to_string(action.value) + ".";
+            game.status = "Restored slot " + std::to_string(action.value) + ". " + game.status;
         }
-        audio.restart(game);
         break;
     case Action::Continue:
         game.continue_dialogue();
@@ -123,35 +150,30 @@ void DesktopSession::apply(UiAction action) {
         ui.ending_wait = false;
         break;
     case Action::Choose:
-        game.choose(action.value);
+        play({InputKind::Choose, Direction::Up, Item::HeroOrb, action.value});
         break;
     case Action::UseItem: {
         const auto item = static_cast<Item>(action.value);
         ui.close_overlays();
         if (item == Item::FlightOrb) {
-            ui.flight = game.hero.floor;
-            game.hero.flight_direction = 0;
-        } else if (item == Item::HeroOrb && game.use(item)) {
+            play({InputKind::OpenFlight});
+        } else if (item == Item::HeroOrb && play({InputKind::UseItem, Direction::Up, item})) {
             ui.enemies = true;
             ui.enemy_first_row = 0;
-        } else
-            game.use(item);
+        } else if (item != Item::HeroOrb)
+            play({InputKind::UseItem, Direction::Up, item});
         break;
     }
     case Action::FlightUp:
     case Action::FlightDown: {
-        const bool up = action.kind == Action::FlightUp;
-        const int next = up ? (ui.flight == 43 ? 45 : ui.flight + 1) : (ui.flight == 45 ? 43 : ui.flight - 1);
-        if (game.flight_preview(next, up ? 1 : 2))
-            ui.flight = next;
+        play({action.kind == Action::FlightUp ? InputKind::FlightUp : InputKind::FlightDown});
         break;
     }
     case Action::Travel:
-        game.use(Item::FlightOrb, ui.flight);
-        ui.flight = -1;
+        play({InputKind::Travel});
         break;
     case Action::CancelFlight:
-        ui.flight = -1;
+        play({InputKind::Cancel});
         break;
     case Action::Mute:
         ui.muted = !ui.muted;
@@ -159,6 +181,11 @@ void DesktopSession::apply(UiAction action) {
         break;
     case Action::Speed:
         ui.speed_index = action.value;
+        break;
+    case Action::Recording:
+        recorder_.enable(!recorder_.enabled());
+        game.status = recorder_.enabled() ? "Recording enabled for the next new game or a recorded save."
+                                          : "Replay recording disabled.";
         break;
     case Action::None:
         break;

@@ -30,8 +30,8 @@ Start with the [C++ build and controls](cpp/README.md),
 [fidelity coverage](cpp/FIDELITY.md).
 [Original data](docs/original-data.md), [game rules](docs/mechanics.md), and
 [attribution](THIRD_PARTY.md) cover the supporting details.
-The [replay verification plan](docs/replay-verification.md) describes recording
-C++ player actions and checking explicit gameplay values against Rust with a
+The [replay recorder and CLI](docs/replay-verification.md) support recording
+C++ player actions and checking explicit gameplay values with a
 separate test script.
 
 The original installation is read only during development and tests. Decompiled

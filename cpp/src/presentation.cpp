@@ -853,7 +853,7 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
                 return i < int(actions.size()) ? UiAction{actions[i]} : UiAction{};
             }
     } else if (ui.menu == Menu::Options) {
-        constexpr Rectangle rect{70, MenuHeight, 244, 132};
+        constexpr Rectangle rect{70, MenuHeight, 244, 191};
         DrawRectangleRec(rect, Panel);
         DrawRectangleLinesEx(rect, 1, Border);
         if (art_->text.button({rect.x + 8, rect.y + 8, 228, 28},
@@ -865,7 +865,12 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
             if (art_->text.button({rect.x + 8 + i * 78, rect.y + 67, 72, 26},
                                   std::to_string(int(GameSpeeds[i])) + "x", mouse))
                 return {Action::Speed, i};
-        if (art_->text.button({rect.x + 8, rect.y + 101, 228, 24}, "Close", mouse))
+        if (art_->text.button({rect.x + 8, rect.y + 101, 228, 28},
+                              ui.recording_enabled ? "Record new games: on" : "Record new games: off", mouse))
+            return {Action::Recording};
+        art_->text.draw(ui.recording_active ? "Recording this game" : "Starts on new game or recorded load",
+                        int(rect.x + 8), int(rect.y + 135), 13, Muted);
+        if (art_->text.button({rect.x + 8, rect.y + 160, 228, 24}, "Close", mouse))
             ui.menu = Menu::None;
     }
     return {};
@@ -975,7 +980,8 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
     }
     const std::string label = (game.hero.cycle_factor_minus_one ? "Backside  /  " : "") +
                               std::to_string(int(GameSpeeds[ui.speed_index])) + "x  /  " +
-                              (ui.muted ? "Music off" : "Music on");
+                              (ui.muted ? "Music off" : "Music on") +
+                              (ui.recording_active ? "  /  Recording" : "");
     art_->text.fit(label, {440, 3, 350, 22}, 17, Muted, true);
     if (ui.menu != Menu::None)
         action = draw_menu(game, ui, mouse);

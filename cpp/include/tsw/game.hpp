@@ -2,6 +2,7 @@
 #include <array>
 #include <cstdint>
 #include <filesystem>
+#include <iosfwd>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -357,6 +358,8 @@ class Game {
     void next_cycle();
     void save(const std::filesystem::path&, SaveKind = SaveKind::Slot) const;
     void load(const std::filesystem::path&, SaveKind = SaveKind::Slot);
+    void save(std::ostream&, SaveKind = SaveKind::Slot) const;
+    void load(std::istream&, SaveKind = SaveKind::Slot);
     bool flight_preview(int destination_floor, int direction = 1);
     // Exposed state inputs for original-machine differential probes.
     int contact_index{}, scratch_index{}, neighbor_index{}, message_code{}, door_opened{};

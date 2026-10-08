@@ -131,9 +131,12 @@ an emulated copy of the original EXE. They bypass VCL/device calls and report
 what was skipped. These controlled cases expose branches without requiring a
 full tower playthrough; altered-map cases also exercise unusual bounds and
 numeric predicates. Desktop smoke fixtures check the modern window, input,
-scene timing and saves. The [replay verification plan](replay-verification.md)
-proposes a small gameplay CLI, action recordings and explicit checks in a separate
-test script for the later Rust work. The research probe's raw state edits and
+scene timing and saves. The [replay recorder and CLI](replay-verification.md)
+use `tsw_replay` at the application boundary for player inputs, exact Flight
+selection and opt-in save companions. `tsw_cli` drains automatic commands without
+graphics or audio. Explicit assertions belong to Catch2 and an external test
+script; neither engine needs a common state schema for later Rust comparisons.
+The research probe's raw state edits and
 internal handler calls remain research controls.
 
 `tsw_audio_tests` drives the production mixer for offline functional and Debug
