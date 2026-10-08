@@ -59,8 +59,7 @@ Game playback(const std::filesystem::path& path) {
     Game game;
     int flight = -1;
     for (const auto& action : read_replay(input)) {
-        apply_input(game, flight, action);
-        settle_action(game);
+        execute_input(game, flight, action);
     }
     return game;
 }
@@ -79,6 +78,48 @@ void matches_save(const std::filesystem::path& save, SaveKind kind = SaveKind::S
     REQUIRE(record.str().size() == 6957);
 }
 } // namespace
+
+TEST_CASE("Replay streaming reader and writer share line numbering and prefix parsing", "[replay]") {
+    std::istringstream recording("\n  \r\n{\"type\":\"new_game\"}\n\t\n"
+                                 "{\"type\":\"move\",\"direction\":\"up\"}\nbroken\n");
+    std::size_t line{};
+    const auto start = read_replay_input(recording, line);
+    REQUIRE(start->kind == InputKind::NewGame);
+    REQUIRE(line == 3);
+    const auto move = read_replay_input(recording, line);
+    REQUIRE(move->kind == InputKind::Move);
+    REQUIRE(line == 5);
+    std::ostringstream output;
+    const std::array actions{*start, *move};
+    write_replay(output, actions);
+    std::istringstream roundtrip(output.str());
+    REQUIRE(read_replay(roundtrip) == std::vector<PlayerInput>(actions.begin(), actions.end()));
+    REQUIRE_THROWS_WITH(read_replay_input(recording, line), Catch::Matchers::ContainsSubstring("Line 6:"));
+}
+
+TEST_CASE("Settled replay observers match live input outcomes", "[replay]") {
+    const std::vector<PlayerInput> inputs{
+        {InputKind::NewGame}, {InputKind::Move, Direction::Up}, {InputKind::Move, Direction::Left}};
+    Game live, replayed;
+    int live_flight = -1, replayed_flight = -1;
+    std::vector<InputOutcome> expected;
+    for (const auto& input : inputs)
+        expected.push_back(execute_input(live, live_flight, input));
+    ReplayPlayer player(inputs);
+    std::size_t step{};
+    player.seek(replayed, replayed_flight, inputs.size(),
+                [&](const PlayerInput& input, const InputOutcome& result) {
+                    REQUIRE(input == inputs[step]);
+                    REQUIRE(result.accepted == expected[step].accepted);
+                    REQUIRE(result.ok == expected[step].ok);
+                    REQUIRE(result.moved == expected[step].moved);
+                    REQUIRE(result.messages == expected[step].messages);
+                    REQUIRE(result.message == expected[step].message);
+                    ++step;
+                });
+    REQUIRE(step == inputs.size());
+    REQUIRE(gameplay_json(live, live_flight) == gameplay_json(replayed, replayed_flight));
+}
 
 TEST_CASE("Replay parser accepts player commands and rejects malformed inputs", "[replay]") {
     for (const auto* source :

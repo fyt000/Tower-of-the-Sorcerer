@@ -292,8 +292,23 @@ bool apply_input(Game& game, int& flight, const PlayerInput& input) {
     throw std::runtime_error("Unknown player input");
 }
 
-void settle_action(Game& game) {
-    game.finish_commands(true);
+void settle_action(Game& game, std::vector<std::string>* speech) {
+    if (!speech)
+        game.finish_commands(true);
+    else {
+        // Capture every original speech before continuing, while retaining actual shop choices.
+        for (std::size_t count = 0;; ++count) {
+            if (count == 10000)
+                throw std::runtime_error("Dialogue drain exceeded ten thousand continuations");
+            game.finish_commands();
+            if (!game.dialogue)
+                break;
+            speech->push_back(game.dialogue->text);
+            if (game.dialogue->shop)
+                break;
+            game.continue_dialogue();
+        }
+    }
     if (game.checkpoint_requested && !game.busy()) {
         game.checkpoint_requested = false;
         save_in_memory(game, SaveKind::Checkpoint, false);
@@ -323,22 +338,65 @@ std::string gameplay_json(const Game& game, int flight, int map_floor) {
     return write_json(view);
 }
 
-std::vector<PlayerInput> read_replay(std::istream& stream) {
-    std::vector<PlayerInput> inputs;
+InputOutcome execute_input(Game& game, int& flight, const PlayerInput& input) {
+    const auto old_hero = game.hero;
+    const auto old_floors = game.floors;
+    const auto old_monsters = game.monsters;
+    const auto old_dialogue = game.dialogue;
+    const auto old_status = game.status;
+    const auto old_flight = flight;
+    const bool old_dead = game.visual.dead;
+    InputOutcome result;
+    result.accepted = apply_input(game, flight, input);
+    settle_action(game, &result.speech);
+    auto compared_hero = game.hero;
+    compared_hero.facing = old_hero.facing; // Turning toward a wall is a refused contact.
+    const bool changed = compared_hero != old_hero || game.floors != old_floors ||
+                         game.monsters != old_monsters || game.dialogue != old_dialogue ||
+                         flight != old_flight || game.visual.dead != old_dead;
+    result.ok = result.accepted && (input.kind != InputKind::Move || changed || !result.speech.empty());
+    result.moved =
+        game.hero.x != old_hero.x || game.hero.y != old_hero.y || game.hero.floor != old_hero.floor;
+    result.messages = result.speech;
+    if (game.status != old_status)
+        result.messages.push_back(game.status);
+    result.message = game.status != old_status ? game.status
+                     : !result.speech.empty()  ? result.speech.back()
+                     : result.ok               ? "Action applied."
+                     : result.accepted         ? "Contact did not change the board or hero position."
+                                               : "Action unavailable in the current state.";
+    return result;
+}
+
+std::optional<PlayerInput> read_replay_input(std::istream& stream, std::size_t& number) {
     std::string line;
-    std::size_t number{};
     while (std::getline(stream, line)) {
         ++number;
         if (line.find_first_not_of(" \t\r") == std::string::npos)
             continue;
         try {
-            inputs.push_back(parse_input(line));
+            return parse_input(line);
         } catch (const std::exception& error) {
             throw std::runtime_error("Line " + std::to_string(number) + ": " + error.what());
         }
     }
     if (stream.bad())
         throw std::runtime_error("Unable to read recording");
+    return std::nullopt;
+}
+
+std::vector<PlayerInput> read_replay(std::istream& stream) {
+    std::vector<PlayerInput> inputs;
+    std::size_t number{};
+    while (const auto input = read_replay_input(stream, number))
+        inputs.push_back(*input);
     return inputs;
+}
+
+void write_replay(std::ostream& stream, std::span<const PlayerInput> inputs) {
+    for (const auto& input : inputs)
+        stream << input_json(input) << '\n';
+    if (!stream)
+        throw std::runtime_error("Unable to write replay recording");
 }
 } // namespace tsw

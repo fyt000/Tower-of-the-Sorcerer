@@ -19,7 +19,7 @@ Ghidra files are marked as decompiler inspection output.
 | vcpkg catalog | `b5d1a94fb7f88fd835e360fd23a45a09ceedbf48` | Build tool, not distributed with game |
 | TinySoundFont / TinyMidiLoader | `853a0a171759f1ddba0de1442133a75912bbeffa` | `TinySoundFont-LICENSE.txt` |
 | Catch2 (test runner only) | 3.13.0, vcpkg port revision 1 | `licenses/catch2.txt` |
-| Glaze (replay input/output) | 7.2.2 | `licenses/glaze.txt` |
+| Glaze (replay and MCP input/output) | 7.2.2 | `licenses/glaze.txt` |
 | GeneralUser GS | 2.0.3; `684543d5e5efaef08d02be50dcda8d552478fa60` | `GeneralUser-GS-LICENSE.txt` |
 
 GeneralUser GS is by **S. Christian Collins**. The package includes the complete

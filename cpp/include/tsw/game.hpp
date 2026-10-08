@@ -224,6 +224,7 @@ struct Command {
 
 struct Monster {
     std::int32_t hp{}, attack{}, defense{}, gold{};
+    friend bool operator==(const Monster&, const Monster&) = default;
 };
 
 struct EnemyInfo {
@@ -235,6 +236,7 @@ struct EnemyInfo {
 struct Floor {
     std::uint8_t up_landing{}, down_landing{};
     std::array<std::uint8_t, CellCount> tiles{};
+    friend bool operator==(const Floor&, const Floor&) = default;
 };
 
 struct Hero {
@@ -257,6 +259,7 @@ struct Hero {
     int music_track = 5;
     int flight_direction{}, highest_floor_stair{};
     int fairy_score{}, fairy_rank{}, fairy_category{};
+    friend bool operator==(const Hero&, const Hero&) = default;
 };
 
 struct Dialogue {
@@ -264,6 +267,7 @@ struct Dialogue {
     int continuation{};
     bool shop{};
     std::array<std::string, 3> choices{};
+    friend bool operator==(const Dialogue&, const Dialogue&) = default;
 };
 
 struct Visual {
@@ -315,6 +319,8 @@ class Game {
     void finish_commands(bool continue_speech = false);
     bool busy() const;
 
+    int shop_cost() const { return dialogue && dialogue->shop ? shop_cost_ : -1; }
+
     int& inventory(Item item) { return hero.items.at(static_cast<int>(item)); }
 
     int inventory(Item item) const { return hero.items.at(static_cast<int>(item)); }
@@ -365,6 +371,7 @@ class Game {
     int contact_index{}, scratch_index{}, neighbor_index{}, message_code{}, door_opened{};
 
   private:
+    friend struct GameState;
     // Preserve unmapped Delphi fields and the manual writer's live checksum words.
     mutable std::optional<std::array<std::uint32_t, OriginalHeroWordCount>> original_save_record_;
 

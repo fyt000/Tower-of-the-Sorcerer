@@ -6,8 +6,7 @@ namespace tsw {
 namespace {
 void write_recording(const std::filesystem::path& path, const std::vector<PlayerInput>& history) {
     std::ofstream output(path, std::ios::binary | std::ios::trunc);
-    for (const auto& input : history)
-        output << input_json(input) << '\n';
+    write_replay(output, history);
     output.flush();
     if (!output)
         throw std::runtime_error("Unable to write replay recording");

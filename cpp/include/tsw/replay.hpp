@@ -1,5 +1,6 @@
 #pragma once
 #include "tsw/game.hpp"
+#include <functional>
 #include <iosfwd>
 #include <span>
 
@@ -31,9 +32,22 @@ struct PlayerInput {
 PlayerInput parse_input(std::string_view);
 std::string input_json(const PlayerInput&);
 bool apply_input(Game&, int& flight, const PlayerInput&);
-void settle_action(Game&);
+void settle_action(Game&, std::vector<std::string>* speech = nullptr);
+
+// Settled execution shared by headless clients and replay seek. Animated playback
+// deliberately uses apply_input alone and lets the desktop drain the command stack.
+struct InputOutcome {
+    bool accepted{}, ok{}, moved{};
+    std::vector<std::string> speech, messages;
+    std::string message;
+};
+
+InputOutcome execute_input(Game&, int& flight, const PlayerInput&);
+using InputObserver = std::function<void(const PlayerInput&, const InputOutcome&)>;
 std::string gameplay_json(const Game&, int flight = -1, int map_floor = -1);
+std::optional<PlayerInput> read_replay_input(std::istream&, std::size_t& line_number);
 std::vector<PlayerInput> read_replay(std::istream&);
+void write_replay(std::ostream&, std::span<const PlayerInput>);
 std::filesystem::path recording_path(const std::filesystem::path& save);
 
 // Rewind reconstructs a prefix through real actions, without snapshots or a state schema.
@@ -50,7 +64,7 @@ class ReplayPlayer {
     std::span<const PlayerInput> history() const { return {inputs_.data(), position_}; }
 
     bool next(Game&, int& flight);
-    void seek(Game&, int& flight, std::size_t position);
+    void seek(Game&, int& flight, std::size_t position, const InputObserver& = {});
 
   private:
     std::vector<PlayerInput> inputs_;
@@ -64,6 +78,10 @@ class Recorder {
     bool enabled() const { return enabled_; }
 
     bool active() const { return history_.has_value(); }
+
+    std::span<const PlayerInput> history() const {
+        return history_ ? std::span<const PlayerInput>(*history_) : std::span<const PlayerInput>{};
+    }
 
     void enable(bool);
     void new_game();

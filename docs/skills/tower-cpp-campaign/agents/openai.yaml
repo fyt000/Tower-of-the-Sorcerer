@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tower C++ Campaign"
+  short_description: "Play the C++ tower with resource-aware strategy"
+  default_prompt: "Use $tower-cpp-campaign to continue the C++ tower campaign, preserve resources, and reassess the strategy for the current floors and cycle."

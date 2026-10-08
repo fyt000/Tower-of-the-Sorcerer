@@ -35,6 +35,10 @@ Settings using the original opening artwork. The
 [replay recorder, visual playback and CLI](docs/replay-verification.md) support
 recording C++ player actions, watching with pause/step/rewind/takeover controls
 and checking explicit gameplay values with a separate test script.
+The [native C++ MCP mode](docs/cpp-mcp.md) exposes player observations, inspection,
+actions, original-format saves and replay import/export through `tsw_cli mcp`.
+An optional Python bridge hot-reloads immutable C++ workers while preserving
+the complete session, including open shops, Flight, recordings and checkpoints.
 
 The original installation is read only during development and tests. Decompiled
 exports are inspection evidence, not the author's original source. Local media

@@ -127,6 +127,39 @@ Manual slots read and write `Savedat/save1.dat` through `save8.dat` beside the
 executable. The same path is used regardless of which executable created a save.
 `--save-dir` selects a different directory explicitly; slot lookup stays within it.
 
+## Native C++ MCP boundary
+
+`tsw_mcp` adds the stdio JSON-RPC server to `tsw_cli mcp`. Glaze parses and writes
+transport records; the original core retains its native structs and private
+continuations. The observation projection adds named tile definitions, native
+combat forecasts, item help, equipment, Wisdom clues, dialogue choices and
+recent speech. Normal observations retain visible appearances and Hero Orb
+access rules; developer observations expose raw native state and copied-session
+simulations. Headless settling can collect speech before advancing continuations,
+with identical gameplay writes to ordinary replay settling.
+
+Session checkpoints copy `Game` and application state, preserving private shop
+fields, Flight selection, recording and the observation timeline. Persistent
+files use `Game::save/load` and `Recorder` without an additional serialization
+schema. CLI and replay share an incremental JSONL reader and recording writer.
+Typed settled input execution returns speech and contact outcomes without a
+JSON comparison. `ReplayPlayer::seek` reconstructs prefixes for desktop rewind
+and MCP; an observer records MCP history/feedback in a temporary session before
+committing. Forward desktop playback uses `apply_input` and retains animation
+commands for its scheduler. Recordings support immediate takeover.
+The server needs no desktop/media dependencies. [The MCP interface](cpp-mcp.md)
+documents tools, resources, save boundaries, replay and Python hot reload.
+
+The optional Python stdio bridge runs immutable C++ workers, replacing them on
+manifest activation through private versioned checkpoint/restore RPCs.
+`GameState` captures every native field, including private shop/fight state and
+original checksum words, without a JSON dependency in the core. Glaze serializes
+that state at the MCP boundary with recording/timeline/checkpoints. Restoration
+validates a complete temporary session before committing; a failed candidate
+leaves a healthy old worker active. Publication probes a copied worker before
+atomically replacing the manifest. The public bridge denies runtime RPCs and
+adds only the read-only `mcp_runtime` tool to the native catalog.
+
 ## Existing Rust implementation
 
 `tos-core` is a deterministic engine with configurable campaign rules, scripts,

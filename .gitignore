@@ -1,4 +1,5 @@
 /build/
+/artifacts/
 /rust/node_modules/
 /rust/web/pkg/
 /rust/web/campaign.json
@@ -8,3 +9,5 @@
 **/__pycache__/
 *.save.json
 *.log
+*.tmp
+*.temp

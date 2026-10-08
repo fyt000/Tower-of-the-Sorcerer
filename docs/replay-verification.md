@@ -14,6 +14,14 @@ core and original binary saves have no JSON dependency. Commands are checked
 for required fields, unknown fields and valid player choices. Existing JSONL
 recordings remain readable regardless of object field order.
 
+The desktop recorder, headless CLI and [native MCP mode](cpp-mcp.md) share
+JSONL parsing/writing and player inputs in `tsw_replay`. Settled execution
+returns typed contact outcomes and captured speech for headless clients;
+`ReplayPlayer::seek` uses that execution for desktop rewind and MCP prefix
+reconstruction. Forward desktop playback still leaves animation commands
+queued for its scheduler. CLI prefixes stop reading at `--limit`; MCP validates
+the whole recording before replacing its live session.
+
 ## Opt in and save
 
 Recording is off by default. Start with `--record`, or enable

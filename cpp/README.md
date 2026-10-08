@@ -208,6 +208,42 @@ describe save branching, original reload behavior and the external assertion too
 The Rust comparison adapter is later work; the C++ recorder does not impose a
 common internal representation on either engine.
 
+## Native MCP mode
+
+`tsw_cli mcp` serves the C++ game directly over stdio, including visible state,
+tile inspection, Hero Orb forecasts, dialogue choices/clues, destination
+navigation, save/load and JSONL replay import/export. Compact observations group
+event descriptions and forecasts by type; routine actions return resource and
+tile changes. `detail: "full"` provides raw maps, history and item usage help.
+`--developer` additionally enables native diagnostics, all-floor observations
+in full detail and isolated action simulations. It uses the same core,
+original save format and player inputs as the desktop, with no Node runtime:
+
+```powershell
+./build/cpp/vs/Release/tsw_cli.exe mcp
+./build/cpp/vs/Release/tsw_cli.exe mcp --load ./Savedat/save1.dat
+./build/cpp/vs/Release/tsw_cli.exe mcp --developer
+```
+
+Session checkpoints can retain open shops and Flight previews. Supply a path to
+save an original `.dat` with a replay companion for persistence after disconnect.
+Replays can run a whole recording or a prefix, followed by live takeover.
+For hot reload, publish a worker and configure the client to launch the Python
+bridge (Python 3.10+, standard library only):
+
+```powershell
+python cpp/tools/build_mcp.py --build-dir build/cpp/vs
+python cpp/tools/mcp_server.py --developer
+```
+
+Republishing replaces the worker before its next request while the bridge stays
+connected. The complete session transfers, including open shops, Flight,
+recording and checkpoint IDs. Workers run immutable executable copies, allowing
+rebuilds on Windows. `mcp_runtime` exposes deployment, process IDs and reload
+health. Failed candidates retain the old worker; actions are never retried.
+[MCP tools, observations, client configuration and save/replay behavior](../docs/cpp-mcp.md)
+describe the native interface and Python publication/reload workflow.
+
 ## Validate and package
 
 Catch2 runs core cases in `tsw_tests` and offline playback cases in `tsw_audio_tests`.

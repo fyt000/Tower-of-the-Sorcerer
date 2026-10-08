@@ -16,14 +16,19 @@ bool ReplayPlayer::next(Game& game, int& flight) {
     return true;
 }
 
-void ReplayPlayer::seek(Game& game, int& flight, std::size_t position) {
+void ReplayPlayer::seek(Game& game, int& flight, std::size_t position, const InputObserver& observer) {
     if (position > inputs_.size())
         throw std::out_of_range("Replay step is outside this recording");
     Game restored;
     int restored_flight = -1;
     for (std::size_t i = 0; i < position; ++i) {
-        apply_input(restored, restored_flight, inputs_[i]);
-        settle_action(restored);
+        try {
+            const auto outcome = execute_input(restored, restored_flight, inputs_[i]);
+            if (observer)
+                observer(inputs_[i], outcome);
+        } catch (const std::exception& error) {
+            throw std::runtime_error("Replay input " + std::to_string(i + 1) + ": " + error.what());
+        }
     }
     game = std::move(restored);
     flight = restored_flight;
