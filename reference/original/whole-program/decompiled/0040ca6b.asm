@@ -1,0 +1,5 @@
+; FUN_0040ca6b at 0x0040ca6b
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040ca6b  8d45ec  LEA EAX,[EBP + -0x14]
+0040ca6e  e8696affff  CALL 0x004034dc
+0040ca73  c3  RET

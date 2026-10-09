@@ -1,0 +1,12 @@
+; root_0040fbc8 at 0x0040fbc8
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040fbc8  53  PUSH EBX
+0040fbca  8ca64800e82d  MOV word ptr [ESI + 0x2de80048],FS
+0040fbd0  a1ffff8bd8  MOV EAX,[0xd88bffff]
+0040fbd5  0fb7d3  MOVZX EDX,BX
+0040fbd8  b101  MOV CL,0x1
+0040fbda  a18ca64800  MOV EAX,[0x0048a68c]
+0040fbdf  e8d8a0ffff  CALL 0x00409cbc
+0040fbe4  8bc3  MOV EAX,EBX
+0040fbe6  5b  POP EBX
+0040fbe7  c3  RET

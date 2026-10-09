@@ -1,0 +1,5 @@
+; FUN_0040dc0f at 0x0040dc0f
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040dc0f  8d45fc  LEA EAX,[EBP + -0x4]
+0040dc12  e8c558ffff  CALL 0x004034dc
+0040dc17  c3  RET

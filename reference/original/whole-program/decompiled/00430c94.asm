@@ -1,0 +1,4 @@
+; root_00430c94 at 0x00430c94
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00430c94  c7420c01000000  MOV dword ptr [EDX + 0xc],0x1
+00430c9b  c3  RET

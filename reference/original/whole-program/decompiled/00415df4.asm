@@ -1,0 +1,9 @@
+; root_00415df4 at 0x00415df4
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00415df4  6683b8fa00000000  CMP word ptr [EAX + 0xfa],0x0
+00415dfc  7410  JZ 0x00415e0e
+00415dfe  8bc8  MOV ECX,EAX
+00415e00  8bd0  MOV EDX,EAX
+00415e02  8b81fc000000  MOV EAX,dword ptr [ECX + 0xfc]
+00415e08  ff91f8000000  CALL dword ptr [ECX + 0xf8]
+00415e0e  c3  RET

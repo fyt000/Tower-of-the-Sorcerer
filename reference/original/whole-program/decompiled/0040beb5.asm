@@ -1,0 +1,17 @@
+; root_0040beb5 at 0x0040beb5
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040beb5  8b4508  MOV EAX,dword ptr [EBP + 0x8]
+0040beb8  50  PUSH EAX
+0040beb9  8b4508  MOV EAX,dword ptr [EBP + 0x8]
+0040bebc  83c0f0  ADD EAX,-0x10
+0040bebf  e83cffffff  CALL 0x0040be00
+0040bec4  59  POP ECX
+0040bec5  84c0  TEST AL,AL
+0040bec7  7505  JNZ 0x0040bece
+0040bec9  e84673ffff  CALL 0x00403214
+0040bece  e89573ffff  CALL 0x00403268
+0040bed3  5f  POP EDI
+0040bed4  5e  POP ESI
+0040bed5  5b  POP EBX
+0040bed6  5d  POP EBP
+0040bed7  c3  RET

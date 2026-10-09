@@ -1,0 +1,12 @@
+; root_0041df99 at 0x0041df99
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041df99  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0041df9c  e8934cfeff  CALL 0x00402c34
+0041dfa1  e86e52feff  CALL 0x00403214
+0041dfa6  e8bd52feff  CALL 0x00403268
+0041dfab  5f  POP EDI
+0041dfac  5e  POP ESI
+0041dfad  5b  POP EBX
+0041dfae  8be5  MOV ESP,EBP
+0041dfb0  5d  POP EBP
+0041dfb1  c3  RET

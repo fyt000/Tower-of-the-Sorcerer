@@ -1,0 +1,3 @@
+; root_0041b0c7 at 0x0041b0c7
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041b0c7  ebe3  JMP 0x0041b0ac

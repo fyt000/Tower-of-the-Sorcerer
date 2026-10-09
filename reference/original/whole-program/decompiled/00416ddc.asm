@@ -1,0 +1,9 @@
+; root_00416ddc at 0x00416ddc
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00416ddc  f6403608  TEST byte ptr [EAX + 0x36],0x8
+00416de0  740a  JZ 0x00416dec
+00416de2  0fbfd2  MOVSX EDX,DX
+00416de5  8990c8000000  MOV dword ptr [EAX + 0xc8],EDX
+00416deb  c3  RET
+00416dec  e88fffffff  CALL 0x00416d80
+00416df1  c3  RET

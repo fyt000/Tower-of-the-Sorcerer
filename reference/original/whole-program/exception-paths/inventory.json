@@ -1,0 +1,1216 @@
+{
+  "schema_version": 1,
+  "original_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "published_methods": 230,
+  "exception_frames": 64,
+  "frames_with_parent_omissions": 64,
+  "frames_with_global_omissions": 1,
+  "frames": [
+    {
+      "method": "TForm2.scoresave",
+      "original_entry": "0x439ce0",
+      "handler": "0x43a2ea",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0043a2ef"
+      ],
+      "assembly_file": "0043a2ea.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TForm2.scoreload",
+      "original_entry": "0x437f2c",
+      "handler": "0x439b19",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 4,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00438c65",
+        "00439b1e"
+      ],
+      "assembly_file": "00439b19.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TForm2.scoreload",
+      "original_entry": "0x437f2c",
+      "handler": "0x438c60",
+      "dispatcher": "0x402f4c",
+      "kind": "@HandleAnyException",
+      "instructions": 8,
+      "instruction_bytes": 36,
+      "omitted_from_parent_export": 8,
+      "omitted_from_all_exports": 1,
+      "absent_addresses": [
+        "0x438c7d"
+      ],
+      "unresolved_exits": [
+        {
+          "address": "0x438c7d",
+          "reason": "indirect-control-transfer"
+        },
+        {
+          "address": "0x43966b",
+          "reason": "@DoneExcept-runtime-transfer"
+        }
+      ],
+      "continuation_export_owners": [
+        "00438c65"
+      ],
+      "assembly_file": "00438c60.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TForm2.hyouji",
+      "original_entry": "0x436c14",
+      "handler": "0x437589",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0043758e"
+      ],
+      "assembly_file": "00437589.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TForm2.loadwork",
+      "original_entry": "0x43a3fc",
+      "handler": "0x43a4e0",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 4,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0043a4c5",
+        "0043a4e5"
+      ],
+      "assembly_file": "0043a4e0.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TForm2.loadwork",
+      "original_entry": "0x43a3fc",
+      "handler": "0x43a4c0",
+      "dispatcher": "0x402f4c",
+      "kind": "@HandleAnyException",
+      "instructions": 1,
+      "instruction_bytes": 5,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [
+        {
+          "address": "0x43a4c5",
+          "reason": "@DoneExcept-runtime-transfer"
+        }
+      ],
+      "continuation_export_owners": [
+        "0043a4c5"
+      ],
+      "assembly_file": "0043a4c0.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TForm2.optionload",
+      "original_entry": "0x4375d8",
+      "handler": "0x437f08",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00437f0d"
+      ],
+      "assembly_file": "00437f08.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TForm2.Button1Click",
+      "original_entry": "0x43a5f0",
+      "handler": "0x43bbba",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0043bbbf"
+      ],
+      "assembly_file": "0043bbba.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TForm4.Button1Click",
+      "original_entry": "0x4402e8",
+      "handler": "0x44084d",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 7,
+      "instruction_bytes": 24,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00440852"
+      ],
+      "assembly_file": "0044084d.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TForm4.Button3Click",
+      "original_entry": "0x440984",
+      "handler": "0x440a2b",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 6,
+      "instruction_bytes": 19,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00440a30"
+      ],
+      "assembly_file": "00440a2b.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.syokidata0",
+      "original_entry": "0x484f48",
+      "handler": "0x488842",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00488847"
+      ],
+      "assembly_file": "00488842.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.openning9",
+      "original_entry": "0x482e60",
+      "handler": "0x48473f",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00484744"
+      ],
+      "assembly_file": "0048473f.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.monswork",
+      "original_entry": "0x44b6f4",
+      "handler": "0x44b77c",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0044b781"
+      ],
+      "assembly_file": "0044b77c.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.img6work",
+      "original_entry": "0x480f60",
+      "handler": "0x48197f",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00481984"
+      ],
+      "assembly_file": "0048197f.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.taisen2",
+      "original_entry": "0x47f7d4",
+      "handler": "0x480264",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 5,
+      "instruction_bytes": 16,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00480269"
+      ],
+      "assembly_file": "00480264.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.obudameiji",
+      "original_entry": "0x44ff0c",
+      "handler": "0x45004a",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 5,
+      "instruction_bytes": 16,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0045004f"
+      ],
+      "assembly_file": "0045004a.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.loadwork",
+      "original_entry": "0x47e7d4",
+      "handler": "0x47ea93",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 4,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047ea47",
+        "0047ea98"
+      ],
+      "assembly_file": "0047ea93.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.loadwork",
+      "original_entry": "0x47e7d4",
+      "handler": "0x47ea42",
+      "dispatcher": "0x402f4c",
+      "kind": "@HandleAnyException",
+      "instructions": 4,
+      "instruction_bytes": 23,
+      "omitted_from_parent_export": 4,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [
+        {
+          "address": "0x47ea59",
+          "reason": "@DoneExcept-runtime-transfer"
+        }
+      ],
+      "continuation_export_owners": [
+        "0047ea47"
+      ],
+      "assembly_file": "0047ea42.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.savework",
+      "original_entry": "0x47eadc",
+      "handler": "0x47ec11",
+      "dispatcher": "0x402f4c",
+      "kind": "@HandleAnyException",
+      "instructions": 26,
+      "instruction_bytes": 128,
+      "omitted_from_parent_export": 26,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [
+        {
+          "address": "0x47ec91",
+          "reason": "@DoneExcept-runtime-transfer"
+        }
+      ],
+      "continuation_export_owners": [
+        "0047ec16"
+      ],
+      "assembly_file": "0047ec11.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.soundplay",
+      "original_entry": "0x47c2bc",
+      "handler": "0x47c70c",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047c711"
+      ],
+      "assembly_file": "0047c70c.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.yousei",
+      "original_entry": "0x478f0c",
+      "handler": "0x47bd30",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 7,
+      "instruction_bytes": 30,
+      "omitted_from_parent_export": 7,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00479eae",
+        "0047bd35"
+      ],
+      "assembly_file": "0047bd30.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.yousei",
+      "original_entry": "0x478f0c",
+      "handler": "0x479ea9",
+      "dispatcher": "0x402f4c",
+      "kind": "@HandleAnyException",
+      "instructions": 7,
+      "instruction_bytes": 34,
+      "omitted_from_parent_export": 7,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [
+        {
+          "address": "0x479ec4",
+          "reason": "indirect-control-transfer"
+        },
+        {
+          "address": "0x47a7e2",
+          "reason": "@DoneExcept-runtime-transfer"
+        }
+      ],
+      "continuation_export_owners": [
+        "00479eae"
+      ],
+      "assembly_file": "00479ea9.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.ichicheck",
+      "original_entry": "0x46cb1c",
+      "handler": "0x4770c4",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "004770c9"
+      ],
+      "assembly_file": "004770c4.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.touzoku",
+      "original_entry": "0x465900",
+      "handler": "0x4660b6",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "004660bb"
+      ],
+      "assembly_file": "004660b6.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.openning31",
+      "original_entry": "0x4653b8",
+      "handler": "0x465882",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00465887"
+      ],
+      "assembly_file": "00465882.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.openning2",
+      "original_entry": "0x464048",
+      "handler": "0x4653a7",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "004653ac"
+      ],
+      "assembly_file": "004653a7.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.mevent",
+      "original_entry": "0x46397c",
+      "handler": "0x46403a",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0046403f"
+      ],
+      "assembly_file": "0046403a.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.monshyouji",
+      "original_entry": "0x44b78c",
+      "handler": "0x44bbfd",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0044bc02"
+      ],
+      "assembly_file": "0044bbfd.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.syokidata2",
+      "original_entry": "0x454de8",
+      "handler": "0x455bb5",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00455bba"
+      ],
+      "assembly_file": "00455bb5.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.dameiji",
+      "original_entry": "0x450064",
+      "handler": "0x45026d",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 5,
+      "instruction_bytes": 16,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00450272"
+      ],
+      "assembly_file": "0045026d.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.stackwork",
+      "original_entry": "0x4526c0",
+      "handler": "0x454804",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00454809"
+      ],
+      "assembly_file": "00454804.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.yousya",
+      "original_entry": "0x44f26c",
+      "handler": "0x44fef1",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 5,
+      "instruction_bytes": 16,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0044fef6"
+      ],
+      "assembly_file": "0044fef1.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.zyouout",
+      "original_entry": "0x449e18",
+      "handler": "0x44a437",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 6,
+      "instruction_bytes": 19,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0044a43c"
+      ],
+      "assembly_file": "0044a437.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.syounin",
+      "original_entry": "0x449014",
+      "handler": "0x4496ed",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "004496f2"
+      ],
+      "assembly_file": "004496ed.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.taisen",
+      "original_entry": "0x44a480",
+      "handler": "0x44b6cd",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 5,
+      "instruction_bytes": 16,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0044b6d2"
+      ],
+      "assembly_file": "0044b6cd.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.handan",
+      "original_entry": "0x444490",
+      "handler": "0x448fd7",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 5,
+      "instruction_bytes": 16,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00448fdc"
+      ],
+      "assembly_file": "00448fd7.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.disp",
+      "original_entry": "0x44cb34",
+      "handler": "0x44ccb1",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 5,
+      "instruction_bytes": 16,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0044ccb6"
+      ],
+      "assembly_file": "0044ccb1.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.formactivate",
+      "original_entry": "0x44280c",
+      "handler": "0x442ba8",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 4,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "004429e6",
+        "00442bad"
+      ],
+      "assembly_file": "00442ba8.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.formactivate",
+      "original_entry": "0x44280c",
+      "handler": "0x4429e1",
+      "dispatcher": "0x402f4c",
+      "kind": "@HandleAnyException",
+      "instructions": 43,
+      "instruction_bytes": 188,
+      "omitted_from_parent_export": 43,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [
+        {
+          "address": "0x442a9d",
+          "reason": "@DoneExcept-runtime-transfer"
+        }
+      ],
+      "continuation_export_owners": [
+        "004429e6"
+      ],
+      "assembly_file": "004429e1.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Button2Click",
+      "original_entry": "0x44e1cc",
+      "handler": "0x44ea74",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 5,
+      "instruction_bytes": 16,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0044ea79"
+      ],
+      "assembly_file": "0044ea74.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Button38Click",
+      "original_entry": "0x450ba0",
+      "handler": "0x451b5d",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 5,
+      "instruction_bytes": 16,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00451b62"
+      ],
+      "assembly_file": "00451b5d.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Button39Click",
+      "original_entry": "0x451e1c",
+      "handler": "0x452098",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 5,
+      "instruction_bytes": 16,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0045209d"
+      ],
+      "assembly_file": "00452098.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Button40Click",
+      "original_entry": "0x4520b4",
+      "handler": "0x452344",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 5,
+      "instruction_bytes": 16,
+      "omitted_from_parent_export": 5,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00452336",
+        "00452349"
+      ],
+      "assembly_file": "00452344.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Button41Click",
+      "original_entry": "0x452360",
+      "handler": "0x4525f2",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 5,
+      "instruction_bytes": 16,
+      "omitted_from_parent_export": 5,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "004525e4",
+        "004525f7"
+      ],
+      "assembly_file": "004525f2.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Load11Click",
+      "original_entry": "0x47d9d4",
+      "handler": "0x47db5e",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047db63"
+      ],
+      "assembly_file": "0047db5e.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Load21Click",
+      "original_entry": "0x47db94",
+      "handler": "0x47dd1e",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047dd23"
+      ],
+      "assembly_file": "0047dd1e.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Load31Click",
+      "original_entry": "0x47dd54",
+      "handler": "0x47dede",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047dee3"
+      ],
+      "assembly_file": "0047dede.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Load41Click",
+      "original_entry": "0x47df14",
+      "handler": "0x47e09e",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047e0a3"
+      ],
+      "assembly_file": "0047e09e.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Load51Click",
+      "original_entry": "0x47e0d4",
+      "handler": "0x47e25e",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047e263"
+      ],
+      "assembly_file": "0047e25e.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Load61Click",
+      "original_entry": "0x47e294",
+      "handler": "0x47e41e",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047e423"
+      ],
+      "assembly_file": "0047e41e.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Load71Click",
+      "original_entry": "0x47e454",
+      "handler": "0x47e5de",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047e5e3"
+      ],
+      "assembly_file": "0047e5de.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Load81Click",
+      "original_entry": "0x47e614",
+      "handler": "0x47e79e",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047e7a3"
+      ],
+      "assembly_file": "0047e79e.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.OptionSave1Click",
+      "original_entry": "0x47d324",
+      "handler": "0x47d44a",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047d44f"
+      ],
+      "assembly_file": "0047d44a.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Save11Click",
+      "original_entry": "0x47ecc4",
+      "handler": "0x47ed97",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047ed9c"
+      ],
+      "assembly_file": "0047ed97.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Save21Click",
+      "original_entry": "0x47edb8",
+      "handler": "0x47ee8b",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047ee90"
+      ],
+      "assembly_file": "0047ee8b.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Save31Click",
+      "original_entry": "0x47eeac",
+      "handler": "0x47ef7f",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047ef84"
+      ],
+      "assembly_file": "0047ef7f.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Save41Click",
+      "original_entry": "0x47efa0",
+      "handler": "0x47f073",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047f078"
+      ],
+      "assembly_file": "0047f073.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Save51Click",
+      "original_entry": "0x47f094",
+      "handler": "0x47f167",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047f16c"
+      ],
+      "assembly_file": "0047f167.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Save61Click",
+      "original_entry": "0x47f188",
+      "handler": "0x47f25b",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047f260"
+      ],
+      "assembly_file": "0047f25b.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Save71Click",
+      "original_entry": "0x47f27c",
+      "handler": "0x47f34f",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047f354"
+      ],
+      "assembly_file": "0047f34f.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.Save81Click",
+      "original_entry": "0x47f370",
+      "handler": "0x47f443",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "0047f448"
+      ],
+      "assembly_file": "0047f443.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.HighScore1Click",
+      "original_entry": "0x482988",
+      "handler": "0x482a5f",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00482a64"
+      ],
+      "assembly_file": "00482a5f.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.timer4ontimer",
+      "original_entry": "0x482a98",
+      "handler": "0x482e3e",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00482e43"
+      ],
+      "assembly_file": "00482e3e.asm",
+      "semantic_recovery_proven": false
+    },
+    {
+      "method": "TTSW10.K6Click",
+      "original_entry": "0x484a50",
+      "handler": "0x484b04",
+      "dispatcher": "0x403140",
+      "kind": "@HandleFinally",
+      "instructions": 4,
+      "instruction_bytes": 11,
+      "omitted_from_parent_export": 1,
+      "omitted_from_all_exports": 0,
+      "absent_addresses": [],
+      "unresolved_exits": [],
+      "continuation_export_owners": [
+        "00484b09"
+      ],
+      "assembly_file": "00484b04.asm",
+      "semantic_recovery_proven": false
+    }
+  ],
+  "complete_exception_recovery": false,
+  "limits": [
+    "Only retained published-method instructions that install a Delphi FS catch/finally frame are scanned. Omitted parent instructions can themselves hide further frames.",
+    "Continuation roots are recognized only for @HandleAnyException and @HandleFinally. Typed/unknown handlers are retained as unresolved.",
+    "Calls are recorded but not inlined; Windows dispatch and exception/unwind runtime are not executed by this audit.",
+    "This supplements the existing structural ledger; it does not relabel prior decompilation or establish semantic equivalence."
+  ]
+}

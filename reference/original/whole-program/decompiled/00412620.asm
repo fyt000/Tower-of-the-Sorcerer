@@ -1,0 +1,6 @@
+; root_00412620 at 0x00412620
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00412620  8b4004  MOV EAX,dword ptr [EAX + 0x4]
+00412623  8b10  MOV EDX,dword ptr [EAX]
+00412625  ff5234  CALL dword ptr [EDX + 0x34]
+00412628  c3  RET

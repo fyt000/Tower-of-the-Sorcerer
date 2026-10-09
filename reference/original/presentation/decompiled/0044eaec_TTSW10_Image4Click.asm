@@ -1,0 +1,4 @@
+; TTSW10_Image4Click at 0044eaec
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0044eaec  e88f330300  CALL 0x00481e80
+0044eaf1  c3  RET

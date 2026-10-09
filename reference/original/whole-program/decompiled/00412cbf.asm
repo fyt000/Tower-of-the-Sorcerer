@@ -1,0 +1,7 @@
+; FUN_00412cbf at 0x00412cbf
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00412cba  e8e5ffffff  CALL 0x00412ca4
+00412cbf  a1d0a64800  MOV EAX,[0x0048a6d0]
+00412cc4  83780800  CMP dword ptr [EAX + 0x8],0x0
+00412cc8  7ff0  JG 0x00412cba
+00412cca  c3  RET

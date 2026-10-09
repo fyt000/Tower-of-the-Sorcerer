@@ -2,6 +2,9 @@
 *.rs text eol=lf
 *.cpp text eol=lf
 *.hpp text eol=lf
+*.pas text eol=lf
+*.dpr text eol=lf
+*.inc text eol=lf
 *.cmake text eol=lf
 CMakeLists.txt text eol=lf
 .gitignore text eol=lf
@@ -17,3 +20,17 @@ CMakeLists.txt text eol=lf
 *.wav binary
 *.mid binary
 *.ttf binary
+
+# Retain the exact bytes of recovered evidence and hash-checked reports.
+# These may contain either LF or CRLF; normalization invalidates their hashes.
+/reference/original/presentation/** -text !eol whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+/reference/original/whole-program/** -text !eol whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+/reference/delphi2/runtime-spans/** -text !eol whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+/reference/delphi2/*.json -text !eol whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+/delphi/*-report.json -text !eol whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+/delphi/src/generated/** -text !eol whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Ghidra exports and retained assembly keep their hash-addressed whitespace.
+/reference/original/presentation/decompiled/** -whitespace
+/reference/original/whole-program/decompiled/** -whitespace
+/reference/original/whole-program/exception-paths/*.asm -whitespace

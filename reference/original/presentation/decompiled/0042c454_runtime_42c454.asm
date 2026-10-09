@@ -1,0 +1,6 @@
+; Runtime boundary 0042c454; original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0042c454  3a5020  CMP DL,byte ptr [EAX + 0x20]
+0042c457  7408  JZ 0x0042c461
+0042c459  885020  MOV byte ptr [EAX + 0x20],DL
+0042c45c  e8a3ffffff  CALL 0x0042c404
+0042c461  c3  RET

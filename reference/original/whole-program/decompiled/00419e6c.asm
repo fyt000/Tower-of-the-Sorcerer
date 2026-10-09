@@ -1,0 +1,6 @@
+; FUN_00419e6c at 0x00419e6c
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00419e6c  8b400c  MOV EAX,dword ptr [EAX + 0xc]
+00419e6f  8a5019  MOV DL,byte ptr [EAX + 0x19]
+00419e72  8bc2  MOV EAX,EDX
+00419e74  c3  RET

@@ -1,0 +1,30 @@
+; FUN_0040bbb0 at 0x0040bbb0
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040bbb0  53  PUSH EBX
+0040bbb1  56  PUSH ESI
+0040bbb2  57  PUSH EDI
+0040bbb3  8bd8  MOV EBX,EAX
+0040bbb5  8b432c  MOV EAX,dword ptr [EBX + 0x2c]
+0040bbb8  85c0  TEST EAX,EAX
+0040bbba  742b  JZ 0x0040bbe7
+0040bbbc  8b7008  MOV ESI,dword ptr [EAX + 0x8]
+0040bbbf  4e  DEC ESI
+0040bbc0  85f6  TEST ESI,ESI
+0040bbc2  7c16  JL 0x0040bbda
+0040bbc4  46  INC ESI
+0040bbc5  33ff  XOR EDI,EDI
+0040bbc7  8bd7  MOV EDX,EDI
+0040bbc9  8b432c  MOV EAX,dword ptr [EBX + 0x2c]
+0040bbcc  e86fdeffff  CALL 0x00409a40
+0040bbd1  e85e70ffff  CALL 0x00402c34
+0040bbd6  47  INC EDI
+0040bbd7  4e  DEC ESI
+0040bbd8  75ed  JNZ 0x0040bbc7
+0040bbda  8b432c  MOV EAX,dword ptr [EBX + 0x2c]
+0040bbdd  e85270ffff  CALL 0x00402c34
+0040bbe2  33c0  XOR EAX,EAX
+0040bbe4  89432c  MOV dword ptr [EBX + 0x2c],EAX
+0040bbe7  5f  POP EDI
+0040bbe8  5e  POP ESI
+0040bbe9  5b  POP EBX
+0040bbea  c3  RET

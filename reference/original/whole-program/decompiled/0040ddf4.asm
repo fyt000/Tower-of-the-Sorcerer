@@ -1,0 +1,47 @@
+; FUN_0040ddf4 at 0x0040ddf4
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040ddf4  55  PUSH EBP
+0040ddf5  8bec  MOV EBP,ESP
+0040ddf7  6a00  PUSH 0x0
+0040ddf9  53  PUSH EBX
+0040ddfa  56  PUSH ESI
+0040ddfb  57  PUSH EDI
+0040ddfc  33c0  XOR EAX,EAX
+0040ddfe  55  PUSH EBP
+0040ddff  686bde4000  PUSH 0x40de6b
+0040de04  64ff30  PUSH dword ptr FS:[EAX]
+0040de07  648920  MOV dword ptr FS:[EAX],ESP
+0040de0a  8b4508  MOV EAX,dword ptr [EBP + 0x8]
+0040de0d  8b4008  MOV EAX,dword ptr [EAX + 0x8]
+0040de10  50  PUSH EAX
+0040de11  e896fbffff  CALL 0x0040d9ac
+0040de16  59  POP ECX
+0040de17  84c0  TEST AL,AL
+0040de19  7430  JZ 0x0040de4b
+0040de1b  8d4dfc  LEA ECX,[EBP + -0x4]
+0040de1e  8b4508  MOV EAX,dword ptr [EBP + 0x8]
+0040de21  8b4008  MOV EAX,dword ptr [EAX + 0x8]
+0040de24  8b50f4  MOV EDX,dword ptr [EAX + -0xc]
+0040de27  8b4508  MOV EAX,dword ptr [EBP + 0x8]
+0040de2a  8b4008  MOV EAX,dword ptr [EAX + 0x8]
+0040de2d  8b40fc  MOV EAX,dword ptr [EAX + -0x4]
+0040de30  8b401c  MOV EAX,dword ptr [EAX + 0x1c]
+0040de33  e8d8a6ffff  CALL 0x00408510
+0040de38  8b55fc  MOV EDX,dword ptr [EBP + -0x4]
+0040de3b  8b4508  MOV EAX,dword ptr [EBP + 0x8]
+0040de3e  8b40fc  MOV EAX,dword ptr [EAX + -0x4]
+0040de41  e81a59ffff  CALL 0x00403760
+0040de46  0f94c3  SETZ BL
+0040de49  eb0a  JMP 0x0040de55
+0040de4b  8b4508  MOV EAX,dword ptr [EBP + 0x8]
+0040de4e  8378fc00  CMP dword ptr [EAX + -0x4],0x0
+0040de52  0f94c3  SETZ BL
+0040de55  33c0  XOR EAX,EAX
+0040de57  5a  POP EDX
+0040de58  59  POP ECX
+0040de59  59  POP ECX
+0040de5a  648910  MOV dword ptr FS:[EAX],EDX
+0040de5d  6872de4000  PUSH 0x40de72
+0040de62  8d45fc  LEA EAX,[EBP + -0x4]
+0040de65  e87256ffff  CALL 0x004034dc
+0040de6a  c3  RET

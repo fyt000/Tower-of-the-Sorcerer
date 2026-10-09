@@ -1,0 +1,6 @@
+; TTSW10_Button16Click at 0044eed4
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0044eed4  c705a0c5480005000000  MOV dword ptr [0x0048c5a0],0x5
+0044eede  c70524894b0001000000  MOV dword ptr [0x004b8924],0x1
+0044eee8  e82bafffff  CALL 0x00449e18
+0044eeed  c3  RET

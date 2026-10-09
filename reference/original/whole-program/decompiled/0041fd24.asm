@@ -1,0 +1,16 @@
+; root_0041fd24 at 0x0041fd24
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041fd24  55  PUSH EBP
+0041fd25  8bec  MOV EBP,ESP
+0041fd27  31c0  XOR EAX,EAX
+0041fd29  50  PUSH EAX
+0041fd2a  ff7514  PUSH dword ptr [EBP + 0x14]
+0041fd2d  ff7510  PUSH dword ptr [EBP + 0x10]
+0041fd30  ff750c  PUSH dword ptr [EBP + 0xc]
+0041fd33  89e2  MOV EDX,ESP
+0041fd35  8b4104  MOV EAX,dword ptr [ECX + 0x4]
+0041fd38  ff11  CALL dword ptr [ECX]
+0041fd3a  83c40c  ADD ESP,0xc
+0041fd3d  58  POP EAX
+0041fd3e  5d  POP EBP
+0041fd3f  c21000  RET 0x10

@@ -1,0 +1,6 @@
+; FUN_0043dcda at 0x0043dcda
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0043dcda  8d45f0  LEA EAX,[EBP + -0x10]
+0043dcdd  ba03000000  MOV EDX,0x3
+0043dce2  e81558fcff  CALL 0x004034fc
+0043dce7  c3  RET

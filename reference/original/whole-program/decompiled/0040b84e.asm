@@ -1,0 +1,5 @@
+; FUN_0040b84e at 0x0040b84e
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040b84e  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0040b851  e8de73ffff  CALL 0x00402c34
+0040b856  c3  RET

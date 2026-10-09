@@ -1,0 +1,6 @@
+; FUN_0041af14 at 0x0041af14
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041af14  8b55f0  MOV EDX,dword ptr [EBP + -0x10]
+0041af17  8b45f4  MOV EAX,dword ptr [EBP + -0xc]
+0041af1a  e84977feff  CALL 0x00402668
+0041af1f  c3  RET

@@ -1,0 +1,8 @@
+; FUN_0043e9d7 at 0x0043e9d7
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0043e9d7  8d85a0feffff  LEA EAX,[EBP + 0xfffffea0]
+0043e9dd  e8fa4afcff  CALL 0x004034dc
+0043e9e2  8d85a4feffff  LEA EAX,[EBP + 0xfffffea4]
+0043e9e8  ba40534000  MOV EDX,0x405340
+0043e9ed  e87250fcff  CALL 0x00403a64
+0043e9f2  c3  RET

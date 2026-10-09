@@ -1,0 +1,3 @@
+; root_0041d70d at 0x0041d70d
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041d70d  ebed  JMP 0x0041d6fc

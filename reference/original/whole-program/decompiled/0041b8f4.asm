@@ -1,0 +1,6 @@
+; FUN_0041b8f4 at 0x0041b8f4
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041b8f4  8b55ec  MOV EDX,dword ptr [EBP + -0x14]
+0041b8f7  8b45f0  MOV EAX,dword ptr [EBP + -0x10]
+0041b8fa  e8696dfeff  CALL 0x00402668
+0041b8ff  c3  RET

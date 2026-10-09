@@ -1,0 +1,3 @@
+; ImageList_GetImageCount at 0x0040ec4c
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040ec4c  ff25d8b54b00  JMP dword ptr [0x004bb5d8]

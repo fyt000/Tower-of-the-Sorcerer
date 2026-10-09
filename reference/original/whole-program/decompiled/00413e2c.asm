@@ -1,0 +1,22 @@
+; FUN_00413e2c at 0x00413e2c
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00413e2c  55  PUSH EBP
+00413e2d  8bec  MOV EBP,ESP
+00413e2f  8b4508  MOV EAX,dword ptr [EBP + 0x8]
+00413e32  8b40fc  MOV EAX,dword ptr [EAX + -0x4]
+00413e35  8b401c  MOV EAX,dword ptr [EAX + 0x1c]
+00413e38  85c0  TEST EAX,EAX
+00413e3a  7414  JZ 0x00413e50
+00413e3c  8b5508  MOV EDX,dword ptr [EBP + 0x8]
+00413e3f  8a403d  MOV AL,byte ptr [EAX + 0x3d]
+00413e42  8b5508  MOV EDX,dword ptr [EBP + 0x8]
+00413e45  8b52f8  MOV EDX,dword ptr [EDX + -0x8]
+00413e48  3a423d  CMP AL,byte ptr [EDX + 0x3d]
+00413e4b  0f95c0  SETNZ AL
+00413e4e  5d  POP EBP
+00413e4f  c3  RET
+00413e50  8b4508  MOV EAX,dword ptr [EBP + 0x8]
+00413e53  8b40f8  MOV EAX,dword ptr [EAX + -0x8]
+00413e56  8a403d  MOV AL,byte ptr [EAX + 0x3d]
+00413e59  5d  POP EBP
+00413e5a  c3  RET

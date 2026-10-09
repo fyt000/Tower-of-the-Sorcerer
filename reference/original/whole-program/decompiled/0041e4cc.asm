@@ -1,0 +1,5 @@
+; root_0041e4cc at 0x0041e4cc
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041e4cc  6a0c  PUSH 0xc
+0041e4ce  e8596bfeff  CALL 0x0040502c
+0041e4d3  c3  RET

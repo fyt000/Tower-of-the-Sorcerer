@@ -1,0 +1,5 @@
+; FUN_00402e48 at 0x00402e48
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00402e48  8b10  MOV EDX,dword ptr [EAX]
+00402e4a  ff52f8  CALL dword ptr [EDX + -0x8]
+00402e4d  c3  RET

@@ -1,0 +1,23 @@
+; root_0047ea47 at 0x0047ea47
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0047ea47  c7058cc5480073000000  MOV dword ptr [0x0048c58c],0x73
+0047ea51  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0047ea54  e8dbe0fcff  CALL 0x0044cb34
+0047ea59  e80a48f8ff  CALL 0x00403268
+0047ea5e  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0047ea61  8b8030030000  MOV EAX,dword ptr [EAX + 0x330]
+0047ea67  80782801  CMP byte ptr [EAX + 0x28],0x1
+0047ea6b  7510  JNZ 0x0047ea7d
+0047ea6d  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0047ea70  e883deffff  CALL 0x0047c8f8
+0047ea75  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0047ea78  e83fd8ffff  CALL 0x0047c2bc
+0047ea7d  33c0  XOR EAX,EAX
+0047ea7f  5a  POP EDX
+0047ea80  59  POP ECX
+0047ea81  59  POP ECX
+0047ea82  648910  MOV dword ptr FS:[EAX],EDX
+0047ea85  689aea4700  PUSH 0x47ea9a
+0047ea8a  8d45f8  LEA EAX,[EBP + -0x8]
+0047ea8d  e84a4af8ff  CALL 0x004034dc
+0047ea92  c3  RET

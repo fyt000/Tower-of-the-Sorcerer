@@ -1,0 +1,3 @@
+; root_0043d80a at 0x0043d80a
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0043d80a  ebeb  JMP 0x0043d7f7

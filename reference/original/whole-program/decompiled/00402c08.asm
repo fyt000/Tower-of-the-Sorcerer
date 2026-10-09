@@ -1,0 +1,4 @@
+; root_00402c08 at 0x00402c08
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00402c08  8b40e8  MOV EAX,dword ptr [EAX + -0x18]
+00402c0b  c3  RET

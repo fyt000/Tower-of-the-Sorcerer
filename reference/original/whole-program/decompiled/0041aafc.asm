@@ -1,0 +1,19 @@
+; FUN_0041aafc at 0x0041aafc
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041aafc  53  PUSH EBX
+0041aafd  8bd8  MOV EBX,EAX
+0041aaff  8b4310  MOV EAX,dword ptr [EBX + 0x10]
+0041ab02  e8c9f4ffff  CALL 0x00419fd0
+0041ab07  50  PUSH EAX
+0041ab08  8b4304  MOV EAX,dword ptr [EBX + 0x4]
+0041ab0b  50  PUSH EAX
+0041ab0c  e8bba2feff  CALL 0x00404dcc
+0041ab11  8b4310  MOV EAX,dword ptr [EBX + 0x10]
+0041ab14  0fb64010  MOVZX EAX,byte ptr [EAX + 0x10]
+0041ab18  0fb70445fc944800  MOVZX EAX,word ptr [EAX*0x2 + 0x4894fc]
+0041ab20  50  PUSH EAX
+0041ab21  8b4304  MOV EAX,dword ptr [EBX + 0x4]
+0041ab24  50  PUSH EAX
+0041ab25  e8caa2feff  CALL 0x00404df4
+0041ab2a  5b  POP EBX
+0041ab2b  c3  RET

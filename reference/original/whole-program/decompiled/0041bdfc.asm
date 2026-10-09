@@ -1,0 +1,31 @@
+; root_0041bdfc at 0x0041bdfc
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041bdfc  55  PUSH EBP
+0041bdfd  8bec  MOV EBP,ESP
+0041bdff  83c4f8  ADD ESP,-0x8
+0041be02  53  PUSH EBX
+0041be03  8955fc  MOV dword ptr [EBP + -0x4],EDX
+0041be06  8945f8  MOV dword ptr [EBP + -0x8],EAX
+0041be09  8b45f8  MOV EAX,dword ptr [EBP + -0x8]
+0041be0c  50  PUSH EAX
+0041be0d  8b00  MOV EAX,dword ptr [EAX]
+0041be0f  8b4024  MOV EAX,dword ptr [EAX + 0x24]
+0041be12  50  PUSH EAX
+0041be13  8b45f8  MOV EAX,dword ptr [EBP + -0x8]
+0041be16  50  PUSH EAX
+0041be17  8b00  MOV EAX,dword ptr [EAX]
+0041be19  8b4030  MOV EAX,dword ptr [EAX + 0x30]
+0041be1c  50  PUSH EAX
+0041be1d  55  PUSH EBP
+0041be1e  e881ffffff  CALL 0x0041bda4
+0041be23  59  POP ECX
+0041be24  8bc8  MOV ECX,EAX
+0041be26  ba40be4100  MOV EDX,0x41be40
+0041be2b  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0041be2e  8b18  MOV EBX,dword ptr [EAX]
+0041be30  ff5304  CALL dword ptr [EBX + 0x4]
+0041be33  5b  POP EBX
+0041be34  59  POP ECX
+0041be35  59  POP ECX
+0041be36  5d  POP EBP
+0041be37  c3  RET

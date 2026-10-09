@@ -1,0 +1,24 @@
+; FUN_00423bc4 at 0x00423bc4
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00423bc4  53  PUSH EBX
+00423bc5  8bd8  MOV EBX,EAX
+00423bc7  8b4340  MOV EAX,dword ptr [EBX + 0x40]
+00423bca  3b4348  CMP EAX,dword ptr [EBX + 0x48]
+00423bcd  7412  JZ 0x00423be1
+00423bcf  894348  MOV dword ptr [EBX + 0x48],EAX
+00423bd2  66837b5a00  CMP word ptr [EBX + 0x5a],0x0
+00423bd7  7408  JZ 0x00423be1
+00423bd9  8bd3  MOV EDX,EBX
+00423bdb  8b435c  MOV EAX,dword ptr [EBX + 0x5c]
+00423bde  ff5358  CALL dword ptr [EBX + 0x58]
+00423be1  8b433c  MOV EAX,dword ptr [EBX + 0x3c]
+00423be4  3b4344  CMP EAX,dword ptr [EBX + 0x44]
+00423be7  7412  JZ 0x00423bfb
+00423be9  894344  MOV dword ptr [EBX + 0x44],EAX
+00423bec  66837b5200  CMP word ptr [EBX + 0x52],0x0
+00423bf1  7408  JZ 0x00423bfb
+00423bf3  8bd3  MOV EDX,EBX
+00423bf5  8b4354  MOV EAX,dword ptr [EBX + 0x54]
+00423bf8  ff5350  CALL dword ptr [EBX + 0x50]
+00423bfb  5b  POP EBX
+00423bfc  c3  RET

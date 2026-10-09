@@ -1,0 +1,5 @@
+; FUN_00423d1c at 0x00423d1c
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00423d1c  8b4030  MOV EAX,dword ptr [EAX + 0x30]
+00423d1f  8b4008  MOV EAX,dword ptr [EAX + 0x8]
+00423d22  c3  RET

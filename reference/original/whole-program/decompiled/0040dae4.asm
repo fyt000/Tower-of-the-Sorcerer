@@ -1,0 +1,57 @@
+; FUN_0040dae4 at 0x0040dae4
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040dae4  55  PUSH EBP
+0040dae5  8bec  MOV EBP,ESP
+0040dae7  83c4f4  ADD ESP,-0xc
+0040daea  53  PUSH EBX
+0040daeb  56  PUSH ESI
+0040daec  57  PUSH EDI
+0040daed  33c9  XOR ECX,ECX
+0040daef  894df4  MOV dword ptr [EBP + -0xc],ECX
+0040daf2  8955f8  MOV dword ptr [EBP + -0x8],EDX
+0040daf5  8945fc  MOV dword ptr [EBP + -0x4],EAX
+0040daf8  33c0  XOR EAX,EAX
+0040dafa  55  PUSH EBP
+0040dafb  6871db4000  PUSH 0x40db71
+0040db00  64ff30  PUSH dword ptr FS:[EAX]
+0040db03  648920  MOV dword ptr FS:[EAX],ESP
+0040db06  a1c8914800  MOV EAX,[0x004891c8]
+0040db0b  8b7008  MOV ESI,dword ptr [EAX + 0x8]
+0040db0e  4e  DEC ESI
+0040db0f  85f6  TEST ESI,ESI
+0040db11  7c3a  JL 0x0040db4d
+0040db13  46  INC ESI
+0040db14  33ff  XOR EDI,EDI
+0040db16  8bd7  MOV EDX,EDI
+0040db18  a1c8914800  MOV EAX,[0x004891c8]
+0040db1d  e81ebfffff  CALL 0x00409a40
+0040db22  8bd8  MOV EBX,EAX
+0040db24  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0040db27  3b4304  CMP EAX,dword ptr [EBX + 0x4]
+0040db2a  751d  JNZ 0x0040db49
+0040db2c  8d55f4  LEA EDX,[EBP + -0xc]
+0040db2f  8b45f8  MOV EAX,dword ptr [EBP + -0x8]
+0040db32  ff530c  CALL dword ptr [EBX + 0xc]
+0040db35  84c0  TEST AL,AL
+0040db37  7414  JZ 0x0040db4d
+0040db39  8b4508  MOV EAX,dword ptr [EBP + 0x8]
+0040db3c  8b40fc  MOV EAX,dword ptr [EAX + -0x4]
+0040db3f  8b55f4  MOV EDX,dword ptr [EBP + -0xc]
+0040db42  e83dfcffff  CALL 0x0040d784
+0040db47  eb12  JMP 0x0040db5b
+0040db49  47  INC EDI
+0040db4a  4e  DEC ESI
+0040db4b  75c9  JNZ 0x0040db16
+0040db4d  8b4508  MOV EAX,dword ptr [EBP + 0x8]
+0040db50  8b40fc  MOV EAX,dword ptr [EAX + -0x4]
+0040db53  8b55f8  MOV EDX,dword ptr [EBP + -0x8]
+0040db56  e8c5fcffff  CALL 0x0040d820
+0040db5b  33c0  XOR EAX,EAX
+0040db5d  5a  POP EDX
+0040db5e  59  POP ECX
+0040db5f  59  POP ECX
+0040db60  648910  MOV dword ptr FS:[EAX],EDX
+0040db63  6878db4000  PUSH 0x40db78
+0040db68  8d45f4  LEA EAX,[EBP + -0xc]
+0040db6b  e86c59ffff  CALL 0x004034dc
+0040db70  c3  RET

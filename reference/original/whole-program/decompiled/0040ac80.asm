@@ -1,0 +1,27 @@
+; root_0040ac80 at 0x0040ac80
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040ac80  53  PUSH EBX
+0040ac81  56  PUSH ESI
+0040ac82  51  PUSH ECX
+0040ac83  8bf2  MOV ESI,EDX
+0040ac85  8bd8  MOV EBX,EAX
+0040ac87  807b1400  CMP byte ptr [EBX + 0x14],0x0
+0040ac8b  750e  JNZ 0x0040ac9b
+0040ac8d  8bd6  MOV EDX,ESI
+0040ac8f  8bc3  MOV EAX,EBX
+0040ac91  e81ef8ffff  CALL 0x0040a4b4
+0040ac96  890424  MOV dword ptr [ESP],EAX
+0040ac99  eb16  JMP 0x0040acb1
+0040ac9b  8bcc  MOV ECX,ESP
+0040ac9d  8bd6  MOV EDX,ESI
+0040ac9f  8bc3  MOV EAX,EBX
+0040aca1  8b18  MOV EBX,dword ptr [EAX]
+0040aca3  ff5370  CALL dword ptr [EBX + 0x70]
+0040aca6  84c0  TEST AL,AL
+0040aca8  7507  JNZ 0x0040acb1
+0040acaa  c70424ffffffff  MOV dword ptr [ESP],0xffffffff
+0040acb1  8b0424  MOV EAX,dword ptr [ESP]
+0040acb4  5a  POP EDX
+0040acb5  5e  POP ESI
+0040acb6  5b  POP EBX
+0040acb7  c3  RET

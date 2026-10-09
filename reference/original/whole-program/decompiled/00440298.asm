@@ -1,0 +1,7 @@
+; TForm4_DriveComboBox1Change at 0x00440298
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00440298  8b90b0010000  MOV EDX,dword ptr [EAX + 0x1b0]
+0044029e  8a925c010000  MOV DL,byte ptr [EDX + 0x15c]
+004402a4  8b80b4010000  MOV EAX,dword ptr [EAX + 0x1b4]
+004402aa  e811efffff  CALL 0x0043f1c0
+004402af  c3  RET

@@ -1,0 +1,13 @@
+; FUN_00413118 at 0x00413118
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00413118  8b4824  MOV ECX,dword ptr [EAX + 0x24]
+0041311b  890a  MOV dword ptr [EDX],ECX
+0041311d  8b4828  MOV ECX,dword ptr [EAX + 0x28]
+00413120  894a04  MOV dword ptr [EDX + 0x4],ECX
+00413123  8b4824  MOV ECX,dword ptr [EAX + 0x24]
+00413126  03482c  ADD ECX,dword ptr [EAX + 0x2c]
+00413129  894a08  MOV dword ptr [EDX + 0x8],ECX
+0041312c  8b4828  MOV ECX,dword ptr [EAX + 0x28]
+0041312f  034830  ADD ECX,dword ptr [EAX + 0x30]
+00413132  894a0c  MOV dword ptr [EDX + 0xc],ECX
+00413135  c3  RET

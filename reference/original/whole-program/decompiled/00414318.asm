@@ -1,0 +1,5 @@
+; root_00414318 at 0x00414318
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00414318  8b10  MOV EDX,dword ptr [EAX]
+0041431a  ff5244  CALL dword ptr [EDX + 0x44]
+0041431d  c3  RET

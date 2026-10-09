@@ -1,0 +1,7 @@
+; root_0042f510 at 0x0042f510
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0042f510  8b5044  MOV EDX,dword ptr [EAX + 0x44]
+0042f513  8b8034010000  MOV EAX,dword ptr [EAX + 0x134]
+0042f519  8b08  MOV ECX,dword ptr [EAX]
+0042f51b  ff5108  CALL dword ptr [ECX + 0x8]
+0042f51e  c3  RET

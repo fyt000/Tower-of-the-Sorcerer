@@ -1,0 +1,4 @@
+; root_00412e74 at 0x00412e74
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00412e74  8b4020  MOV EAX,dword ptr [EAX + 0x20]
+00412e77  c3  RET

@@ -1,0 +1,28 @@
+; FUN_0040cea4 at 0x0040cea4
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040cea4  55  PUSH EBP
+0040cea5  8bec  MOV EBP,ESP
+0040cea7  6a00  PUSH 0x0
+0040cea9  53  PUSH EBX
+0040ceaa  56  PUSH ESI
+0040ceab  57  PUSH EDI
+0040ceac  8bd8  MOV EBX,EAX
+0040ceae  33c0  XOR EAX,EAX
+0040ceb0  55  PUSH EBP
+0040ceb1  68e2ce4000  PUSH 0x40cee2
+0040ceb6  64ff30  PUSH dword ptr FS:[EAX]
+0040ceb9  648920  MOV dword ptr FS:[EAX],ESP
+0040cebc  8d55fc  LEA EDX,[EBP + -0x4]
+0040cebf  8bc3  MOV EAX,EBX
+0040cec1  e82effffff  CALL 0x0040cdf4
+0040cec6  837dfc00  CMP dword ptr [EBP + -0x4],0x0
+0040ceca  75f0  JNZ 0x0040cebc
+0040cecc  33c0  XOR EAX,EAX
+0040cece  5a  POP EDX
+0040cecf  59  POP ECX
+0040ced0  59  POP ECX
+0040ced1  648910  MOV dword ptr FS:[EAX],EDX
+0040ced4  68e9ce4000  PUSH 0x40cee9
+0040ced9  8d45fc  LEA EAX,[EBP + -0x4]
+0040cedc  e8fb65ffff  CALL 0x004034dc
+0040cee1  c3  RET

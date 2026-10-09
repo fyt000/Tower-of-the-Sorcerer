@@ -1,0 +1,5 @@
+; FUN_0041a204 at 0x0041a204
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041a204  8b400c  MOV EAX,dword ptr [EAX + 0xc]
+0041a207  8a401c  MOV AL,byte ptr [EAX + 0x1c]
+0041a20a  c3  RET

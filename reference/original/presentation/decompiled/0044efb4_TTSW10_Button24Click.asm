@@ -1,0 +1,6 @@
+; TTSW10_Button24Click at 0044efb4
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0044efb4  c705a0c548000d000000  MOV dword ptr [0x0048c5a0],0xd
+0044efbe  c70524894b0001000000  MOV dword ptr [0x004b8924],0x1
+0044efc8  e84baeffff  CALL 0x00449e18
+0044efcd  c3  RET

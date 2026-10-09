@@ -1,0 +1,5 @@
+; root_004143bc at 0x004143bc
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+004143bc  33c0  XOR EAX,EAX
+004143be  89420c  MOV dword ptr [EDX + 0xc],EAX
+004143c1  c3  RET

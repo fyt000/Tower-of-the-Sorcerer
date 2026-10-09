@@ -1,0 +1,8 @@
+; root_00433ae0 at 0x00433ae0
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00433ae0  8b4a08  MOV ECX,dword ptr [EDX + 0x8]
+00433ae3  51  PUSH ECX
+00433ae4  8b4a04  MOV ECX,dword ptr [EDX + 0x4]
+00433ae7  ba01020000  MOV EDX,0x201
+00433aec  e8c701feff  CALL 0x00413cb8
+00433af1  c3  RET

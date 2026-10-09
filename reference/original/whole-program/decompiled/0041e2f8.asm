@@ -1,0 +1,5 @@
+; root_0041e2f8 at 0x0041e2f8
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041e2f8  33c9  XOR ECX,ECX
+0041e2fa  e855ffffff  CALL 0x0041e254
+0041e2ff  c3  RET

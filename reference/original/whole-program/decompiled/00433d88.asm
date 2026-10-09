@@ -1,0 +1,5 @@
+; root_00433d88 at 0x00433d88
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00433d88  8b8010010000  MOV EAX,dword ptr [EAX + 0x110]
+00433d8e  8a4020  MOV AL,byte ptr [EAX + 0x20]
+00433d91  c3  RET

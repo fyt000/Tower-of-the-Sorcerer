@@ -1,0 +1,3 @@
+; root_00409f2a at 0x00409f2a
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00409f2a  ebf0  JMP 0x00409f1c

@@ -1,0 +1,3 @@
+; SetEndOfFile at 0x00401280
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00401280  ff253cb14b00  JMP dword ptr [0x004bb13c]

@@ -1,0 +1,6 @@
+; root_00421a5c at 0x00421a5c
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00421a5c  8b8024010000  MOV EAX,dword ptr [EAX + 0x124]
+00421a62  8b08  MOV ECX,dword ptr [EAX]
+00421a64  ff5108  CALL dword ptr [ECX + 0x8]
+00421a67  c3  RET

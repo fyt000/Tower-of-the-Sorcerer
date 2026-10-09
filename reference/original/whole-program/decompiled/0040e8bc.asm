@@ -1,0 +1,7 @@
+; root_0040e8bc at 0x0040e8bc
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040e8bc  53  PUSH EBX
+0040e8bd  8bd8  MOV EBX,EAX
+0040e8bf  804b1c40  OR byte ptr [EBX + 0x1c],0x40
+0040e8c3  5b  POP EBX
+0040e8c4  c3  RET

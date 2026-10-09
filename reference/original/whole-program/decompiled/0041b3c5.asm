@@ -1,0 +1,6 @@
+; FUN_0041b3c5 at 0x0041b3c5
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041b3c5  8b55dc  MOV EDX,dword ptr [EBP + -0x24]
+0041b3c8  8b45e8  MOV EAX,dword ptr [EBP + -0x18]
+0041b3cb  e89872feff  CALL 0x00402668
+0041b3d0  c3  RET

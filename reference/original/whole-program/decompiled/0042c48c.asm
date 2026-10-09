@@ -1,0 +1,9 @@
+; root_0042c48c at 0x0042c48c
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0042c48c  6683782e00  CMP word ptr [EAX + 0x2e],0x0
+0042c491  740a  JZ 0x0042c49d
+0042c493  8bc8  MOV ECX,EAX
+0042c495  8bd0  MOV EDX,EAX
+0042c497  8b4130  MOV EAX,dword ptr [ECX + 0x30]
+0042c49a  ff512c  CALL dword ptr [ECX + 0x2c]
+0042c49d  c3  RET

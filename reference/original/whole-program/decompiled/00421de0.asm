@@ -1,0 +1,5 @@
+; root_00421de0 at 0x00421de0
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00421de0  83b83c01000000  CMP dword ptr [EAX + 0x13c],0x0
+00421de7  0f95c0  SETNZ AL
+00421dea  c3  RET

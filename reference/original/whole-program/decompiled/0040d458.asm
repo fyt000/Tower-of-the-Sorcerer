@@ -1,0 +1,27 @@
+; root_0040d458 at 0x0040d458
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040d458  55  PUSH EBP
+0040d459  8bec  MOV EBP,ESP
+0040d45b  51  PUSH ECX
+0040d45c  53  PUSH EBX
+0040d45d  8bda  MOV EBX,EDX
+0040d45f  8945fc  MOV dword ptr [EBP + -0x4],EAX
+0040d462  804b1c04  OR byte ptr [EBX + 0x1c],0x4
+0040d466  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0040d469  83782c00  CMP dword ptr [EAX + 0x2c],0x0
+0040d46d  7410  JZ 0x0040d47f
+0040d46f  55  PUSH EBP
+0040d470  8b4308  MOV EAX,dword ptr [EBX + 0x8]
+0040d473  e890ffffff  CALL 0x0040d408
+0040d478  59  POP ECX
+0040d479  8b55fc  MOV EDX,dword ptr [EBP + -0x4]
+0040d47c  89421c  MOV dword ptr [EDX + 0x1c],EAX
+0040d47f  8b55fc  MOV EDX,dword ptr [EBP + -0x4]
+0040d482  8bc3  MOV EAX,EBX
+0040d484  8b08  MOV ECX,dword ptr [EAX]
+0040d486  ff5120  CALL dword ptr [ECX + 0x20]
+0040d489  80631cfb  AND byte ptr [EBX + 0x1c],0xfb
+0040d48d  5b  POP EBX
+0040d48e  59  POP ECX
+0040d48f  5d  POP EBP
+0040d490  c3  RET

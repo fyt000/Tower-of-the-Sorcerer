@@ -1,0 +1,96 @@
+; root_0041bea8 at 0x0041bea8
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041bea8  55  PUSH EBP
+0041bea9  8bec  MOV EBP,ESP
+0041beab  83c4f4  ADD ESP,-0xc
+0041beae  53  PUSH EBX
+0041beaf  56  PUSH ESI
+0041beb0  57  PUSH EDI
+0041beb1  8bf2  MOV ESI,EDX
+0041beb3  8bd8  MOV EBX,EAX
+0041beb5  85f6  TEST ESI,ESI
+0041beb7  7414  JZ 0x0041becd
+0041beb9  8bc3  MOV EAX,EBX
+0041bebb  e8b86cfeff  CALL 0x00402b78
+0041bec0  8bf8  MOV EDI,EAX
+0041bec2  8bc6  MOV EAX,ESI
+0041bec4  e8af6cfeff  CALL 0x00402b78
+0041bec9  3bf8  CMP EDI,EAX
+0041becb  7404  JZ 0x0041bed1
+0041becd  33c0  XOR EAX,EAX
+0041becf  eb02  JMP 0x0041bed3
+0041bed1  b001  MOV AL,0x1
+0041bed3  8845ff  MOV byte ptr [EBP + -0x1],AL
+0041bed6  8bc3  MOV EAX,EBX
+0041bed8  8b10  MOV EDX,dword ptr [EAX]
+0041beda  ff5218  CALL dword ptr [EDX + 0x18]
+0041bedd  84c0  TEST AL,AL
+0041bedf  750b  JNZ 0x0041beec
+0041bee1  8bc6  MOV EAX,ESI
+0041bee3  8b10  MOV EDX,dword ptr [EAX]
+0041bee5  ff5218  CALL dword ptr [EDX + 0x18]
+0041bee8  84c0  TEST AL,AL
+0041beea  7424  JZ 0x0041bf10
+0041beec  8bc3  MOV EAX,EBX
+0041beee  8b10  MOV EDX,dword ptr [EAX]
+0041bef0  ff5218  CALL dword ptr [EDX + 0x18]
+0041bef3  84c0  TEST AL,AL
+0041bef5  740b  JZ 0x0041bf02
+0041bef7  8bc6  MOV EAX,ESI
+0041bef9  8b10  MOV EDX,dword ptr [EAX]
+0041befb  ff5218  CALL dword ptr [EDX + 0x18]
+0041befe  84c0  TEST AL,AL
+0041bf00  7504  JNZ 0x0041bf06
+0041bf02  33c0  XOR EAX,EAX
+0041bf04  eb02  JMP 0x0041bf08
+0041bf06  b001  MOV AL,0x1
+0041bf08  8845ff  MOV byte ptr [EBP + -0x1],AL
+0041bf0b  e9a0000000  JMP 0x0041bfb0
+0041bf10  807dff00  CMP byte ptr [EBP + -0x1],0x0
+0041bf14  0f8496000000  JZ 0x0041bfb0
+0041bf1a  b201  MOV DL,0x1
+0041bf1c  b8688f4000  MOV EAX,0x408f68
+0041bf21  e8e66cfeff  CALL 0x00402c0c
+0041bf26  8945f8  MOV dword ptr [EBP + -0x8],EAX
+0041bf29  33c0  XOR EAX,EAX
+0041bf2b  55  PUSH EBP
+0041bf2c  68a9bf4100  PUSH 0x41bfa9
+0041bf31  64ff30  PUSH dword ptr FS:[EAX]
+0041bf34  648920  MOV dword ptr FS:[EAX],ESP
+0041bf37  8b55f8  MOV EDX,dword ptr [EBP + -0x8]
+0041bf3a  8bc3  MOV EAX,EBX
+0041bf3c  8b08  MOV ECX,dword ptr [EAX]
+0041bf3e  ff5130  CALL dword ptr [ECX + 0x30]
+0041bf41  b201  MOV DL,0x1
+0041bf43  b8688f4000  MOV EAX,0x408f68
+0041bf48  e8bf6cfeff  CALL 0x00402c0c
+0041bf4d  8945f4  MOV dword ptr [EBP + -0xc],EAX
+0041bf50  33c0  XOR EAX,EAX
+0041bf52  55  PUSH EBP
+0041bf53  688cbf4100  PUSH 0x41bf8c
+0041bf58  64ff30  PUSH dword ptr FS:[EAX]
+0041bf5b  648920  MOV dword ptr FS:[EAX],ESP
+0041bf5e  8b55f4  MOV EDX,dword ptr [EBP + -0xc]
+0041bf61  8bc6  MOV EAX,ESI
+0041bf63  8b08  MOV ECX,dword ptr [EAX]
+0041bf65  ff5130  CALL dword ptr [ECX + 0x30]
+0041bf68  8b55f4  MOV EDX,dword ptr [EBP + -0xc]
+0041bf6b  8b45f8  MOV EAX,dword ptr [EBP + -0x8]
+0041bf6e  e8f5feffff  CALL 0x0041be68
+0041bf73  8845ff  MOV byte ptr [EBP + -0x1],AL
+0041bf76  33c0  XOR EAX,EAX
+0041bf78  5a  POP EDX
+0041bf79  59  POP ECX
+0041bf7a  59  POP ECX
+0041bf7b  648910  MOV dword ptr FS:[EAX],EDX
+0041bf7e  6893bf4100  PUSH 0x41bf93
+0041bf83  8b45f4  MOV EAX,dword ptr [EBP + -0xc]
+0041bf86  e8a96cfeff  CALL 0x00402c34
+0041bf8b  c3  RET
+0041bfb0  8a45ff  MOV AL,byte ptr [EBP + -0x1]
+0041bfb3  5f  POP EDI
+0041bfb4  5e  POP ESI
+0041bfb5  5b  POP EBX
+0041bfb6  8be5  MOV ESP,EBP
+0041bfb8  5d  POP EBP
+0041bfb9  c3  RET

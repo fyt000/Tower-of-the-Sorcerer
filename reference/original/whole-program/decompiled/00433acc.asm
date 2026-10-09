@@ -1,0 +1,11 @@
+; root_00433acc at 0x00433acc
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00433acc  56  PUSH ESI
+00433acd  8bf0  MOV ESI,EAX
+00433acf  8bc6  MOV EAX,ESI
+00433ad1  e86e28feff  CALL 0x00416344
+00433ad6  8bc6  MOV EAX,ESI
+00433ad8  8b10  MOV EDX,dword ptr [EAX]
+00433ada  ff5244  CALL dword ptr [EDX + 0x44]
+00433add  5e  POP ESI
+00433ade  c3  RET

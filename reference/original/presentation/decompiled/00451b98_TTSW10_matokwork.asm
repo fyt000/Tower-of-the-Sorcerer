@@ -1,0 +1,31 @@
+; TTSW10_matokwork at 00451b98
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00451ba4  ff03  INC dword ptr [EBX]
+00451ba6  8b13  MOV EDX,dword ptr [EBX]
+00451ba8  8d1452  LEA EDX,[EDX + EDX*0x2]
+00451bab  66c704560000  MOV word ptr [ESI + EDX*0x2],0x0
+00451bb1  66c74456020000  MOV word ptr [ESI + EDX*0x2 + 0x2],0x0
+00451bb8  66c74456040000  MOV word ptr [ESI + EDX*0x2 + 0x4],0x0
+00451bbf  ff03  INC dword ptr [EBX]
+00451bc1  8b13  MOV EDX,dword ptr [EBX]
+00451bc3  8d1452  LEA EDX,[EDX + EDX*0x2]
+00451bc6  66c704560d00  MOV word ptr [ESI + EDX*0x2],0xd
+00451bcc  668b0d5cc54800  MOV CX,word ptr [0x0048c55c]
+00451bd3  66894c5602  MOV word ptr [ESI + EDX*0x2 + 0x2],CX
+00451bd8  66c74456040700  MOV word ptr [ESI + EDX*0x2 + 0x4],0x7
+00451bdf  e8ec440100  CALL 0x004660d0
+00451be4  ff03  INC dword ptr [EBX]
+00451be6  8b03  MOV EAX,dword ptr [EBX]
+00451be8  8d0440  LEA EAX,[EAX + EAX*0x2]
+00451beb  66c704460000  MOV word ptr [ESI + EAX*0x2],0x0
+00451bf1  66c74446020000  MOV word ptr [ESI + EAX*0x2 + 0x2],0x0
+00451bf8  66c74446040000  MOV word ptr [ESI + EAX*0x2 + 0x4],0x0
+00451bff  ff03  INC dword ptr [EBX]
+00451c01  8b03  MOV EAX,dword ptr [EBX]
+00451c03  8d0440  LEA EAX,[EAX + EAX*0x2]
+00451c06  66c704460100  MOV word ptr [ESI + EAX*0x2],0x1
+00451c0c  66c74446020100  MOV word ptr [ESI + EAX*0x2 + 0x2],0x1
+00451c13  66c74446040000  MOV word ptr [ESI + EAX*0x2 + 0x4],0x0
+00451c1a  5e  POP ESI
+00451c1b  5b  POP EBX
+00451c1c  c3  RET

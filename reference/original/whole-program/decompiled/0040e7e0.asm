@@ -1,0 +1,22 @@
+; FUN_0040e7e0 at 0x0040e7e0
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040e7e0  55  PUSH EBP
+0040e7e1  8bec  MOV EBP,ESP
+0040e7e3  8b4508  MOV EAX,dword ptr [EBP + 0x8]
+0040e7e6  8378fc00  CMP dword ptr [EAX + -0x4],0x0
+0040e7ea  7419  JZ 0x0040e805
+0040e7ec  8b4508  MOV EAX,dword ptr [EBP + 0x8]
+0040e7ef  8b40f8  MOV EAX,dword ptr [EAX + -0x8]
+0040e7f2  668b401a  MOV AX,word ptr [EAX + 0x1a]
+0040e7f6  8b5508  MOV EDX,dword ptr [EBP + 0x8]
+0040e7f9  8b52fc  MOV EDX,dword ptr [EDX + -0x4]
+0040e7fc  663b421a  CMP AX,word ptr [EDX + 0x1a]
+0040e800  0f95c0  SETNZ AL
+0040e803  5d  POP EBP
+0040e804  c3  RET
+0040e805  8b4508  MOV EAX,dword ptr [EBP + 0x8]
+0040e808  8b40f8  MOV EAX,dword ptr [EAX + -0x8]
+0040e80b  6683781a00  CMP word ptr [EAX + 0x1a],0x0
+0040e810  0f95c0  SETNZ AL
+0040e813  5d  POP EBP
+0040e814  c3  RET

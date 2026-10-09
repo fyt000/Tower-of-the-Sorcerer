@@ -1,0 +1,6 @@
+; root_004291dc at 0x004291dc
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+004291dc  8b8018010000  MOV EAX,dword ptr [EAX + 0x118]
+004291e2  8b08  MOV ECX,dword ptr [EAX]
+004291e4  ff5108  CALL dword ptr [ECX + 0x8]
+004291e7  c3  RET

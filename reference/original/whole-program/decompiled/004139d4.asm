@@ -1,0 +1,5 @@
+; FUN_004139d4 at 0x004139d4
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+004139d4  8b10  MOV EDX,dword ptr [EAX]
+004139d6  ff5248  CALL dword ptr [EDX + 0x48]
+004139d9  c3  RET

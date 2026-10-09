@@ -1,0 +1,8 @@
+; root_00430be4 at 0x00430be4
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00430be4  53  PUSH EBX
+00430be5  8a909e010000  MOV DL,byte ptr [EAX + 0x19e]
+00430beb  66bbdeff  MOV BX,0xffde
+00430bef  e8e820fdff  CALL 0x00402cdc
+00430bf4  5b  POP EBX
+00430bf5  c3  RET

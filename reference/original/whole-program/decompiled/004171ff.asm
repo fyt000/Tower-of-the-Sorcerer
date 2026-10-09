@@ -1,0 +1,3 @@
+; root_004171ff at 0x004171ff
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+004171ff  ebe8  JMP 0x004171e9

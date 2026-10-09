@@ -1,0 +1,9 @@
+; root_004107dc at 0x004107dc
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+004107dc  3a502b  CMP DL,byte ptr [EAX + 0x2b]
+004107df  740a  JZ 0x004107eb
+004107e1  88502b  MOV byte ptr [EAX + 0x2b],DL
+004107e4  b201  MOV DL,0x1
+004107e6  8b08  MOV ECX,dword ptr [EAX]
+004107e8  ff5128  CALL dword ptr [ECX + 0x28]
+004107eb  c3  RET

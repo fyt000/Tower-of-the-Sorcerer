@@ -1,0 +1,19 @@
+; FUN_0040cef0 at 0x0040cef0
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040cef0  55  PUSH EBP
+0040cef1  8bec  MOV EBP,ESP
+0040cef3  53  PUSH EBX
+0040cef4  8b5d08  MOV EBX,dword ptr [EBP + 0x8]
+0040cef7  83c3fc  ADD EBX,-0x4
+0040cefa  eb07  JMP 0x0040cf03
+0040cefc  8b03  MOV EAX,dword ptr [EBX]
+0040cefe  e891000000  CALL 0x0040cf94
+0040cf03  8b03  MOV EAX,dword ptr [EBX]
+0040cf05  e85eebffff  CALL 0x0040ba68
+0040cf0a  84c0  TEST AL,AL
+0040cf0c  74ee  JZ 0x0040cefc
+0040cf0e  8b03  MOV EAX,dword ptr [EBX]
+0040cf10  e8bff4ffff  CALL 0x0040c3d4
+0040cf15  5b  POP EBX
+0040cf16  5d  POP EBP
+0040cf17  c3  RET

@@ -1,0 +1,45 @@
+; FUN_0040aba4 at 0x0040aba4
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040aba4  53  PUSH EBX
+0040aba5  56  PUSH ESI
+0040aba6  57  PUSH EDI
+0040aba7  55  PUSH EBP
+0040aba8  83c4f4  ADD ESP,-0xc
+0040abab  894c2404  MOV dword ptr [ESP + 0x4],ECX
+0040abaf  891424  MOV dword ptr [ESP],EDX
+0040abb2  8be8  MOV EBP,EAX
+0040abb4  c644240800  MOV byte ptr [ESP + 0x8],0x0
+0040abb9  33f6  XOR ESI,ESI
+0040abbb  8b7d0c  MOV EDI,dword ptr [EBP + 0xc]
+0040abbe  4f  DEC EDI
+0040abbf  3bfe  CMP EDI,ESI
+0040abc1  7c34  JL 0x0040abf7
+0040abc3  8d1c37  LEA EBX,[EDI + ESI*0x1]
+0040abc6  d1eb  SHR EBX,0x1
+0040abc8  8b4508  MOV EAX,dword ptr [EBP + 0x8]
+0040abcb  8b04d8  MOV EAX,dword ptr [EAX + EBX*0x8]
+0040abce  8b1424  MOV EDX,dword ptr [ESP]
+0040abd1  e85eaeffff  CALL 0x00405a34
+0040abd6  85c0  TEST EAX,EAX
+0040abd8  7d05  JGE 0x0040abdf
+0040abda  8d7301  LEA ESI,[EBX + 0x1]
+0040abdd  eb14  JMP 0x0040abf3
+0040abdf  8bfb  MOV EDI,EBX
+0040abe1  4f  DEC EDI
+0040abe2  85c0  TEST EAX,EAX
+0040abe4  750d  JNZ 0x0040abf3
+0040abe6  c644240801  MOV byte ptr [ESP + 0x8],0x1
+0040abeb  807d1501  CMP byte ptr [EBP + 0x15],0x1
+0040abef  7402  JZ 0x0040abf3
+0040abf1  8bf3  MOV ESI,EBX
+0040abf3  3bfe  CMP EDI,ESI
+0040abf5  7dcc  JGE 0x0040abc3
+0040abf7  8b442404  MOV EAX,dword ptr [ESP + 0x4]
+0040abfb  8930  MOV dword ptr [EAX],ESI
+0040abfd  8a442408  MOV AL,byte ptr [ESP + 0x8]
+0040ac01  83c40c  ADD ESP,0xc
+0040ac04  5d  POP EBP
+0040ac05  5f  POP EDI
+0040ac06  5e  POP ESI
+0040ac07  5b  POP EBX
+0040ac08  c3  RET

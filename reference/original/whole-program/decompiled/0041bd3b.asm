@@ -1,0 +1,9 @@
+; FUN_0041bd3b at 0x0041bd3b
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041bd3b  8b45cc  MOV EAX,dword ptr [EBP + -0x34]
+0041bd3e  50  PUSH EAX
+0041bd3f  e8888ffeff  CALL 0x00404ccc
+0041bd44  8b45c8  MOV EAX,dword ptr [EBP + -0x38]
+0041bd47  50  PUSH EAX
+0041bd48  e87f8ffeff  CALL 0x00404ccc
+0041bd4d  c3  RET

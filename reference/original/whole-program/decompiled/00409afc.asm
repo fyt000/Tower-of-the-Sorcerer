@@ -1,0 +1,6 @@
+; FUN_00409afc at 0x00409afc
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00409afc  8b5008  MOV EDX,dword ptr [EAX + 0x8]
+00409aff  4a  DEC EDX
+00409b00  e83bffffff  CALL 0x00409a40
+00409b05  c3  RET

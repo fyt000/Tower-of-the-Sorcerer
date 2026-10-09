@@ -1,0 +1,5 @@
+; root_00430c7c at 0x00430c7c
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00430c7c  8b10  MOV EDX,dword ptr [EAX]
+00430c7e  ff9284000000  CALL dword ptr [EDX + 0x84]
+00430c84  c3  RET

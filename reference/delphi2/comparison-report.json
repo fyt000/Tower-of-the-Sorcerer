@@ -1,0 +1,4555 @@
+{
+  "schema_version": 1,
+  "original_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "archive_sha256": "2917f047c10ab8f9bb611ac3b547e7a6e19c7ac0fb5ba92c58b3dc6b8b990992",
+  "compiler_sha256": "14a81a389ac824fae2683491ccd5d5caf36b8d199ebb181ed06f8a635892d09a",
+  "variants": {
+    "base": {
+      "compile": {
+        "exit_code": 0,
+        "arguments": [
+          "-B",
+          "-U..\\base\\lib",
+          "-GD",
+          "RuntimeProbe.dpr"
+        ],
+        "log_sha256": "ca4e0cf4287783d902e9650f5ad3bf19ab78217e72bd99ed3ab3f8b6276aff60"
+      },
+      "updates": [],
+      "exe_sha256": "036fb3ebc6c0c2ea9b93e4f5fa93017133f918e187299d3765fca4e24fe3ec66",
+      "code_sha256": "620e4ddc576c47926a1630c82ad93da9b8e4744a75391fcfcad77c3dabff69a0",
+      "runtime_shapes": [
+        {
+          "symbol": "TControl.Click",
+          "original_address": "0x00413eac",
+          "compiled_address": "0x0041b98c",
+          "bytes": 27,
+          "normalized_shape_match": true,
+          "original_masked_operands": [],
+          "compiled_masked_operands": []
+        },
+        {
+          "symbol": "TWinControl.CanFocus",
+          "original_address": "0x00416c2c",
+          "compiled_address": "0x0041e6a8",
+          "bytes": 51,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 8,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 8,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        },
+        {
+          "symbol": "TButton.CMDialogKey",
+          "original_address": "0x0042a480",
+          "compiled_address": "0x0041fc38",
+          "bytes": 100,
+          "normalized_shape_match": false,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 41,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 46,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 73,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 92,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 41,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 46,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 73,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 92,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "first_difference": {
+            "instruction": 6,
+            "original": "<CsInsn 0x42a48d [80bb0601000000]: cmp byte ptr [ebx + 0x106], 0>",
+            "compiled": "<CsInsn 0x41fc45 [80bb0201000000]: cmp byte ptr [ebx + 0x102], 0>"
+          }
+        },
+        {
+          "symbol": "TTimer.Timer",
+          "original_address": "0x0042c48c",
+          "compiled_address": "0x00420848",
+          "bytes": 18,
+          "normalized_shape_match": true,
+          "original_masked_operands": [],
+          "compiled_masked_operands": []
+        },
+        {
+          "symbol": "TTimer.WndProc",
+          "original_address": "0x0042c390",
+          "compiled_address": "0x0042074c",
+          "bytes": 113,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 25,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 43,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 66,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 71,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 76,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 99,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 25,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 43,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 66,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 71,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 76,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 99,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        },
+        {
+          "symbol": "MakeObjectInstance",
+          "original_address": "0x0041fd4c",
+          "compiled_address": "0x0040ed38",
+          "bytes": 152,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 6,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 30,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 47,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 57,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 62,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 70,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 89,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 118,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 6,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 30,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 47,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 57,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 62,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 70,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 89,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 118,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            }
+          ]
+        },
+        {
+          "symbol": "@InitExe",
+          "original_address": "0x00403420",
+          "compiled_address": "0x004031e4",
+          "bytes": 45,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 0,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 7,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 12,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 18,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 23,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 29,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 39,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 0,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 7,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 12,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 18,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 23,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 29,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 39,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            }
+          ]
+        },
+        {
+          "symbol": "@HandleAnyException",
+          "original_address": "0x00402f4c",
+          "compiled_address": "0x00402d10",
+          "bytes": 195,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 31,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 36,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 64,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 102,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 108,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 117,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 140,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 150,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 157,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 162,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 184,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 31,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 36,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 64,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 102,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 108,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 117,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 140,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 150,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 157,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 162,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 184,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        },
+        {
+          "symbol": "@HandleFinally",
+          "original_address": "0x00403140",
+          "compiled_address": "0x00402f04",
+          "bytes": 54,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 20,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 20,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        }
+      ],
+      "compiled_framework_cases": [
+        {
+          "name": "Escape.enabled",
+          "inputs": {},
+          "expected": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "actual": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.button-disabled",
+          "inputs": {
+            "button_enabled": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.parent-disabled",
+          "inputs": {
+            "panel_enabled": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.parent-hidden",
+          "inputs": {
+            "panel_visible": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.button-hidden",
+          "inputs": {
+            "button_visible": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.alt",
+          "inputs": {
+            "key_data": 536870912
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.no-parent-form",
+          "inputs": {
+            "no_form": true
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Enter.default-active",
+          "inputs": {
+            "key": 13
+          },
+          "expected": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "actual": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "passed": true
+        },
+        {
+          "name": "Enter.inactive",
+          "inputs": {
+            "key": 13,
+            "active": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.not-cancel",
+          "inputs": {
+            "cancel": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Click.direct-disabled",
+          "inputs": {
+            "direct": true,
+            "button_enabled": false
+          },
+          "expected": {
+            "callbacks": 1,
+            "message_result": 0,
+            "modal_result": 7
+          },
+          "actual": {
+            "callbacks": 1,
+            "message_result": 0,
+            "modal_result": 7
+          },
+          "passed": true
+        },
+        {
+          "name": "Timer.delivered-while-disabled",
+          "inputs": {
+            "enabled": false,
+            "handler_assigned": true
+          },
+          "expected": {
+            "callbacks": 1,
+            "exception_frame_restored": true
+          },
+          "actual": {
+            "callbacks": 1,
+            "exception_frame_restored": true
+          },
+          "passed": true
+        },
+        {
+          "name": "Timer.no-handler",
+          "inputs": {
+            "enabled": false,
+            "handler_assigned": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "exception_frame_restored": true
+          },
+          "actual": {
+            "callbacks": 0,
+            "exception_frame_restored": true
+          },
+          "passed": true
+        }
+      ],
+      "native": {
+        "exit_code": 0,
+        "observations": [
+          {
+            "name": "TControl.InstanceSize",
+            "value": 168
+          },
+          {
+            "name": "TWinControl.InstanceSize",
+            "value": 252
+          },
+          {
+            "name": "TButton.InstanceSize",
+            "value": 264
+          },
+          {
+            "name": "TForm.InstanceSize",
+            "value": 428
+          },
+          {
+            "name": "TTimer.InstanceSize",
+            "value": 52
+          },
+          {
+            "name": "CanFocus.enabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Escape.enabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Escape.modal-result",
+            "passed": true,
+            "value": 7
+          },
+          {
+            "name": "CanFocus.button-disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.button-disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Click.direct-disabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Escape.parent-disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.parent-hidden",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.button-hidden",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.alt",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.reenabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Enter.default-active",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "GeneratedWndProc.result",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "GeneratedWndProc.callback",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Timer.windows-dispatch",
+            "passed": true,
+            "value": 2
+          },
+          {
+            "name": "Timer.disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Timer.delivered-while-disabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Timer.exception-continuation",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Timer.no-handler",
+            "passed": true,
+            "value": 0
+          }
+        ],
+        "log_sha256": "40c103029141d98585c063592235622c4e9e3668a589cc2c72d2c5601de5100b"
+      },
+      "layouts": [
+        {
+          "class_name": "TControl",
+          "original": 168,
+          "compiled": 168,
+          "matches_original": true
+        },
+        {
+          "class_name": "TWinControl",
+          "original": 256,
+          "compiled": 252,
+          "matches_original": false
+        },
+        {
+          "class_name": "TButton",
+          "original": 268,
+          "compiled": 264,
+          "matches_original": false
+        },
+        {
+          "class_name": "TForm",
+          "original": 432,
+          "compiled": 428,
+          "matches_original": false
+        },
+        {
+          "class_name": "TTimer",
+          "original": 52,
+          "compiled": 52,
+          "matches_original": true
+        }
+      ]
+    },
+    "forms-update": {
+      "compile": {
+        "exit_code": 0,
+        "arguments": [
+          "-B",
+          "-Uoverride;..\\base\\lib",
+          "-GD",
+          "RuntimeProbe.dpr"
+        ],
+        "log_sha256": "2d971ca5849e7109aa80bd8e5d379265519c87d1f63aa9caeff1401dfa628fad"
+      },
+      "updates": [
+        "FORMS.dcu"
+      ],
+      "exe_sha256": "f2a2084b160442e955589ddb896e9fa11c341978ea1c2e3649de44b06b166b34",
+      "code_sha256": "4b355d3860cfd032e17faa12dc1f6ff0f120081b37130f20eda2a555b3cb7b5d",
+      "runtime_shapes": [
+        {
+          "symbol": "TControl.Click",
+          "original_address": "0x00413eac",
+          "compiled_address": "0x0041b994",
+          "bytes": 27,
+          "normalized_shape_match": true,
+          "original_masked_operands": [],
+          "compiled_masked_operands": []
+        },
+        {
+          "symbol": "TWinControl.CanFocus",
+          "original_address": "0x00416c2c",
+          "compiled_address": "0x0041e6b0",
+          "bytes": 51,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 8,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 8,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        },
+        {
+          "symbol": "TButton.CMDialogKey",
+          "original_address": "0x0042a480",
+          "compiled_address": "0x0041fc40",
+          "bytes": 100,
+          "normalized_shape_match": false,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 41,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 46,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 73,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 92,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 41,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 46,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 73,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 92,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "first_difference": {
+            "instruction": 6,
+            "original": "<CsInsn 0x42a48d [80bb0601000000]: cmp byte ptr [ebx + 0x106], 0>",
+            "compiled": "<CsInsn 0x41fc4d [80bb0201000000]: cmp byte ptr [ebx + 0x102], 0>"
+          }
+        },
+        {
+          "symbol": "TTimer.Timer",
+          "original_address": "0x0042c48c",
+          "compiled_address": "0x00420850",
+          "bytes": 18,
+          "normalized_shape_match": true,
+          "original_masked_operands": [],
+          "compiled_masked_operands": []
+        },
+        {
+          "symbol": "TTimer.WndProc",
+          "original_address": "0x0042c390",
+          "compiled_address": "0x00420754",
+          "bytes": 113,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 25,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 43,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 66,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 71,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 76,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 99,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 25,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 43,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 66,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 71,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 76,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 99,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        },
+        {
+          "symbol": "MakeObjectInstance",
+          "original_address": "0x0041fd4c",
+          "compiled_address": "0x0040ed38",
+          "bytes": 152,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 6,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 30,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 47,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 57,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 62,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 70,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 89,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 118,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 6,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 30,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 47,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 57,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 62,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 70,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 89,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 118,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            }
+          ]
+        },
+        {
+          "symbol": "@InitExe",
+          "original_address": "0x00403420",
+          "compiled_address": "0x004031e4",
+          "bytes": 45,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 0,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 7,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 12,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 18,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 23,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 29,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 39,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 0,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 7,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 12,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 18,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 23,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 29,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 39,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            }
+          ]
+        },
+        {
+          "symbol": "@HandleAnyException",
+          "original_address": "0x00402f4c",
+          "compiled_address": "0x00402d10",
+          "bytes": 195,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 31,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 36,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 64,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 102,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 108,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 117,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 140,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 150,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 157,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 162,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 184,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 31,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 36,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 64,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 102,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 108,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 117,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 140,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 150,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 157,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 162,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 184,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        },
+        {
+          "symbol": "@HandleFinally",
+          "original_address": "0x00403140",
+          "compiled_address": "0x00402f04",
+          "bytes": 54,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 20,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 20,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        }
+      ],
+      "compiled_framework_cases": [
+        {
+          "name": "Escape.enabled",
+          "inputs": {},
+          "expected": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "actual": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.button-disabled",
+          "inputs": {
+            "button_enabled": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.parent-disabled",
+          "inputs": {
+            "panel_enabled": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.parent-hidden",
+          "inputs": {
+            "panel_visible": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.button-hidden",
+          "inputs": {
+            "button_visible": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.alt",
+          "inputs": {
+            "key_data": 536870912
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.no-parent-form",
+          "inputs": {
+            "no_form": true
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Enter.default-active",
+          "inputs": {
+            "key": 13
+          },
+          "expected": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "actual": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "passed": true
+        },
+        {
+          "name": "Enter.inactive",
+          "inputs": {
+            "key": 13,
+            "active": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.not-cancel",
+          "inputs": {
+            "cancel": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Click.direct-disabled",
+          "inputs": {
+            "direct": true,
+            "button_enabled": false
+          },
+          "expected": {
+            "callbacks": 1,
+            "message_result": 0,
+            "modal_result": 7
+          },
+          "actual": {
+            "callbacks": 1,
+            "message_result": 0,
+            "modal_result": 7
+          },
+          "passed": true
+        },
+        {
+          "name": "Timer.delivered-while-disabled",
+          "inputs": {
+            "enabled": false,
+            "handler_assigned": true
+          },
+          "expected": {
+            "callbacks": 1,
+            "exception_frame_restored": true
+          },
+          "actual": {
+            "callbacks": 1,
+            "exception_frame_restored": true
+          },
+          "passed": true
+        },
+        {
+          "name": "Timer.no-handler",
+          "inputs": {
+            "enabled": false,
+            "handler_assigned": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "exception_frame_restored": true
+          },
+          "actual": {
+            "callbacks": 0,
+            "exception_frame_restored": true
+          },
+          "passed": true
+        }
+      ],
+      "native": {
+        "exit_code": 0,
+        "observations": [
+          {
+            "name": "TControl.InstanceSize",
+            "value": 168
+          },
+          {
+            "name": "TWinControl.InstanceSize",
+            "value": 252
+          },
+          {
+            "name": "TButton.InstanceSize",
+            "value": 264
+          },
+          {
+            "name": "TForm.InstanceSize",
+            "value": 428
+          },
+          {
+            "name": "TTimer.InstanceSize",
+            "value": 52
+          },
+          {
+            "name": "CanFocus.enabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Escape.enabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Escape.modal-result",
+            "passed": true,
+            "value": 7
+          },
+          {
+            "name": "CanFocus.button-disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.button-disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Click.direct-disabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Escape.parent-disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.parent-hidden",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.button-hidden",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.alt",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.reenabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Enter.default-active",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "GeneratedWndProc.result",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "GeneratedWndProc.callback",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Timer.windows-dispatch",
+            "passed": true,
+            "value": 2
+          },
+          {
+            "name": "Timer.disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Timer.delivered-while-disabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Timer.exception-continuation",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Timer.no-handler",
+            "passed": true,
+            "value": 0
+          }
+        ],
+        "log_sha256": "40c103029141d98585c063592235622c4e9e3668a589cc2c72d2c5601de5100b"
+      },
+      "layouts": [
+        {
+          "class_name": "TControl",
+          "original": 168,
+          "compiled": 168,
+          "matches_original": true
+        },
+        {
+          "class_name": "TWinControl",
+          "original": 256,
+          "compiled": 252,
+          "matches_original": false
+        },
+        {
+          "class_name": "TButton",
+          "original": 268,
+          "compiled": 264,
+          "matches_original": false
+        },
+        {
+          "class_name": "TForm",
+          "original": 432,
+          "compiled": 428,
+          "matches_original": false
+        },
+        {
+          "class_name": "TTimer",
+          "original": 52,
+          "compiled": 52,
+          "matches_original": true
+        }
+      ]
+    },
+    "system-update": {
+      "compile": {
+        "exit_code": 0,
+        "arguments": [
+          "-B",
+          "-Uoverride;..\\base\\lib",
+          "-GD",
+          "RuntimeProbe.dpr"
+        ],
+        "log_sha256": "bcb02f5bc1395afbe5acac8667c4320c995ec89883033617ad4c2b4a7036bb46"
+      },
+      "updates": [
+        "SYSTEM.DCU"
+      ],
+      "exe_sha256": "23145c828e16ab509388593c2c138ceab7b6dde701333241a1a8242526a59588",
+      "code_sha256": "c1e0bfc8f0effb86d68603f6b9cd2a8eeb99db3677b0bf2a7e34c566bb69b90b",
+      "runtime_shapes": [
+        {
+          "symbol": "TControl.Click",
+          "original_address": "0x00413eac",
+          "compiled_address": "0x0041b9b8",
+          "bytes": 27,
+          "normalized_shape_match": true,
+          "original_masked_operands": [],
+          "compiled_masked_operands": []
+        },
+        {
+          "symbol": "TWinControl.CanFocus",
+          "original_address": "0x00416c2c",
+          "compiled_address": "0x0041e6d4",
+          "bytes": 51,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 8,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 8,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        },
+        {
+          "symbol": "TButton.CMDialogKey",
+          "original_address": "0x0042a480",
+          "compiled_address": "0x0041fc64",
+          "bytes": 100,
+          "normalized_shape_match": false,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 41,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 46,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 73,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 92,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 41,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 46,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 73,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 92,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "first_difference": {
+            "instruction": 6,
+            "original": "<CsInsn 0x42a48d [80bb0601000000]: cmp byte ptr [ebx + 0x106], 0>",
+            "compiled": "<CsInsn 0x41fc71 [80bb0201000000]: cmp byte ptr [ebx + 0x102], 0>"
+          }
+        },
+        {
+          "symbol": "TTimer.Timer",
+          "original_address": "0x0042c48c",
+          "compiled_address": "0x00420874",
+          "bytes": 18,
+          "normalized_shape_match": true,
+          "original_masked_operands": [],
+          "compiled_masked_operands": []
+        },
+        {
+          "symbol": "TTimer.WndProc",
+          "original_address": "0x0042c390",
+          "compiled_address": "0x00420778",
+          "bytes": 113,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 25,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 43,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 66,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 71,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 76,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 99,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 25,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 43,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 66,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 71,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 76,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 99,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        },
+        {
+          "symbol": "MakeObjectInstance",
+          "original_address": "0x0041fd4c",
+          "compiled_address": "0x0040ed64",
+          "bytes": 152,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 6,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 30,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 47,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 57,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 62,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 70,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 89,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 118,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 6,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 30,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 47,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 57,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 62,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 70,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 89,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 118,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            }
+          ]
+        },
+        {
+          "symbol": "@InitExe",
+          "original_address": "0x00403420",
+          "compiled_address": "0x00403210",
+          "bytes": 45,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 0,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 7,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 12,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 18,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 23,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 29,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 39,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 0,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 7,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 12,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 18,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 23,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 29,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 39,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            }
+          ]
+        },
+        {
+          "symbol": "@HandleAnyException",
+          "original_address": "0x00402f4c",
+          "compiled_address": "0x00402d3c",
+          "bytes": 195,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 31,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 36,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 64,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 102,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 108,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 117,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 140,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 150,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 157,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 162,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 184,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 31,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 36,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 64,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 102,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 108,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 117,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 140,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 150,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 157,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 162,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 184,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        },
+        {
+          "symbol": "@HandleFinally",
+          "original_address": "0x00403140",
+          "compiled_address": "0x00402f30",
+          "bytes": 54,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 20,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 20,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        }
+      ],
+      "compiled_framework_cases": [
+        {
+          "name": "Escape.enabled",
+          "inputs": {},
+          "expected": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "actual": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.button-disabled",
+          "inputs": {
+            "button_enabled": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.parent-disabled",
+          "inputs": {
+            "panel_enabled": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.parent-hidden",
+          "inputs": {
+            "panel_visible": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.button-hidden",
+          "inputs": {
+            "button_visible": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.alt",
+          "inputs": {
+            "key_data": 536870912
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.no-parent-form",
+          "inputs": {
+            "no_form": true
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Enter.default-active",
+          "inputs": {
+            "key": 13
+          },
+          "expected": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "actual": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "passed": true
+        },
+        {
+          "name": "Enter.inactive",
+          "inputs": {
+            "key": 13,
+            "active": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.not-cancel",
+          "inputs": {
+            "cancel": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Click.direct-disabled",
+          "inputs": {
+            "direct": true,
+            "button_enabled": false
+          },
+          "expected": {
+            "callbacks": 1,
+            "message_result": 0,
+            "modal_result": 7
+          },
+          "actual": {
+            "callbacks": 1,
+            "message_result": 0,
+            "modal_result": 7
+          },
+          "passed": true
+        },
+        {
+          "name": "Timer.delivered-while-disabled",
+          "inputs": {
+            "enabled": false,
+            "handler_assigned": true
+          },
+          "expected": {
+            "callbacks": 1,
+            "exception_frame_restored": true
+          },
+          "actual": {
+            "callbacks": 1,
+            "exception_frame_restored": true
+          },
+          "passed": true
+        },
+        {
+          "name": "Timer.no-handler",
+          "inputs": {
+            "enabled": false,
+            "handler_assigned": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "exception_frame_restored": true
+          },
+          "actual": {
+            "callbacks": 0,
+            "exception_frame_restored": true
+          },
+          "passed": true
+        }
+      ],
+      "native": {
+        "exit_code": 0,
+        "observations": [
+          {
+            "name": "TControl.InstanceSize",
+            "value": 168
+          },
+          {
+            "name": "TWinControl.InstanceSize",
+            "value": 252
+          },
+          {
+            "name": "TButton.InstanceSize",
+            "value": 264
+          },
+          {
+            "name": "TForm.InstanceSize",
+            "value": 428
+          },
+          {
+            "name": "TTimer.InstanceSize",
+            "value": 52
+          },
+          {
+            "name": "CanFocus.enabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Escape.enabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Escape.modal-result",
+            "passed": true,
+            "value": 7
+          },
+          {
+            "name": "CanFocus.button-disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.button-disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Click.direct-disabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Escape.parent-disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.parent-hidden",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.button-hidden",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.alt",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.reenabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Enter.default-active",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "GeneratedWndProc.result",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "GeneratedWndProc.callback",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Timer.windows-dispatch",
+            "passed": true,
+            "value": 2
+          },
+          {
+            "name": "Timer.disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Timer.delivered-while-disabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Timer.exception-continuation",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Timer.no-handler",
+            "passed": true,
+            "value": 0
+          }
+        ],
+        "log_sha256": "40c103029141d98585c063592235622c4e9e3668a589cc2c72d2c5601de5100b"
+      },
+      "layouts": [
+        {
+          "class_name": "TControl",
+          "original": 168,
+          "compiled": 168,
+          "matches_original": true
+        },
+        {
+          "class_name": "TWinControl",
+          "original": 256,
+          "compiled": 252,
+          "matches_original": false
+        },
+        {
+          "class_name": "TButton",
+          "original": 268,
+          "compiled": 264,
+          "matches_original": false
+        },
+        {
+          "class_name": "TForm",
+          "original": 432,
+          "compiled": 428,
+          "matches_original": false
+        },
+        {
+          "class_name": "TTimer",
+          "original": 52,
+          "compiled": 52,
+          "matches_original": true
+        }
+      ]
+    },
+    "all-updates": {
+      "compile": {
+        "exit_code": 0,
+        "arguments": [
+          "-B",
+          "-Uoverride;..\\base\\lib",
+          "-GD",
+          "RuntimeProbe.dpr"
+        ],
+        "log_sha256": "30f4d8bc1db996f13f8465e4d0de3efbf55ca9487caf8049017d595bc91083ba"
+      },
+      "updates": [
+        "FORMS.dcu",
+        "REGSTR.DCU",
+        "SHLOBJ.DCU",
+        "SYSTEM.DCU"
+      ],
+      "exe_sha256": "51f7df5e8af540e8df02a178a4364bbfc25a33f8eff9fbc29ad73d51ebffeaf0",
+      "code_sha256": "9d4b54be588c76952eec4b359f4bbb1d8342f09966a534c0f18c8cee63189de4",
+      "runtime_shapes": [
+        {
+          "symbol": "TControl.Click",
+          "original_address": "0x00413eac",
+          "compiled_address": "0x0041b9c0",
+          "bytes": 27,
+          "normalized_shape_match": true,
+          "original_masked_operands": [],
+          "compiled_masked_operands": []
+        },
+        {
+          "symbol": "TWinControl.CanFocus",
+          "original_address": "0x00416c2c",
+          "compiled_address": "0x0041e6dc",
+          "bytes": 51,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 8,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 8,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        },
+        {
+          "symbol": "TButton.CMDialogKey",
+          "original_address": "0x0042a480",
+          "compiled_address": "0x0041fc6c",
+          "bytes": 100,
+          "normalized_shape_match": false,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 41,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 46,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 73,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 92,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 41,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 46,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 73,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 92,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "first_difference": {
+            "instruction": 6,
+            "original": "<CsInsn 0x42a48d [80bb0601000000]: cmp byte ptr [ebx + 0x106], 0>",
+            "compiled": "<CsInsn 0x41fc79 [80bb0201000000]: cmp byte ptr [ebx + 0x102], 0>"
+          }
+        },
+        {
+          "symbol": "TTimer.Timer",
+          "original_address": "0x0042c48c",
+          "compiled_address": "0x0042087c",
+          "bytes": 18,
+          "normalized_shape_match": true,
+          "original_masked_operands": [],
+          "compiled_masked_operands": []
+        },
+        {
+          "symbol": "TTimer.WndProc",
+          "original_address": "0x0042c390",
+          "compiled_address": "0x00420780",
+          "bytes": 113,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 25,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 43,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 66,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 71,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 76,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 99,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 25,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 43,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 58,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 66,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 71,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 76,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 99,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        },
+        {
+          "symbol": "MakeObjectInstance",
+          "original_address": "0x0041fd4c",
+          "compiled_address": "0x0040ed64",
+          "bytes": 152,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 6,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 30,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 47,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 57,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 62,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 70,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 89,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 118,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 6,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 30,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 47,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 57,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 62,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 70,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 89,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 118,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            }
+          ]
+        },
+        {
+          "symbol": "@InitExe",
+          "original_address": "0x00403420",
+          "compiled_address": "0x00403210",
+          "bytes": 45,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 0,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 7,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 12,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 18,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 23,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 29,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 39,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 0,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 7,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 12,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 18,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 23,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 29,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 39,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            }
+          ]
+        },
+        {
+          "symbol": "@HandleAnyException",
+          "original_address": "0x00402f4c",
+          "compiled_address": "0x00402d3c",
+          "bytes": 195,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 31,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 36,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 64,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 102,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 108,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 117,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 140,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 150,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 157,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 162,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 184,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 31,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 36,
+              "operand_offset": 2,
+              "bytes": 4,
+              "reason": "image-memory-address"
+            },
+            {
+              "instruction_offset": 64,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 102,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 108,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 117,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 140,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 150,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 157,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 162,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            },
+            {
+              "instruction_offset": 184,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        },
+        {
+          "symbol": "@HandleFinally",
+          "original_address": "0x00403140",
+          "compiled_address": "0x00402f30",
+          "bytes": 54,
+          "normalized_shape_match": true,
+          "original_masked_operands": [
+            {
+              "instruction_offset": 20,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ],
+          "compiled_masked_operands": [
+            {
+              "instruction_offset": 20,
+              "operand_offset": 3,
+              "bytes": 4,
+              "reason": "image-pointer-immediate"
+            },
+            {
+              "instruction_offset": 37,
+              "operand_offset": 1,
+              "bytes": 4,
+              "reason": "external-relative-transfer"
+            }
+          ]
+        }
+      ],
+      "compiled_framework_cases": [
+        {
+          "name": "Escape.enabled",
+          "inputs": {},
+          "expected": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "actual": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.button-disabled",
+          "inputs": {
+            "button_enabled": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.parent-disabled",
+          "inputs": {
+            "panel_enabled": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.parent-hidden",
+          "inputs": {
+            "panel_visible": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.button-hidden",
+          "inputs": {
+            "button_visible": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.alt",
+          "inputs": {
+            "key_data": 536870912
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.no-parent-form",
+          "inputs": {
+            "no_form": true
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Enter.default-active",
+          "inputs": {
+            "key": 13
+          },
+          "expected": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "actual": {
+            "callbacks": 1,
+            "message_result": 1,
+            "modal_result": 7
+          },
+          "passed": true
+        },
+        {
+          "name": "Enter.inactive",
+          "inputs": {
+            "key": 13,
+            "active": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Escape.not-cancel",
+          "inputs": {
+            "cancel": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "actual": {
+            "callbacks": 0,
+            "message_result": 0,
+            "modal_result": 0
+          },
+          "passed": true
+        },
+        {
+          "name": "Click.direct-disabled",
+          "inputs": {
+            "direct": true,
+            "button_enabled": false
+          },
+          "expected": {
+            "callbacks": 1,
+            "message_result": 0,
+            "modal_result": 7
+          },
+          "actual": {
+            "callbacks": 1,
+            "message_result": 0,
+            "modal_result": 7
+          },
+          "passed": true
+        },
+        {
+          "name": "Timer.delivered-while-disabled",
+          "inputs": {
+            "enabled": false,
+            "handler_assigned": true
+          },
+          "expected": {
+            "callbacks": 1,
+            "exception_frame_restored": true
+          },
+          "actual": {
+            "callbacks": 1,
+            "exception_frame_restored": true
+          },
+          "passed": true
+        },
+        {
+          "name": "Timer.no-handler",
+          "inputs": {
+            "enabled": false,
+            "handler_assigned": false
+          },
+          "expected": {
+            "callbacks": 0,
+            "exception_frame_restored": true
+          },
+          "actual": {
+            "callbacks": 0,
+            "exception_frame_restored": true
+          },
+          "passed": true
+        }
+      ],
+      "native": {
+        "exit_code": 0,
+        "observations": [
+          {
+            "name": "TControl.InstanceSize",
+            "value": 168
+          },
+          {
+            "name": "TWinControl.InstanceSize",
+            "value": 252
+          },
+          {
+            "name": "TButton.InstanceSize",
+            "value": 264
+          },
+          {
+            "name": "TForm.InstanceSize",
+            "value": 428
+          },
+          {
+            "name": "TTimer.InstanceSize",
+            "value": 52
+          },
+          {
+            "name": "CanFocus.enabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Escape.enabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Escape.modal-result",
+            "passed": true,
+            "value": 7
+          },
+          {
+            "name": "CanFocus.button-disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.button-disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Click.direct-disabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Escape.parent-disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.parent-hidden",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.button-hidden",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.alt",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Escape.reenabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Enter.default-active",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "GeneratedWndProc.result",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "GeneratedWndProc.callback",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Timer.windows-dispatch",
+            "passed": true,
+            "value": 2
+          },
+          {
+            "name": "Timer.disabled",
+            "passed": true,
+            "value": 0
+          },
+          {
+            "name": "Timer.delivered-while-disabled",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Timer.exception-continuation",
+            "passed": true,
+            "value": 1
+          },
+          {
+            "name": "Timer.no-handler",
+            "passed": true,
+            "value": 0
+          }
+        ],
+        "log_sha256": "40c103029141d98585c063592235622c4e9e3668a589cc2c72d2c5601de5100b"
+      },
+      "layouts": [
+        {
+          "class_name": "TControl",
+          "original": 168,
+          "compiled": 168,
+          "matches_original": true
+        },
+        {
+          "class_name": "TWinControl",
+          "original": 256,
+          "compiled": 252,
+          "matches_original": false
+        },
+        {
+          "class_name": "TButton",
+          "original": 268,
+          "compiled": 264,
+          "matches_original": false
+        },
+        {
+          "class_name": "TForm",
+          "original": 432,
+          "compiled": 428,
+          "matches_original": false
+        },
+        {
+          "class_name": "TTimer",
+          "original": 52,
+          "compiled": 52,
+          "matches_original": true
+        }
+      ]
+    }
+  },
+  "original_framework_cases": [
+    {
+      "name": "Escape.enabled",
+      "inputs": {},
+      "expected": {
+        "callbacks": 1,
+        "message_result": 1,
+        "modal_result": 7
+      },
+      "actual": {
+        "callbacks": 1,
+        "message_result": 1,
+        "modal_result": 7
+      },
+      "passed": true
+    },
+    {
+      "name": "Escape.button-disabled",
+      "inputs": {
+        "button_enabled": false
+      },
+      "expected": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "actual": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "passed": true
+    },
+    {
+      "name": "Escape.parent-disabled",
+      "inputs": {
+        "panel_enabled": false
+      },
+      "expected": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "actual": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "passed": true
+    },
+    {
+      "name": "Escape.parent-hidden",
+      "inputs": {
+        "panel_visible": false
+      },
+      "expected": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "actual": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "passed": true
+    },
+    {
+      "name": "Escape.button-hidden",
+      "inputs": {
+        "button_visible": false
+      },
+      "expected": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "actual": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "passed": true
+    },
+    {
+      "name": "Escape.alt",
+      "inputs": {
+        "key_data": 536870912
+      },
+      "expected": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "actual": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "passed": true
+    },
+    {
+      "name": "Escape.no-parent-form",
+      "inputs": {
+        "no_form": true
+      },
+      "expected": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "actual": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "passed": true
+    },
+    {
+      "name": "Enter.default-active",
+      "inputs": {
+        "key": 13
+      },
+      "expected": {
+        "callbacks": 1,
+        "message_result": 1,
+        "modal_result": 7
+      },
+      "actual": {
+        "callbacks": 1,
+        "message_result": 1,
+        "modal_result": 7
+      },
+      "passed": true
+    },
+    {
+      "name": "Enter.inactive",
+      "inputs": {
+        "key": 13,
+        "active": false
+      },
+      "expected": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "actual": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "passed": true
+    },
+    {
+      "name": "Escape.not-cancel",
+      "inputs": {
+        "cancel": false
+      },
+      "expected": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "actual": {
+        "callbacks": 0,
+        "message_result": 0,
+        "modal_result": 0
+      },
+      "passed": true
+    },
+    {
+      "name": "Click.direct-disabled",
+      "inputs": {
+        "direct": true,
+        "button_enabled": false
+      },
+      "expected": {
+        "callbacks": 1,
+        "message_result": 0,
+        "modal_result": 7
+      },
+      "actual": {
+        "callbacks": 1,
+        "message_result": 0,
+        "modal_result": 7
+      },
+      "passed": true
+    },
+    {
+      "name": "Timer.delivered-while-disabled",
+      "inputs": {
+        "enabled": false,
+        "handler_assigned": true
+      },
+      "expected": {
+        "callbacks": 1,
+        "exception_frame_restored": true
+      },
+      "actual": {
+        "callbacks": 1,
+        "exception_frame_restored": true
+      },
+      "passed": true
+    },
+    {
+      "name": "Timer.no-handler",
+      "inputs": {
+        "enabled": false,
+        "handler_assigned": false
+      },
+      "expected": {
+        "callbacks": 0,
+        "exception_frame_restored": true
+      },
+      "actual": {
+        "callbacks": 0,
+        "exception_frame_restored": true
+      },
+      "passed": true
+    }
+  ],
+  "toolchain_provenance": {
+    "payload_sha256": "7e830af7514c808854bf4e2122951bbcda2a3edc4813a1fe293ea521e73cb54c",
+    "extractor": {
+      "url": "https://github.com/lephilousophe/idecomp",
+      "commit": "bd2b77624b96bb2a4f347518d087126759296a03",
+      "files": {
+        "idecomp.py": "a116f3cafc4e59be461b40ebe15b50c0782e7040a0ead7da7950f98e8359545a",
+        "pwexplode.py": "3e9818e19f44c162df0baec649c09394bc149f829eeb7dcd67ed807c0ec1a3f9"
+      }
+    },
+    "total_media_files": 1676,
+    "extracted_files": 492,
+    "updates": [
+      {
+        "path": "updates/FORMS.dcu",
+        "size": 84732,
+        "sha256": "e080bfb9361a81070325c9d7db8cf1bb4abe637abff5906e40d105264f9cdcb3"
+      },
+      {
+        "path": "updates/REGSTR.DCU",
+        "size": 39421,
+        "sha256": "362b4bf16beb984efd1f2ccf8addc183773b7287b94f868d5b89f2e911c76169"
+      },
+      {
+        "path": "updates/SHLOBJ.DCU",
+        "size": 15394,
+        "sha256": "df25dec7e85e401b538e74f7624c52259ee948aad1d835daa7839fe62b9dcd5c"
+      },
+      {
+        "path": "updates/SYSTEM.DCU",
+        "size": 45668,
+        "sha256": "88a8ec820d6de46441e09c2879d1b5891be53d67cf3df477f75ebe054605817a"
+      }
+    ],
+    "build_report_sha256": "eaa47218a667c56ca2bb578e8cdf88946ce1b3f89a2a8963cc28d9bf68d40c50",
+    "key_files": [
+      {
+        "path": "DELPHI32/OPTIONS/SOURCE/RTL/SYS/SYSTEM.PAS",
+        "size": 192470,
+        "compressed_size": 41840,
+        "offset": 10846822,
+        "date": "1996-05-30T02:01:00",
+        "flags": 0,
+        "extracted_path": "base/source/RTL/SYS/SYSTEM.PAS",
+        "sha256": "e507be3932c3517d45e6b9df77b76952699487593db933d8175ed5711858d001"
+      },
+      {
+        "path": "DELPHI32/OPTIONS/SOURCE/VCL/FORMS.PAS",
+        "size": 140700,
+        "compressed_size": 37939,
+        "offset": 11494977,
+        "date": "1996-05-30T02:01:00",
+        "flags": 0,
+        "extracted_path": "base/source/VCL/FORMS.PAS",
+        "sha256": "d80e38e727c937865cda86b258c364222475df01a51392f5595a1f39a56b0a8a"
+      },
+      {
+        "path": "DELPHI32/OPTIONS/SOURCE/VCL/CONTROLS.PAS",
+        "size": 152659,
+        "compressed_size": 38020,
+        "offset": 11570517,
+        "date": "1996-05-30T02:01:00",
+        "flags": 0,
+        "extracted_path": "base/source/VCL/CONTROLS.PAS",
+        "sha256": "fe1761ef88d721cdfa64c75446acc53f17aa333d7b750881c2524df7397b8c87"
+      },
+      {
+        "path": "DELPHI32/OPTIONS/SOURCE/VCL/STDCTRLS.PAS",
+        "size": 95859,
+        "compressed_size": 23043,
+        "offset": 11789914,
+        "date": "1996-05-30T02:01:00",
+        "flags": 0,
+        "extracted_path": "base/source/VCL/STDCTRLS.PAS",
+        "sha256": "2c4ab2b29863795d2e40a3bbf2a1b072c66b3fb7d80db9f6364229dae9452d62"
+      },
+      {
+        "path": "DELPHI32/OPTIONS/SOURCE/VCL/EXTCTRLS.PAS",
+        "size": 53259,
+        "compressed_size": 13372,
+        "offset": 11862913,
+        "date": "1996-05-30T02:01:00",
+        "flags": 0,
+        "extracted_path": "base/source/VCL/EXTCTRLS.PAS",
+        "sha256": "148a1fe4eebe5edd2ed679cb61d27f24833edd1f851aaac96a9086d8f3e3d5b9"
+      },
+      {
+        "path": "DELPHI32/MINIMAL/BIN/DCC32.EXE",
+        "size": 372736,
+        "compressed_size": 212861,
+        "offset": 35105986,
+        "date": "1996-05-31T15:30:02",
+        "flags": 0,
+        "extracted_path": "base/bin/DCC32.EXE",
+        "sha256": "14a81a389ac824fae2683491ccd5d5caf36b8d199ebb181ed06f8a635892d09a"
+      },
+      {
+        "path": "DELPHI32/MINIMAL/LIB/CONTROLS.DCU",
+        "size": 89528,
+        "compressed_size": 41827,
+        "offset": 36517457,
+        "date": "1996-05-31T15:34:02",
+        "flags": 0,
+        "extracted_path": "base/lib/CONTROLS.DCU",
+        "sha256": "96350b4b0f39b3a559a3cdead250e40e9209938147cffd1e72fe071c7d465798"
+      },
+      {
+        "path": "DELPHI32/MINIMAL/LIB/FORMS.DCU",
+        "size": 84724,
+        "compressed_size": 40988,
+        "offset": 37240067,
+        "date": "1996-05-31T15:34:02",
+        "flags": 0,
+        "extracted_path": "base/lib/FORMS.DCU",
+        "sha256": "dabf697f08df8224caa43944d9fa4ffa0ce73b8ec8b26732ad4b807a7ed7d89b"
+      },
+      {
+        "path": "DELPHI32/MINIMAL/LIB/EXTCTRLS.DCU",
+        "size": 48421,
+        "compressed_size": 19257,
+        "offset": 37466709,
+        "date": "1996-05-31T15:34:04",
+        "flags": 0,
+        "extracted_path": "base/lib/EXTCTRLS.DCU",
+        "sha256": "1fcd7eb419e9d16e892ca73fd68032c89940398f454dade7697c010da2fb9a4d"
+      },
+      {
+        "path": "DELPHI32/MINIMAL/LIB/SYSTEM.DCU",
+        "size": 45592,
+        "compressed_size": 25921,
+        "offset": 37540851,
+        "date": "1996-05-31T15:30:12",
+        "flags": 0,
+        "extracted_path": "base/lib/SYSTEM.DCU",
+        "sha256": "02a05301c65f54c1054d0c27a465c1e26786339eec199e4865a41c46ca8611ae"
+      },
+      {
+        "path": "DELPHI32/MINIMAL/LIB/STDCTRLS.DCU",
+        "size": 84807,
+        "compressed_size": 30869,
+        "offset": 38142503,
+        "date": "1996-05-31T15:34:04",
+        "flags": 0,
+        "extracted_path": "base/lib/STDCTRLS.DCU",
+        "sha256": "7b50c630f693ada658e756fa2e6f6b8d50a12334637caba268f6f0dc2f021a9b"
+      },
+      {
+        "path": "DELPHI32/MINIMAL/SLIB/CONTROLS.DCU",
+        "size": 89528,
+        "compressed_size": 41827,
+        "offset": 41693411,
+        "date": "1996-05-31T15:34:42",
+        "flags": 0,
+        "extracted_path": "base/slib/CONTROLS.DCU",
+        "sha256": "96350b4b0f39b3a559a3cdead250e40e9209938147cffd1e72fe071c7d465798"
+      },
+      {
+        "path": "DELPHI32/MINIMAL/SLIB/EXTCTRLS.DCU",
+        "size": 48421,
+        "compressed_size": 19258,
+        "offset": 41977272,
+        "date": "1996-05-31T15:34:42",
+        "flags": 0,
+        "extracted_path": "base/slib/EXTCTRLS.DCU",
+        "sha256": "072294da89414b7dbf28ecafa21d1de2f08b4b5f29b935a3a915e7bfd9256563"
+      },
+      {
+        "path": "DELPHI32/MINIMAL/SLIB/FORMS.DCU",
+        "size": 84724,
+        "compressed_size": 40988,
+        "offset": 42020954,
+        "date": "1996-05-31T15:34:42",
+        "flags": 0,
+        "extracted_path": "base/slib/FORMS.DCU",
+        "sha256": "dabf697f08df8224caa43944d9fa4ffa0ce73b8ec8b26732ad4b807a7ed7d89b"
+      },
+      {
+        "path": "DELPHI32/MINIMAL/SLIB/STDCTRLS.DCU",
+        "size": 85609,
+        "compressed_size": 30887,
+        "offset": 42299962,
+        "date": "1996-05-31T15:34:42",
+        "flags": 0,
+        "extracted_path": "base/slib/STDCTRLS.DCU",
+        "sha256": "f05a2a309d147e0077ac3ef17cd126edcd65323a98b51dc1212a1fbd322e60e1"
+      }
+    ]
+  },
+  "focused_original_runtime_spans": [
+    {
+      "symbol": "TControl.Click",
+      "address": "0x00413eac",
+      "bytes": 27,
+      "unlisted_instructions": [],
+      "unlisted_instruction_bytes": 0
+    },
+    {
+      "symbol": "TWinControl.CanFocus",
+      "address": "0x00416c2c",
+      "bytes": 51,
+      "unlisted_instructions": [],
+      "unlisted_instruction_bytes": 0
+    },
+    {
+      "symbol": "TButton.CMDialogKey",
+      "address": "0x0042a480",
+      "bytes": 100,
+      "unlisted_instructions": [],
+      "unlisted_instruction_bytes": 0
+    },
+    {
+      "symbol": "TTimer.Timer",
+      "address": "0x0042c48c",
+      "bytes": 18,
+      "unlisted_instructions": [],
+      "unlisted_instruction_bytes": 0
+    },
+    {
+      "symbol": "TTimer.WndProc",
+      "address": "0x0042c390",
+      "bytes": 113,
+      "unlisted_instructions": [],
+      "unlisted_instruction_bytes": 0
+    },
+    {
+      "symbol": "MakeObjectInstance",
+      "address": "0x0041fd4c",
+      "bytes": 152,
+      "unlisted_instructions": [],
+      "unlisted_instruction_bytes": 0
+    },
+    {
+      "symbol": "@InitExe",
+      "address": "0x00403420",
+      "bytes": 45,
+      "unlisted_instructions": [],
+      "unlisted_instruction_bytes": 0
+    },
+    {
+      "symbol": "@HandleAnyException",
+      "address": "0x00402f4c",
+      "bytes": 195,
+      "unlisted_instructions": [
+        {
+          "address": "0x00402fee",
+          "bytes": "e8a5040000",
+          "instruction": "call 0x403498"
+        },
+        {
+          "address": "0x00402ff3",
+          "bytes": "8b8800000000",
+          "instruction": "mov ecx, dword ptr [eax]"
+        },
+        {
+          "address": "0x00402ff9",
+          "bytes": "8b11",
+          "instruction": "mov edx, dword ptr [ecx]"
+        },
+        {
+          "address": "0x00402ffb",
+          "bytes": "899000000000",
+          "instruction": "mov dword ptr [eax], edx"
+        },
+        {
+          "address": "0x00403001",
+          "bytes": "8b4108",
+          "instruction": "mov eax, dword ptr [ecx + 8]"
+        },
+        {
+          "address": "0x00403004",
+          "bytes": "e92bfcffff",
+          "instruction": "jmp 0x402c34"
+        }
+      ],
+      "unlisted_instruction_bytes": 27
+    },
+    {
+      "symbol": "@HandleFinally",
+      "address": "0x00403140",
+      "bytes": 54,
+      "unlisted_instructions": [],
+      "unlisted_instruction_bytes": 0
+    }
+  ],
+  "reconstruction": {
+    "original_address": "0x00451c20",
+    "compiled_address": "0x00401bc4",
+    "bytes": 282,
+    "literal_byte_match": true,
+    "original_bytes_sha256": "9bee74d86cd5aadb1fd653f15886f9c22cee7b4ff1e2a7ec750a4e9d1c99dcfc",
+    "compiled_bytes_sha256": "9bee74d86cd5aadb1fd653f15886f9c22cee7b4ff1e2a7ec750a4e9d1c99dcfc",
+    "cases": 9216,
+    "mismatches": [],
+    "floors": [
+      0,
+      1,
+      50
+    ],
+    "indices": [
+      0,
+      10,
+      110,
+      120
+    ],
+    "previous_monster_values": [
+      -123,
+      0,
+      32
+    ],
+    "passed": true,
+    "source": [
+      {
+        "source": "reference/delphi2/probes/RecoveryProbe.dpr",
+        "source_sha256": "21e1d77e75b0be307545f0e034633d1301d46feb40a7b3d3dcd9b57e3d999c0b",
+        "staged_sha256": "8b22a0bc3f116230cff7c36f82ecdf809a3b676eb6c0ce45e20a3b5f78cb39c0"
+      },
+      {
+        "source": "reference/delphi2/recovered/RecoveredNeighbor.pas",
+        "source_sha256": "70b6ebb490e112c962628eb5adfb7745a81af3655654af388028d02ef0b1d0a4",
+        "staged_sha256": "1a2aaf40145bf7705c43aefb7e0e8db8862c972893e374e22b2aa080295279ef"
+      }
+    ]
+  },
+  "limits": [
+    "Only one gameplay routine reconstructed, not a full Pascal game project or author's source text.",
+    "Runtime address-normalized shapes do not establish effect equivalence; ABI mismatches remain failures.",
+    "Framework emulation follows VCL code but models Windows GetKeyState and uses synthetic objects/events.",
+    "Native framework tests exercise this archive's VCL on this Windows host, not the original game executable.",
+    "No campaign, complete Windows-input/timer schedule, file-failure matrix or full-game behavioral proof."
+  ],
+  "status": {
+    "gameplay_reconstruction_passed": true,
+    "framework_fixtures_passed": true,
+    "native_framework_checks_passed": true,
+    "complete_runtime_baseline_accepted": false,
+    "full_pascal_game_recovered": false
+  }
+}

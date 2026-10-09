@@ -1,0 +1,14 @@
+; root_0041abe8 at 0x0041abe8
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041abe8  53  PUSH EBX
+0041abe9  8bd8  MOV EBX,EAX
+0041abeb  f6430808  TEST byte ptr [EBX + 0x8],0x8
+0041abef  7413  JZ 0x0041ac04
+0041abf1  806308f7  AND byte ptr [EBX + 0x8],0xf7
+0041abf5  a1dca64800  MOV EAX,[0x0048a6dc]
+0041abfa  50  PUSH EAX
+0041abfb  8b4304  MOV EAX,dword ptr [EBX + 0x4]
+0041abfe  50  PUSH EAX
+0041abff  e8c8a1feff  CALL 0x00404dcc
+0041ac04  5b  POP EBX
+0041ac05  c3  RET

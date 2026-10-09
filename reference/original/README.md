@@ -8,6 +8,12 @@ separate [C++ implementation](../../cpp/README.md).
 - [Source index](decompiled/INDEX.md): initial 106-function export, ten recovered
   callbacks/helpers and repaired arrival switch.
 - [Call map](decompiled/CALLS.md): exported routine relationships and unresolved calls.
+- [Presentation/input review](presentation/REVIEW.md): all 130 serialized UI
+  event bindings, published method tables, assembly, confirmed discrepancies,
+  and remaining framework/timer boundaries.
+- [Whole-program accounting](whole-program/REVIEW.md): executable byte ledger,
+  3,298 machine-entry exports, Delphi-2 runtime recognition, installed exception
+  continuations, callback trampolines, and explicit unresolved regions.
 - [Research workflow](../../docs/reverse-engineering.md): supported executable,
   Ghidra scripts, translation rules and executable comparisons.
 - [Fidelity scope](../../cpp/FIDELITY.md): passing evidence and remaining limits.

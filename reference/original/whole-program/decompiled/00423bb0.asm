@@ -1,0 +1,5 @@
+; FUN_00423bb0 at 0x00423bb0
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00423bb0  8b402c  MOV EAX,dword ptr [EAX + 0x2c]
+00423bb3  e8885efeff  CALL 0x00409a40
+00423bb8  c3  RET

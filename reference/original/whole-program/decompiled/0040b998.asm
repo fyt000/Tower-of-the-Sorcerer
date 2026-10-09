@@ -1,0 +1,64 @@
+; root_0040b998 at 0x0040b998
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040b998  55  PUSH EBP
+0040b999  8bec  MOV EBP,ESP
+0040b99b  83c4f4  ADD ESP,-0xc
+0040b99e  53  PUSH EBX
+0040b99f  8bda  MOV EBX,EDX
+0040b9a1  8945fc  MOV dword ptr [EBP + -0x4],EAX
+0040b9a4  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0040b9a7  8b5050  MOV EDX,dword ptr [EAX + 0x50]
+0040b9aa  8bc3  MOV EAX,EBX
+0040b9ac  e883a0ffff  CALL 0x00405a34
+0040b9b1  85c0  TEST EAX,EAX
+0040b9b3  0f85a7000000  JNZ 0x0040ba60
+0040b9b9  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0040b9bc  e8cf140000  CALL 0x0040ce90
+0040b9c1  3c0a  CMP AL,0xa
+0040b9c3  741a  JZ 0x0040b9df
+0040b9c5  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0040b9c8  ff4810  DEC dword ptr [EAX + 0x10]
+0040b9cb  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0040b9ce  e8c1150000  CALL 0x0040cf94
+0040b9d3  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0040b9d6  c6404c01  MOV byte ptr [EAX + 0x4c],0x1
+0040b9da  e801ffffff  CALL 0x0040b8e0
+0040b9df  b201  MOV DL,0x1
+0040b9e1  b8688f4000  MOV EAX,0x408f68
+0040b9e6  e82172ffff  CALL 0x00402c0c
+0040b9eb  8945f8  MOV dword ptr [EBP + -0x8],EAX
+0040b9ee  33c0  XOR EAX,EAX
+0040b9f0  55  PUSH EBP
+0040b9f1  684eba4000  PUSH 0x40ba4e
+0040b9f6  64ff30  PUSH dword ptr FS:[EAX]
+0040b9f9  648920  MOV dword ptr FS:[EAX],ESP
+0040b9fc  8d55f4  LEA EDX,[EBP + -0xc]
+0040b9ff  b904000000  MOV ECX,0x4
+0040ba04  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0040ba07  e8fc010000  CALL 0x0040bc08
+0040ba0c  8b55f4  MOV EDX,dword ptr [EBP + -0xc]
+0040ba0f  8b45f8  MOV EAX,dword ptr [EBP + -0x8]
+0040ba12  e8d1f8ffff  CALL 0x0040b2e8
+0040ba17  8b45f8  MOV EAX,dword ptr [EBP + -0x8]
+0040ba1a  8b5004  MOV EDX,dword ptr [EAX + 0x4]
+0040ba1d  8b4df4  MOV ECX,dword ptr [EBP + -0xc]
+0040ba20  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0040ba23  e8e0010000  CALL 0x0040bc08
+0040ba28  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0040ba2b  c6404c01  MOV byte ptr [EAX + 0x4c],0x1
+0040ba2f  8b55f8  MOV EDX,dword ptr [EBP + -0x8]
+0040ba32  8b4514  MOV EAX,dword ptr [EBP + 0x14]
+0040ba35  ff5510  CALL dword ptr [EBP + 0x10]
+0040ba38  33c0  XOR EAX,EAX
+0040ba3a  5a  POP EDX
+0040ba3b  59  POP ECX
+0040ba3c  59  POP ECX
+0040ba3d  648910  MOV dword ptr FS:[EAX],EDX
+0040ba40  6855ba4000  PUSH 0x40ba55
+0040ba45  8b45f8  MOV EAX,dword ptr [EBP + -0x8]
+0040ba48  e8e771ffff  CALL 0x00402c34
+0040ba4d  c3  RET
+0040ba60  5b  POP EBX
+0040ba61  8be5  MOV ESP,EBP
+0040ba63  5d  POP EBP
+0040ba64  c21000  RET 0x10

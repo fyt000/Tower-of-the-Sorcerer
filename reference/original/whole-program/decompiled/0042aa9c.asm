@@ -1,0 +1,7 @@
+; root_0042aa9c at 0x0042aa9c
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0042aa9c  3a9004010000  CMP DL,byte ptr [EAX + 0x104]
+0042aaa2  740b  JZ 0x0042aaaf
+0042aaa4  889004010000  MOV byte ptr [EAX + 0x104],DL
+0042aaaa  e8c5a6feff  CALL 0x00415174
+0042aaaf  c3  RET

@@ -1,0 +1,7 @@
+; FUN_0040e8d4 at 0x0040e8d4
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040e8d4  53  PUSH EBX
+0040e8d5  8bd8  MOV EBX,EAX
+0040e8d7  80631cfe  AND byte ptr [EBX + 0x1c],0xfe
+0040e8db  5b  POP EBX
+0040e8dc  c3  RET

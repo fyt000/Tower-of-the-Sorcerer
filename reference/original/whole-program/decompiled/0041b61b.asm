@@ -1,0 +1,6 @@
+; FUN_0041b61b at 0x0041b61b
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041b61b  8b45f4  MOV EAX,dword ptr [EBP + -0xc]
+0041b61e  50  PUSH EAX
+0041b61f  e8a896feff  CALL 0x00404ccc
+0041b624  c3  RET

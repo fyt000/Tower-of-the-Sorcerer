@@ -1,0 +1,3 @@
+; root_00406ab4 at 0x00406ab4
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00406ab4  ebf0  JMP 0x00406aa6

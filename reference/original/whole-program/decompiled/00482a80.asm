@@ -1,0 +1,7 @@
+; TTSW10_mediaplayer5onnotify at 0x00482a80
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00482a80  8b90d8020000  MOV EDX,dword ptr [EAX + 0x2d8]
+00482a86  80bafc01000000  CMP byte ptr [EDX + 0x1fc],0x0
+00482a8d  7505  JNZ 0x00482a94
+00482a8f  e82898ffff  CALL 0x0047c2bc
+00482a94  c3  RET

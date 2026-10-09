@@ -1,0 +1,8 @@
+; FUN_0041db9c at 0x0041db9c
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041db9c  8b5014  MOV EDX,dword ptr [EAX + 0x14]
+0041db9f  85d2  TEST EDX,EDX
+0041dba1  7407  JZ 0x0041dbaa
+0041dba3  8bc2  MOV EAX,EDX
+0041dba5  e81ef7ffff  CALL 0x0041d2c8
+0041dbaa  c3  RET

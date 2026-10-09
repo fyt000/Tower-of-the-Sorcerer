@@ -1,0 +1,3 @@
+; thunk_FUN_00402f4c at 0x0041c285
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041c285  e9c26cfeff  JMP 0x00402f4c

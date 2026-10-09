@@ -1,0 +1,5 @@
+; FUN_0043d973 at 0x0043d973
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0043d973  8d85e8feffff  LEA EAX,[EBP + 0xfffffee8]
+0043d979  e85e5bfcff  CALL 0x004034dc
+0043d97e  c3  RET

@@ -1,0 +1,5 @@
+; root_004235d0 at 0x004235d0
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+004235d0  8b08  MOV ECX,dword ptr [EAX]
+004235d2  ff51f0  CALL dword ptr [ECX + -0x10]
+004235d5  c3  RET

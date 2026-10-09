@@ -1,0 +1,4 @@
+; FUN_00402d04 at 0x00402d04
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00402d04  8b40d4  MOV EAX,dword ptr [EAX + -0x2c]
+00402d07  c3  RET

@@ -1,0 +1,9 @@
+; FUN_0040bbec at 0x0040bbec
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040bbec  53  PUSH EBX
+0040bbed  8bd8  MOV EBX,EAX
+0040bbef  8bc3  MOV EAX,EBX
+0040bbf1  e89a120000  CALL 0x0040ce90
+0040bbf6  ff4b10  DEC dword ptr [EBX + 0x10]
+0040bbf9  5b  POP EBX
+0040bbfa  c3  RET

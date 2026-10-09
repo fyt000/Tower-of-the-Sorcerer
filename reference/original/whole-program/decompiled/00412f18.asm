@@ -1,0 +1,4 @@
+; root_00412f18 at 0x00412f18
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00412f18  88503c  MOV byte ptr [EAX + 0x3c],DL
+00412f1b  c3  RET

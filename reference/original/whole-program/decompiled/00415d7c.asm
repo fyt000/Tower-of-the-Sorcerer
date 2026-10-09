@@ -1,0 +1,12 @@
+; root_00415d7c at 0x00415d7c
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00415d7c  56  PUSH ESI
+00415d7d  8bf0  MOV ESI,EAX
+00415d7f  8bc6  MOV EAX,ESI
+00415d81  8b08  MOV ECX,dword ptr [EAX]
+00415d83  ff51f0  CALL dword ptr [ECX + -0x10]
+00415d86  8bc6  MOV EAX,ESI
+00415d88  8b10  MOV EDX,dword ptr [EAX]
+00415d8a  ff5278  CALL dword ptr [EDX + 0x78]
+00415d8d  5e  POP ESI
+00415d8e  c3  RET

@@ -1,0 +1,5 @@
+; FUN_00409fc4 at 0x00409fc4
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00409fc4  8b4008  MOV EAX,dword ptr [EAX + 0x8]
+00409fc7  8b4008  MOV EAX,dword ptr [EAX + 0x8]
+00409fca  c3  RET

@@ -1,0 +1,23 @@
+; FUN_0041dad8 at 0x0041dad8
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041dad8  53  PUSH EBX
+0041dad9  56  PUSH ESI
+0041dada  8bd8  MOV EBX,EAX
+0041dadc  837b1400  CMP dword ptr [EBX + 0x14],0x0
+0041dae0  752e  JNZ 0x0041db10
+0041dae2  8bc3  MOV EAX,EBX
+0041dae4  e8c3000000  CALL 0x0041dbac
+0041dae9  8bcb  MOV ECX,EBX
+0041daeb  b201  MOV DL,0x1
+0041daed  b8c0d14100  MOV EAX,0x41d1c0
+0041daf2  e871f7ffff  CALL 0x0041d268
+0041daf7  8bf0  MOV ESI,EAX
+0041daf9  897314  MOV dword ptr [EBX + 0x14],ESI
+0041dafc  895e28  MOV dword ptr [ESI + 0x28],EBX
+0041daff  c746248cbd4100  MOV dword ptr [ESI + 0x24],0x41bd8c
+0041db06  895e30  MOV dword ptr [ESI + 0x30],EBX
+0041db09  c7462cc4d84100  MOV dword ptr [ESI + 0x2c],0x41d8c4
+0041db10  8b4314  MOV EAX,dword ptr [EBX + 0x14]
+0041db13  5e  POP ESI
+0041db14  5b  POP EBX
+0041db15  c3  RET

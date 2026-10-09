@@ -1,0 +1,10 @@
+; root_0043ede0 at 0x0043ede0
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0043ede0  53  PUSH EBX
+0043ede1  8bd8  MOV EBX,EAX
+0043ede3  8bc3  MOV EAX,EBX
+0043ede5  e8de50fdff  CALL 0x00413ec8
+0043edea  8bc3  MOV EAX,EBX
+0043edec  e847faffff  CALL 0x0043e838
+0043edf1  5b  POP EBX
+0043edf2  c3  RET

@@ -1,0 +1,11 @@
+; root_0040aa80 at 0x0040aa80
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040aa80  83780400  CMP dword ptr [EAX + 0x4],0x0
+0040aa84  7511  JNZ 0x0040aa97
+0040aa86  6683781a00  CMP word ptr [EAX + 0x1a],0x0
+0040aa8b  740a  JZ 0x0040aa97
+0040aa8d  8bc8  MOV ECX,EAX
+0040aa8f  8bd0  MOV EDX,EAX
+0040aa91  8b411c  MOV EAX,dword ptr [ECX + 0x1c]
+0040aa94  ff5118  CALL dword ptr [ECX + 0x18]
+0040aa97  c3  RET

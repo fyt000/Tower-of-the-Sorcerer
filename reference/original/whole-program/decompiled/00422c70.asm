@@ -1,0 +1,22 @@
+; root_00422c70 at 0x00422c70
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00422c70  55  PUSH EBP
+00422c71  8bec  MOV EBP,ESP
+00422c73  51  PUSH ECX
+00422c74  8945fc  MOV dword ptr [EBP + -0x4],EAX
+00422c77  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+00422c7a  8b08  MOV ECX,dword ptr [EAX]
+00422c7c  ff51f0  CALL dword ptr [ECX + -0x10]
+00422c7f  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+00422c82  8b9028010000  MOV EDX,dword ptr [EAX + 0x128]
+00422c88  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+00422c8b  e86cefffff  CALL 0x00421bfc
+00422c90  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+00422c93  f6401c10  TEST byte ptr [EAX + 0x1c],0x10
+00422c97  7507  JNZ 0x00422ca0
+00422c99  55  PUSH EBP
+00422c9a  e8d5feffff  CALL 0x00422b74
+00422c9f  59  POP ECX
+00422ca0  59  POP ECX
+00422ca1  5d  POP EBP
+00422ca2  c3  RET

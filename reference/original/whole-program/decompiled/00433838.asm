@@ -1,0 +1,8 @@
+; root_00433838 at 0x00433838
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00433838  8b5208  MOV EDX,dword ptr [EDX + 0x8]
+0043383b  8b482c  MOV ECX,dword ptr [EAX + 0x2c]
+0043383e  894a0c  MOV dword ptr [EDX + 0xc],ECX
+00433841  8b4030  MOV EAX,dword ptr [EAX + 0x30]
+00433844  894210  MOV dword ptr [EDX + 0x10],EAX
+00433847  c3  RET

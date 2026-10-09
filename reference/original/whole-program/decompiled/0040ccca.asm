@@ -1,0 +1,21 @@
+; root_0040ccca at 0x0040ccca
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040ccca  33d2  XOR EDX,EDX
+0040cccc  8b45f8  MOV EAX,dword ptr [EBP + -0x8]
+0040cccf  e894ebffff  CALL 0x0040b868
+0040ccd4  837df800  CMP dword ptr [EBP + -0x8],0x0
+0040ccd8  7508  JNZ 0x0040cce2
+0040ccda  8b45f4  MOV EAX,dword ptr [EBP + -0xc]
+0040ccdd  e8525fffff  CALL 0x00402c34
+0040cce2  e82d65ffff  CALL 0x00403214
+0040cce7  e87c65ffff  CALL 0x00403268
+0040ccec  33c0  XOR EAX,EAX
+0040ccee  5a  POP EDX
+0040ccef  59  POP ECX
+0040ccf0  59  POP ECX
+0040ccf1  648910  MOV dword ptr FS:[EAX],EDX
+0040ccf4  680ecd4000  PUSH 0x40cd0e
+0040ccf9  8d45e4  LEA EAX,[EBP + -0x1c]
+0040ccfc  ba02000000  MOV EDX,0x2
+0040cd01  e8f667ffff  CALL 0x004034fc
+0040cd06  c3  RET

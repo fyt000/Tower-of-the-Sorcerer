@@ -1,0 +1,106 @@
+; TTSW10_disp at 0044cb34
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0044cb34  55  PUSH EBP
+0044cb35  8bec  MOV EBP,ESP
+0044cb37  6a00  PUSH 0x0
+0044cb39  6a00  PUSH 0x0
+0044cb3b  53  PUSH EBX
+0044cb3c  56  PUSH ESI
+0044cb3d  57  PUSH EDI
+0044cb3e  8bd8  MOV EBX,EAX
+0044cb40  be88864b00  MOV ESI,0x4b8688
+0044cb45  33c0  XOR EAX,EAX
+0044cb47  55  PUSH EBP
+0044cb48  68b1cc4400  PUSH 0x44ccb1
+0044cb4d  64ff30  PUSH dword ptr FS:[EAX]
+0044cb50  648920  MOV dword ptr FS:[EAX],ESP
+0044cb53  837e100a  CMP dword ptr [ESI + 0x10],0xa
+0044cb57  7d11  JGE 0x0044cb6a
+0044cb59  b874864b00  MOV EAX,0x4b8674
+0044cb5e  bac8cc4400  MOV EDX,0x44ccc8
+0044cb63  e8c469fbff  CALL 0x0040352c
+0044cb68  eb0f  JMP 0x0044cb79
+0044cb6a  b874864b00  MOV EAX,0x4b8674
+0044cb6f  bad4cc4400  MOV EDX,0x44ccd4
+0044cb74  e8b369fbff  CALL 0x0040352c
+0044cb79  8d4dfc  LEA ECX,[EBP + -0x4]
+0044cb7c  8b834c040000  MOV EAX,dword ptr [EBX + 0x44c]
+0044cb82  8b8000010000  MOV EAX,dword ptr [EAX + 0x100]
+0044cb88  bad4000000  MOV EDX,0xd4
+0044cb8d  8b38  MOV EDI,dword ptr [EAX]
+0044cb8f  ff570c  CALL dword ptr [EDI + 0xc]
+0044cb92  8d45fc  LEA EAX,[EBP + -0x4]
+0044cb95  8b1574864b00  MOV EDX,dword ptr [0x004b8674]
+0044cb9b  e8b86afbff  CALL 0x00403658
+0044cba0  8d45fc  LEA EAX,[EBP + -0x4]
+0044cba3  50  PUSH EAX
+0044cba4  8d55f8  LEA EDX,[EBP + -0x8]
+0044cba7  8b4610  MOV EAX,dword ptr [ESI + 0x10]
+0044cbaa  e8bd8ffbff  CALL 0x00405b6c
+0044cbaf  8b55f8  MOV EDX,dword ptr [EBP + -0x8]
+0044cbb2  58  POP EAX
+0044cbb3  e8a06afbff  CALL 0x00403658
+0044cbb8  8d45fc  LEA EAX,[EBP + -0x4]
+0044cbbb  50  PUSH EAX
+0044cbbc  8d4df8  LEA ECX,[EBP + -0x8]
+0044cbbf  8b834c040000  MOV EAX,dword ptr [EBX + 0x44c]
+0044cbc5  8b8000010000  MOV EAX,dword ptr [EAX + 0x100]
+0044cbcb  bad5000000  MOV EDX,0xd5
+0044cbd0  8b38  MOV EDI,dword ptr [EAX]
+0044cbd2  ff570c  CALL dword ptr [EDI + 0xc]
+0044cbd5  8b55f8  MOV EDX,dword ptr [EBP + -0x8]
+0044cbd8  58  POP EAX
+0044cbd9  e87a6afbff  CALL 0x00403658
+0044cbde  8b55fc  MOV EDX,dword ptr [EBP + -0x4]
+0044cbe1  8b83f0030000  MOV EAX,dword ptr [EBX + 0x3f0]
+0044cbe7  e8e869fcff  CALL 0x004135d4
+0044cbec  8d55fc  LEA EDX,[EBP + -0x4]
+0044cbef  8b06  MOV EAX,dword ptr [ESI]
+0044cbf1  e8768ffbff  CALL 0x00405b6c
+0044cbf6  8b55fc  MOV EDX,dword ptr [EBP + -0x4]
+0044cbf9  8b83c8030000  MOV EAX,dword ptr [EBX + 0x3c8]
+0044cbff  e8d069fcff  CALL 0x004135d4
+0044cc04  8d55fc  LEA EDX,[EBP + -0x4]
+0044cc07  8b4604  MOV EAX,dword ptr [ESI + 0x4]
+0044cc0a  e85d8ffbff  CALL 0x00405b6c
+0044cc0f  8b55fc  MOV EDX,dword ptr [EBP + -0x4]
+0044cc12  8b83cc030000  MOV EAX,dword ptr [EBX + 0x3cc]
+0044cc18  e8b769fcff  CALL 0x004135d4
+0044cc1d  8d55fc  LEA EDX,[EBP + -0x4]
+0044cc20  8b4608  MOV EAX,dword ptr [ESI + 0x8]
+0044cc23  e8448ffbff  CALL 0x00405b6c
+0044cc28  8b55fc  MOV EDX,dword ptr [EBP + -0x4]
+0044cc2b  8b83d0030000  MOV EAX,dword ptr [EBX + 0x3d0]
+0044cc31  e89e69fcff  CALL 0x004135d4
+0044cc36  8d55fc  LEA EDX,[EBP + -0x4]
+0044cc39  8b460c  MOV EAX,dword ptr [ESI + 0xc]
+0044cc3c  e82b8ffbff  CALL 0x00405b6c
+0044cc41  8b55fc  MOV EDX,dword ptr [EBP + -0x4]
+0044cc44  8b83d4030000  MOV EAX,dword ptr [EBX + 0x3d4]
+0044cc4a  e88569fcff  CALL 0x004135d4
+0044cc4f  833d8cc5480001  CMP dword ptr [0x0048c58c],0x1
+0044cc56  7513  JNZ 0x0044cc6b
+0044cc58  8b1584864b00  MOV EDX,dword ptr [0x004b8684]
+0044cc5e  8b83c8010000  MOV EAX,dword ptr [EBX + 0x1c8]
+0044cc64  e86b69fcff  CALL 0x004135d4
+0044cc69  eb2b  JMP 0x0044cc96
+0044cc6b  8d4dfc  LEA ECX,[EBP + -0x4]
+0044cc6e  8b158cc54800  MOV EDX,dword ptr [0x0048c58c]
+0044cc74  83c27f  ADD EDX,0x7f
+0044cc77  8b834c040000  MOV EAX,dword ptr [EBX + 0x44c]
+0044cc7d  8b8000010000  MOV EAX,dword ptr [EAX + 0x100]
+0044cc83  8b30  MOV ESI,dword ptr [EAX]
+0044cc85  ff560c  CALL dword ptr [ESI + 0xc]
+0044cc88  8b55fc  MOV EDX,dword ptr [EBP + -0x4]
+0044cc8b  8b83c8010000  MOV EAX,dword ptr [EBX + 0x1c8]
+0044cc91  e83e69fcff  CALL 0x004135d4
+0044cc96  33c0  XOR EAX,EAX
+0044cc98  5a  POP EDX
+0044cc99  59  POP ECX
+0044cc9a  59  POP ECX
+0044cc9b  648910  MOV dword ptr FS:[EAX],EDX
+0044cc9e  68b8cc4400  PUSH 0x44ccb8
+0044cca3  8d45f8  LEA EAX,[EBP + -0x8]
+0044cca6  ba02000000  MOV EDX,0x2
+0044ccab  e84c68fbff  CALL 0x004034fc
+0044ccb0  c3  RET

@@ -1,0 +1,6 @@
+; FUN_0042cf78 at 0x0042cf78
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0042cf78  83c9ff  OR ECX,0xffffffff
+0042cf7b  83caff  OR EDX,0xffffffff
+0042cf7e  e801000000  CALL 0x0042cf84
+0042cf83  c3  RET

@@ -1,0 +1,5 @@
+; FUN_0040bbfc at 0x0040bbfc
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040bbfc  e893130000  CALL 0x0040cf94
+0040bc01  e8e6fcffff  CALL 0x0040b8ec
+0040bc06  c3  RET

@@ -1,0 +1,3 @@
+; thunk_FUN_00403140 at 0x0047ef7f
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0047ef7f  e9bc41f8ff  JMP 0x00403140

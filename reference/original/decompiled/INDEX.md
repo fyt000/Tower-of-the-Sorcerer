@@ -7,7 +7,10 @@ C-like decompiler output for every detected function entering 0x440000..0x488FFF
 The initial 106-function export is supplemented by ten recovered callbacks/item
 helpers and 16 save routines below. The repaired `0x46CB1C` export recovers the two-level arrival
 switch missed by initial analysis. The runnable readable C++ implementation is
-in [baseline](../../../baseline/README.md), with [fidelity evidence](../../../baseline/FIDELITY.md).
+in [C++](../../../cpp/README.md), with [fidelity evidence](../../../cpp/FIDELITY.md).
+The [presentation/input supplement](../presentation/REVIEW.md) independently
+recovers published method tables and serialized form events, extending this
+initial detected-function export.
 
 | Entry | Function | Source | Result |
 |---|---|---|---|

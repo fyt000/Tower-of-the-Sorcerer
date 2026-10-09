@@ -1,0 +1,12 @@
+; FUN_00416be0 at 0x00416be0
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+00416be0  53  PUSH EBX
+00416be1  8bd8  MOV EBX,EAX
+00416be3  8bc3  MOV EAX,EBX
+00416be5  8b10  MOV EDX,dword ptr [EAX]
+00416be7  ff5244  CALL dword ptr [EDX + 0x44]
+00416bea  8bc3  MOV EAX,EBX
+00416bec  8b10  MOV EDX,dword ptr [EAX]
+00416bee  ff5250  CALL dword ptr [EDX + 0x50]
+00416bf1  5b  POP EBX
+00416bf2  c3  RET

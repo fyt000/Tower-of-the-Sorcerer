@@ -1,0 +1,14 @@
+; root_0041e5da at 0x0041e5da
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0041e5da  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0041e5dd  e85246feff  CALL 0x00402c34
+0041e5e2  e82d4cfeff  CALL 0x00403214
+0041e5e7  e87c4cfeff  CALL 0x00403268
+0041e5ec  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0041e5ef  894308  MOV dword ptr [EBX + 0x8],EAX
+0041e5f2  5f  POP EDI
+0041e5f3  5e  POP ESI
+0041e5f4  5b  POP EBX
+0041e5f5  8be5  MOV ESP,EBP
+0041e5f7  5d  POP EBP
+0041e5f8  c3  RET

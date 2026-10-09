@@ -1,0 +1,15 @@
+; root_0040cd98 at 0x0040cd98
+; Original SHA-256 41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779
+0040cd98  8b45fc  MOV EAX,dword ptr [EBP + -0x4]
+0040cd9b  e804010000  CALL 0x0040cea4
+0040cda0  e86f64ffff  CALL 0x00403214
+0040cda5  e8be64ffff  CALL 0x00403268
+0040cdaa  33c0  XOR EAX,EAX
+0040cdac  5a  POP EDX
+0040cdad  59  POP ECX
+0040cdae  59  POP ECX
+0040cdaf  648910  MOV dword ptr FS:[EAX],EDX
+0040cdb2  68c7cd4000  PUSH 0x40cdc7
+0040cdb7  8d45f8  LEA EAX,[EBP + -0x8]
+0040cdba  e81d67ffff  CALL 0x004034dc
+0040cdbf  c3  RET
