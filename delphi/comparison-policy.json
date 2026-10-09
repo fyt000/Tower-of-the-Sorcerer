@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "original_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "accepted_differences": [
+    {
+      "id": "english-vcl-without-japanese-ime",
+      "authorization": "User accepted the IME difference and authorized the Delphi reconstruction on 2026-10-09.",
+      "behavior": "Japanese input-method mode management is omitted by the supplied English Delphi 2 VCL.",
+      "original_field": {"class": "TWinControl", "property": "ImeMode", "offset": 212, "bytes": 1},
+      "original_methods": ["0x00415da4", "0x00415dbc"],
+      "original_helpers": ["0x0040ee6c", "0x0040ee88", "0x0040efa0"],
+      "original_to_english_form_field_delta": -4,
+      "button_dialog_key_operands": [
+        {"instruction_offset": 13, "original_displacement": 262, "english_displacement": 258, "meaning": "TButton.Active"},
+        {"instruction_offset": 29, "original_displacement": 261, "english_displacement": 257, "meaning": "TButton.Cancel"}
+      ],
+      "referenced_vcl_members": [
+        {"meaning": "TCustomMemo.Lines storage", "original_displacement": 280, "english_displacement": 276},
+        {"meaning": "TCustomListBox.Items storage", "original_displacement": 256, "english_displacement": 252},
+        {"meaning": "TButton.SetFocus virtual slot", "original_displacement": 128, "english_displacement": 120, "original_target": "0x00416c60", "english_target_symbol": "TWinControl.SetFocus", "original_removed_slots": [{"offset": 120, "target": "0x00415da4"}, {"offset": 124, "target": "0x00415dbc"}]}
+      ],
+      "limits": "No blanket field-offset adjustment, branch masking, skipped game callback, or ignored gameplay effect is authorized. Other library differences remain unresolved."
+    }
+  ],
+  "complete_game_recovered": false
+}

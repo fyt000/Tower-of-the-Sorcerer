@@ -1,0 +1,1612 @@
+{
+  "schema_version": 1,
+  "original_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "build_report_sha256": "c304d15e54978098379b7a832c97c7dc9512fbf30cf7fef7de2a6a33c3ffdb4e",
+  "comparisons": 105,
+  "cases": [
+    {
+      "inputs": {
+        "name_bytes": 0,
+        "name_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "installation": "load",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 0,
+        "name_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "installation": "load",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 27,
+      "compiled_effects": 27,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 0,
+        "name_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "installation": "load",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 29,
+      "compiled_effects": 29,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 0,
+        "name_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "installation": "load",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 0,
+        "name_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "installation": "load",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 0,
+        "name_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "installation": "missing-ini",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 32,
+      "compiled_effects": 32,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 0,
+        "name_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "installation": "missing-ini",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 28,
+      "compiled_effects": 28,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 0,
+        "name_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "installation": "missing-ini",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 30,
+      "compiled_effects": 30,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 0,
+        "name_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "installation": "missing-ini",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 32,
+      "compiled_effects": 32,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 0,
+        "name_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "installation": "missing-ini",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-ini-save-error",
+      "original_effects": 23,
+      "compiled_effects": 23,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 0,
+        "name_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "installation": "missing-bitmap",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 40,
+      "compiled_effects": 40,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 0,
+        "name_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "installation": "missing-bitmap",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 36,
+      "compiled_effects": 36,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 0,
+        "name_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "installation": "missing-bitmap",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 38,
+      "compiled_effects": 38,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 0,
+        "name_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "installation": "missing-bitmap",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 40,
+      "compiled_effects": 40,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 0,
+        "name_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "installation": "missing-bitmap",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-ini-save-error",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 4,
+        "name_sha256": "72a9345fb29494a4e9667d7bd68f37e8fe1df384270553f17b4c4a06b1f2b5e0",
+        "installation": "load",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 4,
+        "name_sha256": "72a9345fb29494a4e9667d7bd68f37e8fe1df384270553f17b4c4a06b1f2b5e0",
+        "installation": "load",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 27,
+      "compiled_effects": 27,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 4,
+        "name_sha256": "72a9345fb29494a4e9667d7bd68f37e8fe1df384270553f17b4c4a06b1f2b5e0",
+        "installation": "load",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 29,
+      "compiled_effects": 29,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 4,
+        "name_sha256": "72a9345fb29494a4e9667d7bd68f37e8fe1df384270553f17b4c4a06b1f2b5e0",
+        "installation": "load",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 4,
+        "name_sha256": "72a9345fb29494a4e9667d7bd68f37e8fe1df384270553f17b4c4a06b1f2b5e0",
+        "installation": "load",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 4,
+        "name_sha256": "72a9345fb29494a4e9667d7bd68f37e8fe1df384270553f17b4c4a06b1f2b5e0",
+        "installation": "missing-ini",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 32,
+      "compiled_effects": 32,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 4,
+        "name_sha256": "72a9345fb29494a4e9667d7bd68f37e8fe1df384270553f17b4c4a06b1f2b5e0",
+        "installation": "missing-ini",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 28,
+      "compiled_effects": 28,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 4,
+        "name_sha256": "72a9345fb29494a4e9667d7bd68f37e8fe1df384270553f17b4c4a06b1f2b5e0",
+        "installation": "missing-ini",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 30,
+      "compiled_effects": 30,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 4,
+        "name_sha256": "72a9345fb29494a4e9667d7bd68f37e8fe1df384270553f17b4c4a06b1f2b5e0",
+        "installation": "missing-ini",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 32,
+      "compiled_effects": 32,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 4,
+        "name_sha256": "72a9345fb29494a4e9667d7bd68f37e8fe1df384270553f17b4c4a06b1f2b5e0",
+        "installation": "missing-ini",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-ini-save-error",
+      "original_effects": 23,
+      "compiled_effects": 23,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 4,
+        "name_sha256": "72a9345fb29494a4e9667d7bd68f37e8fe1df384270553f17b4c4a06b1f2b5e0",
+        "installation": "missing-bitmap",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 40,
+      "compiled_effects": 40,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 4,
+        "name_sha256": "72a9345fb29494a4e9667d7bd68f37e8fe1df384270553f17b4c4a06b1f2b5e0",
+        "installation": "missing-bitmap",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 36,
+      "compiled_effects": 36,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 4,
+        "name_sha256": "72a9345fb29494a4e9667d7bd68f37e8fe1df384270553f17b4c4a06b1f2b5e0",
+        "installation": "missing-bitmap",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 38,
+      "compiled_effects": 38,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 4,
+        "name_sha256": "72a9345fb29494a4e9667d7bd68f37e8fe1df384270553f17b4c4a06b1f2b5e0",
+        "installation": "missing-bitmap",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 40,
+      "compiled_effects": 40,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 4,
+        "name_sha256": "72a9345fb29494a4e9667d7bd68f37e8fe1df384270553f17b4c4a06b1f2b5e0",
+        "installation": "missing-bitmap",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-ini-save-error",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 10,
+        "name_sha256": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+        "installation": "load",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 10,
+        "name_sha256": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+        "installation": "load",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 27,
+      "compiled_effects": 27,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 10,
+        "name_sha256": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+        "installation": "load",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 29,
+      "compiled_effects": 29,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 10,
+        "name_sha256": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+        "installation": "load",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 10,
+        "name_sha256": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+        "installation": "load",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 10,
+        "name_sha256": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+        "installation": "missing-ini",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 32,
+      "compiled_effects": 32,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 10,
+        "name_sha256": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+        "installation": "missing-ini",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 28,
+      "compiled_effects": 28,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 10,
+        "name_sha256": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+        "installation": "missing-ini",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 30,
+      "compiled_effects": 30,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 10,
+        "name_sha256": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+        "installation": "missing-ini",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 32,
+      "compiled_effects": 32,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 10,
+        "name_sha256": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+        "installation": "missing-ini",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-ini-save-error",
+      "original_effects": 23,
+      "compiled_effects": 23,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 10,
+        "name_sha256": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+        "installation": "missing-bitmap",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 40,
+      "compiled_effects": 40,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 10,
+        "name_sha256": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+        "installation": "missing-bitmap",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 36,
+      "compiled_effects": 36,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 10,
+        "name_sha256": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+        "installation": "missing-bitmap",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 38,
+      "compiled_effects": 38,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 10,
+        "name_sha256": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+        "installation": "missing-bitmap",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 40,
+      "compiled_effects": 40,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 10,
+        "name_sha256": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+        "installation": "missing-bitmap",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-ini-save-error",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 11,
+        "name_sha256": "254aa248acb47dd654ca3ea53f48c2c26d641d23d7e2e93a1ec56258df7674c4",
+        "installation": "load",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 11,
+        "name_sha256": "254aa248acb47dd654ca3ea53f48c2c26d641d23d7e2e93a1ec56258df7674c4",
+        "installation": "load",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 27,
+      "compiled_effects": 27,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 11,
+        "name_sha256": "254aa248acb47dd654ca3ea53f48c2c26d641d23d7e2e93a1ec56258df7674c4",
+        "installation": "load",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 29,
+      "compiled_effects": 29,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 11,
+        "name_sha256": "254aa248acb47dd654ca3ea53f48c2c26d641d23d7e2e93a1ec56258df7674c4",
+        "installation": "load",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 11,
+        "name_sha256": "254aa248acb47dd654ca3ea53f48c2c26d641d23d7e2e93a1ec56258df7674c4",
+        "installation": "load",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 11,
+        "name_sha256": "254aa248acb47dd654ca3ea53f48c2c26d641d23d7e2e93a1ec56258df7674c4",
+        "installation": "missing-ini",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 32,
+      "compiled_effects": 32,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 11,
+        "name_sha256": "254aa248acb47dd654ca3ea53f48c2c26d641d23d7e2e93a1ec56258df7674c4",
+        "installation": "missing-ini",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 28,
+      "compiled_effects": 28,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 11,
+        "name_sha256": "254aa248acb47dd654ca3ea53f48c2c26d641d23d7e2e93a1ec56258df7674c4",
+        "installation": "missing-ini",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 30,
+      "compiled_effects": 30,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 11,
+        "name_sha256": "254aa248acb47dd654ca3ea53f48c2c26d641d23d7e2e93a1ec56258df7674c4",
+        "installation": "missing-ini",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 32,
+      "compiled_effects": 32,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 11,
+        "name_sha256": "254aa248acb47dd654ca3ea53f48c2c26d641d23d7e2e93a1ec56258df7674c4",
+        "installation": "missing-ini",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-ini-save-error",
+      "original_effects": 23,
+      "compiled_effects": 23,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 11,
+        "name_sha256": "254aa248acb47dd654ca3ea53f48c2c26d641d23d7e2e93a1ec56258df7674c4",
+        "installation": "missing-bitmap",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 40,
+      "compiled_effects": 40,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 11,
+        "name_sha256": "254aa248acb47dd654ca3ea53f48c2c26d641d23d7e2e93a1ec56258df7674c4",
+        "installation": "missing-bitmap",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 36,
+      "compiled_effects": 36,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 11,
+        "name_sha256": "254aa248acb47dd654ca3ea53f48c2c26d641d23d7e2e93a1ec56258df7674c4",
+        "installation": "missing-bitmap",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 38,
+      "compiled_effects": 38,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 11,
+        "name_sha256": "254aa248acb47dd654ca3ea53f48c2c26d641d23d7e2e93a1ec56258df7674c4",
+        "installation": "missing-bitmap",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 40,
+      "compiled_effects": 40,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 11,
+        "name_sha256": "254aa248acb47dd654ca3ea53f48c2c26d641d23d7e2e93a1ec56258df7674c4",
+        "installation": "missing-bitmap",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-ini-save-error",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 255,
+        "name_sha256": "ae53ef4fa49739df77cfc1f4074418f77bb99b00713f097514c8b404e458fedf",
+        "installation": "load",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 255,
+        "name_sha256": "ae53ef4fa49739df77cfc1f4074418f77bb99b00713f097514c8b404e458fedf",
+        "installation": "load",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 27,
+      "compiled_effects": 27,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 255,
+        "name_sha256": "ae53ef4fa49739df77cfc1f4074418f77bb99b00713f097514c8b404e458fedf",
+        "installation": "load",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 29,
+      "compiled_effects": 29,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 255,
+        "name_sha256": "ae53ef4fa49739df77cfc1f4074418f77bb99b00713f097514c8b404e458fedf",
+        "installation": "load",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 255,
+        "name_sha256": "ae53ef4fa49739df77cfc1f4074418f77bb99b00713f097514c8b404e458fedf",
+        "installation": "load",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 255,
+        "name_sha256": "ae53ef4fa49739df77cfc1f4074418f77bb99b00713f097514c8b404e458fedf",
+        "installation": "missing-ini",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 32,
+      "compiled_effects": 32,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 255,
+        "name_sha256": "ae53ef4fa49739df77cfc1f4074418f77bb99b00713f097514c8b404e458fedf",
+        "installation": "missing-ini",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 28,
+      "compiled_effects": 28,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 255,
+        "name_sha256": "ae53ef4fa49739df77cfc1f4074418f77bb99b00713f097514c8b404e458fedf",
+        "installation": "missing-ini",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 30,
+      "compiled_effects": 30,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 255,
+        "name_sha256": "ae53ef4fa49739df77cfc1f4074418f77bb99b00713f097514c8b404e458fedf",
+        "installation": "missing-ini",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 32,
+      "compiled_effects": 32,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 255,
+        "name_sha256": "ae53ef4fa49739df77cfc1f4074418f77bb99b00713f097514c8b404e458fedf",
+        "installation": "missing-ini",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-ini-save-error",
+      "original_effects": 23,
+      "compiled_effects": 23,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 255,
+        "name_sha256": "ae53ef4fa49739df77cfc1f4074418f77bb99b00713f097514c8b404e458fedf",
+        "installation": "missing-bitmap",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 40,
+      "compiled_effects": 40,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 255,
+        "name_sha256": "ae53ef4fa49739df77cfc1f4074418f77bb99b00713f097514c8b404e458fedf",
+        "installation": "missing-bitmap",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 36,
+      "compiled_effects": 36,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 255,
+        "name_sha256": "ae53ef4fa49739df77cfc1f4074418f77bb99b00713f097514c8b404e458fedf",
+        "installation": "missing-bitmap",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 38,
+      "compiled_effects": 38,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 255,
+        "name_sha256": "ae53ef4fa49739df77cfc1f4074418f77bb99b00713f097514c8b404e458fedf",
+        "installation": "missing-bitmap",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 40,
+      "compiled_effects": 40,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 255,
+        "name_sha256": "ae53ef4fa49739df77cfc1f4074418f77bb99b00713f097514c8b404e458fedf",
+        "installation": "missing-bitmap",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-ini-save-error",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 256,
+        "name_sha256": "e075f2f51cad23d0537186cfcd50f911ea954f9c2e32a437f45327f1b7899bbb",
+        "installation": "load",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 256,
+        "name_sha256": "e075f2f51cad23d0537186cfcd50f911ea954f9c2e32a437f45327f1b7899bbb",
+        "installation": "load",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 27,
+      "compiled_effects": 27,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 256,
+        "name_sha256": "e075f2f51cad23d0537186cfcd50f911ea954f9c2e32a437f45327f1b7899bbb",
+        "installation": "load",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 29,
+      "compiled_effects": 29,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 256,
+        "name_sha256": "e075f2f51cad23d0537186cfcd50f911ea954f9c2e32a437f45327f1b7899bbb",
+        "installation": "load",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 256,
+        "name_sha256": "e075f2f51cad23d0537186cfcd50f911ea954f9c2e32a437f45327f1b7899bbb",
+        "installation": "load",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 256,
+        "name_sha256": "e075f2f51cad23d0537186cfcd50f911ea954f9c2e32a437f45327f1b7899bbb",
+        "installation": "missing-ini",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 32,
+      "compiled_effects": 32,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 256,
+        "name_sha256": "e075f2f51cad23d0537186cfcd50f911ea954f9c2e32a437f45327f1b7899bbb",
+        "installation": "missing-ini",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 28,
+      "compiled_effects": 28,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 256,
+        "name_sha256": "e075f2f51cad23d0537186cfcd50f911ea954f9c2e32a437f45327f1b7899bbb",
+        "installation": "missing-ini",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 30,
+      "compiled_effects": 30,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 256,
+        "name_sha256": "e075f2f51cad23d0537186cfcd50f911ea954f9c2e32a437f45327f1b7899bbb",
+        "installation": "missing-ini",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 32,
+      "compiled_effects": 32,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 256,
+        "name_sha256": "e075f2f51cad23d0537186cfcd50f911ea954f9c2e32a437f45327f1b7899bbb",
+        "installation": "missing-ini",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-ini-save-error",
+      "original_effects": 23,
+      "compiled_effects": 23,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 256,
+        "name_sha256": "e075f2f51cad23d0537186cfcd50f911ea954f9c2e32a437f45327f1b7899bbb",
+        "installation": "missing-bitmap",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 40,
+      "compiled_effects": 40,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 256,
+        "name_sha256": "e075f2f51cad23d0537186cfcd50f911ea954f9c2e32a437f45327f1b7899bbb",
+        "installation": "missing-bitmap",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 36,
+      "compiled_effects": 36,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 256,
+        "name_sha256": "e075f2f51cad23d0537186cfcd50f911ea954f9c2e32a437f45327f1b7899bbb",
+        "installation": "missing-bitmap",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 38,
+      "compiled_effects": 38,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 256,
+        "name_sha256": "e075f2f51cad23d0537186cfcd50f911ea954f9c2e32a437f45327f1b7899bbb",
+        "installation": "missing-bitmap",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 40,
+      "compiled_effects": 40,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 256,
+        "name_sha256": "e075f2f51cad23d0537186cfcd50f911ea954f9c2e32a437f45327f1b7899bbb",
+        "installation": "missing-bitmap",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-ini-save-error",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 300,
+        "name_sha256": "4daeb9ac8be203281aceb5f4511220333686abfde4d2ccd50a49cd156a2e8cf5",
+        "installation": "load",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 300,
+        "name_sha256": "4daeb9ac8be203281aceb5f4511220333686abfde4d2ccd50a49cd156a2e8cf5",
+        "installation": "load",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 27,
+      "compiled_effects": 27,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 300,
+        "name_sha256": "4daeb9ac8be203281aceb5f4511220333686abfde4d2ccd50a49cd156a2e8cf5",
+        "installation": "load",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 29,
+      "compiled_effects": 29,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 300,
+        "name_sha256": "4daeb9ac8be203281aceb5f4511220333686abfde4d2ccd50a49cd156a2e8cf5",
+        "installation": "load",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 300,
+        "name_sha256": "4daeb9ac8be203281aceb5f4511220333686abfde4d2ccd50a49cd156a2e8cf5",
+        "installation": "load",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 300,
+        "name_sha256": "4daeb9ac8be203281aceb5f4511220333686abfde4d2ccd50a49cd156a2e8cf5",
+        "installation": "missing-ini",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 32,
+      "compiled_effects": 32,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 300,
+        "name_sha256": "4daeb9ac8be203281aceb5f4511220333686abfde4d2ccd50a49cd156a2e8cf5",
+        "installation": "missing-ini",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 28,
+      "compiled_effects": 28,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 300,
+        "name_sha256": "4daeb9ac8be203281aceb5f4511220333686abfde4d2ccd50a49cd156a2e8cf5",
+        "installation": "missing-ini",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 30,
+      "compiled_effects": 30,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 300,
+        "name_sha256": "4daeb9ac8be203281aceb5f4511220333686abfde4d2ccd50a49cd156a2e8cf5",
+        "installation": "missing-ini",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 32,
+      "compiled_effects": 32,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 300,
+        "name_sha256": "4daeb9ac8be203281aceb5f4511220333686abfde4d2ccd50a49cd156a2e8cf5",
+        "installation": "missing-ini",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-ini-save-error",
+      "original_effects": 23,
+      "compiled_effects": 23,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 300,
+        "name_sha256": "4daeb9ac8be203281aceb5f4511220333686abfde4d2ccd50a49cd156a2e8cf5",
+        "installation": "missing-bitmap",
+        "options": "valid"
+      },
+      "passed": true,
+      "terminal": "syokidata0",
+      "original_effects": 40,
+      "compiled_effects": 40,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 300,
+        "name_sha256": "4daeb9ac8be203281aceb5f4511220333686abfde4d2ccd50a49cd156a2e8cf5",
+        "installation": "missing-bitmap",
+        "options": "missing-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:2",
+      "original_effects": 36,
+      "compiled_effects": 36,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 300,
+        "name_sha256": "4daeb9ac8be203281aceb5f4511220333686abfde4d2ccd50a49cd156a2e8cf5",
+        "installation": "missing-bitmap",
+        "options": "short-options"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:100",
+      "original_effects": 38,
+      "compiled_effects": 38,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 300,
+        "name_sha256": "4daeb9ac8be203281aceb5f4511220333686abfde4d2ccd50a49cd156a2e8cf5",
+        "installation": "missing-bitmap",
+        "options": "close-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-option-io-error:6",
+      "original_effects": 40,
+      "compiled_effects": 40,
+      "first_difference": null,
+      "state_differences": []
+    },
+    {
+      "inputs": {
+        "name_bytes": 300,
+        "name_sha256": "4daeb9ac8be203281aceb5f4511220333686abfde4d2ccd50a49cd156a2e8cf5",
+        "installation": "missing-bitmap",
+        "options": "save-error"
+      },
+      "passed": true,
+      "terminal": "unhandled-ini-save-error",
+      "original_effects": 31,
+      "compiled_effects": 31,
+      "first_difference": null,
+      "state_differences": []
+    }
+  ],
+  "original_activation_body": {
+    "start": "0x44280c",
+    "bytes": 938,
+    "sha256": "cbc241ab42afb56decdd2a6f0ca9495915f624dca7a6ef85e9f22f60b5322938"
+  },
+  "compiled_activation_body": {
+    "start": "0x448ebc",
+    "bytes": 1136,
+    "sha256": "264662a9180df5433cfa4dd58063a4ffd78908c9fe3e1713f35681d9ff583a79"
+  },
+  "fixture_transcript_sha256": "acd5e493a4f25538a05fdbc2e0731aa4119b9fc896b64584d939be1dcac50e29",
+  "executed_memo_framework_bodies": [
+    {
+      "method": "TMemoStrings.Get",
+      "bytes": 67,
+      "external_callees": [
+        "TWinControl.GetHandle",
+        "SendMessage",
+        "@LStrFromLenStr"
+      ]
+    },
+    {
+      "method": "TMemoStrings.Clear",
+      "bytes": 9,
+      "external_callees": [
+        "TCustomEdit.Clear"
+      ]
+    },
+    {
+      "method": "TCustomEdit.Clear",
+      "bytes": 23,
+      "external_callees": [
+        "TWinControl.GetHandle",
+        "SetWindowText"
+      ]
+    }
+  ],
+  "native_io_boundary_cases": [
+    {
+      "native_memo_name_bytes": 0,
+      "short_name_bytes": 0,
+      "physical_line_lengths": [
+        8,
+        11,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "native_memo_name_bytes": 4,
+      "short_name_bytes": 4,
+      "physical_line_lengths": [
+        8,
+        11,
+        4
+      ],
+      "passed": true
+    },
+    {
+      "native_memo_name_bytes": 10,
+      "short_name_bytes": 10,
+      "physical_line_lengths": [
+        8,
+        11,
+        10
+      ],
+      "passed": true
+    },
+    {
+      "native_memo_name_bytes": 11,
+      "short_name_bytes": 10,
+      "physical_line_lengths": [
+        8,
+        11,
+        11
+      ],
+      "passed": true
+    },
+    {
+      "native_memo_name_bytes": 255,
+      "short_name_bytes": 10,
+      "physical_line_lengths": [
+        8,
+        11,
+        77,
+        77,
+        77,
+        24
+      ],
+      "passed": true
+    },
+    {
+      "native_memo_name_bytes": 256,
+      "short_name_bytes": 10,
+      "physical_line_lengths": [
+        8,
+        11,
+        77,
+        77,
+        77,
+        25
+      ],
+      "passed": true
+    },
+    {
+      "native_memo_name_bytes": 300,
+      "short_name_bytes": 10,
+      "physical_line_lengths": [
+        8,
+        11,
+        77,
+        77,
+        77,
+        69
+      ],
+      "passed": true
+    },
+    {
+      "native_startup_io_boundary_passed": true,
+      "native_activation_executed": false
+    }
+  ],
+  "startup_prefix_passed": true,
+  "full_activation_compared": false,
+  "full_game_recovered": false,
+  "pixel_equivalence_established": false,
+  "limits": [
+    "Execution stops at the entry to syokidata0; no downstream game callback is skipped or declared recovered by these fixtures.",
+    "Windows-directory, current-directory, VCL memo/bitmap I/O, string helpers and Pascal file runtime use explicit observers. Real old/new memo getters and clear wrappers execute; Windows messages and handle creation remain boundaries.",
+    "Fault injection transfers through the installed @HandleAnyException frame into its real original/compiled handler. OS exception dispatch, RtlUnwind, cleanup and native failure timing are not certified.",
+    "Uncaught INI-save and option-I/O failures stop at named boundaries; their exception unwinding is not compared.",
+    "Physical memo lines, including native wrapping of 255/256/300-byte ASCII names, come from the independent hidden native boundary harness. The original Windows process is not run; arbitrary fonts/DPI/DBCS/long-line behavior remains outside this scope.",
+    "Raw runtime file records are excluded because handles/private pointers are modeled. Requests, requested byte counts, option bytes, paths, names and ordered game writes are compared."
+  ]
+}

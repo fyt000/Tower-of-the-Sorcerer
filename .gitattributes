@@ -28,7 +28,8 @@ CMakeLists.txt text eol=lf
 /reference/delphi2/runtime-spans/** -text !eol whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 /reference/delphi2/*.json -text !eol whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 /delphi/*-report.json -text !eol whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-/delphi/src/generated/** -text !eol whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Generated declaration/check includes retain their final separator line.
+/delphi/src/generated/** -text !eol whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
 
 # Ghidra exports and retained assembly keep their hash-addressed whitespace.
 /reference/original/presentation/decompiled/** -whitespace

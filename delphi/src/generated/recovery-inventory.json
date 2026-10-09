@@ -1,0 +1,1894 @@
+{
+  "schema_version": 1,
+  "original_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "accepted_difference": "English Delphi 2 VCL lacks Japanese IME support. Original serialized resources remain intact.",
+  "initialization": {
+    "original_entry": "0x00455cb8",
+    "original_export_sha256": "2b972cd69ecd680ee813edb39789d19543981fd653a19a98aece1bd744e27315",
+    "conditions": 4,
+    "assignments": 6439
+  },
+  "methods": [
+    {
+      "form": "TAboutBox",
+      "method": "OKButtonClick",
+      "original_entry": "0x00434084",
+      "events": [
+        "OnClick"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TAboutBox",
+      "method": "image1onclick",
+      "original_entry": "0x00434094",
+      "events": [
+        "OnClick"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TAboutBox",
+      "method": "image2onclick",
+      "original_entry": "0x004340b4",
+      "events": [
+        "OnClick"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TAboutBox",
+      "method": "Timer1Timer",
+      "original_entry": "0x004340e0",
+      "events": [
+        "OnTimer"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TAboutBox",
+      "method": "programicononclick",
+      "original_entry": "0x00434130",
+      "events": [
+        "OnClick"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TAboutBox",
+      "method": "AboutBoxonclose",
+      "original_entry": "0x0043415c",
+      "events": [
+        "OnClose"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TAboutBox",
+      "method": "formactivate",
+      "original_entry": "0x0043416c",
+      "events": [
+        "OnActivate"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TAboutBox",
+      "method": "copyrightonclick",
+      "original_entry": "0x004345a4",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm2",
+      "method": "scoresave",
+      "original_entry": "0x00439ce0",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm2",
+      "method": "scoreload",
+      "original_entry": "0x00437f2c",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm2",
+      "method": "hyouji",
+      "original_entry": "0x00436c14",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm2",
+      "method": "loadwork",
+      "original_entry": "0x0043a3fc",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm2",
+      "method": "optionload",
+      "original_entry": "0x004375d8",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm2",
+      "method": "formactivate",
+      "original_entry": "0x00434bc4",
+      "events": [
+        "OnActivate"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm2",
+      "method": "Button6Click",
+      "original_entry": "0x00436bf0",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm2",
+      "method": "form2onclose",
+      "original_entry": "0x0043a504",
+      "events": [
+        "OnClose"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm2",
+      "method": "BitBtn3Click",
+      "original_entry": "0x0043a578",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm2",
+      "method": "BitBtn1Click",
+      "original_entry": "0x0043a528",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm2",
+      "method": "BitBtn2Click",
+      "original_entry": "0x0043a550",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm2",
+      "method": "BitBtn4Click",
+      "original_entry": "0x0043a5a0",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm2",
+      "method": "BitBtn5Click",
+      "original_entry": "0x0043a5c8",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm2",
+      "method": "Button1Click",
+      "original_entry": "0x0043a5f0",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm4",
+      "method": "DriveComboBox1Change",
+      "original_entry": "0x00440298",
+      "events": [
+        "OnChange"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TForm4",
+      "method": "DirectoryListBox1Change",
+      "original_entry": "0x004402b0",
+      "events": [
+        "OnChange"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TForm4",
+      "method": "Button1Click",
+      "original_entry": "0x004402e8",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm4",
+      "method": "Button2Click",
+      "original_entry": "0x00440974",
+      "events": [
+        "OnClick"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TForm4",
+      "method": "Button3Click",
+      "original_entry": "0x00440984",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TForm4",
+      "method": "form4onclose",
+      "original_entry": "0x00440a88",
+      "events": [
+        "OnClose"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TForm4",
+      "method": "form4activate",
+      "original_entry": "0x00440a98",
+      "events": [
+        "OnActivate"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "syokidata0",
+      "original_entry": "0x00484f48",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "append",
+      "original_entry": "0x00484de8",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "openning9",
+      "original_entry": "0x00482e60",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "kasanegaki",
+      "original_entry": "0x0044439c",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "kaidanwork",
+      "original_entry": "0x00442dc8",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "monswork",
+      "original_entry": "0x0044b6f4",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "img17work",
+      "original_entry": "0x0048287c",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "img16work",
+      "original_entry": "0x00482770",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "img15work",
+      "original_entry": "0x00482664",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "img13work",
+      "original_entry": "0x00482558",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "img12work",
+      "original_entry": "0x0048244c",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "img11work",
+      "original_entry": "0x00482340",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "img10work",
+      "original_entry": "0x00482234",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "img9work",
+      "original_entry": "0x00482128",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "img8work",
+      "original_entry": "0x0048201c",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "img4work",
+      "original_entry": "0x00481e80",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "img5work",
+      "original_entry": "0x0048198c",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "img6work",
+      "original_entry": "0x00480f60",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "itemichiwork2",
+      "original_entry": "0x0046171c",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "itemichiwork",
+      "original_entry": "0x004610c4",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "takowork2",
+      "original_entry": "0x00454a58",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "takowork1",
+      "original_entry": "0x004548a0",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "monidouwork",
+      "original_entry": "0x00480a90",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "monidou",
+      "original_entry": "0x00480384",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "madoushi1",
+      "original_entry": "0x0044c464",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "madoushilivework",
+      "original_entry": "0x00461ef4",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "ydamei3",
+      "original_entry": "0x00480340",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "damei3",
+      "original_entry": "0x004802fc",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "dameiji2",
+      "original_entry": "0x0048028c",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "taisen2",
+      "original_entry": "0x0047f7d4",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "ydameiji2",
+      "original_entry": "0x004502d0",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "damecount2",
+      "original_entry": "0x00450360",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "obudameiji",
+      "original_entry": "0x0044ff0c",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "timerin",
+      "original_entry": "0x0047f5a8",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "speedlow",
+      "original_entry": "0x0047f544",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "speedmiddle",
+      "original_entry": "0x0047f4e0",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "speedhigh",
+      "original_entry": "0x0047f47c",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "loadwork",
+      "original_entry": "0x0047e7d4",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "savework",
+      "original_entry": "0x0047eadc",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "soundplay",
+      "original_entry": "0x0047c2bc",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "kaidandowncheck",
+      "original_entry": "0x00443050",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "kaidanupcheck",
+      "original_entry": "0x00442f80",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "yusyai4",
+      "original_entry": "0x004440e8",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "yusyai3",
+      "original_entry": "0x00443a34",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "yusyai2",
+      "original_entry": "0x00443c08",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "yusyai1",
+      "original_entry": "0x00443de8",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "yusyaidou",
+      "original_entry": "0x00443808",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "yukiwork",
+      "original_entry": "0x00451d3c",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "matokwork",
+      "original_entry": "0x00451b98",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "doorstackin",
+      "original_entry": "0x004660d0",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "optionl1",
+      "original_entry": "0x0047d4a4",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "yusyahyouji1",
+      "original_entry": "0x004433a4",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "yusyahyouji",
+      "original_entry": "0x00443648",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "mazyutu1",
+      "original_entry": "0x0044c5c4",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "banpaiawork",
+      "original_entry": "0x0047c978",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "madoushi2",
+      "original_entry": "0x00462560",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "soundcheck",
+      "original_entry": "0x0047c8f8",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "doorcheck",
+      "original_entry": "0x0047beac",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "yousei",
+      "original_entry": "0x00478f0c",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "ichicheck",
+      "original_entry": "0x0046cb1c",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "dooropen",
+      "original_entry": "0x004770e0",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "moncheck",
+      "original_entry": "0x004664e4",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "touzoku",
+      "original_entry": "0x00465900",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "openning31",
+      "original_entry": "0x004653b8",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "openning2",
+      "original_entry": "0x00464048",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "mevent",
+      "original_entry": "0x0046397c",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "zenolivework",
+      "original_entry": "0x00461a0c",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "imagework",
+      "original_entry": "0x00454c10",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "monshyouji",
+      "original_entry": "0x0044b78c",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "damecount",
+      "original_entry": "0x0045031c",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "ydamecount",
+      "original_entry": "0x004503a8",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "gameover",
+      "original_entry": "0x00454da0",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "syokidata",
+      "original_entry": "0x00455cb8",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "syokidata2",
+      "original_entry": "0x00454de8",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "dameiji",
+      "original_entry": "0x00450064",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "ydameiji",
+      "original_entry": "0x00450288",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "stackwork",
+      "original_entry": "0x004526c0",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "timer2on",
+      "original_entry": "0x0044bc0c",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "toroad2",
+      "original_entry": "0x0044bc34",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "mmmes",
+      "original_entry": "0x00451c20",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "itemlive",
+      "original_entry": "0x00450880",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "itemdel",
+      "original_entry": "0x00450758",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "yousya",
+      "original_entry": "0x0044f26c",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "itemdisp",
+      "original_entry": "0x0044ccd8",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "mhyouji",
+      "original_entry": "0x00442c38",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "mmes",
+      "original_entry": "0x0044c9f0",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "zyouout",
+      "original_entry": "0x00449e18",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "syounin",
+      "original_entry": "0x00449014",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "roujin",
+      "original_entry": "0x00449708",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "buttonfocus",
+      "original_entry": "0x00442d50",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "taisen",
+      "original_entry": "0x0044a480",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "keydisplay",
+      "original_entry": "0x0044bed8",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "idou",
+      "original_entry": "0x0044c04c",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "handan",
+      "original_entry": "0x00444490",
+      "events": [],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "disp",
+      "original_entry": "0x0044cb34",
+      "events": [],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "formactivate",
+      "original_entry": "0x0044280c",
+      "events": [
+        "OnActivate"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Timer1Timer",
+      "original_entry": "0x00443120",
+      "events": [
+        "OnTimer"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button1Click",
+      "original_entry": "0x0044da10",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button2Click",
+      "original_entry": "0x0044e1cc",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button7Click",
+      "original_entry": "0x0044ea90",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Image4Click",
+      "original_entry": "0x0044eaec",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button10Click",
+      "original_entry": "0x0044eaf4",
+      "events": [
+        "OnClick"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button8Click",
+      "original_entry": "0x0044ed94",
+      "events": [
+        "OnClick"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button9Click",
+      "original_entry": "0x0044ed1c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Image5Click",
+      "original_entry": "0x0044ee44",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button11Click",
+      "original_entry": "0x0044ee4c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button12Click",
+      "original_entry": "0x0044ee64",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button13Click",
+      "original_entry": "0x0044ee80",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button14Click",
+      "original_entry": "0x0044ee9c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button15Click",
+      "original_entry": "0x0044eeb8",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button16Click",
+      "original_entry": "0x0044eed4",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button17Click",
+      "original_entry": "0x0044eef0",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button18Click",
+      "original_entry": "0x0044ef0c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button19Click",
+      "original_entry": "0x0044ef28",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button20Click",
+      "original_entry": "0x0044ef44",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button21Click",
+      "original_entry": "0x0044ef60",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button22Click",
+      "original_entry": "0x0044ef7c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button23Click",
+      "original_entry": "0x0044ef98",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button24Click",
+      "original_entry": "0x0044efb4",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button25Click",
+      "original_entry": "0x0044efd0",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button26Click",
+      "original_entry": "0x0044efec",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button27Click",
+      "original_entry": "0x0044f008",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button28Click",
+      "original_entry": "0x0044f024",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button29Click",
+      "original_entry": "0x0044f040",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button30Click",
+      "original_entry": "0x0044f05c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button31Click",
+      "original_entry": "0x0044f078",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button32Click",
+      "original_entry": "0x0044f094",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button33Click",
+      "original_entry": "0x0044f0b0",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button34Click",
+      "original_entry": "0x0044f0cc",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button35Click",
+      "original_entry": "0x0044f0e8",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Image6Click",
+      "original_entry": "0x0044f264",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button36Click",
+      "original_entry": "0x004503ec",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Image8Click",
+      "original_entry": "0x00450878",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button37Click",
+      "original_entry": "0x00450b78",
+      "events": [
+        "OnClick"
+      ],
+      "status": "implemented-awaiting-comparison"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button38Click",
+      "original_entry": "0x00450ba0",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Image9Click",
+      "original_entry": "0x00451b78",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Image10Click",
+      "original_entry": "0x00451b80",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Image12Click",
+      "original_entry": "0x00451b88",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Image13Click",
+      "original_entry": "0x00451b90",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Image15Click",
+      "original_entry": "0x00451dfc",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Image16Click",
+      "original_entry": "0x00451e04",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Image17Click",
+      "original_entry": "0x00451e0c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Image11Click",
+      "original_entry": "0x00451e14",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button39Click",
+      "original_entry": "0x00451e1c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button40Click",
+      "original_entry": "0x004520b4",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button41Click",
+      "original_entry": "0x00452360",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Button42Click",
+      "original_entry": "0x0045260c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "timer2timer",
+      "original_entry": "0x0045265c",
+      "events": [
+        "OnTimer"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "formkeydown",
+      "original_entry": "0x00460bd8",
+      "events": [
+        "OnKeyDown"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "timer3ontimer",
+      "original_entry": "0x00461760",
+      "events": [
+        "OnTimer"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "button8onmousedown",
+      "original_entry": "0x004618fc",
+      "events": [
+        "OnMouseDown"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "button8onmouseup",
+      "original_entry": "0x00461944",
+      "events": [
+        "OnMouseUp"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "button9onmousedown",
+      "original_entry": "0x00461984",
+      "events": [
+        "OnMouseDown"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "button9onmouseup",
+      "original_entry": "0x004619cc",
+      "events": [
+        "OnMouseUp"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "GameStart1Click",
+      "original_entry": "0x004637e8",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "GameQuit1Click",
+      "original_entry": "0x00463874",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Exit1Click",
+      "original_entry": "0x0046391c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "wavon1Click",
+      "original_entry": "0x0047c20c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "BGMON1Click",
+      "original_entry": "0x0047c258",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Help2Click",
+      "original_entry": "0x0047d2d8",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "About1Click",
+      "original_entry": "0x0047d318",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Load11Click",
+      "original_entry": "0x0047d9d4",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Load21Click",
+      "original_entry": "0x0047db94",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Load31Click",
+      "original_entry": "0x0047dd54",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Load41Click",
+      "original_entry": "0x0047df14",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Load51Click",
+      "original_entry": "0x0047e0d4",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Load61Click",
+      "original_entry": "0x0047e294",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Load71Click",
+      "original_entry": "0x0047e454",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Load81Click",
+      "original_entry": "0x0047e614",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "OptionSave1Click",
+      "original_entry": "0x0047d324",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Save11Click",
+      "original_entry": "0x0047ecc4",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Save21Click",
+      "original_entry": "0x0047edb8",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Save31Click",
+      "original_entry": "0x0047eeac",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Save41Click",
+      "original_entry": "0x0047efa0",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Save51Click",
+      "original_entry": "0x0047f094",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Save61Click",
+      "original_entry": "0x0047f188",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Save71Click",
+      "original_entry": "0x0047f27c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Save81Click",
+      "original_entry": "0x0047f370",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "High1Click",
+      "original_entry": "0x0047f464",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Middle1Click",
+      "original_entry": "0x0047f46c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Low1Click",
+      "original_entry": "0x0047f474",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "NormalOption1Click",
+      "original_entry": "0x0047f5e8",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Large1Click",
+      "original_entry": "0x0047f6cc",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Small1Click",
+      "original_entry": "0x0047f724",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "Normal1Click",
+      "original_entry": "0x0047f77c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "tiny1Click",
+      "original_entry": "0x00480e0c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "KeyboardControl1Click",
+      "original_entry": "0x00480e64",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "MouseControl1Click",
+      "original_entry": "0x00480ee0",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "HighScore1Click",
+      "original_entry": "0x00482988",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "timer4ontimer",
+      "original_entry": "0x00482a98",
+      "events": [
+        "OnTimer"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "K5Click",
+      "original_entry": "0x00484a20",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "K6Click",
+      "original_entry": "0x00484a50",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "TSW10close",
+      "original_entry": "0x00484b14",
+      "events": [
+        "OnClose"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "mediaplayer5onnotify",
+      "original_entry": "0x00482a80",
+      "events": [
+        "OnNotify"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "BitBtn1Click",
+      "original_entry": "0x00484b5c",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "BitBtn2Click",
+      "original_entry": "0x00484bb0",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "BitBtn3Click",
+      "original_entry": "0x00484c04",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "BitBtn4Click",
+      "original_entry": "0x00484c58",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "N640x4001Click",
+      "original_entry": "0x00484d74",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "N800x5001Click",
+      "original_entry": "0x00484cac",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    },
+    {
+      "form": "TTSW10",
+      "method": "image34click",
+      "original_entry": "0x00484de0",
+      "events": [
+        "OnClick"
+      ],
+      "status": "unrecovered-fails-explicitly"
+    }
+  ],
+  "serialized_events": 130,
+  "published_methods": 230,
+  "complete_game_recovered": false,
+  "graphics_layout": {
+    "original_entry": "0x00484f48",
+    "original_export_sha256": "7426d318cfb9e1509537b7f10429c2a99ac0424c6583230254aac83d7b2e028d",
+    "prefix_only": true,
+    "signed_halves": 27,
+    "control_setters": 499,
+    "assignments": 47
+  }
+}

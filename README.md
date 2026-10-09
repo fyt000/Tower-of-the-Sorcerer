@@ -3,12 +3,21 @@
 This repository recovers and reimplements the English **Tower of the Sorcerer
 for Windows 1.2** by Oz & Kenichi.
 
-The current goal is a readable, faithful C++ implementation of the original
+The C++ implementation provides the current playable remake of the original
 Delphi game. Its core retains the original branches, loops, shared monster
 state, callbacks and command order, with named types and constants. Decompiled
 code and the unpatched original executable are the evidence. Gameplay quirks
 are preserved; unsafe memory access and audio/rendering engine problems are
 fixed. Future features can build on this reference.
+
+A [native Delphi reconstruction](delphi/README.md) is now in progress using the
+supplied Delphi 2 compiler, unchanged original form resources and independently
+compared Pascal routines. Japanese IME behavior is an explicitly accepted
+compatibility difference. The project builds and its hidden form/core, graphics
+and startup-I/O harnesses pass. Comparisons cover recovered core, rendering,
+Flight sequences and startup's installation/settings prefix; it is not yet a
+complete playable game. Missing methods and exception-continuation gaps remain
+explicit.
 
 The earlier Rust rewrite remains an independent implementation. Its architecture
 is available for replay, terminal play and other experiments. It is not the
@@ -18,6 +27,7 @@ specification for the C++ game.
 |---|---|
 | `cpp/` | C++23 game, `tsw` namespace, Glaze replay serialization, raylib graphics, miniaudio device, TSF/TML music, Catch2 tests |
 | `rust/` | Rust workspace, browser/native UI, Node tools and integration tests |
+| `delphi/` | Native Delphi 2 reconstruction, original form declarations, recovered Pascal core and scoped comparison evidence |
 | `reference/original/` | Ghidra exports, source index and recovered UI evidence |
 | `data/` | Shared extraction evidence and Rust campaign/localization data |
 | `tools/` | Original executable/data extraction and Ghidra research tools |
