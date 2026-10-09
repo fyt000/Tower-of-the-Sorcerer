@@ -26,7 +26,7 @@ from build_delphi_game import WORK
 GAME = dict(syokidata0=0x484F48, mhyouji=0x442C38, yusyahyouji1=0x4433A4,
             yusyahyouji=0x443648, kasanegaki=0x44439C, imagework=0x454C10)
 GLOBALS = dict(Hero=(0x4B8688, 684), Maps=(0x4B8934, 6273), RenderOrder=(0x489B20, 121),
-               OriginalOptions=(0x489B9C, 10), UiSpan=(0x48C578, 4), UiStep=(0x48C57C, 4),
+               GameOptions=(0x489B9C, 10), UiSpan=(0x48C578, 4), UiStep=(0x48C57C, 4),
                DrawX=(0x48C54C, 4), DrawY=(0x48C550, 4), DrawIndex=(0x48C570, 4),
                NeighborY=(0x48C560, 4), NeighborIndex=(0x48C55C, 4), ScratchIndex=(0x48C558, 4),
                GraphicTile=(0x48C5A8, 4), DoorOpened=(0x48C554, 4),
@@ -335,7 +335,7 @@ class GraphicsRunner:
         self.border = (form_seed[0] - form_seed[2], form_seed[1] - form_seed[3])
         for name, address in self.storage.items():
             self.u.mem_write(address, bytes(self.spec[name][1]))
-        self.u.mem_write(self.storage["OriginalOptions"], bytes([10, 12, 0, 1, 0, 1, 0, 0, scale, 0]))
+        self.u.mem_write(self.storage["GameOptions"], bytes([10, 12, 0, 1, 0, 1, 0, 0, scale, 0]))
         self.u.mem_write(self.storage["RenderOrder"], self.pe.get_data(0x489B20 - self.pe.OPTIONAL_HEADER.ImageBase, 121) if self.original
                          else pefile.PE(str(ROOT / "build/research/TSW.exe")).get_data(0x489B20 - 0x400000, 121))
         self.write32(self.storage["Hero"] + 636, cycle)
@@ -594,7 +594,7 @@ def main():
     if digest(original_path) != ORIGINAL_HASH:
         raise ValueError("Original executable pin changed")
     original = pefile.PE(str(original_path))
-    path = WORK / "native/Tower.exe"
+    path = WORK / "game/Tower.exe"
     build = json.loads((WORK / "build-report.json").read_text())
     for record in build["inputs"]:
         source = ROOT / record["source"]
@@ -611,7 +611,7 @@ def main():
     old = GraphicsRunner(original, original=True, assets=args.assets)
     runners = {name: GraphicsRunner(pefile.PE(str(ROOT / build["builds"][name]["artifact"])),
                         map_path=(ROOT / build["builds"][name]["artifact"]).with_suffix(".map"), assets=args.assets)
-               for name in ("native", "graphics")}
+               for name in ("game", "graphics")}
     cases = []
     transcript = hashlib.sha256()
     def compare(method, inputs):
@@ -674,12 +674,13 @@ def main():
                           "Pixels cover populated atlas cells, frame bitmaps, floors 1 and 49 in both animation frames and all four hero facings. Unwritten atlas tails and uninitialized pixels are excluded.",
                           "Native control bounds use recorded initial streamed-control bounds; differences produced by unrelated component constructors are not classified by these game-body tests.",
                           "Main formactivate and other startup, input, story, timer and I/O paths remain unrecovered; these measurements do not establish full-window pixels or complete-game equivalence."])
-    target = ROOT / "delphi/graphics-comparison-report.json"
+    target = ROOT / "build/delphi-game/reports/graphics-comparison-report.json"
     content = json.dumps(report, indent=2) + "\n"
     if args.check:
         if target.read_text(encoding="utf-8") != content:
             raise ValueError("Stale graphics comparison report")
     else:
+        target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content, encoding="utf-8")
     print("Native graphics pixels", report["native_pixels_compared"], "passed", passed, flush=True)
     if not passed:

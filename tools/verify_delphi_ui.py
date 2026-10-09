@@ -36,8 +36,8 @@ EXTRAS = {"about_activate": (0x43416C, "TAboutBox.formactivate"),
           "about_image2_click": (0x4340B4, "TAboutBox.image2onclick"),
           "about_timer": (0x4340E0, "TAboutBox.Timer1Timer"),
           "holder_activate": (0x440A98, "TForm4.form4activate"),
-          "font_prefix": (0x47D4A4, "ApplyOriginalFontPrefix"),
-          "visual_prefix": (0x454DE8, "PrepareOriginalVisualPrefix")}
+          "font_prefix": (0x47D4A4, "ApplyFontLayout"),
+          "visual_prefix": (0x454DE8, "PrepareSceneGraphics")}
 PREFIX_STOPS = {"font_prefix": 0x47F5A8, "visual_prefix": 0x431C8C}
 
 
@@ -361,7 +361,7 @@ def compare_native_ui(original, build):
     from compare_delphi_binary import resource_payloads
     icons = []
     original_resources = resource_payloads(original)
-    for variant in ("ui", "native"):
+    for variant in ("ui", "game"):
         linked = resource_payloads(pefile.PE(str(ROOT / build["builds"][variant]["artifact"])))
         for identity, raw in original_resources.items():
             if identity[0] in (3, 14):
@@ -386,7 +386,7 @@ def compare_native_ui(original, build):
                   full_window_captures=[r for r in rows if "capture" in r],
                   skipped_captures=[r for r in rows if "capture_skipped" in r],
                   title_asset_sha256={name: digest(assets / "Data" / name) for name in ("title05.bmp", "title05R.bmp")},
-                  focus_assertions=3, original_window_pixels_verified=False)
+                  focus_assertions=3, reference_window_pixels_verified=False)
     if not passed:
         print(json.dumps([c for c in supported + pixels + icons if not c["passed"]][:8], indent=2))
         raise ValueError("Native UI witness mismatch")
@@ -403,8 +403,8 @@ def main():
     original = pefile.PE(str(ROOT / "build/research/TSW.exe"))
     old = UIRunner(original, original=True)
     new = UIRunner(pefile.PE(str(WORK / "ui/UISmoke.exe")), map_path=WORK / "ui/UISmoke.map")
-    production = UIRunner(pefile.PE(str(WORK / "native/Tower.exe")), map_path=WORK / "native/Tower.map", include_prefixes=False)
-    candidates = {"ui": new, "native": production}
+    production = UIRunner(pefile.PE(str(WORK / "game/Tower.exe")), map_path=WORK / "game/Tower.map", include_prefixes=False)
+    candidates = {"ui": new, "game": production}
     runners, cases, transcript = (old, *candidates.values()), [], hashlib.sha256()
 
     def compare(name, inputs):
@@ -412,7 +412,7 @@ def main():
         left = old.state()
         for variant, candidate in candidates.items():
             if name not in candidate.entries:
-                if name not in PREFIX_STOPS or variant != "native":
+                if name not in PREFIX_STOPS or variant != "game":
                     raise ValueError("Missing production UI entry: " + name)
                 continue
             actual, right = candidate.run(name), candidate.state()
@@ -441,7 +441,7 @@ def main():
     for small, large, speed in itertools.product((8, 9, 10, 12, 11), (10, 11, 12, 14, 13), (0, 1, 2, 3, 4)):
         for runner in runners:
             runner.seed()
-            runner.u.mem_write(runner.storage["OriginalOptions"], bytes([small, large, 0, speed, 0, 1, 0, 0, 0, 0]))
+            runner.u.mem_write(runner.storage["GameOptions"], bytes([small, large, 0, speed, 0, 1, 0, 0, 0, 0]))
         compare("font_prefix", dict(small=small, large=large, speed=speed))
     print("Font/menu prefixes passed", flush=True)
     for scale, cycle in itertools.product((0, 1), (0, 43)):
@@ -502,12 +502,13 @@ def main():
                           "About and data-holder activation bodies are complete. The font and startup-visual helpers are bounded prefixes, stopping before timer configuration and media setup respectively.",
                           "Native isolated bitmap checks use independent original-operation replay. Property/font/menu witnesses check original setter requests; font glyphs, theme rendering and full-window pixels remain unproven.",
                           "Native full-client captures are reconstruction inspection artifacts; no original running-window screenshot oracle is claimed."])
-    target = ROOT / "delphi/ui-comparison-report.json"
+    target = ROOT / "build/delphi-game/reports/ui-comparison-report.json"
     content = json.dumps(report, indent=2) + "\n"
     if args.check:
         if target.read_text() != content:
             raise ValueError("Stale UI comparison report")
     else:
+        target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content)
 
 

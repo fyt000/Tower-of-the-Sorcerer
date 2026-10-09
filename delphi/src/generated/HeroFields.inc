@@ -1,9 +1,10 @@
+    { WordN names retain byte offsets for fields whose meaning is unknown. }
     hp: Longint;
     attack: Longint;
     defense: Longint;
     gold: Longint;
     floor: Longint;
-    Word20: Longint;
+    highest_floor: Longint;
     x: Longint;
     y: Longint;
     yellow_keys: Longint;
@@ -39,7 +40,7 @@
     Word152: Longint;
     Word156: Longint;
     Word160: Longint;
-    Word164: Longint;
+    sacred_shield: Longint;
     Word168: Longint;
     Word172: Longint;
     Word176: Longint;
@@ -86,9 +87,9 @@
     Word340: Longint;
     Word344: Longint;
     Word348: Longint;
-    Word352: Longint;
-    Word356: Longint;
-    Word360: Longint;
+    facing: Longint;
+    effects_muted: Longint;
+    music_track: Longint;
     Word364: Longint;
     Word368: Longint;
     Word372: Longint;
@@ -168,4 +169,4 @@
     Word668: Longint;
     Word672: Longint;
     Word676: Longint;
-    Word680: Longint;
+    save_version: Longint;

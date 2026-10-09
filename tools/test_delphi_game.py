@@ -17,12 +17,12 @@ class DelphiGameTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.original = pefile.PE(str(ROOT / "build/research/TSW.exe"))
-        cls.path = WORK / "native/Tower.exe"
+        cls.path = WORK / "game/Tower.exe"
         cls.candidate = pefile.PE(str(cls.path))
         cls.mapping = symbols(cls.candidate, cls.path.with_suffix(".map"))
         cls.policy = json.loads((ROOT / "delphi/comparison-policy.json").read_text())
         cls.build = json.loads((WORK / "build-report.json").read_text())
-        cls.core_path = WORK / "native-core/CoreRecoveryProbe.dll"
+        cls.core_path = WORK / "core-probe/CoreProbe.dll"
         cls.core = pefile.PE(str(cls.core_path))
         cls.entries = exports(cls.core)
         cls.storage = locations(cls.core, cls.entries)
@@ -99,14 +99,16 @@ class DelphiGameTests(unittest.TestCase):
         result = compare_native_gates(self.original, "\n".join(json.dumps(r) for r in rows))
         self.assertFalse(result["passed"])
 
-    def test_missing_methods_are_explicit_and_never_complete(self):
+    def test_all_methods_have_bodies_without_claiming_full_equivalence(self):
         files = generated()
-        inventory = json.loads(files["recovery-inventory.json"])
+        inventory = json.loads(files["method-inventory.json"])
         missing = [m for m in inventory["methods"] if m["status"].startswith("unrecovered")]
-        self.assertEqual(files["MissingMethods.inc"].count("MissingRecovery("), len(missing))
-        self.assertGreater(len(missing), 0)
+        self.assertNotIn("MissingMethods.inc", files)
+        self.assertEqual(len(missing), 0)
+        self.assertEqual(inventory["implemented_methods"], 230)
+        self.assertTrue(inventory["complete_published_coverage"])
         self.assertFalse(inventory["complete_game_recovered"])
-        report = json.loads((ROOT / "delphi/comparison-report.json").read_text())
+        report = json.loads((ROOT / "build/delphi-game/reports/comparison-report.json").read_text())
         self.assertFalse(report["full_game_recovered"])
         self.assertFalse(report["pixel_equivalence_established"])
 

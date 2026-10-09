@@ -127,14 +127,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    old_path, new_path = ROOT / "build/research/TSW.exe", WORK / "native/Tower.exe"
+    old_path, new_path = ROOT / "build/research/TSW.exe", WORK / "game/Tower.exe"
     if digest(old_path) != ORIGINAL_HASH:
         raise ValueError("Original executable pin changed")
     build = json.loads((WORK / "build-report.json").read_text())
     for row in build["inputs"]:
         if digest(ROOT / row["source"]) != row["source_sha256"]:
             raise ValueError("Rebuild changed Delphi source: " + row["source"])
-    if digest(new_path) != build["builds"]["native"]["artifact_sha256"]:
+    if digest(new_path) != build["builds"]["game"]["artifact_sha256"]:
         raise ValueError("Compiled executable differs from build report")
     old, new = pefile.PE(str(old_path)), pefile.PE(str(new_path))
     sections, resources = compare_sections(old, new), compare_resources(old, new)
@@ -147,7 +147,7 @@ def main():
     else:
         delta_path.parent.mkdir(exist_ok=True)
         delta_path.write_text(delta_text)
-    probe_path = WORK / "emulator/CoreRecoveryProbe.dll"
+    probe_path = WORK / "emulator/CoreProbe.dll"
     if digest(probe_path) != build["builds"]["emulator"]["artifact_sha256"]:
         raise ValueError("Original-address core probe changed")
     probe = pefile.PE(str(probe_path))
@@ -155,7 +155,7 @@ def main():
                                                     if s.name == b"ClassifyNeighbor")
     content = []
     linked_resources = resource_payloads(new)
-    for name, address, length in (("ORIGINAL_MONSTERS", 0x489910, 528), ("ORIGINAL_RENDER_ORDER", 0x489B20, 121)):
+    for name, address, length in (("MONSTER_STATS", 0x489910, 528), ("RENDER_ORDER", 0x489B20, 121)):
         content.append(dict(name=name, original_address=address, candidate_location="RCDATA:" + name,
                             **byte_difference(old.get_data(address - old.OPTIONAL_HEADER.ImageBase, length),
                                               linked_resources[10, name, 0])))
@@ -192,11 +192,12 @@ def main():
                           "Resource payload equality is checked by exact type/name/language, independently of resource directory/RVA placement.",
                           "Raw differences are not classified as behavioral failures or accepted differences by this report. Unimplemented methods and runtime/UI dependencies remain outside whole-program equivalence."])
     content = json.dumps(report, indent=2) + "\n"
-    target = ROOT / "delphi/binary-comparison-report.json"
+    target = ROOT / "build/delphi-game/reports/binary-comparison-report.json"
     if args.check:
         if target.read_text() != content:
             raise ValueError("Stale binary comparison report")
     else:
+        target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content)
     for record in sections:
         print(record["section"], "raw equal", record.get("exact_bytes_equal"),

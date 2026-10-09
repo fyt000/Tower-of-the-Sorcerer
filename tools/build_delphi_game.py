@@ -16,7 +16,7 @@ import subprocess
 import pefile
 
 from build_delphi2_reference import digest, stage
-from reconstruct_delphi_project import generated, OUT
+from reconstruct_delphi_project import generated, output_path
 from review_delphi2_media import validate_media
 from verify_delphi2_reference import ORIGINAL_HASH
 
@@ -56,13 +56,13 @@ def resources(original):
         raise ValueError("Original form resource inventory changed")
     # The statically initialized monster table is game content, not code.
     blob = original.get_data(0x489910 - original.OPTIONAL_HEADER.ImageBase, 528)
-    raw += resource_record(10, "ORIGINAL_MONSTERS", 0, blob)
-    content_records = [dict(name="ORIGINAL_MONSTERS", language=0, bytes=len(blob),
+    raw += resource_record(10, "MONSTER_STATS", 0, blob)
+    content_records = [dict(name="MONSTER_STATS", language=0, bytes=len(blob),
                             sha256=hashlib.sha256(blob).hexdigest())]
     # Original constant table traverses the 121 map cells in a fixed order.
     blob = original.get_data(0x489B20 - original.OPTIONAL_HEADER.ImageBase, 121)
-    raw += resource_record(10, "ORIGINAL_RENDER_ORDER", 0, blob)
-    content_records.append(dict(name="ORIGINAL_RENDER_ORDER", language=0, bytes=len(blob),
+    raw += resource_record(10, "RENDER_ORDER", 0, blob)
+    content_records.append(dict(name="RENDER_ORDER", language=0, bytes=len(blob),
                                 sha256=hashlib.sha256(blob).hexdigest()))
     icons = []
     for kind in original.DIRECTORY_ENTRY_RESOURCE.entries:
@@ -76,17 +76,19 @@ def resources(original):
                 raw += resource_record(kind.id, identifier, language.id, blob)
                 icons.append(dict(kind=kind.id, name=identifier, language=language.id,
                                   bytes=len(blob), sha256=hashlib.sha256(blob).hexdigest()))
-    (WORK / "OriginalResources.res").write_bytes(raw)
+    (WORK / "GameResources.res").write_bytes(raw)
     return records, content_records, icons
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--smoke", action="store_true")
+    parser.add_argument("--audio-smoke", action="store_true",
+                        help="Run audio checks when audio code/assets/configuration changed")
     parser.add_argument("--assets", type=Path, default=Path(r"D:\Program Files (x86)\Tower of the Sorcerer"))
     args = parser.parse_args()
     for name, content in generated().items():
-        if (OUT / name).read_text(encoding="utf-8") != content:
+        if output_path(name).read_text(encoding="utf-8") != content:
             raise ValueError("Regenerate stale Delphi source: " + name)
     toolchain = ROOT / "build/research/delphi2"
     validate_media(toolchain)
@@ -94,6 +96,7 @@ def main():
     if digest(original_path) != ORIGINAL_HASH:
         raise ValueError("Original executable changed")
     WORK.mkdir(parents=True, exist_ok=True)
+    (WORK / "reports").mkdir(exist_ok=True)
     inputs = []
     source_root = ROOT / "delphi"
     for path in sorted(source_root.rglob("*")):
@@ -113,8 +116,8 @@ def main():
         report["graphics_assets"] = [dict(path=str(path.resolve()), sha256=digest(path))
             for folder in ("Data", "Data3") for name in ("center.bmp", "left.bmp", "leftr.bmp", "right.bmp", "rightr.bmp", "title05.bmp", "title05R.bmp", "chtable.oz", "chtableb.oz", "key.oz")
             for path in (args.assets / folder / name,)]
-    projects = [("native", "Tower.dpr", False), ("emulator", "tests/CoreRecoveryProbe.dpr", True),
-                ("native-core", "tests/CoreRecoveryProbe.dpr", False)]
+    projects = [("game", "Tower.dpr", False), ("emulator", "tests/CoreProbe.dpr", True),
+                ("core-probe", "tests/CoreProbe.dpr", False)]
     if (WORK / "tests/FormSmoke.dpr").exists():
         projects.append(("smoke", "tests/FormSmoke.dpr", False))
     if (WORK / "tests/GraphicsSmoke.dpr").exists():
@@ -123,12 +126,20 @@ def main():
         projects.append(("startup-io", "tests/StartupIOSmoke.dpr", False))
     if (WORK / "tests/UISmoke.dpr").exists():
         projects.append(("ui", "tests/UISmoke.dpr", False))
+    if (WORK / "tests/RuntimeSmoke.dpr").exists():
+        projects.append(("runtime", "tests/RuntimeSmoke.dpr", False))
+    if (WORK / "tests/PersistenceSmoke.dpr").exists():
+        projects.append(("persistence", "tests/PersistenceSmoke.dpr", False))
+    if (WORK / "tests/AudioSmoke.dpr").exists():
+        projects.append(("audio", "tests/AudioSmoke.dpr", False))
+    if (WORK / "tests/RankingSmoke.dpr").exists():
+        projects.append(("ranking", "tests/RankingSmoke.dpr", False))
     for name, project, absolute in projects:
         dest = WORK / name
         dest.mkdir(exist_ok=True)
         command = [str(compiler), "-B", "-GD", "-U" + lib + ";src", "-Isrc;src\\generated", "-E" + name, "-N" + name]
         if absolute:
-            command.append("-DORIGINAL_ADDRESSES")
+            command.append("-DEMULATOR_ADDRESSES")
         command.append(project.replace("/", "\\"))
         result = subprocess.run(command, cwd=WORK, capture_output=True, timeout=30)
         (dest / "compile.log").write_bytes(result.stdout + result.stderr)
@@ -143,6 +154,34 @@ def main():
             break
         record.update(artifact=str(artifact.relative_to(ROOT)).replace("\\", "/"),
                       artifact_sha256=digest(artifact), map_sha256=digest(artifact.with_suffix(".map")))
+        if (name in ("persistence", "ranking") and args.smoke) or (name == "audio" and args.audio_smoke):
+            fixtures = dest / "fixtures"
+            fixtures.mkdir(exist_ok=True)
+            arguments = ([str(fixtures.resolve()), str(args.assets.resolve())]
+                         if name in ("persistence", "ranking") else [str(args.assets.resolve())])
+            result = subprocess.run([str(artifact), *arguments], cwd=dest,
+                                    capture_output=True, timeout=60,
+                                    creationflags=subprocess.CREATE_NO_WINDOW)
+            log = dest / "native.log"
+            log.write_bytes(result.stdout + result.stderr)
+            record.update(native_exit=result.returncode, native_output=result.stdout.decode("cp1252"),
+                          native_log_sha256=digest(log))
+            print("Native", name, "smoke exit", result.returncode, flush=True)
+            if result.returncode:
+                print(record["native_output"][-3000:])
+        if name == "runtime" and args.smoke:
+            fixtures = dest / "fixtures"
+            fixtures.mkdir(exist_ok=True)
+            result = subprocess.run([str(artifact), str(args.assets.resolve()), str(fixtures.resolve())],
+                                    cwd=dest, capture_output=True, timeout=60,
+                                    creationflags=subprocess.CREATE_NO_WINDOW)
+            log = dest / "native.log"
+            log.write_bytes(result.stdout + result.stderr)
+            record.update(native_exit=result.returncode, native_output=result.stdout.decode("cp1252"),
+                          native_log_sha256=digest(log))
+            print("Native runtime smoke exit", result.returncode, flush=True)
+            if result.returncode:
+                print(record["native_output"][-3000:])
         if name == "smoke" and args.smoke:
             result = subprocess.run([str(artifact)], cwd=dest, capture_output=True, timeout=30,
                                     creationflags=subprocess.CREATE_NO_WINDOW)

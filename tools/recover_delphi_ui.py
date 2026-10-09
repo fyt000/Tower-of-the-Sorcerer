@@ -28,11 +28,11 @@ def recovered_ui(manifest):
             value = value.replace("DAT_0048a760", "AboutBox").replace("_DAT_0048c50c", "DataHolderForm")
             value = value.replace(" == ", " = ").replace(" && ", " and ")
             value = value.replace("'\\x01'", "True")
-            value = re.sub(r"\(uint\)DAT_00489b9([cd])", lambda m: "OriginalOptions[" + str(int(m[1], 16) - 12) + "]", value)
-            value = re.sub(r"DAT_00489b9([cdf])", lambda m: "OriginalOptions[" + str(int(m[1], 16) - 12) + "]", value)
+            value = re.sub(r"\(uint\)DAT_00489b9([cd])", lambda m: "GameOptions[" + str(int(m[1], 16) - 12) + "]", value)
+            value = re.sub(r"DAT_00489b9([cdf])", lambda m: "GameOptions[" + str(int(m[1], 16) - 12) + "]", value)
             value = re.sub(r"'\\x0([123])'", r"\1", value)
             value = re.sub(r"0x([\da-f]+)", lambda m: "$" + m[1].upper(), value)
-            value = re.sub(r"(OriginalOptions\[\d+\]) = True", r"\1 = 1", value)
+            value = re.sub(r"(GameOptions\[\d+\]) = True", r"\1 = 1", value)
             if "FUN_" in value or "*(" in value or "DAT_" in value or "param_" in value:
                 raise ValueError("Unreviewed UI expression: " + value)
             return value
@@ -100,5 +100,5 @@ def recovered_ui(manifest):
         raise ValueError("Startup hidden-control inventory changed")
     return {"AboutLayout.inc": translate(about, "TAboutBox"),
             "DataHolderLayout.inc": translate(holder, "TForm4"),
-            "FontPrefix.inc": translate(fonts, "TTSW10"),
+            "FontLayout.inc": translate(fonts, "TTSW10"),
             "StartupHidden.inc": translate(startup, "TTSW10")}

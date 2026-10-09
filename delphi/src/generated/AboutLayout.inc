@@ -47,19 +47,19 @@
   Comments.Font.Size := 10;
   if MainForm.Small1.Checked = True then
   begin
-  ProductName.Font.Size := $D;
-  Label1.Font.Size := 10;
-  Version.Font.Size := 10;
-  Copyright.Font.Size := 8;
-  Comments.Font.Size := 8;
+    ProductName.Font.Size := $D;
+    Label1.Font.Size := 10;
+    Version.Font.Size := 10;
+    Copyright.Font.Size := 8;
+    Comments.Font.Size := 8;
   end;
   if MainForm.tiny1.Checked = True then
   begin
-  ProductName.Font.Size := $C;
-  Label1.Font.Size := 9;
-  Version.Font.Size := 9;
-  Copyright.Font.Size := 7;
-  Comments.Font.Size := 7;
+    ProductName.Font.Size := $C;
+    Label1.Font.Size := 9;
+    Version.Font.Size := 9;
+    Copyright.Font.Size := 7;
+    Comments.Font.Size := 7;
   end;
   ProgramIcon.Visible := True;
   Image1.Visible := False;

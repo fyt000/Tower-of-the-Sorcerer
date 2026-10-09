@@ -45,7 +45,7 @@ def recover_layout(manifest):
         text = re.sub(r"(?:\(int \*\))?param_1\[(0x[\da-f]+)\]",
                       lambda m: fields[int(m[1], 16)], text)
         text = text.replace("DAT_0048c510[0xb]", "Self.Width")
-        text = text.replace("DAT_0048c510", "Self").replace("DAT_00489ba4", "OriginalOptions[8]")
+        text = text.replace("DAT_0048c510", "Self").replace("DAT_00489ba4", "GameOptions[8]")
         text = text.replace("DAT_0048c578", "UiSpan").replace("DAT_0048c57c", "UiStep")
         text = text.replace("(int)", "").replace("(uint)", "")
         text = text.replace("'\\0'", "0").replace("'\\x01'", "1")
@@ -59,10 +59,10 @@ def recover_layout(manifest):
         # Reject residual C syntax and identifiers outside the reviewed family.
         tokens = re.findall(r"[A-Za-z_]\w*", re.sub(r"\$[\dA-F]+", "", text))
         allowed = set(fields.values()) | set(PROPERTIES.values()) | {
-            "Self", "Screen", "ClientHeight", "ClientWidth", "Width", "OriginalOptions", "UiSpan", "UiStep",
+            "Self", "Screen", "ClientHeight", "ClientWidth", "Width", "GameOptions", "UiSpan", "UiStep",
             "iVar1", "iVar2", "uVar11", "div", "and", "TControl", "Pointer"}
         if (any(t not in allowed for t in tokens)
-                or re.search(r"[\[\]]", text.replace("OriginalOptions[8]", ""))
+                or re.search(r"[\[\]]", text.replace("GameOptions[8]", ""))
                 or "*(" in text
                 or not re.fullmatch(r"[A-Za-z0-9_.$ \[\]+*()=<>-]+", text)):
             raise ValueError("Unreviewed layout expression: " + text)
@@ -71,7 +71,7 @@ def recover_layout(manifest):
     statements = re.findall(r"[^;{}]+[;{}]|[{}]", source)
     if "".join(statements).replace(" ", "").replace("\n", "") != source.replace(" ", "").replace("\n", ""):
         raise ValueError("Unparsed layout text")
-    lines = ["{ Original $00484F48 control layout; restricted grammar, no machine code. }"]
+    lines = ["{ Generated control bounds for the two display sizes. }"]
     assignments = setters = 0
     for statement in statements:
         statement = " ".join(statement.split())
@@ -132,7 +132,7 @@ def recover_hints(manifest):
     stop = source.index('  FUN_00419c7c(', start)
     form = next(f for f in manifest["forms"] if f["class_name"] == "TTSW10")
     fields = {int(f["offset"], 16) // 4: f["name"] for f in form["fields"]}
-    result = ["{ Original $00484F48 hint/ShowHint tail; every statement must match. }"]
+    result = ["{ Generated item and control hints. }"]
     hints = show_hints = 0
     for line in source[start:stop].splitlines():
         hint = re.fullmatch(r'  FUN_0040352c\(\(int \*\)\(param_1\[(0x[\da-f]+)\] \+ 0x54\),\(undefined4 \*\)(.*)\);', line)

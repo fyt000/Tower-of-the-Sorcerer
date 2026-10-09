@@ -1,11 +1,12 @@
-unit OriginalCore;
+unit GameCore;
 
-{ High-level Pascal recovered from the pinned executable. Addresses in the
-  comments identify the source evidence; production code uses normal storage. }
+{ Combat and checksums require signed 32-bit wrapping arithmetic.
+  Address comments identify routines used by the comparison probes. }
 {$A+,Z-,O+,R-,Q-,S-}
 
 interface
-uses OriginalState;
+uses
+  GameState;
 
 procedure InitializeCycle;
 procedure ClassifyNeighbor;
@@ -30,7 +31,7 @@ implementation
 
 procedure InitializeCycle;
 begin
-{$I InitializeCycle.inc}
+  {$I InitializeCycle.inc}
 end;
 
 procedure ClassifyNeighbor; { $00451C20 }
@@ -39,15 +40,15 @@ begin
   case Maps[Hero.floor, NeighborIndex + 2] of
     8: TileClass := 1;
     61..90, 93..96, 133..144, 147..158:
-      begin
-        TileClass := 2;
-        case Maps[Hero.floor, NeighborIndex + 2] of
-          61..96: MonsterIndex := (Maps[Hero.floor, NeighborIndex + 2] - 61) div 2;
-          97..114: MonsterIndex := 18;
-          115..132: MonsterIndex := 19;
-          133..158: MonsterIndex := (Maps[Hero.floor, NeighborIndex + 2] - 133) div 2 + 20;
-        end;
+    begin
+      TileClass := 2;
+      case Maps[Hero.floor, NeighborIndex + 2] of
+        61..96: MonsterIndex := (Maps[Hero.floor, NeighborIndex + 2] - 61) div 2;
+        97..114: MonsterIndex := 18;
+        115..132: MonsterIndex := 19;
+        133..158: MonsterIndex := (Maps[Hero.floor, NeighborIndex + 2] - 133) div 2 + 20;
       end;
+    end;
     13: TileClass := 3;
   end;
 end;
@@ -56,15 +57,17 @@ procedure ClassifyInteraction; { $0044C9F0; preserves prior message unless a cas
 begin
   case Maps[Hero.floor, NeighborIndex + 2] of
     11:
-      begin
-        TileClass := 19;
-        if Hero.floor = Hero.Word20 then Hero.Word664 := 1;
-      end;
+    begin
+      TileClass := 19;
+      if Hero.floor = Hero.highest_floor then
+        Hero.Word664 := 1;
+    end;
     12:
-      begin
-        TileClass := 19;
-        if Hero.floor = Hero.Word20 then Hero.Word664 := 2;
-      end;
+    begin
+      TileClass := 19;
+      if Hero.floor = Hero.highest_floor then
+        Hero.Word664 := 2;
+    end;
     13: TileClass := 52;
     16, 18: TileClass := 24;
     19, 20: TileClass := 13;
@@ -76,21 +79,21 @@ begin
   end;
 end;
 
-procedure FaceUpLanding; { $00442F80; all four tests run in the original order }
+procedure FaceUpLanding; { $00442F80; the last matching adjacent stair sets facing }
 begin
   ScratchIndex := Hero.y * 11 + Hero.x;
   NeighborIndex := ScratchIndex - 11;
   if (Hero.y >= 1) and (Hero.y <= 10) and (Maps[Hero.floor, NeighborIndex + 2] = 12) then
-    Hero.Word352 := 1;
+    Hero.facing := 1;
   NeighborIndex := ScratchIndex - 1;
   if (Hero.x >= 1) and (Hero.x <= 10) and (Maps[Hero.floor, NeighborIndex + 2] = 12) then
-    Hero.Word352 := 3;
+    Hero.facing := 3;
   NeighborIndex := ScratchIndex + 1;
   if (Hero.x >= 0) and (Hero.x < 10) and (Maps[Hero.floor, NeighborIndex + 2] = 12) then
-    Hero.Word352 := 2;
+    Hero.facing := 2;
   NeighborIndex := ScratchIndex + 11;
   if (Hero.y >= 0) and (Hero.y < 10) and (Maps[Hero.floor, ScratchIndex + 13] = 12) then
-    Hero.Word352 := 4;
+    Hero.facing := 4;
 end;
 
 procedure FaceDownLanding; { $00443050 }
@@ -98,24 +101,25 @@ begin
   ScratchIndex := Hero.y * 11 + Hero.x;
   NeighborIndex := ScratchIndex - 11;
   if (Hero.y >= 1) and (Hero.y <= 10) and (Maps[Hero.floor, NeighborIndex + 2] = 11) then
-    Hero.Word352 := 1;
+    Hero.facing := 1;
   NeighborIndex := ScratchIndex - 1;
   if (Hero.x >= 1) and (Hero.x <= 10) and (Maps[Hero.floor, NeighborIndex + 2] = 11) then
-    Hero.Word352 := 3;
+    Hero.facing := 3;
   NeighborIndex := ScratchIndex + 1;
   if (Hero.x >= 0) and (Hero.x < 10) and (Maps[Hero.floor, NeighborIndex + 2] = 11) then
-    Hero.Word352 := 2;
+    Hero.facing := 2;
   NeighborIndex := ScratchIndex + 11;
   if (Hero.y >= 0) and (Hero.y < 10) and (Maps[Hero.floor, ScratchIndex + 13] = 11) then
-    Hero.Word352 := 4;
+    Hero.facing := 4;
 end;
 
 procedure CountHeroStrikes; { $0045031C }
 begin
   if RemainingHP > 0 then
   begin
-    RemainingHP := Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1) +
-      (RemainingHP - Hero.attack);
+    RemainingHP :=
+        Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1)
+            + (RemainingHP - Hero.attack);
     Inc(StrikeCount);
     CountHeroStrikes;
   end;
@@ -125,8 +129,10 @@ procedure CountDoubleHeroStrikes; { $00450360 }
 begin
   if RemainingHP > 0 then
   begin
-    RemainingHP := RemainingHP - Hero.attack * 2 +
-      Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1);
+    RemainingHP :=
+        RemainingHP
+            - Hero.attack * 2
+            + Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1);
     Inc(StrikeCount);
     CountDoubleHeroStrikes;
   end;
@@ -136,8 +142,10 @@ procedure CountEnemyStrikes; { $004503A8 }
 begin
   if RemainingHP > 0 then
   begin
-    RemainingHP := RemainingHP - Monsters[MonsterIndex].Attack *
-      (Hero.cycle_factor_minus_one + 1) + Hero.defense;
+    RemainingHP :=
+        RemainingHP
+            - Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1)
+            + Hero.defense;
     Inc(StrikeCount);
     CountEnemyStrikes;
   end;
@@ -148,8 +156,9 @@ begin
   StrikeCount := 0;
   RemainingHP := Hero.hp;
   CountEnemyStrikes;
-  Damage := (Hero.attack - Monsters[MonsterIndex].Defense *
-    (Hero.cycle_factor_minus_one + 1)) * (StrikeCount - 1);
+  Damage :=
+      (Hero.attack - Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1))
+          * (StrikeCount - 1);
 end;
 
 procedure SelectGraphicFrame; { $00454C10; the return register is unused by callers }
@@ -160,7 +169,11 @@ begin
     13, 14: DoorOpened := 147;
     16: DoorOpened := 2;
     19..26: DoorOpened := 1;
-    27, 28: if Hero.Word464 <> 1 then DoorOpened := 1 else DoorOpened := 0;
+    27, 28:
+      if Hero.Word464 <> 1 then
+        DoorOpened := 1
+      else
+        DoorOpened := 0;
     61..96: DoorOpened := 1;
     97..105, 115..123: DoorOpened := 9;
     133..157: DoorOpened := 1;
@@ -172,16 +185,18 @@ begin
   StrikeCount := 0;
   RemainingHP := Hero.hp;
   CountEnemyStrikes;
-  Damage := (Hero.attack * 2 - Monsters[MonsterIndex].Defense *
-    (Hero.cycle_factor_minus_one + 1)) * (StrikeCount - 1);
+  Damage :=
+      (Hero.attack * 2 - Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1))
+          * (StrikeCount - 1);
 end;
 
-procedure CountBattleHeroStrikes; { $004802FC; separate original entry }
+procedure CountBattleHeroStrikes; { $004802FC }
 begin
   if RemainingHP > 0 then
   begin
-    RemainingHP := Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1) +
-      (RemainingHP - Hero.attack);
+    RemainingHP :=
+        Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1)
+            + (RemainingHP - Hero.attack);
     Inc(StrikeCount);
     CountBattleHeroStrikes;
   end;
@@ -191,8 +206,10 @@ procedure CountBattleEnemyStrikes; { $00480340 }
 begin
   if RemainingHP > 0 then
   begin
-    RemainingHP := RemainingHP - Monsters[MonsterIndex].Attack *
-      (Hero.cycle_factor_minus_one + 1) + Hero.defense;
+    RemainingHP :=
+        RemainingHP
+            - Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1)
+            + Hero.defense;
     Inc(StrikeCount);
     CountBattleEnemyStrikes;
   end;
@@ -277,12 +294,28 @@ procedure CheckSpecialDoors; { $0047BEAC }
 begin
   if Hero.floor = 39 then
   begin
-    if (Maps[39, 14] + Maps[39, 18] + Maps[39, 36] + Maps[39, 38] +
-        Maps[39, 58] + Maps[39, 60] + Maps[39, 62] = 7) and
-        (Maps[39, 16] = 6) and (ContactIndex = 38) then DoorReward;
-    if (Maps[39, 14] + Maps[39, 18] + Maps[39, 36] + Maps[39, 38] +
-        Maps[39, 58] + Maps[39, 60] + Maps[39, 62] = 7) and
-        (Maps[39, 40] = 6) and (ContactIndex = 14) then DoorReward;
+    if (Maps[39, 14]
+                + Maps[39, 18]
+                + Maps[39, 36]
+                + Maps[39, 38]
+                + Maps[39, 58]
+                + Maps[39, 60]
+                + Maps[39, 62]
+            = 7)
+        and (Maps[39, 16] = 6)
+        and (ContactIndex = 38) then
+      DoorReward;
+    if (Maps[39, 14]
+                + Maps[39, 18]
+                + Maps[39, 36]
+                + Maps[39, 38]
+                + Maps[39, 58]
+                + Maps[39, 60]
+                + Maps[39, 62]
+            = 7)
+        and (Maps[39, 40] = 6)
+        and (ContactIndex = 14) then
+      DoorReward;
   end
   else if (Hero.floor = 43) and (ContactIndex = 7) and (Maps[43, 10] = 93) then
     PushCommand(6, 7, 7);

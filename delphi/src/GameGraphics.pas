@@ -1,13 +1,13 @@
-unit OriginalGraphics;
+unit GameGraphics;
 
-{ Separate linker storage for the original bitmap globals. Graphics methods
-  operate on Delphi's real canvases and image lists. }
+{ Shared canvases for map frames and sprite-mask composition. }
 interface
-uses Windows, Graphics;
+uses
+  Windows,
+  Graphics;
 
 var
-  MapBitmap1, MapBitmap2, WorkBitmap1, WorkBitmap2, WorkBitmap3,
-    FrameBitmap: TBitmap;
+  MapBitmap1, MapBitmap2, WorkBitmap1, WorkBitmap2, WorkBitmap3, FrameBitmap: TBitmap;
   SourceRect, TargetRect: TRect;
 
 procedure ComposeSprite;
@@ -17,6 +17,8 @@ implementation
 
 procedure ComposeSprite; { $0044439C }
 begin
+  { OR the sprite into its mask, invert the mask, then combine it with the
+    destination using OR and AND. Copy modes must be restored for later blits. }
   WorkBitmap2.Canvas.CopyMode := $EE0086;
   WorkBitmap2.Canvas.CopyRect(TargetRect, WorkBitmap3.Canvas, TargetRect);
   WorkBitmap3.Canvas.CopyMode := $330008;
@@ -32,12 +34,18 @@ end;
 
 procedure ReleaseGraphics;
 begin
-  MapBitmap1.Free; MapBitmap1 := nil;
-  MapBitmap2.Free; MapBitmap2 := nil;
-  WorkBitmap1.Free; WorkBitmap1 := nil;
-  WorkBitmap2.Free; WorkBitmap2 := nil;
-  WorkBitmap3.Free; WorkBitmap3 := nil;
-  FrameBitmap.Free; FrameBitmap := nil;
+  MapBitmap1.Free;
+  MapBitmap1 := nil;
+  MapBitmap2.Free;
+  MapBitmap2 := nil;
+  WorkBitmap1.Free;
+  WorkBitmap1 := nil;
+  WorkBitmap2.Free;
+  WorkBitmap2 := nil;
+  WorkBitmap3.Free;
+  WorkBitmap3 := nil;
+  FrameBitmap.Free;
+  FrameBitmap := nil;
 end;
 
 end.

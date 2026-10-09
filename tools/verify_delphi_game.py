@@ -379,8 +379,8 @@ def main():
             raise ValueError("Compiled artifact changed")
     policy_path = ROOT / "delphi/comparison-policy.json"
     policy = json.loads(policy_path.read_text())
-    main_pe = pefile.PE(str(WORK / "native/Tower.exe"))
-    main_symbols = symbols(main_pe, WORK / "native/Tower.map")
+    main_pe = pefile.PE(str(WORK / "game/Tower.exe"))
+    main_symbols = symbols(main_pe, WORK / "game/Tower.map")
     runtime = accepted_button_comparison(original, main_pe, main_symbols, policy)
     original_framework = framework_cases(original, {**RUNTIME, "TButton.Click": 0x42A370})
     compiled_framework = framework_cases(main_pe, main_symbols)
@@ -396,14 +396,14 @@ def main():
     summaries = [r for r in native_rows if "serialized_bindings_verified" in r]
     if len(summaries) != 1 or any(summaries[0].get(k) != v for k, v in
                                dict(serialized_bindings_verified=130, published_fields_verified=279,
-                                    published_methods_verified=230, native_gate_cases=384, passed=True).items()):
+                                    published_methods_verified=230, modal_gate_cases=384, passed=True).items()):
         raise ValueError("Incomplete native form/binding validation")
     gates = compare_native_gates(original, native_output)
     records = verify_form_resources(main_pe, build["original_form_resources"])
     content_records = verify_form_resources(main_pe, build["original_content_resources"])
     runners = {"original": Runner(original, ENTRIES, STORAGE)}
     byte_matches = {}
-    for name in ("emulator", "native-core"):
+    for name in ("emulator", "core-probe"):
         candidate = pefile.PE(str(ROOT / build["builds"][name]["artifact"]))
         entry = exports(candidate)
         storage = locations(candidate, entry)
@@ -417,7 +417,7 @@ def main():
     evidence = hashlib.sha256()
     for name, inputs, state in cases(original):
         old, old_calls, old_writes, old_effects = runners["original"].run(name, state)
-        for variant in ("emulator", "native-core"):
+        for variant in ("emulator", "core-probe"):
             new, new_calls, new_writes, new_effects = runners[variant].run(name, state)
             same = old == new and old_effects == new_effects
             if not same:
@@ -435,7 +435,7 @@ def main():
         counts[name] += 1
         if counts[name] == 1:
             print("Comparing", name, flush=True)
-    inventory = json.loads((ROOT / "delphi/src/generated/recovery-inventory.json").read_text())
+    inventory = json.loads((ROOT / "build/delphi-game/reports/method-inventory.json").read_text())
     report = dict(schema_version=1, original_sha256=ORIGINAL_HASH, policy_sha256=digest(policy_path),
                   build_report_sha256=digest(WORK / "build-report.json"), resources=records,
                   content_resources=content_records,
@@ -460,12 +460,13 @@ def main():
                           "Strike fixtures use positive penetration and bounded recursion; nonterminating original inputs are outside this measured domain.",
                           "Original Delphi resources are exact; native form streaming is validated on this host without activating the game.",
                           "IME is an authorized exception; other library and unrecovered gameplay differences are not accepted."])
-    target = ROOT / "delphi/comparison-report.json"
+    target = ROOT / "build/delphi-game/reports/comparison-report.json"
     content = json.dumps(report, indent=2) + "\n"
     if args.check:
         if target.read_text(encoding="utf-8") != content:
             raise ValueError("Stale Delphi game comparison report")
     else:
+        target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content, encoding="utf-8")
     print("Core comparisons", report["comparisons"], "disagreements", len(disagreements), flush=True)
     print("Native modal gates", gates["comparisons"], "passed", gates["passed"], flush=True)

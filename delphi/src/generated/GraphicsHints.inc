@@ -1,4 +1,4 @@
-{ Original $00484F48 hint/ShowHint tail; every statement must match. }
+  { Generated item and control hints. }
   Button11.Hint := 'Old Man of 4F';
   Button12.Hint := 'Old Man of 6F';
   Button13.Hint := 'Merchant of 6F';

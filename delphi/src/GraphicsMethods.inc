@@ -3,7 +3,7 @@ var
   iVar1, iVar2, uVar11, Row, Column: Longint;
   Path: string;
 begin
-{$I GraphicsLayout.inc}
+  {$I GraphicsLayout.inc}
   Image1.Visible := False;
   Image2.Visible := False;
   Image3.Visible := False;
@@ -11,11 +11,13 @@ begin
   Image1.Picture.LoadFromFile(Path);
   if Hero.cycle_factor_minus_one = 0 then
     Path := Memo12.Lines[1] + DataDirectory + '\left.bmp'
-  else Path := Memo12.Lines[1] + DataDirectory + '\leftr.bmp';
+  else
+    Path := Memo12.Lines[1] + DataDirectory + '\leftr.bmp';
   Image2.Picture.LoadFromFile(Path);
   if Hero.cycle_factor_minus_one = 0 then
     Path := Memo12.Lines[1] + DataDirectory + '\right.bmp'
-  else Path := Memo12.Lines[1] + DataDirectory + '\rightr.bmp';
+  else
+    Path := Memo12.Lines[1] + DataDirectory + '\rightr.bmp';
   Image3.Picture.LoadFromFile(Path);
 
   MapBitmap1 := TBitmap.Create;
@@ -34,8 +36,13 @@ begin
     for Column := 0 to 10 do
       if (Row < 19) or ((Row = 19) and (Column < 9)) then
       begin
-        SourceRect := Rect(Image6.Width * Column, Image6.Height * Row,
-          (Column + 1) * Image6.Width, (Row + 1) * Image6.Height);
+        SourceRect :=
+            Rect(
+                Image6.Width * Column,
+                Image6.Height * Row,
+                (Column + 1) * Image6.Width,
+                (Row + 1) * Image6.Height
+            );
         MapBitmap2.Canvas.CopyRect(TargetRect, MapBitmap1.Canvas, SourceRect);
         ImageList1.Add(MapBitmap2, nil);
       end;
@@ -46,7 +53,7 @@ begin
   MapBitmap1.LoadFromFile(Path);
   ImageList3.Width := Image6.Width;
   ImageList3.Height := Image6.Height;
-  { The original overwrites this global without freeing its previous bitmap. }
+  { A fresh bitmap supplies the ending sprite atlas. }
   MapBitmap2 := TBitmap.Create;
   MapBitmap2.Width := Image6.Width;
   MapBitmap2.Height := Image6.Height;
@@ -56,8 +63,13 @@ begin
     for Column := 0 to 10 do
       if (Row < 14) or ((Row = 14) and (Column < 5)) then
       begin
-        SourceRect := Rect(Image6.Width * Column, Image6.Height * Row,
-          (Column + 1) * Image6.Width, (Row + 1) * Image6.Height);
+        SourceRect :=
+            Rect(
+                Image6.Width * Column,
+                Image6.Height * Row,
+                (Column + 1) * Image6.Width,
+                (Row + 1) * Image6.Height
+            );
         MapBitmap2.Canvas.CopyRect(TargetRect, MapBitmap1.Canvas, SourceRect);
         ImageList3.Add(MapBitmap2, nil);
       end;
@@ -77,8 +89,13 @@ begin
   for Row := 0 to 1 do
     for Column := 0 to 1 do
     begin
-      SourceRect := Rect(MapBitmap2.Width * Column, MapBitmap2.Height * Row,
-        (Column + 1) * MapBitmap2.Width, (Row + 1) * MapBitmap2.Height);
+      SourceRect :=
+          Rect(
+              MapBitmap2.Width * Column,
+              MapBitmap2.Height * Row,
+              (Column + 1) * MapBitmap2.Width,
+              (Row + 1) * MapBitmap2.Height
+          );
       MapBitmap2.Canvas.CopyRect(TargetRect, MapBitmap1.Canvas, SourceRect);
       ImageList2.Add(MapBitmap2, nil);
     end;
@@ -99,7 +116,7 @@ begin
   FrameBitmap := TBitmap.Create;
   FrameBitmap.Width := Image1.Width + Image2.Width + Image3.Width;
   FrameBitmap.Height := Image1.Height;
-{$I GraphicsHints.inc}
+  {$I GraphicsHints.inc}
   Memo11.Font.Color := $FFFFFF;
   DrawFlag1 := 0;
   DrawFlag2 := 0;
@@ -151,18 +168,37 @@ begin
 end;
 
 procedure TTSW10.kasanegaki; { $0044439C }
-begin ComposeSprite; end;
+begin
+  ComposeSprite;
+end;
 
 procedure TTSW10.yusyahyouji1; { $004433A4 }
 var
   FirstFrame, SecondFrame: Longint;
 begin
-  case Hero.Word352 of
-    1: begin FirstFrame := $FA; SecondFrame := $FC; end;
-    2: begin FirstFrame := $102; SecondFrame := $104; end;
-    3: begin FirstFrame := $10A; SecondFrame := $10C; end;
-    4: begin FirstFrame := $112; SecondFrame := $114; end;
-  else Exit;
+  case Hero.facing of
+    1:
+    begin
+      FirstFrame := $FA;
+      SecondFrame := $FC;
+    end;
+    2:
+    begin
+      FirstFrame := $102;
+      SecondFrame := $104;
+    end;
+    3:
+    begin
+      FirstFrame := $10A;
+      SecondFrame := $10C;
+    end;
+    4:
+    begin
+      FirstFrame := $112;
+      SecondFrame := $114;
+    end;
+  else
+    Exit;
   end;
   NeighborIndex := Image6.Width * Hero.x;
   NeighborY := Image6.Height * Hero.y;

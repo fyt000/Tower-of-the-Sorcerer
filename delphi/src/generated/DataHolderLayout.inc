@@ -40,13 +40,13 @@
   Label2.Font.Size := $B;
   if MainForm.Small1.Checked = True then
   begin
-  Label1.Font.Size := $B;
-  Label2.Font.Size := 9;
+    Label1.Font.Size := $B;
+    Label2.Font.Size := 9;
   end;
   if MainForm.tiny1.Checked = True then
   begin
-  Label1.Font.Size := 10;
-  Label2.Font.Size := 8;
+    Label1.Font.Size := 10;
+    Label2.Font.Size := 8;
   end;
   FontSize := Label2.Font.Size;
   memo1.Font.Size := FontSize;

@@ -656,4 +656,3 @@
     CheckBinding(Form, 'About1', 'OnClick', 'About1Click');
     CheckBinding(Form, 'Timer4', 'OnTimer', 'timer4ontimer');
   end;
-

@@ -477,10 +477,30 @@
     procedure timer2timer(Sender: TObject);
     procedure formkeydown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure timer3ontimer(Sender: TObject);
-    procedure button8onmousedown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure button8onmouseup(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure button9onmousedown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure button9onmouseup(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure button8onmousedown(
+        Sender: TObject;
+        Button: TMouseButton;
+        Shift: TShiftState;
+        X, Y: Integer
+    );
+    procedure button8onmouseup(
+        Sender: TObject;
+        Button: TMouseButton;
+        Shift: TShiftState;
+        X, Y: Integer
+    );
+    procedure button9onmousedown(
+        Sender: TObject;
+        Button: TMouseButton;
+        Shift: TShiftState;
+        X, Y: Integer
+    );
+    procedure button9onmouseup(
+        Sender: TObject;
+        Button: TMouseButton;
+        Shift: TShiftState;
+        X, Y: Integer
+    );
     procedure GameStart1Click(Sender: TObject);
     procedure GameQuit1Click(Sender: TObject);
     procedure Exit1Click(Sender: TObject);
@@ -529,4 +549,3 @@
     procedure N800x5001Click(Sender: TObject);
     procedure image34click(Sender: TObject);
   end;
-

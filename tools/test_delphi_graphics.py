@@ -15,7 +15,7 @@ class GraphicsIntegrityTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.original = pefile.PE(str(ROOT / "build/research/TSW.exe"))
-        cls.path = WORK / "native/Tower.exe"
+        cls.path = WORK / "game/Tower.exe"
         cls.data = cls.path.read_bytes()
         cls.candidate = pefile.PE(data=cls.data)
         cls.mapping = symbols(cls.candidate, cls.path.with_suffix(".map"))

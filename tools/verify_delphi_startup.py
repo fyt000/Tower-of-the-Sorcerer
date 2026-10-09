@@ -229,7 +229,7 @@ class StartupRunner(GraphicsRunner):
                 self.file_open = self.option_fault != "open"
                 self.io_error = 2 if not self.file_open else 0
             elif name == "@BlockRead":
-                if d != self.storage["OriginalOptions"] or c != 10 or self.read32(sp + 4) != 0:
+                if d != self.storage["GameOptions"] or c != 10 or self.read32(sp + 4) != 0:
                     raise ValueError("Option record read changed")
                 raw = self.option_bytes[:c]
                 self.u.mem_write(d, raw)
@@ -287,8 +287,8 @@ def main():
         staged = WORK / source.relative_to(ROOT / "delphi")
         if digest(source) != record["source_sha256"] or digest(staged) != record["staged_sha256"]:
             raise ValueError("Stale startup source: " + record["source"])
-    artifact = WORK / "native/Tower.exe"
-    record = build["builds"]["native"]
+    artifact = WORK / "game/Tower.exe"
+    record = build["builds"]["game"]
     if digest(artifact) != record["artifact_sha256"] or digest(artifact.with_suffix(".map")) != record["map_sha256"]:
         raise ValueError("Stale startup artifact")
     native = build["builds"]["startup-io"]
@@ -304,9 +304,9 @@ def main():
         if digest(WORK / "startup-io/fixtures" / name) != sha:
             raise ValueError("Native startup fixture changed: " + name)
     native_cases = [json.loads(line) for line in native["native_output"].splitlines() if line.strip()]
-    if not native_cases[-1].get("native_startup_io_boundary_passed"):
+    if not native_cases[-1].get("startup_io_boundary_passed"):
         raise ValueError("Native startup I/O boundary did not finish")
-    line_lengths = {case["native_memo_name_bytes"]: case["physical_line_lengths"] for case in native_cases[:-1]}
+    line_lengths = {case["memo_name_bytes"]: case["physical_line_lengths"] for case in native_cases[:-1]}
     old = StartupRunner(pefile.PE(str(ROOT / "build/research/TSW.exe")), original=True)
     new = StartupRunner(pefile.PE(str(artifact)), map_path=artifact.with_suffix(".map"))
     cases = []
@@ -316,11 +316,11 @@ def main():
                                                ("valid", "missing-options", "short-options", "close-error", "save-error")):
         inputs = dict(name_bytes=len(name), name_sha256=hashlib.sha256(name).hexdigest(), installation=path, options=options)
         lengths = line_lengths[len(name)]
-        if lengths[:2] != [8, 11] or sum(lengths[2:]) != len(name):
+        if lengths[:2] != [8, 9] or sum(lengths[2:]) != len(name):
             raise ValueError("Native physical memo-line witness changed")
         # Use the admitted Windows boundary values, obtained independently of
         # the recovered game procedure. The real old/new getters consume them.
-        physical_lines = [b"X:\\saves", b"X:\\original"]
+        physical_lines = [b"X:\\saves", b"X:\\assets"]
         physical_lines.extend(name[sum(lengths[2:i + 2]):sum(lengths[2:i + 3])] for i in range(len(lengths) - 2))
         for runner in (old, new):
             runner.seed_case(physical_lines, load_fault=path == "missing-ini",
@@ -352,12 +352,13 @@ def main():
                           "Uncaught INI-save and option-I/O failures stop at named boundaries; their exception unwinding is not compared.",
                           "Physical memo lines, including native wrapping of 255/256/300-byte ASCII names, come from the independent hidden native boundary harness. The original Windows process is not run; arbitrary fonts/DPI/DBCS/long-line behavior remains outside this scope.",
                           "Raw runtime file records are excluded because handles/private pointers are modeled. Requests, requested byte counts, option bytes, paths, names and ordered game writes are compared."])
-    target = ROOT / "delphi/startup-comparison-report.json"
+    target = ROOT / "build/delphi-game/reports/startup-comparison-report.json"
     content = json.dumps(report, indent=2) + "\n"
     if args.check:
         if target.read_text(encoding="utf-8") != content:
             raise ValueError("Stale startup comparison report")
     else:
+        target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content, encoding="utf-8")
     print("Startup installation/settings prefix comparisons", len(cases), "passed")
 

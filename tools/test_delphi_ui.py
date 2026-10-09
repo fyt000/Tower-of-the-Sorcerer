@@ -14,7 +14,7 @@ class UIIntegrityTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.original = pefile.PE(str(ROOT / "build/research/TSW.exe"))
-        cls.path = WORK / "native/Tower.exe"
+        cls.path = WORK / "game/Tower.exe"
         cls.raw = cls.path.read_bytes()
         cls.pe = pefile.PE(data=cls.raw)
         cls.mapping = symbols(cls.pe, cls.path.with_suffix(".map"))
@@ -75,7 +75,7 @@ class UIIntegrityTests(unittest.TestCase):
                    and i.operands[1].imm == 2)
         old, new = self.runners(self.mutate(ins.address + ins.imm_offset, b"\x03"), True)
         for runner in (old, new):
-            for name, value in dict(floor=15, x=5, y=5, Word48=0, Word608=2, Word352=1).items():
+            for name, value in dict(floor=15, x=5, y=5, Word48=0, Word608=2, facing=1).items():
                 runner.write32(runner.storage["Hero"] + HERO_OFFSETS[name], value)
             runner.u.mem_write(runner.storage["Maps"] + 15 * 123 + 62, b"\x06")
             runner.u.mem_write(runner.storage["AnimationFrame"], b"\x01")

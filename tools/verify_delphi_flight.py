@@ -157,7 +157,7 @@ def main():
             raise ValueError("Stale Flight artifact")
     original = pefile.PE(str(ROOT / "build/research/TSW.exe"))
     old = FlightRunner(original, original=True)
-    new = FlightRunner(pefile.PE(str(WORK / "native/Tower.exe")), map_path=WORK / "native/Tower.map")
+    new = FlightRunner(pefile.PE(str(WORK / "game/Tower.exe")), map_path=WORK / "game/Tower.map")
     cases, sequences = [], []
     transcript = hashlib.sha256()
     def compare(method, inputs):
@@ -247,12 +247,13 @@ def main():
                           "Effects include the 684-byte hero, all maps, monster table, rendering globals, texts, dialog button gates, requested timers and a seeded 512-command prefix.",
                           "BGM-enabled states and unrecovered soundcheck/soundplay are excluded. They are not treated as accepted differences or silent successes.",
                           "Queued animation commands are compared but not dispatched. Actual Windows focus delivery, input event reachability and timer callback ordering remain unverified."])
-    target = ROOT / "delphi/flight-comparison-report.json"
+    target = ROOT / "build/delphi-game/reports/flight-comparison-report.json"
     content = json.dumps(report, indent=2) + "\n"
     if args.check:
         if target.read_text(encoding="utf-8") != content:
             raise ValueError("Stale Flight report")
     else:
+        target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content, encoding="utf-8")
     print("Flight/body comparisons", len(cases), "sequences", len(sequences), "opened", report["opened_sequences"], flush=True)
 

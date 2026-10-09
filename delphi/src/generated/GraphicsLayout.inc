@@ -1,86 +1,86 @@
-  { Original $00484F48 control layout; restricted grammar, no machine code. }
+  { Generated control bounds for the two display sizes. }
   iVar1 := Screen.Width;
-  if (iVar1 < 800) and (OriginalOptions[8] = 1) then
+  if (iVar1 < 800) and (GameOptions[8] = 1) then
   begin
-  OriginalOptions[8] := 0;
+    GameOptions[8] := 0;
   end;
-  if OriginalOptions[8] = 0 then
+  if GameOptions[8] = 0 then
   begin
-  iVar1 := Screen.Width;
-  if iVar1 < 800 then
-  begin
-  k1.Enabled := False;
-  end;
-  DataDirectory := '\data';
-  UiSpan := $90;
-  UiStep := $18;
+    iVar1 := Screen.Width;
+    if iVar1 < 800 then
+    begin
+      k1.Enabled := False;
+    end;
+    DataDirectory := '\data';
+    UiSpan := $90;
+    UiStep := $18;
   end
-  else if OriginalOptions[8] = 1 then
+  else if GameOptions[8] = 1 then
   begin
-  DataDirectory := '\data3';
-  UiSpan := $B4;
-  UiStep := $1E;
+    DataDirectory := '\data3';
+    UiSpan := $B4;
+    UiStep := $1E;
   end;
   Self.Top := 0;
-  if OriginalOptions[8] = 0 then
+  if GameOptions[8] = 0 then
   begin
-  iVar1 := Screen.Width;
-  if iVar1 < $281 then
-  begin
-  Self.Left := $FFFFFFFC;
-  Self.ClientHeight := $1A8;
-  Self.Width := $288;
+    iVar1 := Screen.Width;
+    if iVar1 < $281 then
+    begin
+      Self.Left := $FFFFFFFC;
+      Self.ClientHeight := $1A8;
+      Self.Width := $288;
+    end
+    else
+    begin
+      Self.Left := 0;
+      Self.ClientHeight := $1A8;
+      Self.Width := $288;
+    end;
   end
-  else
+  else if GameOptions[8] = 1 then
   begin
-  Self.Left := 0;
-  Self.ClientHeight := $1A8;
-  Self.Width := $288;
+    iVar1 := Screen.Width;
+    if iVar1 < $321 then
+    begin
+      Self.Left := $FFFFFFFD;
+      Self.ClientHeight := $212;
+      Self.Width := $328;
+    end
+    else
+    begin
+      Self.Left := 0;
+      Self.ClientHeight := $212;
+      Self.Width := $328;
+    end;
   end;
+  if GameOptions[8] = 0 then
+  begin
+    Image1.Height := 400;
+    Image1.Width := $186;
+    Image1.Top := 0;
+    Image1.Left := $7D;
+    Image6.Height := $20;
+    Image6.Width := Image6.Height;
+    Image6.Top := $C0;
+    iVar1 := (Image1.Left) div 2;
+    uVar11 := Image6.Width * 3;
+    iVar2 := (uVar11) div 2;
+    Image6.Left := (Image2.Left + iVar1) - iVar2;
   end
-  else if OriginalOptions[8] = 1 then
+  else if GameOptions[8] = 1 then
   begin
-  iVar1 := Screen.Width;
-  if iVar1 < $321 then
-  begin
-  Self.Left := $FFFFFFFD;
-  Self.ClientHeight := $212;
-  Self.Width := $328;
-  end
-  else
-  begin
-  Self.Left := 0;
-  Self.ClientHeight := $212;
-  Self.Width := $328;
-  end;
-  end;
-  if OriginalOptions[8] = 0 then
-  begin
-  Image1.Height := 400;
-  Image1.Width := $186;
-  Image1.Top := 0;
-  Image1.Left := $7D;
-  Image6.Height := $20;
-  Image6.Width := Image6.Height;
-  Image6.Top := $C0;
-  iVar1 := (Image1.Left) div 2;
-  uVar11 := Image6.Width * 3;
-  iVar2 := (uVar11) div 2;
-  Image6.Left := (Image2.Left + iVar1) - iVar2;
-  end
-  else if OriginalOptions[8] = 1 then
-  begin
-  Image1.Height := 500;
-  Image1.Width := $1E8;
-  Image1.Top := 0;
-  Image1.Left := $9C;
-  Image6.Height := $28;
-  Image6.Width := Image6.Height;
-  Image6.Top := $F0;
-  iVar1 := (Image1.Left) div 2;
-  uVar11 := Image6.Width * 3;
-  iVar2 := (uVar11) div 2;
-  Image6.Left := (Image2.Left + iVar1) - iVar2;
+    Image1.Height := 500;
+    Image1.Width := $1E8;
+    Image1.Top := 0;
+    Image1.Left := $9C;
+    Image6.Height := $28;
+    Image6.Width := Image6.Height;
+    Image6.Top := $F0;
+    iVar1 := (Image1.Left) div 2;
+    uVar11 := Image6.Width * 3;
+    iVar2 := (uVar11) div 2;
+    Image6.Left := (Image2.Left + iVar1) - iVar2;
   end;
   Image2.Height := Image1.Height;
   Image2.Width := Image1.Left;
@@ -146,39 +146,39 @@
   Image18.Width := Image6.Width;
   Image18.Top := Image13.Top + Image13.Height;
   Image18.Left := Image4.Left;
-  if OriginalOptions[8] = 0 then
+  if GameOptions[8] = 0 then
   begin
-  Image19.Height := Image6.Height;
-  Image19.Width := Image6.Width;
-  Image19.Top := $30;
-  Image19.Left := Image3.Left + $50;
-  Image20.Height := Image6.Height;
-  Image20.Width := Image6.Width;
-  Image20.Top := $60;
-  Image20.Left := Image19.Left;
-  Image32.Height := Image6.Height * 2;
-  Image32.Width := Image6.Width * 3;
-  Image32.Top := $90;
-  iVar1 := (Image3.Width) div 2;
-  iVar2 := (Image32.Width) div 2;
-  Image32.Left := (Image3.Left + iVar1) - iVar2;
+    Image19.Height := Image6.Height;
+    Image19.Width := Image6.Width;
+    Image19.Top := $30;
+    Image19.Left := Image3.Left + $50;
+    Image20.Height := Image6.Height;
+    Image20.Width := Image6.Width;
+    Image20.Top := $60;
+    Image20.Left := Image19.Left;
+    Image32.Height := Image6.Height * 2;
+    Image32.Width := Image6.Width * 3;
+    Image32.Top := $90;
+    iVar1 := (Image3.Width) div 2;
+    iVar2 := (Image32.Width) div 2;
+    Image32.Left := (Image3.Left + iVar1) - iVar2;
   end
-  else if OriginalOptions[8] = 1 then
+  else if GameOptions[8] = 1 then
   begin
-  Image19.Height := Image6.Height;
-  Image19.Width := Image6.Width;
-  Image19.Top := $3C;
-  Image19.Left := Image3.Left + 100;
-  Image20.Height := Image6.Height;
-  Image20.Width := Image6.Width;
-  Image20.Top := $78;
-  Image20.Left := Image19.Left;
-  Image32.Height := Image6.Height * 2;
-  Image32.Width := Image6.Width * 3;
-  Image32.Top := $B4;
-  iVar1 := (Image3.Width) div 2;
-  iVar2 := (Image32.Width) div 2;
-  Image32.Left := (Image3.Left + iVar1) - iVar2;
+    Image19.Height := Image6.Height;
+    Image19.Width := Image6.Width;
+    Image19.Top := $3C;
+    Image19.Left := Image3.Left + 100;
+    Image20.Height := Image6.Height;
+    Image20.Width := Image6.Width;
+    Image20.Top := $78;
+    Image20.Left := Image19.Left;
+    Image32.Height := Image6.Height * 2;
+    Image32.Width := Image6.Width * 3;
+    Image32.Top := $B4;
+    iVar1 := (Image3.Width) div 2;
+    iVar2 := (Image32.Width) div 2;
+    Image32.Left := (Image3.Left + iVar1) - iVar2;
   end;
   Image22.Width := Image6.Height;
   Image22.Height := Image6.Width;
@@ -200,39 +200,39 @@
   Image30.Height := Image6.Height;
   Image31.Height := Image6.Height;
   Image31.Width := Image6.Width;
-  if OriginalOptions[8] = 0 then
+  if GameOptions[8] = 0 then
   begin
-  Image31.Top := $E6;
-  iVar1 := (Image3.Width) div 2;
-  Image31.Left := iVar1 + -$10 + Image3.Left;
-  Button1.Height := $19;
-  Button1.Width := $4B;
-  Button1.Top := $110;
-  Button1.Left := $170;
-  BitBtn1.Height := $14;
-  BitBtn1.Width := Image6.Width;
-  BitBtn1.Top := $163;
-  iVar1 := (Image3.Width) div 2;
-  iVar2 := (BitBtn1.Width) div 2;
-  BitBtn1.Left := (Image3.Left + iVar1) - iVar2;
-  Button2.Left := $108;
+    Image31.Top := $E6;
+    iVar1 := (Image3.Width) div 2;
+    Image31.Left := iVar1 + -$10 + Image3.Left;
+    Button1.Height := $19;
+    Button1.Width := $4B;
+    Button1.Top := $110;
+    Button1.Left := $170;
+    BitBtn1.Height := $14;
+    BitBtn1.Width := Image6.Width;
+    BitBtn1.Top := $163;
+    iVar1 := (Image3.Width) div 2;
+    iVar2 := (BitBtn1.Width) div 2;
+    BitBtn1.Left := (Image3.Left + iVar1) - iVar2;
+    Button2.Left := $108;
   end
-  else if OriginalOptions[8] = 1 then
+  else if GameOptions[8] = 1 then
   begin
-  Image31.Top := $120;
-  iVar1 := (Image3.Width) div 2;
-  Image31.Left := iVar1 + -$10 + Image3.Left;
-  Button1.Height := $1F;
-  Button1.Width := $5E;
-  Button1.Top := $154;
-  Button1.Left := $1CC;
-  BitBtn1.Height := $19;
-  BitBtn1.Width := Image6.Width;
-  BitBtn1.Top := $1BC;
-  iVar1 := (Image3.Width) div 2;
-  iVar2 := (BitBtn1.Width) div 2;
-  BitBtn1.Left := (Image3.Left + iVar1) - iVar2;
-  Button2.Left := $14A;
+    Image31.Top := $120;
+    iVar1 := (Image3.Width) div 2;
+    Image31.Left := iVar1 + -$10 + Image3.Left;
+    Button1.Height := $1F;
+    Button1.Width := $5E;
+    Button1.Top := $154;
+    Button1.Left := $1CC;
+    BitBtn1.Height := $19;
+    BitBtn1.Width := Image6.Width;
+    BitBtn1.Top := $1BC;
+    iVar1 := (Image3.Width) div 2;
+    iVar2 := (BitBtn1.Width) div 2;
+    BitBtn1.Left := (Image3.Left + iVar1) - iVar2;
+    Button2.Left := $14A;
   end;
   Button2.Height := Button1.Height;
   Button2.Width := Button1.Width;
@@ -251,7 +251,10 @@
   BitBtn3.Width := BitBtn1.Width;
   BitBtn3.Top := BitBtn2.Top;
   iVar1 := Longint(BitBtn1);
-  BitBtn3.Left := TControl(Pointer(iVar1)).Height div 10 + TControl(Pointer(iVar1)).Left + TControl(Pointer(iVar1)).Width;
+  BitBtn3.Left :=
+      TControl(Pointer(iVar1)).Height div 10
+          + TControl(Pointer(iVar1)).Left
+          + TControl(Pointer(iVar1)).Width;
   BitBtn4.Height := BitBtn1.Height;
   BitBtn4.Width := BitBtn1.Width;
   BitBtn4.Top := BitBtn1.Height div 10 + BitBtn1.Top + BitBtn1.Height;
@@ -374,27 +377,27 @@
   Button35.Width := Image5.Width;
   Button35.Top := Button29.Top + Button29.Height;
   Button35.Left := Button15.Left;
-  if OriginalOptions[8] = 0 then
+  if GameOptions[8] = 0 then
   begin
-  Button36.Height := $14;
-  Button36.Width := $40;
-  Button36.Top := $16A;
-  Button36.Left := 400;
-  Button39.Height := $20;
-  Button39.Width := $E0;
-  Button39.Top := $50;
-  Button39.Left := $D0;
+    Button36.Height := $14;
+    Button36.Width := $40;
+    Button36.Top := $16A;
+    Button36.Left := 400;
+    Button39.Height := $20;
+    Button39.Width := $E0;
+    Button39.Top := $50;
+    Button39.Left := $D0;
   end
-  else if OriginalOptions[8] = 1 then
+  else if GameOptions[8] = 1 then
   begin
-  Button36.Height := $19;
-  Button36.Width := $50;
-  Button36.Top := $1C5;
-  Button36.Left := 500;
-  Button39.Height := $28;
-  Button39.Width := $118;
-  Button39.Top := 100;
-  Button39.Left := $FF;
+    Button36.Height := $19;
+    Button36.Width := $50;
+    Button36.Top := $1C5;
+    Button36.Left := 500;
+    Button39.Height := $28;
+    Button39.Width := $118;
+    Button39.Top := 100;
+    Button39.Left := $FF;
   end;
   Button40.Height := Button39.Height;
   Button40.Width := Button39.Width;
@@ -413,79 +416,79 @@
   Edit8.Width := Self.Width;
   Edit8.Top := Image1.Top + Image1.Height;
   Edit8.Left := Image2.Left;
-  if OriginalOptions[8] = 0 then
+  if GameOptions[8] = 0 then
   begin
-  Memo11.Height := Edit8.Height;
-  Memo11.Width := $67;
-  Memo11.Top := $2D;
-  iVar1 := (Image2.Width) div 2;
-  iVar2 := (Memo11.Width) div 2;
-  Memo11.Left := (Image2.Left + iVar1) - iVar2;
-  Memo1.Height := $14;
-  Memo1.Width := $4C;
-  Memo1.Top := $4E;
-  Memo1.Left := (Memo11.Left + Memo11.Width) - Memo1.Width;
-  Memo9.Height := Memo1.Height;
-  Memo9.Width := $44;
-  Memo9.Top := $40;
-  Memo9.Left := Image3.Left + 9;
-  Memo10.Height := Memo1.Height;
-  Memo10.Width := Memo9.Width;
-  Memo10.Top := $70;
-  Memo10.Left := Memo9.Left;
-  Memo8.Height := Memo1.Height;
-  Memo8.Width := $67;
-  Memo8.Top := $10C;
-  Memo8.Left := Image3.Left + 9;
-  Memo5.Height := Memo1.Height;
-  Memo5.Top := Memo8.Top + Memo8.Height;
-  Memo5.Left := Image3.Left + $2A;
-  Memo5.Width := (Memo8.Left + Memo8.Width) - Memo5.Left;
-  Edit13.Height := $14;
-  Edit13.Width := $72;
-  Edit13.Top := $50;
-  Edit13.Left := $B5;
-  Edit14.Height := Edit13.Height;
-  Edit14.Width := $13E;
-  Panel2.Height := $28;
-  Panel2.Width := $B8;
+    Memo11.Height := Edit8.Height;
+    Memo11.Width := $67;
+    Memo11.Top := $2D;
+    iVar1 := (Image2.Width) div 2;
+    iVar2 := (Memo11.Width) div 2;
+    Memo11.Left := (Image2.Left + iVar1) - iVar2;
+    Memo1.Height := $14;
+    Memo1.Width := $4C;
+    Memo1.Top := $4E;
+    Memo1.Left := (Memo11.Left + Memo11.Width) - Memo1.Width;
+    Memo9.Height := Memo1.Height;
+    Memo9.Width := $44;
+    Memo9.Top := $40;
+    Memo9.Left := Image3.Left + 9;
+    Memo10.Height := Memo1.Height;
+    Memo10.Width := Memo9.Width;
+    Memo10.Top := $70;
+    Memo10.Left := Memo9.Left;
+    Memo8.Height := Memo1.Height;
+    Memo8.Width := $67;
+    Memo8.Top := $10C;
+    Memo8.Left := Image3.Left + 9;
+    Memo5.Height := Memo1.Height;
+    Memo5.Top := Memo8.Top + Memo8.Height;
+    Memo5.Left := Image3.Left + $2A;
+    Memo5.Width := (Memo8.Left + Memo8.Width) - Memo5.Left;
+    Edit13.Height := $14;
+    Edit13.Width := $72;
+    Edit13.Top := $50;
+    Edit13.Left := $B5;
+    Edit14.Height := Edit13.Height;
+    Edit14.Width := $13E;
+    Panel2.Height := $28;
+    Panel2.Width := $B8;
   end
-  else if OriginalOptions[8] = 1 then
+  else if GameOptions[8] = 1 then
   begin
-  Memo11.Height := Edit8.Height;
-  Memo11.Width := $81;
-  Memo11.Top := $38;
-  iVar1 := (Image2.Width) div 2;
-  iVar2 := (Memo11.Width) div 2;
-  Memo11.Left := (Image2.Left + iVar1) - iVar2;
-  Memo1.Height := $19;
-  Memo1.Width := $5F;
-  Memo1.Top := $62;
-  Memo1.Left := (Memo11.Left + Memo11.Width) - Memo1.Width;
-  Memo9.Height := Memo1.Height;
-  Memo9.Width := $55;
-  Memo9.Top := $50;
-  Memo9.Left := Image3.Left + $B;
-  Memo10.Height := Memo1.Height;
-  Memo10.Width := Memo9.Width;
-  Memo10.Top := $8C;
-  Memo10.Left := Memo9.Left;
-  Memo8.Height := Memo1.Height;
-  Memo8.Width := $81;
-  Memo8.Top := $14F;
-  Memo8.Left := Image3.Left + $B;
-  Memo5.Height := Memo1.Height;
-  Memo5.Top := Memo8.Top + Memo8.Height;
-  Memo5.Left := Image3.Left + $35;
-  Memo5.Width := (Memo8.Left + Memo8.Width) - Memo5.Left;
-  Edit13.Height := $19;
-  Edit13.Width := $8F;
-  Edit13.Top := 100;
-  Edit13.Left := $E2;
-  Edit14.Height := Edit13.Height;
-  Edit14.Width := $18E;
-  Panel2.Height := $32;
-  Panel2.Width := $E6;
+    Memo11.Height := Edit8.Height;
+    Memo11.Width := $81;
+    Memo11.Top := $38;
+    iVar1 := (Image2.Width) div 2;
+    iVar2 := (Memo11.Width) div 2;
+    Memo11.Left := (Image2.Left + iVar1) - iVar2;
+    Memo1.Height := $19;
+    Memo1.Width := $5F;
+    Memo1.Top := $62;
+    Memo1.Left := (Memo11.Left + Memo11.Width) - Memo1.Width;
+    Memo9.Height := Memo1.Height;
+    Memo9.Width := $55;
+    Memo9.Top := $50;
+    Memo9.Left := Image3.Left + $B;
+    Memo10.Height := Memo1.Height;
+    Memo10.Width := Memo9.Width;
+    Memo10.Top := $8C;
+    Memo10.Left := Memo9.Left;
+    Memo8.Height := Memo1.Height;
+    Memo8.Width := $81;
+    Memo8.Top := $14F;
+    Memo8.Left := Image3.Left + $B;
+    Memo5.Height := Memo1.Height;
+    Memo5.Top := Memo8.Top + Memo8.Height;
+    Memo5.Left := Image3.Left + $35;
+    Memo5.Width := (Memo8.Left + Memo8.Width) - Memo5.Left;
+    Edit13.Height := $19;
+    Edit13.Width := $8F;
+    Edit13.Top := 100;
+    Edit13.Left := $E2;
+    Edit14.Height := Edit13.Height;
+    Edit14.Width := $18E;
+    Panel2.Height := $32;
+    Panel2.Width := $E6;
   end;
   iVar1 := Self.ClientHeight;
   Panel2.Top := ((iVar1 - Edit8.Height) - Panel2.Height) + -4;
@@ -597,20 +600,20 @@
   Edit33.Width := Edit14.Width - Edit13.Width;
   Edit33.Top := Edit25.Top;
   Edit33.Left := Edit25.Left + Edit25.Width;
-  if OriginalOptions[8] = 0 then
+  if GameOptions[8] = 0 then
   begin
-  RichEdit1.Height := 200;
-  RichEdit1.Width := $17E;
-  RichEdit1.Top := $2D;
-  RichEdit1.Left := $81;
+    RichEdit1.Height := 200;
+    RichEdit1.Width := $17E;
+    RichEdit1.Top := $2D;
+    RichEdit1.Left := $81;
   end
   else
   begin
-  if OriginalOptions[8] = 1 then
-  begin
-  RichEdit1.Height := $FA;
-  RichEdit1.Width := $1DE;
-  RichEdit1.Top := $38;
-  RichEdit1.Left := $A1;
-  end;
+    if GameOptions[8] = 1 then
+    begin
+      RichEdit1.Height := $FA;
+      RichEdit1.Width := $1DE;
+      RichEdit1.Top := $38;
+      RichEdit1.Left := $A1;
+    end;
   end;
