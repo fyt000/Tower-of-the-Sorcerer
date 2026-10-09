@@ -36,6 +36,7 @@ DesktopSession::DesktopSession(const Assets& assets, const std::filesystem::path
     ui.speed_index = settings.game_speed;
     ui.replay_speed_index = settings.replay_speed;
     ui.muted = settings.muted;
+    ui.hero_orb_actual_damage = settings.hero_orb_actual_damage;
     recorder_.enable(record.value_or(settings.recording));
     recorder_.new_game();
     recording_status();
@@ -94,8 +95,9 @@ void DesktopSession::recording_status() {
 }
 
 void DesktopSession::preferences() {
-    save_settings(save_directory_ / "settings.json",
-                  {ui.speed_index, ui.replay_speed_index, recorder_.enabled(), ui.muted});
+    save_settings(
+        save_directory_ / "settings.json",
+        {ui.speed_index, ui.replay_speed_index, recorder_.enabled(), ui.muted, ui.hero_orb_actual_damage});
 }
 
 void DesktopSession::open_home(bool startup) {
@@ -286,6 +288,23 @@ void DesktopSession::advance_commands(float seconds) {
 }
 
 void DesktopSession::apply(UiAction action) {
+    switch (action.kind) {
+    case Action::Save:
+    case Action::SaveSlot:
+    case Action::OpenSaveSlots:
+    case Action::Load:
+    case Action::LoadSlot:
+    case Action::OpenLoadSlots:
+    case Action::FairyCheckpoint:
+        // Original item, Hero Orb and Flight panels call 0x450758. Enforce
+        // their file-control gate here as well as in the rendered buttons:
+        // shortcuts and direct dispatch must obey the same modal state.
+        if (!ui.file_controls_enabled())
+            throw std::runtime_error("Close the item or Orb panel before saving or loading");
+        break;
+    default:
+        break;
+    }
     if (ui.replay_active && !ui.home)
         switch (action.kind) {
         case Action::Save:
@@ -471,6 +490,10 @@ void DesktopSession::apply(UiAction action) {
         game.status = recorder_.enabled()
                           ? "Recording enabled for new games, recorded loads and replay takeover."
                           : "Replay recording disabled.";
+        break;
+    case Action::HeroOrbActualDamage:
+        ui.hero_orb_actual_damage = !ui.hero_orb_actual_damage;
+        preferences();
         break;
     case Action::None:
         break;

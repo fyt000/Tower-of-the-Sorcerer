@@ -380,8 +380,11 @@ struct McpServer::Impl {
                 if (found == checkpoints.end())
                     throw std::runtime_error("Unknown session checkpoint");
                 session = found->second;
-            } else
+            } else {
+                if (session.flight >= 0)
+                    throw std::runtime_error("Close the Flight selector before loading a native save");
                 load_file(path_field(args), save_kind(args));
+            }
             return observe(session, developer, -1, detail);
         }
         if (name == "replay_game") {

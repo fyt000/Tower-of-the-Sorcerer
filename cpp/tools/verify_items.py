@@ -1,7 +1,7 @@
 """Compare active item builders and Flight callbacks with the pinned x86 game.
 
-Item entries are fragments inside the Delphi button handler. They stop before
-its string/exception epilogue. Only reviewed gameplay helpers are followed;
+Items execute the published confirmation callback (0x450BA0) from entry to
+return, including its setup and exception epilogue. Reviewed gameplay helpers are followed;
 skipped VCL and runtime calls are disclosed in the report.
 """
 from pathlib import Path
@@ -14,13 +14,12 @@ import sys
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tools'))
 from original_event_probe import RAW, pe, probe
-from unicorn.x86_const import UC_X86_REG_EBP, UC_X86_REG_EBX, UC_X86_REG_ESI
 from differential import HASH
 from verify_interactions import HERO, FIELDS
+from comparison_boundary import check_skipped_calls
 
-ENTRIES = {4: 0x450C1F, 5: 0x450DA7, 6: 0x450F31, 7: 0x4511B3,
-           8: 0x4513E4, 9: 0x451543, 11: 0x4516AB, 12: 0x4518E6, 13: 0x4519FB}
-FOLLOW = [0x451C20, 0x451B98, 0x44BC34, 0x451D3C, 0x4660D0, 0x442F80, 0x443050, 0x47C8F8]
+FOLLOW = [0x451C20, 0x451B98, 0x44BC34, 0x451D3C, 0x4660D0, 0x442F80, 0x443050, 0x47C8F8,
+          0x442C38, 0x454C10]
 
 
 def main():
@@ -91,8 +90,8 @@ def main():
     skipped, failures, groups = set(), [], {}
     watched = [HERO + 68 + 4 * i for i in range(15)] + [HERO + o for o in (352, 360, 632, 664)]
     for name, item, floor, x, y, changes, values, cpp, extra, destination in scenarios:
-        globals = [(HERO + FIELDS[k], v) for k, v in values.items()] + extra + [(HERO + 352, 4)]
-        lines = ['original', f'set floor {floor}', f'set x {x}', f'set y {y}', 'set facing 4']
+        globals = [(HERO + 664, 2)] + [(HERO + FIELDS[k], v) for k, v in values.items()] + extra + [(HERO + 352, 4)]
+        lines = ['original', f'set floor {floor}', f'set x {x}', f'set y {y}', 'set facing 4', 'set highest_stair 2']
         lines += [f'tile {f} {ty * 11 + tx} {t}' for f, tx, ty, t in changes]
         lines += [f'set {k} {v}' for k, v in values.items()] + cpp
         if item < 0:
@@ -102,12 +101,11 @@ def main():
         elif item == 2:
             original = probe(0x44EAF4, floor, x, y, changes, globals=globals,
                              include_presentation=True, follow_calls=FOLLOW, watch_globals=watched)
-            lines += ['item 2 1', f'use 2 {destination}']
+            lines += ['item 2 1', f'flight_confirm {destination}']
             group = 'flight-confirm'
         else:
             globals += [(HERO + 68 + item * 4, 1), (0x48C574, item + 1)]
-            original = probe(ENTRIES[item], floor, x, y, changes, end=0x451B42, globals=globals,
-                             registers=[(UC_X86_REG_ESI, 0x200000), (UC_X86_REG_EBX, 0x48C5AC), (UC_X86_REG_EBP, 0x202000)],
+            original = probe(0x450BA0, floor, x, y, changes, globals=globals,
                              include_presentation=True, follow_calls=FOLLOW, watch_globals=watched)
             lines += [f'item {item} 1', f'use {item}']
             group = f'item-{item}'
@@ -148,14 +146,16 @@ def main():
         groups[group] = groups.get(group, 0) + 1
     process.stdin.close()
     process.wait()
+    boundary = check_skipped_calls(skipped)
     report = dict(original_sha256=HASH, scenarios=len(scenarios), passed=len(scenarios) - len(failures), groups=groups,
                   failures=failures, skipped_original_calls=sorted(skipped),
-                  limits='Isolated item fragments and Flight callbacks. VCL drawing/string calls skipped. Preview floor stays in modern UI state; command playback and natural routes are separate checks.')
+                  boundary_audit=boundary,
+                  limits='Full published item-confirmation callback and isolated Flight callbacks; caller eligibility is not established here. Effectful map redraw is followed. Preview floor stays in modern UI state. Full Flight inputs are checked by verify_flight.py; rendering/device/string behavior is excluded.')
     output = ROOT / 'build/cpp/reports/item-report.json'
     output.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     print(f'{report["passed"]}/{report["scenarios"]} matched; {output}')
     print(json.dumps(failures[:6], indent=2))
-    return bool(failures)
+    return bool(failures or boundary['unreviewed_calls'] or boundary['effectful_skips'])
 
 
 if __name__ == '__main__':

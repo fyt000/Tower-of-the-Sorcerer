@@ -394,8 +394,36 @@ TEST_CASE("MCP checkpoints restore private shop state recording and observation 
     REQUIRE(encode(client.tool("game_state")) == encode(current));
 }
 
+TEST_CASE("MCP Flight observation and both actions enforce staircase entry", "[mcp][flight]") {
+    auto game = room();
+    game.inventory(Item::FlightOrb) = 1;
+    game.hero.highest_floor = 2;
+    for (bool developer : {false, true}) {
+        Client client(developer, game);
+        const auto state = client.tool("game_state");
+        REQUIRE_FALSE(state["inventory_items"][1]["usable"].get<bool>());
+        for (const auto action :
+             {R"({"type":"flight_open"})", R"({"type":"use_item","item":"flying_orb","floor":2})"}) {
+            const auto rejected = client.act(action);
+            REQUIRE(rejected["flight"].as<int>() == -1);
+            REQUIRE(encode(rejected["hero"]) == encode(state["hero"]));
+            REQUIRE_FALSE(rejected["last_action"]["ok"].get<bool>());
+        }
+    }
+    game.tile_at(1, 4, 5) = StairsUp;
+    Client client(false, game);
+    REQUIRE(client.tool("game_state")["inventory_items"][1]["usable"].get<bool>());
+    client.act(R"({"type":"flight_open"})");
+    const auto preview = client.act(R"({"type":"flight_up"})");
+    const auto refused = client.act(R"({"type":"use_item","item":"hero_orb"})");
+    REQUIRE_FALSE(refused["last_action"]["ok"].get<bool>());
+    REQUIRE(refused["flight"].as<int>() == 2);
+    REQUIRE(encode(refused["hero"]) == encode(preview["hero"]));
+}
+
 TEST_CASE("MCP Flight checkpoints retain previews and cancellation", "[mcp][saves]") {
     auto game = room();
+    game.tile_at(1, 4, 5) = StairsUp;
     game.inventory(Item::FlightOrb) = 1;
     game.hero.highest_floor = 45;
     Client client(false, game);
@@ -569,15 +597,20 @@ TEST_CASE("MCP runtime migration preserves shops Flight and checkpoint identitie
     Directory directory;
     const auto path = directory.file("runtime.json");
     auto game = room();
+    game.tile_at(1, 4, 5) = StairsUp;
     game.inventory(Item::FlightOrb) = 1;
     game.hero.highest_floor = 4;
     game.tile_at(1, 5, 4) = Altar;
+    game.save(directory.file("native.dat"));
     Client source(true, game, true), target(true, Game{}, true);
     const auto shop = source.act(R"({"type":"move","direction":"up"})");
     const auto id = source.tool("save_game")["checkpoint"];
     source.act(R"({"type":"choose","choice":"leave"})");
     source.act(R"({"type":"flight_open"})");
     const auto preview = source.act(R"({"type":"flight_up"})");
+    REQUIRE(source.raw_tool("load_game", Json{{"path", directory.file("native.dat")}})["result"]["isError"]
+                .get<bool>());
+    REQUIRE(encode(source.tool("game_state")) == encode(preview));
     const auto flight_id = source.tool("save_game")["checkpoint"];
     REQUIRE(source.rpc("runtime/checkpoint", Json{{"path", path}}).contains("result"));
     const auto first = target.rpc("runtime/restore", Json{{"path", path}});

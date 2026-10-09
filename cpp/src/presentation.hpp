@@ -33,7 +33,7 @@ struct DesktopUi {
     int selected_slot = 1;
     SavePicker save_picker = SavePicker::None;
     SaveSlots save_slots;
-    bool inventory{}, enemies{}, help{}, muted{}, ending_wait{};
+    bool inventory{}, enemies{}, help{}, muted{}, ending_wait{}, hero_orb_actual_damage{};
     bool recording_enabled{}, recording_active{};
     bool home{}, game_started = true, replay_picker{}, replay_active{}, replay_paused{}, replay_in_progress{};
     bool quick_available{}, fairy_available{};
@@ -49,6 +49,8 @@ struct DesktopUi {
         return home || replay_picker || inventory || enemies || help || selected_item >= 0 ||
                menu != Menu::None || save_picker != SavePicker::None;
     }
+
+    bool file_controls_enabled() const { return flight < 0 && !enemies && selected_item < 0; }
 
     void close_overlays() {
         inventory = enemies = help = false;
@@ -79,6 +81,7 @@ enum class Action {
     Mute,
     Speed,
     Recording,
+    HeroOrbActualDamage,
     MainMenu,
     ResumeGame,
     OpenSettings,
@@ -147,6 +150,7 @@ class Presentation {
     UiAction draw_dialogue(const Game&, DesktopUi&, Vector2 mouse);
     UiAction draw_inventory(const Game&, DesktopUi&, Vector2 mouse);
     void draw_enemies(const Game&, DesktopUi&, Vector2 mouse);
+    void draw_qol_status(const DesktopUi&, Rectangle, Vector2 mouse);
     UiAction draw_item(const Game&, DesktopUi&, Vector2 mouse);
     UiAction draw_menu(const Game&, DesktopUi&, Vector2 mouse);
     UiAction draw_save_slots(const Game&, DesktopUi&, Vector2 mouse);

@@ -314,6 +314,7 @@ bool Game::run_one(Command* executed) {
             break;
         case Callback::Teleport:
             hero.floor = b;
+            hero.highest_floor_stair = 0; // Original floor-change callback redraws the map.
             if (b == 50) {
                 hero.x = floors.at(b).up_landing % BoardWidth;
                 hero.y = floors.at(b).up_landing / BoardWidth;

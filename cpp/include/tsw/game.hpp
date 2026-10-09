@@ -334,6 +334,8 @@ class Game {
     std::uint8_t tile_at(int floor, int x, int y) const { return tile(floor, cell(x, y)); }
 
     Forecast forecast(int tile_id, bool enemy_first = false) const;
+    // 0x44FF0C: the original Orb display omits Cross and Slayer bonuses.
+    Forecast orb_forecast(int tile_id) const;
     static int monster_for_tile(int tile_id);
     static TileClass classify_tile(int tile_id);
     static int animation_offset(int tile_id);
@@ -367,6 +369,10 @@ class Game {
     void save(std::ostream&, SaveKind = SaveKind::Slot) const;
     void load(std::istream&, SaveKind = SaveKind::Slot);
     bool flight_preview(int destination_floor, int direction = 1);
+    bool can_open_flight() const;
+    bool open_flight();
+    // Original selector callback; player inputs must enter through open_flight first.
+    bool confirm_flight(int destination_floor);
     // Exposed state inputs for original-machine differential probes.
     int contact_index{}, scratch_index{}, neighbor_index{}, message_code{}, door_opened{};
 

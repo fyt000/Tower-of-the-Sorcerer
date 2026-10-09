@@ -271,6 +271,7 @@ void Game::continue_original(int stage) {
     case 13:
         visual.battle = false;
         commands.clear();
+        hero.highest_floor_stair = 0; // 0x44DA10 redraws the map here.
         break;
     case 14:
         push(Op::Wait);

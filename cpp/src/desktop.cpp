@@ -110,15 +110,15 @@ UiAction keyboard(const Game& game, DesktopUi& ui) {
     }
     if (IsKeyPressed(KEY_F2))
         return {Action::NewGame};
-    if (IsKeyPressed(KEY_F5))
+    if (IsKeyPressed(KEY_F5) && ui.file_controls_enabled())
         return {Action::Save};
-    if (IsKeyPressed(KEY_F6))
+    if (IsKeyPressed(KEY_F6) && ui.file_controls_enabled())
         return {Action::OpenSaveSlots};
-    if (IsKeyPressed(KEY_F7))
+    if (IsKeyPressed(KEY_F7) && ui.file_controls_enabled())
         return {Action::OpenLoadSlots};
-    if (IsKeyPressed(KEY_F9))
+    if (IsKeyPressed(KEY_F9) && ui.file_controls_enabled())
         return {Action::Load};
-    if (IsKeyPressed(KEY_F8))
+    if (IsKeyPressed(KEY_F8) && ui.file_controls_enabled())
         return {Action::FairyCheckpoint};
     if (ui.enemies) {
         if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_ENTER))

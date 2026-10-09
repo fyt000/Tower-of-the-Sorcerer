@@ -5,6 +5,12 @@ It uses the same `Game`, player inputs, original save writer/loader and recorder
 as the desktop and headless CLI. The runtime needs no Node, Python, assets,
 window or audio device. It is available with `TSW_GUI=OFF`.
 
+Flight requires legal adjacent-stair entry for both `flight_open` and direct
+`use_item` travel, in developer mode as well as normal mode. A selector session
+blocks other active items. `inventory_items[].usable` includes the Flight
+entry condition. Historical recordings made with the unrestricted Flight bug
+can diverge under the corrected rules; see the [fidelity audit](fidelity-audit-2026-10-09.md).
+
 From the repository root:
 
 ```powershell

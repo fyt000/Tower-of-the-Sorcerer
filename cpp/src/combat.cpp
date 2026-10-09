@@ -47,6 +47,22 @@ Forecast Game::forecast(int t, bool enemy_first) const {
     return {true, enemy_hit * (hits - (enemy_first ? 0 : 1)), hits, static_cast<int>(hero_hit), enemy_hit};
 }
 
+Forecast Game::orb_forecast(int t) const {
+    // The displayed prediction has its own original arithmetic path. Battle
+    // damage still uses forecast(), including the equipment bonuses.
+    const int enemy = monster_for_tile(t);
+    if (enemy < 0)
+        return {};
+    const auto& row = monsters[enemy];
+    const int scale = hero.cycle_factor_minus_one + 1;
+    const auto hit = std::int64_t(hero.attack) - std::int64_t(row.defense) * scale;
+    if (hit <= 0)
+        return {};
+    const auto hits = (std::int64_t(row.hp) * scale + hit - 1) / hit;
+    const int enemy_hit = std::max(0, row.attack * scale - hero.defense);
+    return {true, enemy_hit * (hits - 1), hits, static_cast<int>(hit), enemy_hit};
+}
+
 void Game::damage_pose(int index, int underlying) {
     const int color = DownDamageColor + (static_cast<int>(hero.facing) - 1) * FacingSpriteStride;
     push(Op::Wait, underlying < 0 ? tile(hero.floor, cell(hero.x, hero.y)) : underlying, color);

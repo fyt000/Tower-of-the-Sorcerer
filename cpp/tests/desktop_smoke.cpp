@@ -14,12 +14,13 @@ std::string file_contents(const std::filesystem::path& path) {
     return {std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
 }
 
-std::uint64_t board_fingerprint(Presentation& renderer) {
+std::uint64_t board_fingerprint(Presentation& renderer,
+                                Rectangle region = {BoardX, BoardY, BoardPixels, BoardPixels}) {
     Image image = renderer.capture_canvas();
     Color* pixels = LoadImageColors(image);
     std::uint64_t hash = 14695981039346656037ull;
-    for (int y = BoardY; y < BoardY + BoardPixels; ++y)
-        for (int x = BoardX; x < BoardX + BoardPixels; ++x) {
+    for (int y = int(region.y); y < region.y + region.height; ++y)
+        for (int x = int(region.x); x < region.x + region.width; ++x) {
             const auto pixel = pixels[y * image.width + x];
             hash = (hash ^ (pixel.r | pixel.g << 8 | pixel.b << 16)) * 1099511628211ull;
         }
@@ -101,24 +102,79 @@ int verify_smoke(DesktopSession& session, const std::string& name, const std::fi
         require(renderer.screenshot(output / "home.png"), "Opening artwork and menu must render");
         session.dispatch({Action::OpenSettings});
         require(ui.home && ui.menu == Menu::Options, "Settings must open over the startup menu");
+        require(!ui.hero_orb_actual_damage, "Hero Orb actual damage QOL must default off");
         session.dispatch({Action::Speed, 2});
         session.dispatch({Action::ReplaySpeed, 4});
         if (!ui.recording_enabled)
             session.dispatch({Action::Recording});
         if (!ui.muted)
             session.dispatch({Action::Mute});
+        session.dispatch({Action::HeroOrbActualDamage});
         const auto settings = load_settings(output / "saves/settings.json");
         require(settings.game_speed == 2 && settings.replay_speed == 4 && settings.recording &&
-                    settings.muted,
+                    settings.muted && settings.hero_orb_actual_damage,
                 "All menu preferences must be saved");
         renderer.draw(game, ui, {-1, -1});
         require(renderer.screenshot(output / "settings.png"),
                 "Settings must render sharp labels and choices");
+        renderer.draw(game, ui, {400, 420});
+        require(renderer.screenshot(output / "settings-qol-hover.png"),
+                "Settings QOL hover must explain the enabled option");
         ui.close_overlays();
         session.dispatch({Action::NewGame});
         require(!ui.home && ui.game_started && ui.recording_active && !game.busy(),
                 "New game must leave the menu and honor recording");
+        const Game before_orb = game;
+        game.hero.attack = 100;
+        game.hero.defense = 20;
+        game.inventory(Item::Cross) = 1;
+        game.monsters[ZombieRow] = {260, 85, 5, 0};
+        game.floors[game.hero.floor].tiles.fill(Road);
+        game.tile_at(game.hero.floor, 5, 4) = Zombie;
+        ui.enemies = true;
+        session.dispatch({Action::HeroOrbActualDamage});
+        renderer.draw(game, ui, {-1, -1});
+        require(renderer.screenshot(output / "hero-orb-original.png"), "Original Orb damage must render");
+        constexpr Rectangle damage_column{564, BoardY + 112, 116, 29};
+        const auto original_damage = board_fingerprint(renderer, damage_column);
+        const auto hero_before_qol = game.hero;
+        const auto floors_before_qol = game.floors;
+        session.dispatch({Action::HeroOrbActualDamage});
+        renderer.draw(game, ui, {-1, -1});
+        require(board_fingerprint(renderer, damage_column) != original_damage,
+                "Enabling QOL must change the rendered bonus-assisted damage");
+        require(game.hero == hero_before_qol && game.floors == floors_before_qol,
+                "Changing Orb display QOL must preserve gameplay state");
+        require(renderer.screenshot(output / "hero-orb-actual.png"), "Actual Orb damage must render");
+        renderer.draw(game, ui, {620, BoardY + 44});
+        require(renderer.screenshot(output / "hero-orb-qol-hover.png"),
+                "Orb QOL badge hover must explain the enabled option");
+        session.dispatch({Action::HeroOrbActualDamage});
+        renderer.draw(game, ui, {-1, -1});
+        require(board_fingerprint(renderer, damage_column) == original_damage,
+                "Disabling QOL must restore the original Orb damage display");
+        require(!load_settings(output / "saves/settings.json").hero_orb_actual_damage,
+                "Disabling QOL must persist");
+        game = before_orb;
+        ui.close_overlays();
         session.dispatch({Action::SaveSlot, 1});
+        const auto saved = file_contents(output / "saves/save1.dat");
+        for (int panel = 0; panel < 3; ++panel) {
+            ui.flight = panel == 0 ? game.hero.floor : -1;
+            ui.enemies = panel == 1;
+            ui.selected_item = panel == 2 ? int(Item::Bomb) : -1;
+            const auto hero_before = game.hero;
+            session.dispatch({Action::SaveSlot, 1});
+            require(!ui.notice.empty() && file_contents(output / "saves/save1.dat") == saved,
+                    "Item and Orb panels must block native writes through direct dispatch");
+            ui.notice.clear();
+            session.dispatch({Action::LoadSlot, 1});
+            require(!ui.notice.empty() && game.hero == hero_before,
+                    "Item and Orb panels must block native loads through direct dispatch");
+            ui.close_overlays();
+            ui.flight = -1;
+            ui.notice.clear();
+        }
         game.hero.hp = 1777;
         session.dispatch({Action::MainMenu});
         session.dispatch({Action::OpenLoadSlots});

@@ -22,6 +22,16 @@ branches. Stairs and Flight skip floor 44; wings can reach it. Normal-stair
 travel sets the Flight ceiling, while wings preserve that distinction. Door
 checks run even when contact is refused for lack of a key.
 
+Flight opens only beside stairs under the original ordered cardinal scan;
+certain later classified neighbors can override a stair result. Its ceiling
+is `highest_floor`, and 44F is excluded. Opening and each successful preview
+clear the highest-floor stair marker through the original map redraw effect.
+Other active items are disabled during selection. A direct Flight input
+performs the same opening and preview sequence as the selector. Returning to
+the highest floor in that sequence uses its normal upward arrival square.
+Successful wings, deferred floor changes, dialogue stage 13 and file-load
+refresh also clear the marker. See the [Flight audit](fidelity-audit-2026-10-09.md).
+
 ## Floors, dialogue and cycles
 
 Floor puzzles preserve the original numeric-sum predicates and command order.

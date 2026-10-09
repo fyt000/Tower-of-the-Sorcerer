@@ -1,4 +1,5 @@
 #include "tsw/game.hpp"
+#include "tsw/replay.hpp"
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -19,7 +20,7 @@ template <class Range> void array(const Range& range) {
     std::cout << ']';
 }
 
-void snapshot(const Game& game) {
+void snapshot(const Game& game, int selector) {
     const auto& h = game.hero;
     std::cout << "{\"hero\":";
     array(std::array<int, 17>{h.hp, h.attack, h.defense, h.gold, h.floor, h.highest_floor, h.x, h.y,
@@ -39,6 +40,7 @@ void snapshot(const Game& game) {
     array(h.old_man_heard);
     std::cout << ",\"flight\":[" << h.flight_direction << ',' << h.highest_floor_stair << ',' << int(h.facing)
               << ']';
+    std::cout << ",\"selector\":" << selector;
     std::cout << ",\"music\":" << h.music_track;
     std::cout << ",\"fairy\":[" << h.fairy_score << ',' << h.fairy_rank << ',' << h.fairy_category << ','
               << game.checkpoint_requested << ']';
@@ -128,6 +130,7 @@ void set(Game& game, const std::string& name, int value) {
 
 int main() {
     Game game;
+    int selector = -1;
     std::string line;
     while (std::getline(std::cin, line)) {
         std::istringstream input(line);
@@ -138,6 +141,7 @@ int main() {
             if (command == "reset")
                 game.new_game();
             else if (command == "original") {
+                selector = -1;
                 game.new_game();
                 game.hero = Hero{};
                 game.hero.hp = 400;
@@ -210,6 +214,16 @@ int main() {
                 b = -1;
                 input >> b;
                 game.use(static_cast<Item>(a), b);
+            } else if (command == "input") {
+                std::string source;
+                std::getline(input, source);
+                const bool accepted = apply_input(game, selector, parse_input(source));
+                std::cout << "{\"accepted\":" << accepted << "}\n" << std::flush;
+            } else if (command == "flight_open") {
+                std::cout << "{\"accepted\":" << game.open_flight() << "}\n" << std::flush;
+            } else if (command == "flight_confirm") {
+                input >> a;
+                game.confirm_flight(a);
             } else if (command == "preview") {
                 input >> a >> b;
                 game.flight_preview(a, b);
@@ -248,10 +262,10 @@ int main() {
                 else
                     game.save(path, command == "save-checkpoint" ? SaveKind::Checkpoint : SaveKind::Slot);
             } else if (command == "snapshot")
-                snapshot(game);
-            else if (command == "forecast") {
+                snapshot(game, selector);
+            else if (command == "forecast" || command == "orb_forecast") {
                 input >> a >> b;
-                const auto f = game.forecast(a, b != 0);
+                const auto f = command == "orb_forecast" ? game.orb_forecast(a) : game.forecast(a, b != 0);
                 std::cout << "{\"penetrates\":" << f.penetrates << ",\"damage\":" << f.damage
                           << ",\"hits\":" << f.hero_hits << "}\n"
                           << std::flush;

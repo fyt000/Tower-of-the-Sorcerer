@@ -41,6 +41,7 @@ if(NOT glaze_FOUND)
 endif()
 add_library(tsw_replay src/replay.cpp src/replay_player.cpp src/recorder.cpp src/settings.cpp)
 target_link_libraries(tsw_replay PUBLIC tsw_core PRIVATE glaze::glaze)
+target_link_libraries(tsw_probe PRIVATE tsw_replay)
 add_library(tsw_mcp src/mcp.cpp src/mcp_observation.cpp src/mcp_runtime.cpp)
 target_link_libraries(tsw_mcp PUBLIC tsw_replay PRIVATE glaze::glaze)
 add_executable(tsw_cli src/cli.cpp)
@@ -82,6 +83,9 @@ if(BUILD_TESTING)
     catch_discover_tests(tsw_tests TEST_PREFIX "core: " PROPERTIES LABELS "core")
     find_package(Python3 COMPONENTS Interpreter QUIET)
     if(Python3_Interpreter_FOUND)
+        add_test(NAME comparison_boundary_guard COMMAND ${Python3_EXECUTABLE}
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools/comparison_boundary.py" --self-test)
+        set_tests_properties(comparison_boundary_guard PROPERTIES LABELS "fidelity" TIMEOUT 30)
         set(replay_cases "${CMAKE_CURRENT_SOURCE_DIR}/../tests/replays")
         add_test(NAME replay_door COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/check_replay.py"
             "${replay_cases}/first-floor-door.jsonl" "${replay_cases}/first-floor-door.expected.json"
@@ -235,6 +239,7 @@ if(TSW_GUI)
         set_tests_properties(window_resize PROPERTIES TIMEOUT 60 LABELS "desktop")
         add_test(NAME desktop_scenarios COMMAND tsw_verify --assets "${presentation_assets}"
             --smoke all --output "${CMAKE_CURRENT_BINARY_DIR}/desktop-checks")
-        set_tests_properties(desktop_scenarios PROPERTIES TIMEOUT 90 LABELS "desktop")
+        # DesktopSession opens an audio device, so -LE audio must exclude this suite.
+        set_tests_properties(desktop_scenarios PROPERTIES TIMEOUT 90 LABELS "desktop;audio")
     endif()
 endif()

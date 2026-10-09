@@ -234,29 +234,18 @@ bool apply_input(Game& game, int& flight, const PlayerInput& input) {
             throw std::runtime_error("Close the Flight selector before moving");
         return game.move(input.direction);
     case InputKind::UseItem:
-        // A direct flight follows the same monotonically selected route as the desktop.
-        if (input.item == Item::FlightOrb && !game.busy() && game.inventory(input.item) > 0 &&
-            input.value >= 1 && input.value <= game.hero.highest_floor && input.value != 44) {
-            game.hero.flight_direction = 0;
-            int floor = game.hero.floor;
-            const int step = input.value > floor ? 1 : -1;
-            while (floor != input.value) {
-                floor += step;
-                if (floor == 44)
-                    floor += step;
-                game.flight_preview(floor, step > 0 ? 1 : 2);
-            }
-        }
+        // 0x450758 disables active item controls while the selector is open.
+        if (flight >= 0)
+            return false;
         return game.use(input.item, input.value);
     case InputKind::Choose:
         if (game.dialogue && !game.dialogue->shop && input.value < 0)
             return game.continue_dialogue();
         return game.choose(input.value);
     case InputKind::OpenFlight:
-        if (game.busy() || game.inventory(Item::FlightOrb) <= 0)
+        if (flight >= 0 || !game.open_flight())
             return false;
         flight = game.hero.floor;
-        game.hero.flight_direction = 0;
         return true;
     case InputKind::FlightUp:
     case InputKind::FlightDown: {
@@ -272,7 +261,7 @@ bool apply_input(Game& game, int& flight, const PlayerInput& input) {
     case InputKind::Travel: {
         if (flight < 0)
             throw std::runtime_error("Flight selector is not open");
-        const bool used = game.use(Item::FlightOrb, flight);
+        const bool used = game.confirm_flight(flight);
         flight = -1;
         return used;
     }
@@ -284,6 +273,10 @@ bool apply_input(Game& game, int& flight, const PlayerInput& input) {
         return game.choose(-1);
     case InputKind::Save:
     case InputKind::Reload:
+        // 0x450758 disables both native save and load while Flight is open.
+        // Session snapshots are separate from these player file operations.
+        if (flight >= 0)
+            return false;
         save_in_memory(game, input.save_kind, input.kind == InputKind::Reload);
         if (input.kind == InputKind::Reload)
             flight = -1;

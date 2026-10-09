@@ -403,6 +403,7 @@ def make_startup(cli, folder):
         floor = value["session"]["game"]["floors"][1]
         floor["tiles"] = [6] * 121
         floor["tiles"][4 * 11 + 5] = 16
+        floor["tiles"][5 * 11 + 4] = 11
         path.write_text(json.dumps(value), encoding="utf-8")
         reply = native.rpc("runtime/restore", {"path": str(path)})
         assert "result" in reply, reply

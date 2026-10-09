@@ -14,7 +14,8 @@ constexpr std::array<std::string_view, 15> ItemIds{
 constexpr std::array<std::string_view, 15> ItemHelp{
     "Reveals enemy statistics and combat forecasts; unlocks manual saves.",
     "Shows clues recorded while owning the Orb of Wisdom.",
-    "Travel to a floor from 1 through highest_floor, except 44. Supply floor, or use the flight selector.",
+    "Use beside a staircase to travel from 1 through highest_floor, except 44. Supply floor, or use the "
+    "flight selector.",
     "Passive: doubles attack against Zombies, Zombie Knights and Vampires in ordinary combat.",
     "Restores attack * 10 + defense * 5 HP; consumed on use.",
     "Removes adjacent brick walls; consumed on use.",
@@ -354,7 +355,8 @@ Json observe(const Session& session, bool developer, int map_floor, std::string_
                  {"charges", h.items[i]},
                  {"usage", ItemHelp[i]},
                  {"passive", item == Item::Cross || item == Item::DragonSlayer || item == Item::LuckyGold},
-                 {"usable", !game.busy() && session.flight < 0}});
+                 {"usable", !game.busy() && session.flight < 0 &&
+                                (item != Item::FlightOrb || game.can_open_flight())}});
     }
     if (game.inventory(Item::WisdomOrb))
         for (int i = 0; i < int(h.wisdom_hints.size()); ++i)

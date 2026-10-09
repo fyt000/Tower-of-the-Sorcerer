@@ -9,7 +9,17 @@ the translation; [retained rules](../docs/mechanics.md) identifies important bra
 
 ## Current evidence
 
-| Original-machine comparison | Passing scenarios |
+The [whole-program accounting](../reference/original/whole-program/REVIEW.md)
+now retains 3,298 machine-entry C/assembly pairs and inventories every CODE and
+PE file byte. All 102 direct targets missing from the earlier presentation
+corpus have exports. It identifies Delphi-2 runtime shapes, callback
+trampolines, incomplete listing bodies and exception continuations. Remaining
+gaps include 14,369 unresolved CODE bytes, 101 metadata/instruction conflict
+bytes, 397 warned exports and unresolved framework delivery. This adds source
+evidence and freshness guards, not additional behavioral agreement cases.
+`verify_original.py` requires a current ledger and records its hash.
+
+| Original-machine comparison | Passing cases or stages |
 |---|---:|
 | Floor/guard/door builders and altered-state predicates | 731 |
 | Contact and ordinary/forced combat | 992 |
@@ -17,13 +27,23 @@ the translation; [retained rules](../docs/mechanics.md) identifies important bra
 | Items, cardinal bounds, wings and Flight | 2,067 |
 | Save bytes, checksums, raw Fairy records and Zeno load reconstruction | 148 |
 | Correction-log triggers, border retreats and explicit 49F safety exception | 246 |
-| Total | 4,610 |
+| Flight entry matrices and complete input sequences | 1,670 |
+| Original Hero Orb displayed arithmetic | 528 |
+| Total cases/stages | 6,808 |
 
 These execute isolated original x86 handlers and compare their output with the
-compiled C++ probe. Reports list skipped calls. Unread stale `b` operands in
+compiled C++ probe. Flight comparisons carry original memory between callbacks;
+the other counts mainly describe isolated cases. Active item confirmation now
+executes from the published callback entry through return. Original-only UI
+gate/timer/prompt assertions are separate from these agreement counts.
+Reports list skipped calls.
+The [9 October Flight audit](../docs/fidelity-audit-2026-10-09.md) documents an
+entry check and effectful redraw that the old 4,610 comparisons missed. Pass
+counts establish agreement only within each report's stated boundary.
+Unread stale `b` operands in
 HeroStrike/Reward are normalized; other compared operands and orders are retained.
 
-The **27 Catch2 core cases / 137 assertions** execute complete command stacks, bounded long fights,
+The Catch2 core, replay and MCP cases execute complete command stacks, bounded long fights,
 fatal cancellation, dialogue aliases, Fairy restores, all eight save slots,
 replacement backups, shared original slot paths, cycle carry/reset rules and
 the 50F gate/seal/wing branches. They reproduce the 33F lower-entry softlock
@@ -61,8 +81,9 @@ is also tested as `TSW.exe` beside only copied original media folders, without
 an external soundfont, extracted PNGs or original EXE.
 
 Save checks execute the original writer's wrapping checksum loops, its loader's
-acceptance path, the raw Fairy write/read instructions and Zeno reconstruction.
-They cover byte-exact read/write, edits, opaque-word retention, frontside/backside seal states,
+acceptance path, the raw Fairy write/read instructions, load refresh, effectful
+map redraw and Zeno reconstruction. They cover writer-exact bytes before and
+after refresh, edits, opaque-word retention, frontside/backside seal states,
 all directions, raw Fairy snapshots, corrupt/truncated records and bounds checks.
 File I/O and VCL UI calls are mocked. Fixtures come from the original writer;
 the installed `Savedat/` folder had no historical player files to test.
@@ -96,6 +117,25 @@ No optional gameplay fixes from tswKai are enabled by this audit.
 
 ## Deliberate differences and remaining work
 
+The [presentation/input review](../reference/original/presentation/REVIEW.md)
+recovers all 130 serialized UI event bindings and 230 published methods, with
+240 C-like/assembly pairs including runtime boundaries. The old corpus lacked
+100 of those published entries. Entry recovery is separate from branch, alias,
+and Windows event-delivery coverage.
+
+The default Hero Orb display uses its separate original arithmetic, which omits
+Cross and Dragon Slayer bonuses; actual combat forecasts retain them. The only
+optional QOL setting, **Hero Orb actual damage**, defaults off and switches the
+Orb display to the combat forecast when enabled. It is a desktop preference,
+separate from native game saves and replay inputs, with an enabled-QOL hover
+explanation. There
+are 528 original numeric row comparisons, plus separately labeled item
+open/cancel, idle-timer, and death-prompt checks. Native file actions respect
+item/Orb modal controls across desktop dispatch, shortcuts, and Flight
+replay/MCP paths. Imported idle redraw words 608/612 are retained, without
+advancing the legacy wall clock; exact save bytes after arbitrary original
+idle timing are outside the verified scope.
+
 - Command execution is iterative and combat memory is bounded; legacy recursive
   timers and fixed stack buffers are replaced while command order is preserved.
 - raylib provides rendering and input; miniaudio provides the audio device. Original board proportions, assets,
@@ -115,6 +155,10 @@ No optional gameplay fixes from tswKai are enabled by this audit.
   durations or a full natural tower playthrough.
 
 Machine-readable original comparisons are generated in `build/cpp/reports/`.
+`tools/verify_original.py` runs all retained suites and rejects unknown or
+effectful skipped callees through `comparison_boundary.py`. Packaging requires
+the resulting probe/report hashes. The scan catches direct named writes;
+aliased and transitive effects still require review.
 Renderer, asset and window reports live in their configured build tree under
 `build/cpp/`. Packages carry copies of this evidence; generated reports are not
 tracked as source files.

@@ -8,6 +8,7 @@ from original_event_probe import probe, pe, RAW
 from audit_original_items import CLUE_OFFSETS
 from verify_interactions import HERO, FIELDS
 from differential import HASH
+from comparison_boundary import check_skipped_calls
 
 def main():
     (ROOT / 'build/cpp/reports').mkdir(parents=True, exist_ok=True)
@@ -56,15 +57,16 @@ def main():
                     add(f'fairy/{floor}/{cycle}/{music}/{hp}','fairy',floor,[(floor,5,4,23)],
                         {'hp':hp,'attack':attack,'defense':defense,'cycle':cycle,'music':music},address=0x478F0C)
     follow=[0x4660D0,0x449708,0x449014,0x44C04C,0x44C464,0x44C5C4,0x44C9F0,
-            0x47BEAC,0x442DC8,0x442F80,0x443050,0x46397C,0x46CB1C,0x461A0C,0x461EF4,0x464048]
+            0x47BEAC,0x442DC8,0x442F80,0x443050,0x46397C,0x46CB1C,0x461A0C,0x461EF4,0x464048,
+            0x442C38,0x454C10,0x449E18]
     watched=[HERO+68+4*i for i in range(15)]+[HERO+128+4*i for i in range(10)]
     watched += [HERO+320+4*i for i in range(11,68)]+[HERO+o for o in CLUE_OFFSETS]+[HERO+168+4*i for i in range(12)]+[HERO+264,HERO+268,HERO+284,HERO+340,HERO+344,HERO+352,HERO+360,HERO+664]
     for name,kind,f,changes,values,extra,cpp,address in scenarios:
         x,y=values.get('x',5),values.get('y',5)
-        globals=[(HERO+FIELDS[k],v) for k,v in values.items()]+extra+[(HERO+352,4),(0x48C584,49)]
+        globals=[(HERO+FIELDS[k],v) for k,v in values.items()]+extra+[(HERO+352,4),(HERO+664,2),(0x48C584,49)]
         original=probe(address,f,x,y,changes,globals=globals,include_presentation=True,follow_calls=follow,watch_globals=watched)
         skipped.update(original['calls'])
-        lines=['original',f'set floor {f}',f'set x {x}',f'set y {y}','set facing 4','set contact 49']
+        lines=['original',f'set floor {f}',f'set x {x}',f'set y {y}','set facing 4','set contact 49','set highest_stair 2']
         lines += [f'tile {f} {y*11+x} {t}' for f,x,y,t in changes]+[f'set {k} {v}' for k,v in values.items()]
         lines += [c for c in cpp if not c.startswith('choose') and c!='call contact']
         lines += [] if kind=='continue' else ['call contact']
@@ -91,6 +93,8 @@ def main():
         for i in range(11,68):
             value=original['watched_globals'][hex(HERO+320+4*i)]
             if actual['flags'][i]!=value:diff.append(dict(flag=i,cpp=actual['flags'][i],original=value))
+        value=original['watched_globals'][hex(HERO+664)]
+        if actual['flight'][1]!=value:diff.append(dict(highest_stair=actual['flight'][1],original=value))
         expected=[list(RAW[f*123+2:(f+1)*123]) for f in range(51)]
         for f,x,y,t in changes+original['changed']:
             if 0<=x<11 and 0<=y<11:expected[f][y*11+x]=t
@@ -105,9 +109,10 @@ def main():
         if diff:failures.append(dict(scenario=name,differences=diff))
         groups[kind]=groups.get(kind,0)+1
     process.stdin.close();process.wait()
-    report=dict(original_sha256=hashlib.sha256(pe.__data__).hexdigest(),scenarios=len(scenarios),passed=len(scenarios)-len(failures),groups=groups,failures=failures,skipped_original_calls=sorted(skipped),limits='Isolated builder/state comparisons. VCL/RTL helpers skipped and listed; Fairy user ranking files and rendering are outside scope.')
+    boundary=check_skipped_calls(skipped)
+    report=dict(original_sha256=hashlib.sha256(pe.__data__).hexdigest(),scenarios=len(scenarios),passed=len(scenarios)-len(failures),groups=groups,failures=failures,skipped_original_calls=sorted(skipped),boundary_audit=boundary,limits='Isolated builder/state comparisons. Effectful map redraw and dialogue display followed; excluded VCL/RTL calls explicitly audited. Fairy user ranking files and rendering are outside scope.')
     (ROOT/'build/cpp/reports/callback-report.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
     print(f'{report["passed"]}/{report["scenarios"]} matched')
-    print(json.dumps(failures[:5],indent=2));return bool(failures)
+    print(json.dumps(failures[:5],indent=2));return bool(failures or boundary['unreviewed_calls'] or boundary['effectful_skips'])
 
 if __name__=='__main__':sys.exit(main())

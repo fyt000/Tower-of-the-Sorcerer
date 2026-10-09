@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import zipfile
+from comparison_boundary import check_skipped_calls
 
 CPP = Path(__file__).resolve().parents[1]
 ROOT = CPP.parent
@@ -23,6 +24,14 @@ def main():
     args = parser.parse_args()
     build = args.build_dir.resolve()
     binaries, original, output = build / args.configuration, args.original_dir.resolve(), args.output.resolve()
+    suite = json.loads((ROOT / 'build/cpp/reports/original-suite.json').read_text(encoding='utf-8'))
+    if suite['cpp_probe_sha256'] != hashlib.sha256((binaries / 'tsw_probe.exe').read_bytes()).hexdigest():
+        raise RuntimeError('Original comparison suite belongs to another build; run verify_original.py')
+    if suite['boundary_policy_sha256'] != hashlib.sha256(Path(__file__).with_name('comparison_boundary.py').read_bytes()).hexdigest():
+        raise RuntimeError('Comparison exclusions changed after verification; run verify_original.py')
+    inventory = ROOT / 'reference/original/presentation/effect-inventory.json'
+    if suite.get('presentation_inventory_sha256') != hashlib.sha256(inventory.read_bytes()).hexdigest():
+        raise RuntimeError('Presentation recovery/review inventory changed; run verify_original.py')
     if output == original or output.is_relative_to(original):
         raise RuntimeError('Package output must be separate from the original installation')
     required = ['tsw_game.exe', 'tsw_cli.exe', 'tsw_probe.exe', 'tsw_tests.exe', 'tsw_audio_tests.exe', 'tsw_verify.exe',
@@ -62,11 +71,18 @@ def main():
     (output / 'FIDELITY.md').write_text(fidelity, encoding='utf-8')
     validation = output / 'validation'
     validation.mkdir(exist_ok=True)
-    for name in ('differential', 'interaction', 'callback', 'item', 'save', 'quirk'):
+    for name in ('differential', 'interaction', 'callback', 'item', 'save', 'quirk', 'flight', 'ui-sequence'):
         source = ROOT / 'build/cpp/reports' / f'{name}-report.json'
         report = json.loads(source.read_text(encoding='utf-8'))
+        if suite['reports'].get(source.name) != hashlib.sha256(source.read_bytes()).hexdigest():
+            raise RuntimeError(f'Comparison report changed after verification: {source.name}')
         if report['passed'] != report['scenarios'] or report['failures']:
             raise RuntimeError(f'Unresolved fidelity comparisons in {source.name}')
+        boundary = check_skipped_calls(report['skipped_original_calls'])
+        if boundary['unreviewed_calls'] or boundary['effectful_skips']:
+            raise RuntimeError(f'Unreviewed comparison boundary in {source.name}: {boundary}')
+        if name == 'flight' and report['cpp_probe_sha256'] != hashlib.sha256((binaries / 'tsw_probe.exe').read_bytes()).hexdigest():
+            raise RuntimeError('Flight evidence belongs to a different compiled probe; rerun verify_original.py')
         shutil.copy2(source, validation / source.name)
     for folder, name, minimum in [('presentation-checks', 'presentation-report.json', 131),
                                    ('asset-checks', 'asset-report.json', 71),

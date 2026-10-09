@@ -28,7 +28,7 @@ python -m pip install pefile pillow
 Set-Location cpp
 & $cmake --preset windows
 & $cmake --build --preset release -j 4
-& $ctest --preset release
+& $ctest --preset release -LE audio
 & ../build/cpp/vs/Release/tsw_game.exe
 ```
 
@@ -46,11 +46,15 @@ pinned sources when installed packages are unavailable:
 ```sh
 cmake -S cpp -B build/cpp/core -DTSW_GUI=OFF
 cmake --build build/cpp/core --config Release
-ctest --test-dir build/cpp/core -C Release --output-on-failure
+ctest --test-dir build/cpp/core -C Release -LE audio --output-on-failure
 ```
 
 Use `-DBUILD_TESTING=OFF` to omit Catch2 runners and the desktop verification executable.
 The game and its libraries contain no test fixtures or verification code.
+
+The default verification commands exclude audio-labelled tests. The desktop
+scenario suite also has that label because it constructs a live audio device;
+pure renderer and window checks remain available without sound.
 
 ## Original folder compatibility
 
@@ -101,7 +105,11 @@ Returning to the main menu pauses gameplay and adds **Continue game** or
 restore buttons. `--load FILE` and `--replay FILE` enter their respective modes directly.
 
 Settings persist in `Savedat/settings.json`, or the directory selected by `--save-dir`.
-They cover walking/animation speed, replay/animation speed, recording and audio mute.
+They cover walking/animation speed, replay/animation speed, recording, audio mute
+and the default-off **Hero Orb actual damage** QOL setting. This is the only QOL
+option: enabling it includes Cross and Dragon Slayer bonuses in the Orb's damage
+display. Off preserves the original displayed arithmetic. Hover over the QOL
+badge in the game or Orb panel, or the setting itself, to see what is enabled.
 These are replacement-game preferences; original settings are not imported.
 
 | Control | Action |
@@ -115,7 +123,7 @@ These are replacement-game preferences; original settings are not imported.
 | F5 / F9 / F8 | Quick save / quick restore / Fairy checkpoint |
 | F2 / M | New game / mute music and effects |
 | Esc | Main menu, or close/cancel the current overlay |
-| Options / Settings | Game speed, replay speed, audio and opt-in recording |
+| Options / Settings | Game speed, replay speed, audio, opt-in recording and Hero Orb QOL |
 
 Shop choices are clickable; Esc cancels a shop. Long dialogue and Wisdom clues
 scroll with the mouse wheel. Hero Orb forecasts have their own overlay. The

@@ -224,11 +224,102 @@ TEST_CASE("Headless settling continues speech but leaves actual shop decisions",
     REQUIRE_FALSE(game.dialogue);
 }
 
+TEST_CASE("Flight rejects illegal entry and direct travel without changing position", "[replay][flight]") {
+    Game game;
+    game.hero.floor = game.hero.highest_floor = 19;
+    game.hero.x = 5;
+    game.hero.y = 2;
+    game.inventory(Item::FlightOrb) = 1;
+    int flight = -1;
+    const auto floors = game.floors;
+    for (const auto input : {PlayerInput{InputKind::OpenFlight},
+                             PlayerInput{InputKind::UseItem, Direction::Up, Item::FlightOrb, 15}}) {
+        game.hero.flight_direction = 2;
+        game.hero.highest_floor_stair = 1;
+        REQUIRE_FALSE(apply_input(game, flight, input));
+        REQUIRE(flight == -1);
+        REQUIRE(game.hero.floor == 19);
+        REQUIRE(game.hero.x == 5);
+        REQUIRE(game.hero.y == 2);
+        REQUIRE(game.hero.flight_direction == 0);
+        REQUIRE(game.hero.highest_floor_stair == 0);
+        REQUIRE(game.floors == floors);
+        REQUIRE(game.message_code == 20);
+    }
+    REQUIRE_FALSE(game.use(Item::FlightOrb, 15));
+}
+
+TEST_CASE("Flight round trips retain the highest floor entrance through both input routes",
+          "[replay][flight]") {
+    for (int highest : {10, 15, 19}) {
+        for (bool direct : {false, true}) {
+            Game game;
+            int flight = -1;
+            game.hero.floor = game.hero.highest_floor = highest;
+            const int entrance = game.floors[highest].up_landing;
+            game.hero.x = entrance % 11;
+            game.hero.y = entrance / 11;
+            game.hero.highest_floor_stair = 1; // Reproduce the stale pre-fix marker.
+            game.inventory(Item::FlightOrb) = 1;
+            auto travel = [&](int destination) {
+                if (direct)
+                    REQUIRE(apply_input(game, flight,
+                                        {InputKind::UseItem, Direction::Up, Item::FlightOrb, destination}));
+                else {
+                    REQUIRE(apply_input(game, flight, {InputKind::OpenFlight}));
+                    REQUIRE(apply_input(
+                        game, flight,
+                        {destination > game.hero.floor ? InputKind::FlightUp : InputKind::FlightDown}));
+                    REQUIRE(apply_input(game, flight, {InputKind::Travel}));
+                }
+                settle_action(game);
+            };
+            travel(highest - 1);
+            travel(highest);
+            REQUIRE(game.hero.floor == highest);
+            REQUIRE(cell(game.hero.x, game.hero.y) == entrance);
+            REQUIRE(game.hero.highest_floor_stair == 0);
+            REQUIRE(flight == -1);
+        }
+    }
+}
+
+TEST_CASE("Flight opening and preview resets do not move the hero", "[replay][flight]") {
+    Game game;
+    game.hero.x = game.hero.y = 5;
+    game.floors[1].tiles.fill(Road);
+    game.tile_at(1, 4, 5) = StairsUp;
+    game.hero.highest_floor = 2;
+    game.inventory(Item::FlightOrb) = 1;
+    const int position = cell(game.hero.x, game.hero.y);
+    int flight = -1;
+    game.hero.highest_floor_stair = 2;
+    REQUIRE(apply_input(game, flight, {InputKind::OpenFlight}));
+    REQUIRE(game.hero.highest_floor_stair == 0);
+    REQUIRE_FALSE(apply_input(game, flight, {InputKind::OpenFlight}));
+    REQUIRE_FALSE(apply_input(game, flight, {InputKind::FlightDown}));
+    game.hero.highest_floor_stair = 1;
+    REQUIRE(apply_input(game, flight, {InputKind::FlightUp}));
+    REQUIRE(game.hero.highest_floor_stair == 0);
+    REQUIRE_FALSE(apply_input(game, flight, {InputKind::FlightUp}));
+    REQUIRE(cell(game.hero.x, game.hero.y) == position);
+    REQUIRE(game.hero.floor == 1);
+    REQUIRE(apply_input(game, flight, {InputKind::Cancel}));
+    REQUIRE(flight == -1);
+    REQUIRE(apply_input(game, flight, {InputKind::OpenFlight}));
+    REQUIRE(apply_input(game, flight, {InputKind::Travel}));
+    settle_action(game);
+    REQUIRE(cell(game.hero.x, game.hero.y) == position);
+    REQUIRE(game.hero.floor == 1);
+}
+
 TEST_CASE("Flight playback retains preview writes reversals cancellation and landing direction", "[replay]") {
     Game game;
     int flight = -1;
     game.hero.floor = 34;
     game.hero.highest_floor = 45;
+    game.hero.x = game.floors[34].up_landing % 11;
+    game.hero.y = game.floors[34].up_landing / 11;
     game.inventory(Item::FlightOrb) = 1;
     game.tile(35, 91) = Road;
     game.tile(2, 120) = Thief;
@@ -239,7 +330,7 @@ TEST_CASE("Flight playback retains preview writes reversals cancellation and lan
     REQUIRE(game.tile(2, 120) == Road);
     REQUIRE(game.hero.floor == 34);
     game.inventory(Item::HeroOrb) = 1;
-    REQUIRE(apply_input(game, flight, {InputKind::UseItem, Direction::Up, Item::HeroOrb}));
+    REQUIRE_FALSE(apply_input(game, flight, {InputKind::UseItem, Direction::Up, Item::HeroOrb}));
     REQUIRE(flight == 35);
     apply_input(game, flight, {InputKind::FlightDown});
     REQUIRE(game.hero.flight_direction == 2);
@@ -263,14 +354,34 @@ TEST_CASE("Replay reload runs original shared Zeno reconstruction", "[replay][sa
         Game game;
         game.hero.zeno_sealed = true;
         game.hero.cycle_factor_minus_one = 43;
+        game.hero.highest_floor_stair = 2;
         game.monsters[ZenoRow] = {800, 500, 100, 1000};
-        int flight = 35;
+        int flight = -1;
         apply_input(game, flight, {InputKind::Reload, Direction::Up, Item::HeroOrb, -1, kind});
         REQUIRE(game.monsters[ZenoRow].hp == 800 * 44);
         REQUIRE(game.monsters[ZenoRow].attack == 500 * 44);
         REQUIRE(game.monsters[ZenoRow].defense == 100 * 44);
+        REQUIRE(game.hero.highest_floor_stair == 0);
         REQUIRE(flight == -1);
     }
+}
+
+TEST_CASE("Native replay saves and reloads respect the original Flight modal gate", "[replay][saves]") {
+    Game game;
+    game.inventory(Item::FlightOrb) = 1;
+    game.hero.x = game.hero.y = 5;
+    game.tile(1, cell(5, 4)) = StairsUp;
+    int flight = -1;
+    REQUIRE(apply_input(game, flight, {InputKind::OpenFlight}));
+    const auto before = game.hero;
+    for (auto kind : {InputKind::Save, InputKind::Reload}) {
+        REQUIRE_FALSE(apply_input(game, flight, {kind}));
+        REQUIRE(game.hero == before);
+        REQUIRE(flight == 1);
+        REQUIRE(game.commands.empty());
+    }
+    REQUIRE(apply_input(game, flight, {InputKind::Cancel}));
+    REQUIRE(apply_input(game, flight, {InputKind::Save}));
 }
 
 TEST_CASE("Replay settling terminates after fatal combat", "[replay]") {
@@ -408,16 +519,23 @@ TEST_CASE("Desktop settings persist opt in audio and both speeds with bounds che
     ReplayDirectory directory;
     const auto path = directory.path / "settings.json";
     REQUIRE_FALSE(load_settings(path).recording);
+    REQUIRE_FALSE(load_settings(path).hero_orb_actual_damage);
     REQUIRE(load_settings(path).replay_speed == 2);
-    save_settings(path, {2, 6, true, true});
+    save_settings(path, {2, 6, true, true, true});
     const auto settings = load_settings(path);
     REQUIRE(settings.game_speed == 2);
     REQUIRE(settings.replay_speed == 6);
     REQUIRE(settings.recording);
     REQUIRE(settings.muted);
+    REQUIRE(settings.hero_orb_actual_damage);
+    {
+        std::ofstream output(path);
+        output << R"({"game_speed":2,"replay_speed":6,"recording":true,"muted":true})";
+    }
+    REQUIRE_FALSE(load_settings(path).hero_orb_actual_damage);
     REQUIRE_THROWS(save_settings(path, {3, 0, false, false}));
-    for (const auto* source :
-         {R"({"game_speed":-1})", R"({"replay_speed":7})", R"({"recording":"true"})", "not json"}) {
+    for (const auto* source : {R"({"game_speed":-1})", R"({"replay_speed":7})", R"({"recording":"true"})",
+                               R"({"hero_orb_actual_damage":"true"})", "not json"}) {
         std::ofstream output(path);
         output << source;
         output.close();

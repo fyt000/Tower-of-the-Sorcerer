@@ -175,6 +175,19 @@ struct Typography {
         draw(title, int(rect.x + 18), int(rect.y + 16), 21, Gold);
         DrawLine(int(rect.x + 18), int(rect.y + 45), int(rect.x + rect.width - 18), int(rect.y + 45), Border);
     }
+
+    void tooltip(Rectangle anchor, const std::string& text) const {
+        const auto wrapped = wrap(text, 300, 16);
+        const float height = 20 + 22 * float(std::count(wrapped.begin(), wrapped.end(), '\n'));
+        const float x = std::clamp(anchor.x + anchor.width - 324, 8.f, CanvasWidth - 332.f);
+        const float y = anchor.y + anchor.height + 6 + height < CanvasHeight - 8
+                            ? anchor.y + anchor.height + 6
+                            : anchor.y - height - 6;
+        const Rectangle rect{x, y, 324, height};
+        DrawRectangleRec(rect, Color{38, 35, 43, 255});
+        DrawRectangleLinesEx(rect, 1, Gold);
+        draw(wrapped, int(x + 12), int(y + 10), 16);
+    }
 };
 
 bool passive(Item item) {
@@ -770,7 +783,7 @@ void Presentation::draw_enemies(const Game& game, DesktopUi& ui, Vector2 mouse) 
             art_->text.fit(
                 std::to_string(std::array<int, 3>{monster.hp, monster.attack, monster.defense}[i] * scale),
                 {rect.x + 216 + i * 82, y + 4, 76, 29}, 18, Ink, false, true);
-        const auto forecast = game.forecast(tile);
+        const auto forecast = ui.hero_orb_actual_damage ? game.forecast(tile) : game.orb_forecast(tile);
         art_->text.fit(
             forecast.penetrates ? std::to_string(forecast.damage) : "Blocked", {rect.x + 464, y + 4, 116, 29},
             18, !forecast.penetrates || forecast.damage >= game.hero.hp ? Color{255, 161, 146, 255} : Ink);
@@ -786,6 +799,21 @@ void Presentation::draw_enemies(const Game& game, DesktopUi& ui, Vector2 mouse) 
         ui.enemies = false;
     art_->text.fit("Scroll or use Up / Down to browse. The battle panel keeps the last victory.",
                    {rect.x + 16, rect.y + 382, 568, 18}, 14, Muted);
+    draw_qol_status(ui, {rect.x + 452, rect.y + 12, 132, 28}, mouse);
+}
+
+void Presentation::draw_qol_status(const DesktopUi& ui, Rectangle rect, Vector2 mouse) {
+    DrawRectangleRec(rect, Bar);
+    DrawRectangleLinesEx(rect, 1, ui.hero_orb_actual_damage ? Gold : Border);
+    art_->text.fit(ui.hero_orb_actual_damage ? "QOL: 1 enabled" : "QOL: none", rect, 16,
+                   ui.hero_orb_actual_damage ? Gold : Muted);
+    if (CheckCollisionPointRec(mouse, rect))
+        art_->text.tooltip(rect,
+                           ui.hero_orb_actual_damage
+                               ? "Enabled QOLs:\nHero Orb actual damage\nIncludes Cross and Dragon Slayer "
+                                 "bonuses. Change this in Settings."
+                               : "Enabled QOLs: none\nHero Orb uses the original damage display, which "
+                                 "ignores Cross and Dragon Slayer bonuses. Change this in Settings.");
 }
 
 UiAction Presentation::draw_item(const Game& game, DesktopUi& ui, Vector2 mouse) {
@@ -849,12 +877,13 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
             Action::Load,    Action::FairyCheckpoint, Action::OpenReplays,   Action::MainMenu};
         for (int i = 0; i < int(labels.size()); ++i)
             if (art_->text.button({rect.x + 6, rect.y + 6 + i * 33, rect.width - 12, 27}, labels[i], mouse,
-                                  (i != 1 && i != 3) || !game.busy())) {
+                                  ((i != 1 && i != 3) || !game.busy()) &&
+                                      (i < 1 || i > 5 || ui.file_controls_enabled()))) {
                 ui.menu = Menu::None;
                 return i < int(actions.size()) ? UiAction{actions[i]} : UiAction{};
             }
     } else if (ui.menu == Menu::Options) {
-        constexpr Rectangle rect{182, 82, 436, 390};
+        constexpr Rectangle rect{182, 46, 436, 464};
         art_->text.modal(rect, "Settings");
         if (art_->text.button({rect.x + 18, rect.y + 60, 400, 34},
                               ui.muted ? "Enable music and effects [M]" : "Mute music and effects [M]",
@@ -877,8 +906,23 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
             return {Action::Recording};
         art_->text.draw("New games, recorded loads and replay takeover.", int(rect.x + 18), int(rect.y + 308),
                         15, Muted);
-        if (art_->text.button({rect.x + 18, rect.y + 346, 400, 30}, "Done [Esc]", mouse))
+        art_->text.draw("Quality of life", int(rect.x + 18), int(rect.y + 332), 17, Gold);
+        const Rectangle qol{rect.x + 18, rect.y + 358, 400, 34};
+        if (art_->text.button(
+                qol, ui.hero_orb_actual_damage ? "Hero Orb actual damage: on" : "Hero Orb actual damage: off",
+                mouse))
+            return {Action::HeroOrbActualDamage};
+        art_->text.draw("Off keeps the original display. Hover for details.", int(rect.x + 18),
+                        int(rect.y + 400), 15, Muted);
+        if (art_->text.button({rect.x + 18, rect.y + 426, 400, 30}, "Done [Esc]", mouse))
             ui.menu = Menu::None;
+        if (CheckCollisionPointRec(mouse, qol))
+            art_->text.tooltip(qol,
+                               ui.hero_orb_actual_damage
+                                   ? "Enabled QOLs:\nHero Orb actual damage\nShows combat damage with Cross "
+                                     "and Dragon Slayer bonuses. Battle rules are unchanged."
+                                   : "Enabled QOLs: none\nEnable this to show combat damage with Cross "
+                                     "and Dragon Slayer bonuses. Default: off.");
     }
     return {};
 }
@@ -1153,6 +1197,8 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
         art_->text.button({658, MenuHeight + ContentHeight + 3, 135, StatusHeight - 6}, "Continue", mouse,
                           !ui.modal()))
         action = {Action::ContinueEnding};
+    if (!ui.replay_active)
+        draw_qol_status(ui, {220, 3, 132, 22}, mouse);
     EndTextureMode();
     return action;
 }

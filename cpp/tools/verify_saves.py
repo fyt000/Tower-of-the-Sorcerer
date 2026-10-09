@@ -12,6 +12,7 @@ import os
 import random
 import struct
 import subprocess
+import sys
 
 import capstone
 import pefile
@@ -20,6 +21,7 @@ from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ECX, UC_X86_REG_EDX,
                               UC_X86_REG_EIP, UC_X86_REG_ESI, UC_X86_REG_ESP)
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / 'tools'))
 HASH = '41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779'
 HERO, MAP, MONSTERS = 0x4b8688, 0x4b8934, 0x489910
 MAP_BYTES, HERO_BYTES, SAVE_BYTES = 6273, 684, 6957
@@ -123,12 +125,18 @@ class Original:
             return b''.join(writes)
         if not accepted:
             return None
-        # Run the actual load-time Zeno reconstruction, skipping preceding UI refresh.
-        machine.reg_write(UC_X86_REG_ESI, HERO)
-        machine.emu_start(0x455b49, 0x455b9f, count=100)
-        return {'maps': bytes(machine.mem_read(MAP, MAP_BYTES)),
-                'hero': bytes(machine.mem_read(HERO, HERO_BYTES)),
-                'monsters': [list(struct.unpack('<4i', machine.mem_read(MONSTERS + 16*i, 16)))
+        # Continue through the real refresh, including its effectful map draw
+        # and Zeno reconstruction, instead of resuming only the Zeno fragment.
+        from original_event_probe import probe
+        maps = bytes(machine.mem_read(MAP, MAP_BYTES))
+        hero = bytes(machine.mem_read(HERO, HERO_BYTES))
+        floor, highest, x, y = struct.unpack('<4i', hero[16:32])
+        refreshed = probe(0x454DE8, floor, x, y, state={HERO: hero, MAP: maps},
+                          follow_calls=[0x442C38, 0x454C10], return_state=True)
+        self.skipped.update(refreshed['calls'])
+        state = refreshed['state']
+        return {'maps': state[MAP], 'hero': state[HERO],
+                'monsters': [list(struct.unpack('<4i', state[MONSTERS][16*i:16*i+16]))
                              for i in range(33)], 'consumed': position}
 
     def write(self, maps, hero):
@@ -176,7 +184,7 @@ class Cpp:
 
 
 def expected_snapshot(record, original):
-    words = list(struct.unpack('<171i', record[MAP_BYTES:SAVE_BYTES]))
+    words = list(struct.unpack('<171i', original['hero']))
     value = lambda offset: words[offset // 4]
     return {
         'hero': words[:12] + [0, 0] + words[14:17],
@@ -251,11 +259,13 @@ def main():
                     check(name + '/all-imported-fields', all(actual[key] == value for key, value in expected.items()))
                     output = directory / 'roundtrip.dat'
                     cpp.run(f'save "{output.as_posix()}"')
-                    check(name + '/exact-roundtrip', output.read_bytes() == file)
+                    check(name + '/post-refresh-writer-matches', output.read_bytes() ==
+                          original.write(old['maps'], old['hero']))
                     check(name + '/original-reads-cpp', original.load(output.read_bytes())['monsters'] == actual['monsters'])
                     cpp.run('set hp 456789', 'set sealed 0', 'item 7 2', 'flag 51 1', 'hint 12 2', 'tile 49 27 6',
                             f'save "{output.as_posix()}"')
                     edited_hero = list(struct.unpack('<171I', file[MAP_BYTES:]))
+                    edited_hero[664 // 4] = 0
                     edited_maps = bytearray(file[:MAP_BYTES])
                     for offset, value in ((0, 456789), (624, 0), (96, 2), (524, 1), (304, 2)):
                         edited_hero[offset // 4] = value
@@ -342,7 +352,8 @@ def main():
               'original_blockread_sizes': sorted(original.read_sizes),
               'original_blockwrite_sizes': sorted(original.write_sizes),
               'skipped_original_calls': sorted(original.skipped), 'checks': cases,
-              'limits': 'Synthetic records from the actual original writer. Original checksum and Zeno load instructions run; VCL UI and file system calls are mocked. No historical player save was available.'}
+              'followed_load_refresh': ['0x454de8', '0x442c38', '0x454c10'],
+              'limits': 'Synthetic records from the actual original writer. Original checksum, complete refresh body, effectful map redraw and Zeno reconstruction run. Slot and modern checkpoint loads share the refreshed state. VCL rendering/device/string and file system calls are excluded. No historical player save was available.'}
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8', newline='\n')
     print(f'{report["passed"]}/{len(cases)} save comparisons passed; {args.report}', flush=True)

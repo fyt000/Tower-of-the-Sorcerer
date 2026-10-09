@@ -114,6 +114,9 @@ void Game::load(std::istream& input, SaveKind kind) {
     save_detail::OriginalRecord record;
     Game restored = save_detail::decode_original(bytes, record, kind);
     restored.original_save_record_ = record;
+    // The original load refresh (0x454DE8 -> 0x442C38) clears this live marker
+    // after reading the raw record. Runtime snapshots bypass file loading.
+    restored.hero.highest_floor_stair = 0;
     *this = std::move(restored); // A malformed file never partially changes the live game.
 }
 } // namespace tsw
