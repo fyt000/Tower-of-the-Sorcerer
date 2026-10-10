@@ -5,6 +5,7 @@
 #include <map>
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 
 namespace tsw {
 namespace replay_json {
@@ -37,6 +38,11 @@ struct ChoiceInput {
 struct SaveInput {
     std::string type;
     std::string kind;
+};
+
+struct RankingsInput {
+    std::string type;
+    std::vector<std::vector<RankingEntry>> tables;
 };
 
 struct HeroValues {
@@ -122,7 +128,20 @@ PlayerInput parse_input(std::string_view source) {
     // Read the discriminator first, then let the selected record enforce its fields.
     const auto type = read_input<InputType, true>(source).type;
     PlayerInput action;
-    if (type == "move") {
+    if (type == "rankings") {
+        const auto values = read_input<RankingsInput>(source);
+        if (values.tables.size() != RankingCategoryCount)
+            throw std::runtime_error("Ranking input must contain exactly five tables");
+        RankingTables tables;
+        for (int category = 0; category < RankingCategoryCount; ++category) {
+            if (values.tables[category].size() != RankingEntryCount)
+                throw std::runtime_error("Ranking table must contain exactly ten entries");
+            std::copy(values.tables[category].begin(), values.tables[category].end(),
+                      tables[category].begin());
+        }
+        action.kind = InputKind::Rankings;
+        action.rankings = std::make_shared<const RankingTables>(std::move(tables));
+    } else if (type == "move") {
         action.kind = InputKind::Move;
         const auto direction = read_input<MoveInput>(source).direction;
         if (direction == "up")
@@ -195,6 +214,14 @@ PlayerInput parse_input(std::string_view source) {
 
 std::string input_json(const PlayerInput& action) {
     switch (action.kind) {
+    case InputKind::Rankings: {
+        if (!action.rankings)
+            throw std::runtime_error("Ranking input is missing its tables");
+        RankingsInput values{"rankings", {}};
+        for (const auto& table : *action.rankings)
+            values.tables.emplace_back(table.begin(), table.end());
+        return write_json(values);
+    }
     case InputKind::NewGame:
         return write_json(InputType{"new_game"});
     case InputKind::Move:
@@ -225,6 +252,11 @@ std::string input_json(const PlayerInput& action) {
 
 bool apply_input(Game& game, int& flight, const PlayerInput& input) {
     switch (input.kind) {
+    case InputKind::Rankings:
+        if (!input.rankings)
+            throw std::runtime_error("Ranking input is missing its tables");
+        game.rankings = *input.rankings;
+        return true;
     case InputKind::NewGame:
         game.new_game();
         flight = -1;

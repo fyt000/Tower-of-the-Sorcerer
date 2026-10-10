@@ -81,6 +81,8 @@ PlayerInput player_action(const Json& value, bool developer, const Game& game) {
     if (value.contains("floor"))
         integer_field(value, "floor", 1, 50);
     auto input = parse_input(dump(value));
+    if (input.kind == InputKind::Rankings)
+        throw std::runtime_error("Ranking table updates belong to replay recordings");
     if (!developer && (input.kind == InputKind::Save || input.kind == InputKind::Reload) &&
         game.inventory(Item::HeroOrb) <= 0)
         throw std::runtime_error("The Orb of the Hero is required to save");
@@ -241,6 +243,8 @@ struct McpServer::Impl {
     void load_file(const std::filesystem::path& path, SaveKind kind) {
         Session restored;
         restored.recorder.load(restored.game, path, kind);
+        restored.game.rankings = load_rankings(path.parent_path());
+        restored.recorder.rankings(restored.game.rankings);
         // A recorded load carries its deterministic action count. An unrecorded
         // native save starts a new observation timeline with recording inactive.
         for (const auto& action : restored.recorder.history()) {

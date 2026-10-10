@@ -13,7 +13,7 @@ option(TSW_GUI "Build the raylib desktop game" ON)
 option(TSW_SANITIZERS "Enable address and undefined behavior checks" OFF)
 add_library(tsw_core src/game.cpp src/combat.cpp src/items.cpp src/contact.cpp
     src/floor_checks.cpp src/scenes.cpp src/npcs.cpp src/save.cpp src/original_save.cpp src/save_slots.cpp
-    src/game_state.cpp)
+    src/game_state.cpp src/rankings.cpp)
 target_include_directories(tsw_core PUBLIC include PRIVATE src)
 if(MSVC)
     target_compile_options(tsw_core PRIVATE /W4 /utf-8)
@@ -75,7 +75,8 @@ if(BUILD_TESTING)
             endforeach()
         endif()
     endif()
-    add_executable(tsw_tests tests/core_tests.cpp tests/replay_tests.cpp tests/mcp_tests.cpp)
+    add_executable(tsw_tests tests/core_tests.cpp tests/tile_variant_tests.cpp tests/replay_tests.cpp tests/mcp_tests.cpp
+        tests/ranking_tests.cpp tests/ranking_game_tests.cpp tests/ranking_replay_tests.cpp)
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/test-temp")
     target_compile_definitions(tsw_tests PRIVATE TSW_TEST_TEMP="${CMAKE_CURRENT_BINARY_DIR}/test-temp")
     target_link_libraries(tsw_tests PRIVATE tsw_mcp Catch2::Catch2WithMain glaze::glaze)

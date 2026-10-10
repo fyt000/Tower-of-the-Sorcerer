@@ -41,12 +41,16 @@ struct DesktopUi {
     std::size_t replay_step{}, replay_count{};
     std::vector<std::filesystem::path> replay_files;
     std::string replay_path, replay_name, replay_error, notice;
+    bool rankings{}, ranking_reset_confirmation{};
+    int ranking_category = 1, ranking_entry_category{}, ranking_position{};
+    std::optional<RankingEntry> ranking_entry;
+    std::string ranking_name;
     bool replay_path_focus = true;
     Menu menu = Menu::None;
     float dialogue_scroll{};
 
     bool modal() const {
-        return home || replay_picker || inventory || enemies || help || selected_item >= 0 ||
+        return home || replay_picker || rankings || inventory || enemies || help || selected_item >= 0 ||
                menu != Menu::None || save_picker != SavePicker::None;
     }
 
@@ -58,6 +62,9 @@ struct DesktopUi {
         menu = Menu::None;
         save_picker = SavePicker::None;
         replay_picker = false;
+        rankings = ranking_reset_confirmation = false;
+        ranking_entry.reset();
+        ranking_name.clear();
     }
 };
 enum class Action {
@@ -85,6 +92,10 @@ enum class Action {
     MainMenu,
     ResumeGame,
     OpenSettings,
+    OpenRankings,
+    RankingCategory,
+    SubmitRanking,
+    ResetRankings,
     OpenReplays,
     PlayReplay,
     ReplayPause,
@@ -141,7 +152,7 @@ class Presentation {
     float walking_remaining_{};
     float animation_seconds_{};
     void draw_board(const Game&, int floor, bool animated);
-    void draw_door(const Visual&, int x, int y);
+    void draw_door(const Game&, int x, int y);
     void draw_transformation(const Game&, int animation);
     void draw_scene(const Game&);
     void cache_scene();
@@ -156,6 +167,7 @@ class Presentation {
     UiAction draw_save_slots(const Game&, DesktopUi&, Vector2 mouse);
     UiAction draw_home(const DesktopUi&, Vector2 mouse);
     UiAction draw_replays(DesktopUi&, Vector2 mouse);
+    UiAction draw_rankings(const Game&, DesktopUi&, Vector2 mouse);
     UiAction draw_replay_controls(const DesktopUi&, Vector2 mouse);
     void draw_help(DesktopUi&, Vector2 mouse);
 };

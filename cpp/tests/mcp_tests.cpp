@@ -514,6 +514,55 @@ TEST_CASE("MCP loading an unrecorded native save reports recording unavailable",
     REQUIRE_FALSE(std::filesystem::exists(recording_path(temporary.file("unrecorded.dat"))));
 }
 
+TEST_CASE("MCP file loads and runtime migration retain custom Fairy rankings", "[mcp][rankings]") {
+    Directory temporary;
+    auto game = room();
+    game.hero.floor = game.hero.highest_floor = 10;
+    game.floors[10].tiles.fill(Road);
+    game.tile_at(10, 5, 4) = Fairy;
+    auto table = default_rankings(1);
+    for (auto& entry : table)
+        entry.score = 500;
+    write_rankings(temporary.path, 1, table);
+    const auto path = temporary.file("fairy-before.dat");
+    game.save(path);
+    Client client(true, Game{}, true);
+    client.tool("load_game", Json{{"path", path}});
+    const auto runtime = temporary.file("rankings-runtime.json");
+    REQUIRE(client.rpc("runtime/checkpoint", Json{{"path", runtime}}).contains("result"));
+    Client migrated(true, Game{}, true);
+    REQUIRE(migrated.rpc("runtime/restore", Json{{"path", runtime}}).contains("result"));
+    migrated.act(R"({"type":"move","direction":"up"})");
+    const auto after = temporary.file("fairy-after.dat");
+    migrated.tool("save_game", Json{{"path", after}});
+    Game saved;
+    saved.load(after);
+    REQUIRE(saved.hero.fairy_score == 415);
+    REQUIRE(saved.hero.fairy_rank == 0);
+}
+
+TEST_CASE("MCP preserves ranking context across new game and rejects live table injection",
+          "[mcp][rankings][replay]") {
+    auto game = room();
+    game.rankings[0][0].score = 500;
+    Client client(false, game);
+    client.tool("new_game");
+    const auto source = client.tool("export_replay")["replay"].get<std::string>();
+    std::istringstream stream(source);
+    const auto history = read_replay(stream);
+    REQUIRE(history.size() == 2);
+    REQUIRE(history[0].kind == InputKind::NewGame);
+    REQUIRE(history[1].kind == InputKind::Rankings);
+    REQUIRE(history[1].rankings);
+    REQUIRE(*history[1].rankings == game.rankings);
+    const auto before = client.tool("game_state");
+    const auto result = client.raw_tool("game_action", Json{{"action", decode(input_json(history[1]))}});
+    REQUIRE(result["result"]["isError"].get<bool>());
+    REQUIRE(encode(client.tool("game_state")) == encode(before));
+    client.tool("replay_game", Json{{"replay", source}});
+    REQUIRE(client.tool("export_replay")["replay"].get<std::string>() == source);
+}
+
 TEST_CASE("MCP file saving refuses directory targets without replacing them or changing the session",
           "[mcp][saves]") {
     Directory temporary;
@@ -718,4 +767,99 @@ TEST_CASE("Complete game snapshots preserve pending combat speech and death", "[
     speech.finish_commands(true);
     REQUIRE(glz::write_json(GameState::capture(speech)).value() ==
             glz::write_json(GameState::capture(game)).value());
+}
+
+TEST_CASE("MCP altar decorations are omitted from interaction destinations", "[mcp][navigation][tiles]") {
+    auto game = room();
+    game.tile_at(1, 5, 4) = Altar;
+    game.tile_at(1, 4, 5) = AltarTop;
+    game.tile_at(1, 6, 5) = AltarSide;
+    Client client(false, game);
+    REQUIRE(client.tool("inspect_tile", Json{{"x", 5}, {"y", 4}})["kind"].get<std::string>() == "npc");
+    for (int x : {4, 6}) {
+        const auto inspected = client.tool("inspect_tile", Json{{"x", x}, {"y", 5}});
+        REQUIRE(inspected["name"].get<std::string>() == "Altar");
+        REQUIRE(inspected["kind"].get<std::string>() == "decoration");
+        const auto refused = client.tool("navigate", Json{{"x", x}, {"y", 5}});
+        REQUIRE(refused["navigation"]["reason"].get<std::string>() == "not_a_destination");
+        REQUIRE_FALSE(refused["navigation"]["reached"].get<bool>());
+        REQUIRE(refused["navigation"]["inputs"].as<int>() == 0);
+    }
+    const auto compact = client.tool("game_state", Json{{"detail", "compact"}});
+    REQUIRE(compact["floor"]["points"].get_array().size() == 1);
+    REQUIRE(compact["floor"]["points"][0]["id"].as<int>() == Altar);
+    REQUIRE_FALSE(compact["tile_types"].contains(std::to_string(AltarTop)));
+    REQUIRE_FALSE(compact["tile_types"].contains(std::to_string(AltarSide)));
+    const auto opened = client.tool("navigate", Json{{"x", 5}, {"y", 4}});
+    REQUIRE(opened["navigation"]["reached"].get<bool>());
+    REQUIRE(opened["phase"].get<std::string>() == "shop");
+    REQUIRE(opened["pending_interaction"]["choices"].get_array().size() == 4);
+}
+
+TEST_CASE("MCP alternate monster pieces expose forecasts and navigate into combat", "[mcp][combat][tiles]") {
+    for (int tile : {106, 107, 108, 109, 110, 111, 112, 113, 114, 158}) {
+        CAPTURE(tile);
+        auto game = room();
+        game.monsters[OctopusRow] = game.monsters[32] = {250, 130, 10, 44};
+        game.tile_at(1, 5, 4) = static_cast<std::uint8_t>(tile);
+        const int expected_row = tile == 158 ? 32 : OctopusRow;
+        Client client(false, game);
+        const auto inspected = client.tool("inspect_tile", Json{{"x", 5}, {"y", 4}});
+        REQUIRE(inspected["kind"].get<std::string>() == "enemy");
+        REQUIRE(inspected["name"].get<std::string>() == Game::monster_name(expected_row));
+        REQUIRE(inspected["enemy"]["row"].as<int>() == expected_row);
+        REQUIRE(inspected["enemy"]["forecast"]["penetrates"].get<bool>());
+        REQUIRE(inspected["enemy"]["forecast"]["survivable"].get<bool>());
+        REQUIRE(inspected["enemy"]["forecast"]["hero_hits"].as<int>() == 3);
+        REQUIRE(inspected["enemy"]["forecast"]["damage"].as<int>() == 60);
+        const auto full = client.tool("game_state");
+        REQUIRE(full["enemies"].get_array().size() == 1);
+        REQUIRE(full["enemies"][0]["enemy"]["row"].as<int>() == expected_row);
+        const auto compact = client.tool("game_state", Json{{"detail", "compact"}});
+        REQUIRE(compact["floor"]["points"].get_array().size() == 1);
+        REQUIRE(compact["floor"]["points"][0]["id"].as<int>() == tile);
+        REQUIRE(compact["floor"]["points"][0]["reachable"].get<bool>());
+        const auto type = compact["tile_types"][std::to_string(tile)];
+        REQUIRE(type["kind"].get<std::string>() == "enemy");
+        REQUIRE(type["available"].get<bool>());
+        REQUIRE(type["enemy"]["forecast"]["damage"].as<int>() == 60);
+        const auto after = client.tool("navigate", Json{{"x", 5}, {"y", 4}});
+        REQUIRE(after["navigation"]["reached"].get<bool>());
+        REQUIRE(after["navigation"]["inputs"].as<int>() == 1);
+        REQUIRE(after["phase"].get<std::string>() == "playing");
+        REQUIRE(after["hero"]["x"].as<int>() == 5);
+        REQUIRE(after["hero"]["y"].as<int>() == 4);
+        REQUIRE(after["hero"]["hp"].as<int>() == 940);
+        REQUIRE(after["hero"]["gold"].as<int>() == 100 + (tile == 158 ? 44 : 22));
+        const auto completed = client.tool("game_state");
+        REQUIRE(completed["map"][cell(5, 4)].as<int>() == Road);
+        REQUIRE(completed["last_encounter"]["name"].get<std::string>() == Game::monster_name(expected_row));
+        REQUIRE(completed["last_encounter"]["damage"].as<int>() == 60);
+    }
+}
+
+TEST_CASE("MCP refuses inert dragon and stair-cover contacts", "[mcp][navigation][tiles]") {
+    for (int tile : {123, 131, 159}) {
+        CAPTURE(tile);
+        auto game = room();
+        game.tile_at(1, 5, 4) = static_cast<std::uint8_t>(tile);
+        Client client(false, game);
+        const auto inspected = client.tool("inspect_tile", Json{{"x", 5}, {"y", 4}});
+        REQUIRE(inspected["kind"].get<std::string>() == "decoration");
+        REQUIRE_FALSE(inspected.contains("enemy"));
+        REQUIRE(client.tool("game_state")["enemies"].get_array().empty());
+        REQUIRE(
+            client.tool("game_state", Json{{"detail", "compact"}})["floor"]["points"].get_array().empty());
+        const auto after = client.tool("navigate", Json{{"x", 5}, {"y", 4}});
+        REQUIRE_FALSE(after["navigation"]["reached"].get<bool>());
+        REQUIRE(after["navigation"]["reason"].get<std::string>() == "refused");
+        REQUIRE(after["navigation"]["inputs"].as<int>() == 1);
+        const auto completed = client.tool("game_state");
+        REQUIRE_FALSE(completed["last_action"]["ok"].get<bool>());
+        REQUIRE(after["hero"]["x"].as<int>() == 5);
+        REQUIRE(after["hero"]["y"].as<int>() == 5);
+        REQUIRE(after["hero"]["hp"].as<int>() == 1000);
+        REQUIRE(after["hero"]["gold"].as<int>() == 100);
+        REQUIRE(completed["map"][cell(5, 4)].as<int>() == tile);
+    }
 }

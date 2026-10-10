@@ -50,6 +50,9 @@ The hero record contains 171 little-endian 32-bit words. Together the map and
 hero records form a 6,957-byte save. Fields whose meaning is unknown retain
 `WordN` names, where `N` is their persisted byte offset. Signed arithmetic wraps
 at 32 bits because combat and file checksums depend on that behavior.
+Attack penetration is checked separately from total damage. An overflowing
+damage total can be negative; forecasts display that number and the battle
+selection compares it with HP as a signed value.
 
 Story commands are six-byte records containing an opcode and two operands.
 The dispatcher executes them newest first; several animation opcodes consume

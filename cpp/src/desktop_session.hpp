@@ -37,5 +37,7 @@ class DesktopSession {
     bool advance_queue(float seconds);
     void advance_replay(float seconds);
     void seek_replay(std::size_t step);
+    void refresh_rankings();
+    void open_rankings(bool submission = false);
 };
 } // namespace tsw

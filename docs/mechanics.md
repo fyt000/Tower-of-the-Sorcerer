@@ -63,5 +63,9 @@ cycle factor again. This legacy backside load quirk is retained; repeated loads
 reconstruct from flags rather than multiplying the already loaded row. The
 cycle-2 50F contact branch reinstalls its fixed `1000/625/125` row before combat.
 The table above describes live gate/seal gameplay without that intervening load.
-Fairy checkpoints are saved after their completed scene; custom original ranking
-files are not imported.
+Fairy checkpoints are saved after their completed scene. Fairy ranks use the
+save directory's five ten-entry tables. Scores are compared first, then HP;
+the final strict tie-break compares `attack + defense - previous HP` with the
+previous attack, using signed 32-bit wrapping. Qualifying first-cycle results
+can be submitted after the Fairy dialogue. Ranking tables use separate files
+and are preserved when loading a game slot.

@@ -162,7 +162,7 @@ void Game::contact() {
                 battle();
             }
             return;
-        } else if (monster_for_tile(target) >= 0 && target <= MagicianB + 4) {
+        } else if (monster_for_tile(target) >= 0) {
             battle();
             return;
         } else

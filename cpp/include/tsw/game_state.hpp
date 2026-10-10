@@ -9,6 +9,7 @@ struct GameState {
     Hero hero;
     std::array<Floor, FloorCount> floors;
     std::array<Monster, 33> monsters;
+    RankingTables rankings;
     std::vector<Command> commands;
     std::optional<Dialogue> dialogue;
     Visual visual;

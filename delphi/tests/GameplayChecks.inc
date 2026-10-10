@@ -238,3 +238,77 @@ begin
   MoveUp;
   Require(Hero.hp = 1000, 'sacred-shield-prevents-magic-and-pincer');
 end;
+
+procedure CombatOverflowChecks;
+var
+  SavedMonster: TMonsterStats;
+  Hits, DamageValue, I: Longint;
+  HasReward, HasDefeat: Boolean;
+begin
+  Room(1);
+  SavedMonster := Monsters[26];
+  try
+    Monsters[26].HP := 4500;
+    Monsters[26].Attack := 560;
+    Monsters[26].Defense := 310;
+    Hero.cycle_factor_minus_one := 43;
+    Hero.hp := 1000;
+    Hero.attack := 13642;
+    Hero.defense := 1000;
+    DamageValue := ForecastDamage(26, False, False, Hits);
+    Require(
+        (DamageValue = -1954630936) and (Hits = 99000) and AttackPenetrates(26),
+        'combat-overflow-keeps-penetration-separate'
+    );
+    MonsterIndex := 26;
+    MainForm.dameiji;
+    Require(
+        (DamageMode = 0)
+            and (Damage = DamageValue)
+            and (Pos(IntToStr(DamageValue), MonsterText) > 0),
+        'combat-overflow-displays-numeric-damage'
+    );
+    MainForm.obudameiji;
+    Require(
+        (DamageMode = 0)
+            and (Damage = DamageValue)
+            and (Pos(IntToStr(DamageValue), MonsterText) > 0),
+        'orb-overflow-displays-numeric-damage'
+    );
+    Maps[1, 51] := 145;
+    ContactIndex := 49;
+    MainForm.taisen;
+    HasReward := False;
+    HasDefeat := False;
+    for I := 1 to EventCursor do
+    begin
+      HasReward := HasReward or (EventStack[I].Opcode = 7);
+      HasDefeat := HasDefeat or (EventStack[I].Opcode = 3);
+    end;
+    Require(
+        (Hero.y = 4)
+            and (BattleHP = 198000)
+            and (EventCursor > 0)
+            and (EventCursor < 50)
+            and HasReward
+            and not HasDefeat,
+        'combat-overflow-starts-streamed-victory-plan'
+    );
+    for I := 1 to 3 do
+      MainForm.timer2timer(nil);
+    Require(
+        (BattleHP = 197998) and (Hero.hp = 1000) and BattleNeedsRefill,
+        'combat-overflow-executes-first-hero-strike'
+    );
+    CancelBattle;
+    EventCursor := 0;
+    MainForm.Timer2.Enabled := False;
+    Require(not BattleNeedsRefill, 'combat-overflow-cancels-streamed-turns');
+  finally
+    CancelBattle;
+    EventCursor := 0;
+    MainForm.Timer2.Enabled := False;
+    Monsters[26] := SavedMonster;
+  end;
+  Room(1);
+end;

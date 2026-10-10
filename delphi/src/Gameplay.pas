@@ -11,6 +11,7 @@ type
 
 function MonsterForTile(Tile: Longint): Longint;
 function AttackMultiplier(Enemy: Longint; EnemyFirst: Boolean): Longint;
+function AttackPenetrates(Enemy: Longint): Boolean;
 function ForecastDamage(Enemy: Longint; EnemyFirst, Orb: Boolean; var Hits: Longint): Longint;
 function ReadHeroField(Offset: Longint): Longint;
 procedure WriteHeroField(Offset, Value: Longint);
@@ -96,6 +97,16 @@ begin
     AttackMultiplier := 2;
 end;
 
+function AttackPenetrates(Enemy: Longint): Boolean;
+begin
+  AttackPenetrates := False;
+  if (Enemy < 0) or (Enemy > 32) then
+    Exit;
+  { Base attack must beat scaled defense before equipment bonuses apply.
+    Penetration is independent of wrapped total damage. }
+  AttackPenetrates := Hero.attack > Monsters[Enemy].Defense * (Hero.cycle_factor_minus_one + 1);
+end;
+
 function ForecastDamage(
     Enemy: Longint;
     EnemyFirst, Orb: Boolean;
@@ -106,12 +117,9 @@ var
 begin
   Hits := 0;
   ForecastDamage := -1;
-  if (Enemy < 0) or (Enemy > 32) then
+  if not AttackPenetrates(Enemy) then
     Exit;
   Scale := Hero.cycle_factor_minus_one + 1;
-  { Base attack must beat scaled defense before equipment bonuses apply. }
-  if Hero.attack <= Monsters[Enemy].Defense * Scale then
-    Exit;
   Hit := Hero.attack;
   if not Orb then
     Hit := Hit * AttackMultiplier(Enemy, EnemyFirst);

@@ -715,3 +715,64 @@ TEST_CASE("Eight save slots share original paths and keep independent backups", 
     REQUIRE(inspect_save_slots(shared)[1].hp == 33333);
     std::filesystem::remove_all(directory);
 }
+
+TEST_CASE("Queued conversations include their equipment clues and Zeno explanation",
+          "[npcs][scenes][dialogue]") {
+    SECTION("The 2F thief names the first sword and shield floors") {
+        auto g = room(2);
+        g.hero.x = 0;
+        g.tile_at(2, 0, 4) = Thief;
+        REQUIRE(g.move(Direction::Up));
+        g.finish_commands();
+        REQUIRE(g.dialogue);
+        REQUIRE(g.dialogue->continuation == 15);
+        REQUIRE(g.dialogue->text.starts_with(Game::original_dialogue(4)));
+        REQUIRE(g.dialogue->text.find("sword on the 5th floor and a shield on the 9th") != std::string::npos);
+        REQUIRE(g.continue_dialogue());
+        g.finish_commands();
+        REQUIRE(g.hero.dialogue_seen[15] == 1);
+        REQUIRE(!g.busy());
+    }
+
+    SECTION("The thief after the 10F boss names the next equipment floors") {
+        auto g = room(10);
+        g.hero.y = 9;
+        g.hero.dialogue_seen[26] = 1;
+        g.tile_at(10, 5, 8) = SpecialRoad;
+        REQUIRE(g.move(Direction::Up));
+        g.finish_commands();
+        REQUIRE(g.dialogue);
+        REQUIRE(g.dialogue->continuation == 27);
+        REQUIRE(g.dialogue->text.starts_with(Game::original_dialogue(16)));
+        REQUIRE(g.dialogue->text.find("shield on the 11th floor and a sword on the 17th") !=
+                std::string::npos);
+        REQUIRE(g.continue_dialogue());
+        g.finish_commands();
+        REQUIRE(g.hero.dialogue_seen[27] == 1);
+        REQUIRE(!g.busy());
+    }
+
+    SECTION("The 24F gate scene explains Zeno's false information and traps") {
+        auto g = room(24);
+        g.hero.y = 1;
+        g.tile_at(24, 5, 0) = SpecialRoad;
+        REQUIRE(g.move(Direction::Up));
+        g.finish_commands();
+        for (int speech = 48; speech < 55; ++speech) {
+            REQUIRE(g.dialogue);
+            REQUIRE(g.dialogue->continuation == speech + 10);
+            REQUIRE(g.continue_dialogue());
+            g.finish_commands();
+        }
+        REQUIRE(g.dialogue);
+        REQUIRE(g.dialogue->continuation == 65);
+        REQUIRE(g.dialogue->text.starts_with(Game::original_dialogue(54)));
+        REQUIRE(g.dialogue->text.find("false information, set various traps in this tower") !=
+                std::string::npos);
+        REQUIRE(g.dialogue->text.find("as arranged beforehand") != std::string::npos);
+        REQUIRE(g.continue_dialogue());
+        REQUIRE(g.hero.dialogue_seen[65] == 1);
+        g.finish_commands(true);
+        REQUIRE(!g.busy());
+    }
+}

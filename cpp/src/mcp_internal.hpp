@@ -17,7 +17,10 @@ struct Session {
     Json last_action;
     Json::array_t log;
 
-    explicit Session(Game initial = Game{}) : game(std::move(initial)) { recorder.new_game(); }
+    explicit Session(Game initial = Game{}) : game(std::move(initial)) {
+        recorder.new_game(game.rankings);
+        steps = recorder.history().size() - 1;
+    }
 
     void act(const PlayerInput&);
     void record(const PlayerInput&, const InputOutcome&);

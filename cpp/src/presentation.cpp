@@ -412,7 +412,8 @@ void Presentation::cache_scene() {
     cache_valid_ = true;
 }
 
-void Presentation::draw_door(const Visual& visual, int x, int y) {
+void Presentation::draw_door(const Game& game, int x, int y) {
+    const auto& visual = game.visual;
     // 0x4770E0: 16 steps cover half a 40-pixel tile, then a complete tile for walls/lava.
     const int half = TileSize / 2, opened = std::clamp(visual.door_frame * half / DoorFrames, 0, half);
     const int remaining = half - opened, full = 2 * opened;
@@ -454,7 +455,7 @@ void Presentation::draw_door(const Visual& visual, int x, int y) {
     case DoorMotion::RoadFromLeft:
     case DoorMotion::RoadFromTop:
     case DoorMotion::RoadFromBottom: {
-        art_->tile(Lava + int(animation_seconds_ * 2) % 2 * Game::animation_offset(Lava), x, y);
+        art_->tile(Lava + int(animation_seconds_ * 2) % 2 * game.animation_offset(Lava), x, y);
         const auto motion = static_cast<DoorMotion>(visual.door_mode);
         if (motion == DoorMotion::RoadFromRight)
             part(Road, TileSize - full, 0, full, TileSize, 0, 0);
@@ -494,7 +495,7 @@ void Presentation::draw_board(const Game& game, int floor, bool animated) {
     for (int index = 0; index < CellCount; ++index) {
         const int x = BoardX + index % BoardWidth * TileSize, y = BoardY + index / BoardWidth * TileSize;
         int value = source_board ? v.stair_source.tiles[index] : game.tile(floor, index);
-        value += animation * Game::animation_offset(value);
+        value += animation * game.animation_offset(value);
         art_->tile(value, x, y);
         if (!active)
             continue;
@@ -504,7 +505,7 @@ void Presentation::draw_board(const Game& game, int floor, bool animated) {
             DrawTexture(art_->transparent(layer.color, layer.mask), x, y, WHITE);
         }
         if (v.door_cell == index)
-            draw_door(v, x, y);
+            draw_door(game, x, y);
         if (v.stair_source_floor >= 0 && v.stair_cover[index])
             art_->tile(StairCover, x, y);
     }
@@ -865,20 +866,23 @@ void Presentation::draw_help(DesktopUi& ui, Vector2 mouse) {
 
 UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse) {
     if (ui.menu == Menu::Game) {
-        constexpr Rectangle rect{6, MenuHeight, 214, 306};
+        constexpr Rectangle rect{6, MenuHeight, 214, 339};
         DrawRectangleRec(rect, Panel);
         DrawRectangleLinesEx(rect, 1, Border);
-        const std::array<const char*, 9> labels{
-            "New game [F2]",   "Save slots [F6]",    "Load slots [F7]",
-            "Quick save [F5]", "Quick restore [F9]", "Fairy checkpoint [F8]",
-            "Play replay",     "Main menu [Esc]",    "Close"};
-        const std::array<Action, 8> actions{
-            Action::NewGame, Action::OpenSaveSlots,   Action::OpenLoadSlots, Action::Save,
-            Action::Load,    Action::FairyCheckpoint, Action::OpenReplays,   Action::MainMenu};
+        const std::array<const char*, 10> labels{"New game [F2]",      "Save slots [F6]",
+                                                 "Load slots [F7]",    "Quick save [F5]",
+                                                 "Quick restore [F9]", "Fairy checkpoint [F8]",
+                                                 "Rankings [R]",       "Play replay",
+                                                 "Main menu [Esc]",    "Close"};
+        const std::array<Action, 9> actions{
+            Action::NewGame,      Action::OpenSaveSlots, Action::OpenLoadSlots,
+            Action::Save,         Action::Load,          Action::FairyCheckpoint,
+            Action::OpenRankings, Action::OpenReplays,   Action::MainMenu};
         for (int i = 0; i < int(labels.size()); ++i)
             if (art_->text.button({rect.x + 6, rect.y + 6 + i * 33, rect.width - 12, 27}, labels[i], mouse,
                                   ((i != 1 && i != 3) || !game.busy()) &&
-                                      (i < 1 || i > 5 || ui.file_controls_enabled()))) {
+                                      (i < 1 || i > 5 || ui.file_controls_enabled()) &&
+                                      (i != 6 || !game.busy()))) {
                 ui.menu = Menu::None;
                 return i < int(actions.size()) ? UiAction{actions[i]} : UiAction{};
             }
@@ -924,6 +928,56 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
                                    : "Enabled QOLs: none\nEnable this to show combat damage with Cross "
                                      "and Dragon Slayer bonuses. Default: off.");
     }
+    return {};
+}
+
+UiAction Presentation::draw_rankings(const Game& game, DesktopUi& ui, Vector2 mouse) {
+    constexpr Rectangle rect{110, 42, 580, 470};
+    art_->text.modal(rect, "Fairy rankings");
+    constexpr std::array<int, RankingCategoryCount> Floors{10, 20, 25, 40, 49};
+    for (int category = 1; category <= RankingCategoryCount; ++category)
+        if (art_->text.button(
+                {rect.x + 18 + (category - 1) * 110, rect.y + 56, 103, 28},
+                std::format("{}F{}", Floors[category - 1], category == ui.ranking_category ? " *" : ""),
+                mouse))
+            return {Action::RankingCategory, category};
+    constexpr std::array<float, 6> Columns{128, 166, 318, 390, 484, 560};
+    constexpr std::array<float, 6> Widths{32, 144, 64, 86, 68, 100};
+    constexpr std::array<const char*, 6> Headers{"Rank", "Name", "Score", "HP", "ATK", "DEF"};
+    for (int column = 0; column < int(Headers.size()); ++column)
+        art_->text.fit(Headers[column], {Columns[column], 135, Widths[column], 22}, 16, Gold);
+    const auto& table = game.rankings.at(ui.ranking_category - 1);
+    for (int row = 0; row < RankingEntryCount; ++row) {
+        const auto& entry = table[row];
+        const std::array<std::string, 6> cells{std::to_string(row + 1),      entry.name,
+                                               std::to_string(entry.score),  std::to_string(entry.hp),
+                                               std::to_string(entry.attack), std::to_string(entry.defense)};
+        for (int column = 0; column < int(cells.size()); ++column)
+            art_->text.fit(cells[column], {Columns[column], 159.f + row * 22, Widths[column], 22}, 16);
+    }
+    const bool submission =
+        ui.ranking_entry && ui.ranking_entry_category == ui.ranking_category && ui.ranking_position > 0;
+    if (ui.ranking_reset_confirmation)
+        art_->text.draw("Reset this category? Click Confirm reset to replace its scores.", 128, 399, 16,
+                        Gold);
+    else if (submission) {
+        art_->text.draw(std::format("New entry: rank {}. Enter your name.", ui.ranking_position), 128, 387,
+                        16, Gold);
+        const Rectangle input{128, 415, 430, 30};
+        DrawRectangleRec(input, Bar);
+        DrawRectangleLinesEx(input, 1, Gold);
+        art_->text.draw(ui.ranking_name + "_", 136, 420, 18);
+    }
+    if (art_->text.button({128, 464, 178, 30},
+                          ui.ranking_reset_confirmation ? "Confirm reset" : "Reset category", mouse,
+                          !ui.replay_active))
+        return {Action::ResetRankings};
+    if (art_->text.button({316, 464, 156, 30}, "Submit [Enter]", mouse,
+                          submission && !ui.ranking_name.empty() && !ui.ranking_reset_confirmation &&
+                              !ui.replay_active))
+        return {Action::SubmitRanking};
+    if (art_->text.button({482, 464, 190, 30}, "Done [Esc]", mouse))
+        ui.close_overlays();
     return {};
 }
 
@@ -1091,12 +1145,15 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
     rlMatrixMode(RL_MODELVIEW);
     ClearBackground(Bar);
     if (ui.home) {
-        const bool overlay = ui.save_picker != SavePicker::None || ui.replay_picker || ui.menu != Menu::None;
+        const bool overlay =
+            ui.save_picker != SavePicker::None || ui.replay_picker || ui.rankings || ui.menu != Menu::None;
         auto action = draw_home(ui, overlay ? Vector2{-1, -1} : mouse);
         if (ui.save_picker != SavePicker::None)
             action = draw_save_slots(game, ui, mouse);
         else if (ui.replay_picker)
             action = draw_replays(ui, mouse);
+        else if (ui.rankings)
+            action = draw_rankings(game, ui, mouse);
         else if (ui.menu != Menu::None)
             action = draw_menu(game, ui, mouse);
         if (!ui.notice.empty())
@@ -1121,6 +1178,8 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
         action = draw_save_slots(game, ui, mouse);
     else if (ui.replay_picker)
         action = draw_replays(ui, mouse);
+    else if (ui.rankings)
+        action = draw_rankings(game, ui, mouse);
     else if (game.dialogue && !ui.help && ui.menu == Menu::None) {
         ui.inventory = false;
         ui.selected_item = -1;

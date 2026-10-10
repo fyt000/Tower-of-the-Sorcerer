@@ -67,7 +67,7 @@ external soundfont or original EXE is needed at runtime.
 Keep the original EXE as `TSW.original.exe` if replacing it; it remains the
 input for decompilation and future builds. Development and tests do not overwrite
 the installed game. Compatibility covers media, folder layout and original
-`.dat` game saves. Original rankings and settings are not imported.
+`.dat` game saves and ranking tables. Original settings are not imported.
 
 The extracted PNG layout is also supported: place it in `assets/` beside the
 executable, or use `--assets DIRECTORY` with either layout. Selection checks the
@@ -122,6 +122,7 @@ These are replacement-game preferences; original settings are not imported.
 | Slot picker: 1–8 or arrows, Enter, Esc | Select, save/replace/load, close |
 | F5 / F9 / F8 | Quick save / quick restore / Fairy checkpoint |
 | F2 / M | New game / mute music and effects |
+| R / Game > Rankings | View the five Fairy ranking categories |
 | Esc | Main menu, or close/cancel the current overlay |
 | Options / Settings | Game speed, replay speed, audio, opt-in recording and Hero Orb QOL |
 
@@ -156,6 +157,22 @@ Open a specific manual or quick save file:
 
 Numbered saves have the format, filename and location the original EXE expects. The replacement
 executable's filename does not affect saving or loading.
+
+Fairy rankings use ten entries per category for 10F, 20F, 25F, 40F and 49F.
+The Fairy compares the score and combat stats against the selected table. After
+the first-cycle Fairy dialogue, a qualifying player can enter a name and submit
+the result. Rankings can also be opened with R or **Game > Rankings**; Left/Right
+selects a category, Enter submits a name, and Esc closes without submitting.
+**Reset category** asks for confirmation and restores only that category's defaults.
+
+Tables persist in the save directory as `option1.dat` through `option5.dat`, each
+with its matching `option11.dat` through `option51.dat` name file. Numeric files
+retain the 288-byte layout, category markers and wrapping checksums; names are
+ten CRLF lines. Missing or malformed files use the complete default table.
+Rankings belong to the directory and survive loading a game slot or starting a
+new cycle. Watching a replay cannot submit or reset ranking files.
+Recordings include sparse in-memory table updates so Fairy results survive
+replay and rewind even if the ranking files change later.
 
 ## Visual replay, recording and headless CLI
 

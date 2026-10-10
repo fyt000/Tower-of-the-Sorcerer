@@ -1,6 +1,7 @@
 #include "tsw/replay.hpp"
 #include <fstream>
 #include <stdexcept>
+#include <utility>
 
 namespace tsw {
 namespace {
@@ -15,6 +16,22 @@ void write_recording(const std::filesystem::path& path, const std::vector<Player
 void remove_temporary(const std::filesystem::path& path) {
     std::error_code ignored;
     std::filesystem::remove(path, ignored);
+}
+
+void record_rankings(std::vector<PlayerInput>& history, const RankingTables& tables) {
+    const RankingTables* previous = nullptr;
+    for (auto input = history.rbegin(); input != history.rend(); ++input)
+        if (input->kind == InputKind::Rankings) {
+            if (!input->rankings)
+                throw std::runtime_error("Ranking input is missing its tables");
+            previous = input->rankings.get();
+            break;
+        }
+    if (previous ? *previous == tables : tables == default_rankings())
+        return;
+    PlayerInput update{InputKind::Rankings};
+    update.rankings = std::make_shared<const RankingTables>(tables);
+    history.push_back(std::move(update));
 }
 } // namespace
 
@@ -32,10 +49,12 @@ void Recorder::enable(bool enabled) {
         history_.reset();
 }
 
-void Recorder::new_game() {
+void Recorder::new_game(const RankingTables& tables) {
     history_.reset();
-    if (enabled_)
+    if (enabled_) {
         history_ = std::vector<PlayerInput>{{InputKind::NewGame}};
+        record_rankings(*history_, tables);
+    }
 }
 
 void Recorder::stop() {
@@ -60,6 +79,11 @@ void Recorder::append(const PlayerInput& input) {
         history_->push_back(input);
 }
 
+void Recorder::rankings(const RankingTables& tables) {
+    if (history_)
+        record_rankings(*history_, tables);
+}
+
 void Recorder::save(Game& game, const std::filesystem::path& path, SaveKind kind) {
     const auto companion = recording_path(path);
     auto temporary = companion;
@@ -77,11 +101,12 @@ void Recorder::save(Game& game, const std::filesystem::path& path, SaveKind kind
 
     if (!path.parent_path().empty())
         std::filesystem::create_directories(path.parent_path());
-    if (history_) {
-        auto snapshot = *history_;
-        snapshot.push_back(saved);
+    auto snapshot = history_;
+    if (snapshot) {
+        record_rankings(*snapshot, game.rankings);
+        snapshot->push_back(saved);
         try {
-            write_recording(temporary, snapshot);
+            write_recording(temporary, *snapshot);
         } catch (...) {
             remove_temporary(temporary);
             throw;
@@ -108,7 +133,7 @@ void Recorder::save(Game& game, const std::filesystem::path& path, SaveKind kind
         if (history_) {
             std::filesystem::rename(temporary, companion);
             std::filesystem::last_write_time(companion, std::filesystem::last_write_time(path));
-            history_->push_back(saved);
+            history_ = std::move(snapshot);
         }
     } catch (const std::exception& error) {
         history_.reset();

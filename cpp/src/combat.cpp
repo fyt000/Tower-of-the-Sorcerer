@@ -12,7 +12,7 @@ constexpr int ForcedVictoryOperand = 193;
 int Game::monster_for_tile(int t) {
     if (t >= GreenSlime && t <= Vampire + 1)
         return (t - GreenSlime) / 2;
-    if (t >= OctopusFirst && t <= OctopusMouth + 1)
+    if (t >= OctopusFirst && t <= OctopusLast)
         return OctopusRow;
     if (t == DragonHead)
         return DragonRow;
@@ -162,10 +162,14 @@ void Game::battle_finished(const Fight& fight) {
     push(Op::Message);
     const int position = cell(hero.x, hero.y);
     if (!fight.enemy_first && ((fight.enemy == OctopusRow && target_tile == OctopusMouth) ||
-                               (fight.enemy == DragonRow && target_tile == DragonHead)))
-        for (int offset : {-21, -22, -23, -12, -11, -10, -1, 0, 1})
-            push(Op::WriteTile, position + offset, Road);
-    else
+                               (fight.enemy == DragonRow && target_tile == DragonHead))) {
+        for (int offset : {-21, -22, -23, -12, -11, -10, -1, 0, 1}) {
+            const int index = position + offset;
+            // Saves permit edge placements; retain only body cells in the flat floor array.
+            if (index >= 0 && index < CellCount)
+                push(Op::WriteTile, index, Road);
+        }
+    } else
         push(Op::WriteTile, position, Road);
     push(Op::Wait);
     push(Op::Callback, Callback::BattleEnd);

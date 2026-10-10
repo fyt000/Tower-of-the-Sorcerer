@@ -26,6 +26,7 @@ std::filesystem::path text_path(const std::string& text) {
 DesktopSession::DesktopSession(const Assets& assets, const std::filesystem::path& save_directory,
                                Game initial, std::optional<bool> record)
     : game(std::move(initial)), renderer(assets), audio(assets), save_directory_(save_directory) {
+    refresh_rankings();
     Settings settings;
     try {
         settings = load_settings(save_directory_ / "settings.json");
@@ -38,7 +39,7 @@ DesktopSession::DesktopSession(const Assets& assets, const std::filesystem::path
     ui.muted = settings.muted;
     ui.hero_orb_actual_damage = settings.hero_orb_actual_damage;
     recorder_.enable(record.value_or(settings.recording));
-    recorder_.new_game();
+    recorder_.new_game(game.rankings);
     recording_status();
     audio.mute(ui.muted);
     audio.restart(game);
@@ -68,6 +69,14 @@ float DesktopSession::scaled_seconds(float real_seconds) const {
 void DesktopSession::move(Direction direction) {
     if (ui.home || ui.replay_active)
         return;
+    // Read the category files before a Fairy encounter can calculate its rank.
+    const int x = game.hero.x + (direction == Direction::Right) - (direction == Direction::Left);
+    const int y = game.hero.y + (direction == Direction::Down) - (direction == Direction::Up);
+    if (!game.busy() && x >= 0 && x < BoardWidth && y >= 0 && y < BoardWidth) {
+        const auto target = game.tile_at(game.hero.floor, x, y);
+        if (target == Fairy || target == Fairy2)
+            refresh_rankings();
+    }
     const auto before = game.hero;
     play({InputKind::Move, direction});
     renderer.moved(before, game.hero);
@@ -121,6 +130,7 @@ void DesktopSession::load(const std::filesystem::path& path, SaveKind kind) {
     recorder_.load(game, path, kind);
     replay_.reset();
     ui.replay_active = ui.replay_paused = false;
+    refresh_rankings();
     ui.home = false;
     ui.game_started = true;
     renderer.reset();
@@ -132,6 +142,27 @@ void DesktopSession::load(const std::filesystem::path& path, SaveKind kind) {
     audio.suspend(false);
     audio.restart(game);
     recording_status();
+}
+
+void DesktopSession::refresh_rankings() {
+    game.rankings = load_rankings(save_directory_);
+    if (!ui.replay_active)
+        recorder_.rankings(game.rankings);
+}
+
+void DesktopSession::open_rankings(bool submission) {
+    ui.close_overlays();
+    if (!ui.replay_active)
+        refresh_rankings();
+    ui.rankings = true;
+    ui.ranking_category = std::clamp(game.hero.fairy_category, 1, RankingCategoryCount);
+    if (submission && game.hero.fairy_rank > 0) {
+        const auto& hero = game.hero;
+        ui.ranking_entry = RankingEntry{hero.fairy_score, hero.hp, hero.attack, hero.defense, {}};
+        ui.ranking_entry_category = ui.ranking_category;
+        // Fairy contact caches the insertion position; reloading rows does not rerank it.
+        ui.ranking_position = game.hero.fairy_rank;
+    }
 }
 
 void DesktopSession::replay(const std::filesystem::path& path) {
@@ -260,8 +291,8 @@ void DesktopSession::advance_replay(float seconds) {
 }
 
 void DesktopSession::advance_commands(float seconds) {
-    if (ui.home || ui.replay_picker || ui.save_picker != SavePicker::None || ui.menu != Menu::None ||
-        ui.help) {
+    if (ui.home || ui.replay_picker || ui.rankings || ui.save_picker != SavePicker::None ||
+        ui.menu != Menu::None || ui.help) {
         recording_status();
         return;
     }
@@ -339,10 +370,11 @@ void DesktopSession::apply(UiAction action) {
         break;
     case Action::NewGame:
         game.new_game();
+        refresh_rankings();
         replay_.reset();
         ui.replay_active = ui.replay_paused = ui.home = false;
         ui.game_started = true;
-        recorder_.new_game();
+        recorder_.new_game(game.rankings);
         renderer.reset();
         audio.suspend(false);
         audio.restart(game);
@@ -366,6 +398,40 @@ void DesktopSession::apply(UiAction action) {
         ui.replay_path = ui.replay_files.empty() ? "" : path_text(ui.replay_files.front());
         ui.replay_path_focus = true;
         ui.replay_picker = true;
+        break;
+    case Action::OpenRankings:
+        if (!game.busy() || ui.home)
+            open_rankings();
+        break;
+    case Action::RankingCategory:
+        ui.ranking_category = std::clamp(action.value, 1, RankingCategoryCount);
+        ui.ranking_reset_confirmation = false;
+        break;
+    case Action::SubmitRanking:
+        if (ui.rankings && !ui.replay_active && ui.ranking_entry &&
+            ui.ranking_entry_category == ui.ranking_category) {
+            auto table = game.rankings[ui.ranking_category - 1];
+            auto entry = *ui.ranking_entry;
+            entry.name = ui.ranking_name;
+            insert_ranking(table, ui.ranking_position, std::move(entry));
+            write_rankings(save_directory_, ui.ranking_category, table);
+            game.rankings[ui.ranking_category - 1] = std::move(table);
+            recorder_.rankings(game.rankings);
+            ui.ranking_entry.reset();
+            ui.ranking_name.clear();
+            ui.ranking_reset_confirmation = false;
+        }
+        break;
+    case Action::ResetRankings:
+        if (ui.rankings && !ui.replay_active) {
+            if (!ui.ranking_reset_confirmation)
+                ui.ranking_reset_confirmation = true;
+            else {
+                game.rankings[ui.ranking_category - 1] = reset_rankings(save_directory_, ui.ranking_category);
+                recorder_.rankings(game.rankings);
+                ui.ranking_reset_confirmation = false;
+            }
+        }
         break;
     case Action::PlayReplay:
         replay(text_path(ui.replay_path));
@@ -444,9 +510,14 @@ void DesktopSession::apply(UiAction action) {
             game.status = "Restored slot " + std::to_string(action.value) + ". " + game.status;
         }
         break;
-    case Action::Continue:
+    case Action::Continue: {
+        const int stage = game.dialogue ? game.dialogue->continuation : 0;
+        const bool fairy = !game.hero.cycle_factor_minus_one &&
+                           (stage == 26 || stage == 32 || stage == 34 || stage == 50 || stage == 57);
         game.continue_dialogue();
-        break;
+        if (fairy)
+            open_rankings(true);
+    } break;
     case Action::ContinueEnding:
         ui.ending_wait = false;
         break;

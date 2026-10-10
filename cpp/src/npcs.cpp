@@ -397,24 +397,10 @@ void Game::speak_fairy() {
     }
     ++hero.fairy_visits;
     hero.fairy_score = std::max(0, score);
-    hero.fairy_rank = 0;
+    hero.fairy_rank = ranking_position(rankings.at(category - 1),
+                                       {hero.fairy_score, hero.hp, hero.attack, hero.defense, {}});
     hero.fairy_category = category;
     checkpoint_requested = true;
-    // Default original rankings. Ties preserve the odd ATK+DEF-HP comparison at 0x479EAF.
-    for (int row = 0; row < 10; ++row) {
-        const int threshold = 100 - row * 10;
-        const int hp = (10 - row) * (category == 1 ? 50 : category == 2 ? 100 : category == 4 ? 500 : 1000);
-        const int attack = category == 1   ? 25 - row
-                           : category == 2 ? 50 - row * 5
-                           : category == 4 ? 200 - row * 10
-                                           : 500 - row * 50;
-        if (hero.fairy_score > threshold ||
-            (hero.fairy_score == threshold &&
-             (hero.hp > hp || (hero.hp == hp && hero.attack + hero.defense - hp > attack)))) {
-            hero.fairy_rank = row + 1;
-            break;
-        }
-    }
     if (hero.music_track) {
         hero.music_track = 12;
         push(Op::FloorMusic);

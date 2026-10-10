@@ -50,12 +50,18 @@ the 50F gate/seal/wing branches. They reproduce the 33F lower-entry softlock
 through walking and combat, check gold completion text and safe 47F boundaries,
 and finish the original 4,500-round Archsorcerer
 and 7,920-round backside Gateman fights with every strike and bounded memory.
+Tile-variant cases exercise all 81 attackable map IDs through forecasts, movement,
+combat, rewards and removal. They retain the octopus mouth's exact full-body rule,
+the dragon's single attackable head, Zeno's floor/cycle branches and bounded body
+cleanup for edge placements loaded from saves. Source comparison also checks the
+Time Gate completion animation and MCP interaction metadata.
 The core, renderer, asset loading, complete MIDI synthesis and audio-device
 checks have passed MSVC AddressSanitizer Release runs.
 
-The **131 presentation checks** cover original standing/walking poses, all twelve
+The **147 presentation checks** cover original standing/walking poses, all twelve
 door/wall/lava modes, both stair phases, all 32 Vampire frames, capture and ending
-playback, red panels, Zeno variants and overlays. They run with both original
+playback, red panels, Zeno variants, Time Gate completion, Hero Orb tile grouping
+and overlays. They run with both original
 and extracted media. The **71 asset checks** establish pixel equality for all
 31 loaded images, unchanged bytes for 17 MIDI tracks and eight WAV effects,
 WAV decoding, embedded media and selection/error handling. Catch2 audio cases
@@ -138,6 +144,9 @@ idle timing are outside the verified scope.
 
 - Command execution is iterative and combat memory is bounded; legacy recursive
   timers and fixed stack buffers are replaced while command order is preserved.
+- Combat forecasts accumulate damage in 64 bits. At extreme backside values,
+  Delphi 2 wraps the total to a signed 32-bit value and can select the success
+  route from a negative total. C++ retains the wider total for that decision.
 - raylib provides rendering and input; miniaudio provides the audio device. Original board proportions, assets,
   masks and scene stages remain; GUI overlays, fonts, settings and timing are modern.
 - MIDI uses TinySoundFont/GeneralUser GS, so instrument timbre differs from a
@@ -148,7 +157,9 @@ idle timing are outside the verified scope.
   validation, backups and independent manual/quick/Fairy files are modern.
   Manual slots use the original `Savedat/save1.dat` through `save8.dat` paths;
   there is no alternate-directory or old-filename lookup. Original settings
-  and custom rankings are not imported. Original checksums
+  are not imported. Fairy rankings use the five compatible 288-byte numeric
+  tables and separate name files, with complete default fallback on invalid data.
+  Original checksums
   do not protect map bytes or the final hero words; no extension is added.
 - Tests establish agreement for sampled states and isolated handlers. They do not
   prove every possible branch, pixel-exact Delphi compositing, exact legacy timer

@@ -1,4 +1,5 @@
 #pragma once
+#include "tsw/rankings.hpp"
 #include <array>
 #include <cstdint>
 #include <filesystem>
@@ -103,6 +104,7 @@ enum Tile : std::uint8_t {
     Vampire = 95,
     OctopusFirst = 97,
     OctopusMouth = 104,
+    OctopusLast = 114,
     DragonFirst = 115,
     DragonHead = 122,
     GoldenKnight = 133,
@@ -303,6 +305,7 @@ class Game {
     Hero hero;
     std::array<Floor, FloorCount> floors{};
     std::array<Monster, 33> monsters{};
+    RankingTables rankings = default_rankings();
     std::vector<Command> commands; // Insertion order; back() executes first.
     std::optional<Dialogue> dialogue;
     Visual visual;
@@ -338,7 +341,7 @@ class Game {
     Forecast orb_forecast(int tile_id) const;
     static int monster_for_tile(int tile_id);
     static TileClass classify_tile(int tile_id);
-    static int animation_offset(int tile_id);
+    int animation_offset(int tile_id) const;
     static std::string_view item_name(Item);
     static std::string_view monster_name(int index);
     static std::string_view original_dialogue(int id);

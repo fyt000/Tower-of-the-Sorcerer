@@ -76,8 +76,10 @@ int main(int argc, char** argv) try {
     }
     Game game;
     int flight = -1;
-    if (!load.empty())
+    if (!load.empty()) {
         game.load(load, kind);
+        game.rankings = load_rankings(load.parent_path());
+    }
     std::ifstream recording;
     if (mode == "replay") {
         recording.open(replay, std::ios::binary);

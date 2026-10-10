@@ -2,6 +2,7 @@
 #include "tsw/game.hpp"
 #include <functional>
 #include <iosfwd>
+#include <memory>
 #include <span>
 
 namespace tsw {
@@ -16,7 +17,8 @@ enum class InputKind {
     Travel,
     Cancel,
     Save,
-    Reload
+    Reload,
+    Rankings
 };
 
 // Player commands belong to the application boundary, not the original command stack.
@@ -26,7 +28,13 @@ struct PlayerInput {
     Item item = Item::HeroOrb;
     int value = -1;
     SaveKind save_kind = SaveKind::Slot;
-    friend bool operator==(const PlayerInput&, const PlayerInput&) = default;
+    std::shared_ptr<const RankingTables> rankings;
+
+    friend bool operator==(const PlayerInput& left, const PlayerInput& right) {
+        return left.kind == right.kind && left.direction == right.direction && left.item == right.item &&
+               left.value == right.value && left.save_kind == right.save_kind &&
+               (left.rankings ? right.rankings && *left.rankings == *right.rankings : !right.rankings);
+    }
 };
 
 PlayerInput parse_input(std::string_view);
@@ -84,10 +92,12 @@ class Recorder {
     }
 
     void enable(bool);
-    void new_game();
+    void new_game(const RankingTables& = default_rankings());
     void stop();
     void resume(std::span<const PlayerInput>);
     void append(const PlayerInput&);
+    // Sparse environment records keep external ranking changes deterministic.
+    void rankings(const RankingTables&);
     void save(Game&, const std::filesystem::path&, SaveKind = SaveKind::Slot);
     // Loading the game succeeds independently of a missing or malformed companion.
     void load(Game&, const std::filesystem::path&, SaveKind = SaveKind::Slot);

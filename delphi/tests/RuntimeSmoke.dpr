@@ -241,6 +241,7 @@ begin
     Drain;
     Require((Hero.bomb = 0) and (Maps[1, 61] = 6), 'bomb-consumed-and-clears-enemy');
     GameplayChecks;
+    CombatOverflowChecks;
     LargeBattleChecks;
     Room(49);
     Hero.cycle_factor_minus_one := 0;

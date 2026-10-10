@@ -177,6 +177,79 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         ui.close_overlays();
     }
 
+    {
+        renderer.reset();
+        Game alternate;
+        alternate.floors[1].tiles.fill(Road);
+        alternate.hero.x = alternate.hero.y = 5;
+        alternate.inventory(Item::HeroOrb) = 1;
+        for (int tile = 106; tile <= 114; ++tile)
+            alternate.tile(1, tile - 106) = static_cast<std::uint8_t>(tile);
+        alternate.tile(1, 10) = 123;
+        alternate.tile(1, 11) = 131;
+        alternate.tile(1, 12) = StairCover;
+        alternate.tile(1, 13) = GateKeeperA + 1;
+        ui.enemies = true;
+        ui.enemy_first_row = 0;
+        draw(alternate);
+        // Exclude the raw atlas-piece icons; names, counts, stats and damage must agree.
+        constexpr Rectangle OrbRows{152, BoardY + 108, 532, 240};
+        const auto alternate_rows = fingerprint(renderer, OrbRows);
+        snapshot("hero-orb-alternate-pieces");
+        auto canonical = alternate;
+        for (int index = 0; index < 9; ++index)
+            canonical.tile(1, index) = OctopusFirst;
+        for (int index = 10; index <= 12; ++index)
+            canonical.tile(1, index) = Road;
+        canonical.tile(1, 13) = GateKeeperA;
+        draw(canonical);
+        require(fingerprint(renderer, OrbRows) == alternate_rows,
+                "Hero Orb groups alternate octopus pieces and Gate-Keeper frames into the same rows as base "
+                "tiles");
+        canonical.floors[1].tiles.fill(Road);
+        draw(canonical);
+        require(fingerprint(renderer, OrbRows) != alternate_rows,
+                "Hero Orb alternate-only enemies produce visible rows rather than an empty floor");
+        ui.close_overlays();
+    }
+
+    for (int gate : {TimeGate, TimeGate2}) {
+        renderer.reset();
+        Game game;
+        game.floors[1].tiles.fill(Road);
+        game.hero.x = game.hero.y = 5;
+        game.tile_at(1, 4, 4) = static_cast<std::uint8_t>(gate);
+        game.tile_at(1, 3, 4) = Lava;
+        game.tile_at(1, 5, 4) = Altar;
+        const Rectangle gate_area{BoardX + 4 * TileSize, BoardY + 4 * TileSize, TileSize, TileSize};
+        const Rectangle lava_area{BoardX + 3 * TileSize, BoardY + 4 * TileSize, TileSize, TileSize};
+        const Rectangle altar_area{BoardX + 5 * TileSize, BoardY + 4 * TileSize, TileSize, TileSize};
+        draw(game);
+        const auto gate_first = fingerprint(renderer, gate_area);
+        renderer.advance(.5f);
+        draw(game);
+        const auto gate_second = fingerprint(renderer, gate_area);
+        const auto lava_second = fingerprint(renderer, lava_area);
+        const auto altar_second = fingerprint(renderer, altar_area);
+        require(gate_first != gate_second,
+                "Time Gate tile " + std::to_string(gate) + " animates before its conversation completes");
+        game.hero.dialogue_seen[36] = 1;
+        draw(game);
+        require(fingerprint(renderer, gate_area) == gate_first,
+                "Time Gate tile " + std::to_string(gate) + " freezes on its stored frame after speech");
+        renderer.advance(.5f);
+        draw(game);
+        require(fingerprint(renderer, gate_area) == gate_first &&
+                    fingerprint(renderer, lava_area) != lava_second &&
+                    fingerprint(renderer, altar_area) != altar_second,
+                "Completed Time Gate speech freezes only the gate, while lava and altars keep animating");
+        game.hero.dialogue_seen[36] = 2;
+        renderer.advance(.5f);
+        draw(game);
+        require(fingerprint(renderer, gate_area) == gate_second,
+                "Time Gate animation tests completion flag equal to one, rather than any nonzero value");
+    }
+
     // All twelve door modes must animate and finish with exactly the committed tile.
     for (int mode = 1; mode <= 12; ++mode) {
         renderer.reset();
@@ -524,6 +597,27 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         draw(game);
         require(ui.dialogue_scroll == 200, "Long Wisdom passages retain scrolling");
         snapshot("wisdom-scroll");
+    }
+    {
+        Game game;
+        ui.close_overlays();
+        ui.rankings = true;
+        ui.ranking_category = 1;
+        ui.ranking_entry_category = 1;
+        ui.ranking_position = 1;
+        ui.ranking_entry = RankingEntry{415, 1000, 100, 100, {}};
+        ui.ranking_name = "Hero";
+        const auto before = game.rankings;
+        draw(game);
+        require(ui.modal(), "Ranking entry pauses gameplay while a name is entered");
+        require(game.rankings == before, "Rendering a ranking entry does not submit or reset scores");
+        snapshot("ranking-entry");
+        ui.ranking_category = 5;
+        ui.ranking_reset_confirmation = true;
+        draw(game);
+        snapshot("ranking-reset-confirmation");
+        ui.close_overlays();
+        require(!ui.ranking_entry && !ui.rankings, "Closing rankings cancels the pending entry");
     }
     std::ofstream report(output / "presentation-report.json");
     report << "{\n  \"passed\": " << checks.size() << ",\n  \"checks\": [\n";

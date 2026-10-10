@@ -155,6 +155,18 @@ void Game::show_dialogue(int id) {
     if (id < 1 || id > int(original::Dialogue.size()))
         throw std::runtime_error("Invalid original speech ID");
     dialogue = Dialogue{std::string(original::Dialogue[id - 1]), id + 10, false, {}};
+    // These conversations store their final paragraph in a separate text entry.
+    switch (id) {
+    case 5:
+        dialogue->text += original::Dialogue[57];
+        break;
+    case 17:
+        dialogue->text += original::Dialogue[58];
+        break;
+    case 55:
+        dialogue->text += original::Dialogue[59];
+        break;
+    }
 }
 
 bool Game::continue_dialogue() {
@@ -416,12 +428,15 @@ void Game::queue_death() {
     push(Op::DeathScene);
 }
 
-int Game::animation_offset(int t) {
+int Game::animation_offset(int t) const {
     if (t == Lava || t == StarVoid)
         return 147;
     if (t == Altar)
         return 2;
-    if ((t >= Merchant && t <= TimeGate2) || (t >= GreenSlime && t <= Vampire + 1) ||
+    // Completing the second gate conversation freezes its two map frames.
+    if (t == TimeGate || t == TimeGate2)
+        return hero.dialogue_seen[36] == 1 ? 0 : 1;
+    if ((t >= Merchant && t <= OldMan2) || (t >= GreenSlime && t <= Vampire + 1) ||
         (t >= GoldenKnight && t <= 157))
         return 1;
     if ((t >= OctopusFirst && t <= 105) || (t >= DragonFirst && t <= 123))

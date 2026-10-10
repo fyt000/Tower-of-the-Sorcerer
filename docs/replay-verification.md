@@ -97,6 +97,8 @@ directly with `tsw_game --replay FILE`.
 
 The speed choices are 0.25x, 0.5x, 1x, 2x, 3x, 5x and 10x. One step is one
 recorded command, including the initial `new_game` and save/reload boundaries.
+Sparse `rankings` records also count as steps. They restore the in-memory Fairy
+tables used by the recorded run and never write ranking files.
 Playback drives the desktop's existing command queue; non-choice speech and the
 ending card remain visible for a scaled delay before continuing. Shops wait for
 their recorded choices. Live gameplay input is blocked until takeover.
@@ -160,6 +162,13 @@ normal monotonic selection route. Save boundaries use
 `{"type":"save","kind":"slot"}` or `checkpoint`; loads use `reload` with the
 same kind. These C++ boundary commands and exact Flight inputs need corresponding
 Rust support before those traces can be compared.
+
+The recorder adds `rankings` records when the five Fairy tables change, including
+custom tables at the start of a game. Their `tables` field contains five arrays
+of ten entries, each with `score`, `hp`, `attack`, `defense` and `name`. Playback
+uses these values instead of rereading the current ranking files. Older recordings
+without these records use the default tables. This preserves the Fairy's rank
+and save checksum when tables are updated during a run or after recording it.
 
 Headless replay drains the original automatic command queue without animation delays,
 continues dialogue with no decision through its real callbacks and leaves shops

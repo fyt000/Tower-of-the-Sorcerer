@@ -9,6 +9,35 @@ using namespace tsw;
 
 namespace {
 UiAction keyboard(const Game& game, DesktopUi& ui) {
+    if (ui.rankings) {
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            ui.close_overlays();
+            return {};
+        }
+        const int step = IsKeyPressed(KEY_LEFT) ? -1 : IsKeyPressed(KEY_RIGHT) ? 1 : 0;
+        if (step)
+            return {Action::RankingCategory, ui.ranking_category + step};
+        if (ui.ranking_entry && ui.ranking_entry_category == ui.ranking_category &&
+            !ui.ranking_reset_confirmation) {
+            if ((IsKeyPressed(KEY_BACKSPACE) || IsKeyPressedRepeat(KEY_BACKSPACE)) &&
+                !ui.ranking_name.empty()) {
+                auto last = ui.ranking_name.size() - 1;
+                while (last && (static_cast<unsigned char>(ui.ranking_name[last]) & 0xc0) == 0x80)
+                    --last;
+                ui.ranking_name.resize(last);
+            }
+            for (int codepoint = GetCharPressed(); codepoint; codepoint = GetCharPressed())
+                if (codepoint >= 32) {
+                    int size{};
+                    const auto* text = CodepointToUTF8(codepoint, &size);
+                    if (ui.ranking_name.size() + size <= RankingNameLimit)
+                        ui.ranking_name.append(text, size);
+                }
+            if (IsKeyPressed(KEY_ENTER) && !ui.ranking_name.empty())
+                return {Action::SubmitRanking};
+        }
+        return {};
+    }
     if (ui.replay_picker) {
         if (IsKeyPressed(KEY_ESCAPE)) {
             ui.close_overlays();
@@ -110,6 +139,8 @@ UiAction keyboard(const Game& game, DesktopUi& ui) {
     }
     if (IsKeyPressed(KEY_F2))
         return {Action::NewGame};
+    if (IsKeyPressed(KEY_R) && !game.busy() && ui.flight < 0)
+        return {Action::OpenRankings};
     if (IsKeyPressed(KEY_F5) && ui.file_controls_enabled())
         return {Action::Save};
     if (IsKeyPressed(KEY_F6) && ui.file_controls_enabled())
@@ -196,7 +227,7 @@ int main(int argc, char** argv) try {
             std::cout << "Tower of the Sorcerer original cpp\n"
                          "Arrows / WASD: move. Enter: continue. I: inventory.\n"
                          "F6 / F7: eight save / load slots. F5 / F9: quick save / restore.\n"
-                         "F8: Fairy checkpoint. F2: new game. M: mute.\n"
+                         "F8: Fairy checkpoint. F2: new game. M: mute. R: Fairy rankings.\n"
                          "Saves: Savedat/save1.dat through save8.dat beside this executable.\n"
                          "--assets DIR --save-dir DIR --load FILE\n"
                          "--replay FILE: watch a JSONL recording with visual controls.\n"

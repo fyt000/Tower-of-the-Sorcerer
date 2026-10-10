@@ -4,13 +4,17 @@
 
 namespace tsw {
 GameState GameState::capture(const Game& g) {
-    return {g.hero,          g.floors,        g.monsters,
-            g.commands,      g.dialogue,      g.visual,
-            g.status,        g.sounds,        g.checkpoint_requested,
-            g.contact_index, g.scratch_index, g.neighbor_index,
-            g.message_code,  g.door_opened,   g.original_save_record_,
-            g.fight_,        g.shop_kind_,    g.shop_cost_,
-            g.shop_hint_,    g.shop_id_,      g.shop_npc_cell_,
+    return {g.hero,           g.floors,
+            g.monsters,       g.rankings,
+            g.commands,       g.dialogue,
+            g.visual,         g.status,
+            g.sounds,         g.checkpoint_requested,
+            g.contact_index,  g.scratch_index,
+            g.neighbor_index, g.message_code,
+            g.door_opened,    g.original_save_record_,
+            g.fight_,         g.shop_kind_,
+            g.shop_cost_,     g.shop_hint_,
+            g.shop_id_,       g.shop_npc_cell_,
             g.stopped_};
 }
 
@@ -19,6 +23,7 @@ Game GameState::restore() const {
     g.hero = hero;
     g.floors = floors;
     g.monsters = monsters;
+    g.rankings = rankings;
     // Runtime migration also permits a fallen hero, unlike manual saves.
     if (hero.hp < 0)
         throw std::runtime_error("Invalid runtime hit points");

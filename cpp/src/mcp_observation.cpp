@@ -128,10 +128,12 @@ Json tile_definition(int tile) {
             kind = "void";
             break;
         case Altar:
+            name = "Altar";
+            kind = "npc";
+            break;
         case AltarTop:
         case AltarSide:
             name = "Altar";
-            kind = "npc";
             break;
         case Merchant:
         case Merchant2:
@@ -246,6 +248,11 @@ std::string dump(const Json& value) {
 
 void Session::act(const PlayerInput& input) {
     record(input, execute_input(game, flight, input));
+    if (input.kind == InputKind::NewGame) {
+        const auto previous = recorder.history().size();
+        recorder.rankings(game.rankings);
+        steps += recorder.history().size() - previous;
+    }
 }
 
 void Session::record(const PlayerInput& input, const InputOutcome& outcome) {

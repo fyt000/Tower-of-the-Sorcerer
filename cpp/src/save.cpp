@@ -113,6 +113,8 @@ void Game::load(std::istream& input, SaveKind kind) {
         throw std::runtime_error("Truncated original save: expected 6957 bytes");
     save_detail::OriginalRecord record;
     Game restored = save_detail::decode_original(bytes, record, kind);
+    // Rankings belong to the save directory, not to an individual game slot.
+    restored.rankings = rankings;
     restored.original_save_record_ = record;
     // The original load refresh (0x454DE8 -> 0x442C38) clears this live marker
     // after reading the raw record. Runtime snapshots bypass file loading.

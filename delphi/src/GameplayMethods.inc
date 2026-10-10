@@ -144,7 +144,7 @@ end;
 procedure TTSW10.obudameiji; { $0044FF0C; Orb deliberately ignores Cross/Slayer }
 begin
   Damage := ForecastDamage(MonsterIndex, False, True, StrikeCount);
-  if Damage < 0 then
+  if not AttackPenetrates(MonsterIndex) then
   begin
     DamageMode := 1;
     MonsterText := GameplayText(Self, $B9);
@@ -159,8 +159,8 @@ end;
 procedure TTSW10.dameiji; { $00450064 }
 begin
   Damage := ForecastDamage(MonsterIndex, False, False, StrikeCount);
-  DamageMode := Ord(Damage < 0);
-  if Damage < 0 then
+  DamageMode := Ord(not AttackPenetrates(MonsterIndex));
+  if DamageMode <> 0 then
     MonsterText := GameplayText(Self, $B9)
   else
     MonsterText := GameplayText(Self, $B8) + ' ' + IntToStr(Damage);
@@ -196,7 +196,7 @@ begin
   GameplayEnemyFirst := EnemyFirst;
   Expected := ForecastDamage(Enemy, EnemyFirst, False, Hits);
   Form.monshyouji;
-  if Expected < 0 then
+  if not AttackPenetrates(Enemy) then
   begin
     GameplayMessage(Form, 113);
     Exit;
