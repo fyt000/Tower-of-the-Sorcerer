@@ -10,10 +10,7 @@ import json
 import os
 import struct
 
-import pefile
-
-ROOT = Path(__file__).resolve().parents[1]
-HASH = "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779"
+from recovery_evidence import ROOT, ORIGINAL_HASH as HASH
 
 
 class FormReader:
@@ -147,6 +144,8 @@ def main():
     parser.add_argument("--exe", type=Path, default=Path(os.environ.get("TOS_ORIGINAL_EXE", r"D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe")))
     parser.add_argument("--output", type=Path, default=ROOT / "reference/original/presentation")
     args = parser.parse_args()
+    import pefile
+
     raw = args.exe.read_bytes()
     if hashlib.sha256(raw).hexdigest() != HASH:
         raise ValueError("Executable hash differs; recovery requires review")

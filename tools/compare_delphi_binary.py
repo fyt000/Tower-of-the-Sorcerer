@@ -14,7 +14,7 @@ import struct
 
 import pefile
 
-from verify_delphi2_reference import ROOT, ORIGINAL_HASH, digest
+from recovery_evidence import ROOT, ORIGINAL_HASH, digest
 from build_delphi_game import WORK
 
 

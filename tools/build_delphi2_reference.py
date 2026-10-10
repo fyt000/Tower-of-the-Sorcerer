@@ -6,17 +6,12 @@ Requires tools/prepare_delphi2_reference.py to have prepared the toolchain.
 """
 from pathlib import Path
 import argparse
-import hashlib
 import json
 import os
 import shutil
 import subprocess
 
-ROOT = Path(__file__).resolve().parents[1]
-
-
-def digest(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+from recovery_evidence import ROOT, digest
 
 
 def stage(source, destination):

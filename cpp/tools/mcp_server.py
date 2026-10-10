@@ -1,6 +1,5 @@
 """Stable stdio MCP bridge with transactional C++ worker hot reload (standard library only)."""
 import argparse
-from collections import deque
 import json
 import math
 import os
@@ -56,7 +55,6 @@ class Worker:
         self.failure = None
         self.next_id = 0
         self.outbound, self.replies = Queue(), Queue()
-        self.stderr_tail = deque(maxlen=16)
         self.process = subprocess.Popen(
             [deployment.executable, "mcp", "--runtime-bridge", *options],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -106,7 +104,6 @@ class Worker:
                 if not data:
                     return
                 text = data.decode("utf-8", errors="replace")
-                self.stderr_tail.append(text)
                 sys.stderr.write(text)
                 sys.stderr.flush()
         except (OSError, ValueError):

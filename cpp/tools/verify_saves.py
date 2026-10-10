@@ -18,7 +18,7 @@ import capstone
 import pefile
 import unicorn
 from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ECX, UC_X86_REG_EDX,
-                              UC_X86_REG_EIP, UC_X86_REG_ESI, UC_X86_REG_ESP)
+                              UC_X86_REG_EIP, UC_X86_REG_ESP)
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tools'))

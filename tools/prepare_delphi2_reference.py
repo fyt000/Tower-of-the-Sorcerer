@@ -7,19 +7,15 @@ Base units and the archive's separate Updates directory are never overlaid.
 """
 from pathlib import Path, PureWindowsPath
 import argparse
-import hashlib
 import importlib
 import json
 import subprocess
 import sys
 import stat
 
-ROOT = Path(__file__).resolve().parents[1]
+from recovery_evidence import ROOT, digest as sha256
+
 EXTRACTOR_COMMIT = "bd2b77624b96bb2a4f347518d087126759296a03"
-
-
-def sha256(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def main():

@@ -15,7 +15,7 @@ import struct
 import capstone
 import pefile
 from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_EDX, UC_X86_REG_ECX,
-                               UC_X86_REG_ESP, UC_X86_REG_EIP, UC_X86_REG_EFLAGS)
+                               UC_X86_REG_ESP, UC_X86_REG_EFLAGS)
 
 from verify_delphi_flight import FlightRunner
 from verify_delphi_graphics import (ROOT, WORK, ORIGINAL_HASH, digest, symbols, data_symbols,

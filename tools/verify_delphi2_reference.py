@@ -21,8 +21,8 @@ from unicorn.x86_const import (
     UC_X86_REG_EIP, UC_X86_REG_EFLAGS,
 )
 
-ROOT = Path(__file__).resolve().parents[1]
-ORIGINAL_HASH = "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779"
+from recovery_evidence import ROOT, ORIGINAL_HASH, digest
+
 RUNTIME = {
     "TControl.Click": 0x413EAC,
     "TWinControl.CanFocus": 0x416C2C,
@@ -34,10 +34,6 @@ RUNTIME = {
     "@HandleAnyException": 0x402F4C,
     "@HandleFinally": 0x403140,
 }
-
-
-def digest(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def symbols(pe, path):

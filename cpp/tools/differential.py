@@ -4,7 +4,7 @@ Delphi/VCL rendering calls are skipped by the original probe and listed in the
 report. The baseline itself is exercised through its compiled probe program.
 """
 from pathlib import Path
-import argparse, hashlib, json, random, struct, subprocess, sys
+import argparse, hashlib, json, random, subprocess, sys
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'tools'))

@@ -9,18 +9,16 @@ import argparse
 import hashlib
 import json
 import os
-import shutil
 import struct
 import subprocess
 
 import pefile
 
-from build_delphi2_reference import digest, stage
+from build_delphi2_reference import stage
+from recovery_evidence import ROOT, ORIGINAL_HASH, digest
 from reconstruct_delphi_project import generated, output_path
 from review_delphi2_media import validate_media
-from verify_delphi2_reference import ORIGINAL_HASH
 
-ROOT = Path(__file__).resolve().parents[1]
 WORK = ROOT / "build/delphi-game"
 
 

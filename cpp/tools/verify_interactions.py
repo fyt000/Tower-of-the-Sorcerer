@@ -13,7 +13,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tools'))
-from original_event_probe import probe, pe, RAW
+from original_event_probe import probe, pe
 from differential import HASH
 
 HERO = 0x4B8688

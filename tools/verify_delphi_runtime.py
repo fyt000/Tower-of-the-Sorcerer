@@ -4,18 +4,13 @@ Run build_delphi_game.py --smoke first. Add --audio-smoke when changes affect
 audio. Native fixture assertions execute real Pascal and VCL bodies; the scene
 comparison separately executes the pinned original machine code in Unicorn.
 """
-from pathlib import Path
 import argparse
-import hashlib
 import json
 
-ROOT = Path(__file__).resolve().parents[1]
+from recovery_evidence import ROOT, digest
+
 WORK = ROOT / "build/delphi-game"
 REPORT = ROOT / "build/delphi-game/reports/runtime-verification-report.json"
-
-
-def digest(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def evidence():

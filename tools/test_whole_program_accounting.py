@@ -1,6 +1,5 @@
 """Adversarial checks of recognition and accounting guards, not game fidelity."""
 from contextlib import contextmanager
-from pathlib import Path
 import json
 import unittest
 

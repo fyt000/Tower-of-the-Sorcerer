@@ -6,12 +6,12 @@ and one high-level gameplay reconstruction compiles to the original routine's
 literal machine bytes. This is a working research baseline, not a recovered
 complete Pascal game project or a claim to the author's original source text.
 
-The subsequent [native Delphi project](../../delphi/README.md) starts the game
-reconstruction after the user accepted the Japanese IME difference. It compiles
-the original forms unchanged, uses normal native storage, and compares 18 core
-procedures plus modal control gates. Its separate inventory retains all missing
-methods and its report keeps full-game/pixel acceptance false. This earlier
-compiler-probe report and its library mismatches remain unchanged.
+The subsequent [Delphi game](../../delphi/README.md) embeds the forms unchanged,
+implements all 230 published methods, and uses normal compiler-allocated storage.
+Its tests cover gameplay, persistence, rankings, core routines, and modal gates.
+Its reports retain the limits on exhaustive equivalence and pixel comparisons.
+This compiler-probe report and its library mismatches describe the earlier
+research baseline.
 
 The [comparison report](comparison-report.json) retains both successful checks
 and library incompatibilities. The original game installation and campaign

@@ -6,6 +6,7 @@ import json
 import re
 
 from format_delphi import format_source, formatter
+from extract_original_ui import walk
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "delphi/src/generated"
@@ -72,12 +73,6 @@ def initialization():
         raise ValueError(f"Initialization inventory changed: {conditions}, {assignments}")
     return "\n".join(result) + "\n", dict(original_entry="0x00455cb8", original_export_sha256=sha(path.read_bytes()),
                                          conditions=conditions, assignments=assignments)
-
-
-def walk(component):
-    yield component
-    for child in component["children"]:
-        yield from walk(child)
 
 
 def parameters(events):

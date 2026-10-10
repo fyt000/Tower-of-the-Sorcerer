@@ -5,7 +5,7 @@ Events are authored translations of observed memory writes and queued
 instructions; calls/graphics are not blindly interpreted as gameplay.
 Campaign integration is deliberately a separate regeneration step.
 """
-import json,pathlib
+import json
 from original_event_probe import probe as original_probe, RAW, ROOT
 from original_animation import tile_transition
 

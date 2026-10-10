@@ -12,13 +12,8 @@ import os
 import subprocess
 import zipfile
 
-import pefile
-
 from build_delphi2_reference import stage
-from verify_delphi2_reference import (
-    ROOT, ORIGINAL_HASH, RUNTIME, digest, framework_cases, gameplay_comparison,
-    instructions, normalized, original_span, symbols,
-)
+from recovery_evidence import ROOT, ORIGINAL_HASH, digest
 
 MEDIA = {
     "desktop7z": ("Borland Delphi Desktop 2.0(1).7z", "desktop7z/Borland Delphi Desktop 2.0/DATA.Z"),
@@ -123,6 +118,13 @@ def main():
     parser.add_argument("--downloads", type=Path, default=Path("D:/Downloads"))
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
+    # Build scripts import validate_media without the comparison engine.
+    import pefile
+    from verify_delphi2_reference import (
+        RUNTIME, framework_cases, gameplay_comparison, instructions, normalized,
+        original_span, symbols,
+    )
+
     media = ROOT / "build/research/delphi2-additional-media"
     desktop = ROOT / "build/research/delphi2-desktop"
     client = ROOT / "build/research/delphi2"

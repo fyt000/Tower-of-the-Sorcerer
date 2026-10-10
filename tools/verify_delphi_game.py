@@ -4,7 +4,6 @@ Both original-address and production-storage compilations execute in Unicorn.
 All calls inside tested core routines execute; no gameplay call is stubbed.
 IME acceptance is narrow, checked independently of gameplay comparisons.
 """
-from pathlib import Path
 import argparse
 import hashlib
 import itertools
@@ -12,7 +11,6 @@ import json
 import random
 import struct
 
-import capstone
 import pefile
 import unicorn
 from unicorn.x86_const import UC_X86_REG_EAX, UC_X86_REG_ESP, UC_X86_REG_EIP, UC_X86_REG_EFLAGS

@@ -6,7 +6,6 @@ The full dispatcher span includes its embedded five-entry jump table.
 """
 from pathlib import Path
 import argparse
-import hashlib
 import html
 import itertools
 import json

@@ -8,7 +8,7 @@ and floor-event paths against these branch observations.
 import hashlib
 import json
 
-from original_event_probe import ROOT, RAW, pe, md, probe
+from original_event_probe import ROOT, pe, md, probe
 
 EXE_HASH = '41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779'
 WATCH = [0x489a00, 0x489a04, 0x489a08, 0x4b88f8]

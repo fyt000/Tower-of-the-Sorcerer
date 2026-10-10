@@ -1,5 +1,4 @@
 """Deliberate graphics/Flight corruptions must fail the comparison boundary."""
-import json
 import struct
 import unittest
 

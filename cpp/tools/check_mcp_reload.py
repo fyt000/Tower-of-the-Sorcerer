@@ -12,7 +12,6 @@ import subprocess
 import sys
 from tempfile import TemporaryDirectory
 from threading import Thread
-import time
 from unittest.mock import patch
 import uuid
 

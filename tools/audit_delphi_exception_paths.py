@@ -11,7 +11,7 @@ import re
 import capstone
 import pefile
 
-from verify_delphi2_reference import ROOT, ORIGINAL_HASH, digest
+from recovery_evidence import ROOT, ORIGINAL_HASH, digest
 
 EXPORTS = ROOT / "reference/original/whole-program/decompiled"
 OUT = ROOT / "reference/original/whole-program/exception-paths"

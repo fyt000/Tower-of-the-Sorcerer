@@ -9,12 +9,11 @@ import copy
 import hashlib
 import itertools
 import json
-import struct
 
 import pefile
 from unicorn.x86_const import UC_X86_REG_EAX, UC_X86_REG_EDX, UC_X86_REG_ECX
 
-from verify_delphi_graphics import (ROOT, WORK, ORIGINAL_HASH, digest, symbols, class_vmt,
+from verify_delphi_graphics import (ROOT, WORK, ORIGINAL_HASH, digest, class_vmt,
                                    GraphicsRunner, GAME, GLOBALS, BOUNDARIES, first_difference)
 
 FLIGHT_GAME = {**GAME, "monswork": 0x44B6F4, "monshyouji": 0x44B78C, "disp": 0x44CB34,

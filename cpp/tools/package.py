@@ -11,7 +11,8 @@ from comparison_boundary import check_skipped_calls
 
 CPP = Path(__file__).resolve().parents[1]
 ROOT = CPP.parent
-NAME = 'tower-of-the-sorcerer-0.9-windows-x64'
+VERSION = '0.9'
+NAME = f'tower-of-the-sorcerer-{VERSION}-windows-x64'
 
 
 def main():
@@ -104,12 +105,14 @@ def main():
         'F6/F7 write and read the same Savedat/save1.dat through save8.dat files.\n'
         'New saves use the original 6957-byte records and original shared-Zeno load rules.\n'
         'Fairy snapshots use Savedat/save0.dat and retain the original raw checksum words.\n'
-        'Original preferences and rankings are not imported.\n\n'
+        'Ranking tables load from Savedat/option1.dat through option5.dat and their matching name files.\n'
+        'Legacy preferences are not imported.\n\n'
         'Arrows / WASD: walk. Enter / Space: continue dialogue and the ending card.\n'
         'Click owned items or press I for inventory. Flight: Up/Down, Enter to travel, Esc to cancel.\n'
         'F6 / F7: eight save / load slots. 1-8 or arrows: select. Enter: confirm. Esc: close.\n'
         'F5 / F9: quick save / restore. F8: completed Fairy checkpoint.\n'
         'F2: new game. M: mute. Settings: 1x / 3x / 10x walking and animation speed.\n'
+        'R / Game > Rankings: view Fairy scores. Qualifying first-cycle Fairy encounters allow name submission.\n'
         'Saves: Savedat/ beside the EXE. Replace keeps a .bak. No other folders are searched.\n'
         'Optional: --assets DIRECTORY (original or PNG layout), --save-dir DIRECTORY, --load FILE.\n'
         'Opt-in recording: Settings > Record new games, then New game; --record overrides the launch preference.\n'
@@ -128,9 +131,9 @@ def main():
     hashes = {file.relative_to(output).as_posix(): hashlib.sha256(file.read_bytes()).hexdigest()
               for file in sorted(output.rglob('*')) if file.is_file() and file.name != 'package-manifest.json'}
     (output / 'package-manifest.json').write_text(
-        json.dumps({'version': '0.9', 'layout': 'original', 'files': hashes}, indent=2) + '\n', encoding='utf-8')
+        json.dumps({'version': VERSION, 'layout': 'original', 'files': hashes}, indent=2) + '\n', encoding='utf-8')
     archive = shutil.make_archive(str(output), 'zip', root_dir=output.parent, base_dir=output.name)
-    drop_in = output.parent / 'tower-of-the-sorcerer-0.9-drop-in.zip'
+    drop_in = output.parent / f'tower-of-the-sorcerer-{VERSION}-drop-in.zip'
     with zipfile.ZipFile(drop_in, 'w', compression=zipfile.ZIP_DEFLATED) as package:
         for file in sorted(output.rglob('*')):
             relative = file.relative_to(output)
