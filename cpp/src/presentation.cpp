@@ -642,8 +642,7 @@ UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mous
     for (int i = 0; i < 3; ++i) {
         const int count = std::array<int, 3>{h.yellow_keys, h.blue_keys, h.red_keys}[i];
         art_->icon(std::array<int, 3>{YellowKey, BlueKey, RedKey}[i],
-                   {RightX + 17, float(MenuHeight + 181 + i * 26), 25, 25},
-                   count ? WHITE : Color{190, 190, 190, 160});
+                   {RightX + 17, float(MenuHeight + 181 + i * 26), 25, 25});
         art_->text.fit(std::to_string(count), {RightX + 52, float(MenuHeight + 183 + i * 26), 80, 23}, 20,
                        Ink, true);
     }
