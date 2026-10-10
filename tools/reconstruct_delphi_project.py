@@ -113,6 +113,8 @@ def forms(manifest, implemented):
             inventory.append(dict(form=cls, method=method["name"], original_entry=method["address"],
                                   events=[e["event"] for e in events],
                                   status="implemented"))
+        if cls == "TTSW10":
+            declaration.extend(["  public", "    constructor Create(AOwner: TComponent); override;"])
         declaration.extend(["  end;", ""])
     return "\n".join(declaration) + "\n", inventory
 

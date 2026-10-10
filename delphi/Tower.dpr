@@ -6,13 +6,17 @@ uses
   GameForms,
   GameState,
   GameCore,
-  GameContent;
+  GameContent,
+  GameInstance;
 {$R GameResources.res}
 
 var
   I: Integer;
   Assets, Saves: string;
 begin
+  { Check before application initialization, settings and game-form creation. }
+  if ActivateExistingGame then
+    Exit;
   Application.Initialize;
   Assets := '';
   Saves := '';

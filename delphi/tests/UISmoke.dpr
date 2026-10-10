@@ -201,6 +201,8 @@ begin
   DisableTransitions := True;
   DisableCaptureTransitions(Form.Handle, 3, @DisableTransitions, SizeOf(DisableTransitions));
   Form.Show;
+  { A hidden launcher can override the first ShowWindow call via STARTUPINFO. }
+  ShowWindow(Form.Handle, SW_SHOWNORMAL);
   Form.BringToFront;
   SetForegroundWindow(Form.Handle);
   Form.Update;
@@ -343,6 +345,57 @@ begin
   end;
 end;
 
+procedure CheckMessageLine;
+const
+  FontSizes: array[0..3, 0..1] of Byte = ((8, 10), (9, 11), (10, 12), (12, 14));
+var
+  I: Integer;
+  DC: HDC;
+  SavedText: string;
+  OldFont, OldMessageFont: Byte;
+begin
+  OldFont := GameOptions[0];
+  OldMessageFont := GameOptions[1];
+  SavedText := MainForm.Edit8.Text;
+  DC := CreateCompatibleDC(0);
+  if DC = 0 then
+    raise Exception.Create('Cannot allocate the message-line color test context');
+  try
+    for I := 0 to 3 do
+    begin
+      GameOptions[0] := FontSizes[I, 0];
+      GameOptions[1] := FontSizes[I, 1];
+      ApplyFontLayout(MainForm);
+      with MainForm.Edit8 do
+      begin
+        if not Enabled
+            or not ReadOnly
+            or TabStop
+            or (GetWindowLong(Handle, GWL_STYLE) and WS_DISABLED <> 0) then
+          raise Exception.Create('Message line must be enabled, read-only and outside tab order');
+        if (Top <> MainForm.Image1.Height) or (Top + Height <> MainForm.ClientHeight) then
+          raise Exception.Create('Message line does not fill the area below the artwork');
+        if Color <> clGray then
+          raise Exception.Create('Message line must use a fixed gray background');
+        SendMessage(MainForm.Handle, WM_CTLCOLORSTATIC, DC, Handle);
+        if (GetTextColor(DC) <> ColorToRGB(clWhite)) or (GetBkColor(DC) <> ColorToRGB(clGray)) then
+          raise Exception.Create('Message line colors do not contrast');
+        Text := 'You got a yellow key.';
+        Perform(WM_CHAR, Ord('x'), 0);
+        if Text <> 'You got a yellow key.' then
+          raise Exception.Create('Message line accepted typed input');
+      end;
+    end;
+    WriteLn('{"message_line_font_modes":4,"passed":true,"scale":', GameOptions[8], '}');
+  finally
+    DeleteDC(DC);
+    MainForm.Edit8.Text := SavedText;
+    GameOptions[0] := OldFont;
+    GameOptions[1] := OldMessageFont;
+    ApplyFontLayout(MainForm);
+  end;
+end;
+
 procedure Run;
 var
   Painter: TFixturePainter;
@@ -386,6 +439,7 @@ begin
       MainForm.ImageList3.Clear;
       MainForm.syokidata0;
       ApplyFontLayout(MainForm);
+      CheckMessageLine;
       PrepareSceneGraphics(MainForm);
       FrameBitmap.SaveToFile(ParamStr(2) + '\title-frame' + IntToStr(Scale) + '.bmp');
       Snapshot(MainForm, 'main-title' + IntToStr(Scale));

@@ -9,8 +9,11 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import struct
 import subprocess
+import tempfile
+import time
 
 import pefile
 
@@ -18,8 +21,108 @@ from build_delphi2_reference import stage
 from recovery_evidence import ROOT, ORIGINAL_HASH, digest
 from reconstruct_delphi_project import generated, output_path
 from review_delphi2_media import validate_media
+from verify_delphi_entry import compare_entry
 
 WORK = ROOT / "build/delphi-game"
+
+
+def smoke_game_instance(artifact, directory):
+    cases, children = [], []
+    output = []
+
+    def wait_until(condition, message):
+        deadline = time.monotonic() + 5
+        while not condition():
+            if time.monotonic() >= deadline:
+                raise RuntimeError(message)
+            time.sleep(0.01)
+
+    def start_owner(label, window_class, cwd):
+        ready, release = fixtures / f"{label}.ready", fixtures / f"{label}.release"
+        arguments = [str(artifact), "--owner", window_class, str(ready), str(release)]
+        child = subprocess.Popen(arguments, cwd=cwd, stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT, creationflags=subprocess.CREATE_NO_WINDOW)
+        children.append(child)
+        wait_until(lambda: ready.exists() or child.poll() is not None, f"{label}: window creation timed out")
+        if not ready.exists() or child.poll() is not None:
+            raise RuntimeError(f"{label}: expected fixture window, exit {child.poll()}")
+        return child, release
+
+    def finish(child, release):
+        release.write_text("release\n", encoding="ascii")
+        result = child.wait(timeout=5)
+        if result != 0:
+            raise RuntimeError(f"Expected clean release, exit {result}")
+
+    def check(executable, label, cwd, existing):
+        warning = fixtures / f"{label}.warning"
+        result = subprocess.run([str(executable), "--check", str(warning)], cwd=cwd,
+                                capture_output=True, timeout=5,
+                                creationflags=subprocess.CREATE_NO_WINDOW)
+        expected = 2 if existing else 0
+        if result.returncode != expected or warning.exists() != existing:
+            detail = (result.stdout + result.stderr).decode("cp1252", errors="replace").strip()
+            raise RuntimeError(f"{label}: expected exit {expected}/warning {existing}, "
+                               f"got {result.returncode}/warning {warning.exists()}: {detail}")
+
+    def passed(name):
+        cases.append(dict(name=name, native_exit=0))
+        output.append(f"PASS {name}")
+
+    # Fixture owners do not run the entry guard; challengers check their hidden
+    # top-level windows and dismiss only their own exact warning dialog.
+    with tempfile.TemporaryDirectory(prefix="fixtures-", dir=directory) as temporary:
+        fixtures = Path(temporary).resolve()
+        other_cwd = fixtures / "other-cwd"
+        other_cwd.mkdir()
+        try:
+            available = subprocess.run([str(artifact), "--available"], cwd=directory,
+                                       capture_output=True, timeout=5,
+                                       creationflags=subprocess.CREATE_NO_WINDOW)
+            if available.returncode != 0:
+                raise RuntimeError("Close the running TTSW10 game window before instance smoke tests")
+            owner, release = start_owner("owner", "game", directory)
+            check(artifact, "other-cwd", other_cwd, existing=True)
+            passed("same executable across working directories")
+
+            copy = fixtures / "InstanceCopy.exe"
+            shutil.copyfile(artifact, copy)
+            check(copy, "copy", other_cwd, existing=True)
+            passed("copied and renamed executable is also blocked")
+
+            alias = fixtures / "InstanceAlias.exe"
+            os.link(artifact, alias)
+            check(alias, "alias", other_cwd, existing=True)
+            passed("hard-link executable alias")
+
+            finish(owner, release)
+            check(artifact, "after-release", directory, existing=False)
+            passed("startup after clean exit")
+
+            owner, release = start_owner("termination-owner", "game", directory)
+            owner.terminate()
+            owner.wait(timeout=5)
+            check(artifact, "after-termination", directory, existing=False)
+            passed("startup after process termination")
+
+            owner, release = start_owner("unrelated-owner", "unrelated", directory)
+            check(artifact, "unrelated", directory, existing=False)
+            finish(owner, release)
+            passed("same title with unrelated window class is allowed")
+        except Exception as error:
+            cases.append(dict(name="instance enforcement", native_exit=1))
+            output.append(f"FAIL {error}")
+        finally:
+            for child in children:
+                if child.poll() is None:
+                    child.terminate()
+                stdout, _ = child.communicate(timeout=5)
+                if stdout:
+                    output.append(stdout.decode("cp1252", errors="replace").strip())
+    log = directory / "native.log"
+    log.write_text("\n".join(output) + "\n", encoding="utf-8")
+    return dict(native_exit=max(case["native_exit"] for case in cases), native_cases=cases,
+                native_output=log.read_text(encoding="utf-8"), native_log_sha256=digest(log))
 
 
 def resource_id(value):
@@ -132,6 +235,8 @@ def main():
         projects.append(("audio", "tests/AudioSmoke.dpr", False))
     if (WORK / "tests/RankingSmoke.dpr").exists():
         projects.append(("ranking", "tests/RankingSmoke.dpr", False))
+    if (WORK / "tests/InstanceSmoke.dpr").exists():
+        projects.append(("instance", "tests/InstanceSmoke.dpr", False))
     for name, project, absolute in projects:
         dest = WORK / name
         dest.mkdir(exist_ok=True)
@@ -152,6 +257,17 @@ def main():
             break
         record.update(artifact=str(artifact.relative_to(ROOT)).replace("\\", "/"),
                       artifact_sha256=digest(artifact), map_sha256=digest(artifact.with_suffix(".map")))
+        if name == "game" and args.smoke:
+            entry = compare_entry(artifact, artifact.with_suffix(".map"))
+            record["entry_comparison"] = entry
+            (WORK / "reports/entry-comparison.json").write_text(
+                json.dumps(entry, indent=2) + "\n", encoding="utf-8")
+            print("Program entry comparison", len(entry["cases"]), "cases passed", flush=True)
+        if name == "instance" and args.smoke:
+            record.update(smoke_game_instance(artifact.resolve(), dest.resolve()))
+            print("Single-instance smoke exit", record["native_exit"], flush=True)
+            if record["native_exit"]:
+                print(record["native_output"])
         if (name in ("persistence", "ranking") and args.smoke) or (name == "audio" and args.audio_smoke):
             fixtures = dest / "fixtures"
             fixtures.mkdir(exist_ok=True)

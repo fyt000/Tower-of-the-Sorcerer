@@ -53,6 +53,18 @@ uses
   MMSystem,
   ShellAPI;
 
+constructor TTSW10.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  { Windows forces disabled edit text to COLOR_GRAYTEXT. Keep the message
+    line read-only and enabled so its white text remains visible. }
+  Edit8.ReadOnly := True;
+  Edit8.TabStop := False;
+  Edit8.Enabled := True;
+  Edit8.Color := clGray;
+  Edit8.Font.Color := clWhite;
+end;
+
 procedure TTSW10.syokidata;
 begin
   InitializeCycle;

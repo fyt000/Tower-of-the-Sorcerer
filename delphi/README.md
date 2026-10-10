@@ -1,15 +1,15 @@
 # Tower of the Sorcerer — Delphi 2
 
-The Windows game uses Object Pascal, Delphi 2 VCL forms, bitmap atlases, and
-Windows MCI audio. It includes gameplay, story events, endings, subsequent
-cycles, eight save slots, five ranking categories, and persistent options.
+This Object Pascal project aims for a faithful recovery of the Windows 1.2
+game using Delphi 2 VCL forms, bitmap atlases and Windows MCI audio. It includes
+endings, subsequent cycles, eight save slots, five ranking categories and
+persistent options.
 
 ## Build and run
 
-The extracted Delphi 2 compiler must be available under `build/research/delphi2/`;
-see [compiler preparation](../reference/delphi2/README.md). Install the Python
-dependencies from `tools/requirements.txt` and provide the game installation's
-assets. Run these commands from the repository root:
+Prepare the compiler under `build/research/delphi2/` using the
+[compiler guide](../reference/delphi2/README.md), install
+`tools/requirements.txt`, and supply game assets. From the repository root:
 
 ```powershell
 python tools/reconstruct_delphi_project.py
@@ -17,89 +17,74 @@ python tools/build_delphi_game.py --smoke
 .\tools\run_delphi_game.ps1
 ```
 
-The launcher accepts `-SkipIntro`, `-Assets PATH`, and `-SaveDirectory PATH`.
-Its default asset directory is `D:\Program Files (x86)\Tower of the Sorcerer`.
-Saves default to `build/delphi-game/game/savedat`. Folder selection persists in
-`TSW12.INI` beside the executable; an explicit save directory overrides it.
+Launcher options: `-SkipIntro`, `-Assets PATH`, `-SaveDirectory PATH`.
+Defaults are `D:\Program Files (x86)\Tower of the Sorcerer` for assets and
+`build/delphi-game/game/savedat` for saves. Passing `--assets` to `Tower.exe`
+uses portable `TSW12.INI` beside the executable and creates save directories;
+without it, settings use the Windows-directory convention. Explicit save paths
+override folder selection.
 
-Passing `--assets` to `Tower.exe` selects portable settings and creates missing
-save directories. Starting without that argument uses the installed game's
-Windows-directory `TSW12.INI` convention.
+Startup checks for a `TTSW10` window, including one from a renamed or copied
+executable. A second launch shows the game's warning, requests foreground
+activation of that window and exits before settings or game-form creation.
+The check retains the simultaneous-start race before either main window exists.
 
 ## Architecture
 
 | Module | Responsibility |
 |---|---|
-| [GameState.pas](src/GameState.pas) | Persisted records, options, shared gameplay state, and event storage |
-| [GameCore.pas](src/GameCore.pas), [Gameplay.pas](src/Gameplay.pas) | Tile classification, combat arithmetic, field access, and clue mapping |
-| [GameForms.pas](src/GameForms.pas) and the `*Methods.inc` files | VCL event handlers grouped by gameplay, story, startup, menus, graphics, and persistence |
-| [EventScenes.inc](src/EventScenes.inc) | Floor arrival scenes, guard triggers, and boss rewards |
-| [GameGraphics.pas](src/GameGraphics.pas), [GameContent.pas](src/GameContent.pas) | Shared rendering canvases and embedded monster/render-order tables |
-| [Persistence.pas](src/Persistence.pas) | Save validation, checksums, rankings, and default score tables |
-| [Audio.pas](src/Audio.pas) | MIDI filenames, floor music selection, and playback observations |
-| [generated/](src/generated/) | DFM bindings, record fields, initialization, hints, and control layouts |
+| [GameState.pas](src/GameState.pas) | Persisted records, options, globals and event storage |
+| [GameCore.pas](src/GameCore.pas), [Gameplay.pas](src/Gameplay.pas) | Classification, combat arithmetic, field access and clues |
+| [GameForms.pas](src/GameForms.pas), `*Methods.inc`, [EventScenes.inc](src/EventScenes.inc) | VCL handlers, floor triggers and story scripts |
+| [GameGraphics.pas](src/GameGraphics.pas), [GameContent.pas](src/GameContent.pas) | Canvases, masks, monster tables and render order |
+| [Persistence.pas](src/Persistence.pas), [Audio.pas](src/Audio.pas) | Saves/rankings and MCI routing |
+| [GameInstance.pas](src/GameInstance.pas) | Window-class startup check and duplicate-launch warning |
+| [generated/](src/generated/) | DFM bindings, fields, initialization and layouts |
 
-The five binary DFM resources and application icons are embedded unchanged.
-Class, component, and published handler names remain serialization keys; those
-names cannot be changed independently of the DFM. Other units, helpers, and
-state types use names based on their purpose. Routine addresses and serialized
-field offsets are indexed by the comparison tools.
+Five DFM resources and application icons are embedded unchanged. Class,
+component and published-handler names are DFM serialization keys.
+Unknown persisted fields use `WordN`, where `N` is their byte offset.
+The [save specification](../docs/original-data.md#original-saves) describes
+the 6,957-byte map/hero records, checksums and raw Fairy checkpoints.
 
-Each floor record contains two landing bytes followed by an 11 × 11 map.
-The hero record contains 171 little-endian 32-bit words. Together the map and
-hero records form a 6,957-byte save. Fields whose meaning is unknown retain
-`WordN` names, where `N` is their persisted byte offset. Signed arithmetic wraps
-at 32 bits because combat and file checksums depend on that behavior.
-Attack penetration is checked separately from total damage. An overflowing
-damage total can be negative; forecasts display that number and the battle
-selection compares it with HP as a signed value.
+Signed arithmetic wraps at 32 bits. Penetration is checked separately from
+total damage; an overflowing negative total is displayed and compared with HP
+as signed. Story commands are six-byte opcode/operand records, executed newest
+first. Some animation opcodes consume a paired record; dialogue waits for
+confirmation. The 30,000-command queue streams oversized battles one turn at
+a time. Restart and load cancel battle continuations.
 
-Story commands are six-byte records containing an opcode and two operands.
-The dispatcher executes them newest first; several animation opcodes consume
-a paired operand record. Dialogue pauses the dispatcher until confirmation.
-Queues hold 30,000 commands. Battles that exceed this capacity generate one
-turn at a time; restart and load cancel pending battle continuations.
-
-Save slots are checked in temporary records before replacing game state.
-Fairy checkpoints use the raw record format and may retain stale checksums.
-Ranking files contain a 288-byte numeric table and a separate ten-line name
-file. Invalid ranking data restores the complete default table and names.
-
-Rendering uses the supplied `Data` and `Data3` bitmap atlases. Sprite masks are
-combined with VCL canvas raster operations. Audio uses eight WAV effect routes
-and seventeen MIDI tracks through MCI; device or media failures leave gameplay
-running.
-
-The `EMULATOR_ADDRESSES` compiler define is confined to the comparison DLL.
-It maps game globals to fixed addresses for CPU emulation. The application
-and a second probe use normal compiler-allocated storage.
+Slots are validated in temporary records. Ranking load failure restores the
+complete default table and names. VCL raster operations apply bitmap masks;
+MCI routes eight WAV effects and seventeen MIDI tracks. Audio failure leaves
+gameplay running. `EMULATOR_ADDRESSES` maps globals to fixed addresses only
+in the comparison DLL; the application and storage probe use allocated globals.
 
 ## Known differences and limits
 
-- The English Delphi 2 VCL lacks Japanese IME support. The accepted field and
-  dispatch offsets are documented in [comparison-policy.json](comparison-policy.json).
-  Its RTL/VCL messages also differ from the Japanese library's string resources.
-- The 49F summon omits the stray queue increment at `$004637DD`, which could
-  expose an unwritten stale command. Scene comparisons report this raw mismatch.
-- Oversized battles use bounded turn generation. Corrupt or truncated slot
-  saves preserve the current game state. Portable startup keeps long paths as
-  logical lines rather than wrapping them in the internal settings memo.
-- In two font modes, the folder dialog's drive selector realizes heights of
-  24 and 19 after a request for 20. These remain unresolved geometry differences.
-- Walking, door, tile-slide, vampire, and ending animations lack exhaustive
-  pixel comparisons. Whole-window font, DPI, focus, and timer delivery are also
-  outside the established comparison scope.
-- Integration tests use seeded game states and execute the ending through the
-  next-cycle reset. They do not establish an uninterrupted campaign playthrough,
-  whole-program binary equality, or exhaustive exception-path equivalence.
+- English Delphi 2 VCL lacks Japanese IME support and has different RTL/VCL
+  message resources. Accepted field/dispatch offsets are in
+  [comparison-policy.json](comparison-policy.json).
+- The 49F summon omits the cursor increment at `$004637DD` that exposes an
+  unwritten stale 129th command. Comparisons report this mismatch.
+- Oversized fights stream turns; corrupt/truncated slot loads preserve state.
+  Portable startup keeps long paths as logical settings lines.
+- The bottom message line uses an enabled, read-only control with fixed gray
+  background and white text. Disabled Windows edits force gray text and hide
+  messages against the recovered gray background.
+- The drive selector realizes heights 24 and 19 after requesting 20 in two
+  font modes; this geometry difference is unresolved.
+- Walk, door, tile-slide, vampire and ending pixels are not exhaustively
+  compared. Whole-window fonts, DPI, focus and timer delivery are outside scope.
+- Seeded integration cases reach the ending and next-cycle reset. They do not
+  prove a full natural campaign, binary equality or all exception paths.
 
 ## Formatting and verification
 
 [pasfmt 0.7.0](https://github.com/integrated-application-development/pasfmt)
-formats every `.pas`, `.dpr`, and `.inc` file using [pasfmt.toml](pasfmt.toml).
-The wrapper downloads the checksum-pinned Windows release into ignored build
-output when it is absent. Include fragments are formatted in their enclosing
-record, type, statement, or unit context. Source generators use the same formatter.
+uses [pasfmt.toml](pasfmt.toml). The wrapper caches a checksum-pinned Windows
+release under ignored build output and formats includes in their enclosing
+context. Generators use the same formatter.
 
 ```powershell
 python tools/format_delphi.py
@@ -107,22 +92,19 @@ python tools/format_delphi.py --check
 python tools/reconstruct_delphi_project.py --check
 ```
 
-| Tool | Purpose |
-|---|---|
-| `build_delphi_game.py --smoke` | Build the application and run form, graphics, startup, UI, gameplay, persistence, and ranking harnesses |
-| `build_delphi_game.py --smoke --audio-smoke` | Add MCI audio checks when changes touch audio code, assets, dependencies, or configuration |
-| `verify_delphi_runtime.py` | Check source coverage and collect connected gameplay/save/ranking/audio evidence |
-| `test_delphi_events.py` | Compare scene queues and state with the reference executable in CPU emulation |
-| `verify_delphi_game.py` | Compare core arithmetic, state writes, resources, and modal gates |
-| `verify_delphi_graphics.py`, `verify_delphi_flight.py` | Compare raster operations and pixels, monster display, and Flight sequences |
-| `verify_delphi_startup.py`, `verify_delphi_ui.py` | Compare settings/exception handling, controls, fonts, menus, and timer behavior |
-| `test_delphi_game.py`, `test_delphi_graphics.py`, `test_delphi_startup.py`, `test_delphi_ui.py` | Verify that comparison checks detect deliberate mutations |
-| `compare_delphi_binary.py` | Account for literal section and resource differences |
-| `audit_delphi_exception_paths.py` | Locate exception continuations omitted from method exports |
+Tools below live in `tools/`. Comparison tools accept `--check` for stale
+reports; regenerate and rebuild after source changes. Outputs stay in `build/`.
 
-Tool paths are relative to `tools/`. Comparison commands accept `--check` to
-reject stale reports. Reports and executable artifacts are generated under
-ignored `build/`; they are not source files. Regenerate and rebuild after source
-changes before running comparisons. Compiler and reference-data preparation
-tools remain documented in the [compiler guide](../reference/delphi2/README.md)
-and [reverse-engineering workflow](../docs/reverse-engineering.md).
+| Tools | Purpose |
+|---|---|
+| `build_delphi_game.py --smoke`, `verify_delphi_runtime.py` | Build, harnesses, coverage and connected runtime evidence |
+| `verify_delphi_entry.py`, `test_delphi_entry.py` | Both program-entry paths, duplicate-launch calls and comparison integrity |
+| `build_delphi_game.py --smoke --audio-smoke` | MCI checks; run only for audio-related changes |
+| `test_delphi_events.py`, `verify_delphi_game.py` | Scene queues, arithmetic, writes, resources and modal gates |
+| `verify_delphi_graphics.py`, `verify_delphi_flight.py` | Raster operations, display and Flight sequences |
+| `verify_delphi_startup.py`, `verify_delphi_ui.py` | Settings, exceptions, controls, fonts, menus and timers |
+| `test_delphi_{game,graphics,startup,ui}.py` | Deliberate mutations that check comparison integrity |
+| `compare_delphi_binary.py`, `audit_delphi_exception_paths.py` | Section/resource differences and exception continuations |
+
+The [recovery workflow](../docs/reverse-engineering.md) owns reference-data
+preparation and comparison procedures.

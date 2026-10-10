@@ -1,175 +1,93 @@
 # Fidelity scope
 
-The C++ baseline aims to preserve the supported English **Tower of the Sorcerer
-1.2** core decisions, state writes and command order. Its source comes from the
-original Delphi executable, reviewed Ghidra output and assembly, independently
-of the Rust campaign. [Source recovery](../docs/reverse-engineering.md) identifies
-the executable hash and workflow; [architecture](../docs/architecture.md) explains
-the translation; [retained rules](../docs/mechanics.md) identifies important branches.
+C++ is an architecturally similar rewrite of the Delphi 2 game, retaining its
+core logic while adding features and quality-of-life improvements. Comparisons
+check the English **Tower of the Sorcerer 1.2** gameplay decisions, state writes
+and command order. Its source derives from recovered Delphi code and assembly,
+independently of Rust. [Recovery](../docs/reverse-engineering.md),
+[architecture](../docs/architecture.md) and [mechanics](../docs/mechanics.md)
+describe the evidence, implementation and nonobvious rules.
 
 ## Current evidence
 
-The [whole-program accounting](../reference/original/whole-program/REVIEW.md)
-now retains 3,298 machine-entry C/assembly pairs and inventories every CODE and
-PE file byte. All 102 direct targets missing from the earlier presentation
-corpus have exports. It identifies Delphi-2 runtime shapes, callback
-trampolines, incomplete listing bodies and exception continuations. Remaining
-gaps include 14,369 unresolved CODE bytes, 101 metadata/instruction conflict
-bytes, 397 warned exports and unresolved framework delivery. This adds source
-evidence and freshness guards, not additional behavioral agreement cases.
-`verify_original.py` requires a current ledger and records its hash.
+- [Whole-program accounting](../reference/original/whole-program/REVIEW.md)
+  inventories code/resources, exports and unresolved ranges. Freshness guards
+  establish provenance, not behavioral equality.
+- Isolated x86 handlers are compared with the compiled C++ probe. Flight cases
+  carry state across callbacks; reports list skipped callees. Unread stale
+  `b` operands in HeroStrike/Reward are normalized. The
+  [Flight audit](../docs/fidelity-audit-2026-10-09.md) documents its entry/redraw rules.
+- Core, replay and MCP tests execute complete queues, long/fatal fights,
+  attackable tile variants, dialogue aliases, saves, rankings, cycles and
+  gate/seal/wing paths. Time Gate animation and interaction metadata are
+  checked against Pascal source.
+- Presentation and asset checks cover decoded pixels, masks and scene stages.
+  Audio checks render complete tracks, looping and overlapping effects;
+  Debug heap hooks require allocation-free prepared rendering. Device tests
+  cover initialization, control and shutdown, not audible equivalence.
+- Window tests check resize, maximize/restore, framebuffer resolution, font
+  detail and pointer mapping. Desktop smoke tests cover pauses, saves and
+  ending playback, including an installation with only supplied media.
+- Save comparisons cover writer output, wrapping checksums, raw Fairy
+  records, load reconstruction, opaque words and invalid records. File I/O
+  and VCL calls are mocked; no historical player saves were available.
 
-| Original-machine comparison | Passing cases or stages |
-|---|---:|
-| Floor/guard/door builders and altered-state predicates | 731 |
-| Contact and ordinary/forced combat | 992 |
-| NPCs, continuations, stairs, hazards, capture/ending and Fairy scoring | 426 |
-| Items, cardinal bounds, wings and Flight | 2,067 |
-| Save bytes, checksums, raw Fairy records and Zeno load reconstruction | 148 |
-| Correction-log triggers, border retreats and explicit 49F safety exception | 246 |
-| Flight entry matrices and complete input sequences | 1,670 |
-| Original Hero Orb displayed arithmetic | 528 |
-| Total cases/stages | 6,808 |
-
-These execute isolated original x86 handlers and compare their output with the
-compiled C++ probe. Flight comparisons carry original memory between callbacks;
-the other counts mainly describe isolated cases. Active item confirmation now
-executes from the published callback entry through return. Original-only UI
-gate/timer/prompt assertions are separate from these agreement counts.
-Reports list skipped calls.
-The [9 October Flight audit](../docs/fidelity-audit-2026-10-09.md) documents an
-entry check and effectful redraw that the old 4,610 comparisons missed. Pass
-counts establish agreement only within each report's stated boundary.
-Unread stale `b` operands in
-HeroStrike/Reward are normalized; other compared operands and orders are retained.
-
-The Catch2 core, replay and MCP cases execute complete command stacks, bounded long fights,
-fatal cancellation, dialogue aliases, Fairy restores, all eight save slots,
-replacement backups, shared original slot paths, cycle carry/reset rules and
-the 50F gate/seal/wing branches. They reproduce the 33F lower-entry softlock
-through walking and combat, check gold completion text and safe 47F boundaries,
-and finish the original 4,500-round Archsorcerer
-and 7,920-round backside Gateman fights with every strike and bounded memory.
-Tile-variant cases exercise all 81 attackable map IDs through forecasts, movement,
-combat, rewards and removal. They retain the octopus mouth's exact full-body rule,
-the dragon's single attackable head, Zeno's floor/cycle branches and bounded body
-cleanup for edge placements loaded from saves. Source comparison also checks the
-Time Gate completion animation and MCP interaction metadata.
-The core, renderer, asset loading, complete MIDI synthesis and audio-device
-checks have passed MSVC AddressSanitizer Release runs.
-
-The **147 presentation checks** cover original standing/walking poses, all twelve
-door/wall/lava modes, both stair phases, all 32 Vampire frames, capture and ending
-playback, red panels, Zeno variants, Time Gate completion, Hero Orb tile grouping
-and overlays. They run with both original
-and extracted media. The **71 asset checks** establish pixel equality for all
-31 loaded images, unchanged bytes for 17 MIDI tracks and eight WAV effects,
-WAV decoding, embedded media and selection/error handling. Catch2 audio cases
-check that the bank supplies every MIDI program used by the 35,343 parsed messages,
-render all 17 complete tracks across varied callback sizes, and verify finite,
-nonzero output on playback and looping. Offline PCM checks cover the original
-startup lead-in, pause/resume, mute, same-track restart and sixteen overlapping
-voices per WAV. Queue cases exercise capacity, rollover and concurrent bursts.
-MSVC Debug tests use the CRT heap hook to require zero allocation, reallocation
-or free operations during complete prepared tracks, loops, switches and effect
-bursts. This instrumentation is confined to the test executable. The native-device
-case checks WASAPI initialization, cached track control and joined shutdown;
-it does not establish audible equivalence or uninterrupted playback on every device.
-
-Window checks verify six resize/maximize/restore layouts, including native canvas
-dimensions, physical framebuffer pixels and pointer mapping. Enlarged glyphs must
-contain detail within their former logical pixels, proving the text is rasterized
-at the display resolution rather than enlarging a fixed low-resolution canvas.
-
-Desktop smoke checks cover command pause/resume, numbered saves, Fairy
-checkpoints and the ending at the installed high-DPI setting. The replacement
-is also tested as `TSW.exe` beside only copied original media folders, without
-an external soundfont, extracted PNGs or original EXE.
-
-Save checks execute the original writer's wrapping checksum loops, its loader's
-acceptance path, the raw Fairy write/read instructions, load refresh, effectful
-map redraw and Zeno reconstruction. They cover writer-exact bytes before and
-after refresh, edits, opaque-word retention, frontside/backside seal states,
-all directions, raw Fairy snapshots, corrupt/truncated records and bounds checks.
-File I/O and VCL UI calls are mocked. Fixtures come from the original writer;
-the installed `Savedat/` folder had no historical player files to test.
+These are scoped checks, not proof of every branch, pixel, timer duration,
+Windows event-delivery path or a full natural campaign. The
+[presentation/input review](../reference/original/presentation/REVIEW.md)
+distinguishes recovered entries from behavior and framework coverage.
 
 ## Correction-log policy
 
 The [tswKai correction log](https://github.com/Z-H-Sun/tswKai/wiki/1.1-%E2%80%90-Run-TSW-Game#corrections-log)
 and [patch descriptions](https://github.com/Z-H-Sun/tswKai/wiki/1.2.1-%E2%80%90-Patch-Config#features)
-identify triggers to investigate. The pinned unpatched EXE remains the oracle.
-Gameplay quirks stay in the baseline; memory corruption and audio scheduling
-faults do not. `tools/verify_quirks.py` records the additional machine comparisons.
+identify cases to investigate. Comparisons use the pinned unpatched executable.
+Gameplay quirks remain; memory corruption and audio scheduling faults are
+contained. `tools/verify_quirks.py` records those comparisons; optional
+tswKai gameplay patches are not enabled.
 
-| Case | Baseline behavior |
+| Case | Retained behavior or explicit exception |
 |---|---|
-| 33F trap | Only the upper cell triggers it. Clearing the guards first from below, then touching that cell, still seals the exits. |
-| 47F Magician A | The hero-row guard and horizontal wrapping within the flat floor array remain. Index 121 is rejected: it aliases the next floor's stair landing byte in the original packed maps. |
-| Backside 45F Merchant | Pays the original unscaled 2,000 HP for 1,000 gold. |
-| Sealed Zeno after load | Retains the shared-row reconstruction and extra backside scaling documented above. |
-| Lucky Gold and enemy-first combat | Actual income doubles, as in the original. The modern completion text includes the credited amount; Delphi's wrong enemy-first display of the undoubled amount is a presentation difference. |
-| 40F boss prompt | The original yellow-door message command remains. |
-| 50F Thief / backside magic text | Original speech/message IDs remain. VCL text positioning is outside the modern overlay's fidelity scope. |
-| Magician A mask | The original bitmap pixels remain unchanged; no one-pixel asset correction is applied. |
-| 49F summon ghost | Eight guards × eight animation stages × two records gives 128 written commands. The stray cursor increment at `0x4637DD` exposes an unwritten 129th record; the report reproduces that stale command and explicitly excludes it. |
-| Combat buffer overflow | Every round executes incrementally; no legacy fixed event buffer is used. |
-| Closely spaced effects / BGM stalls | Preloaded WAV voices overlap. Parsed MIDI tracks are cached; the direct device callback takes no lock and allocates or frees no memory. |
-
-Prologue options, translations, shortcuts, fonts, window placement, loading during
-events and sound preferences belong to the modern UI/settings scope. The runtime
-mute option persists across loads, independently of saved gameplay music state.
-No optional gameplay fixes from tswKai are enabled by this audit.
+| 33F trap | Only the upper cell triggers it; entering after clearing guards from below still seals exits. |
+| 47F Magician A | Hero-row guard and flat-array horizontal wrapping remain. Index 121, which aliases the next floor landing byte, is rejected. |
+| Backside 45F Merchant | Gives unscaled 2,000 HP for 1,000 gold. |
+| Sealed Zeno load | Keeps the shared-row reconstruction and extra scaling in the [save specification](../docs/original-data.md#original-saves). |
+| Enemy-first Lucky Gold | Income doubles. C++ completion text shows credited gold; Delphi displays the undoubled amount. |
+| 40F boss / 50F Thief / backside text | Yellow-door prompt and speech/message IDs remain; VCL positioning differs. |
+| Magician A mask | Bitmap pixels remain unchanged; no one-pixel correction. |
+| 49F summon | 128 written commands execute. The cursor increment at `0x4637DD` exposes an unwritten stale 129th record, explicitly excluded. |
+| Combat overflow / closely spaced audio | Bounded turn generation and cached overlapping voices replace unsafe buffer/scheduling behavior; see [architecture](../docs/architecture.md). |
 
 ## Deliberate differences and remaining work
 
-The [presentation/input review](../reference/original/presentation/REVIEW.md)
-recovers all 130 serialized UI event bindings and 230 published methods, with
-240 C-like/assembly pairs including runtime boundaries. The old corpus lacked
-100 of those published entries. Entry recovery is separate from branch, alias,
-and Windows event-delivery coverage.
+- C++ accumulates forecast damage in 64 bits. At extreme backside values,
+  Delphi wraps to signed 32 bits and may admit combat from a negative total;
+  C++ uses the wider total for that decision.
+- raylib/miniaudio replace VCL rendering, input and device interaction.
+  Assets, masks, proportions and scene stages remain; overlays, fonts,
+  settings and timing differ. TinySoundFont/GeneralUser GS changes MIDI
+  timbre relative to Windows MIDI; uninterrupted playback on every device is
+  unverified.
+- Hero Orb display omits Cross/Dragon Slayer bonuses while combat includes
+  them. **Hero Orb actual damage** optionally uses combat arithmetic, defaults
+  off and is a desktop preference outside saves/replay inputs. Item/Orb modal
+  gates remain enforced for file actions and Flight.
+- Saves retain the 6,957-byte format and raw `save0.dat` checksum words.
+  Validation, backups, independent manual/quick/Fairy files and writing Fairy
+  checkpoints after completed scenes are application decisions. Manual slots
+  use `Savedat/save1.dat`–`save8.dat`, or an explicit save directory.
+  Checksums omit map bytes and final hero words; no extension is added.
+- Rankings use five compatible 288-byte numeric tables and separate ten-line
+  name files, with complete defaults on invalid data. They survive slot loads;
+  sparse replay records preserve ranking-dependent decisions. The numeric/name
+  pair is written sequentially: failure on the second file can leave mixed data.
+- Legacy settings are not imported. Runtime mute persists across loads
+  independently of saved music state. Imported idle words 608/612 survive
+  without advancing the legacy wall clock; arbitrary-idle byte equality is
+  unverified.
 
-The default Hero Orb display uses its separate original arithmetic, which omits
-Cross and Dragon Slayer bonuses; actual combat forecasts retain them. The only
-optional QOL setting, **Hero Orb actual damage**, defaults off and switches the
-Orb display to the combat forecast when enabled. It is a desktop preference,
-separate from native game saves and replay inputs, with an enabled-QOL hover
-explanation. There
-are 528 original numeric row comparisons, plus separately labeled item
-open/cancel, idle-timer, and death-prompt checks. Native file actions respect
-item/Orb modal controls across desktop dispatch, shortcuts, and Flight
-replay/MCP paths. Imported idle redraw words 608/612 are retained, without
-advancing the legacy wall clock; exact save bytes after arbitrary original
-idle timing are outside the verified scope.
-
-- Command execution is iterative and combat memory is bounded; legacy recursive
-  timers and fixed stack buffers are replaced while command order is preserved.
-- Combat forecasts accumulate damage in 64 bits. At extreme backside values,
-  Delphi 2 wraps the total to a signed 32-bit value and can select the success
-  route from a negative total. C++ retains the wider total for that decision.
-- raylib provides rendering and input; miniaudio provides the audio device. Original board proportions, assets,
-  masks and scene stages remain; GUI overlays, fonts, settings and timing are modern.
-- MIDI uses TinySoundFont/GeneralUser GS, so instrument timbre differs from a
-  Windows MIDI device. Uninterrupted audio on every device is not established.
-- Saves use the original 6,957-byte records and shared-Zeno load reconstruction,
-  including legacy backside scaling. Fairy snapshots retain the original raw
-  `Savedat/save0.dat` record layout without recalculating slot checksums. Bounds
-  validation, backups and independent manual/quick/Fairy files are modern.
-  Manual slots use the original `Savedat/save1.dat` through `save8.dat` paths;
-  there is no alternate-directory or old-filename lookup. Original settings
-  are not imported. Fairy rankings use the five compatible 288-byte numeric
-  tables and separate name files, with complete default fallback on invalid data.
-  Original checksums
-  do not protect map bytes or the final hero words; no extension is added.
-- Tests establish agreement for sampled states and isolated handlers. They do not
-  prove every possible branch, pixel-exact Delphi compositing, exact legacy timer
-  durations or a full natural tower playthrough.
-
-Machine-readable original comparisons are generated in `build/cpp/reports/`.
-`tools/verify_original.py` runs all retained suites and rejects unknown or
-effectful skipped callees through `comparison_boundary.py`. Packaging requires
-the resulting probe/report hashes. The scan catches direct named writes;
-aliased and transitive effects still require review.
-Renderer, asset and window reports live in their configured build tree under
-`build/cpp/`. Packages carry copies of this evidence; generated reports are not
-tracked as source files.
+Reports live under ignored `build/cpp/`; packages include their evidence.
+`tools/verify_original.py` requires current source accounting and rejects
+unknown/effectful skipped callees through `comparison_boundary.py`.
+Its direct-write scan does not establish absence of aliased or transitive
+effects. Packaging checks probe/report hashes.

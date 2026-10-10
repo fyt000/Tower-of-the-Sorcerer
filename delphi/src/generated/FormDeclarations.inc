@@ -548,4 +548,6 @@
     procedure N640x4001Click(Sender: TObject);
     procedure N800x5001Click(Sender: TObject);
     procedure image34click(Sender: TObject);
+  public
+    constructor Create(AOwner: TComponent); override;
   end;

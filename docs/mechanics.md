@@ -1,71 +1,63 @@
-# Rules retained by the C++ baseline
+# Game mechanics
 
-This is a compact guide to decisions that matter when checking original behavior.
-The implementation and decompiled source remain the detailed specification.
-See [fidelity coverage](../cpp/FIDELITY.md) for the tested limits.
+These rules matter when comparing the C++ and Delphi implementations.
+Source is the detailed specification; [fidelity notes](../cpp/FIDELITY.md)
+record differences and verification limits.
 
 ## Combat and items
 
-Attack penetration is checked before applying ordinary-battle Cross/Slayer
-bonuses. A penetrating hit deals effective attack minus scaled enemy defense;
-required hits round up. Ordinary combat starts with the hero, while forced
-combat starts with the enemy and ignores those bonuses. Fatal combat stops at
-the killing strike and cancels later rewards.
+Penetration is checked before Cross/Dragon Slayer bonuses. A penetrating hit
+deals effective attack minus scaled defense; required hits round up. Ordinary
+combat is hero-first. Forced combat is enemy-first and omits those bonuses.
+A fatal strike cancels later rewards. See the
+[arithmetic difference](../cpp/FIDELITY.md#deliberate-differences-and-remaining-work)
+at extreme backside values.
 
-Monster rows are shared and their HP/attack/defense scale by the current cycle
-factor. Victory uses the row's gold, with Lucky Gold's multiplier. Bomb uses raw
-rewards and its original tile classifier. Octopus parts remain separate encounters;
-the mouth and Dragon head clear their original body cells on victory.
+Shared monster HP, attack and defense scale by the cycle factor. Victory
+applies Lucky Gold; Bomb uses raw rewards and its tile classifier. Octopus
+parts are separate encounters; mouth and Dragon head victories have body
+cleanup rules.
 
-Item consumption, refused attempts and cardinal bounds retain their original
-branches. Stairs and Flight skip floor 44; wings can reach it. Normal-stair
-travel sets the Flight ceiling, while wings preserve that distinction. Door
-checks run even when contact is refused for lack of a key.
+Stairs and Flight skip 44F; wings can reach it. Normal stairs set the Flight
+ceiling. Refused doors still run floor checks. Flight uses an ordered cardinal
+scan: a later classified neighbor can override a stair result. Its ceiling is
+`highest_floor`, and other active items are disabled during selection.
 
-Flight opens only beside stairs under the original ordered cardinal scan;
-certain later classified neighbors can override a stair result. Its ceiling
-is `highest_floor`, and 44F is excluded. Opening and each successful preview
-clear the highest-floor stair marker through the original map redraw effect.
-Other active items are disabled during selection. A direct Flight input
-performs the same opening and preview sequence as the selector. Returning to
-the highest floor in that sequence uses its normal upward arrival square.
-Successful wings, deferred floor changes, dialogue stage 13 and file-load
-refresh also clear the marker. See the [Flight audit](fidelity-audit-2026-10-09.md).
+Opening Flight and successful previews clear the highest-floor stair marker
+through map redraw. Direct Flight input performs that same sequence; returning
+to the highest floor uses its upward arrival square. Successful wings,
+deferred floor changes, dialogue stage 13 and file-load refresh also clear
+the marker. See the [Flight audit](fidelity-audit-2026-10-09.md).
 
 ## Floors, dialogue and cycles
 
-Floor puzzles preserve the original numeric-sum predicates and command order.
-Dialogue continuation flags retain their aliases, including the 2F gift at slot
-18 and first 42F arrival at slot 51. Gifts, purchases and recorded hearing are
-shared with their original continuation state rather than duplicated flags.
+Floor puzzles retain numeric-sum predicates and command order. Dialogue flags
+share their continuation state, including the 2F gift at slot 18 and first
+42F arrival at slot 51.
 
-First-cycle 50F Zeno contact starts the ending. The second cycle carries hero
-stats, resets gold/items and uses the backside factor of 44. Further cycles
-preserve gold, items, acquisition flags and explored ceiling as in the initializer.
-Capture has separate frontside/backside stat and inventory branches.
+First-cycle 50F Zeno contact starts the ending. Cycle 2 retains HP/attack/defense,
+resets gold/items and uses a factor of 44. Cycle 3 onward also preserves gold,
+items, acquisition flags and the explored ceiling. Capture has separate
+frontside/backside stat and inventory branches.
 
-| Backside 50F Zeno | HP | Attack | Defense |
+| Backside 50F Zeno, without an intervening load | HP | Attack | Defense |
 |---|---:|---:|---:|
 | Cycle 2 fixed row | 44,000 | 27,500 | 5,500 |
 | Later cycle, restored row | 352,000 | 220,000 | 44,000 |
 | Later cycle, re-sealed row | 35,200 | 22,000 | 4,400 |
 
-The 24F gate removes an existing seal by multiplying the shared row by ten,
-then installs the fixed row only in cycle 2 and queues an enemy-first fight.
-Later cycles leave Zeno for ordinary contact. A new 49F seal after gate entry
-remains effective when returning to 50F with a wing. Backside victory plays its
-closing commands before starting the next cycle.
+The 24F gate removes a seal by multiplying the shared row by ten. Only cycle 2
+then installs the fixed row and queues enemy-first combat; later cycles use
+ordinary contact. Re-sealing on 49F remains effective when returning by wing.
+Backside victory finishes its closing commands before the next cycle.
+Loading reconstructs monster rows from flags, including extra scaling for
+sealed Zeno on the backside; repeated loads do not multiply an existing row.
+The exact rows and checksum/checkpoint rules belong to the
+[save specification](original-data.md#original-saves).
+Cycle-2 50F contact reinstalls its `1000/625/125` row before combat.
 
-Saving does not serialize monster rows. As in the original load routine,
-unsealed Zeno is rebuilt as `8000/5000/1000`; sealed Zeno is rebuilt as
-`800/500/100 × (cycle_factor_minus_one + 1)`. Combat then applies its usual
-cycle factor again. This legacy backside load quirk is retained; repeated loads
-reconstruct from flags rather than multiplying the already loaded row. The
-cycle-2 50F contact branch reinstalls its fixed `1000/625/125` row before combat.
-The table above describes live gate/seal gameplay without that intervening load.
-Fairy checkpoints are saved after their completed scene. Fairy ranks use the
-save directory's five ten-entry tables. Scores are compared first, then HP;
-the final strict tie-break compares `attack + defense - previous HP` with the
-previous attack, using signed 32-bit wrapping. Qualifying first-cycle results
-can be submitted after the Fairy dialogue. Ranking tables use separate files
-and are preserved when loading a game slot.
+Fairy rankings use five independent ten-entry tables. Compare score, then HP,
+then strictly compare wrapping signed 32-bit
+`attack + defense - previous HP > previous attack`. First-cycle qualifying
+entries can be submitted after dialogue, using the insertion position cached
+at contact. Ranking tables survive slot loads.

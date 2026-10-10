@@ -1,73 +1,30 @@
 # Tower of the Sorcerer
 
-This repository recovers and reimplements the English **Tower of the Sorcerer
+Implementations and source recovery for the English **Tower of the Sorcerer
 for Windows 1.2** by Oz & Kenichi.
 
-The C++ implementation provides the current playable remake of the original
-Delphi game. Its core retains the original branches, loops, shared monster
-state, callbacks and command order, with named types and constants. Decompiled
-code and the unpatched original executable are the evidence. Gameplay quirks
-are preserved; unsafe memory access and audio/rendering engine problems are
-fixed. Future features can build on this reference.
+The Delphi 2 project aims for a faithful recovery of the game. C++ is an
+architecturally similar rewrite with the same core game logic, plus new
+features and quality-of-life improvements. Rust is an independent rewrite.
 
-The [Delphi 2 game](delphi/README.md) uses the VCL forms, bitmap assets, save
-formats, and MCI audio. Its guide covers architecture, known compatibility
-differences, formatting, and verification tools. Launch it with
-`.\tools\run_delphi_game.ps1`; development saves and settings remain under
-`build/` by default.
-
-The earlier Rust rewrite remains an independent implementation. Its architecture
-is available for replay, terminal play and other experiments. It is not the
-specification for the C++ game.
-
-| Directory | Contents |
+| Implementation | Start here |
 |---|---|
-| `cpp/` | C++23 game, `tsw` namespace, Glaze replay serialization, raylib graphics, miniaudio device, TSF/TML music, Catch2 tests |
-| `rust/` | Rust workspace, browser/native UI, Node tools and integration tests |
-| `delphi/` | Delphi 2 game, VCL forms, Pascal gameplay, source generators and comparison policy |
-| `reference/original/` | Ghidra exports, source index and recovered UI evidence |
-| `data/` | Shared extraction evidence and Rust campaign/localization data |
-| `tools/` | Original executable/data extraction and Ghidra research tools |
-| `docs/` | Game architecture, original formats, mechanics and research workflow |
-| `build/` | Ignored C++/Rust builds, downloaded dependencies, reports, test output and packages |
+| Delphi 2 recovery with VCL forms and MCI audio | [Build, run and tools](delphi/README.md) |
+| C++23 rewrite, desktop UI and headless CLI/MCP | [Build, run and controls](cpp/README.md) |
+| Rust rewrite with desktop/browser UI and campaign editor | [Build and run](rust/README.md) |
 
-Start with the [C++ build and controls](cpp/README.md),
-[architecture](docs/architecture.md),
-[decompilation and comparison workflow](docs/reverse-engineering.md), and
-[fidelity coverage](cpp/FIDELITY.md).
-[Original data](docs/original-data.md), [game rules](docs/mechanics.md), and
-[attribution](THIRD_PARTY.md) cover the supporting details.
-The C++ startup menu offers New game, Load game, Play replay and persistent
-Settings using the original opening artwork. The
-[replay recorder, visual playback and CLI](docs/replay-verification.md) support
-recording C++ player actions, watching with pause/step/rewind/takeover controls
-and checking explicit gameplay values with a separate test script.
-The [native C++ MCP mode](docs/cpp-mcp.md) exposes player observations, inspection,
-actions, original-format saves and replay import/export through `tsw_cli mcp`.
-An optional Python bridge hot-reloads immutable C++ workers while preserving
-the complete session, including open shops, Flight, recordings and checkpoints.
+| Guide | Contents |
+|---|---|
+| [Architecture](docs/architecture.md) | Modules and implementation decisions |
+| [Mechanics](docs/mechanics.md) | Nonobvious game rules and retained quirks |
+| [Data formats](docs/original-data.md) | Maps, assets, saves and rankings |
+| [Fidelity](cpp/FIDELITY.md) | Known differences and verification limits |
+| [Replay and CLI](docs/replay-verification.md) | Recording, playback and assertions |
+| [MCP](docs/cpp-mcp.md) | Tools, observations and worker hot reload |
+| [Recovery tools](docs/reverse-engineering.md) | Extraction and comparison workflow |
 
-The original installation is read only during development and tests. Decompiled
-exports are inspection evidence, not the author's original source. Local media
-and packages are excluded from Git.
-
-## Rust setup
-
-Rust, Node.js and Python are needed for the earlier rewrite. From the repository root:
-
-```powershell
-python -m pip install -r tools/requirements.txt
-python tools/setup_assets.py --source "D:/Program Files (x86)/Tower of the Sorcerer"
-Set-Location rust
-npm ci
-rustup target add wasm32-unknown-unknown
-npm run build
-npm run start:native
-# Browser: npm start, then http://127.0.0.1:8080/
-```
-
-`npm run editor` opens the campaign editor. `npm run check` runs Rust tests and
-Clippy; `npm run test:browser`, `npm run test:native` and `npm run test:mcp` run
-integration checks. Cargo output is in `build/rust/target/`; Node tools put
-reports and packages in `build/rust/`. Extracted Rust media stays in
-`rust/web/assets/`, and Node's installed dependencies stay in `rust/node_modules/`.
+Recovered evidence lives in `reference/`; shared content in `data/`; research
+tools in `tools/`. Builds, dependencies, reports and packages go under ignored
+`build/`. Development reads the game installation without modifying it.
+Decompiled exports are evidence, not the authors' source. See
+[attribution](THIRD_PARTY.md).
