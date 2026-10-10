@@ -172,9 +172,10 @@ Json definitions(bool developer) {
     auto save = object_schema(Json{{"path", Json{{"type", "string"}, {"minLength", 1}}}, {"kind", kind}});
     save["dependentRequired"] = Json{{"kind", Json::array_t{"path"}}};
     tool("save_game",
-         "Create an opaque session checkpoint (including open shops and Flight). Optionally also write an "
-         "original .dat file and replay companion at path, at an idle command boundary. Requires the Hero "
-         "Orb in normal mode. Session checkpoints expire at disconnect; files persist.",
+         "Create an opaque session checkpoint (including open shops and Flight), up to 64 per connection. "
+         "With path, write an original .dat file and replay companion at an idle command boundary, even "
+         "when checkpoints are full (checkpoint is then null). Requires the Hero Orb in normal mode. "
+         "Session checkpoints expire at disconnect; files persist.",
          save, false);
     auto load = object_schema(Json{{"checkpoint", Json{{"type", "string"}}},
                                    {"path", Json{{"type", "string"}, {"minLength", 1}}},
@@ -338,12 +339,13 @@ struct McpServer::Impl {
             object_arguments(args, {"path", "kind"});
             if (session.game.hero.hp <= 0 || (!developer && session.game.inventory(Item::HeroOrb) <= 0))
                 throw std::runtime_error("A living hero with the Orb of the Hero is required to save");
-            if (checkpoints.size() >= MaxCheckpoints)
+            const bool checkpoint_available = checkpoints.size() < MaxCheckpoints;
+            if (!checkpoint_available && !args.contains("path"))
                 throw std::runtime_error(
-                    "Maximum 64 session checkpoints; restart the connection or use an existing save");
+                    "Maximum 64 session checkpoints; supply path for a persistent save or load an existing "
+                    "checkpoint");
             auto next = session;
-            Json result{{"checkpoint", "checkpoint-" + std::to_string(next_checkpoint + 1)},
-                        {"persistent", args.contains("path")}};
+            Json result{{"checkpoint", Json{}}, {"persistent", args.contains("path")}};
             if (args.contains("path")) {
                 if (session.flight >= 0)
                     throw std::runtime_error("Close the Flight selector before writing a native save");
@@ -366,9 +368,12 @@ struct McpServer::Impl {
             } else if (args.contains("kind"))
                 throw std::runtime_error(
                     "kind requires path; a session checkpoint is a complete native copy");
-            const auto id = result["checkpoint"].get<std::string>();
-            checkpoints.emplace(id, next);
-            ++next_checkpoint;
+            if (checkpoint_available) {
+                const auto id = "checkpoint-" + std::to_string(next_checkpoint + 1);
+                checkpoints.emplace(id, next);
+                ++next_checkpoint;
+                result["checkpoint"] = id;
+            }
             session = std::move(next);
             return result;
         }
@@ -528,9 +533,17 @@ std::optional<std::string> McpServer::respond(std::string_view source) {
             if (method == "runtime/checkpoint")
                 checkpoint_runtime(path, impl_->developer, impl_->session, impl_->checkpoints,
                                    impl_->next_checkpoint);
-            else
-                restore_runtime(path, impl_->developer, impl_->session, impl_->checkpoints,
-                                impl_->next_checkpoint);
+            else {
+                try {
+                    restore_runtime(path, impl_->developer, impl_->session, impl_->checkpoints,
+                                    impl_->next_checkpoint);
+                } catch (const IncompatibleRuntimeCheckpoint& error) {
+                    auto response = error_response(id, -32003, error.what());
+                    response["error"]["data"] =
+                        Json{{"kind", "session_incompatible"}, {"session_continuable", false}};
+                    return dump(response);
+                }
+            }
             result = Json{{"restored", method == "runtime/restore"}, {"version", 1}};
         } else if (method == "tools/list")
             result = impl_->catalog;

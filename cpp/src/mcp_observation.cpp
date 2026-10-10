@@ -54,9 +54,15 @@ int visible_tile(int tile, bool developer) {
     return tile == SpecialRoad ? Road : tile;
 }
 
-Json tile_definition(int tile) {
+Json tile_definition(const Game& game, int floor, int tile) {
     std::string_view name = "Decoration", kind = "decoration";
-    if (const int enemy = Game::monster_for_tile(tile); enemy >= 0) {
+    // Match contact()'s ending dispatch rather than predicting ordinary combat.
+    const bool ending =
+        floor == 50 && !game.hero.cycle_factor_minus_one && (tile == Zeno || tile == Zeno + 1);
+    if (ending) {
+        name = Game::monster_name(ZenoRow);
+        kind = "trigger";
+    } else if (const int enemy = Game::monster_for_tile(tile); enemy >= 0) {
         name = Game::monster_name(enemy);
         kind = "enemy";
     } else if (tile >= HeroOrb && tile <= LuckyGold) {
@@ -194,6 +200,11 @@ Json tile_definition(int tile) {
         }
     }
     Json result{{"id", tile}, {"name", name}, {"kind", kind}};
+    if (ending) {
+        result["interaction"] = "ending";
+        result["hp_cost"] = 0;
+        result["available"] = true;
+    }
     if (tile >= YellowDoor && tile <= RedDoor)
         result["key"] = tile == YellowDoor ? "yellow" : tile == BlueDoor ? "blue" : "red";
     if (tile >= YellowKey && tile <= BlueKey)
@@ -282,11 +293,11 @@ void Session::record(const PlayerInput& input, const InputOutcome& outcome) {
 
 Json inspect(const Game& game, bool developer, int floor, int x, int y) {
     const int raw = game.tile_at(floor, x, y);
-    auto result = tile_definition(visible_tile(raw, developer));
+    auto result = tile_definition(game, floor, visible_tile(raw, developer));
     result["floor"] = floor;
     result["x"] = x;
     result["y"] = y;
-    if (Game::monster_for_tile(raw) >= 0) {
+    if (result["kind"].get<std::string>() == "enemy") {
         const bool unlocked = developer || game.inventory(Item::HeroOrb) > 0;
         result["details_locked"] = !unlocked;
         if (unlocked)
@@ -317,12 +328,14 @@ Json observe(const Session& session, bool developer, int map_floor, std::string_
         const int raw = game.tile(map_floor, i), id = visible_tile(raw, developer);
         map[i] = id;
         ids.insert(id);
-        if (Game::monster_for_tile(raw) >= 0)
-            enemies.get_array().push_back(
-                inspect(game, developer, map_floor, i % BoardWidth, i / BoardWidth));
+        if (Game::monster_for_tile(raw) >= 0) {
+            auto enemy = inspect(game, developer, map_floor, i % BoardWidth, i / BoardWidth);
+            if (enemy["kind"].get<std::string>() == "enemy")
+                enemies.get_array().push_back(std::move(enemy));
+        }
     }
     for (int id : ids)
-        definitions[std::to_string(id)] = tile_definition(id);
+        definitions[std::to_string(id)] = tile_definition(game, map_floor, id);
     result["tile_defs"] = std::move(definitions);
     result["enemies"] = std::move(enemies);
     result["floor"] = h.floor;
@@ -450,7 +463,7 @@ Json observe(const Session& session, bool developer, int map_floor, std::string_
         for (int x = 0; x < BoardWidth; ++x) {
             const int raw = game.tile_at(map_floor, x, y), id = visible_tile(raw, developer);
             row += visible_tile(raw, false) == Road ? '.' : '#';
-            const auto definition = tile_definition(id);
+            const auto definition = tile_definition(game, map_floor, id);
             const auto kind = definition["kind"].get<std::string>();
             if (kind == "floor" || kind == "wall" || kind == "void" || kind == "lava" || kind == "decoration")
                 continue;

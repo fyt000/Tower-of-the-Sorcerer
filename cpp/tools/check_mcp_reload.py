@@ -142,10 +142,11 @@ def bridge(manifest, *options):
     return client
 
 
-def fake_worker(folder, catalog, mode):
+def fake_worker(folder, catalog, mode, snapshot=None):
     # Python itself is the fixture executable: the bridge launches `python mcp ...`.
     # No descendant process is needed, so crash/timeout fixtures cannot leak a child.
-    fixture = {"catalog": catalog, "mode": mode, "marker": str(folder / "attempts.txt")}
+    fixture = {"catalog": catalog, "mode": mode, "marker": str(folder / "attempts.txt"),
+               "snapshot": snapshot}
     (folder / "fixture.json").write_text(json.dumps(fixture), encoding="utf-8")
     (folder / "mcp").write_text('''import json, sys, time
 from pathlib import Path
@@ -167,6 +168,9 @@ for line in sys.stdin:
         if mode == "catalog":
             tools.append({"name": "fixture_tool", "inputSchema": {"type": "object"}})
         reply["result"] = {"tools": tools}
+    elif method == "runtime/checkpoint" and mode == "legacy":
+        Path(request["params"]["path"]).write_text(json.dumps(fixture["snapshot"]), encoding="utf-8")
+        reply["result"] = {"version": 1}
     elif method == "runtime/restore":
         if mode == "reject":
             reply.pop("result")
@@ -413,6 +417,90 @@ def make_startup(cli, folder):
         native.close()
 
 
+def check_incompatible_reset(cli, folder):
+    native = Client([str(cli), "mcp", "--developer", "--runtime-bridge"])
+    try:
+        native.initialize()
+        catalog = native.rpc("tools/list")["result"]["tools"]
+        native.tool("game_action", action={"type": "move", "direction": "up"})
+        saved = folder / "recover.dat"
+        native.tool("save_game", path=str(saved))
+        native.tool("save_game")
+        history = native.tool("export_replay")
+        snapshot = folder / "legacy.json"
+        native.rpc("runtime/checkpoint", {"path": str(snapshot)})
+        legacy = json.loads(snapshot.read_text(encoding="utf-8"))
+        # Reproduce the deployed 8 October worker's missing rankings field.
+        legacy["session"]["game"].pop("rankings")
+        for checkpoint in legacy["checkpoints"].values():
+            checkpoint["game"].pop("rankings")
+    finally:
+        native.close()
+    for recovery in ("new_game", "native-new-game", "load_game", "replay_game"):
+        target = folder / recovery
+        target.mkdir()
+        fake_worker(target, catalog, "legacy", legacy)
+        manifest = target / "current.json"
+        activate(manifest, sys.executable)
+        client = bridge(manifest, "--developer")
+        try:
+            previous = client.runtime()
+            activate(manifest, cli, version="updated")
+            rejected = client.call("game_action", action={"type": "move", "direction": "left"})
+            assert rejected["error"]["code"] == -32003, rejected
+            assert rejected["error"]["data"]["session_continuable"] is False
+            current = client.runtime()
+            assert current["current"]["version"] == "updated"
+            assert current["worker_pid"] != previous["worker_pid"]
+            assert not alive(previous["worker_pid"])
+            assert current["worker_running"] and not current["session_continuable"]
+            assert current["recovery_required"]
+            assert current["last_reload"]["status"] == "reset"
+            assert current["last_reload"]["session_restored"] is False
+            assert "rankings" in current["last_reload"]["reason"]
+            assert client.notifications == [], client.notifications
+            observed = client.call("game_state")
+            assert observed["result"]["_meta"]["session_continuable"] is False
+            initial = observed["result"]["structuredContent"]
+            assert initial["steps"] == 0 and initial["hero"]["x"] == 5
+            assert initial["hero"]["y"] == 10
+            # Neither pipelined stale mutations nor failed recovery may release the gate.
+            start_id = client.next_id
+            for i in (1, 2):
+                client.send({"jsonrpc": "2.0", "id": start_id + i, "method": "tools/call",
+                             "params": {"name": "game_action", "arguments": {
+                                 "action": {"type": "move", "direction": "up"}}}})
+            client.next_id += 2
+            for i in (1, 2):
+                assert client.receive(start_id + i)["error"]["code"] == -32003
+            assert client.call("load_game", checkpoint="checkpoint-1")["result"]["isError"]
+            assert client.call("replay_game", replay="invalid")["result"]["isError"]
+            assert client.runtime()["recovery_required"]
+            assert client.tool("game_state") == initial
+            # Another compatible deployment must not release recovery either.
+            activate(manifest, cli, version="updated-again")
+            assert client.tool("game_state") == initial
+            assert client.runtime()["recovery_required"]
+            if recovery == "load_game":
+                restored = client.tool("load_game", path=str(saved))
+                assert restored["hero"]["y"] == 9
+            elif recovery == "replay_game":
+                restored = client.tool("replay_game", replay=history["replay"])
+                assert restored["hero"]["y"] == 9
+            elif recovery == "native-new-game":
+                client.tool("game_action", action={"type": "new_game"})
+            else:
+                client.tool("new_game")
+            assert client.runtime()["session_continuable"]
+            assert not client.runtime()["recovery_required"]
+            assert not client.runtime()["recovery_tools"]
+            moved = client.tool("game_action", action={"type": "move", "direction": "left"})
+            assert moved["hero"]["x"] == 4
+            assert client.tool("save_game")["checkpoint"] == "checkpoint-1"
+        finally:
+            client.close()
+
+
 def check_startup_and_shops(cli, folder):
     save = make_startup(cli, folder)
     manifest = folder / "current.json"
@@ -482,6 +570,7 @@ def main():
         root = Path(temporary)
         for name, check in (("windows-headers", check_windows_headers), ("lifecycle", check_lifecycle),
                             ("transfer", check_transfer), ("rollback", check_rollback),
+                            ("incompatible-reset", check_incompatible_reset),
                             ("startup-shops-flight", check_startup_and_shops),
                             ("timeout", lambda cli, folder: check_failure(cli, folder, "timeout")),
                             ("crash", lambda cli, folder: check_failure(cli, folder, "crash"))):

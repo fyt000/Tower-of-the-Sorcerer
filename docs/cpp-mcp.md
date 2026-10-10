@@ -63,11 +63,24 @@ launches require a supported console PE executable.
 Before each public request, a changed activation transfers the complete session
 to a candidate: maps/hero/monster/ranking state, pending commands and shop/Flight
 continuations, presentation, recording, feedback/log/counter, and checkpoint IDs.
-The bridge switches only after successful initialization and restoration.
+The bridge verifies candidate initialization before switching and preserves
+the session when restoration succeeds.
 Mutations remain ordered; transfer does not replay inputs under the new code.
-Private migration data is versioned and limited to 128 MiB; incompatible schema
-or developer mode retains the old worker. Increment the runtime version when
-changing that schema.
+Private migration data is versioned and limited to 128 MiB. Compatible sessions
+continue unchanged. A structured schema/version/mode incompatibility activates
+the healthy new worker with a fresh session instead of blocking the update.
+Increment the runtime version when changing that schema; older schemas do not
+need migration support.
+
+After that reset, `mcp_runtime` reports `session_continuable: false`,
+`recovery_required: true`, and `recovery_tools: ["new_game", "load_game", "replay_game"]`.
+The last reload has `status: "reset"`, `session_restored: false`, and the mismatch
+reason. Observation results also carry the continuation flag in `_meta`.
+Gameplay requests, including the request that triggered the update, return
+`-32003` without executing until a successful new game, file load or replay.
+`game_action` with `{ "type": "new_game" }` also recovers. Failed recovery keeps
+the gate closed; old opaque checkpoint IDs expire. Persistent saves/replays
+remain available for deliberate loading under the new build.
 
 The bridge adds read-only `mcp_runtime`, reporting PIDs, worker health/error,
 deployment and last reload outcome. Successful reloads attach
@@ -77,8 +90,8 @@ advertises `tools.listChanged`, following the
 [MCP protocol](https://modelcontextprotocol.io/specification/2025-11-25/server/tools).
 
 Invalid manifests keep a healthy session running and report reload metadata.
-A failed candidate returns an error before the triggering request executes;
-later requests use the old worker. That activation stays blocked until another
+A candidate startup, I/O or unclassified restore failure returns an error before
+the triggering request executes; later requests use the old worker. That activation stays blocked until another
 is published. Crashed/timed-out workers become unavailable; mutations are never
 retried because commit status may be unknown. Reconnect from a persistent save.
 
@@ -128,8 +141,14 @@ Coordinates are zero-based on an 11×11 board; full maps use `map[y * width + x]
 `game_state`, new/load/replay/simulation default to compact; action/navigation
 use summary. A floor-changing mutation upgrades summary to compact. Legacy
 clients can request `full`. `reachable` describes apparent-road contact;
-`available` describes a key or known survivable fight. Neither predicts scripts
-or damage, and sealed gates may refuse contact.
+`available` describes a key, known survivable fight, or recognized ending trigger.
+Routes do not predict scripts or damage, and sealed gates may refuse contact.
+
+On first-cycle floor 50, both Zeno frames are reported as `kind: "trigger"`,
+`interaction: "ending"`, `hp_cost: 0`, and `available: true`, even without the
+Hero Orb. This contact starts the ending and carries HP into the next cycle;
+it has no enemy combat forecast. Floor 49 and later-cycle Zeno retain enemy
+statistics and combat forecasts.
 
 Normal mode conceals walls/objects as brick and special roads as road, and hides
 private flags/unpreviewed maps. Enemy forecasts and manual saves require the
@@ -186,6 +205,9 @@ scripted rearrangements. A manual door contact opens it; the next move enters.
 `{"checkpoint":"checkpoint-1","persistent":false}`. `load_game` with that ID
 restores the exact session, including open interactions, recording and feedback.
 Up to 64 checkpoints survive new game within the connection and expire at exit.
+File saves also create a session checkpoint while capacity remains. At the limit,
+no-path saves fail, while file saves still succeed and return `checkpoint: null`;
+existing session checkpoints remain available for loading.
 
 For persistence, call `save_game`/`load_game` with
 `{"path":"D:/games/tower/Savedat/save1.dat","kind":"slot"}`. Kind defaults to

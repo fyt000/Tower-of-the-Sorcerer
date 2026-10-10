@@ -19,10 +19,19 @@ MAX_REQUEST_BYTES = 8 * 1024 * 1024
 MAX_REPLY_BYTES = 128 * 1024 * 1024
 RUNTIME_TOOL = {
     "name": "mcp_runtime",
-    "description": "Read bridge/worker process IDs, active deployment and the last hot reload outcome.",
+    "description": "Read bridge/worker process IDs, active deployment, session continuation/recovery status "
+                   "and the last hot reload outcome.",
     "inputSchema": {"type": "object", "properties": {}, "additionalProperties": False},
     "annotations": {"readOnlyHint": True, "openWorldHint": False},
 }
+RECOVERY_TOOLS = ("new_game", "load_game", "replay_game")
+OBSERVATION_TOOLS = ("game_state", "inspect_tile", "plan_path")
+
+
+class WorkerRpcError(RuntimeError):
+    def __init__(self, error):
+        super().__init__(error.get("message", "Worker request failed"))
+        self.data = error.get("data")
 
 
 def default_initialization():
@@ -147,7 +156,7 @@ class Worker:
     def required(self, method, params=None):
         reply = self.request(method, params)
         if "error" in reply:
-            raise RuntimeError(reply["error"].get("message", "Worker request failed"))
+            raise WorkerRpcError(reply["error"])
         return reply["result"]
 
     def notify(self, method, params=None):
@@ -210,6 +219,7 @@ class Bridge:
         self.initialization = default_initialization()
         self.blocked = None
         self.last_reload = None
+        self.session_continuable = True
         self.directory = TemporaryDirectory(prefix="tsw-mcp-session-")
         self.checkpoint = Path(self.directory.name) / "worker.json"
 
@@ -262,15 +272,25 @@ class Bridge:
                 self.blocked is not None and requested.activation == self.blocked.activation):
             return None
         previous = self.active.deployment.json()
+        reset_reason = None
         try:
             self.active.required("runtime/checkpoint", {"path": str(self.checkpoint)})
             self.candidate = self._worker(requested)
             self.candidate.prepare(self.initialization)
             if self.candidate.initialization["protocolVersion"] != self.initialization["protocolVersion"]:
                 raise RuntimeError("Candidate changed the negotiated MCP protocol version")
-            restored = self.candidate.required("runtime/restore", {"path": str(self.checkpoint)})
-            if restored.get("restored") is not True:
-                raise RuntimeError("Candidate did not confirm session restoration")
+            try:
+                restored = self.candidate.required("runtime/restore", {"path": str(self.checkpoint)})
+                if restored.get("restored") is not True:
+                    raise RuntimeError("Candidate did not confirm session restoration")
+            except WorkerRpcError as error:
+                if (not isinstance(error.data, dict) or
+                        error.data.get("kind") != "session_incompatible" or
+                        error.data.get("session_continuable") is not False):
+                    raise
+                # The candidate is healthy, but this session cannot migrate. Use
+                # its untouched initial session and require explicit recovery.
+                reset_reason = str(error)
         except (OSError, ValueError, RuntimeError) as error:
             if self.candidate:
                 self.candidate.close()
@@ -291,6 +311,11 @@ class Bridge:
         self.blocked = None
         self.last_reload = {"status": "succeeded", "previous": previous, "current": requested.json(),
                             "session_restored": True, "tools_changed": changed}
+        if reset_reason is not None:
+            self.session_continuable = False
+            self.last_reload.update(status="reset", session_restored=False, session_lost=True,
+                                    session_continuable=False, reason=reset_reason,
+                                    recovery_tools=list(RECOVERY_TOOLS))
         old.close()
         if self.ready and changed:
             self.emit({"jsonrpc": "2.0", "method": "notifications/tools/list_changed"})
@@ -299,6 +324,9 @@ class Bridge:
     def runtime(self):
         return {"bridge_pid": os.getpid(), "worker_pid": self.active.process.pid,
                 "worker_running": self.active.running, "worker_error": self.active.failure,
+                "session_continuable": self.session_continuable and self.active.running,
+                "recovery_required": not self.session_continuable,
+                "recovery_tools": list(RECOVERY_TOOLS) if not self.session_continuable else [],
                 "current": self.active.deployment.json(), "last_reload": self.last_reload}
 
     @staticmethod
@@ -357,13 +385,33 @@ class Bridge:
                 reply = {"result": {"content": [{"type": "text", "text": encode(value)}],
                                     "structuredContent": value, "isError": False}}
             else:
+                name = params.get("name") if method == "tools/call" else None
+                native_new_game = (name == "game_action" and
+                                   isinstance(params.get("arguments"), dict) and
+                                   params["arguments"].get("action") == {"type": "new_game"})
+                recovery = name in RECOVERY_TOOLS or native_new_game
+                if (not self.session_continuable and method == "tools/call" and
+                        name not in OBSERVATION_TOOLS and not recovery):
+                    return self.error(identifier, -32003,
+                                      "The update is active, but the previous session cannot continue. "
+                                      "Call new_game, load_game or replay_game before gameplay.",
+                                      {"session_continuable": False,
+                                       "recovery_tools": list(RECOVERY_TOOLS),
+                                       "runtime_reload": self.last_reload})
                 reply = self.active.request(method, params)
+                if (recovery and "result" in reply and
+                        not reply["result"].get("isError", False)):
+                    self.session_continuable = True
                 if method == "tools/list" and "result" in reply:
                     reply["result"]["tools"] = [*reply["result"]["tools"], RUNTIME_TOOL]
             reply["jsonrpc"], reply["id"] = "2.0", identifier
             if reloaded is not None and isinstance(reply.get("result"), dict):
                 result = reply["result"]
                 result["_meta"] = {**result.get("_meta", {}), "runtime_reload": reloaded}
+            if not self.session_continuable and isinstance(reply.get("result"), dict):
+                result = reply["result"]
+                result["_meta"] = {**result.get("_meta", {}), "session_continuable": False,
+                                   "recovery_tools": list(RECOVERY_TOOLS)}
             return reply
         except (OSError, ValueError, RuntimeError) as error:
             return self.error(identifier, -32000, str(error), {"runtime_reload": self.last_reload})

@@ -41,7 +41,7 @@ template <typename T> void complete_shape(const T& value, const Json& source) {
         glz::for_each<glz::reflect<T>::size>([&]<std::size_t I> {
             const auto key = glz::reflect<T>::keys[I];
             if (!source.is_object() || !source.contains(key))
-                throw std::runtime_error("Incomplete runtime object: " + std::string(key));
+                throw IncompatibleRuntimeCheckpoint("Incomplete runtime object: " + std::string(key));
             complete_shape(glz::get<I>(members), source[key]);
         });
     } else if constexpr (glz::nullable_t<T>) {
@@ -52,7 +52,7 @@ template <typename T> void complete_shape(const T& value, const Json& source) {
             complete_shape(member, source[key]);
     } else if constexpr (glz::writable_array_t<T>) {
         if (!source.is_array() || source.get_array().size() != value.size())
-            throw std::runtime_error("Incomplete runtime array");
+            throw IncompatibleRuntimeCheckpoint("Incomplete runtime array");
         std::size_t index{};
         for (const auto& member : value)
             complete_shape(member, source[index++]);
@@ -158,13 +158,19 @@ void restore_runtime(const std::filesystem::path& path, bool developer, Session&
         value.error_on_unknown_keys = true;
         return value;
     }();
+    // Validate JSON before treating missing/unknown fields as a schema mismatch.
+    const auto source = parse(data);
     RuntimeState state{};
-    if (const auto error = glz::read<options>(state, data))
+    if (const auto error = glz::read<options>(state, data)) {
+        if (error.ec == glz::error_code::missing_key || error.ec == glz::error_code::unknown_key)
+            throw IncompatibleRuntimeCheckpoint(glz::format_error(error, data));
         throw std::runtime_error(glz::format_error(error, data));
-    complete_shape(state, parse(data));
-    if (state.version != RuntimeVersion || state.developer != developer || state.checkpoints.size() > 64 ||
-        state.next_checkpoint == std::numeric_limits<std::uint64_t>::max())
-        throw std::runtime_error("Incompatible runtime checkpoint version, mode or checkpoint count");
+    }
+    complete_shape(state, source);
+    if (state.version != RuntimeVersion || state.developer != developer)
+        throw IncompatibleRuntimeCheckpoint("Incompatible runtime checkpoint version or mode");
+    if (state.checkpoints.size() > 64 || state.next_checkpoint == std::numeric_limits<std::uint64_t>::max())
+        throw std::runtime_error("Invalid runtime checkpoint count");
     auto restored = restore(state.session);
     std::map<std::string, Session> restored_checkpoints;
     for (const auto& [id, saved] : state.checkpoints) {

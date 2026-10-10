@@ -2,12 +2,17 @@
 #include "tsw/replay.hpp"
 #include <glaze/json/generic.hpp>
 #include <map>
+#include <stdexcept>
 #include <utility>
 
 namespace tsw::mcp_detail {
 using Json = glz::generic_u64;
 Json parse(std::string_view);
 std::string dump(const Json&);
+
+struct IncompatibleRuntimeCheckpoint : std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
 
 struct Session {
     Game game;

@@ -1,97 +1,67 @@
 ---
 name: tower-cpp-campaign
-description: "Play Tower of the Sorcerer through the tower_cpp MCP using destination navigation, compact observations, combat forecasts, key budgeting and persistent saves. Includes a tested first-cycle floors 1-10 strategy and guidance for reassessing later floors and cycles."
+description: "Play and investigate Tower of the Sorcerer through the connected tower_cpp MCP. Use compact observations, destination navigation, combat breakpoints, key and item budgeting, persistent saves and session recovery; reassess strategy from current state without treating past routes as optimal."
 ---
 
 # Tower C++ Campaign
 
-Use the native `tower_cpp` MCP to make strategic choices while the server handles ordinary walking. Plan for the next equipment, resource or progression milestone, then update the plan from observed results.
+Use the connected `tower_cpp` service for ordinary play. Let the server handle walking while choosing fights, doors, purchases and item uses deliberately. Plan toward an equipment, access or progression milestone, then revise the plan from observed results.
 
-## Scope of the strategy
+## Evidence and scope
 
-The recorded strategy has been playtested only on **first-cycle floors 1-10**, ending on floor 11. Read [the early-game reference](references/first-ten-floors.md) when playing that section or reviewing its route. Its coordinates, enemy damage, two altar purchases and merchant avoidance describe that particular tested route.
+A first-cycle campaign reached the floor-50 ending through normal inputs, restarts and replay reconstruction. Completion shows that the selected history worked; it establishes neither an optimal route nor ideal purchases, item timing or equipment order. Earlier failed branches and bailout HP purchases are lessons about planning, not recommendations to repeat.
 
-For floors 11 onward, backside rounds or further cycles, establish a new plan from current state, native forecasts, clues and relevant source. Equipment, monster scaling, hazards, scripts, merchants and carry/reset rules can change the economics. Early-game experience is evidence for a hypothesis, not proof of a later-game strategy.
+Read [early-area considerations](references/first-ten-floors.md) when planning the opening climb and floor-10 arena. It provides decision criteria, not a prescribed route.
 
-## Efficient MCP usage
+Reassess all numeric thresholds, access routes and item effects against the active build, live cycle, equipment and current forecasts. Source knowledge, live observations, tested branches and proposed strategies are different kinds of evidence. Do not describe a source-derived or merely completed route as optimal.
 
-1. Start with `game_state` using its compact default. Read the current hero, `cycle`, inventory, phase and pending interaction before deciding whether to continue or load a requested save. Preserve an existing journey unless the task calls for a new one.
-2. Select an event from `floor.points`. Resolve its numeric `id` through `tile_types["<id>"]` for the name, kind, pickup gain, key color or `enemy.forecast`. Coordinates run from 0 to 10, with `(0,0)` at the top left. `walkable_rows` uses `.` for apparent road and `#` for other squares.
-3. Use `navigate` for movement and endpoint contact. Choose intervening pickups, fights and doors individually; the server routes through apparent road. Routine action responses are summaries, and floor transitions include the next floor's compact view.
-4. Read `navigation.reason`, `messages`, hero and `changes` after acting. Stop and revise the plan when a script, hazard or unexpected result interrupts it. Refresh compact state after map rearrangement, when access has changed, or when new stats require updated forecasts. Avoid reading the same full observation after every step.
+## Connected MCP workflow
 
-Example tool arguments:
+At the start, read `mcp_runtime` when available and compact `game_state`. Verify the active deployment, normal/developer mode, continuation status and actual journey before acting. Separate server processes can hold different games even when they use the same repository or executable. Use one connection as the authoritative session.
 
-```json
-{"x": 5, "y": 8, "floor": 4, "interact": true}
-```
+Select an event from `floor.points`; resolve its ID through `tile_types`. Use `navigate(x,y,floor)` for walking and endpoint contact. Use `game_action` for listed shop choices, item uses and deliberate contacts with concealed walls. Read returned stats, tile changes, messages, pending interaction and navigation reason before continuing. Reuse summaries; refresh compact state when access, forecasts or scripts need reassessment. Reserve full observations for a specific diagnostic need.
 
-`floor` guards against stale coordinates. `interact` defaults to true: the endpoint can fight, collect, open a shop or change floors. Selected doors receive both native contacts to open and enter. `interact: false` stops at an event's approach square. An unreachable target executes zero movement inputs.
+`reachable` is geometric access, and `available` describes the selected interaction. Neither budgets the whole journey. Combat forecasts and `plan_path` exclude movement magic, pincers and scripted effects. Plan those costs separately, including the return route.
 
-`reachable` describes geometric access to contact a point; type-level `available` describes a known fight's survivability or key possession. Neither guarantees that the whole route is safe. A sealed gate can be reachable and still refuse contact. For event endpoints, `navigation.reached` can mean successful contact while the hero remains adjacent.
+For connection checks, interruption semantics, saves, replay and update recovery, read [MCP workflow](references/mcp-workflow.md). Prefer connected tool calls over an extra shell/HTTP controller for gameplay. A helper can organize observations or test a justified branch, but its assumptions and errors are separate from the native game.
 
-Use `game_action` for shop choices, items and deliberate single-step contacts:
+## Strategy principles
 
-```json
-{"action": {"type": "choose", "choice": "1"}}
-{"action": {"type": "use_item", "item": "flying_orb", "floor": 9}}
-{"action": {"type": "move", "direction": "right"}}
-```
+- **Choose the milestone before the fights.** Name what a fight opens or funds. Revisit earlier floors after equipment or stat gains; optional fights that are affordable now can be much cheaper later. Avoid clearing an area just because it is reachable.
+- **Account for Lucky Gold.** Leaving optional enemies alive can increase later ordinary-combat rewards, including enemies that already cost zero HP. Fight them earlier when their access or gold is needed to reach a more valuable milestone. Bomb rewards use base gold, even with Lucky Gold; include the forgone bonus in the route's economy.
+- **Treat HP as a route budget.** Include required fights, movement hazards, scripts and the way back. Survival needs HP strictly above lethal damage. Distinguish total supplies from supplies accessible before the blocker. Delay optional potions until after known HP-halving effects when the lower-HP passage remains survivable; automatic pickup collection can make this worse.
+- **Compare red and blue gems at current breakpoints.** Attack is especially valuable when it penetrates defense or removes an enemy strike. Defense can win when many strikes remain or several necessary enemies become harmless. Compare total damage saved across the next required encounters, subtract each gem room's access cost, then recompute after every upgrade. There is no fixed color priority.
+- **Budget keys by color and access.** Reserve keys for the intended milestone, including the merchant's door, exit and item access. Price rooms sequentially using keys spent and recovered, fights, supplies and later access. Consider actual merchant offers and stock, delayed equipment routes, and Mattock wall bypasses before declaring a shortage.
+- **Buy a concrete improvement.** Merchant HP is generally poor value; altar HP also advances the shared purchase count and raises later stat prices. Consider HP spending only after checking lower-damage routes, deferred supplies, upgrades and revisits, and identify the specific survival blocker it resolves. A bailout for an inefficient route does not establish a good purchase.
+- **Acquire and use items as separate decisions.** Reserve consumables for a named blocker. Compare their immediate return with other uses, including key savings, avoided fights and lost future supplies. Super Mattock needs a planned floor and worthwhile return, plus its price and merchant access; availability alone is not a reason to buy it early.
+- **Compare shield strategies, then prioritize the chosen objective.** Compare bombing with fighting the guards after any needed upgrades; weigh HP and hazard costs, shield timing, gold rewards and the Bomb's value elsewhere. Once the Sacred Shield is the chosen objective, make obtaining it the top priority throughout preparation and travel. Take detours only when they are needed for access or survival, and identify how they enable the shield route. Budget the required keys, access item, guards and movement hazards together; defer optional side trips for fights, supplies or exploration until protected. Neither the acquisition method nor its timing is established as optimal by the completed attempt.
+- **Check traps and formation puzzles before committing.** Budget all forced encounters, and inspect clues or the relevant predicate before killing every guard. An enemy's individual forecast cannot establish that a trapped sequence is survivable or that clearing all enemies preserves a puzzle solution.
 
-Choose only a listed shop reply ID. Speech settles automatically; shops remain open for a reply or cancel. Normal navigation preserves concealed walls, so approach a wall supported by a clue/source and deliberately contact it with a movement input. Avoid probing every wall.
+When a route repeatedly needs rescue spending or cannot fund its next access, compare a rewind/restart with continuing. Use the user's authorization and scope; do not hide restarts or replace the live journey with an unreviewed candidate.
 
-Hero Orb forecasts are already present when `forecasts_unlocked` is true; repeatedly using the orb adds no forecasting information. Use `inspect_tile` for one missing detail. Reserve `detail: "full"` for a concrete diagnostic need. `plan_path` is useful for examining a route, while `navigate` is the ordinary execution tool.
+## Mechanics worth checking
 
-Flight uses native direction and stair-landing rules. Confirm the resulting coordinates rather than assuming a destination always uses the same entrance. Native stairs and Flight skip floor 44; wing behavior differs.
+Read [campaign considerations](references/campaign-considerations.md) when planning consumables, later first-cycle objectives, gem/altar comparisons or cycle transitions. It records relevant mechanics and illustrative observations, not a prescribed route.
 
-## Resource planning
-
-- **Choose the next milestone first.** Compare routes to equipment, a necessary key supply, the next area or a required encounter. Defer optional fights when an upcoming upgrade will reduce their cost, unless their reward enables that upgrade now.
-- **Evaluate a room sequentially.** Account for keys spent and recovered, entry fights, potion gains, stat gains and subsequent access. Recompute damage after a gem or equipment pickup; a sum of stale forecasts can misprice the route. Keep a reserve for the next known mandatory colored doors.
-- **Buy meaningful breakpoints.** Compare an upgrade's damage savings across the next required fights. Attack matters when it removes enemy strikes; defense saves HP on remaining strikes. A native forecast marked survivable covers that one fight, not an entire locked sequence.
-- **Preserve future options without hoarding blindly.** HP, keys, gold, consumables and the global altar purchase count all matter. A purchase can be correct when it opens better equipment or prevents a bottleneck. Merchant and HP purchases are valid options; their absence in the tested first ten floors is not a general rule.
-- **Budget trapped sequences before triggering them.** Include all known guards, boss fights and movement hazards, then preserve enough HP to survive strictly. Reinspect the board and clues after scenes before acting on old coordinates.
-
-Altar purchase `n` costs `10*(n*n+n+2)`, starting with `n=0`: **20, 40, 80, 140, 220, ...**. Each choice increases the same global count. Native gains are HP `100*(n+1)*cycle_factor`, attack `2*area*cycle_factor`, defense `4*area*cycle_factor`, with altar `area=(floor+10)/10` using integer division. Waiting for a higher-area altar can improve stat gains at the same next price, but weigh that against the route's current HP cost. Pickup area instead uses `(floor+9)/10`.
-
-For ordinary first-cycle combat without special item bonuses, attack must exceed enemy defense, and:
-
-```text
-hits = ceil(enemy_hp / (attack - enemy_defense))
-damage = max(enemy_attack - defense, 0) * (hits - 1)
-```
-
-Survival requires damage strictly below current HP. Use native forecasts for scaled stats and item effects. Forced combat gives the enemy the opening strike and ignores ordinary Cross/Dragon Slayer bonuses; movement magic and scripted damage also need separate accounting.
-
-## Reassess later floors and cycles
-
-When entering a new area or round, inspect live cycle factor, equipment/protection, inventory, accessible supplies, enemy types, shops and clues. Determine the next necessary encounter and equipment milestone before choosing purchases. Recalculate attack breakpoints and key reserves from those enemies, rather than carrying over first-area numeric thresholds.
-
-When a puzzle or rule changes the route, read only its relevant implementation. The repository is `D:/projects/tos-rust`:
+When the repository is available, read only the implementation needed to settle a rule. In `D:/projects/tos-rust`:
 
 | Question | Source |
 |---|---|
-| Combat, scaled rows, first strike, item multipliers | `cpp/src/combat.cpp` |
-| Pickups, doors, altar price, stairs, movement hazards | `cpp/src/contact.cpp` |
-| Merchant offers, purchases, NPC gifts and clues | `cpp/src/npcs.cpp` |
-| Flight, consumables and passive items | `cpp/src/items.cpp` |
-| Arrival scenes, traps, boss formations and endings | `cpp/src/scenes.cpp` |
-| Guard predicates, gates and scripted rewards | `cpp/src/floor_checks.cpp` |
-| Capture and cycle initialization/carry rules | `cpp/src/game.cpp` |
-| Original maps, landings and monster rows | `cpp/src/original_constants.hpp` |
+| Combat, penetration, forced fights and item multipliers | `cpp/src/combat.cpp` |
+| Pickups, doors, stairs and movement hazards | `cpp/src/contact.cpp` |
+| Merchant offers, stock, altar purchases and clues | `cpp/src/npcs.cpp` |
+| Flight, Mattocks, Bomb, Wings, Warp and Snow Crystal | `cpp/src/items.cpp` |
+| Traps, arrivals, formations, gates and endings | `cpp/src/scenes.cpp`, `cpp/src/floor_checks.cpp` |
+| Capture, cycles and carry/reset rules | `cpp/src/game.cpp` |
+| Maps, landings and base enemy rows | `cpp/src/original_constants.hpp` |
+| Tool observations, saves and session updates | `docs/cpp-mcp.md`, `cpp/src/mcp_observation.cpp`, `cpp/tools/mcp_server.py` |
 
-`docs/mechanics.md` summarizes retained original rules, including later-cycle save reconstruction. `docs/cpp-mcp.md` documents tool usage. Treat observed gameplay, source-derived rules and untested strategy proposals as distinct evidence. Developer observations and `simulate_actions` are available only in developer mode; identify their use when reporting a run.
+Normal play conceals secrets and gates forecasts/saves behind the Hero Orb. Developer simulation is a separate capability; identify its use when reporting an investigation or run.
 
-## Save, resume and retain learning
+## Reporting and continuation
 
-Use `save_game` with an **absolute path** at a useful milestone. Normal-mode saving requires a living hero with the Hero Orb; a native file save also needs an idle boundary and closed Flight selector. The `.dat` and `.dat.replay.jsonl` companion preserve continuation across restarts. A no-path opaque session checkpoint expires when the connection ends.
+Keep a compact milestone note: active session/build and cycle, HP/attack/defense/gold, keys by color, equipment/protection, reserved items, next objective, remaining access costs, unresolved rules and absolute save/replay paths. Preserve the save's replay companion for continuation.
 
-```json
-{"path": "D:/projects/tos-rust/artifacts/my-run/floor20.dat"}
-```
+Report completion from native outcomes and retained evidence. Visiting floor 50, reaching its ending and advancing a cycle are distinct claims. Stop at the user's requested campaign boundary; first-cycle completion does not authorize playing later cycles.
 
-Load a requested native save with `load_game` using its path. `replay_game` imports the full recording or a `limit` prefix and permits takeover from there. Native file reload applies original reconstruction rules; exact session copies and replay reconstruction have different uses. For later-cycle encounters whose shared monster rows change on native load, verify the post-load forecast.
-
-Export recordings with `export_replay({"path":"<absolute path>"})`; its file metadata is enough for routine use. Retain checkpoints before a risky strategic experiment when allowed by the task. Record any rewind or developer simulation honestly and retain evidence for completion claims.
-
-When adding discoveries to this skill, label the floor range, cycle, relevant starting resources and whether the route was actually tested. Keep a compact milestone note with current resources, next objective, unresolved rule and save/replay paths so a future session can resume planning efficiently.
+Treat documented game quirks as intended mechanics unless new evidence establishes a defect. Distinguish a helper failure from a server failure. Base any suspected issue on current behavior, source and a minimal reproduction; a difference from the agent's expectation is insufficient.

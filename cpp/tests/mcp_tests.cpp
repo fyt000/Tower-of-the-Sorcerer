@@ -7,6 +7,7 @@
 #include <glaze/json.hpp>
 #include <glaze/json/generic.hpp>
 #include <sstream>
+#include <utility>
 
 using namespace tsw;
 
@@ -177,6 +178,69 @@ TEST_CASE("MCP forecasts and owned item clues use native values", "[mcp]") {
     const auto after = client.act(R"({"type":"move","direction":"up"})");
     REQUIRE(after["hero"]["hp"].as<int>() == game.hero.hp - forecast);
     REQUIRE(after["last_encounter"]["damage"].as<int>() == forecast);
+}
+
+TEST_CASE("MCP first-cycle 50F Zeno is an available ending trigger", "[mcp][navigation][scenes]") {
+    for (int tile : {int(Zeno), Zeno + 1}) {
+        for (bool orb : {false, true}) {
+            CAPTURE(tile, orb);
+            auto game = room(orb);
+            game.hero.floor = game.hero.highest_floor = 50;
+            game.hero.hp = game.hero.attack = game.hero.defense = 1;
+            game.floors[50].tiles.fill(Road);
+            game.tile_at(50, 5, 4) = static_cast<std::uint8_t>(tile);
+            REQUIRE_FALSE(game.forecast(tile).penetrates);
+            Client client(false, game);
+            const auto inspected = client.tool("inspect_tile", Json{{"x", 5}, {"y", 4}});
+            REQUIRE(inspected["name"].get<std::string>() == Game::monster_name(ZenoRow));
+            REQUIRE(inspected["kind"].get<std::string>() == "trigger");
+            REQUIRE(inspected["interaction"].get<std::string>() == "ending");
+            REQUIRE(inspected["hp_cost"].as<int>() == 0);
+            REQUIRE(inspected["available"].get<bool>());
+            REQUIRE_FALSE(inspected.contains("enemy"));
+            REQUIRE_FALSE(inspected.contains("details_locked"));
+            const auto full = client.tool("game_state");
+            REQUIRE(full["tile_defs"][std::to_string(tile)]["kind"].get<std::string>() == "trigger");
+            REQUIRE(full["enemies"].get_array().empty());
+            const auto compact = client.tool("game_state", Json{{"detail", "compact"}});
+            const auto type = compact["tile_types"][std::to_string(tile)];
+            REQUIRE(type["kind"].get<std::string>() == "trigger");
+            REQUIRE(type["interaction"].get<std::string>() == "ending");
+            REQUIRE(type["hp_cost"].as<int>() == 0);
+            REQUIRE(type["available"].get<bool>());
+            REQUIRE_FALSE(type.contains("enemy"));
+            REQUIRE(compact["floor"]["points"][0]["reachable"].get<bool>());
+            const auto after = client.tool("navigate", Json{{"x", 5}, {"y", 4}, {"detail", "full"}});
+            REQUIRE(after["navigation"]["reached"].get<bool>());
+            REQUIRE(after["navigation"]["inputs"].as<int>() == 1);
+            REQUIRE(after["hero"]["hp"].as<int>() == 1);
+            REQUIRE(after["hero"]["floor"].as<int>() == 1);
+            REQUIRE(after["cycle"]["factor"].as<int>() == 44);
+            REQUIRE(after["last_encounter"].is_null());
+        }
+    }
+}
+
+TEST_CASE("MCP 49F and later-cycle Zeno retain combat forecasts", "[mcp][combat][scenes]") {
+    for (int tile : {int(Zeno), Zeno + 1}) {
+        for (const auto [floor, cycle] : {std::pair{49, 0}, std::pair{49, 43}, std::pair{50, 43}}) {
+            CAPTURE(tile, floor, cycle);
+            auto game = room();
+            game.hero.floor = game.hero.highest_floor = floor;
+            game.hero.cycle_factor_minus_one = cycle;
+            game.floors[floor].tiles.fill(Road);
+            game.tile_at(floor, 5, 4) = static_cast<std::uint8_t>(tile);
+            REQUIRE_FALSE(game.forecast(tile).penetrates);
+            Client client(false, game);
+            const auto inspected = client.tool("inspect_tile", Json{{"x", 5}, {"y", 4}});
+            REQUIRE(inspected["kind"].get<std::string>() == "enemy");
+            REQUIRE_FALSE(inspected.contains("interaction"));
+            REQUIRE_FALSE(inspected["enemy"]["forecast"]["penetrates"].get<bool>());
+            const auto compact = client.tool("game_state", Json{{"detail", "compact"}});
+            REQUIRE_FALSE(compact["tile_types"][std::to_string(tile)]["available"].get<bool>());
+            REQUIRE(client.tool("game_state")["enemies"].get_array().size() == 1);
+        }
+    }
 }
 
 TEST_CASE("MCP defaults omit diagnostic towers and group repeated enemies", "[mcp][navigation]") {
@@ -449,6 +513,7 @@ TEST_CASE("MCP native file saves preserve bytes formats and reject failed loads"
         const auto saved = client.tool(
             "save_game", Json{{"path", path}, {"kind", kind == SaveKind::Slot ? "slot" : "checkpoint"}});
         REQUIRE(saved["persistent"].get<bool>());
+        REQUIRE(saved["checkpoint"].is_string());
         REQUIRE(std::filesystem::file_size(path) == 6957);
         REQUIRE(std::filesystem::exists(recording_path(path)));
         Game native;
@@ -466,6 +531,47 @@ TEST_CASE("MCP native file saves preserve bytes formats and reject failed loads"
         REQUIRE(client.raw_tool("load_game", Json{{"path", damaged}})["result"]["isError"].get<bool>());
         REQUIRE(encode(client.tool("game_state")) == encode(before));
     }
+}
+
+TEST_CASE("MCP persistent saves remain available at the session checkpoint limit", "[mcp][saves]") {
+    Directory temporary;
+    Client client(false, room());
+    const auto initial = client.tool("game_state");
+    for (int i = 1; i <= 64; ++i)
+        REQUIRE(client.tool("save_game")["checkpoint"].get<std::string>() ==
+                "checkpoint-" + std::to_string(i));
+    REQUIRE(client.raw_tool("save_game")["result"]["isError"].get<bool>());
+    REQUIRE(encode(client.tool("game_state")) == encode(initial));
+    client.act(R"({"type":"move","direction":"left"})");
+    const auto before_failure = client.tool("game_state");
+    REQUIRE(client.raw_tool("save_game", Json{{"path", temporary.path.generic_string()}})["result"]["isError"]
+                .get<bool>());
+    REQUIRE(encode(client.tool("game_state")) == encode(before_failure));
+    for (auto kind : {SaveKind::Slot, SaveKind::Checkpoint}) {
+        CAPTURE(kind);
+        const auto path = temporary.file(kind == SaveKind::Slot ? "slot.dat" : "fairy.dat");
+        const Json arguments{{"path", path}, {"kind", kind == SaveKind::Slot ? "slot" : "checkpoint"}};
+        for (int write = 0; write < 2; ++write) {
+            const auto steps = client.tool("game_state")["steps"].as<int>();
+            const auto saved = client.tool("save_game", arguments);
+            REQUIRE(saved["persistent"].get<bool>());
+            REQUIRE(saved["checkpoint"].is_null());
+            REQUIRE(saved["recording"].get<bool>());
+            REQUIRE(client.tool("game_state")["steps"].as<int>() == steps + 1);
+            REQUIRE(std::filesystem::file_size(path) == 6957);
+            REQUIRE(std::filesystem::exists(recording_path(path)));
+            Game native;
+            native.load(path, kind);
+            REQUIRE(native.hero.x == 4);
+            client.act(R"({"type":"move","direction":"left"})");
+            const auto loaded = client.tool("load_game", arguments);
+            REQUIRE(loaded["hero"]["x"].as<int>() == 4);
+            REQUIRE(loaded["recording"]["active"].get<bool>());
+        }
+    }
+    for (const auto id : {"checkpoint-1", "checkpoint-64"})
+        REQUIRE(encode(client.tool("load_game", Json{{"checkpoint", id}})) == encode(initial));
+    REQUIRE(client.raw_tool("save_game")["result"]["isError"].get<bool>());
 }
 
 TEST_CASE("MCP recorded saves and reload branches reproduce exact native save bytes",
@@ -708,8 +814,10 @@ TEST_CASE("MCP runtime restore rejects corrupt incompatible and incomplete files
     const std::string bytes{std::istreambuf_iterator<char>(file), {}};
     auto valid = decode(bytes);
     const auto before = target.tool("game_state");
-    REQUIRE(normal.rpc("runtime/restore", Json{{"path", path}}).contains("error"));
-    for (int problem = 0; problem < 11; ++problem) {
+    const auto wrong_mode = normal.rpc("runtime/restore", Json{{"path", path}});
+    REQUIRE(wrong_mode["error"]["data"]["kind"].get<std::string>() == "session_incompatible");
+    REQUIRE_FALSE(wrong_mode["error"]["data"]["session_continuable"].get<bool>());
+    for (int problem = 0; problem < 12; ++problem) {
         auto broken = valid;
         if (problem == 0)
             broken["version"] = 99;
@@ -733,11 +841,21 @@ TEST_CASE("MCP runtime restore rejects corrupt incompatible and incomplete files
             broken["session"]["game"]["visual"]["last_defeated"] =
                 broken["session"]["game"]["visual"]["battle_enemy"];
             broken["session"]["game"]["visual"]["last_defeated"]["row"] = 999;
-        }
+        } else if (problem == 11)
+            broken["session"]["game"].get_object().erase("rankings");
         std::ofstream(path, std::ios::binary | std::ios::trunc)
             << (problem == 6 ? "{broken" : encode(broken));
         INFO(problem);
-        REQUIRE(target.rpc("runtime/restore", Json{{"path", path}}).contains("error"));
+        const auto rejected = target.rpc("runtime/restore", Json{{"path", path}});
+        REQUIRE(rejected.contains("error"));
+        const bool incompatible = problem == 0 || problem == 4 || problem == 5 || problem == 7 ||
+                                  problem == 8 || problem == 9 || problem == 11;
+        REQUIRE(rejected["error"].contains("data") == incompatible);
+        if (incompatible) {
+            REQUIRE(rejected["error"]["code"].as<int>() == -32003);
+            REQUIRE(rejected["error"]["data"]["kind"].get<std::string>() == "session_incompatible");
+            REQUIRE_FALSE(rejected["error"]["data"]["session_continuable"].get<bool>());
+        }
         REQUIRE(encode(target.tool("game_state")) == encode(before));
     }
 }
