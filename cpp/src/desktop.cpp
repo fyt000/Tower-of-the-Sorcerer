@@ -206,6 +206,7 @@ int main(int argc, char** argv) try {
     std::filesystem::path requested_assets, load_file, replay_file, screenshot;
     auto save_directory = executable / "Savedat";
     std::optional<bool> record;
+    std::optional<Language> language;
     SaveKind load_kind = SaveKind::Slot;
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
@@ -221,6 +222,8 @@ int main(int argc, char** argv) try {
             screenshot = argv[++i];
         else if (arg == "--record")
             record = true;
+        else if (arg == "--language" && i + 1 < argc)
+            language = parse_language(argv[++i]);
         else if (arg == "--checkpoint")
             load_kind = SaveKind::Checkpoint;
         else if (arg == "--help") {
@@ -234,6 +237,7 @@ int main(int argc, char** argv) try {
                          "Replay: Space pause/resume, Left previous, Right next, Home restart, T take over.\n"
                          "Replay: -/+ speed, O settings, Esc main menu. Drop a replay file to watch it.\n"
                          "--record: opt in to save companion replay recordings.\n"
+                         "--language en|ja|en-ja|zh-Hans-ja|zh-Hans-en: select display language.\n"
                          "--checkpoint: use raw Fairy format with --load.\n"
                          "--screenshot FILE: capture the initial frame and exit.\n";
             return 0;
@@ -260,6 +264,8 @@ int main(int argc, char** argv) try {
     int result = 0;
     {
         DesktopSession session(assets, save_directory, {}, record);
+        if (language)
+            session.ui.language = *language;
         if (!load_file.empty())
             session.load(load_file, load_kind);
         else if (!replay_file.empty())

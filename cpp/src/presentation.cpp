@@ -49,6 +49,7 @@ struct Typography {
     struct Typeface {
         std::vector<unsigned char> bytes;
         mutable std::unordered_map<int, Font> sizes;
+        std::vector<int> codepoints;
 
         void load(const std::filesystem::path& path) {
             if (!std::filesystem::exists(path))
@@ -57,6 +58,25 @@ struct Typography {
             if (auto* data = LoadFileData(path.string().c_str(), &count)) {
                 bytes.assign(data, data + count);
                 UnloadFileData(data);
+                // raylib initializes stb_truetype at byte zero. Windows CJK fonts
+                // are collections; move the first face's directory to byte zero,
+                // retaining its absolute table offsets and the original table data.
+                if (bytes.size() >= 16 && std::equal(bytes.begin(), bytes.begin() + 4, "ttcf")) {
+                    const auto be32 = [&](std::size_t at) {
+                        return (std::uint32_t(bytes[at]) << 24) | (std::uint32_t(bytes[at + 1]) << 16) |
+                               (std::uint32_t(bytes[at + 2]) << 8) | bytes[at + 3];
+                    };
+                    const auto offset = std::size_t(be32(12));
+                    if (offset + 12 > bytes.size())
+                        throw std::runtime_error("Invalid CJK font collection");
+                    const auto tables = (int(bytes[offset + 4]) << 8) | bytes[offset + 5];
+                    const auto size = std::size_t(12 + 16 * tables);
+                    if (offset + size > bytes.size())
+                        throw std::runtime_error("Invalid CJK font directory");
+                    const std::vector<unsigned char> directory(bytes.begin() + offset,
+                                                               bytes.begin() + offset + size);
+                    std::copy(directory.begin(), directory.end(), bytes.begin());
+                }
             }
         }
 
@@ -74,7 +94,9 @@ struct Typography {
             if (!font.texture.id || font.baseSize != pixels) {
                 if (font.texture.id && font.texture.id != GetFontDefault().texture.id)
                     UnloadFont(font);
-                font = LoadFontFromMemory(".ttf", bytes.data(), int(bytes.size()), pixels, nullptr, 0);
+                font = LoadFontFromMemory(".ttf", bytes.data(), int(bytes.size()), pixels,
+                                          codepoints.empty() ? nullptr : const_cast<int*>(codepoints.data()),
+                                          int(codepoints.size()));
                 // Glyph alpha already contains antialiasing. Native pixel sampling avoids a second blur.
                 SetTextureFilter(font.texture, TEXTURE_FILTER_POINT);
             }
@@ -82,7 +104,8 @@ struct Typography {
         }
     };
 
-    Typeface body, numbers;
+    Typeface body, numbers, japanese, chinese;
+    Language language = Language::English;
     Vector2 scale{1, 1};
 
     Typography() {
@@ -91,10 +114,31 @@ struct Typography {
             const auto directory = std::filesystem::path(windows) / "Fonts";
             body.load(directory / "seguisb.ttf");
             numbers.load(directory / "segoeuib.ttf");
+            japanese.load(directory / "YuGothR.ttc");
+            if (japanese.bytes.empty())
+                japanese.load(directory / "msgothic.ttc");
+            chinese.load(directory / "msyh.ttc");
         }
+        // An optional user-supplied CJK face also supports portable builds.
+        if (const char* path = std::getenv("TSW_CJK_FONT")) {
+            japanese.load(path);
+            chinese.load(path);
+        }
+        japanese.codepoints = chinese.codepoints = localization_codepoints();
     }
 
-    Font font(int size, bool bold = false) const { return (bold ? numbers : body).at(size, scale.y); }
+    Font font(int size, bool bold = false, std::string_view value = {}) const {
+        const bool unicode =
+            std::any_of(value.begin(), value.end(), [](unsigned char c) { return c >= 128; });
+        if (unicode) {
+            const bool chinese_label = value == language_label(Language::ChineseFromJapanese) ||
+                                       value == language_label(Language::ChineseFromEnglish);
+            const auto& face = (language == Language::Japanese && !chinese_label) ? japanese : chinese;
+            if (!face.bytes.empty())
+                return face.at(size, scale.y);
+        }
+        return (bold ? numbers : body).at(size, scale.y);
+    }
 
     float font_size(Font face, int size) const {
         return face.texture.id == GetFontDefault().texture.id ? float(size) : face.baseSize / scale.y;
@@ -111,13 +155,15 @@ struct Typography {
     }
 
     int width(const std::string& value, int size, bool bold = false) const {
-        const auto face = font(size, bold);
+        const auto face = font(size, bold, value);
         return int(std::ceil(MeasureTextEx(face, value.c_str(), font_size(face, size), 0).x));
     }
 
-    void draw(const std::string& value, int x, int y, int size, Color color = Ink) const {
-        const auto face = font(size);
-        std::istringstream lines(value);
+    void draw(const std::string& value, int x, int y, int size, Color color = Ink,
+              bool translate = true) const {
+        const auto text = translate ? localized_text(language, value) : value;
+        const auto face = font(size, false, text);
+        std::istringstream lines(text);
         std::string line;
         while (std::getline(lines, line)) {
             DrawTextEx(face, line.c_str(), position(float(x), float(y)), font_size(face, size), 0, color);
@@ -126,31 +172,19 @@ struct Typography {
     }
 
     std::string wrap(const std::string& text, int limit, int size) const {
-        std::istringstream paragraphs(text);
-        std::string paragraph, result;
-        while (std::getline(paragraphs, paragraph)) {
-            std::istringstream words(paragraph);
-            std::string word, line;
-            while (words >> word) {
-                const std::string test = line.empty() ? word : line + " " + word;
-                if (!line.empty() && width(test, size) > limit) {
-                    result += line + '\n';
-                    line = word;
-                } else
-                    line = test;
-            }
-            result += line + '\n';
-        }
-        return result;
+        return wrap_localized_text(localized_text(language, text), float(limit), [&](std::string_view line) {
+            return float(width(std::string(line), size));
+        });
     }
 
-    void fit(const std::string& text, Rectangle rect, int size, Color color = Ink, bool right = false,
-             bool bold = false) const {
+    void fit(const std::string& value, Rectangle rect, int size, Color color = Ink, bool right = false,
+             bool bold = false, bool translate = true) const {
+        const auto text = translate ? localized_text(language, value) : value;
         while (size > 10 && width(text, size, bold) > rect.width - 6)
             --size;
         clip(rect);
         const int measured = width(text, size, bold);
-        const auto face = font(size, bold);
+        const auto face = font(size, bold, text);
         DrawTextEx(face, text.c_str(),
                    position(rect.x + (right ? rect.width - measured - 3 : (rect.width - measured) / 2),
                             rect.y + (rect.height - size) / 2),
@@ -186,7 +220,7 @@ struct Typography {
         const Rectangle rect{x, y, 324, height};
         DrawRectangleRec(rect, Color{38, 35, 43, 255});
         DrawRectangleLinesEx(rect, 1, Gold);
-        draw(wrapped, int(x + 12), int(y + 10), 16);
+        draw(wrapped, int(x + 12), int(y + 10), 16, Ink, false);
     }
 };
 
@@ -546,7 +580,19 @@ void Presentation::draw_scene(const Game& game) {
     } else if (mode == 1) {
         art_->scene("data3-open1", Content);
         art_->text.clip({0, MenuHeight, CanvasWidth, float(std::clamp(frame, 0, ContentHeight))});
-        art_->scene("data3-open2", Content);
+        if (art_->text.language == Language::English)
+            art_->scene("data3-open2", Content);
+        else {
+            const auto opening =
+                wrap_localized_text(localized_opening(art_->text.language), 650, [&](std::string_view line) {
+                    return float(art_->text.width(std::string(line), 32));
+                });
+            const int lines = int(std::count(opening.begin(), opening.end(), '\n'));
+            float y = Content.y + (Content.height - lines * 44) / 2;
+            std::istringstream paragraphs(opening);
+            for (std::string line; std::getline(paragraphs, line); y += 44)
+                art_->text.fit(line, {75, y, 650, 44}, 32, WHITE, false, false, false);
+        }
         EndScissorMode();
     } else if (mode == 6) {
         if (frame == 1)
@@ -567,7 +613,20 @@ void Presentation::draw_scene(const Game& game) {
     } else if (mode == 5) {
         art_->scene("data2-end26", Content);
         art_->text.clip({EndingArea.x, EndingArea.y, EndingArea.width, float(std::clamp(frame, 0, 400))});
-        art_->scene("data-exe-ending-story", EndingArea);
+        if (art_->text.language == Language::English)
+            art_->scene("data-exe-ending-story", EndingArea);
+        else {
+            DrawRectangleRec(EndingArea, WHITE);
+            const auto story =
+                wrap_localized_text(localized_ending(art_->text.language), 610, [&](std::string_view line) {
+                    return float(art_->text.width(std::string(line), 24));
+                });
+            const int lines = int(std::count(story.begin(), story.end(), '\n'));
+            float y = EndingArea.y + std::max(8.f, (EndingArea.height - lines * 28) / 2);
+            std::istringstream paragraphs(story);
+            for (std::string line; std::getline(paragraphs, line); y += 28)
+                art_->text.fit(line, {EndingArea.x + 15, y, 610, 28}, 24, BLACK, false, false, false);
+        }
         EndScissorMode();
     } else if (mode == 7 || mode == 8) {
         art_->scene("data-exe-ending-card", Content);
@@ -600,6 +659,13 @@ float command_interval(const Game& game) {
 
 UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mouse) {
     const auto& h = game.hero;
+    if (ui.language != Language::English) {
+        for (int i = 0; i < 4; ++i) {
+            const Rectangle label{12, float(MenuHeight + 101 + i * 29), 38, 22};
+            DrawRectangleRec(label, Panel);
+            art_->text.fit(std::array<const char*, 4>{"HP", "ATK", "DEF", "Gold"}[i], label, 13);
+        }
+    }
     art_->text.fit("Tower " + std::to_string(ui.flight >= 0 ? ui.flight : h.floor),
                    {18, MenuHeight + 59, 124, 24}, 22, Ink, false, true);
     for (int i = 0; i < 4; ++i)
@@ -634,6 +700,11 @@ UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mous
     constexpr std::array<const char*, 6> EquipmentNames{"None", "Iron", "Silver", "Knight", "Holy", "Sacred"};
     for (int i = 0; i < 2; ++i) {
         const int equipment = std::clamp(i == 0 ? h.sword : h.shield, 0, 5);
+        if (ui.language != Language::English) {
+            const Rectangle label{RightX + 12, float(MenuHeight + 59 + i * 60), 82, 22};
+            DrawRectangleRec(label, Panel);
+            art_->text.fit(i == 0 ? "Weapon" : "Shield", label, 17, Gold);
+        }
         art_->text.fit(EquipmentNames[equipment], {RightX + 12, float(MenuHeight + 80 + i * 60), 82, 23}, 19);
         if (equipment)
             art_->icon((i == 0 ? IronSword : IronShield) + equipment - 1,
@@ -699,7 +770,7 @@ UiAction Presentation::draw_dialogue(const Game& game, DesktopUi& ui, Vector2 mo
     constexpr int TextHeight = 188;
     ui.dialogue_scroll = std::clamp(ui.dialogue_scroll, 0.f, std::max(0.f, float(lines * 22 - TextHeight)));
     art_->text.clip({rect.x + 20, rect.y + 62, 376, TextHeight});
-    art_->text.draw(text.c_str(), int(rect.x + 20), int(rect.y + 62 - ui.dialogue_scroll), 18, Ink);
+    art_->text.draw(text.c_str(), int(rect.x + 20), int(rect.y + 62 - ui.dialogue_scroll), 18, Ink, false);
     EndScissorMode();
     if (lines * 22 > TextHeight)
         art_->text.draw("Mouse wheel to scroll", int(rect.x + 20), int(rect.y + 252), 12, Muted);
@@ -725,8 +796,8 @@ UiAction Presentation::draw_inventory(const Game& game, DesktopUi& ui, Vector2 m
         const bool hover = CheckCollisionPointRec(mouse, row);
         DrawRectangleRec(row, count && hover ? Color{88, 79, 76, 255} : Color{66, 62, 70, 255});
         art_->icon(HeroOrb + i, {row.x + 2, row.y + 2, 31, 31}, count ? WHITE : Color{170, 170, 170, 130});
-        art_->text.draw(std::string(Game::item_name(item)).c_str(), int(row.x + 37), int(row.y + 2), 17,
-                        count ? Ink : Muted);
+        art_->text.fit(std::string(Game::item_name(item)), {row.x + 37, row.y + 2, 158, 20}, 17,
+                       count ? Ink : Muted);
         art_->text.draw(count ? passive(item) ? "Passive" : "Use / inspect" : "Not found", int(row.x + 37),
                         int(row.y + 21), 13, count ? Gold : Muted);
         if (count && clicked(row, mouse)) {
@@ -826,7 +897,7 @@ UiAction Presentation::draw_item(const Game& game, DesktopUi& ui, Vector2 mouse)
         int(rect.x + 76), int(rect.y + 68), 18, Gold);
     const auto description = art_->text.wrap(ItemDescriptions[ui.selected_item], 364, 17);
     SetTextLineSpacing(22);
-    art_->text.draw(description.c_str(), int(rect.x + 20), int(rect.y + 112), 17, Ink);
+    art_->text.draw(description.c_str(), int(rect.x + 20), int(rect.y + 112), 17, Ink, false);
     if (passive(item)) {
         if (art_->text.button({rect.x + 20, rect.y + 203, 364, 29}, "Close  [Enter / Esc]", mouse))
             ui.selected_item = -1;
@@ -886,8 +957,16 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
                 return i < int(actions.size()) ? UiAction{actions[i]} : UiAction{};
             }
     } else if (ui.menu == Menu::Options) {
-        constexpr Rectangle rect{182, 46, 436, 464};
+        constexpr Rectangle rect{50, 34, 700, 484};
         art_->text.modal(rect, "Settings");
+        art_->text.draw("Language", int(rect.x + 440), int(rect.y + 60), 19, Gold);
+        for (int i = 0; i < int(Languages.size()); ++i) {
+            const Rectangle choice{rect.x + 440, rect.y + 94 + i * 62, 242, 48};
+            if (art_->text.button(choice, std::string(language_label(Languages[i])), mouse))
+                return {Action::Language, i};
+            if (ui.language == Languages[i])
+                DrawRectangleLinesEx(choice, 2, Gold);
+        }
         if (art_->text.button({rect.x + 18, rect.y + 60, 400, 34},
                               ui.muted ? "Enable music and effects [M]" : "Mute music and effects [M]",
                               mouse))
@@ -952,7 +1031,8 @@ UiAction Presentation::draw_rankings(const Game& game, DesktopUi& ui, Vector2 mo
                                                std::to_string(entry.score),  std::to_string(entry.hp),
                                                std::to_string(entry.attack), std::to_string(entry.defense)};
         for (int column = 0; column < int(cells.size()); ++column)
-            art_->text.fit(cells[column], {Columns[column], 159.f + row * 22, Widths[column], 22}, 16);
+            art_->text.fit(cells[column], {Columns[column], 159.f + row * 22, Widths[column], 22}, 16, Ink,
+                           false, false, column != 1);
     }
     const bool submission =
         ui.ranking_entry && ui.ranking_entry_category == ui.ranking_category && ui.ranking_position > 0;
@@ -965,7 +1045,7 @@ UiAction Presentation::draw_rankings(const Game& game, DesktopUi& ui, Vector2 mo
         const Rectangle input{128, 415, 430, 30};
         DrawRectangleRec(input, Bar);
         DrawRectangleLinesEx(input, 1, Gold);
-        art_->text.draw(ui.ranking_name + "_", 136, 420, 18);
+        art_->text.draw(ui.ranking_name + "_", 136, 420, 18, Ink, false);
     }
     if (art_->text.button({128, 464, 178, 30},
                           ui.ranking_reset_confirmation ? "Confirm reset" : "Reset category", mouse,
@@ -1067,12 +1147,14 @@ UiAction Presentation::draw_replays(DesktopUi& ui, Vector2 mouse) {
         const int index = row + ui.replay_first_row;
         const Rectangle button{rect.x + 18, rect.y + 92 + row * 39, 644, 32};
         const auto text = ui.replay_files[index].filename().u8string();
-        if (art_->text.button(button, std::string(text.begin(), text.end()), mouse)) {
+        if (clicked(button, mouse)) {
             ui.replay_selected = index;
             const auto path = ui.replay_files[index].u8string();
             ui.replay_path.assign(path.begin(), path.end());
             ui.replay_path_focus = false;
         }
+        DrawRectangleRec(button, Panel);
+        art_->text.fit(std::string(text.begin(), text.end()), button, 18, Ink, false, false, false);
         if (ui.replay_selected == index)
             DrawRectangleLinesEx(button, 2, Gold);
     }
@@ -1088,7 +1170,7 @@ UiAction Presentation::draw_replays(DesktopUi& ui, Vector2 mouse) {
         ui.replay_path_focus = true;
     art_->text.clip(field);
     const int offset = std::max(0, art_->text.width(ui.replay_path, 16) - int(field.width) + 24);
-    art_->text.draw(ui.replay_path, int(field.x + 8) - offset, int(field.y + 6), 16);
+    art_->text.draw(ui.replay_path, int(field.x + 8) - offset, int(field.y + 6), 16, Ink, false);
     EndScissorMode();
     if (art_->text.button({rect.x + 18, rect.y + 368, 314, 32}, "Play [Enter]", mouse,
                           !ui.replay_path.empty()))
@@ -1127,6 +1209,7 @@ UiAction Presentation::draw_replay_controls(const DesktopUi& ui, Vector2 mouse) 
 }
 
 UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
+    art_->text.language = ui.language;
     resize_canvas(window_viewport());
     const int mode = game.visual.raster_mode;
     if (!ui.home) {
@@ -1234,7 +1317,8 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
             ui.replay_paused
                 ? (ui.replay_step == ui.replay_count && !ui.replay_in_progress ? "Finished" : "Paused")
                 : "Playing";
-        status = ui.replay_error.empty() ? state + "  /  " + ui.replay_name + "  /  " + game.status
+        status = ui.replay_error.empty() ? localized_text(ui.language, state) + "  /  " + ui.replay_name +
+                                               "  /  " + localized_text(ui.language, game.status)
                                          : ui.replay_error;
     }
     if (!ui.replay_active && !ui.modal() && !game.dialogue && ui.flight < 0) {
@@ -1250,7 +1334,7 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
     art_->text.fit(
         status,
         {7, MenuHeight + ContentHeight + 3, ui.ending_wait ? 643.f : CanvasWidth - 14.f, StatusHeight - 6},
-        17);
+        17, Ink, false, false, !ui.replay_active);
     if (ui.ending_wait && !ui.replay_active &&
         art_->text.button({658, MenuHeight + ContentHeight + 3, 135, StatusHeight - 6}, "Continue", mouse,
                           !ui.modal()))

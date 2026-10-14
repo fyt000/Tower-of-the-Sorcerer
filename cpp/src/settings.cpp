@@ -5,6 +5,7 @@
 namespace tsw {
 namespace {
 void validate(const Settings& settings) {
+    parse_language(settings.language);
     if (settings.game_speed < 0 || settings.game_speed >= int(GameSpeeds.size()) ||
         settings.replay_speed < 0 || settings.replay_speed >= int(ReplaySpeeds.size()))
         throw std::runtime_error("Saved speed setting is out of range");

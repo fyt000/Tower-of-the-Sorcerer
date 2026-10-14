@@ -68,6 +68,14 @@ Shop choices are clickable; Esc cancels. Dialogue and Wisdom clues scroll
 with the wheel. Settings include speeds, recording, mute and **Hero Orb actual
 damage**, an optional forecast that includes Cross and Dragon Slayer bonuses.
 
+**Settings → Language** offers original English, original Japanese, English
+retranslated from Japanese, simplified Chinese retranslated from Japanese, and
+simplified Chinese translated from current English. Chinese item and monster
+names follow TSWH5. Use `--language ja`, `en-ja`, `zh-Hans-ja`, `zh-Hans-en` or `en`
+to override the saved language for one launch. See the
+[translation sources and catalogs](locales/README.md) for extracted text and
+alignment notes.
+
 ## Saves and recording
 
 Saves and `settings.json` live in `Savedat/` beside the executable, overridden

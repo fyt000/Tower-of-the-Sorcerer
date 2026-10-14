@@ -1,0 +1,269 @@
+cpp_id	japanese_source_id	en	ja	en-ja	zh-Hans-ja	zh-Hans-en
+0	0	------	「・・・」	...	「……」	……
+1	1	------ Hey!	「・・・・・おい・・・」	...Hey...	「……喂……」	……喂！
+2	2	------ Hey! Wake up!	「・・・・・おいっ！起きろ！」	...Hey! Wake up!	「……喂！醒醒！」	……喂！醒醒！
+3	3	What a relief you're okay! You were caught and thrown into this prison by the Magic Sergeant. You were unconscious when you got here. Nevertheless, you are so lucky that you just woke up. I've finished the escape tunnel. Let's break out.	「おお無事か！おまえ、ここの魔導師に捕まってこの牢屋に入れられてたんだよ。で、今まで気を失っていた訳だ。にしても、おまえ運がいいぜ。ちょうど抜け穴が完成したときに来るんだからな。そういう訳で俺は今から脱走するところだ。おまえもついてこい。」	Good, you're alive! The sorcerer here captured you and threw you into this cell. You've been unconscious ever since. Lucky for you, I just finished an escape tunnel. I'm breaking out now. Come with me.	「太好了，你还活着！你被这里的魔导师抓住，关进了这间牢房，一直昏迷到现在。不过你运气真好，正赶上我把暗道挖通。我这就要逃出去，你也跟着来吧。」	太好了，你没事！你被魔导师抓住，扔进了这间牢房。进来时你已经昏过去了。不过你运气很好，刚好现在醒过来。我已经把逃生暗道挖好了，一起逃出去吧。
+4	4	O.K. Well, excuse my going first. Your weapon and shield were stolen by the guards. It's not wise to wander about without them.	「よし、じゃあ俺は先に行かせてもらうぜ。ああ、それからおまえの剣と盾、あいつらに取り上げられちまったみたいだな。この塔の中を丸腰で歩き回るのはやめた方がいい。	All right, I'll go ahead. Oh, and it looks like they confiscated your sword and shield. You shouldn't wander around this tower unarmed.\n\n	「好，那我先走了。对了，你的剑和盾好像都被他们没收了。在这座塔里，可别赤手空拳地到处乱闯。\n\n	好，那我先走了。你的武器和盾被守卫抢走了，没有装备就到处乱走可不明智。\n\n
+5	5	Ah, we meet again! Thank you. You beat the Gate-Keeper of this area. I was defeated and imprisoned again. Such a small prison this time. I'm making a secret tunnel in front of the Dragon. Go up to 35th floor and wait for me, while I complete the tunnel.	「ようっ！また会ったな。ここの門番を倒してくれて助かったぜ、ドジってまた捕まっちまってな。今度は、こんな奥の牢に閉じ込められちまった。まあ、それはそれとして、３５階にいるドラゴンの手前まで抜け穴を掘っといたんだ。開通させとくから先に行っててくれ。」	Hey, we meet again! Thanks for taking out the gatekeeper. I messed up and got caught again, and this time they locked me in a cell deep inside. Anyway, I've dug a tunnel leading to the dragon on floor 35. I'll open it up, so go on ahead.	「哟，又见面了！多亏你打倒了这里的门卫。我一时失手，又被抓了，这次还被关进了深处的牢房。先不说这些，我已经挖了一条通往35层魔龙跟前的暗道。我会把它打通，你先过去吧。」	啊，又见面了！谢谢你打倒这里的门卫。我被打败后又关了起来，这次的牢房可真小。我正在挖一条通往魔龙面前的暗道。你先上35层等我，等我把暗道挖完。
+6	6	Don't worry, I'll be there.	「後でちゃんと行くから３５階まで先に行っておいてくれ。」	I'll catch up with you. Go ahead to floor 35.	「我稍后一定会赶过去，你先去35层吧。」	别担心，我会过去的。
+7	7	Oh, thank you for your help. I will raise your offensive and defensive power by 3%. [You feel your strength rise]	「おお、助けてくれてありがとうよ。お礼に、そなたの攻撃力と防御力を３％だけあげてやろう。」（攻撃力と防御力が上がった！）	Thank you for rescuing me. As a reward, I'll increase your attack and defense by 3%. (Your attack and defense increased!)	「谢谢你救了我。作为回报，我把你的攻击力和防御力各提升3%。」（攻击力和防御力提升了！）	谢谢你帮了我。我会把你的攻击力和防御力各提升3%。［你感到自己的力量增强了。］
+8	8	Hi, thank you for your help. Please accept a little reward. (Received 1000 Gold.)	「やあ、助けてくれてありがとう。少ないけれど、お礼にとっておいてくれ。」（１０００ＧＯＬＤもらった！）	Thanks for helping me. It isn't much, but please accept this as a reward. (You received 1,000 gold!)	「谢谢你帮了我。虽然不多，还是收下这点谢礼吧。」（获得了1000金币！）	谢谢你帮忙。收下这点小小的报酬吧。（获得1000金币。）
+9	9	The Magic Sergeant, Zeno, says "Welcome to 'The Magic Tower'. You are the hundredth man who dared to enter my tower. You will now face my guards. Should you happen to survive, I will fight with you in person specially. You should accept your fate."	魔導師ゼノ「ようこそ、『魔法の塔』へ。おまえがちょうど１００人目の侵入者だ。本来なら手下共に相手をさせるところだが、特別にこの私が自ら相手になってやろう。己の不運を呪うのだな。」	Zeno the Sorcerer: Welcome to the Magic Tower. You are its hundredth intruder. Ordinarily I would leave you to my servants, but this time I shall deal with you myself. Curse your own misfortune!	魔导师泽诺：「欢迎来到『魔法之塔』。你正好是第100个闯入者。本来该让手下对付你，不过这次我就破例亲自出手。怨恨自己的不幸吧！」	魔导师泽诺说：「欢迎来到『魔法之塔』。你是第100个敢闯进我塔里的人。先和我的守卫交手吧。你若能活下来，我再亲自和你战斗。接受你的命运吧。」
+10	10	What? Oh!	「なんだっ！？　うわ～っ！？」	What?! Aaah!	「什么？！啊——！」	什么？啊！
+11	11	I will grant you orb of the hero. When you use it, you will be able to forecast the ability of the living monsters on that floor, and how much damage they can do to you. Make good use of it.	「おぬしにこの勇者のオーブをさずけよう。これを持っていれば、セーブ機能が使えるほか、今いる階のモンスターの能力を調べてダメージを予測してくれるじゃろう。有効に使うのじゃ。」	I bestow upon you the Hero's Orb. With it, you can save your game, inspect the monsters on your current floor, and predict the damage they will deal. Use it wisely.	「我把这颗勇者灵球赐给你。有了它，你就能保存游戏，查看当前楼层怪物的能力，并预测战斗伤害。好好利用它吧。」	我把勇者灵球赐给你。使用它，就能查看当前楼层怪物的能力，预测它们会对你造成多少伤害。好好利用它。
+12	12	Ha ha ha, You are lucky to have gotten so far. Since it has come to this, I shall fight with you personally, but first I must test your strength. Go and fight! Skeleton Soldiers!	「ふふふ、よくここまできたな。かくなる上はこの俺様がじきじき相手になってやる・・・といいたいところだが、まずは貴様の力を見せてもらうぞ！出会え！スケルトン兵士たちよ！」	Heh heh, you've done well to get this far. I suppose I'll have to face you myself... but first, show me what you can do! Come forth, skeleton soldiers!	「呵呵，竟然能走到这里。看来只好由我亲自对付你了……不过先让我看看你的实力！出来吧，骷髅士兵们！」	哈哈，能走到这里，你真走运。既然如此，我就亲自和你交手。不过先让我试试你的实力。骷髅士兵们，去战斗吧！
+13	13	How considerably you do. But I will never let you pass. Here, you will die. Fight me!	「ほほう、なかなか・・・。だが、ここから先へは行かせん！ここで葬ってくれるわっ！さあ、こいっ！！！」	Not bad... But you shall go no farther! This is where I bury you! Come and fight!	「哦，还挺有两下子……不过我绝不会让你继续前进！就在这里埋葬你！来吧！」	你还挺有两下子。不过我绝不会让你通过。你会死在这里。和我战斗吧！
+14	14	No, It's not possible! You may have defeated me, but beyond this point you must meet some enemies and snares that are powerful beyond anything you've seen. If careless, you will die!	「ううう・・・よくぞこの俺様を倒せたものだ・・・。しかし、これから先の階はこれまでとは比べものにならんほど強力な敵とワナが待っているぞ、せいぜい気を付けることだな・・・」	Ugh... So you managed to defeat me... But beyond here await enemies and traps far stronger than any you've faced. Watch your step...	「呜……你竟然打倒了我……不过，再往上的敌人和陷阱，比之前厉害得多。你可要小心……」	不，不可能！你虽然打倒了我，但前方的敌人和陷阱，比你见过的都要强大得多。稍有不慎，你就会死！
+15	15					
+16	16	Hey! We meet again! How greatly you beat the boss of this area. It troubled me that I couldn't go upstairs any more.	「よっ！またあったな。すげえじゃねえか。ここのブロックのボスを倒すとはよ。俺もこれ以上、先の階へ行けなくて困ってたんだ。	Hey, you again! Impressive work, beating this section's boss. I was stuck here too, unable to reach the upper floors.\n\n	「哟，又见面了！你真厉害，竟然打倒了这个区域的首领。我也一直困在这里，上不了更高的楼层。\n\n	哟，又见面了！你竟然打倒了这个区域的首领，真厉害。我一直因为上不了更高的楼层而发愁。\n\n
+17	17	Ah! Are you all right? The Big Octopus which lives in here was blocking my progress. Now a loophole has completed at last. You had better put off beating him. See ya later!	「よおっ！無事だったか？ここの大ダコが道をふさいでいて困っていたんだが今ようやく抜け穴が完成したんだ。おまえも、ここの大ダコを倒すのは後回しにした方がいいぜ。じゃあ、またなっ！」	Hey! You're still alive? That giant octopus was blocking my way, but I've finally finished a tunnel. You should leave the octopus for later too. See you around!	「哟，你没事吧？这里的大章鱼一直挡着路，不过我终于把暗道挖通了。你也最好把打倒大章鱼的事留到以后。回头见！」	啊，你没事吧？这里的大章鱼一直挡着我的去路，现在暗道终于挖好了。你最好暂时别去打它。回头见！
+18	18	Well, you found me. I will give you an elixir. Using this medicine, you will gain life according to the offensive and defensive power. It works great if you use it later.	「やれやれ、見つかってしもうたか。褒美におぬしに”エリクサー”をやろう。この薬を使えば、その時の攻撃力と防御力に応じた値だけ生命力が回復するじゃろう。じゃから、当然、後の方で使う方が効果は大きいぞ。」	Well, you found me. As a reward, take this Elixir. It restores HP according to your attack and defense when you use it. Naturally, the longer you wait, the more effective it will be.	「唉，还是被你找到了。奖励你一瓶圣水。使用它时，会根据你当时的攻击力和防御力恢复生命。所以当然越晚使用，效果越好。」	你找到我了。我送你一瓶圣水。用它可以根据攻击力和防御力恢复生命，留到后面再用效果更好。
+19	19	Well, You beat the skeletons and invaded. Never regard me as small like a skeleton. I will show you that I am as immortal as god. Hey, come on!	「ほほう、貴様か、スケルトンを倒して侵入してきた勇者というのは・・・だがこの私をスケルトン共のようなザコと一緒にするなよ。不死に等しいこの私の力を見せてやろう。さあ、こいっ！」	So you're the hero who defeated the skeletons and broke in... Don't lump me in with those weaklings. Let me show you the power of one who is all but immortal. Come!	「哦，你就是打倒骷髅、闯进这里的勇者……可别把我和那些杂兵相提并论。我近乎不死，就让你见识一下我的力量。来吧！」	你打倒了骷髅，闯进来了。可别把我看成骷髅那样的小角色。我会让你见识如神一般不死的力量。来吧！
+20	20	Good god! I've never dreamed I'd be defeated. There is no doubt of your strength. But you will never win against the Great Magic Master as weak as you are. You shall only celebrate fleeting victory at most.	「ううう・・・よもや、この私までもが敗れるとは・・・どうやら貴様の力は本物のようだな・・・だが、その程度では大魔導師様には絶対にかなわんぞ、せいぜい束の間勝利に酔いしれているがいい・・・」	Ugh... I never thought even I would fall... Your strength is real, it seems. But you're still no match for the Archsorcerer. Enjoy your brief victory while it lasts...	「呜……没想到连我也败了……看来你确实有实力。不过凭这点本事，绝对赢不了大魔导师。趁现在尽情陶醉于这短暂的胜利吧……」	天哪！我做梦都没想到自己会被打败。你的力量确实不容置疑。不过以你现在的实力，绝对赢不了大魔导师。你最多只能庆祝这短暂的胜利。
+21	21					
+22	22	-K-I-L-L- -A-N- -I-N-V-A-D-E-R-	「・・・ジ・・・ユウシャ・・・・・コロス・・・」	...HERO...KILL...	「……勇者……杀死……」	杀——死——入——侵——者——
+23	23					
+24	24	Now is the time. You were chosen. If you aren't afraid of Death, you should go through the gate of Time and Space, and come to me.	「・・・ジ・・・トキハキタレリ・・・エラバレシモノヨ、シヲオソレヌナラバジクウノモンヲクグリテ、ワガモトヘクルガヨイ・・・」	...THE TIME HAS COME...CHOSEN ONE, IF YOU DO NOT FEAR DEATH, PASS THROUGH THE GATE OF TIME AND SPACE AND COME TO ME...	「……时机已到……被选中之人啊，若你不惧死亡，就穿过时空之门，来到我面前……」	时机已到。你是被选中的人。如果你不惧死亡，就穿过时空之门，来到我面前。
+25	25	Oh! What? This is a doll!	「これはっ……！人形だっ！」	This is... a doll!	「这是……人偶！」	啊！什么？这是个人偶！
+26	26	The tunnel has not been completed yet. You should have waited a little longer, and you should not have used items. I had a bug in the program. There! Don't worry!	「あっ！まだ抜け穴、完成してなかったのに・・・もう少し待ってればアイテムを使わずにすんだはずだぞ。予定が狂っちまうな・・・いや、気にしないでくれ。」	Ah! I hadn't finished the tunnel yet... If you'd waited a little longer, you wouldn't have needed that item. This throws off the plan... Never mind.	「啊！暗道还没挖通呢……你再等一会儿，就不用消耗道具了。这下计划被打乱了……算了，别在意。」	暗道还没挖完。你该再等一会儿，不该消耗道具。我这边的程序出了点问题……算了，别担心！
+27	27	Oh, I have finished the tunnel. Wha? It's you again. You came at a good time. I have openned a tunnel, and you may use it freely.	「ああ、やっと抜け穴が完成した。あれ？またお前か。いいタイミングできたな。また抜け穴作っといたぜ。自由に使ってくれ。」	At last, the tunnel is finished. Oh, you again! Good timing. I've made another passage. Use it as you please.	「啊，暗道终于挖通了。咦，又是你。来得正好，我又挖了一条暗道，随便用吧。」	哦，暗道已经挖好了。咦，又是你。来得正好。我打通了一条暗道，你随便用吧。
+28	28	The last boss and the captured princess must be in this area. Hmm, I wonder if we should wait before fighting him.	「このブロックに最後のボスと捕まったプリンセスがいるはずだが、今はまだ戦うのは早すぎるだろうな。」	The final boss and the captive princess should be in this section, but you're probably not ready to fight him yet.	「最终首领和被囚禁的公主应该就在这个区域，不过现在去挑战他，还太早了吧。」	最终首领和被囚禁的公主应该就在这个区域。嗯，也许我们应该再等等，别急着和他战斗。
+29	29	You are a brave man beating the bosses of the first and second areas, and ascending the tower. But the game is over now. Here and Now, I will beat you for myself! Give up!	「貴様だな、第１、第２ブロックのボスを倒し登ってきた勇者というのは。だがそれも、ここで終わりだ！ここのブロックのボスである私が自ら貴様の首を上げてやるわっ！覚悟しろっ！」	So you're the hero who beat the bosses of the first two sections and climbed this far. Your journey ends here! As this section's boss, I'll take your head myself! Prepare yourself!	「你就是打倒前两个区域的首领、一路爬上来的勇者吧。不过到此为止了！我是这里的首领，就由我亲自取下你的首级！做好觉悟吧！」	你打倒前两个区域的首领，一路爬上了这座塔，真是个勇敢的人。不过现在一切都结束了！就在这里，我会亲自打倒你！放弃吧！
+30	30	You think you're pretty strong, huh? If you can make it to the 40th floor, I shall fight with you again. There, you will die!	「ううう……今回はこのぐらいにしておいてやる……４０階まで登ってこれたら今度は本気で相手をしてやるからなっ！覚えておけっ！」	Ugh... I'll let you off this time... If you make it to floor 40, I'll fight you seriously! Remember that!	「呜……这次就先放过你……等你爬到40层，我会认真和你打！给我记住！」	你觉得自己很强，是吧？你若能到40层，我就再和你交手。你会死在那里！
+31	31	There you are. I have just finished the tunnel. As you go through it, you will get to the Dragon. And then you should go up.	「おお、来たか。ちゃんと、抜け穴を開通させておいたぜ、この抜け穴を通ればドラゴンの後ろに出られるから、そこから上の階に行くんだな。」	There you are. I've opened the tunnel as promised. It takes you behind the dragon; you can reach the upper floors from there.	「哦，你来了。我已经把暗道打通了。穿过去就能到魔龙身后，再从那里上楼吧。」	你来了。我刚把暗道挖好。穿过去就能到魔龙那里，然后你应该继续上楼。
+32	32	The Golden Knight (who is the boss of this area) has a strong attitude in spite of being weak. It is for this reason that he is disliked by the Magic Sergeant, Zeno, who is the sub commander of this tower.	「このブロックのボスの金騎士は弱いくせに態度だけはでかいから、この塔の副将格の魔導師ゼノには嫌われているらしい。」	The Golden Knight, this section's boss, is weak but full of himself. Apparently Zeno the Sorcerer, the tower's second in command, can't stand him.	「这个区域的首领金骑士，本事不大，架子倒不小。听说塔里的副将魔导师泽诺很讨厌他。」	金骑士是这个区域的首领。他虽然弱，却十分傲慢。所以塔里的副统领魔导师泽诺很讨厌他。
+33	33	I wonder how you were able to come so far. I will make sure you go no further. I will humiliate you 10 times as much as you've disgraced this tower. Ghost Soldiers, charge!	「よくきたな。今度はさっきの様な訳にはいかんぞ！この屈辱は１０倍にして返してくれるわっ！死霊兵士突撃！」	So you've come. This time will be different! I'll repay this humiliation tenfold! Ghost soldiers, charge!	「你终于来了。这次可不会像刚才那样了！这份屈辱，我要十倍奉还！鬼战士，冲锋！」	真不知道你怎么能走到这里。我不会再让你前进。你给这座塔带来的耻辱，我要十倍奉还。鬼战士，冲锋！
+34	34	Humph, that was nothing! Soldiers, charge!	「ふふん、こんなのは小手調べだっ！兵士突撃！」	Hmph, that was just a warm-up! Soldiers, charge!	「哼，这只是热身！战士，冲锋！」	哼，那不算什么！战士，冲锋！
+35	35	We are only beginning. Let's fight from now on. Swordsmen, charge!	「まだまだ、これからっ！剣士突撃！」	We're only getting started! Swordsmen, charge!	「还没完呢！剑士，冲锋！」	这才刚开始。现在继续战斗吧。剑士，冲锋！
+36	36	Heck! How about this attack? Knights, charge!	「うぬぬ……だが、これはどうだっ！騎士突撃！」	Grr... Try this! Knights, charge!	「唔……再试试这个！骑士，冲锋！」	可恶！试试这一招怎么样？骑士，冲锋！
+37	37	How dare you defeat my followers? Never shall I forgive you! Now I won't use discretion. Give up!	「うう……私の部下達を……許さんっ！許さんぞ！今度は手加減はしてやらんっ！覚悟しろ！」	You... my men... I'll never forgive you! This time I'm holding nothing back! Prepare yourself!	「你……竟敢把我的部下……不可饶恕！这次我绝不留手！觉悟吧！」	你竟敢打倒我的部下？我绝不原谅你！现在我不会再手下留情。放弃吧！
+38	38	I will unwillingly forgive you this time. But we shall quarrel seriously when we meet again. You had better give up!	「ごほっ……今回はこのへんで……はあはあ……許しておいてやる……。だが次にやる時は今度こそ本当に本気で相手をしてやるからなっ！覚悟しておけっ！」	Cough... That's enough for now... pant, pant... I'll let you off... But next time, I'll really, truly fight you seriously! Be ready!	「咳……这次就到这里……呼、呼……暂且放过你……不过下次，我一定真正认真地对付你！做好觉悟吧！」	这次我就勉强放过你。不过下次再见，我会认真和你交手。你最好放弃吧！
+39	39					
+40	40	The Golden Knight says "Oh! Sir Zeno. I was not able to catch the brave man. Please forgive me."	金騎士「あっ……！ゼノ様……。あと一歩という所で、勇者を取り逃がしてしまいました。どうか、お許しを……。」	Golden Knight: Ah... Lord Zeno... I almost had the hero, but he escaped. Please forgive me...	金骑士：「啊……泽诺大人……眼看就要抓住勇者，却让他逃了。请您原谅……」	金骑士：「啊！泽诺大人。我没能抓住勇者，请您原谅。」
+41	41	The Magic Sergeant, Zeno replies "You weren't? I dare you to say that again. You come running up here like a coward and tell me you couldn't do your job. What shame! This tower has no need for the likes of you! You've failed me for the last time. You shall now die."	魔導師ゼノ「取り逃がしただと……？逃げてきたのは貴様の方ではないかっ！この恥知らずめがっ！貴様のような臆病者はこの塔には不要だっ！ここで、死ねっ！」	Zeno the Sorcerer: He escaped? You're the one who ran away! You shameless fool! This tower has no use for a coward like you! Die!	魔导师泽诺：「让他逃了？逃回来的是你吧！不知羞耻的东西！这座塔不需要你这种胆小鬼！死在这里吧！」	魔导师泽诺：「没抓住？你还敢这么说。你像个胆小鬼一样逃到这里，还告诉我没完成任务。真丢脸！这座塔不需要你这种人！我不会再容忍你的失败。你现在就得死！」
+42	42	The Golden Knight says "Oh God, please forgive me! Ah!"	金騎士「ああ、どうか、お許し……ぎゃあ～～～っ！！！」	Golden Knight: Please, forgive... Aaaargh!	金骑士：「啊，求您原谅……啊——！」	金骑士：「天哪，求您原谅！啊——！」
+43	43	The Magic Sergeant, Zeno says "I behaved unbecomingly. But don't worry. I quite different from such a fellow. If you should come up to me, I would fight with you directly. I'm waiting for you."	魔導師ゼノ「お見苦しいところをお見せしたな……。だが、安心してもらおう。私はこのようなゴミとはわけが違う。もし、お前が上まで登ってこれたなら今度は、私が直々にお相手しよう。待っているぞ……。」	Zeno the Sorcerer: Forgive that ugly scene. Rest assured, I am nothing like that piece of trash. If you make it to the top, I shall face you myself. I'll be waiting...	魔导师泽诺：「让你见笑了。不过你放心，我和这种废物可不一样。你若能爬到上面，就由我亲自应战。我等着你……」	魔导师泽诺：「刚才失态了。不过你放心，我和那种家伙可不一样。你若能到我这里，我会直接和你战斗。我等着你。」
+44	44	The Magic Sergeant, Zeno "It's amazing that you found your way here at last. I compliment you. Now, as promised, I'll fight with you, man to man!"	魔導師ゼノ「よくぞ、ここまで、たどりついたものだ。誉めてやろう。約束どおり、この私が直々に相手をしよう。さあ、来るがいい。」	Zeno the Sorcerer: Well done, reaching this place. You have my praise. As promised, I shall face you myself. Come!	魔导师泽诺：「能走到这里，值得称赞。我会遵守约定，亲自和你交手。来吧。」	魔导师泽诺：「你终于找到这里，真让人惊讶。值得称赞。现在我会兑现承诺，与你一对一交手！」
+45	45	The Magic Sergeant, Zeno "Alas..."	魔導師ゼノ「うっ……この陣形は……まずいっ！」	Zeno the Sorcerer: That formation... This is bad!	魔导师泽诺：「这个阵形……糟了！」	魔导师泽诺：「糟了……」
+46	46					
+47	47	The brave man says "Who? It's you! Why are you in such a place?"	勇者「おまえはっ……！どうしてこんな所に！」	Hero: You...! What are you doing here?	勇者：「是你……！你怎么会在这里？」	勇者：「谁？是你！你怎么会在这里？」
+48	48	The thief replied "Humph. There is only one reason why I'm here. And this is it!"	盗賊「ふふふ……ここにいるという事は、答えは１つしかあるまい。こういう事だっ！」	Thief: Heh heh... There can be only one reason I'm here. This!	盗贼：「呵呵……我会出现在这里，理由只能有一个。就是这样！」	盗贼：「哼。我会在这里，只有一个原因。就是这个！」
+49	49	The brave man says "Huh? Hey! You're Zeno! Are you still alive?"	勇者「あっ！おまえはゼノッ！生きていたのか！？」	Hero: Ah! You're Zeno! You're alive?!	勇者：「啊！你是泽诺！你还活着？！」	勇者：「什么？你是泽诺！你还活着？」
+50	50	The Magic Sergeant, Zeno says "I will never die. I merely tested your intelligence as a soldier."	魔導師ゼノ「あんなことで倒されるものか。あれは、おまえの戦士としての知性を試したにすぎん。」	Zeno the Sorcerer: Did you think that would kill me? I was merely testing your intelligence as a warrior.	魔导师泽诺：「那种程度怎么可能打倒我？我只是试试你作为战士的智慧罢了。」	魔导师泽诺：「我永远不会死。我只是在测试你作为战士的智慧。」
+51	51	The brave-man says "Huh? What do you mean? Why did you do such a thing?"	勇者「なにっ！？……どういうことだっ！どうして、こんな事を……！？」	Hero: What?! What do you mean? Why go to all this trouble?	勇者：「什么？！……到底怎么回事？为什么要做这些事？！」	勇者：「什么？你是什么意思？为什么要这么做？」
+52	52	The Magic Sergeant, Zeno: "The Sacred Sword 'Weaponer' which you have and The Omniscient Staff 'Intellion' which I have, Legend says that whoever unites the two will recieve great wisdom. But to this end, it must be assured that the soldier who does so can handle the the power of that sword."	魔導師ゼノ「おまえの持つ神剣ウェポナー、そして私の持つ全能の杖インテリオン。この２つの力が合わさる時、偉大なる知恵を手に入れる事ができるという……。しかし、それには、その剣の力を十分に発揮できる能力を持った戦士が必要となるのだ。」	Zeno the Sorcerer: The divine sword Weaponer that you bear, and the omnipotent staff Intellion that I wield... It is said that when their powers unite, one can obtain great wisdom. But that requires a warrior capable of drawing out the sword's full power.	魔导师泽诺：「你持有的神圣剑『威波纳』，和我持有的全能之杖『因特里昂』，据说当两者的力量结合时，就能获得伟大的智慧……不过，这需要一位能充分发挥神剑力量的战士。」	魔导师泽诺：「你持有的神圣剑『威波纳』，和我持有的全知之杖『因特里昂』，传说只要把两者合为一体，就能获得伟大的智慧。但为此，必须确保那位战士能驾驭这把剑的力量。」
+53	53	The brave man says "Are you saying... Am I this soldier?"	勇者「その戦士が俺だというのか……！？」	Hero: And you're saying that warrior is me...?	勇者：「你是说，那位战士就是我……？！」	勇者：「你是说……我就是那位战士？」
+54	54	The Magic Sergeant, Zeno: "Yes, you are correct. But when you came here, your ability wasn't sufficient to master the sacred sword 'Weaponer'.	魔導師ゼノ「そうだ……しかし、おまえの技量はその神剣ウェポナーを使いこなすには十分ではなかった。	Zeno the Sorcerer: Yes... But your skill was not yet sufficient to master the divine sword Weaponer.\n\n	魔导师泽诺：「没错……不过，你原先的本领还不足以驾驭神圣剑『威波纳』。\n\n	魔导师泽诺：「没错。不过你来到这里时，还没有足够的能力驾驭神圣剑『威波纳』。\n\n
+55	55	The brave-man replies "Well, this means that the rumour that a princess was trapped here... was actually a lie in order to get me here, wasn't it?"	勇者「では、姫がさらわれたという情報も、俺をここまで、おびき寄せる為のワナだったというのかっ！？」	Hero: Then the story about the kidnapped princess was a trap to lure me here?!	勇者：「那么，公主被掳走的消息，也是为了把我引到这里而设下的陷阱？！」	勇者：「那么，公主被困在这里的传闻……其实是为了把我引到这里而编造的谎言？」
+56	56	The Magic Sergeant, Zeno says "Yes, that right. And now, if we can work together, this farce will end. Now is the time to act. Using omniscient power, We shall break the sacred sword and recieve great enlightenment. Soldier of the Sacred Sword! Let's finish this!"	魔導師ゼノ「その通りだ。そして、後は私がおまえの力を取りこめば、この茶番劇も終わりとなる……。時は来たれり……我全能なる力を用いて、神剣を砕き偉大なる知恵を手に入れん……。ゆくぞっ！神剣の戦士よ！」	Zeno the Sorcerer: Precisely. Once I absorb your power, this farce will be over. The time has come... With my omnipotent power, I shall shatter the divine sword and obtain great wisdom... Come, warrior of the divine sword!	魔导师泽诺：「正是如此。等我吸收你的力量，这场闹剧就结束了……时机已到……我将以全能之力击碎神剑，获得伟大的智慧……来吧，神剑的战士！」	魔导师泽诺：「没错。现在，只要我们合作，这场闹剧就会结束。行动的时机已到。凭借全知之力，我们将击碎神剑，获得伟大的觉悟。神剑的战士！让我们把这件事做完！」
+57	57	I believe there is a sword on the 5th floor and a shield on the 9th, you had better get them first of all. See you later!	確か５階に剣、９階に盾があったはずだから、まずそれを手に入れることを考えるんだな。じゃあ、またなっ！」	I believe there's a sword on floor 5 and a shield on floor 9. Get those first. See you around!	我记得5层有剑，9层有盾，先想办法拿到它们吧。回头见！」	我记得5层有剑，9层有盾。你最好先拿到它们。回头见！
+58	58	I heard that there is a shield on the 11th floor and a sword on the 17th. I would get them if I were you. Please excuse my going first!	ああ、あと聞いた話だが、１１階に盾、１７階に剣があるそうだ。盾よりも剣の方を先に取りに行った方がいいそうだから、うまく敵をかわして剣を先に取りに行くんだな。じゃ、お先に！」	Oh, I heard there's a shield on floor 11 and a sword on floor 17. They say you should get the sword first, so slip past the enemies and go for it. I'm off!	对了，听说11层有盾，17层有剑。而且最好先拿剑，再拿盾。你要巧妙避开敌人，先去拿剑。我先走啦！」	听说11层有盾，17层有剑。换成我就会去拿。我先走了！
+59	59	For that reason, I gave false information, set various traps in this tower, and waited for you to come. You came to here master the power enough to using the sacred sword as arranged beforehand."	だから、私は偽りの情報を流し、様々なワナをこの塔にしかけ、おまえが来るのを待っていたのだ。そして、予定通り、おまえは神剣を扱うのに十分な力を身につけてここまで来た。」	So I spread false rumors, set traps throughout this tower, and waited for you. Just as planned, you've reached me with the strength to wield the divine sword.	所以，我散布了虚假的消息，在塔里设下各种陷阱，等着你来。如今一切如我所料，你带着足以驾驭神剑的力量，走到了这里。」	因此，我散布了虚假的消息，在塔里设下各种陷阱，等着你来。按照事先的安排，你来到这里，获得了足以驾驭神剑的力量。」
+60	60	I have nothing to say. A certain message may be hidden in this room.	「わしが言うことは何もない。この階に、あるメッセージが隠されているじゃろう。」	I have nothing to tell you. There should be a hidden message on this floor.	「我没什么可说的。这一层应该藏着一条信息。」	我没什么可说的。这间屋子里可能藏着某条信息。
+61	61	The Magic Sergeant, Zeno says "You villain. Little did I expect to be beaten. But I would never die in such a way. I'll be looking forward to fighting with you again."	魔導師ゼノ「ゴホッ！おのれ、この私が倒されるとは……、しかしこれぐらいで死ぬような私ではない！おぬしともう一度、戦う日が来ることを楽しみに待っているぞ！」	Zeno the Sorcerer: Cough! Curse you! To think I would be defeated... But this will not kill me! I look forward to the day we fight again!	魔导师泽诺：「咳！可恶，竟然连我都被打倒……不过我不会就这么死去！我期待着与你再次交手的那一天！」	魔导师泽诺：「可恶的家伙，我没想到自己会被打倒。但我不会这样死去。我期待着再与你交手。」
+62	62	There are doors which cannot be openned with a key; these doors can only open by beating the monsters which guard them.	「この塔には鍵で開けられる扉のほかに ”門” というものがあって、これはその門を守っているモンスターを倒さなければあかないじゃろう。」	Besides doors that open with keys, this tower has gates. To open one, you must defeat the monsters guarding it.	「塔里除了能用钥匙打开的门，还有一种闸门。只有打倒守护它的怪物，闸门才会打开。」	有些门不能用钥匙打开，只有打倒守护它们的怪物，门才会打开。
+63	63	If you buy goods from merchants, you will be able to hear important information later.	「商人から物を買うと、あとで重要な情報を聞くことができるじゃろう。」	After you buy something from a merchant, you can hear important information from them.	「向商人买过东西后，再找他就能听到重要情报。」	向商人买过东西后，之后就能听到重要情报。
+64	64	Here is a magic tower of 50 stories. Every ten stories form one area. The boss who controls each area, are posted in this tower. And if you don't beat them, you cannot ascend from there.	「この塔は全部で５０階建てで、１０階ごとに１つのブロックを形成している。塔の内部には、各ブロックを統括するボスが配置されていて、そいつらを倒さないことには、それより上の階に行くことはできないだろう。」	This tower has 50 floors, divided into sections of ten floors each. Every section has a boss; you must defeat that boss to reach the floors above.	「这座塔共有50层，每10层构成一个区域。每个区域都有统领它的首领，只有打倒首领，才能继续前往更高的楼层。」	这是一座50层的魔塔，每10层构成一个区域。每个区域都有统领它的首领，不打倒首领，就无法继续上楼。
+65	65	When you offer gold at an alter, you may as well have your defensive power risen rather than your offensive power. The enemy whom you cannot beat may appear, provided you won't raise your offensive power.	「祭壇に寄進したときは、攻撃力よりも防御力を主に上げてもらった方がいいでしょう。ただし、攻撃力をまったく上げないと、あとで倒せない敵がでてくるかもしれないよ。」	When donating at an altar, you should mainly improve your defense. But if you never improve your attack, you may eventually face enemies you cannot defeat.	「向祭坛捐献时，最好以提升防御力为主。不过如果完全不提升攻击力，以后可能会遇到打不倒的敌人。」	向祭坛奉献金币时，最好优先提升防御力。不过如果不提升攻击力，也可能遇到你打不倒的敌人。
+66	66	Did you notice the secret passages on the 9th, 16th, and 18th floors?	「９階と１６階と１８階の抜け穴には気が付いたかい？」	Have you noticed the secret passages on floors 9, 16, and 18?	「你发现9层、16层和18层的暗道了吗？」	你注意到9层、16层和18层的暗道了吗？
+67	67	If you carry a cross, the strength of Zombies and Vampires will be cut in half. It is near impossible to defeat them without a cross, especially Vampires. A cross is on a floor higher than this one.	「十字架を持っていれば、ゾンビやバンパイアに対する攻撃力が２倍になる。特にバンパイアは十字架を持っていないと倒せないだろう。これより上の階のどこかにあるらしいが……。」	Carrying the Cross doubles your attack against zombies and vampires. The vampire in particular will be hard to defeat without it. They say it's somewhere on a higher floor...	「携带十字架后，对丧尸和吸血鬼的攻击力会变成两倍。尤其是吸血鬼，没有十字架恐怕很难打倒。听说十字架在更高的某一层……」	携带十字架会让丧尸和吸血鬼的力量减半。没有十字架，几乎不可能打倒它们，尤其是吸血鬼。十字架在更高的某一层。
+68	68	I heard that you can find a red key at two places in this area.	「このブロックでは赤い鍵は２ヶ所で手に入るそうじゃ。」	They say there are two places to find red keys in this section.	「听说这个区域有两处可以拿到红钥匙。」	听说这个区域有两处能找到红钥匙。
+69	69	In this area, if you don't raise your offensive power at an altar a few times, you may not be able to destroy 'Rock' monsters. Be careful!	「このブロックでは、祭壇で攻撃力を何回か上げてもらわないとロックというモンスターが倒せなくなってしまうかもしれん。注意するのじゃ。」	In this section, you may need several attack upgrades from the altar to defeat the monsters called Rocks. Be careful.	「在这个区域，如果不在祭坛提升几次攻击力，可能就打不倒石头人了。要留意。」	在这个区域，如果不在祭坛提升几次攻击力，你可能就打不倒石头人。小心！
+70	70	The Great Magic Master is in this area. He is a proprietor of this magic tower. At your strenght, to attack him means death. It stands to reason that you should not face him, but rather, get items on higher levels first.	「このブロックに、この魔法の塔の主である大魔導師がいるが、今のおまえさんでは戦っても死にに行くようなものじゃろう。とりあえず、うまくやりすごして上のブロックに行くのが正解じゃ。」	The Archsorcerer, master of the Magic Tower, is in this section. Fighting him as you are now would be suicide. For now, find a way past him into the section above.	「魔法之塔的主人，大魔导师就在这个区域。不过以你现在的实力，和他交手无异于送死。暂时设法绕过他，到上面的区域去才是正解。」	大魔导师就在这个区域，他是魔法之塔的主人。以你现在的实力攻击他，无异于送死。应该先避开他，去更高的楼层拿道具。
+71	71	In the stage of this floor, if your strength is 1500, offensive power is 80, defensive power is 98, you have five keys, and one blue key, you are almost ideal.	「この階まで来た段階で、生命力１５００、攻撃力８０、防御力９８、鍵５個、紫の鍵が１個あれば、ほぼ理想的と言えるじゃろう。」	At this point, 1,500 HP, 80 attack, 98 defense, five ordinary keys, and one purple key would be almost ideal.	「到这一层时，若有1500生命、80攻击、98防御、5把普通钥匙和1把紫钥匙，就接近理想状态了。」	到这一层时，如果有1500生命、80攻击、98防御、5把黄钥匙和1把蓝钥匙，就接近理想状态了。
+72	72	The offensive power of the swordsman who uses two swords is too high. He can use two swords at the same time. You will lose much strength if you fight him normally. You should never fight him before your attacks are stronger than his.	「二刀流の剣士は攻撃力がものすごく高い。まともに戦えば大きなダメージを受けるだろう。一撃で倒せるようになるまで、戦わない方がよかろう。」	The swordsman who fights with two swords has extremely high attack. A normal fight will cost you dearly. Avoid him until you can defeat him in one strike.	「双刀剑士的攻击力非常高，正面交战会损失大量生命。在能一击打倒他之前，最好不要战斗。」	双刀剑士的攻击力非常高，能同时使用两把剑。正常战斗会损失大量生命。在你的攻击力超过他之前，最好不要挑战他。
+73	73	This tower is 50 stories high, but in reality it seems that you cannot go up to the 50th floor.	「この塔は５０階建てだが、実際には４９階までしか行けないようだ。」	This tower has 50 floors, but it seems you can only reach floor 49.	「这座塔虽然有50层，但实际上似乎只能到49层。」	这座塔有50层，但实际上似乎无法登上第50层。
+74	74	More haste, less speed.	「急がば回れじゃ。」	When you're in a hurry, take the long way round.	「欲速则不达。」	欲速则不达。
+75	75	You may be able to go upstairs without fighting strong enemies, if you could use four tunnels skillfully in this floor.	「この階の４つの抜け穴をうまく使えば、強い敵とは戦わずに上の階に行けるじゃろう。」	Use this floor's four secret passages wisely, and you can reach the upper floors without fighting the strongest enemies.	「巧妙利用这一层的4条暗道，就能避开强敌，前往更高的楼层。」	如果巧妙利用这一层的4条暗道，也许就能避开强敌，继续上楼。
+76	76	You need the mattock in order to get the treasure which is in the item warehouse on this floor.	「この階の宝物庫にある宝を取るためにはマトックが必要じゃ。」	You need the Mattock to get the treasure in this floor's treasury.	「想拿到这一层宝库里的宝物，需要破墙镐。」	想拿到这一层道具仓库里的宝物，需要破墙镐。
+77	77	There is never a gate without a Gate-Keeper. Conversely there are always enemies who keep the gate on floors that have gates. So,	「門番のいる所には必ず門があるよ。逆に門のある階には、それを守っている敵がいるよ。だから……。」	Wherever there's a gatekeeper, there's a gate. And wherever there's a gate, an enemy guards it. So...	「有门卫的地方一定有闸门。反过来，有闸门的楼层也一定有守门的敌人。所以……」	没有门卫就不会有闸门。反过来，有闸门的楼层也总有守门的敌人。所以……
+78	78	At three o'clock, the secret treasure that lets one travel in space will appear.	「３時になれば空間移動の秘宝が現れるじゃろう。」	At three o'clock, the treasure of spatial travel will appear.	「到了三点，空间转移的秘宝就会出现。」	到了三点，能让人在空间中移动的秘宝就会出现。
+79	79	There is a Lucky Gold somewhere in this tower. If you have it, you can get twice as much money when you beat an enemy.	「この塔のどこかに、幸運の金貨というものがあって、それを持っていると敵を倒したときに得られるお金が２倍になるそうだ。」	Somewhere in this tower is a Lucky Gold Coin. Carrying it doubles the gold you receive for defeating enemies.	「塔里某处藏着幸运金币。携带它时，打倒敌人获得的金币会变成两倍。」	塔里某处有幸运金币。携带它，打倒敌人时就能获得两倍金币。
+80	80	A Magician will attack using magic when he is next to you. The Magic Sergeant will attack and divide the vital power in half when he is caught between two. As for an attack on both sides from the Magic Sergeant, the stronger you are, the more damage you take. So, please be careful.	「魔術師は隣接すると魔法攻撃をしてくる。魔導師は挟まれると生命力を半分にする攻撃をしてくる。魔導師の挟み攻撃は自分の生命力が高いほど受けるダメージが大きいはずじゃから気をつけてな。」	Magicians attack with magic when you stand next to them. Sorcerers halve your HP when you stand between two of them. The more HP you have, the more that pincer attack costs you. Be careful.	「与术士相邻时，会受到魔法攻击。被两名魔导师夹住时，生命会被减半。生命越多，夹击造成的损失就越大，要小心。」	与术士相邻时，它会用魔法攻击你。被两名魔导师夹住时，生命会被减半。遭到魔导师的两侧夹击时，生命越多，损失越大。务必小心。
+81	81	The 44th floor in this tower is an illusion. It seems that we cannot go to there even if we use the stairs. I think that it is impossible to get there without teleporting.	「この塔の４４階は幻の階じゃ。普通の階段を登り降りしたのでは行くことができないらしい。ワープでもしないかぎり行くことは不可能じゃろう。」	Floor 44 is a phantom floor. Ordinary stairs cannot take you there. You'll have to warp to reach it.	「44层是幻影楼层，沿着普通楼梯上下都到不了那里。除非使用传送，否则恐怕无法到达。」	塔里的44层是幻影楼层，走楼梯也到不了那里。恐怕只能靠传送才能到达。
+82	82	The sacred shield can defend you against magic attacks. But I heard this shield is hidden on a floor that doesn't exist.	「神盾は、魔法使いたちの魔法攻撃を防ぐ力があるらしい。……しかし、この盾は幻の階に隠されているそうだ。」	The Divine Shield can protect you from spellcasters' magic attacks... But they say it's hidden on the phantom floor.	「神圣盾似乎能抵挡施法者的魔法攻击……不过，听说它藏在幻影楼层。」	神圣盾能抵御魔法攻击。不过听说它藏在不存在的楼层里。
+83	83	The 41st floor is perfectly symmetrical, and therefore,	「４１階は完全に左右対称になっておる。だから……。」	Floor 41 is perfectly symmetrical from left to right. So...	「41层完全左右对称。所以……」	41层完全左右对称，因此……
+84	84	If you want to beat the Dragon, you must have a holy sword, a holy shield, and a Dragon slayer, and also you must be high level.	「ドラゴンを倒す気なら、聖剣と聖盾、それにドラゴンスレーヤーを持って、なおかつレベルが高くなければならないだろう。」	To defeat the dragon, you should have the Holy Sword, Holy Shield, and Dragon Slayer, as well as considerable strength.	「想打倒魔龙，除了圣剑、圣盾和屠龙匕首，还必须有足够强的实力。」	如果想打倒魔龙，必须有圣剑、圣盾和屠龙匕首，而且自身实力也要够强。
+85	85	It is said that the symbol of 5 on a pair of dice has the force of sealing magic. You had better memorize it till you fight the boss of this area.	「サイコロの５の目の形には、魔を封じ込める力があるという。このブロックのボスと戦う時には、このことを頭にいれておきなされ。」	They say the pattern of five dots on a die can seal away evil. Remember that when you face this section's boss.	「据说骰子五点的阵形有封魔之力。和这个区域的首领交战时，一定要记住这一点。」	据说骰子五点的图案有封印魔法的力量。与这个区域的首领交手时，最好记住这一点。
+86	86	I have done what I can. Good luck!	「もう、話は終わりじゃ。」	That's all I have to say.	「我要说的已经说完了。」	我能做的都做了。祝你好运！
+87	87	Oh, thank you for your help. I will raise your offensive and defensive power 3 percent as a token of my gratitude. [You begin feeling stronger]	「おお、助けてくれてありがとうよ。お礼に、そなたの攻撃力と防御力を３％だけあげてやろう」（攻撃力と防御力が上がった!）	Thank you for rescuing me. As a reward, I'll increase your attack and defense by 3%. (Your attack and defense increased!)	「谢谢你救了我。作为回报，我把你的攻击力和防御力各提升3%。」（攻击力和防御力提升了！）	谢谢你帮忙。作为谢礼，我把你的攻击力和防御力各提升3%。［你开始感到力量增强了。］
+88	88	I will grant you the orb of the hero. You will now be able to save your game, and to forecast the results of fighting monsters on the current floor. Use it often.	「おぬしにこの勇者のオーブをさずけよう。これを持っていれば、セーブ機能が使えるほか、今いる階のモンスターの能力を調べてダメージを予測してくれるじゃろう。有効に使うのじゃ」	I bestow upon you the Hero's Orb. It lets you save your game, inspect this floor's monsters, and predict damage. Use it wisely.	「我把勇者灵球赐给你。有了它，就能保存游戏，查看当前楼层怪物的能力并预测伤害。好好利用它吧。」	我把勇者灵球赐给你。现在你可以保存游戏，并预测与当前楼层怪物交战的结果。记得经常使用。
+89	89	Thank goodness, you found me. I will give you an elixir as a symbol of my gratitude. Using this medicine will cause you to gain life according to your offensive and defensive power. So naturally, the later you use, the more it will have an effect on you.	「やれやれ、見つかってしもうたか。褒美におぬしに”エリクサー”をやろう。この薬を使えば、その時の攻撃力と防御力に応じた値だけ生命力が回復するじゃろう。じゃから、当然、後の方で使う方が効果は大きいぞ。」	Well, you found me. As a reward, take this Elixir. It restores HP according to your attack and defense when you use it. Naturally, the longer you wait, the more effective it will be.	「唉，还是被你找到了。奖励你一瓶圣水。使用它时，会根据当时的攻击力和防御力恢复生命。所以当然越晚使用，效果越好。」	太好了，你找到我了。我送你一瓶圣水作为谢礼。它会根据你的攻击力和防御力恢复生命，所以自然越晚使用，效果越好。
+90	90	Be careful. I have nothing more to say.	「もう、話す事はないよ。」	I have nothing more to say.	「没什么可说的了。」	小心。我没什么可说的了。
+91	91	Please, use it wisely.	「有効に使ってね!」	Use it well!	「好好利用吧！」	请明智地使用它。
+92	92	You have perished in the Sorceror's Tower. Please try again!	生命力がなくなった！(;_;)再挑戦してください！	You have run out of HP! Please try again.	生命耗尽了！(;_;) 请再挑战一次！	你死在了魔法之塔里。请再试一次！
+93	93	The Name	名　前	Name	名字	名称
+94	94	Green Slime	Ｇスライム	Green Slime	绿史莱姆	绿史莱姆
+95	95	Red Slime	Ｒスライム	Red Slime	红史莱姆	红史莱姆
+96	96	Big Slime	Ｂスライム	Big Slime	大史莱姆	大史莱姆
+97	97	Bat	バット	Bat	小蝙蝠	小蝙蝠
+98	98	Priest	僧侶	Priest	祭司	祭司
+99	99	Superion Priest	上級僧侶	High Priest	上级祭司	上级祭司
+100	100	Gate-Keeper C	門番Ｃ	Gatekeeper C	C级门卫	C级门卫
+101	101	Gate-Keeper B	門番Ｂ	Gatekeeper B	B级门卫	B级门卫
+102	102	Skeleton C	スケルトンＣ	Skeleton C	C级骷髅	C级骷髅
+103	103	Skeleton B	スケルトンＢ	Skeleton B	B级骷髅	B级骷髅
+104	104	Skeleton A	スケルトンＡ	Skeleton A	A级骷髅	A级骷髅
+105	105	Big Bat	大バット	Giant Bat	大蝙蝠	大蝙蝠
+106	106	Zombie	ゾンビ	Zombie	丧尸	丧尸
+107	107	Zombie Knight	ゾンビナイト	Zombie Knight	丧尸武士	丧尸武士
+108	108	Rock	ロック	Rock	石头人	石头人
+109	109	The Magic Sergeant, Zeno	魔導師ゼノ	Zeno the Sorcerer	魔导师泽诺	魔导师泽诺
+110	110	The Magic Sergeant	魔導師	Sorcerer	魔导师	魔导师
+111	111	Vampire	バンパイア	Vampire	吸血鬼	吸血鬼
+112	112	Giant Octopus	大ダコ	Giant Octopus	大章鱼	大章鱼
+113	113	Dragon	ドラゴン	Dragon	魔龙	魔龙
+114	114	Golden Knight	金騎士	Golden Knight	金骑士	金骑士
+115	115	Knight	騎士	Knight	骑士	骑士
+116	116	Swordsman	剣士	Swordsman	剑士	剑士
+117	117	Soldier	兵士	Soldier	战士	战士
+118	118	Ghost Soldier	死霊兵士	Ghost Soldier	鬼战士	鬼战士
+119	119	Slime Man	スライムマン	Slime Man	史莱姆人	史莱姆人
+120	120	Great Magic Master	大魔導師	Archsorcerer	大魔导师	大魔导师
+121	121	Vampire Bat	吸血コウモリ	Vampire Bat	血蝙蝠	血蝙蝠
+122	122	SlimeLord	Ｋスライム	King Slime	史莱姆王	史莱姆王
+123	123	Magician A	魔術師Ａ	Magician A	A级术士	A级术士
+124	124	Magician B	魔術師Ｂ	Magician B	B级术士	B级术士
+125	125	Dark Knight	黒騎士	Black Knight	黑骑士	黑骑士
+126	126	Gate-Keeper A	門番Ａ	Gatekeeper A	A级门卫	A级门卫
+127	127					
+128	128	You've found a key.	扉の鍵を手に入れた。	You found a door key.	拿到了门钥匙。	你找到了一把黄钥匙。
+129	129	You've found a blue key.	紫色の扉の鍵を手に入れた。	You found a purple door key.	拿到了紫色门的钥匙。	你找到了一把蓝钥匙。
+130	130	You've found a red key.	赤色の扉の鍵を手に入れた。	You found a red door key.	拿到了红色门的钥匙。	你找到了一把红钥匙。
+131	131	The door has opened.	扉が開いた。	The door opened.	门打开了。	门打开了。
+132	132	The blue door has opened.	紫色の扉が開いた。	The purple door opened.	紫色的门打开了。	蓝门打开了。
+133	133	The red door has opened.	赤色の扉が開いた。	The red door opened.	红色的门打开了。	红门打开了。
+134	134	Went up the stairs.	階段を上った。	You went up the stairs.	上了楼梯。	上了楼梯。
+135	135	Went down the stairs.	階段を下った。	You went down the stairs.	下了楼梯。	下了楼梯。
+136	136					
+137	137	The wall collapsed!	壁がくずれた！	The wall collapsed!	墙壁崩塌了！	墙壁崩塌了！
+138	138	You've found the orb of the hero.	勇者のオーブを手に入れた！	You found the Hero's Orb!	获得了勇者灵球！	获得了勇者灵球！
+139	139	You see an old man.	老人がいる。	There is an old man.	有一位老人。	你看到一位老人。
+140	140	You see a merchant.	商人がいる。	There is a merchant.	有一位商人。	你看到一位商人。
+141	141	You see a fairy.	妖精がいる。	There is a fairy.	有一位仙子。	你看到一位仙子。
+142	142	You see a thief.	盗賊がいる。	There is a thief.	有一名盗贼。	你看到一名盗贼。
+143	143	You don't have the key.	扉の鍵がない！	You have no door key!	没有门钥匙！	你没有黄钥匙。
+144	144	You don't have the blue key.	紫色の鍵がない！	You have no purple key!	没有紫钥匙！	你没有蓝钥匙。
+145	145	You don't have the red key.	赤色の鍵がない！	You have no red key!	没有红钥匙！	你没有红钥匙。
+146	146	You see stairs.	階段がある。	There are stairs.	这里有楼梯。	你看到楼梯。
+147	147	You must be near the stairs to fly!	飛翔のオーブは階段のとなりでなくては使えない！	You must stand beside stairs to use the Flight Orb!	只有站在楼梯旁才能使用飞翔灵球！	必须靠近楼梯才能飞行！
+148	148	You've found the orb of flying.	飛翔のオーブを手に入れた！	You found the Flight Orb!	获得了飞翔灵球！	获得了飞翔灵球！
+149	149	You've found the orb of wisdom.	知恵のオーブを手に入れた！	You found the Wisdom Orb!	获得了智慧灵球！	获得了智慧灵球！
+150	150	You were flew by the orb of flying!	飛翔のオーブを使った！	You used the Flight Orb!	使用了飞翔灵球！	你用飞翔灵球飞行了！
+151	151	You see an altar.	祭壇がある。	There is an altar.	这里有祭坛。	你看到一座祭坛。
+152	152	Got an Iron Sword! Your offensive power was	鉄の剣を手に入れた。攻撃力が	You found an Iron Sword. Attack increases by 	拿到了铁剑，攻击力提升	获得了铁剑！攻击力提升
+153	153	Got a Silver Sword! Your offensive power was	銀の剣を手に入れた。攻撃力が	You found a Silver Sword. Attack increases by 	拿到了银剑，攻击力提升	获得了银剑！攻击力提升
+154	154	Got a Sword of Knight! Your offensive power was	騎士の剣を手に入れた。攻撃力が	You found a Knight's Sword. Attack increases by 	拿到了骑士剑，攻击力提升	获得了骑士剑！攻击力提升
+155	155	Got a Holy Sword! Your offensive power was	聖剣を手に入れた。攻撃力が	You found the Holy Sword. Attack increases by 	拿到了圣剑，攻击力提升	获得了圣剑！攻击力提升
+156	156	Got a Sacred Sword! Your offensive power was	神剣を手に入れた。攻撃力が	You found the Divine Sword. Attack increases by 	拿到了神圣剑，攻击力提升	获得了神圣剑！攻击力提升
+157	157	Got an Iron Shield! Your defensive power was	鉄の盾を手に入れた。防御力が	You found an Iron Shield. Defense increases by 	拿到了铁盾，防御力提升	获得了铁盾！防御力提升
+158	158	Got a Silver Shield! Your defensive power was	銀の盾を手に入れた。防御力が	You found a Silver Shield. Defense increases by 	拿到了银盾，防御力提升	获得了银盾！防御力提升
+159	159	Got a Shield of Knight! Your defensive power was	騎士の盾を手に入れた。防御力が	You found a Knight's Shield. Defense increases by 	拿到了骑士盾，防御力提升	获得了骑士盾！防御力提升
+160	160	Got a Holy Shield! Your defensive power was	聖盾を手に入れた。防御力が	You found the Holy Shield. Defense increases by 	拿到了圣盾，防御力提升	获得了圣盾！防御力提升
+161	161	Got a Sacred Shield! Your defensive power was	神盾を手に入れた。防御力が	You found the Divine Shield. Defense increases by 	拿到了神圣盾，防御力提升	获得了神圣盾！防御力提升
+162	162	Got a red elixir. Your vital power was	赤い回復薬を手に入れた。生命力が	You found a red potion. HP increases by 	拿到了红血瓶，生命提升	获得了红血瓶，生命提升
+163	163	Got a blue elixir. Your vital power was	青い回復薬を手に入れた。生命力が	You found a blue potion. HP increases by 	拿到了蓝血瓶，生命提升	获得了蓝血瓶，生命提升
+164	164	Got a red crystal. Your offensive power was	赤のクリスタルを手に入れた。攻撃力が	You found a red crystal. Attack increases by 	拿到了红宝石，攻击力提升	获得了红宝石，攻击力提升
+165	165	Got a blue crystal. Your defensive power was	青のクリスタルを手に入れた。防御力が	You found a blue crystal. Defense increases by 	拿到了蓝宝石，防御力提升	获得了蓝宝石，防御力提升
+166	166	 points up!	ポイントアップ！	 points!	点！	点！
+167	167	Got a cross! Your offensive power against Vampires and Zombies has doubled.	十字架を手に入れた！バンパイア、ゾンビに対する攻撃力が２倍になった！	You found the Cross! Attack against vampires and zombies is doubled!	获得了十字架！对吸血鬼和丧尸的攻击力变成两倍！	获得了十字架！对吸血鬼和丧尸的攻击力翻倍。
+168	168	You recieved The Magic Elixir.	エリクサーを手に入れた！	You found an Elixir!	获得了圣水！	获得了圣水！
+169	169	You recieved The Magic Mattock.	マトックを手に入れた！	You found a Mattock!	获得了破墙镐！	获得了破墙镐！
+170	170	You recieved The destructible Ball!	破壊の玉を手に入れた！	You found the Orb of Destruction!	获得了破坏爆弹！	获得了破坏爆弹！
+171	171	You recieved The Warp Staff!	空間転移の秘宝を手に入れた！	You found the Treasure of Spatial Travel!	获得了瞬移之翼！	获得了瞬移之翼！
+172	172	You recieved wings to fly up!	昇華の翼を手に入れた！	You found the Wing of Ascension!	获得了升华之翼！	获得了升华之翼！
+173	173	You recieved wings to fly down!	降臨の翼を手に入れた！	You found the Wing of Descent!	获得了降临之翼！	获得了降临之翼！
+174	174	You recieved The Dragon Slayer! Your attack power against the Dragon has doubled!	ドラゴンスレーヤーを手に入れた！ドラゴンに対する攻撃力が２倍になった！	You found the Dragon Slayer! Attack against the dragon is doubled!	获得了屠龙匕首！对魔龙的攻击力变成两倍！	获得了屠龙匕首！对魔龙的攻击力翻倍！
+175	175	Got the snow crystal!	雪の結晶を手に入れた！	You found the Snow Crystal!	获得了雪花结晶！	获得了雪花结晶！
+176	176	Got the magic key!	魔法の鍵を手に入れた！	You found the Magic Key!	获得了大黄门钥匙！	获得了大黄门钥匙！
+177	177	Got The Super Magic Mattock!	スーパーマトックを手に入れた！	You found the Super Mattock!	获得了鹤嘴锄！	获得了鹤嘴锄！
+178	178	Got the Lucky Gold! You now get twice the normal amount of gold.	幸運の金貨を手に入れた！敵が持っているＧＯＬＤ数が２倍になる。	You found the Lucky Gold Coin! Enemies yield twice as much gold.	获得了幸运金币！打倒敌人获得的金币变成两倍。	获得了幸运金币！现在可以获得两倍金币。
+179	179	The lava is really hot.	溶岩が流れている。	Lava is flowing here.	这里流淌着熔岩。	熔岩非常烫。
+180	180	Looking up the results of battling these monsters.	この階にいるモンスターの生命力、攻撃力、防御力、プレーヤーの受けるダメージを検索	Inspect this floor's monsters: HP, attack, defense, and predicted damage to you.	查看本层怪物的生命、攻击、防御及你将受到的伤害。	正在查看与这些怪物交战的结果。
+181	181	Vital power:	命	HP:	生命：	生命：
+182	182	Offensive power:	攻	Attack:	攻击：	攻击：
+183	183	Defensive power:	防	Defense:	防御：	防御：
+184	184	Expected damage:	予想ダメージ	Predicted damage:	预计伤害	预计伤害：
+185	185	Cannot be hit by you!	攻撃不可能	Cannot attack	无法攻击	你无法伤害它！
+186	186	You used the Magic Elixir. Your vital power is now	エリクサーを使った！生命力が	You used an Elixir! HP increases by 	使用了圣水！生命提升	你使用了圣水，现在的生命为
+187	187	You used the Magic Mattock! The walls fell down!	マトックを使った！四方の壁が崩れた！	You used the Mattock! Walls on all four sides collapsed!	使用了破墙镐！四周的墙壁崩塌了！	你使用了破墙镐！墙壁倒塌了！
+188	188	You used The destructible Ball! Enemies on all sides died!	破壊の玉を使った！四方の敵が倒れた！	You used the Orb of Destruction! Enemies on all four sides fell!	使用了破坏爆弹！四周的敌人被消灭了！	你使用了破坏爆弹！四周的敌人都死了！
+189	189	You've warped!	空間転移した！	You warped!	进行了空间转移！	你传送了！
+190	190	You've used the wing to fly up!	昇華の翼を使った！	You used the Wing of Ascension!	使用了升华之翼！	你使用了升华之翼！
+191	191	You've used the wing to fly down!	降臨の翼を使った！	You used the Wing of Descent!	使用了降临之翼！	你使用了降临之翼！
+192	192	You've used the snow crystal!	雪の結晶を使った！	You used the Snow Crystal!	使用了雪花结晶！	你使用了雪花结晶！
+193	193	You've used the magic key! All these doors opened on this floor.	魔法の鍵を使った！この階の扉がすべて開いた！	You used the Magic Key! All doors on this floor opened!	使用了大黄门钥匙！这一层的门全都打开了！	你使用了大黄门钥匙！本层的门都打开了。
+194	194	You've used a Super Magic Mattock! All the walls fell down on this floor!	スーパーマトックを使った！この階の壁がすべて崩れた！	You used the Super Mattock! All walls on this floor collapsed!	使用了鹤嘴锄！这一层的墙壁全都崩塌了！	你使用了鹤嘴锄！本层的墙壁全都倒塌了！
+195	195	You cannot warp (There's an object in the way).	転送先に障害物があって空間転移ができない！	Cannot warp: the destination is obstructed!	转移目的地有障碍物，无法传送！	无法传送，目的地有障碍物。
+196	196	Can't go upstairs (it's blocked)!	上の階に障害物があって転移ができない！	Cannot travel upward: the floor above is obstructed!	上层对应位置有障碍物，无法转移！	无法上楼，上方被挡住了！
+197	197	Can't go downstairs (it's blocked)!	下の階に障害物があって転移ができない！	Cannot travel downward: the floor below is obstructed!	下层对应位置有障碍物，无法转移！	无法下楼，下方被挡住了！
+198	198	The lava cooled and turned to stone.	溶岩が固まって道ができた！	The lava solidified into a path!	熔岩凝固，变成了道路！	熔岩冷却，变成了石头。
+199	199	You've beat	をたおした！	 was defeated!	被打倒了！	你打倒了
+200	200	Recieved	ＧＯＬＤを	You received 	获得了	获得了
+201	201	 Gold.	枚手に入れた！	 gold!	金币！	金币。
+202	202	If you offer me	「この祭壇に	If you donate 	「向这座祭坛捐献	如果你献给我
+203	203	Gold, I will grant your request. Will you?	ＧＯＬＤ寄進すれば望みをかなえてやろう。寄進するか？」	 gold to this altar, I will grant your wish. Will you donate?	金币，我就满足你的愿望。要捐献吗？」	金币，我就满足你的要求。愿意吗？
+204	204	What option shall you choose?	「どの望みをかなえて欲しいのだ？」	Which wish shall I grant?	「你想实现哪个愿望？」	你要选择哪一项？
+205	205	Your life recovers by	生命力を	Restore HP by 	恢复生命	你的生命恢复
+206	206	points.	ポイント回復	 points	点	点。
+207	207	The offensive power is raised	攻撃力を	Increase attack by 	提升攻击力	攻击力提升
+208	208	points.	ポイントアップ	 points	点	点。
+209	209	The defensive power is raised	防御力を	Increase defense by 	提升防御力	防御力提升
+210	210	Then I won't do it after all.	やっぱりやめる	Never mind	还是算了	那我还是不做了。
+211	211	You don't have enough money!	「金がたらん！」	Not enough gold!	「钱不够！」	你的钱不够！
+212	212	Tower	塔	Tower	塔	塔
+213	213	 F	階	 F	层	层
+214	214	Life	生命力	HP	生命	生命
+215	215	Offense	攻撃力	Attack	攻击	攻击
+216	216	Defense	防御力	Defense	防御	防御
+217	217	You can't hurt it, it's defensive power is too high!	防御力が高すぎて攻撃ができない！	You cannot attack: the enemy's defense is too high!	防御力太高，无法攻击！	它的防御太高，你无法伤害它！
+218	218	What?	なんだと～	What?!	什么——	什么？
+219	219	Hey!	あ～っ	Aaah!	啊——	喂！
+220	220	Judging by your vital power, offensive power, defensive power, and number of keys, you have	「この階までのあなたの生命力、防御力、攻撃力、鍵の個数からあなたの実力を評価すると・・・	Judging your ability by your HP, defense, attack, and keys so far, your score is 	「根据到这一层为止的生命、防御、攻击和钥匙数量，评估你的实力，得分为……	根据你的生命、攻击、防御和钥匙数量，你的得分为
+221	221	 points.	点です。	 points.	分。	分。
+222	222	If you have that many points, you might want to reconsider going higher... =)	うーん、この点数だとこれから先へ進むのは、かなり無理があるでしょう。」	At this score, pressing onward will be very difficult.	嗯，这个分数的话，继续前进会相当勉强。」	这个分数的话，或许该重新考虑是否继续往上走…… =)
+223	223	A bit below average. Maybe you should try harder.	いまひとつですね。これから先はかなり苦戦するでしょう。」	Not quite there. You'll face a tough struggle ahead.	还差一些。接下来恐怕会陷入苦战。」	有些低于平均水平。也许你该再努力一点。
+224	224	You are ordinary. You might get by okay!	まあまあですね。この点数ならこれから先もなんとかなるでしょう。」	Not bad. With this score, you should manage the floors ahead.	还不错。这个分数应该能应付接下来的挑战。」	水平一般，应该还能勉强过关！
+225	225	Doing fine! If you wish to continue, I will give you a special rank...	なかなかのものです。もう少し頑張れば称号を差し上げましょう。」	Very good. A little more effort, and I'll award you a title.	很有实力。再努力一点，我就授予你一个称号。」	做得不错！如果你愿意继续，我会给你一个特别称号……
+226	226	Congratulations! Your score is GREAT!	おめでとう！満点です。	Congratulations! A perfect score!	恭喜！满分！	恭喜！你的得分很棒！
+227	227	Do you wish to go on?	よくがんばりましたね。	You've done well.	你很努力了。	你想继续前进吗？
+228	228	I give you the special rank of	あなたには	I award you the title 	授予你	我授予你特别称号：
+229	229	FIGHTER	『戦士』	Warrior	『战士』	战士
+230	230	BRAVE MAN	『勇者』	Brave	『勇者』	勇者
+231	231	HERO	『英雄』	Hero	『英雄』	英雄
+232	232	SWORD EMPEROR	『剣帝』	Sword Emperor	『剑帝』	剑帝
+233	233	FIGHTER GOD	『闘神』	God of Battle	『斗神』	斗神
+234	234	.	の称号を差し上げましょう。	.	的称号。	。
+235	235	You may as well play as good as you have from this point on.	これから先もこの調子でね。」	Keep it up as you go on.	之后也要保持这个势头。」	接下来也要像之前一样好好发挥。
+236	236	It was nice fight so far.	ここまでおつかれさまでした。」	Well done making it this far.	能走到这里，辛苦你了。」	到目前为止，你战斗得不错。
+237	237	Your vital power decreased 200 points by magic attack of Magician A!	魔術師Ａの魔法攻撃だ！生命力が２００ポイント減少！	Magician A's magic attack! You lost 200 HP!	A级术士的魔法攻击！生命减少200点！	A级术士的魔法攻击使你损失了200点生命！
+238	238	Your vital power decreased 100 points by magic attack of Magician B!	魔術師Ｂの魔法攻撃だ！生命力が１００ポイント減少！	Magician B's magic attack! You lost 100 HP!	B级术士的魔法攻击！生命减少100点！	B级术士的魔法攻击使你损失了100点生命！
+239	239	Your vital power decreased in half by the magic attack of Magic Master!	魔導師の魔法攻撃だ！生命力が半減！	A sorcerer's magic attack! Your HP was halved!	魔导师的魔法攻击！生命减半！	魔导师的魔法攻击使你的生命减半！
+240	240	You've beat some of	の一部を倒した。	Part of it was defeated.	的一部分被打倒了。	你打倒了其中一部分：
+241	241	The road changed to the wall!	道が壁に変わった！	The path turned into a wall!	道路变成了墙壁！	道路变成了墙壁！
+242	242	Nobody saved that game yet.	セーブデータがありません。	No saved game exists.	没有存档数据。	还没有人在这里保存过游戏。
+243	243	You're using the stairs.	階段を移動中	Moving on the stairs	正在通过楼梯	你正在使用楼梯。
+244	244	Congratulations! You win the	おめでとう！得点が第	Congratulations! Your score placed 	恭喜！你的得分排在第	恭喜！凭借这个得分，你获得了第
+245	245	 place with the points which you got. I'm going to register your score.	位の成績でした。スコアに登録しておきます。	. I'll record it in the rankings.	名。已登记到排行榜。	名。我会登记你的得分。
+246	246	Thank you for your help. Please accept money as a small token of my gratitude. (Got 1000 Gold.)	「やあ、助けてくれてありがとう。少ないけれど、お礼にとっておいてくれ！」（１０００ＧＯＬＤもらった!）	Thank you for helping me! It isn't much, but accept this reward. (You received 1,000 gold!)	「谢谢你帮忙。虽然不多，还是收下这点谢礼吧！」（获得了1000金币！）	谢谢你帮忙。请收下这点钱，作为小小的谢礼。（获得1000金币。）
+247	247	I will sell a blue key at very special price (50 gold)! Will you buy it?	「紫の鍵を大特価の５０ＧＯＬＤで売るよ! 買わないかい?」	A purple key for just 50 gold! Want to buy it?	「紫钥匙特价50金币！要买吗？」	蓝钥匙特别优惠，只要50金币！要买吗？
+248	248	I will sell five keys for 50 Gold! Will you buy them?	「鍵を５個セットで５０ＧＯＬＤで売るよ! 買わないかい?」	Five door keys for 50 gold! Want to buy them?	「5把门钥匙一套，只要50金币！要买吗？」	5把黄钥匙只要50金币！要买吗？
+249	249	I will sell the rare red key for 800 Gold! Will you buy it?	「希少品の赤い鍵を８００ＧＯＬＤで売るよ！買わないかい？」	A rare red key for 800 gold! Want to buy it?	「稀有的红钥匙，800金币！要买吗？」	稀有红钥匙卖800金币！要买吗？
+250	250	My store will sell as many keys as you need. They are 1000 Gold each. Will you buy them?	「うちの店は鍵をいくらでも売るよ。１つ１０００ＧＯＬＤだが買うかい？」	My shop sells as many door keys as you need. Each costs 1,000 gold. Want one?	「本店的门钥匙要多少有多少，每把1000金币。买吗？」	本店的黄钥匙要多少有多少，每把1000金币。要买吗？
+251	251	I will sell a blue key for 200 Gold! Will you buy it?	「紫の鍵を２００ＧＯＬＤで売るよ！買わないかい？」	A purple key for 200 gold! Want to buy it?	「紫钥匙200金币！要买吗？」	蓝钥匙200金币！要买吗？
+252	252	I will buy your keys at 100 Gold a piece. Will you sell me keys?	「鍵１個を１００ＧＯＬＤで買うよ。鍵を売るかい？」	I'll buy a door key for 100 gold. Want to sell one?	「一把门钥匙，我出100金币收购。要卖吗？」	我以每把100金币收购黄钥匙。要卖给我吗？
+253	253	I will sell four keys and a blue key for 1000 Gold! Will you buy them?	「鍵を４個と紫の鍵をセットにして１０００ＧＯＬＤだ！買うかい？」	Four door keys and one purple key for 1,000 gold! Want the set?	「4把门钥匙加1把紫钥匙，一套1000金币！要买吗？」	4把黄钥匙和1把蓝钥匙，共1000金币！要买吗？
+254	254	I will sell three keys at special price (200 gold). First come, first served.	「鍵３個を大サービスの２００ＧＯＬＤで売るよ！早い者勝ちだよ！」	Three door keys for a bargain 200 gold! First come, first served!	「3把门钥匙大优惠，只要200金币！先到先得！」	3把黄钥匙特价200金币。先到先得。
+255	255	2000 Golds for three blue keys. Deal?	「紫の鍵が３個で２０００ＧＯＬＤだが、買うかい？」	Three purple keys for 2,000 gold. Want them?	「3把紫钥匙2000金币，要买吗？」	3把蓝钥匙2000金币。成交吗？
+256	256	I will increase your life 2000 points at 1000 Gold.	「１０００ＧＯＬＤで生命力を２０００ポイント回復してあげるよ。」	For 1,000 gold, I'll restore 2,000 HP.	「1000金币，我帮你恢复2000点生命。」	花1000金币，我帮你增加2000点生命。
+257	257	Would you like to buy a super mattock (it's very rare) for 4000 Gold?	「超希少品のスーパーマトックを４０００ＧＯＬＤで買わないかい？」	Want to buy an exceptionally rare Super Mattock for 4,000 gold?	「极其稀有的鹤嘴锄，4000金币，要买吗？」	想花4000金币买一把鹤嘴锄吗？它非常稀有。
+258	258	You don't have enough money.	「お金が足りないよ！」	Not enough gold!	「钱不够！」	你的钱不够。
+259	259	Thank you very much.	「まいどーっ！」	Thanks for your business!	「多谢惠顾！」	非常感谢。
+260	260	Loaded the Game.	 データをロード（読み込み）しました。	Game loaded.	已载入数据。	已载入游戏。
+261	261	Saved the Game.	 データをセーブ（保存）しました。	Game saved.	已保存数据。	已保存游戏。
+262	262	You don't have a key!	 鍵を持ってないよ！	You have no key!	你没有钥匙！	你没有黄钥匙！
+263	263	Ah!, we meet again! Thank goodness you're alive!	「ようまたあったな！無事だったか？これは聞いた話なんだが、２５階のボスを倒すと『時空の門』がどこかにできるらしいぞ。」	Hey, we meet again! Still alive? I heard that defeating the boss on floor 25 makes a Gate of Time and Space appear somewhere.	「哟，又见面了！你没事吧？听说打倒25层的首领后，某处就会出现『时空之门』。」	啊，又见面了！谢天谢地，你还活着！
+264	263	I heard that if you beat the boss of 25th floor, 'the gate of time and space' will appear somewhere.	これは聞いた話なんだが、２５階のボスを倒すと『時空の門』がどこかにできるらしいぞ。」	I heard that defeating the boss on floor 25 makes a Gate of Time and Space appear somewhere.	听说打倒25层的首领后，某处就会出现『时空之门』。	听说打倒25层的首领后，『时空之门』会在某处出现。
+265	264	This Game can't load.	このデータはロードできません。	This save cannot be loaded.	无法载入这份数据。	无法载入这个存档。
+266	265	Your vital power decreased 8800 points by Magician A's magic attack!	魔術師Ａの魔法攻撃だ！生命力が８８００ポイント減少！	Magician A's magic attack! You lost 8,800 HP!	A级术士的魔法攻击！生命减少8800点！	A级术士的魔法攻击使你损失了8800点生命！
+267	266	Your vital power decreased 4400 points by Magician B's magic attack!	魔術師Ｂの魔法攻撃だ！生命力が４４００ポイント減少！	Magician B's magic attack! You lost 4,400 HP!	B级术士的魔法攻击！生命减少4400点！	B级术士的魔法攻击使你损失了4400点生命！

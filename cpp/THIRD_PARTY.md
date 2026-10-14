@@ -7,6 +7,13 @@ original form's two ending pictures; external BMP/OZ/MIDI/WAV files keep their
 original formats. Original media and generated local distributions are excluded
 from Git.
 
+Japanese source text in `locales/source/` was extracted from the user's
+**魔法の塔 for Windows Ver1.6a** package by **Oz & Kenichi**. Original dialogue,
+manuals, help prose and ending text remain the original authors' material; they
+are not relicensed under this project's MIT license. The Chinese name reference
+is extracted from the user's TSWH5 archive. New translations and source mappings
+are documented in [the C++ catalogs](locales/README.md).
+
 | Dependency | Pin | License shipped in package |
 |---|---|---|
 | raylib | 5.5, vcpkg port revision 1 | `raylib-LICENSE.txt`; dependency notices under `licenses/` |
@@ -38,3 +45,6 @@ from vcpkg's `share/*/copyright` files and records SHA-256 for each packaged fil
 The desktop can read Segoe UI Semibold and Bold from the user's installed
 Windows fonts through raylib. These font files are not redistributed. If they
 are unavailable, the application uses raylib's bundled default font.
+Japanese and Chinese text uses locally installed Yu Gothic / MS Gothic and
+Microsoft YaHei, or a user-supplied CJK font via `TSW_CJK_FONT`. These font files
+are also not redistributed.

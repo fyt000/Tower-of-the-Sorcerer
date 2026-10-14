@@ -13,7 +13,7 @@ option(TSW_GUI "Build the raylib desktop game" ON)
 option(TSW_SANITIZERS "Enable address and undefined behavior checks" OFF)
 add_library(tsw_core src/game.cpp src/combat.cpp src/items.cpp src/contact.cpp
     src/floor_checks.cpp src/scenes.cpp src/npcs.cpp src/save.cpp src/original_save.cpp src/save_slots.cpp
-    src/game_state.cpp src/rankings.cpp)
+    src/game_state.cpp src/rankings.cpp src/localization.cpp)
 target_include_directories(tsw_core PUBLIC include PRIVATE src)
 if(MSVC)
     target_compile_options(tsw_core PRIVATE /W4 /utf-8)
@@ -77,14 +77,20 @@ if(BUILD_TESTING)
         endif()
     endif()
     add_executable(tsw_tests tests/core_tests.cpp tests/tile_variant_tests.cpp tests/replay_tests.cpp tests/mcp_tests.cpp
-        tests/ranking_tests.cpp tests/ranking_game_tests.cpp tests/ranking_replay_tests.cpp)
+        tests/ranking_tests.cpp tests/ranking_game_tests.cpp tests/ranking_replay_tests.cpp tests/localization_tests.cpp)
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/test-temp")
     target_compile_definitions(tsw_tests PRIVATE TSW_TEST_TEMP="${CMAKE_CURRENT_BINARY_DIR}/test-temp")
     target_link_libraries(tsw_tests PRIVATE tsw_mcp Catch2::Catch2WithMain glaze::glaze)
+    if(MSVC)
+        target_compile_options(tsw_tests PRIVATE /utf-8)
+    endif()
     include(Catch)
     catch_discover_tests(tsw_tests TEST_PREFIX "core: " PROPERTIES LABELS "core")
     find_package(Python3 COMPONENTS Interpreter QUIET)
     if(Python3_Interpreter_FOUND)
+        add_test(NAME cpp_localization_catalogs COMMAND ${Python3_EXECUTABLE}
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools/compile_locales.py" --check)
+        set_tests_properties(cpp_localization_catalogs PROPERTIES LABELS "localization" TIMEOUT 30)
         add_test(NAME comparison_boundary_guard COMMAND ${Python3_EXECUTABLE}
             "${CMAKE_CURRENT_SOURCE_DIR}/tools/comparison_boundary.py" --self-test)
         set_tests_properties(comparison_boundary_guard PROPERTIES LABELS "fidelity" TIMEOUT 30)
@@ -209,7 +215,7 @@ if(TSW_GUI)
         tsw_embed_media(tsw_audio_tests)
         catch_discover_tests(tsw_audio_tests TEST_PREFIX "audio: " TEST_SPEC "~[device]"
             PROPERTIES LABELS "audio" TIMEOUT 300)
-        add_executable(tsw_verify tests/verify.cpp tests/presentation_checks.cpp
+        add_executable(tsw_verify tests/verify.cpp tests/presentation_checks.cpp tests/localization_checks.cpp
             tests/asset_checks.cpp tests/desktop_smoke.cpp)
         target_link_libraries(tsw_verify PRIVATE tsw_desktop)
         target_include_directories(tsw_verify SYSTEM PRIVATE ${TSW_MINIAUDIO_INCLUDE_DIR})
@@ -229,6 +235,9 @@ if(TSW_GUI)
         add_test(NAME original_presentation COMMAND tsw_verify --assets "${presentation_assets}"
             --presentation "${CMAKE_CURRENT_BINARY_DIR}/presentation-checks")
         set_tests_properties(original_presentation PROPERTIES TIMEOUT 60 LABELS "desktop")
+        add_test(NAME localized_presentation COMMAND tsw_verify --assets "${presentation_assets}"
+            --localization "${CMAKE_CURRENT_BINARY_DIR}/localization-checks")
+        set_tests_properties(localized_presentation PROPERTIES TIMEOUT 120 LABELS "desktop;localization")
         if(WIN32 AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../rust/web/assets/original-atlas.png")
             add_test(NAME original_assets COMMAND tsw_verify --assets "${original_directory}"
                 --compare-assets "${CMAKE_CURRENT_SOURCE_DIR}/../rust/web/assets"

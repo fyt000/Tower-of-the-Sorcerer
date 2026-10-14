@@ -29,6 +29,7 @@ enum class Menu { None, Game, Options };
 enum class SavePicker { None, Save, Load };
 
 struct DesktopUi {
+    Language language = Language::English;
     int flight = -1, selected_item = -1, speed_index{}, enemy_first_row{};
     int selected_slot = 1;
     SavePicker save_picker = SavePicker::None;
@@ -89,6 +90,7 @@ enum class Action {
     Speed,
     Recording,
     HeroOrbActualDamage,
+    Language,
     MainMenu,
     ResumeGame,
     OpenSettings,

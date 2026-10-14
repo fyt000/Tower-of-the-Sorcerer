@@ -1,0 +1,2 @@
+# Empty dialogue entries need trailing TSV delimiters to retain all language columns.
+dialogue-comparison.tsv text eol=lf whitespace=-blank-at-eol

@@ -5,6 +5,10 @@
 
 using namespace tsw;
 
+namespace tsw {
+int verify_localization(Presentation&, const std::filesystem::path&);
+}
+
 namespace {
 struct Window {
     explicit Window(bool visible) {
@@ -24,6 +28,7 @@ struct Window {
 int main(int argc, char** argv) try {
     std::filesystem::path requested_assets, presentation, window, asset_check, output = TSW_CHECK_OUTPUT;
     std::filesystem::path compare_assets = TSW_ASSETS;
+    std::filesystem::path localization;
     std::string smoke;
     bool visible = false;
     for (int i = 1; i < argc; ++i) {
@@ -36,6 +41,8 @@ int main(int argc, char** argv) try {
             presentation = argv[++i];
         else if (arg == "--window" && i + 1 < argc)
             window = argv[++i];
+        else if (arg == "--localization" && i + 1 < argc)
+            localization = argv[++i];
         else if (arg == "--asset-check" && i + 1 < argc)
             asset_check = argv[++i];
         else if (arg == "--smoke" && i + 1 < argc)
@@ -48,6 +55,7 @@ int main(int argc, char** argv) try {
             std::cout << "Desktop verification, built only with BUILD_TESTING=ON.\n"
                          "--assets DIR: original or extracted assets.\n"
                          "Choose one: --presentation DIR, --window DIR, --asset-check DIR, --smoke NAME.\n"
+                         "--localization DIR: render five languages without opening audio.\n"
                          "Asset checks: --compare-assets EXTRACTED_DIR.\n"
                          "Smoke: all, initial, capture, stairs, fight, floor10, fairy, ending, slots,\n"
                          "       items, inventory, item, shop, flight, help, backside, enemies, recording, "
@@ -57,7 +65,8 @@ int main(int argc, char** argv) try {
         } else
             throw std::runtime_error("Unknown argument: " + arg);
     }
-    if (int(!presentation.empty()) + int(!window.empty()) + int(!asset_check.empty()) + int(!smoke.empty()) !=
+    if (int(!presentation.empty()) + int(!window.empty()) + int(!asset_check.empty()) + int(!smoke.empty()) +
+            int(!localization.empty()) !=
         1)
         throw std::runtime_error("Choose one verification suite; use --help for options");
     constexpr std::array<std::string_view, 20> SmokeNames{
@@ -76,6 +85,10 @@ int main(int argc, char** argv) try {
     if (!asset_check.empty())
         return verify_assets(assets, Assets(compare_assets, executable), executable, asset_check);
     Window native_window(visible);
+    if (!localization.empty()) {
+        Presentation renderer(assets);
+        return verify_localization(renderer, localization);
+    }
     if (!presentation.empty()) {
         Presentation renderer(assets);
         return verify_presentation(renderer, presentation, assets);
