@@ -520,22 +520,26 @@ TEST_CASE("Desktop settings persist opt in audio and both speeds with bounds che
     const auto path = directory.path / "settings.json";
     REQUIRE_FALSE(load_settings(path).recording);
     REQUIRE_FALSE(load_settings(path).hero_orb_actual_damage);
+    REQUIRE_FALSE(load_settings(path).mouse_walking);
     REQUIRE(load_settings(path).replay_speed == 2);
-    save_settings(path, {2, 6, true, true, true});
+    save_settings(path, {2, 6, true, true, true, "en", true});
     const auto settings = load_settings(path);
     REQUIRE(settings.game_speed == 2);
     REQUIRE(settings.replay_speed == 6);
     REQUIRE(settings.recording);
     REQUIRE(settings.muted);
     REQUIRE(settings.hero_orb_actual_damage);
+    REQUIRE(settings.mouse_walking);
     {
         std::ofstream output(path);
         output << R"({"game_speed":2,"replay_speed":6,"recording":true,"muted":true})";
     }
     REQUIRE_FALSE(load_settings(path).hero_orb_actual_damage);
+    REQUIRE_FALSE(load_settings(path).mouse_walking);
     REQUIRE_THROWS(save_settings(path, {3, 0, false, false}));
-    for (const auto* source : {R"({"game_speed":-1})", R"({"replay_speed":7})", R"({"recording":"true"})",
-                               R"({"hero_orb_actual_damage":"true"})", "not json"}) {
+    for (const auto* source :
+         {R"({"game_speed":-1})", R"({"replay_speed":7})", R"({"recording":"true"})",
+          R"({"hero_orb_actual_damage":"true"})", R"({"mouse_walking":"true"})", "not json"}) {
         std::ofstream output(path);
         output << source;
         output.close();

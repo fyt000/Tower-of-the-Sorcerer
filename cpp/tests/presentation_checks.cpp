@@ -1,5 +1,7 @@
 #include "audio.hpp"
 #include "desktop_checks.hpp"
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -127,6 +129,93 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         }
         require(counts[1] >= 2 * counts[0] && counts[2] >= 5 * counts[0],
                 "3x and 10x game speed accelerate held walking through the same scaled clock");
+    }
+    {
+        renderer.reset();
+        Game game;
+        game.floors[1].tiles.fill(Road);
+        game.hero.x = game.hero.y = 5;
+        const Vector2 hover{BoardX + 8 * TileSize + 20, BoardY + 5 * TileSize + 20};
+        require(!ui.mouse_walking && !mouse_destination(game, ui, hover),
+                "Mouse walking defaults off and cannot select a destination");
+        ui.mouse_walking = true;
+        require(mouse_destination(game, ui, hover) == cell(8, 5),
+                "A map click selects the tile under the logical mouse coordinates");
+        const CanvasViewport viewport{1600, 1116, 1600, 1116, {0, 0, 1600, 1116}};
+        require(mouse_destination(game, ui, viewport.canvas_point({hover.x * 2, hover.y * 2})) == cell(8, 5),
+                "Resized-window mouse coordinates select the same map tile");
+        for (const Vector2 outside : std::array<Vector2, 4>{{{BoardX - 1, BoardY},
+                                                             {BoardX, BoardY - 1},
+                                                             {BoardX + BoardPixels, BoardY},
+                                                             {BoardX, BoardY + BoardPixels}}})
+            require(!mouse_destination(game, ui, outside),
+                    "Clicks outside each board edge cannot select a wrapped tile");
+        for (auto flag :
+             {&DesktopUi::home, &DesktopUi::replay_picker, &DesktopUi::rankings, &DesktopUi::inventory,
+              &DesktopUi::enemies, &DesktopUi::help, &DesktopUi::replay_active, &DesktopUi::ending_wait}) {
+            ui.*flag = true;
+            require(!mouse_destination(game, ui, hover),
+                    "Menus, panels, replay and ending cards disable map clicks");
+            ui.*flag = false;
+        }
+        ui.flight = 2;
+        require(!mouse_destination(game, ui, hover), "Flight preview cannot move the hero by clicking");
+        ui.flight = -1;
+        ui.selected_item = int(Item::Bomb);
+        require(!mouse_destination(game, ui, hover), "Item inspection disables map clicks");
+        ui.close_overlays();
+        ui.menu = Menu::Options;
+        require(!mouse_destination(game, ui, hover), "Options disable map clicks");
+        ui.close_overlays();
+        ui.save_picker = SavePicker::Load;
+        require(!mouse_destination(game, ui, hover), "The save picker disables map clicks");
+        ui.close_overlays();
+        game.push(Op::Wait);
+        require(!mouse_destination(game, ui, hover), "Queued events disable map clicks");
+        game.finish_commands();
+        const auto press_at = [&](Vector2 mouse) {
+            auto* window = glfwGetCurrentContext();
+            const auto callback = glfwSetMouseButtonCallback(window, nullptr);
+            glfwSetMouseButtonCallback(window, callback);
+            require(callback != nullptr, "The window has a native mouse input callback");
+            callback(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
+            const auto action = renderer.draw(game, ui, mouse);
+            callback(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_RELEASE, 0);
+            return action;
+        };
+        const auto click = press_at(hover);
+        require(click.kind == Action::WalkTo && click.value == cell(8, 5),
+                "A left map click dispatches the selected destination");
+        ui.help = true;
+        require(press_at({BoardX + 50, BoardY + 394}).kind == Action::None && !ui.help,
+                "Closing Help consumes its click without selecting the floor underneath");
+        ui.inventory = true;
+        require(press_at({BoardX + 50, BoardY + 400}).kind == Action::None && !ui.inventory,
+                "Closing inventory consumes its click without selecting the floor underneath");
+        ui.selected_item = int(Item::Cross);
+        require(press_at({BoardX + 50, BoardY + 315}).kind == Action::None && ui.selected_item < 0,
+                "Closing item inspection consumes its click without selecting the floor underneath");
+        renderer.draw(game, ui, hover);
+        const auto ordinary_floor = fingerprint(renderer, BoardArea);
+        snapshot("mouse-hover-floor");
+        game.tile_at(1, 7, 5) = SpecialRoad;
+        renderer.draw(game, ui, hover);
+        require(fingerprint(renderer, BoardArea) == ordinary_floor,
+                "Hidden trigger floors do not change the map or mouse hover feedback");
+        game.tile_at(1, 7, 5) = Road;
+        game.tile_at(1, 8, 5) = Wall;
+        renderer.draw(game, ui, hover);
+        const auto ordinary_wall = fingerprint(renderer, BoardArea);
+        for (const auto hidden : {SecretWall, HiddenObject}) {
+            game.tile_at(1, 8, 5) = hidden;
+            renderer.draw(game, ui, hover);
+            require(fingerprint(renderer, BoardArea) == ordinary_wall,
+                    "Hidden walls and objects do not change the map or mouse hover feedback");
+        }
+        snapshot("mouse-hover-wall");
+        renderer.draw(game, ui, {230, 12});
+        snapshot("mouse-qol-tooltip");
+        ui.mouse_walking = false;
     }
     {
         renderer.reset();

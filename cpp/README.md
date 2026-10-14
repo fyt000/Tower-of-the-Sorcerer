@@ -54,6 +54,7 @@ The startup menu offers **New game**, **Load game**, **Play replay** and
 | Control | Action |
 |---|---|
 | Arrows / WASD | Walk; hold to repeat |
+| Click a map tile | Walk to it; contact only the selected event |
 | Enter / Space | Continue dialogue or the ending card |
 | Click an item / I | Inspect or use items / open inventory |
 | Flight: Up / Down, Enter, Esc | Preview, travel, cancel |
@@ -67,6 +68,16 @@ The startup menu offers **New game**, **Load game**, **Play replay** and
 Shop choices are clickable; Esc cancels. Dialogue and Wisdom clues scroll
 with the wheel. Settings include speeds, recording, mute and **Hero Orb actual
 damage**, an optional forecast that includes Cross and Dragon Slayer bonuses.
+
+Enable **Settings → Mouse walking** to use mouse movement (default: off).
+Mouse walking follows the shortest route through apparent floor. Doors, monsters,
+items, NPCs and stairs block routes unless they are the clicked destination.
+Clicking a door or hidden wall makes one contact; click again to enter after it
+opens. Each hidden wall in a tunnel needs its own click. Hidden floor triggers
+look and route like ordinary floor, but trigger their normal event and stop the
+walk immediately. Hazards also stop the walk. A new map click replaces the route;
+keyboard movement, overlays, loading and the main menu cancel it. Mouse steps use
+the normal game speed and are recorded as ordinary movement inputs.
 
 **Settings → Language** offers original English, original Japanese, English
 retranslated from Japanese, simplified Chinese retranslated from Japanese, and

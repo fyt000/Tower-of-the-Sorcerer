@@ -27,6 +27,14 @@ CanvasViewport window_viewport() {
     return view;
 }
 
+std::optional<int> mouse_destination(const Game& game, const DesktopUi& ui, Vector2 mouse) {
+    if (!ui.mouse_walking || ui.modal() || ui.replay_active || ui.flight >= 0 || ui.ending_wait ||
+        game.busy() || mouse.x < BoardX || mouse.y < BoardY || mouse.x >= BoardX + BoardPixels ||
+        mouse.y >= BoardY + BoardPixels)
+        return {};
+    return cell(int((mouse.x - BoardX) / TileSize), int((mouse.y - BoardY) / TileSize));
+}
+
 namespace {
 constexpr int SideWidth = 156, FrameWidth = 488, RightX = SideWidth + FrameWidth;
 constexpr int DoorFrames = 16, TransformationFrames = 32, FirstHeroWalkingColor = 185;
@@ -874,17 +882,20 @@ void Presentation::draw_enemies(const Game& game, DesktopUi& ui, Vector2 mouse) 
 }
 
 void Presentation::draw_qol_status(const DesktopUi& ui, Rectangle rect, Vector2 mouse) {
+    const int count = int(ui.mouse_walking) + int(ui.hero_orb_actual_damage);
     DrawRectangleRec(rect, Bar);
-    DrawRectangleLinesEx(rect, 1, ui.hero_orb_actual_damage ? Gold : Border);
-    art_->text.fit(ui.hero_orb_actual_damage ? "QOL: 1 enabled" : "QOL: none", rect, 16,
-                   ui.hero_orb_actual_damage ? Gold : Muted);
-    if (CheckCollisionPointRec(mouse, rect))
-        art_->text.tooltip(rect,
-                           ui.hero_orb_actual_damage
-                               ? "Enabled QOLs:\nHero Orb actual damage\nIncludes Cross and Dragon Slayer "
-                                 "bonuses. Change this in Settings."
-                               : "Enabled QOLs: none\nHero Orb uses the original damage display, which "
-                                 "ignores Cross and Dragon Slayer bonuses. Change this in Settings.");
+    DrawRectangleLinesEx(rect, 1, count ? Gold : Border);
+    art_->text.fit(count ? std::format("QOL: {} enabled", count) : "QOL: none", rect, 16,
+                   count ? Gold : Muted);
+    if (CheckCollisionPointRec(mouse, rect)) {
+        std::string text = localized_text(ui.language, count ? "Enabled QOLs:" : "Enabled QOLs: none");
+        if (ui.mouse_walking)
+            text += "\n" + localized_text(ui.language, "Mouse walking");
+        if (ui.hero_orb_actual_damage)
+            text += "\n" + localized_text(ui.language, "Hero Orb actual damage");
+        text += "\n" + localized_text(ui.language, "Change QOLs in Settings. Default: off.");
+        art_->text.tooltip(rect, text);
+    }
 }
 
 UiAction Presentation::draw_item(const Game& game, DesktopUi& ui, Vector2 mouse) {
@@ -915,7 +926,8 @@ UiAction Presentation::draw_item(const Game& game, DesktopUi& ui, Vector2 mouse)
 void Presentation::draw_help(DesktopUi& ui, Vector2 mouse) {
     constexpr Rectangle rect{BoardX + 12, BoardY + 14, 416, 410};
     art_->text.modal(rect, "Tower of the Sorcerer");
-    const std::array<std::pair<const char*, const char*>, 8> controls{{{"Arrows / WASD", "Move"},
+    const std::array<std::pair<const char*, const char*>, 9> controls{{{"Arrows / WASD", "Move"},
+                                                                       {"Click map tile", "Walk / contact"},
                                                                        {"Enter / Space", "Continue dialogue"},
                                                                        {"I", "Inventory"},
                                                                        {"F6 / F7", "Save / load slots"},
@@ -927,9 +939,10 @@ void Presentation::draw_help(DesktopUi& ui, Vector2 mouse) {
         art_->text.draw(controls[i].first, int(rect.x + 20), int(rect.y + 60 + i * 24), 17, Ink);
         art_->text.draw(controls[i].second, int(rect.x + 170), int(rect.y + 60 + i * 24), 17, Ink);
     }
-    art_->text.draw("Click an item to inspect or use it.\nHero Orb: view this floor's enemies.\nFlight: Up / "
-                    "Down, Enter to travel, Esc to cancel.\nOptions: music and game speed.",
-                    int(rect.x + 20), int(rect.y + 266), 17, Muted);
+    art_->text.draw(
+        "Click an item to inspect or use it.\nHero Orb: view this floor's enemies.\nFlight: arrows, "
+        "Enter to travel, Esc to cancel.\nOptions: music and game speed.",
+        int(rect.x + 20), int(rect.y + 280), 17, Muted);
     if (art_->text.button({rect.x + 20, rect.y + 365, 376, 29}, "Close  [Esc]", mouse))
         ui.help = false;
 }
@@ -989,22 +1002,26 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
         art_->text.draw("New games, recorded loads and replay takeover.", int(rect.x + 18), int(rect.y + 308),
                         15, Muted);
         art_->text.draw("Quality of life", int(rect.x + 18), int(rect.y + 332), 17, Gold);
-        const Rectangle qol{rect.x + 18, rect.y + 358, 400, 34};
+        const Rectangle qol{rect.x + 18, rect.y + 358, 400, 30};
         if (art_->text.button(
                 qol, ui.hero_orb_actual_damage ? "Hero Orb actual damage: on" : "Hero Orb actual damage: off",
                 mouse))
             return {Action::HeroOrbActualDamage};
-        art_->text.draw("Off keeps the original display. Hover for details.", int(rect.x + 18),
-                        int(rect.y + 400), 15, Muted);
-        if (art_->text.button({rect.x + 18, rect.y + 426, 400, 30}, "Done [Esc]", mouse))
+        const Rectangle walking{rect.x + 18, rect.y + 394, 400, 30};
+        if (art_->text.button(walking, ui.mouse_walking ? "Mouse walking: on" : "Mouse walking: off", mouse))
+            return {Action::MouseWalking};
+        if (CheckCollisionPointRec(mouse, walking))
+            art_->text.tooltip(walking, "Click floor to walk or an event to interact. Hidden events stop the "
+                                        "walk. Default: off.");
+        if (art_->text.button({rect.x + 18, rect.y + 432, 400, 30}, "Done [Esc]", mouse))
             ui.menu = Menu::None;
         if (CheckCollisionPointRec(mouse, qol))
-            art_->text.tooltip(qol,
-                               ui.hero_orb_actual_damage
-                                   ? "Enabled QOLs:\nHero Orb actual damage\nShows combat damage with Cross "
-                                     "and Dragon Slayer bonuses. Battle rules are unchanged."
-                                   : "Enabled QOLs: none\nEnable this to show combat damage with Cross "
-                                     "and Dragon Slayer bonuses. Default: off.");
+            art_->text.tooltip(
+                qol, ui.hero_orb_actual_damage
+                         ? "Hero Orb actual damage: on\nShows combat damage with Cross "
+                           "and Dragon Slayer bonuses. Battle rules are unchanged."
+                         : "Hero Orb actual damage: off\nEnable this to show combat damage with Cross "
+                           "and Dragon Slayer bonuses. Default: off.");
     }
     return {};
 }
@@ -1209,6 +1226,9 @@ UiAction Presentation::draw_replay_controls(const DesktopUi& ui, Vector2 mouse) 
 }
 
 UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
+    // Closing a panel must consume its click instead of selecting the floor underneath.
+    const auto destination = mouse_destination(game, ui, mouse);
+    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     art_->text.language = ui.language;
     resize_canvas(window_viewport());
     const int mode = game.visual.raster_mode;
@@ -1341,6 +1361,16 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
         action = {Action::ContinueEnding};
     if (!ui.replay_active)
         draw_qol_status(ui, {220, 3, 132, 22}, mouse);
+    if (destination && mouse_destination(game, ui, mouse)) {
+        if (!mouse_path(game, *destination).empty()) {
+            const Rectangle target{float(BoardX + *destination % BoardWidth * TileSize),
+                                   float(BoardY + *destination / BoardWidth * TileSize), TileSize, TileSize};
+            DrawRectangleLinesEx(target, 1.f, Gold);
+            SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+        }
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            action = {Action::WalkTo, *destination};
+    }
     EndTextureMode();
     return action;
 }

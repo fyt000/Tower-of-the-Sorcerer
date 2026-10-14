@@ -15,6 +15,10 @@
   that exposes an unwritten stale command in the original.
 - **Hero Orb actual damage** optionally includes Cross/Dragon Slayer bonuses
   in forecasts. It is off by default and is a desktop preference.
+- Mouse walking is opt-in (default: off), routes through apparent floor and contacts only the clicked
+  event. Hidden floor triggers remain concealed and stop the route when reached;
+  doors and hidden walls receive one contact per click. Steps use native movement
+  handlers and replay inputs.
 - Saves retain the original format, with validation, backups and separate
   manual, quick and Fairy files. Fairy checkpoints are written after their
   scenes complete. Rankings persist independently of game saves; their numeric

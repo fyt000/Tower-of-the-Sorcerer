@@ -2,6 +2,7 @@
 #include "assets.hpp"
 #include "raylib.h"
 #include "tsw/game.hpp"
+#include "tsw/mouse_walk.hpp"
 #include "tsw/save_slots.hpp"
 #include "tsw/settings.hpp"
 #include <filesystem>
@@ -36,6 +37,7 @@ struct DesktopUi {
     SaveSlots save_slots;
     bool inventory{}, enemies{}, help{}, muted{}, ending_wait{}, hero_orb_actual_damage{};
     bool recording_enabled{}, recording_active{};
+    bool mouse_walking{};
     bool home{}, game_started = true, replay_picker{}, replay_active{}, replay_paused{}, replay_in_progress{};
     bool quick_available{}, fairy_available{};
     int home_selection = 1, replay_speed_index = 2, replay_selected{}, replay_first_row{};
@@ -105,7 +107,9 @@ enum class Action {
     ReplayNext,
     ReplayRestart,
     ReplayTakeOver,
-    ReplaySpeed
+    ReplaySpeed,
+    WalkTo,
+    MouseWalking
 };
 
 struct UiAction {
@@ -113,7 +117,9 @@ struct UiAction {
     int value{};
 };
 
-inline constexpr float WalkRepeatSeconds = .14f, WalkAnimationSeconds = .12f;
+inline constexpr float WalkRepeatSeconds = MouseWalk::StepSeconds, WalkAnimationSeconds = .12f;
+
+std::optional<int> mouse_destination(const Game&, const DesktopUi&, Vector2 mouse);
 
 struct WalkRepeat {
     float remaining{};

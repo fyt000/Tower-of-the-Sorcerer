@@ -11,6 +11,7 @@ struct Settings {
     int game_speed{}, replay_speed = 2;
     bool recording{}, muted{}, hero_orb_actual_damage{};
     std::string language = "en";
+    bool mouse_walking{};
 };
 
 Settings load_settings(const std::filesystem::path&);

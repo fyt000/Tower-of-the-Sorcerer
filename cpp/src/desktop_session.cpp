@@ -38,6 +38,7 @@ DesktopSession::DesktopSession(const Assets& assets, const std::filesystem::path
     ui.replay_speed_index = settings.replay_speed;
     ui.muted = settings.muted;
     ui.hero_orb_actual_damage = settings.hero_orb_actual_damage;
+    ui.mouse_walking = settings.mouse_walking;
     ui.language = parse_language(settings.language);
     recorder_.enable(record.value_or(settings.recording));
     recorder_.new_game(game.rankings);
@@ -47,6 +48,8 @@ DesktopSession::DesktopSession(const Assets& assets, const std::filesystem::path
 }
 
 void DesktopSession::dispatch(UiAction action) {
+    if (action.kind != Action::None && action.kind != Action::WalkTo)
+        mouse_walk_.cancel();
     const auto before = game.hero;
     try {
         apply(action);
@@ -54,6 +57,8 @@ void DesktopSession::dispatch(UiAction action) {
         game.status = error.what();
         ui.notice = error.what();
     }
+    if (!ui.mouse_walking || ui.modal() || ui.replay_active || ui.flight >= 0 || ui.ending_wait)
+        mouse_walk_.cancel();
     renderer.moved(before, game.hero);
     recording_status();
 }
@@ -68,8 +73,13 @@ float DesktopSession::scaled_seconds(float real_seconds) const {
 }
 
 void DesktopSession::move(Direction direction) {
-    if (ui.home || ui.replay_active)
+    mouse_walk_.cancel();
+    if (ui.modal() || ui.replay_active || ui.flight >= 0 || ui.ending_wait)
         return;
+    move_step(direction);
+}
+
+void DesktopSession::move_step(Direction direction) {
     // Read the category files before a Fairy encounter can calculate its rank.
     const int x = game.hero.x + (direction == Direction::Right) - (direction == Direction::Left);
     const int y = game.hero.y + (direction == Direction::Down) - (direction == Direction::Up);
@@ -107,10 +117,11 @@ void DesktopSession::recording_status() {
 void DesktopSession::preferences() {
     save_settings(save_directory_ / "settings.json",
                   {ui.speed_index, ui.replay_speed_index, recorder_.enabled(), ui.muted,
-                   ui.hero_orb_actual_damage, std::string(language_id(ui.language))});
+                   ui.hero_orb_actual_damage, std::string(language_id(ui.language)), ui.mouse_walking});
 }
 
 void DesktopSession::open_home(bool startup) {
+    mouse_walk_.cancel();
     ui.close_overlays();
     ui.home = true;
     ui.home_selection = ui.game_started && !startup ? 0 : 1;
@@ -128,6 +139,7 @@ void DesktopSession::open_home(bool startup) {
 }
 
 void DesktopSession::load(const std::filesystem::path& path, SaveKind kind) {
+    mouse_walk_.cancel();
     recorder_.load(game, path, kind);
     replay_.reset();
     ui.replay_active = ui.replay_paused = false;
@@ -167,6 +179,7 @@ void DesktopSession::open_rankings(bool submission) {
 }
 
 void DesktopSession::replay(const std::filesystem::path& path) {
+    mouse_walk_.cancel();
     std::ifstream input(path, std::ios::binary);
     if (!input)
         throw std::runtime_error("Unable to open replay: " + path_text(path));
@@ -292,6 +305,8 @@ void DesktopSession::advance_replay(float seconds) {
 }
 
 void DesktopSession::advance_commands(float seconds) {
+    if (!ui.mouse_walking || ui.modal() || ui.replay_active || ui.flight >= 0 || ui.ending_wait)
+        mouse_walk_.cancel();
     if (ui.home || ui.replay_picker || ui.rankings || ui.save_picker != SavePicker::None ||
         ui.menu != Menu::None || ui.help) {
         recording_status();
@@ -300,6 +315,7 @@ void DesktopSession::advance_commands(float seconds) {
     if (replay_)
         advance_replay(seconds);
     else {
+        mouse_walk_.advance(game, seconds, [this](Direction direction) { move_step(direction); });
         advance_queue(seconds);
         if (game.checkpoint_requested && !game.busy()) {
             game.checkpoint_requested = false;
@@ -355,6 +371,10 @@ void DesktopSession::apply(UiAction action) {
             break;
         }
     switch (action.kind) {
+    case Action::WalkTo:
+        if (ui.mouse_walking && !ui.modal() && !ui.replay_active && ui.flight < 0 && !ui.ending_wait)
+            mouse_walk_.start(game, action.value);
+        break;
     case Action::MainMenu:
         open_home();
         break;
@@ -570,6 +590,10 @@ void DesktopSession::apply(UiAction action) {
         break;
     case Action::HeroOrbActualDamage:
         ui.hero_orb_actual_damage = !ui.hero_orb_actual_damage;
+        preferences();
+        break;
+    case Action::MouseWalking:
+        ui.mouse_walking = !ui.mouse_walking;
         preferences();
         break;
     case Action::None:
