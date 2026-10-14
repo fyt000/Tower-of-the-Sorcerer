@@ -1,9 +1,5 @@
 # Game mechanics
 
-These rules matter when comparing the C++ and Delphi implementations.
-Source is the detailed specification; [fidelity notes](../cpp/FIDELITY.md)
-record differences and verification limits.
-
 ## Combat and items
 
 Penetration is checked before Cross/Dragon Slayer bonuses. A penetrating hit
@@ -27,7 +23,8 @@ Opening Flight and successful previews clear the highest-floor stair marker
 through map redraw. Direct Flight input performs that same sequence; returning
 to the highest floor uses its upward arrival square. Successful wings,
 deferred floor changes, dialogue stage 13 and file-load refresh also clear
-the marker. See the [Flight audit](fidelity-audit-2026-10-09.md).
+the marker. Refused wings preserve it; in-memory session checkpoints retain
+selector state without performing a file-load refresh.
 
 ## Floors, dialogue and cycles
 
@@ -61,3 +58,18 @@ then strictly compare wrapping signed 32-bit
 `attack + defense - previous HP > previous attack`. First-cycle qualifying
 entries can be submitted after dialogue, using the insertion position cached
 at contact. Ranking tables survive slot loads.
+
+## Retained quirks
+
+Comparisons use the unpatched original executable. These rules are intentional:
+
+| Case | Behavior |
+|---|---|
+| 33F trap | Only the upper cell triggers it; entry after clearing guards from below still seals exits. |
+| 47F Magician A | The hero-row guard and flat-array horizontal wrapping remain. C++ rejects an index beyond the floor tiles. |
+| Backside 45F Merchant | Gives unscaled 2,000 HP for 1,000 gold. |
+| Enemy-first Lucky Gold | Income doubles. Delphi displays the undoubled amount; C++ displays the credited gold. |
+
+The implementations' safety and presentation differences are documented in
+the [Delphi README](../delphi/README.md#known-differences-and-limits) and
+[C++ fidelity notes](../cpp/FIDELITY.md).

@@ -1,8 +1,5 @@
 # Tower of the Sorcerer — Rust
 
-Independent Rust rewrite with a shared desktop/browser UI and campaign editor.
-See the [repository overview](../README.md) for the Delphi 2 and C++ projects.
-
 ## Build and run
 
 Install Rust, Node.js and Python, then run from the repository root:

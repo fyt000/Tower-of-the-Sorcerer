@@ -3,28 +3,22 @@
 Implementations and source recovery for the English **Tower of the Sorcerer
 for Windows 1.2** by Oz & Kenichi.
 
-The Delphi 2 project aims for a faithful recovery of the game. C++ is an
-architecturally similar rewrite with the same core game logic, plus new
-features and quality-of-life improvements. Rust is an independent rewrite.
+| Project | Focus | Start here |
+|---|---|---|
+| Delphi 2 | Closest reconstruction of the original game | [Build, run and tools](delphi/README.md) |
+| C++ | Desktop UI, headless CLI/MCP and quality-of-life features | [Build, run and controls](cpp/README.md) |
+| Rust | Desktop/browser UI and campaign editor | [Build and run](rust/README.md) |
 
-| Implementation | Start here |
-|---|---|
-| Delphi 2 recovery with VCL forms and MCI audio | [Build, run and tools](delphi/README.md) |
-| C++23 rewrite, desktop UI and headless CLI/MCP | [Build, run and controls](cpp/README.md) |
-| Rust rewrite with desktop/browser UI and campaign editor | [Build and run](rust/README.md) |
+## Documentation
 
-| Guide | Contents |
-|---|---|
-| [Architecture](docs/architecture.md) | Modules and implementation decisions |
-| [Mechanics](docs/mechanics.md) | Nonobvious game rules and retained quirks |
-| [Data formats](docs/original-data.md) | Maps, assets, saves and rankings |
-| [Fidelity](cpp/FIDELITY.md) | Known differences and verification limits |
-| [Replay and CLI](docs/replay-verification.md) | Recording, playback and assertions |
-| [MCP](docs/cpp-mcp.md) | Tools, observations and worker hot reload |
-| [Recovery tools](docs/reverse-engineering.md) | Extraction and comparison workflow |
+- **Playing and building:** use the implementation READMEs above. The C++ README
+  also links to its [replay/CLI](docs/replay-verification.md),
+  [MCP](docs/cpp-mcp.md) and [fidelity](cpp/FIDELITY.md) guides.
+- **Game rules and formats:** [mechanics](docs/mechanics.md) and
+  [original data and recovery](docs/original-data.md).
+- **Source evidence:** [decompilation](reference/original/README.md) and
+  [Delphi compiler reference](reference/delphi2/README.md).
 
-Recovered evidence lives in `reference/`; shared content in `data/`; research
-tools in `tools/`. Builds, dependencies, reports and packages go under ignored
-`build/`. Development reads the game installation without modifying it.
-Decompiled exports are evidence, not the authors' source. See
-[attribution](THIRD_PARTY.md).
+Shared content lives in `data/`, research tools in `tools/`, and generated
+output in ignored `build/`. The original installation is read only.
+See [attribution](THIRD_PARTY.md) for original-game and dependency notices.

@@ -1,4 +1,10 @@
-# Original data and assets
+# Original game data and recovery
+
+The reference target is English **Tower of the Sorcerer for Windows 1.2**.
+Recovered evidence is indexed in [reference/original](../reference/original/README.md).
+The original installation is read only; generated output belongs in `build/`.
+
+## Assets and extraction
 
 The supported EXE supplies **51 floor records, 33 monster rows, and 268
 text strings**. A floor record contains two stair-landing bytes followed by
@@ -19,6 +25,9 @@ The C++ GUI uses Data3 artwork at a 40-pixel logical tile size and loads the
 installation's media directly. PNG extraction supports the Rust UI and asset
 comparisons; the alternate Data artwork and display preferences belong to the
 Delphi game.
+
+Delphi uses Windows MCI for MIDI; C++ synthesizes the same files with
+TinySoundFont and embedded GeneralUser GS. Their playback can sound different.
 
 Run extraction from the repository root:
 
@@ -66,12 +75,67 @@ validation, while numbered slots require valid checksums. Slots use the
 executable's `Savedat` directory or explicit `--save-dir`; see
 [controls and saves](../cpp/README.md).
 
-## Original MIDI playback
+## Rankings
 
-The Delphi game uses VCL MediaPlayer and Windows MCI (`mciSendCommandA`) for
-MIDI; the executable contains no SoundFont. Playback depends on the selected
-Windows MIDI device, as described in
-[Microsoft's MIDI example](https://learn.microsoft.com/en-us/windows/win32/multimedia/playing-a-midi-file).
-C++ synthesizes the same files with TinySoundFont and embedded GeneralUser GS.
-Device instrument/controller differences are possible; audible equivalence
-has not been established.
+Fairy rankings have ten entries for each of 10F, 20F, 25F, 40F and 49F.
+`option1.dat`–`option5.dat` hold 288-byte numeric records; matching
+`option11.dat`–`option51.dat` files hold ten CRLF-separated names. C++ keeps
+these in the save directory and restores a complete default table on invalid
+input. Rankings are separate from game slots.
+
+## Source recovery
+
+Executable hashes and classes are recorded in the
+[structural inventory](../reference/original/whole-program/structural-inventory.json).
+Addresses use image base `0x400000`. The
+[presentation review](../reference/original/presentation/REVIEW.md) and
+[whole-program accounting](../reference/original/whole-program/REVIEW.md)
+index recovered entries and unresolved regions. Compiler preparation is in
+the [Delphi compiler guide](../reference/delphi2/README.md).
+
+Ghidra output is an inspection aid. Check assembly for register arguments,
+indirect calls, strings and aliased state before translating it. Preserve
+state-write timing, arithmetic and reversed command insertion. A drawing
+helper can also change gameplay state; comparisons must follow those effects.
+
+Use Ghidra's headless launcher with scripts from `tools/ghidra`:
+
+```text
+analyzeHeadless PROJECT_DIR original-tsw -import ORIGINAL_DIR/TSW.exe -scriptPath tools/ghidra -postScript ExportOriginal.java reference/original/decompiled
+analyzeHeadless PROJECT_DIR original-tsw -process TSW.exe -noanalysis -scriptPath tools/ghidra -postScript RecoverArrival.java reference/original/decompiled/0046cb1c_arrival_recovered.c
+analyzeHeadless PROJECT_DIR original-tsw -process TSW.exe -noanalysis -scriptPath tools/ghidra -postScript RecoverCallbacks.java reference/original/decompiled
+analyzeHeadless PROJECT_DIR original-tsw -process TSW.exe -noanalysis -scriptPath tools/ghidra -postScript RecoverSaves.java reference/original/decompiled
+```
+
+The linked reviews document presentation and whole-program extraction.
+Check their retained accounting from the repository root:
+
+```powershell
+python tools/fetch_idr_recognition.py
+python tools/account_original_program.py --check
+python tools/review_whole_program.py --check
+python tools/test_whole_program_accounting.py
+```
+
+## Comparison workflow
+
+The [Delphi README](../delphi/README.md#formatting-and-verification) lists its
+comparison tools. After building C++, run its original-handler suite from
+the repository root:
+
+```powershell
+python -m pip install -r tools/requirements.txt
+$env:TOS_ORIGINAL_EXE = 'D:/Program Files (x86)/Tower of the Sorcerer/TSW.exe'
+python cpp/tools/verify_original.py --probe build/cpp/vs/Release/tsw_probe.exe
+```
+
+The suite emulates pinned x86 handlers and compares them with the compiled
+probe. It checks evidence freshness and records skipped calls and execution
+boundaries in `build/cpp/reports/`. Composed tests carry state between callbacks;
+isolated handler agreement does not establish a complete campaign. Unknown
+or effectful skipped calls are rejected, but aliased and transitive effects
+still need assembly review. See [C++ fidelity](../cpp/FIDELITY.md) for limits.
+
+Refresh compiled maps, monsters and text with
+`python cpp/tools/extract_constants.py ORIGINAL_TSW.exe`. The C++ build uses
+`cpp/tools/extract_ui.py` for embedded ending images and save/load menu resources.

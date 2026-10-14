@@ -3,7 +3,7 @@
 The desktop, headless CLI and [MCP](cpp-mcp.md) use the same JSONL player inputs.
 Recordings replay through gameplay and can be watched without their companion
 save. [Build, launch and controls](../cpp/README.md#visual-replay-recording-and-headless-cli)
-are in the C++ README. Rust replay comparison remains separate work.
+are in the C++ README.
 
 ## Opt in and save
 
@@ -89,13 +89,12 @@ validated; object field order is irrelevant.
 
 Directions are `up`, `down`, `left`, `right`; item names appear in CLI inventory.
 Choices accept strings `0`, `1`, `2`, `leave`, or aliases `hp`, `attack`,
-`defense`, `accept`; the recorder stores indices. Rust offer IDs need an adapter.
+`defense`, `accept`; the recorder stores indices.
 
 Exact Flight inputs are `flight_open`, `flight_up`, `flight_down`,
 `flight_confirm`, and `cancel`, with only `type`. They retain preview writes,
 reversals and cancellation; direct Flight item use selects monotonically.
 `save` and `reload` use `kind: "slot"` or `"checkpoint"` and operate in memory.
-These boundary/Flight inputs need Rust support before cross-engine comparison.
 
 A `rankings` record supplies `tables`: five arrays of ten entries, each with
 `score`, `hp`, `attack`, `defense`, `name`. The recorder emits updates when the

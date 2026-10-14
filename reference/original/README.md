@@ -1,24 +1,18 @@
 # Original source evidence
 
-This directory retains evidence from the supported English **Tower of the
-Sorcerer for Windows 1.2**. The original is Borland Delphi/VCL. C-like decompiler
-exports are inspection aids; the compilable, readable implementation is the
-separate [C++ implementation](../../cpp/README.md).
+This directory retains decompiled code, assembly and resource evidence from
+English **Tower of the Sorcerer for Windows 1.2**, a Borland Delphi/VCL game.
 
-- [Source index](decompiled/INDEX.md): initial 106-function export, ten recovered
-  callbacks/helpers and repaired arrival switch.
-- [Call map](decompiled/CALLS.md): exported routine relationships and unresolved calls.
-- [Presentation/input review](presentation/REVIEW.md): all 130 serialized UI
-  event bindings, published method tables, assembly, confirmed discrepancies,
-  and remaining framework/timer boundaries.
-- [Whole-program accounting](whole-program/REVIEW.md): executable byte ledger,
-  3,298 machine-entry exports, Delphi-2 runtime recognition, installed exception
-  continuations, callback trampolines, and explicit unresolved regions.
-- [Research workflow](../../docs/reverse-engineering.md): supported executable,
-  Ghidra scripts, translation rules and executable comparisons.
-- [Fidelity scope](../../cpp/FIDELITY.md): passing evidence and remaining limits.
+- [Gameplay source index](decompiled/INDEX.md) and [call map](decompiled/CALLS.md).
+- [Presentation/input review](presentation/REVIEW.md): forms, event bindings
+  and framework boundaries.
+- [Whole-program accounting](whole-program/REVIEW.md): executable inventory,
+  runtime recognition and unresolved regions.
+- [Data and recovery guide](../../docs/original-data.md): extraction and
+  comparison workflows.
+- [Delphi build instructions](../../delphi/README.md).
 
-The original installation is read only. Source addresses use image base
+Decompiler output is evidence, not the authors' source. Addresses use image base
 `0x400000`; inferred fields, register arguments and indirect calls must be checked
 against assembly. The repaired arrival export supersedes the incomplete initial
 `0046cb1c_ichicheck.c`, which remains in the corpus for comparison.

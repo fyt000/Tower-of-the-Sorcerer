@@ -7,10 +7,6 @@ original form's two ending pictures; external BMP/OZ/MIDI/WAV files keep their
 original formats. Original media and generated local distributions are excluded
 from Git.
 
-The C++ implementation is separate from the original author's Delphi source.
-Its readable translation and probe scripts are in this repository; generated
-Ghidra files are marked as decompiler inspection output.
-
 | Dependency | Pin | License shipped in package |
 |---|---|---|
 | raylib | 5.5, vcpkg port revision 1 | `raylib-LICENSE.txt`; dependency notices under `licenses/` |
