@@ -149,13 +149,13 @@ TEST_CASE("MCP normal observations conceal secrets and gate forecasts and simula
     REQUIRE(client.raw_tool("save_game")["result"]["isError"].get<bool>());
     REQUIRE(client.raw_tool("game_state", Json{{"map_floor", 50}})["result"]["isError"].get<bool>());
     REQUIRE(client.raw_tool("simulate_actions", Json{{"actions", Json::array_t{}}}).contains("error"));
-    REQUIRE(client.rpc("tools/list")["result"]["tools"].get_array().size() == 10);
+    REQUIRE(client.rpc("tools/list")["result"]["tools"].get_array().size() == 11);
     Client developer(true, game);
     const auto diagnostic = developer.tool("game_state", Json{{"map_floor", 1}});
     REQUIRE(diagnostic["map"][cell(5, 4)].as<int>() == SecretWall);
     REQUIRE(diagnostic["floors"].get_array().size() == FloorCount);
     REQUIRE(diagnostic["monsters"].get_array().size() == 33);
-    REQUIRE(developer.rpc("tools/list")["result"]["tools"].get_array().size() == 11);
+    REQUIRE(developer.rpc("tools/list")["result"]["tools"].get_array().size() == 12);
 }
 
 TEST_CASE("MCP forecasts and owned item clues use native values", "[mcp]") {
@@ -980,4 +980,89 @@ TEST_CASE("MCP refuses inert dragon and stair-cover contacts", "[mcp][navigation
         REQUIRE(after["hero"]["gold"].as<int>() == 100);
         REQUIRE(completed["map"][cell(5, 4)].as<int>() == tile);
     }
+}
+
+TEST_CASE("MCP explicit batches match individual inputs and preserve replay", "[mcp][batch]") {
+    Client batch, single;
+    const auto steps = decode(R"([
+        {"type":"action","floor":1,"action":{"type":"move","direction":"up"}},
+        {"type":"navigate","floor":1,"x":4,"y":9}
+    ])");
+    const auto result = batch.tool("run_steps", Json{{"steps", steps}, {"detail", "full"}});
+    single.act(R"({"type":"move","direction":"up"})");
+    const auto expected = single.tool("navigate", Json{{"floor", 1}, {"x", 4}, {"y", 9}, {"detail", "full"}});
+    REQUIRE(result["batch"]["complete"].get<bool>());
+    REQUIRE(result["batch"]["executed_steps"].as<int>() == 2);
+    REQUIRE(encode(result["hero"]) == encode(expected["hero"]));
+    REQUIRE(batch.tool("export_replay")["replay"].get<std::string>() ==
+            single.tool("export_replay")["replay"].get<std::string>());
+}
+
+TEST_CASE("MCP batches validate the whole request before mutation", "[mcp][batch]") {
+    Client client;
+    const auto before = encode(client.tool("game_state"));
+    for (const auto invalid :
+         {R"({"type":"navigate","floor":1,"x":99,"y":0})",
+          R"({"type":"action","floor":1,"action":{"type":"new_game"}})",
+          R"({"type":"action","floor":1,"action":{"type":"reload","kind":"slot"}})",
+          R"({"type":"navigate","x":0,"y":0})", R"({"type":"room","floor":1,"x":0,"y":0})"}) {
+        Json::array_t steps{
+            decode(R"({"type":"action","floor":1,"action":{"type":"move","direction":"up"}})"),
+            decode(invalid)};
+        REQUIRE(client.raw_tool("run_steps", Json{{"steps", steps}})["result"]["isError"].get<bool>());
+        REQUIRE(encode(client.tool("game_state")) == before);
+    }
+    REQUIRE(client.raw_tool("run_steps", Json{{"steps", Json::array_t{}}})["result"]["isError"].get<bool>());
+    Json::array_t too_many(33, decode(R"({"type":"navigate","floor":1,"x":0,"y":0})"));
+    REQUIRE(client.raw_tool("run_steps", Json{{"steps", too_many}})["result"]["isError"].get<bool>());
+}
+
+TEST_CASE("MCP batches retain partial progress and stop at guards and shops", "[mcp][batch]") {
+    auto game = room();
+    Client client(false, game);
+    const auto guarded = client.tool("run_steps", Json{{"steps", decode(R"([
+        {"type":"navigate","floor":1,"x":4,"y":5},
+        {"type":"navigate","floor":2,"x":3,"y":5}
+    ])")}});
+    REQUIRE_FALSE(guarded["batch"]["complete"].get<bool>());
+    REQUIRE(guarded["batch"]["reason"].get<std::string>() == "floor_mismatch");
+    REQUIRE(guarded["batch"]["stopped_at"].as<int>() == 1);
+    REQUIRE(guarded["batch"]["executed_steps"].as<int>() == 1);
+    REQUIRE(client.tool("game_state")["hero"]["x"].as<int>() == 4);
+
+    game.tile_at(1, 5, 3) = Altar;
+    Client shop(false, game);
+    const auto opened = shop.tool("run_steps", Json{{"steps", decode(R"([
+        {"type":"navigate","floor":1,"x":5,"y":3},
+        {"type":"action","floor":1,"action":{"type":"choose","choice":"attack"}}
+    ])")}});
+    REQUIRE(opened["batch"]["reason"].get<std::string>() == "interaction_open");
+    REQUIRE(opened["batch"]["executed_steps"].as<int>() == 1);
+    REQUIRE(opened["hero"]["gold"].as<int>() == game.hero.gold);
+    REQUIRE(opened["phase"].get<std::string>() == "shop");
+}
+
+TEST_CASE("MCP batches stop after damage and floor changes", "[mcp][batch]") {
+    auto game = room();
+    game.hero.equipment_found[SacredShieldFlag] = 0;
+    game.tile_at(1, 6, 4) = MagicianA;
+    Client hazard(false, game);
+    const auto hurt = hazard.tool("run_steps", Json{{"steps", decode(R"([
+        {"type":"navigate","floor":1,"x":5,"y":2},
+        {"type":"navigate","floor":1,"x":4,"y":2}
+    ])")}});
+    REQUIRE(hurt["batch"]["reason"].get<std::string>() == "damage");
+    REQUIRE(hurt["batch"]["executed_steps"].as<int>() == 1);
+    REQUIRE(hurt["hero"]["y"].as<int>() == 4);
+
+    game = room();
+    game.tile_at(1, 5, 4) = StairsUp;
+    Client stairs(false, game);
+    const auto changed = stairs.tool("run_steps", Json{{"steps", decode(R"([
+        {"type":"navigate","floor":1,"x":5,"y":4},
+        {"type":"navigate","floor":2,"x":4,"y":2}
+    ])")}});
+    REQUIRE(changed["batch"]["reason"].get<std::string>() == "floor_changed");
+    REQUIRE(changed["batch"]["executed_steps"].as<int>() == 1);
+    REQUIRE(changed["hero"]["floor"].as<int>() == 2);
 }

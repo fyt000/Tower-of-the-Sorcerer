@@ -164,6 +164,33 @@ Json definitions(bool developer) {
          "Apply one native input. Default summary returns stats, inventory and changed tiles; floor changes "
          "return compact destinations. Use navigate for walking. Shops require a listed choose ID.",
          object_schema(Json{{"action", action}, {"detail", detail}}, {"action"}), false);
+    auto step_actions = action_schema();
+    std::erase_if(step_actions["oneOf"].get_array(), [](const Json& alternative) {
+        const auto name = alternative["properties"]["type"]["const"].get<std::string>();
+        return name == "new_game" || name == "save" || name == "reload";
+    });
+    const Json step_schema{
+        {"oneOf", Json::array_t{object_schema(Json{{"type", Json{{"const", "navigate"}}},
+                                                   {"floor", floor},
+                                                   {"x", integer_schema(0, 10)},
+                                                   {"y", integer_schema(0, 10)},
+                                                   {"interact", Json{{"type", "boolean"}}}},
+                                              {"type", "floor", "x", "y"}),
+                                object_schema(Json{{"type", Json{{"const", "action"}}},
+                                                   {"floor", floor},
+                                                   {"action", step_actions}},
+                                              {"type", "floor", "action"})}}};
+    tool("run_steps",
+         "Execute 1-32 explicit navigation/action steps, each guarded by the current floor. "
+         "Validates all syntax first. Stops after damage, death, a shop/Flight interaction, floor/cycle "
+         "change, refused action or interrupted navigation; completed inputs remain recorded. "
+         "Returns progress and final state. No planner scripts, automatic farming, resets, saves or reloads.",
+         object_schema(
+             Json{{"steps",
+                   Json{{"type", "array"}, {"minItems", 1}, {"maxItems", 32}, {"items", step_schema}}},
+                  {"detail", detail}},
+             {"steps"}),
+         false);
     tool("new_game", "Start a new journey and recording. Existing session checkpoints remain available.",
          object_schema(Json{{"detail", detail}}), false);
     const auto kind = Json{{"type", "string"},
@@ -321,6 +348,99 @@ struct McpServer::Impl {
                 observe(next, developer, -1, detail == "summary" && floor_changed ? "compact" : detail);
             if (detail != "full" && name != "new_game")
                 result["changes"] = changes(session, next, developer);
+            session = std::move(next);
+            return result;
+        }
+        if (name == "run_steps") {
+            object_arguments(args, {"steps", "detail"});
+            const auto detail = detail_field(args, "summary");
+            const auto& steps = field(args, "steps");
+            if (!steps.is_array() || steps.get_array().empty() || steps.get_array().size() > 32)
+                throw std::runtime_error("steps must contain 1-32 entries");
+
+            struct Step {
+                int floor, x{}, y{};
+                bool navigation{}, interact = true;
+                PlayerInput action;
+            };
+
+            std::vector<Step> parsed;
+            // Reject malformed later entries before executing any part of the batch.
+            for (const auto& value : steps.get_array()) {
+                const auto type = string_field(value, "type");
+                Step step{integer_field(value, "floor", 0, 50)};
+                if (type == "navigate") {
+                    object_arguments(value, {"type", "floor", "x", "y", "interact"});
+                    step.navigation = true;
+                    step.x = integer_field(value, "x", 0, 10);
+                    step.y = integer_field(value, "y", 0, 10);
+                    if (value.contains("interact")) {
+                        if (!value["interact"].is_boolean())
+                            throw std::runtime_error("interact must be a boolean");
+                        step.interact = value["interact"].get<bool>();
+                    }
+                } else if (type == "action") {
+                    object_arguments(value, {"type", "floor", "action"});
+                    step.action = player_action(field(value, "action"), developer, session.game);
+                    if (step.action.kind == InputKind::NewGame || step.action.kind == InputKind::Save ||
+                        step.action.kind == InputKind::Reload)
+                        throw std::runtime_error("run_steps does not accept resets, saves or reloads");
+                } else {
+                    throw std::runtime_error("Step type must be navigate or action");
+                }
+                parsed.push_back(step);
+            }
+            auto next = session;
+            Json::array_t outcomes;
+            std::string reason = "completed";
+            int stopped_at = -1;
+            for (std::size_t i = 0; i < parsed.size(); ++i) {
+                const auto& step = parsed[i];
+                const auto before = next.game.hero;
+                if (step.floor != before.floor) {
+                    reason = "floor_mismatch";
+                    stopped_at = int(i);
+                    break;
+                }
+                Json outcome{{"index", i}};
+                if (step.navigation) {
+                    const auto navigation = navigate(next, developer, step.x, step.y, step.interact);
+                    outcome["navigation"] = navigation;
+                    const auto why = navigation["reason"].get<std::string>();
+                    if (why != "arrived" && why != "ready_to_interact")
+                        reason = why;
+                } else {
+                    next.act(step.action);
+                    outcome["last_action"] = next.last_action;
+                    if (!next.last_action["ok"].get<bool>())
+                        reason = "refused";
+                }
+                outcomes.push_back(std::move(outcome));
+                if (next.game.visual.dead || next.game.hero.hp <= 0)
+                    reason = "dead";
+                else if (next.game.hero.cycle_factor_minus_one != before.cycle_factor_minus_one ||
+                         next.game.hero.later_cycle != before.later_cycle)
+                    reason = "cycle_changed";
+                else if (next.game.hero.floor != before.floor)
+                    reason = "floor_changed";
+                else if (next.game.hero.hp < before.hp)
+                    reason = "damage";
+                else if (next.game.busy() || next.flight >= 0)
+                    reason = "interaction_open";
+                if (reason != "completed") {
+                    stopped_at = int(i);
+                    break;
+                }
+            }
+            auto result = observe(
+                next, developer, -1,
+                detail == "summary" && next.game.hero.floor != session.game.hero.floor ? "compact" : detail);
+            result["changes"] = changes(session, next, developer);
+            result["batch"] = Json{{"complete", stopped_at < 0},
+                                   {"reason", reason},
+                                   {"executed_steps", outcomes.size()},
+                                   {"stopped_at", stopped_at},
+                                   {"results", outcomes}};
             session = std::move(next);
             return result;
         }

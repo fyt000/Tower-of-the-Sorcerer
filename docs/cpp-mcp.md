@@ -25,8 +25,7 @@ Client configuration:
 ```
 
 Use absolute executable/file paths; tool file arguments otherwise resolve against
-the server working directory. Initialization supports `2025-11-25`, `2025-06-18`,
-`2025-03-26` and `2024-11-05`. Send `notifications/initialized` before tools or
+the server working directory. Send `notifications/initialized` after initialization and before tools or
 resources. Stdout contains protocol messages only; EOF closes the server.
 
 ## Python bridge and hot reload
@@ -54,59 +53,33 @@ Configure the client to launch `python` with argument
 is loaded once, using JSON-RPC for Unicode paths; replacement workers receive
 the live session.
 
-Publication probes initialization, catalog and checkpoint/restore before
-atomically replacing `build/cpp/dist/mcp/current.json`. Workers use immutable
-copies in `versions/<version>/`, allowing Windows rebuilds. Failed publication
-leaves the manifest intact; keep versions that running bridges use. Windows
-launches require a supported console PE executable.
+Published workers live in immutable version directories under
+`build/cpp/dist/mcp/`. The bridge watches `current.json` and transfers the live
+session before the next request when the active worker changes. Successful
+restoration preserves game state, pending interactions, recording and session
+checkpoints. Keep versions that running bridges still use.
 
-Before each public request, a changed activation transfers the complete session
-to a candidate: maps/hero/monster/ranking state, pending commands and shop/Flight
-continuations, presentation, recording, feedback/log/counter, and checkpoint IDs.
-The bridge verifies candidate initialization before switching and preserves
-the session when restoration succeeds.
-Mutations remain ordered; transfer does not replay inputs under the new code.
-Private migration data is versioned and limited to 128 MiB. Compatible sessions
-continue unchanged. A structured schema/version/mode incompatibility activates
-the healthy new worker with a fresh session instead of blocking the update.
-Increment the runtime version when changing that schema; older schemas do not
-need migration support.
+The bridge adds read-only `mcp_runtime` for worker health and reload outcomes.
+A compatible update continues the session. A schema/version/mode mismatch
+starts a fresh session and reports `recovery_required: true`; gameplay waits
+for `new_game`, `load_game` or `replay_game`. Old session checkpoint IDs expire,
+so use a persistent save or replay for recovery.
 
-After that reset, `mcp_runtime` reports `session_continuable: false`,
-`recovery_required: true`, and `recovery_tools: ["new_game", "load_game", "replay_game"]`.
-The last reload has `status: "reset"`, `session_restored: false`, and the mismatch
-reason. Observation results also carry the continuation flag in `_meta`.
-Gameplay requests, including the request that triggered the update, return
-`-32003` without executing until a successful new game, file load or replay.
-`game_action` with `{ "type": "new_game" }` also recovers. Failed recovery keeps
-the gate closed; old opaque checkpoint IDs expire. Persistent saves/replays
-remain available for deliberate loading under the new build.
+Invalid manifests leave a healthy worker running. Candidate startup or transfer
+failure leaves the previous worker active and fails the triggering request.
+Crashed or timed-out workers require recovery from a persistent save; mutations
+are not retried because their commit status may be unknown.
 
-The bridge adds read-only `mcp_runtime`, reporting PIDs, worker health/error,
-deployment and last reload outcome. Successful reloads attach
-`result._meta.runtime_reload`. A changed catalog emits
-`notifications/tools/list_changed`; unchanged catalogs do not. Initialization
-advertises `tools.listChanged`, following the
-[MCP protocol](https://modelcontextprotocol.io/specification/2025-11-25/server/tools).
-
-Invalid manifests keep a healthy session running and report reload metadata.
-A candidate startup, I/O or unclassified restore failure returns an error before
-the triggering request executes; later requests use the old worker. That activation stays blocked until another
-is published. Crashed/timed-out workers become unavailable; mutations are never
-retried because commit status may be unknown. Reconnect from a persistent save.
-
-`--manifest FILE` or `TSW_MCP_CURRENT` overrides the manifest. Its nonempty
-`version`, `activation`, `executable` strings allow an executable path relative
-to the manifest directory. `--timeout-ms` or `TSW_MCP_TIMEOUT_MS` overrides the
-15,000 ms request deadline. Stderr drains independently; EOF/shutdown closes
-workers and removes temporary checkpoints. Private `runtime/checkpoint` and
-`runtime/restore` require `mcp --runtime-bridge`; the public bridge denies
-`runtime/*`.
+Use `--manifest FILE` / `TSW_MCP_CURRENT` to select a manifest and
+`--timeout-ms` / `TSW_MCP_TIMEOUT_MS` to set the request deadline. Private
+session-transfer RPCs are unavailable to public clients. Schema changes require
+a new runtime version. Tool catalog changes trigger a notification, but some
+clients need an explicit refresh or reconnect.
 
 ## Tools and observations
 
-Normal mode has ten tools; `--developer` adds `simulate_actions`. The bridge
-adds `mcp_runtime`.
+The live tool catalog defines arguments and validation. `--developer` adds
+`simulate_actions`; the optional bridge adds `mcp_runtime`.
 
 | Tool | Arguments | Behavior |
 |---|---|---|
@@ -114,6 +87,7 @@ adds `mcp_runtime`.
 | `inspect_tile` | `x`, `y`, optional `map_floor` | Tile, pickup values and unlocked combat forecast |
 | `plan_path` | `x`, `y` | Read-only apparent-road route, allowing final obstacle contact |
 | `navigate` | `x`, `y`; optional `floor`, `interact`, `detail` | Walk to/contact a selected destination |
+| `run_steps` | 1–32 explicit `steps`; optional `detail` | Batch guarded navigation/actions, stopping at decisions or interruptions |
 | `game_action` | `action`, optional `detail` | Apply one input and settle animations/speech |
 | `new_game` | Optional `detail` | Start a journey and recording |
 | `save_game` | Optional `path`, `kind` | Session checkpoint or persistent save |
@@ -173,8 +147,8 @@ reconstruction and file loads preserve the live session.
 The catalog rejects unknown fields/types. Flight requires adjacent-stair entry
 in both modes; an open selector blocks other active items and
 `inventory_items[].usable` reflects entry legality. Preview direction writes
-are retained and floor 44 is skipped. Older recordings that used unrestricted
-Flight can diverge; see [known differences](../cpp/FIDELITY.md).
+are retained and floor 44 is skipped. See [mechanics](mechanics.md) for the
+entry and redraw rules.
 
 `plan_path` traverses apparent road and allows an event only at the endpoint.
 An unreachable target returns the closest road prefix and `reached: false`.
@@ -253,4 +227,46 @@ Catch2 checks protocol, visibility, navigation, saves/replay and isolation.
 CTest's `mcp_stdio` checks process/file behavior; `mcp_reload` checks transfer,
 rollback, catalogs, crash/timeouts and worker cleanup. Follow the
 [audio test rule](../cpp/README.md#validate-and-package) for broader runs.
-Some clients need an explicit catalog refresh after tool-list changes.
+
+## Explicit step batches and offline planner scripts
+
+`run_steps` reduces round trips for an already chosen sequence. It uses the
+same native actions and apparent-road navigation as `game_action`/`navigate`;
+it does not link the offline planner or run its macro language.
+
+```json
+{
+  "steps": [
+    {"type": "navigate", "floor": 1, "x": 4, "y": 9},
+    {"type": "action", "floor": 1,
+     "action": {"type": "move", "direction": "left"}}
+  ],
+  "detail": "summary"
+}
+```
+
+Every step requires the expected current `floor`. A navigation step accepts
+`x`, `y`, and optional `interact`. An action step accepts the normal native
+`action` object, except resets, saves and reloads. Batches have 1–32 steps;
+all syntax is validated before any input executes. Loops, nested batches,
+file paths, arbitrary code and planner commands are not accepted.
+
+Execution stops on a floor mismatch, refused action, interrupted navigation,
+HP loss, death, floor/cycle change, or an open shop/Flight interaction. A shop
+opening stops even if a purchase was supplied as the next step: inspect the
+returned offer, then submit the explicit choice in a subsequent call. A
+`flight_confirm` can be supplied in a later call after inspecting Flight.
+Explicitly selected pickups and opened doors can complete normally.
+
+Successful inputs remain in the session and native replay; this is not a
+rollback or dry-run API. The response includes final state, aggregate changes,
+and `batch.complete`, `batch.reason`, `batch.executed_steps`, `batch.stopped_at`
+(zero-based, or -1 on completion), and per-step results. An executed navigation
+can stop partway, so inspect its result before deciding where to resume.
+`batch.complete` is false on an interruption even if it occurred in the final
+requested step. A malformed request executes nothing.
+
+Keep strategic commands such as planner `room`, `sweep` and search offline:
+they can choose intervening fights, spend keys and collect supplies using
+planner knowledge. An MCP batch contains only destinations and inputs already
+chosen by the caller, with the ordinary observation and interaction boundary.

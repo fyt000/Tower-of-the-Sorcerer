@@ -93,7 +93,7 @@ def main():
             ordinary = Client(cli)
             clients.append(ordinary)
             ordinary.initialize('2025-03-26')
-            assert len(ordinary.rpc('tools/list')['result']['tools']) == 10
+            assert len(ordinary.rpc('tools/list')['result']['tools']) == 11
             initial = ordinary.tool('game_state')
             assert initial['width'] == 11 and not initial['save_unlocked']
             assert 'floors' not in initial
@@ -105,7 +105,7 @@ def main():
             clients.append(client)
             client.initialize()
             tools = client.rpc('tools/list')['result']['tools']
-            assert len(tools) == 11 and all(t['inputSchema']['type'] == 'object' for t in tools)
+            assert len(tools) == 12 and all(t['inputSchema']['type'] == 'object' for t in tools)
             initial = client.tool('game_state')
             assert len(initial['floors']) == 51 and len(initial['monsters']) == 33
             assert client.tool('plan_path', x=5, y=9)['directions'] == ['up']
