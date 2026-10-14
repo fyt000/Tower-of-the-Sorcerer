@@ -32,6 +32,9 @@ int verify_localization(Presentation& renderer, const std::filesystem::path& out
         capture("settings");
         ui.home = false;
         ui.menu = Menu::None;
+        ui.help = true;
+        capture("help");
+        ui.help = false;
         game.dialogue = Dialogue{std::string(Game::original_dialogue(52)), 0, false, {}};
         capture("dialogue");
         game.dialogue.reset();
@@ -46,6 +49,9 @@ int verify_localization(Presentation& renderer, const std::filesystem::path& out
         ui.selected_item = int(Item::WarpStaff);
         capture("item");
         ui.selected_item = -1;
+        ui.realtime_hero_orb = true;
+        capture("realtime-orb");
+        ui.realtime_hero_orb = false;
         game.visual.raster_mode = 1;
         game.visual.raster_frame = ContentHeight;
         capture("opening");

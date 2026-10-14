@@ -19,6 +19,9 @@
   event. Hidden floor triggers remain concealed and stop the route when reached;
   doors and hidden walls receive one contact per click. Steps use native movement
   handlers and replay inputs.
+- **Realtime Hero Orb** is opt-in (default: off). Owning the Orb unlocks compact
+  on-map monster stats and forecasts, following the actual-damage preference.
+  This changes presentation only; hovered values remain exact.
 - Saves retain the original format, with validation, backups and separate
   manual, quick and Fairy files. Fairy checkpoints are written after their
   scenes complete. Rankings persist independently of game saves; their numeric

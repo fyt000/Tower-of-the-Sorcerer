@@ -200,6 +200,33 @@ struct Typography {
         EndScissorMode();
     }
 
+    void badge(const std::string& value, Rectangle rect, int size, Color color) const {
+        if (value == "∞") {
+            // Keep the blocked-defense symbol legible even with a fallback font.
+            const auto point = [&](int segment) {
+                const float angle = segment * 2 * PI / 32;
+                return Vector2{rect.x + rect.width / 2 + 7 * std::sin(angle),
+                               rect.y + rect.height / 2 + 3 * std::sin(angle * 2)};
+            };
+            for (int pass = 0; pass < 2; ++pass)
+                for (int segment = 0; segment < 32; ++segment)
+                    DrawLineEx(point(segment), point(segment + 1), pass ? 1.5f : 3.f,
+                               pass ? color : Color{16, 15, 22, 255});
+            return;
+        }
+        while (size > 9 && width(value, size, true) > rect.width - 2)
+            --size;
+        const auto face = font(size, true, value);
+        const float x = rect.x + (rect.width - width(value, size, true)) / 2;
+        const float y = rect.y + (rect.height - size) / 2;
+        clip(rect);
+        for (const auto [dx, dy] : std::array<std::array<int, 2>, 4>{{{-1, 0}, {1, 0}, {0, -1}, {0, 1}}})
+            DrawTextEx(face, value.c_str(), position(x + dx, y + dy), font_size(face, size), 0,
+                       Color{16, 15, 22, 255});
+        DrawTextEx(face, value.c_str(), position(x, y), font_size(face, size), 0, color);
+        EndScissorMode();
+    }
+
     bool button(Rectangle rect, const std::string& label, Vector2 mouse, bool enabled = true) const {
         const bool hover = enabled && CheckCollisionPointRec(mouse, rect);
         DrawRectangleRec(rect, hover ? Color{89, 78, 75, 255} : Panel);
@@ -568,6 +595,33 @@ void Presentation::draw_board(const Game& game, int floor, bool animated) {
         draw_transformation(game, animation);
 }
 
+void Presentation::draw_realtime_orb(const Game& game, const DesktopUi& ui) {
+    if (!ui.realtime_hero_orb || !game.inventory(Item::HeroOrb) || ui.modal() || ui.flight >= 0 ||
+        game.busy() || game.visual.raster_mode >= 0)
+        return;
+    for (int index = 0; index < CellCount; ++index) {
+        const auto info = orb_tile_info(game, game.hero.floor, index, ui.hero_orb_actual_damage);
+        if (!info)
+            continue;
+        const float x = float(BoardX + index % BoardWidth * TileSize);
+        const float y = float(BoardY + index / BoardWidth * TileSize);
+        const auto& forecast = info->forecast;
+        const Color cost_color = !forecast.penetrates              ? Color{212, 171, 255, 255}
+                                 : forecast.damage >= game.hero.hp ? Color{255, 118, 118, 255}
+                                 : forecast.damage                 ? Color{255, 222, 148, 255}
+                                                                   : Color{139, 245, 174, 255};
+        const auto cost = !forecast.penetrates ? "∞"
+                          : forecast.damage    ? "-" + compact_orb_number(forecast.damage)
+                                               : "0";
+        art_->text.badge(cost, {x + 1, y, 38, 12}, 12, cost_color);
+        art_->text.badge(compact_orb_number(info->attack), {x, y + 18, 20, 10}, 10,
+                         Color{255, 174, 133, 255});
+        art_->text.badge(compact_orb_number(info->defense), {x + 20, y + 18, 20, 10}, 10,
+                         Color{142, 210, 255, 255});
+        art_->text.badge("+" + compact_orb_number(info->gold), {x + 1, y + 28, 38, 12}, 10, Gold);
+    }
+}
+
 void Presentation::draw_scene(const Game& game) {
     const int mode = game.visual.raster_mode, frame = game.visual.raster_frame;
     if (mode == 9) {
@@ -882,7 +936,7 @@ void Presentation::draw_enemies(const Game& game, DesktopUi& ui, Vector2 mouse) 
 }
 
 void Presentation::draw_qol_status(const DesktopUi& ui, Rectangle rect, Vector2 mouse) {
-    const int count = int(ui.mouse_walking) + int(ui.hero_orb_actual_damage);
+    const int count = int(ui.mouse_walking) + int(ui.hero_orb_actual_damage) + int(ui.realtime_hero_orb);
     DrawRectangleRec(rect, Bar);
     DrawRectangleLinesEx(rect, 1, count ? Gold : Border);
     art_->text.fit(count ? std::format("QOL: {} enabled", count) : "QOL: none", rect, 16,
@@ -893,6 +947,8 @@ void Presentation::draw_qol_status(const DesktopUi& ui, Rectangle rect, Vector2 
             text += "\n" + localized_text(ui.language, "Mouse walking");
         if (ui.hero_orb_actual_damage)
             text += "\n" + localized_text(ui.language, "Hero Orb actual damage");
+        if (ui.realtime_hero_orb)
+            text += "\n" + localized_text(ui.language, "Realtime Hero Orb");
         text += "\n" + localized_text(ui.language, "Change QOLs in Settings. Default: off.");
         art_->text.tooltip(rect, text);
     }
@@ -1002,18 +1058,27 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
         art_->text.draw("New games, recorded loads and replay takeover.", int(rect.x + 18), int(rect.y + 308),
                         15, Muted);
         art_->text.draw("Quality of life", int(rect.x + 18), int(rect.y + 332), 17, Gold);
-        const Rectangle qol{rect.x + 18, rect.y + 358, 400, 30};
+        const Rectangle qol{rect.x + 18, rect.y + 354, 400, 28};
         if (art_->text.button(
                 qol, ui.hero_orb_actual_damage ? "Hero Orb actual damage: on" : "Hero Orb actual damage: off",
                 mouse))
             return {Action::HeroOrbActualDamage};
-        const Rectangle walking{rect.x + 18, rect.y + 394, 400, 30};
+        const Rectangle walking{rect.x + 18, rect.y + 386, 400, 28};
         if (art_->text.button(walking, ui.mouse_walking ? "Mouse walking: on" : "Mouse walking: off", mouse))
             return {Action::MouseWalking};
         if (CheckCollisionPointRec(mouse, walking))
             art_->text.tooltip(walking, "Click floor to walk or an event to interact. Hidden events stop the "
                                         "walk. Default: off.");
-        if (art_->text.button({rect.x + 18, rect.y + 432, 400, 30}, "Done [Esc]", mouse))
+        const Rectangle realtime{rect.x + 18, rect.y + 418, 400, 28};
+        if (art_->text.button(
+                realtime, ui.realtime_hero_orb ? "Realtime Hero Orb: on" : "Realtime Hero Orb: off", mouse))
+            return {Action::RealtimeHeroOrb};
+        if (CheckCollisionPointRec(mouse, realtime))
+            art_->text.tooltip(realtime,
+                               "Requires Hero Orb. Top: HP cost. Left: ATK. Right: DEF. Bottom: gold. "
+                               "∞ means defense cannot be penetrated. Hover a monster for exact "
+                               "values. Uses the Hero Orb damage setting. Default: off.");
+        if (art_->text.button({rect.x + 18, rect.y + 456, 400, 24}, "Done [Esc]", mouse))
             ui.menu = Menu::None;
         if (CheckCollisionPointRec(mouse, qol))
             art_->text.tooltip(
@@ -1270,6 +1335,7 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
                 {RightX, MenuHeight, SideWidth, ContentHeight});
     if (mode != 9)
         draw_board(game, ui.flight >= 0 ? ui.flight : game.hero.floor, ui.flight < 0);
+    draw_realtime_orb(game, ui);
     UiAction action;
     const auto game_mouse = ui.replay_active ? Vector2{-1, -1} : mouse;
     if (!hide_panels_)
@@ -1350,6 +1416,16 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
                     status = std::string(Game::item_name(static_cast<Item>(i))) + "  -  click to inspect";
                 ++owned;
             }
+    }
+    if (ui.realtime_hero_orb && !ui.modal() && !game.busy() && ui.flight < 0 &&
+        CheckCollisionPointRec(mouse, MapArea) && mouse.x < BoardX + BoardPixels &&
+        mouse.y < BoardY + BoardPixels) {
+        const int index = cell(int((mouse.x - BoardX) / TileSize), int((mouse.y - BoardY) / TileSize));
+        if (const auto info = orb_tile_info(game, game.hero.floor, index, ui.hero_orb_actual_damage))
+            status =
+                std::format("{} | HP {} | ATK {} | DEF {} | Gold {} | HP cost {}",
+                            Game::monster_name(info->row), info->hp, info->attack, info->defense, info->gold,
+                            info->forecast.penetrates ? std::to_string(info->forecast.damage) : "∞");
     }
     art_->text.fit(
         status,

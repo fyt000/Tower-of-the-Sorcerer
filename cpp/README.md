@@ -79,6 +79,16 @@ walk immediately. Hazards also stop the walk. A new map click replaces the route
 keyboard movement, overlays, loading and the main menu cancel it. Mouse steps use
 the normal game speed and are recorded as ordinary movement inputs.
 
+**Settings → Realtime Hero Orb** (default: off) shows compact stats on monster
+tiles once you own the Hero Orb. HP cost appears at the top: green for zero,
+amber for damage, red for a lethal fight, and purple **∞** when your attack cannot
+penetrate defense. Attack appears in orange at the left, defense in blue at the
+right, and earned gold at the bottom. Labels use small outlined numbers inside
+the tile; large values use k/M/B/T abbreviations. Hover a monster for exact HP,
+attack, defense, gold and HP cost in the status bar. Forecasts follow **Hero Orb
+actual damage**, and refresh as the hero's stats, equipment or monsters change.
+Labels are hidden during events, combat, floor previews and overlays.
+
 **Settings → Language** offers original English, original Japanese, English
 retranslated from Japanese, simplified Chinese retranslated from Japanese, and
 simplified Chinese translated from current English. Chinese item and monster

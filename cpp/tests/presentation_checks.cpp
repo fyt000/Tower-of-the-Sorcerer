@@ -221,6 +221,83 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         renderer.reset();
         Game game;
         game.floors[1].tiles.fill(Road);
+        game.hero.x = 5;
+        game.hero.y = 9;
+        game.hero.attack = 50;
+        game.hero.defense = 40;
+        game.hero.hp = 150;
+        game.monsters[0] = {100, 40, 10, 1};
+        game.monsters[1] = {100, 75, 20, 3};
+        game.monsters[2] = {150, 100, 25, 8};
+        game.monsters[3] = {100, 75, 80, 4};
+        for (int row = 0; row < 4; ++row) {
+            game.tile_at(1, 2 + row, 3) = static_cast<std::uint8_t>(GreenSlime + row * 2);
+            game.tile_at(1, 2 + row, 4) = static_cast<std::uint8_t>(GreenSlime + row * 2 + 1);
+        }
+        draw(game);
+        const auto original = fingerprint(renderer, BoardArea);
+        require(!ui.realtime_hero_orb, "Realtime Hero Orb defaults off");
+        ui.realtime_hero_orb = true;
+        draw(game);
+        require(fingerprint(renderer, BoardArea) == original,
+                "Enabling realtime stats cannot reveal monster information before owning Hero Orb");
+        game.inventory(Item::HeroOrb) = 1;
+        const auto hero = game.hero;
+        const auto floors = game.floors;
+        draw(game);
+        const auto labeled = fingerprint(renderer, BoardArea);
+        require(labeled != original, "Owning Hero Orb displays labels on normal and animated monster tiles");
+        require(game.hero == hero && game.floors == floors, "Realtime labels preserve gameplay state");
+        snapshot("realtime-orb-costs");
+        for (int row = 0; row < 4; ++row) {
+            const float x = float(BoardX + (2 + row) * TileSize), y = float(BoardY + 3 * TileSize);
+            const auto pixels = renderer.capture_canvas();
+            const auto color_count = [&](Color color) {
+                Color* colors = LoadImageColors(pixels);
+                int count = 0;
+                for (int yy = int(y); yy < y + 12; ++yy)
+                    for (int xx = int(x); xx < x + TileSize; ++xx) {
+                        const auto actual = colors[yy * pixels.width + xx];
+                        if (std::abs(int(actual.r) - int(color.r)) < 8 &&
+                            std::abs(int(actual.g) - int(color.g)) < 8 &&
+                            std::abs(int(actual.b) - int(color.b)) < 8)
+                            ++count;
+                    }
+                UnloadImageColors(colors);
+                return count;
+            };
+            constexpr std::array<Color, 4> colors{
+                {{139, 245, 174, 255}, {255, 222, 148, 255}, {255, 118, 118, 255}, {212, 171, 255, 255}}};
+            require(color_count(colors[row]) > 0,
+                    "HP labels distinguish zero cost, survivable damage, lethal damage and blocked defense");
+            UnloadImage(pixels);
+        }
+        renderer.draw(game, ui, {BoardX + 3 * TileSize + 20, BoardY + 3 * TileSize + 20});
+        snapshot("realtime-orb-hover");
+        game.hero.defense = 100;
+        draw(game);
+        require(fingerprint(renderer, BoardArea) != labeled,
+                "Realtime forecasts update immediately when hero stats change");
+        game.hero.cycle_factor_minus_one = 43;
+        game.inventory(Item::LuckyGold) = 1;
+        game.tile_at(1, 7, 4) = DragonHead;
+        game.tile_at(1, 7, 6) = OctopusMouth;
+        draw(game);
+        snapshot("realtime-orb-backside");
+        ui.realtime_hero_orb = false;
+        draw(game);
+        const auto disabled = fingerprint(renderer, BoardArea);
+        game.push(Op::Wait);
+        ui.realtime_hero_orb = true;
+        draw(game);
+        require(fingerprint(renderer, BoardArea) == disabled,
+                "Queued events suppress realtime labels so animations remain unobscured");
+        ui.realtime_hero_orb = false;
+    }
+    {
+        renderer.reset();
+        Game game;
+        game.floors[1].tiles.fill(Road);
         game.hero.x = game.hero.y = 5;
         game.inventory(Item::HeroOrb) = 1;
         game.tile(1, cell(5, 4)) = GreenSlime;

@@ -12,6 +12,7 @@ struct Settings {
     bool recording{}, muted{}, hero_orb_actual_damage{};
     std::string language = "en";
     bool mouse_walking{};
+    bool realtime_hero_orb{};
 };
 
 Settings load_settings(const std::filesystem::path&);

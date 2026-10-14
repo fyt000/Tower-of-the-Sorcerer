@@ -39,6 +39,7 @@ DesktopSession::DesktopSession(const Assets& assets, const std::filesystem::path
     ui.muted = settings.muted;
     ui.hero_orb_actual_damage = settings.hero_orb_actual_damage;
     ui.mouse_walking = settings.mouse_walking;
+    ui.realtime_hero_orb = settings.realtime_hero_orb;
     ui.language = parse_language(settings.language);
     recorder_.enable(record.value_or(settings.recording));
     recorder_.new_game(game.rankings);
@@ -117,7 +118,8 @@ void DesktopSession::recording_status() {
 void DesktopSession::preferences() {
     save_settings(save_directory_ / "settings.json",
                   {ui.speed_index, ui.replay_speed_index, recorder_.enabled(), ui.muted,
-                   ui.hero_orb_actual_damage, std::string(language_id(ui.language)), ui.mouse_walking});
+                   ui.hero_orb_actual_damage, std::string(language_id(ui.language)), ui.mouse_walking,
+                   ui.realtime_hero_orb});
 }
 
 void DesktopSession::open_home(bool startup) {
@@ -594,6 +596,10 @@ void DesktopSession::apply(UiAction action) {
         break;
     case Action::MouseWalking:
         ui.mouse_walking = !ui.mouse_walking;
+        preferences();
+        break;
+    case Action::RealtimeHeroOrb:
+        ui.realtime_hero_orb = !ui.realtime_hero_orb;
         preferences();
         break;
     case Action::None:

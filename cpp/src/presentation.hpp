@@ -2,6 +2,7 @@
 #include "assets.hpp"
 #include "raylib.h"
 #include "tsw/game.hpp"
+#include "tsw/hero_orb.hpp"
 #include "tsw/mouse_walk.hpp"
 #include "tsw/save_slots.hpp"
 #include "tsw/settings.hpp"
@@ -38,6 +39,7 @@ struct DesktopUi {
     bool inventory{}, enemies{}, help{}, muted{}, ending_wait{}, hero_orb_actual_damage{};
     bool recording_enabled{}, recording_active{};
     bool mouse_walking{};
+    bool realtime_hero_orb{};
     bool home{}, game_started = true, replay_picker{}, replay_active{}, replay_paused{}, replay_in_progress{};
     bool quick_available{}, fairy_available{};
     int home_selection = 1, replay_speed_index = 2, replay_selected{}, replay_first_row{};
@@ -109,7 +111,8 @@ enum class Action {
     ReplayTakeOver,
     ReplaySpeed,
     WalkTo,
-    MouseWalking
+    MouseWalking,
+    RealtimeHeroOrb
 };
 
 struct UiAction {
@@ -160,6 +163,7 @@ class Presentation {
     float walking_remaining_{};
     float animation_seconds_{};
     void draw_board(const Game&, int floor, bool animated);
+    void draw_realtime_orb(const Game&, const DesktopUi&);
     void draw_door(const Game&, int x, int y);
     void draw_transformation(const Game&, int animation);
     void draw_scene(const Game&);
