@@ -89,7 +89,7 @@ after their closing scene, including the final Zeno reward.
 
 The initial achievement list checks an active Zeno seal at the ending, no outer
 Octopus part victories, slaying the Dragon without ever acquiring Dragon Slayer,
-obtaining the Sacred Shield without bombing either of its two 44F guards,
+not bombing either of the Sacred Shield's two 44F guards (even if the shield is never collected),
 at least 21 altar purchases, and finishing with at least five red keys.
 Results apply to the cleared cycle; carried Dragon Slayer counts as acquired.
 

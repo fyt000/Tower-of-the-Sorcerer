@@ -148,6 +148,18 @@ TEST_CASE("Altar and red key achievements use inclusive final-state thresholds",
         }
 }
 
+TEST_CASE("Shield achievement allows leaving the shield uncollected", "[achievements]") {
+    auto game = arena();
+    REQUIRE(game.hero.equipment_found[SacredShieldFlag] == 0);
+    REQUIRE(results(game)[3].status == AchievementStatus::Earned);
+    game.run_history.complete = false;
+    REQUIRE(results(game)[3].status == AchievementStatus::Unverified);
+    game.run_history.shield_guards_bombed = true;
+    REQUIRE(results(game)[3].status == AchievementStatus::Missed);
+    game.run_history.complete = true;
+    REQUIRE(results(game)[3].status == AchievementStatus::Missed);
+}
+
 TEST_CASE("Shield achievement detects Bomb targets at the two guard cells only", "[achievements][items]") {
     for (int floor : {43, 44}) {
         auto game = arena(floor);
@@ -158,7 +170,8 @@ TEST_CASE("Shield achievement detects Bomb targets at the two guard cells only",
         REQUIRE(game.use(Item::Bomb));
         game.finish_commands(true);
         REQUIRE(game.run_history.shield_guards_bombed == (floor == 44));
-        REQUIRE(results(game)[3].status == AchievementStatus::Missed); // Must obtain the shield too.
+        REQUIRE(results(game)[3].status ==
+                (floor == 44 ? AchievementStatus::Missed : AchievementStatus::Earned));
         game.tile_at(floor, 5, 7) = SacredShield;
         game.move(Direction::Up);
         game.finish_commands(true);
