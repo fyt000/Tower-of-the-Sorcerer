@@ -229,6 +229,7 @@ bool DesktopSession::advance_queue(float seconds) {
         if (accumulator_ < beat)
             break;
         Command command;
+        const bool backside = game.hero.cycle_factor_minus_one != 0;
         if (!game.run_one(&command)) {
             accumulator_ = 0;
             blocked = true;
@@ -240,6 +241,10 @@ bool DesktopSession::advance_queue(float seconds) {
         // 0x482E60 mode 8 stops the original timer until the player continues.
         if (command.op == Op::Callback && command.a == int(Callback::RasterScene) &&
             game.visual.raster_mode == 8) {
+            ui.ending_wait = true;
+            replay_speech_ = 0;
+        }
+        if (backside && command.op == Op::Callback && command.a == int(Callback::NextCycle)) {
             ui.ending_wait = true;
             replay_speech_ = 0;
         }
@@ -338,6 +343,10 @@ void DesktopSession::advance_commands(float seconds) {
 }
 
 void DesktopSession::apply(UiAction action) {
+    if (ui.ending_wait && !ui.replay_active && action.kind != Action::ContinueEnding &&
+        action.kind != Action::MainMenu && action.kind != Action::ResumeGame &&
+        action.kind != Action::NewGame && action.kind != Action::Mute)
+        return;
     switch (action.kind) {
     case Action::Save:
     case Action::SaveSlot:
@@ -548,6 +557,7 @@ void DesktopSession::apply(UiAction action) {
     } break;
     case Action::ContinueEnding:
         ui.ending_wait = false;
+        accumulator_ = 0;
         break;
     case Action::Choose:
         play({InputKind::Choose, Direction::Up, Item::HeroOrb, action.value});

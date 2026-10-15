@@ -154,6 +154,12 @@ void Game::battle_finished(const Fight& fight) {
     visual.last_defeated = visual.battle_enemy;
     int reward = monsters[fight.enemy].gold;
     const int target_tile = tile(hero.floor, fight.target);
+    if (fight.enemy == OctopusRow && target_tile != OctopusMouth)
+        run_history.octopus_parts_defeated = true;
+    if (fight.enemy == DragonRow) {
+        run_history.dragon_defeated = true;
+        run_history.dragon_slayer_acquired |= inventory(Item::DragonSlayer) > 0;
+    }
     // 0x44A480: eight pieces award 50 raw gold; mouth awards 100 and clears the body.
     if (fight.enemy == OctopusRow && target_tile != OctopusMouth)
         reward /= 2;

@@ -116,6 +116,14 @@ UiAction keyboard(const Game& game, DesktopUi& ui) {
         return IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) ? UiAction{actions[ui.home_selection]}
                                                                   : UiAction{};
     }
+    if (ui.ending_wait) {
+        if (!ui.replay_active) {
+            if (IsKeyPressed(KEY_ESCAPE))
+                return {Action::MainMenu};
+            return IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) ? UiAction{Action::ContinueEnding}
+                                                                      : UiAction{};
+        }
+    }
     if (ui.replay_active) {
         if (game.dialogue)
             ui.dialogue_scroll = std::max(0.f, ui.dialogue_scroll - GetMouseWheelMove() * 35);
@@ -161,9 +169,6 @@ UiAction keyboard(const Game& game, DesktopUi& ui) {
             ++ui.enemy_first_row;
         return {};
     }
-    if (ui.ending_wait)
-        return IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) ? UiAction{Action::ContinueEnding}
-                                                                  : UiAction{};
     if (game.dialogue) {
         if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE))
             return {game.dialogue->shop ? Action::Choose : Action::Continue};

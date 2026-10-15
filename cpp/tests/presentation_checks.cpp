@@ -597,8 +597,12 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
                     }
                     if (mode == 8) {
                         ui.ending_wait = true;
+                        require(game.ending_summary.has_value(),
+                                "Ending keeps a snapshot of final hero statistics");
                         draw(game);
                         snapshot("ending-wait");
+                        require(!ui.file_controls_enabled(),
+                                "Ending summary blocks file controls until continued");
                         ui.ending_wait = false;
                     }
                 }
@@ -613,6 +617,70 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
                 "Ending returns to the playable backside tower");
         draw(game);
         snapshot("ending-backside");
+    }
+    {
+        Game game;
+        game.hero.hp = 98765432;
+        game.hero.attack = 12345678;
+        game.hero.defense = 87654321;
+        game.hero.gold = 99999999;
+        game.hero.altar_purchases = 1234;
+        game.hero.yellow_keys = game.hero.blue_keys = game.hero.red_keys = 999999;
+        game.hero.zeno_sealed = true;
+        game.run_history.dragon_defeated = true;
+        game.ending_summary = EndingSummary{game.hero, game.run_history};
+        ui.ending_wait = true;
+        draw(game);
+        snapshot("ending-summary-large-stats");
+        game.hero.hp = 3421;
+        game.hero.attack = 1576;
+        game.hero.defense = 835;
+        game.hero.gold = 112;
+        game.hero.altar_purchases = 21;
+        game.hero.yellow_keys = 14;
+        game.hero.blue_keys = 3;
+        game.hero.red_keys = 5;
+        game.hero.sword = 3;
+        game.hero.shield = 4;
+        game.ending_summary = EndingSummary{game.hero, game.run_history};
+        draw(game);
+        snapshot("ending-summary-all-achievements");
+        std::array<std::uint64_t, 6> cards{};
+        for (int i = 0; i < 6; ++i)
+            cards[i] = fingerprint(renderer, {32.f + i % 2 * 376, 272.f + i / 2 * 80, 360, 74});
+        const Rectangle sword_icon{230, 119, 30, 30}, shield_icon{418, 119, 30, 30};
+        const auto sword = fingerprint(renderer, sword_icon), shield = fingerprint(renderer, shield_icon);
+        game.hero.sword = game.hero.shield = 1;
+        draw(game);
+        require(fingerprint(renderer, sword_icon) == sword && fingerprint(renderer, shield_icon) == shield,
+                "Ending equipment icons retain the captured sword and shield after live state changes");
+        game.ending_summary->hero.sword = game.ending_summary->hero.shield = 1;
+        draw(game);
+        require(fingerprint(renderer, sword_icon) != sword && fingerprint(renderer, shield_icon) != shield,
+                "Ending equipment icons follow the latest obtained tiers instead of fixed Sacred icons");
+        game.run_history.complete = false;
+        game.ending_summary = EndingSummary{game.hero, game.run_history};
+        draw(game);
+        snapshot("ending-summary-partial");
+        game.hero.zeno_sealed = false;
+        game.hero.altar_purchases = 20;
+        game.hero.red_keys = 4;
+        game.ending_summary = EndingSummary{game.hero, game.run_history};
+        draw(game);
+        snapshot("ending-summary-empty");
+        const auto empty = fingerprint(renderer, {32, 272, 360, 74});
+        for (int i = 0; i < 6; ++i) {
+            require(cards[i] != empty, "All six earned achievements occupy the same two-column grid");
+            require(fingerprint(renderer, {32.f + i % 2 * 376, 272.f + i / 2 * 80, 360, 74}) == empty,
+                    "Unverified achievements leave no visible cards or placeholders");
+        }
+        const auto unknown = fingerprint(renderer, ContentArea);
+        game.run_history = {true, true, true, false, true};
+        game.ending_summary = EndingSummary{game.hero, game.run_history};
+        draw(game);
+        require(fingerprint(renderer, ContentArea) == unknown,
+                "Unachieved and unverified achievements are both hidden without status labels");
+        ui.ending_wait = false;
     }
     {
         renderer.reset();

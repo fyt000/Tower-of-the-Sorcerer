@@ -59,7 +59,7 @@ struct DesktopUi {
                menu != Menu::None || save_picker != SavePicker::None;
     }
 
-    bool file_controls_enabled() const { return flight < 0 && !enemies && selected_item < 0; }
+    bool file_controls_enabled() const { return !ending_wait && flight < 0 && !enemies && selected_item < 0; }
 
     void close_overlays() {
         inventory = enemies = help = false;
@@ -180,6 +180,7 @@ class Presentation {
     UiAction draw_home(const DesktopUi&, Vector2 mouse);
     UiAction draw_replays(DesktopUi&, Vector2 mouse);
     UiAction draw_rankings(const Game&, DesktopUi&, Vector2 mouse);
+    UiAction draw_ending_summary(const EndingSummary&, DesktopUi&, Vector2 mouse);
     UiAction draw_replay_controls(const DesktopUi&, Vector2 mouse);
     void draw_help(DesktopUi&, Vector2 mouse);
 };

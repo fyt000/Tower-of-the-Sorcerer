@@ -1080,6 +1080,7 @@ void Game::capture() {
 }
 
 void Game::ending() {
+    ending_summary = EndingSummary{hero, run_history};
     // handan's first-cycle Zeno contact: preserve the original stack of raster callbacks.
     push(Op::Wait);
     push(Op::Callback, Callback::NextCycle);

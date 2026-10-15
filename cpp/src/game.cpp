@@ -41,6 +41,8 @@ Game::Game() {
 }
 
 void Game::new_game() {
+    run_history = {};
+    ending_summary.reset();
     original_save_record_.reset();
     hero = Hero{};
     floors = original::Maps;
@@ -76,14 +78,17 @@ void Game::initialize_cycle() {
         hero.items = carried.items;
         hero.equipment_found = carried.equipment_found;
     }
+    run_history.dragon_slayer_acquired = inventory(Item::DragonSlayer) > 0;
 }
 
 void Game::next_cycle() {
+    const EndingSummary summary{hero, run_history};
     if (!hero.cycle_factor_minus_one)
         hero.cycle_factor_minus_one = BacksideFactor - 1;
     else
         hero.later_cycle = 1;
     initialize_cycle();
+    ending_summary = summary;
     status = "The backside tower begins.";
 }
 

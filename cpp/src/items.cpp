@@ -183,6 +183,8 @@ bool Game::use(Item item, int destination) {
         push(Op::UpdateInventory);
         for (int index : cardinal)
             if (index >= 0 && classify_tile(tile(hero.floor, index)) == TileClass::BombTarget) {
+                if (hero.floor == 44 && (index == cell(4, 8) || index == cell(6, 8)))
+                    run_history.shield_guards_bombed = true;
                 contact_index = neighbor_index = index;
                 hero.gold += monsters[monster_for_tile(tile(hero.floor, index))].gold;
                 bomb_dissolve(index);

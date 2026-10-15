@@ -141,6 +141,8 @@ void Game::contact() {
         if (target >= WisdomOrb && target <= LuckyGold) {
             const auto item = static_cast<Item>(target - HeroOrb);
             inventory(item) = item == Item::WarpStaff ? 3 : 1;
+            if (item == Item::DragonSlayer)
+                run_history.dragon_slayer_acquired = true;
             status = "Found " + std::string(item_name(item)) + ".";
         } else if (target >= IronSword && target <= SacredShield) {
             constexpr std::array<int, 5> Gain{10, 20, 40, 50, 100};

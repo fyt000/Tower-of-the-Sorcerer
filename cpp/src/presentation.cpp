@@ -1290,6 +1290,68 @@ UiAction Presentation::draw_replay_controls(const DesktopUi& ui, Vector2 mouse) 
     return {};
 }
 
+UiAction Presentation::draw_ending_summary(const EndingSummary& summary, DesktopUi& ui, Vector2 mouse) {
+    const auto& hero = summary.hero;
+    const auto achievements = ending_achievements(summary);
+    ClearBackground(Color{29, 27, 35, 255});
+    DrawRectangle(0, MenuHeight, CanvasWidth, 59, Panel);
+    DrawLine(32, 86, 768, 86, Border);
+    art_->text.draw("Tower cleared", 32, 43, 28, Gold);
+
+    const int sword = std::clamp(hero.sword, 0, 5), shield = std::clamp(hero.shield, 0, 5);
+    const std::array<std::tuple<const char*, int, int>, 8> stats{
+        {{"HP", hero.hp, RedPotion},
+         {"ATK", hero.attack, sword ? IronSword + sword - 1 : 0},
+         {"Defense", hero.defense, shield ? IronShield + shield - 1 : 0},
+         {"Gold", hero.gold, LuckyGold},
+         {"Altar purchases", hero.altar_purchases, Altar},
+         {"Yellow keys", hero.yellow_keys, YellowKey},
+         {"Blue keys", hero.blue_keys, BlueKey},
+         {"Red keys", hero.red_keys, RedKey}}};
+    for (int i = 0; i < int(stats.size()); ++i) {
+        const auto [label, value, icon] = stats[i];
+        const float x = 32.f + (i % 4) * 188, y = 98.f + (i / 4) * 64;
+        DrawRectangleRec({x, y, 172, 60}, Panel);
+        if (icon)
+            art_->icon(icon, {x + 10, y + 21, 30, 30});
+        art_->text.fit(label, {x + 4, y + 3, 164, 19}, 15, Muted);
+        art_->text.fit(std::to_string(value), {x + 44, y + 23, 120, 29}, 23, Ink, false, true, false);
+    }
+    art_->text.draw("Achievements", 32, 239, 21, Gold);
+    int shown = 0;
+    for (const auto& entry : achievements) {
+        if (entry.status != AchievementStatus::Earned)
+            continue;
+        const float x = 32.f + (shown % 2) * 376, y = 272.f + (shown / 2) * 80;
+        ++shown;
+        DrawRectangleRec({x, y, 360, 74}, Panel);
+        DrawRectangleLinesEx({x, y, 360, 74}, 1, Border);
+        art_->icon(entry.icon, {x + 10, y + 13, 48, 48});
+        if (entry.overlay) {
+            DrawRectangleRec({x + 40, y + 43, 24, 24}, Color{29, 27, 35, 255});
+            art_->icon(entry.overlay, {x + 42, y + 45, 20, 20});
+            if (entry.overlay == DragonSlayer || entry.overlay == Bomb)
+                DrawLineEx({x + 42, y + 65}, {x + 62, y + 45}, 2, Color{240, 124, 116, 255});
+        }
+        const auto name = localized_text(ui.language, entry.name);
+        int size = 18;
+        while (size > 12 && art_->text.width(name, size) > 276)
+            --size;
+        art_->text.draw(name, int(x + 72), int(y + 8), size, Ink, false);
+        art_->text.clip({x + 72, y + 31, 276, 40});
+        art_->text.draw(art_->text.wrap(std::string(entry.description), 276, 14), int(x + 72), int(y + 33),
+                        14, Muted, false);
+        EndScissorMode();
+    }
+    const bool next = art_->text.button({588, 514, 180, 29}, "Next cycle", mouse, !ui.replay_active);
+    if (ui.replay_active) {
+        const auto action = draw_replay_controls(ui, mouse);
+        if (action.kind != Action::None)
+            return action;
+    }
+    return next ? UiAction{Action::ContinueEnding} : UiAction{};
+}
+
 UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
     // Closing a panel must consume its click instead of selecting the floor underneath.
     const auto destination = mouse_destination(game, ui, mouse);
@@ -1311,6 +1373,11 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
     rlOrtho(0, CanvasWidth, CanvasHeight, 0, 0, 1);
     rlMatrixMode(RL_MODELVIEW);
     ClearBackground(Bar);
+    if (!ui.home && ui.ending_wait && game.ending_summary && ui.menu == Menu::None) {
+        const auto action = draw_ending_summary(*game.ending_summary, ui, mouse);
+        EndTextureMode();
+        return action;
+    }
     if (ui.home) {
         const bool overlay =
             ui.save_picker != SavePicker::None || ui.replay_picker || ui.rankings || ui.menu != Menu::None;

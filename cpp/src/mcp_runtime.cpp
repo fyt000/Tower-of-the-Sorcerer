@@ -10,7 +10,7 @@
 
 namespace tsw::mcp_detail {
 namespace runtime_wire {
-constexpr std::uint32_t RuntimeVersion = 2;
+constexpr std::uint32_t RuntimeVersion = 3;
 constexpr std::uintmax_t MaxRuntimeBytes = 128 * 1024 * 1024;
 
 struct SessionState {

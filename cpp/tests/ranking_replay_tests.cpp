@@ -232,15 +232,18 @@ TEST_CASE("A failed save does not commit a prospective ranking update", "[rankin
     recorder.save(game, path);
     const auto bytes = read_file(path);
     const auto companion = read_file(recording_path(path));
+    const auto achievements = read_file(achievement_path(path));
     const auto history = std::vector<PlayerInput>(recorder.history().begin(), recorder.history().end());
     game.rankings = winners();
     game.push(Op::Wait);
     REQUIRE_THROWS(recorder.save(game, path));
     REQUIRE(read_file(path) == bytes);
     REQUIRE(read_file(recording_path(path)) == companion);
+    REQUIRE(read_file(achievement_path(path)) == achievements);
     REQUIRE(std::vector<PlayerInput>(recorder.history().begin(), recorder.history().end()) == history);
     for (const auto& entry : std::filesystem::directory_iterator(files.directory))
-        REQUIRE((entry.path() == path || entry.path() == recording_path(path)));
+        REQUIRE((entry.path() == path || entry.path() == recording_path(path) ||
+                 entry.path() == achievement_path(path)));
     game.finish_commands();
     recorder.save(game, path);
     REQUIRE(recorder.history()[2] == ranking_input(winners()));

@@ -7,6 +7,8 @@ namespace tsw {
 struct GameState {
     using Fight = Game::Fight;
     Hero hero;
+    RunHistory run_history;
+    std::optional<EndingSummary> ending_summary;
     std::array<Floor, FloorCount> floors;
     std::array<Monster, 33> monsters;
     RankingTables rankings;

@@ -4,23 +4,22 @@
 
 namespace tsw {
 GameState GameState::capture(const Game& g) {
-    return {g.hero,           g.floors,
-            g.monsters,       g.rankings,
-            g.commands,       g.dialogue,
-            g.visual,         g.status,
-            g.sounds,         g.checkpoint_requested,
-            g.contact_index,  g.scratch_index,
-            g.neighbor_index, g.message_code,
-            g.door_opened,    g.original_save_record_,
-            g.fight_,         g.shop_kind_,
-            g.shop_cost_,     g.shop_hint_,
-            g.shop_id_,       g.shop_npc_cell_,
+    return {g.hero,          g.run_history,   g.ending_summary,
+            g.floors,        g.monsters,      g.rankings,
+            g.commands,      g.dialogue,      g.visual,
+            g.status,        g.sounds,        g.checkpoint_requested,
+            g.contact_index, g.scratch_index, g.neighbor_index,
+            g.message_code,  g.door_opened,   g.original_save_record_,
+            g.fight_,        g.shop_kind_,    g.shop_cost_,
+            g.shop_hint_,    g.shop_id_,      g.shop_npc_cell_,
             g.stopped_};
 }
 
 Game GameState::restore() const {
     Game g;
     g.hero = hero;
+    g.run_history = run_history;
+    g.ending_summary = ending_summary;
     g.floors = floors;
     g.monsters = monsters;
     g.rankings = rankings;

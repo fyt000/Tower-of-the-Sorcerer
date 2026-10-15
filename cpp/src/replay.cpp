@@ -119,8 +119,13 @@ std::string_view direction_id(Direction direction) {
 void save_in_memory(Game& game, SaveKind kind, bool reload) {
     std::stringstream record(std::ios::in | std::ios::out | std::ios::binary);
     game.save(record, kind);
-    if (reload)
+    if (reload) {
+        const auto history = game.run_history;
+        const auto summary = game.ending_summary;
         game.load(record, kind);
+        game.run_history = history;
+        game.ending_summary = summary;
+    }
 }
 } // namespace
 

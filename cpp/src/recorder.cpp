@@ -95,6 +95,7 @@ void Recorder::save(Game& game, const std::filesystem::path& path, SaveKind kind
     const auto backup_companion = recording_path(backup_save);
     const bool previous = std::filesystem::exists(companion);
     const bool previous_save = std::filesystem::exists(path);
+    std::string achievement_error;
     if (previous && !std::filesystem::is_regular_file(companion))
         throw std::runtime_error("Replay companion must be a regular file");
     const PlayerInput saved{InputKind::Save, Direction::Up, Item::HeroOrb, -1, kind};
@@ -118,6 +119,8 @@ void Recorder::save(Game& game, const std::filesystem::path& path, SaveKind kind
         if (previous)
             std::filesystem::rename(companion, pending);
         game.save(path, kind);
+    } catch (const AchievementSaveError& error) {
+        achievement_error = error.what(); // The original save changed, so its recording must change too.
     } catch (...) {
         if (previous && std::filesystem::exists(pending))
             std::filesystem::rename(pending, companion);
@@ -142,6 +145,8 @@ void Recorder::save(Game& game, const std::filesystem::path& path, SaveKind kind
         remove_temporary(pending);
         throw std::runtime_error(std::string("Game saved, but recording was stopped: ") + error.what());
     }
+    if (!achievement_error.empty())
+        throw AchievementSaveError(achievement_error);
 }
 
 void Recorder::load(Game& game, const std::filesystem::path& path, SaveKind kind) {

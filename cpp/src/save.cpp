@@ -84,9 +84,40 @@ void save_detail::write_file(const std::filesystem::path& path, const std::vecto
 void Game::save(const std::filesystem::path& path, SaveKind kind) const {
     const auto bytes =
         save_detail::encode_original(*this, original_save_record_ ? &*original_save_record_ : nullptr, kind);
-    save_detail::write_file(path, bytes);
+    const auto companion = achievement_path(path);
+    auto pending = companion;
+    pending += ".pending";
+    auto backup = path;
+    backup += ".bak";
+    const bool previous = std::filesystem::exists(companion);
+    const bool previous_save = std::filesystem::exists(path);
+    if (previous && !std::filesystem::is_regular_file(companion))
+        throw std::runtime_error("Achievement companion must be a regular file");
+    // Detach old metadata first: even identical save bytes can belong to different histories.
+    if (previous) {
+        std::filesystem::remove(pending);
+        std::filesystem::rename(companion, pending);
+    }
+    try {
+        save_detail::write_file(path, bytes);
+    } catch (...) {
+        if (previous)
+            std::filesystem::rename(pending, companion);
+        throw;
+    }
     // The original manual writer updates the live checksum words before a later Fairy snapshot.
     original_save_record_ = save_detail::hero_record(bytes);
+    try {
+        std::filesystem::remove(achievement_path(backup));
+        if (previous && previous_save)
+            std::filesystem::rename(pending, achievement_path(backup));
+        else
+            std::filesystem::remove(pending);
+        write_run_history(path, bytes, run_history);
+    } catch (const std::exception& error) {
+        throw AchievementSaveError(std::string("Game saved, but achievement history was not saved: ") +
+                                   error.what());
+    }
 }
 
 void Game::load(const std::filesystem::path& path, SaveKind kind) {
@@ -94,6 +125,13 @@ void Game::load(const std::filesystem::path& path, SaveKind kind) {
     if (!input)
         throw std::runtime_error("Unable to open save");
     load(input, kind);
+    input.clear();
+    input.seekg(0);
+    std::vector<std::uint8_t> bytes(save_detail::OriginalSaveBytes);
+    input.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
+    if (input)
+        if (const auto history = read_run_history(path, bytes))
+            run_history = *history;
 }
 
 void Game::save(std::ostream& output, SaveKind kind) const {
@@ -113,6 +151,8 @@ void Game::load(std::istream& input, SaveKind kind) {
         throw std::runtime_error("Truncated original save: expected 6957 bytes");
     save_detail::OriginalRecord record;
     Game restored = save_detail::decode_original(bytes, record, kind);
+    restored.run_history.complete = false;
+    restored.run_history.dragon_slayer_acquired = restored.inventory(Item::DragonSlayer) > 0;
     // Rankings belong to the save directory, not to an individual game slot.
     restored.rankings = rankings;
     restored.original_save_record_ = record;

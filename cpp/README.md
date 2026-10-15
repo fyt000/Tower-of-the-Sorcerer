@@ -79,6 +79,20 @@ walk immediately. Hazards also stop the walk. A new map click replaces the route
 keyboard movement, overlays, loading and the main menu cancel it. Mouse steps use
 the normal game speed and are recorded as ordinary movement inputs.
 
+After the tower collapses, the ending summary shows final HP, attack, defense,
+gold, total altar purchases, and remaining yellow, blue and red keys. Achievements
+use the original game icons and relevant item overlays. Only earned achievements
+appear, in a single grid with two columns and up to three rows. Sword and shield
+icons match the equipment held at the ending. Enter/Space or **Next cycle**
+continues. Backside victories also show a summary
+after their closing scene, including the final Zeno reward.
+
+The initial achievement list checks an active Zeno seal at the ending, no outer
+Octopus part victories, slaying the Dragon without ever acquiring Dragon Slayer,
+obtaining the Sacred Shield without bombing either of its two 44F guards,
+at least 21 altar purchases, and finishing with at least five red keys.
+Results apply to the cleared cycle; carried Dragon Slayer counts as acquired.
+
 **Settings → Realtime Hero Orb** (default: off) shows compact stats on monster
 tiles once you own the Hero Orb. HP cost appears at the top: green for zero,
 amber for damage, red for a lethal fight, and purple **∞** when your attack cannot
@@ -108,6 +122,16 @@ the running game.
 Game saves and Fairy ranking tables retain their original formats. Rankings
 survive game loads and new cycles. Legacy preferences are not imported.
 See [data formats](../docs/original-data.md#original-saves) for file layouts.
+
+Achievement history lives in a separate `SAVE.achievements.json` companion (for
+example `save1.dat.achievements.json`), including quick saves and Fairy checkpoints.
+Copy it along with the save to retain run evidence. It is bound to the original
+save bytes and has a corresponding companion for `.bak` saves. Original save
+records and checksums contain no achievement fields. Missing, stale, malformed,
+or incompatible companions do not block loading: history-dependent achievements
+remain unverified and hidden unless their requirements can be established. Saving that game again
+preserves the incomplete history. New games and new cycles start fresh tracking;
+replays and in-process checkpoints preserve their recorded evidence.
 
 ## Visual replay, recording and headless CLI
 

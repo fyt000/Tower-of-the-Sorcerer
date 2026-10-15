@@ -1,4 +1,5 @@
 #pragma once
+#include "tsw/achievements.hpp"
 #include "tsw/rankings.hpp"
 #include <array>
 #include <cstdint>
@@ -272,6 +273,12 @@ struct Dialogue {
     friend bool operator==(const Dialogue&, const Dialogue&) = default;
 };
 
+struct EndingSummary {
+    Hero hero;
+    RunHistory history;
+    friend bool operator==(const EndingSummary&, const EndingSummary&) = default;
+};
+
 struct Visual {
     struct Layer {
         int mask{}, color{}, underlying = -1;
@@ -303,6 +310,8 @@ struct Forecast {
 class Game {
   public:
     Hero hero;
+    RunHistory run_history;
+    std::optional<EndingSummary> ending_summary;
     std::array<Floor, FloorCount> floors{};
     std::array<Monster, 33> monsters{};
     RankingTables rankings = default_rankings();

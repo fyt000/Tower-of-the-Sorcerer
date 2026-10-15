@@ -58,6 +58,24 @@ int verify_localization(Presentation& renderer, const std::filesystem::path& out
         game.visual.raster_mode = 5;
         game.visual.raster_frame = 400;
         capture("ending");
+        game.hero.zeno_sealed = true;
+        game.hero.altar_purchases = 21;
+        game.hero.red_keys = 5;
+        game.hero.sword = 3;
+        game.hero.shield = 4;
+        game.inventory(Item::DragonSlayer) = 0;
+        game.run_history.dragon_defeated = true;
+        game.ending_summary = EndingSummary{game.hero, game.run_history};
+        ui.ending_wait = true;
+        capture("ending-summary-all");
+        game.run_history.complete = false;
+        game.ending_summary = EndingSummary{game.hero, game.run_history};
+        capture("ending-summary-partial");
+        game.hero.zeno_sealed = false;
+        game.hero.altar_purchases = 20;
+        game.hero.red_keys = 4;
+        game.ending_summary = EndingSummary{game.hero, game.run_history};
+        capture("ending-summary-empty");
     }
     std::ofstream report(output / "localization-report.json");
     report << "{\"languages\":5,\"rendered_scenes\":" << checks << ",\"audio_opened\":false}\n";

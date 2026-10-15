@@ -693,13 +693,16 @@ TEST_CASE("A refused save preserves both files and the active recording", "[repl
     const auto save = directory.path / "save1.dat";
     recorder.save(game, save);
     const auto bytes = contents(save), recording = contents(recording_path(save));
+    const auto achievements = contents(achievement_path(save));
     game.push(Op::Wait);
     REQUIRE_THROWS(recorder.save(game, save));
     REQUIRE(recorder.active());
     REQUIRE(contents(save) == bytes);
     REQUIRE(contents(recording_path(save)) == recording);
+    REQUIRE(contents(achievement_path(save)) == achievements);
     for (const auto& entry : std::filesystem::directory_iterator(directory.path))
-        REQUIRE((entry.path() == save || entry.path() == recording_path(save)));
+        REQUIRE((entry.path() == save || entry.path() == recording_path(save) ||
+                 entry.path() == achievement_path(save)));
     game.finish_commands();
     walk(game, recorder, Direction::Up);
     recorder.save(game, save);
