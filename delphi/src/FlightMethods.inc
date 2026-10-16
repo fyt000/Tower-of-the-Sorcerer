@@ -1,8 +1,9 @@
 procedure TTSW10.monswork; { $0044B6F4 }
 begin
   MonsterText := ListBox2.Items[$5D];
-  if (MonsterIndex >= 0) and (MonsterIndex < $22) then
-    MonsterText := ListBox2.Items[MonsterIndex + $5E];
+  case MonsterIndex of
+    0..33: MonsterText := ListBox2.Items[MonsterIndex + $5E];
+  end;
 end;
 
 procedure TTSW10.monshyouji; { $0044B78C }
@@ -12,32 +13,7 @@ begin
   Image31.Visible := False;
   DrawX := 0;
   DrawY := 0;
-  if MonsterIndex < 0 then
-  begin
-    Memo5.ReadOnly := False;
-    Memo6.ReadOnly := False;
-    Memo7.ReadOnly := False;
-    monswork;
-    WorkBitmap3.Width := Image6.Width;
-    WorkBitmap3.Height := Image6.Height;
-    ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, $A2);
-    if GameOptions[8] = 0 then
-    begin
-      Image31.Top := $E6;
-      Image31.Left := Image3.Left + $2E;
-    end
-    else if GameOptions[8] = 1 then
-    begin
-      Image31.Top := $120;
-      Image31.Left := Image3.Left + $3A;
-    end;
-    Image31.Canvas.Draw(0, 0, WorkBitmap3);
-    Memo8.Text := MonsterText;
-    Memo5.Text := ListBox2.Items[$D6];
-    Memo6.Text := ListBox2.Items[$D7];
-    Memo7.Text := ListBox2.Items[$D8];
-  end
-  else
+  if MonsterIndex >= 0 then
   begin
     WorkBitmap1.Width := Image6.Width;
     WorkBitmap1.Height := Image6.Height;
@@ -50,29 +26,29 @@ begin
     Memo7.ReadOnly := True;
     monswork;
     Frame := 0;
-    if (MonsterIndex >= 0) and (MonsterIndex < $12) then
-      Frame := MonsterIndex * 2 + $3C
-    else if MonsterIndex = $12 then
-      Frame := $67
-    else if MonsterIndex = $13 then
-      Frame := $79
-    else if (MonsterIndex >= $14) and (MonsterIndex <= $20) then
-      Frame := MonsterIndex * 2 + $5C;
+    case MonsterIndex of
+      0..17: Frame := MonsterIndex * 2 + $3C;
+      18: Frame := $67;
+      19: Frame := $79;
+      20..32: Frame := MonsterIndex * 2 + $5C;
+    end;
     ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, $A2);
     ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, Frame);
     ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, Frame);
     TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
     SourceRect := TargetRect;
     kasanegaki;
-    if GameOptions[8] = 0 then
-    begin
-      Image31.Top := $E6;
-      Image31.Left := Image3.Left + $2E;
-    end
-    else if GameOptions[8] = 1 then
-    begin
-      Image31.Top := $120;
-      Image31.Left := Image3.Left + $3A;
+    case GameOptions[8] of
+      0:
+      begin
+        Image31.Top := $E6;
+        Image31.Left := Image3.Left + $2E;
+      end;
+      1:
+      begin
+        Image31.Top := $120;
+        Image31.Left := Image3.Left + $3A;
+      end;
     end;
     Image31.Picture.Bitmap := WorkBitmap1;
     Memo8.Text := MonsterText;
@@ -80,6 +56,33 @@ begin
     Memo6.Text := IntToStr(Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1));
     Memo7.Text := IntToStr(Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1));
     Image31.Visible := True;
+  end
+  else
+  begin
+    Memo5.ReadOnly := False;
+    Memo6.ReadOnly := False;
+    Memo7.ReadOnly := False;
+    monswork;
+    WorkBitmap3.Width := Image6.Width;
+    WorkBitmap3.Height := Image6.Height;
+    ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, $A2);
+    case GameOptions[8] of
+      0:
+      begin
+        Image31.Top := $E6;
+        Image31.Left := Image3.Left + $2E;
+      end;
+      1:
+      begin
+        Image31.Top := $120;
+        Image31.Left := Image3.Left + $3A;
+      end;
+    end;
+    Image31.Canvas.Draw(0, 0, WorkBitmap3);
+    Memo8.Text := MonsterText;
+    Memo5.Text := ListBox2.Items[$D6];
+    Memo6.Text := ListBox2.Items[$D7];
+    Memo7.Text := ListBox2.Items[$D8];
   end;
 end;
 
@@ -113,24 +116,26 @@ begin
     itemdel;
     TileClass := 0;
     ScratchIndex := Hero.y * 11 + Hero.x;
-    if (Hero.y >= 1) and (Hero.y <= 10) then
-    begin
-      NeighborIndex := ScratchIndex - 11;
-      mmes;
+    NeighborIndex := ScratchIndex - 11;
+    case Hero.y of
+      1..10: mmes;
     end;
     NeighborIndex := ScratchIndex - 1;
-    if (Hero.x >= 1) and (Hero.x <= 10) then
-      mmes;
+    case Hero.x of
+      1..10: mmes;
+    end;
     NeighborIndex := ScratchIndex + 1;
-    if (Hero.x >= 0) and (Hero.x < 10) then
-      mmes;
+    case Hero.x of
+      0..9: mmes;
+    end;
     NeighborIndex := ScratchIndex + 11;
-    if (Hero.y >= 0) and (Hero.y < 10) then
-      mmes;
+    case Hero.y of
+      0..9: mmes;
+    end;
     if TileClass = $13 then
     begin
-      if (Hero.music_track <> 0) and (MediaPlayer5.DeviceID <> 0) then
-        MediaPlayer5.Stop;
+      if Hero.music_track <> 0 then
+        MediaPlayer5.Close;
       mhyouji;
       disp;
       Hero.Word48 := 1;
@@ -140,7 +145,7 @@ begin
         Button8.Enabled := False;
       Button9.Visible := True;
       Button9.Enabled := True;
-      if Hero.floor < 2 then
+      if Hero.floor <= 1 then
         Button9.Enabled := False;
       Button10.Visible := True;
       Button10.SetFocus;
@@ -199,8 +204,6 @@ begin
 end;
 
 procedure TTSW10.Button10Click(Sender: TObject); { $0044EAF4 }
-var
-  Cursor: Longint;
 begin
   Button8.Visible := False;
   Button9.Visible := False;
@@ -210,17 +213,20 @@ begin
   if (Hero.Word632 <> 0) and (Hero.floor <> $31) and (Maps[49, 18] = $17) then
     Maps[49, 18] := 6;
   Hero.Word48 := 0;
-  if Hero.Word632 = 1 then
-  begin
-    if (Hero.floor = Hero.highest_floor) and (Hero.Word664 = 1) then
-      Hero.Word632 := 2;
-  end
-  else if (Hero.Word632 = 2) and (Hero.floor = Hero.highest_floor) and (Hero.Word664 <> 1) then
-    Hero.Word632 := 1;
-  if (Hero.Word632 >= 1) and (Hero.Word632 <= 2) then
-  begin
-    Hero.x := Maps[Hero.floor, Hero.Word632 - 1] mod 11;
-    Hero.y := Maps[Hero.floor, Hero.Word632 - 1] div 11;
+  case Hero.Word632 of
+    1:
+      if (Hero.floor = Hero.highest_floor) and (Hero.Word664 = 1) then
+        Hero.Word632 := 2;
+    2:
+      if (Hero.floor = Hero.highest_floor) and (Hero.Word664 <> 1) then
+        Hero.Word632 := 1;
+  end;
+  case Hero.Word632 of
+    1..2:
+    begin
+      Hero.x := Maps[Hero.floor, Hero.Word632 - 1] mod 11;
+      Hero.y := Maps[Hero.floor, Hero.Word632 - 1] div 11;
+    end;
   end;
   if (Hero.Word632 <> 0) and (Hero.highest_floor = $1D) and (Hero.floor < $1D) then
   begin
@@ -232,21 +238,21 @@ begin
   FlightCell := Hero.y * 11 + Hero.x;
   DrawX := (Image6.Width * FlightCell) mod (Image6.Width * 11);
   DrawY := ((Image6.Height * FlightCell) div (Image6.Height * 11)) * Image6.Height;
-  if Hero.Word632 = 1 then
-    kaidanupcheck
-  else if Hero.Word632 = 2 then
-    kaidandowncheck;
+  case Hero.Word632 of
+    1: kaidanupcheck;
+    2: kaidandowncheck;
+  end;
   timer2on;
-  Cursor := EventCursor + 1;
-  EventCursor := Cursor;
-  EventStack[Cursor].Opcode := 0;
-  EventStack[Cursor].A := 0;
-  EventStack[Cursor].B := 0;
-  Cursor := EventCursor + 1;
-  EventCursor := Cursor;
-  EventStack[Cursor].Opcode := 1;
-  EventStack[Cursor].A := 2;
-  EventStack[Cursor].B := 0;
+  { PushCommand(0, 0, 0): wait. }
+  Inc(EventCursor);
+  EventStack[EventCursor].Opcode := Ord(evWait);
+  EventStack[EventCursor].A := 0;
+  EventStack[EventCursor].B := 0;
+  { PushCommand(1, 2, 0): flight sound. }
+  Inc(EventCursor);
+  EventStack[EventCursor].Opcode := Ord(evSound);
+  EventStack[EventCursor].A := 2;
+  EventStack[EventCursor].B := 0;
   yusyahyouji1;
   TileClass := $17;
   disp;

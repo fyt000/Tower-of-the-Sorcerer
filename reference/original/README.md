@@ -10,7 +10,8 @@ English **Tower of the Sorcerer for Windows 1.2**, a Borland Delphi/VCL game.
   runtime recognition and unresolved regions.
 - [Data and recovery guide](../../docs/original-data.md): extraction and
   comparison workflows.
-- [Delphi build instructions](../../delphi/README.md).
+- [Current Delphi source recovery](../../delphi/README.md): reconstructed Pascal,
+  routine-level byte comparisons, build and verification.
 
 Decompiler output is evidence, not the authors' source. Addresses use image base
 `0x400000`; inferred fields, register arguments and indirect calls must be checked

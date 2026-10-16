@@ -85,13 +85,17 @@ input. Rankings are separate from game slots.
 
 ## Source recovery
 
+The [Delphi recovery status](../delphi/README.md#recovery-status) records the
+current Pascal reconstruction, routine comparisons and remaining limits.
+All 230 published methods have recovered bodies and reviewed boundaries.
+
 Executable hashes and classes are recorded in the
 [structural inventory](../reference/original/whole-program/structural-inventory.json).
 Addresses use image base `0x400000`. The
 [presentation review](../reference/original/presentation/REVIEW.md) and
 [whole-program accounting](../reference/original/whole-program/REVIEW.md)
-index recovered entries and unresolved regions. Compiler preparation is in
-the [Delphi compiler guide](../reference/delphi2/README.md).
+retain the earlier decompilation inventories and unresolved executable regions.
+Compiler preparation is in the [Delphi compiler guide](../reference/delphi2/README.md).
 
 Ghidra output is an inspection aid. Check assembly for register arguments,
 indirect calls, strings and aliased state before translating it. Preserve
@@ -119,7 +123,7 @@ python tools/test_whole_program_accounting.py
 
 ## Comparison workflow
 
-The [Delphi README](../delphi/README.md#formatting-and-verification) lists its
+The [Delphi README](../delphi/README.md#verification) lists its
 comparison tools. After building C++, run its original-handler suite from
 the repository root:
 

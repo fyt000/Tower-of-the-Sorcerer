@@ -24,7 +24,9 @@ from verify_delphi2_reference import ROOT, ORIGINAL_HASH, digest, emulator, symb
 from build_delphi_game import WORK
 
 GAME = dict(syokidata0=0x484F48, mhyouji=0x442C38, yusyahyouji1=0x4433A4,
-            yusyahyouji=0x443648, kasanegaki=0x44439C, imagework=0x454C10)
+            yusyahyouji=0x443648, kasanegaki=0x44439C, imagework=0x454C10,
+            yusyai1=0x443DE8, yusyai2=0x443C08, yusyai3=0x443A34, yusyai4=0x4440E8,
+            monidou=0x480384, monidouwork=0x480A90, banpaiawork=0x47C978)
 GLOBALS = dict(Hero=(0x4B8688, 684), Maps=(0x4B8934, 6273), RenderOrder=(0x489B20, 121),
                GameOptions=(0x489B9C, 10), UiSpan=(0x48C578, 4), UiStep=(0x48C57C, 4),
                DrawX=(0x48C54C, 4), DrawY=(0x48C550, 4), DrawIndex=(0x48C570, 4),
@@ -34,7 +36,9 @@ GLOBALS = dict(Hero=(0x4B8688, 684), Maps=(0x4B8934, 6273), RenderOrder=(0x489B2
                SourceRect=(0x48C52C, 16), TargetRect=(0x48C53C, 16),
                MapBitmap1=(0x48C514, 4), MapBitmap2=(0x48C518, 4),
                WorkBitmap1=(0x48C51C, 4), WorkBitmap2=(0x48C520, 4),
-               WorkBitmap3=(0x48C524, 4), FrameBitmap=(0x48C528, 4), DataDirectory=(0x48C5FC, 4))
+               WorkBitmap3=(0x48C524, 4), FrameBitmap=(0x48C528, 4), DataDirectory=(0x48C5FC, 4),
+               Damage=(0x48C568, 4), StrikeCount=(0x48C56C, 4),
+               EventCursor=(0x48C5AC, 4), EventStack=(0x48C74C, 512 * 6))
 BOUNDARIES = {
     0x423BA8: "TScreen.GetWidth", 0x410378: "TMenuItem.SetEnabled",
     0x413098: "TControl.SetLeft", 0x4130B8: "TControl.SetTop",
@@ -43,14 +47,14 @@ BOUNDARIES = {
     0x413178: "TControl.GetClientWidth", 0x413500: "TControl.SetVisible",
     0x4136AC: "TControl.SetShowHint", 0x419C7C: "TFont.SetColor",
     0x40352C: "@LStrAsg", 0x403658: "@LStrCat", 0x40369C: "@LStrCat3",
-    0x4034DC: "@LStrClr", 0x4036FC: "@LStrCatN",
+    0x4034DC: "@LStrClr", 0x403710: "@LStrCatN",
     0x402C34: "TObject.Free", 0x41D718: "TBitmap.Create", 0x41DAD8: "TBitmap.GetCanvas",
     0x41E1BC: "TBitmap.SetHeight", 0x41E21C: "TBitmap.SetWidth",
     0x41DB3C: "TBitmap.GetHeight", 0x41DB94: "TBitmap.GetWidth",
     0x41C1E8: "TPicture.LoadFromFile", 0x41BFBC: "TGraphic.LoadFromFile",
     0x4178F4: "TCustomImageList.SetWidth", 0x41793C: "TCustomImageList.SetHeight",
     0x417B00: "TCustomImageList.Add", 0x417E44: "TCustomImageList.Draw",
-    0x41A530: "TCanvas.CopyRect", 0x41A5B8: "TCanvas.Draw",
+    0x41A530: "TCanvas.CopyRect", 0x41A5B8: "TCanvas.Draw", 0x421A54: "TForm.GetCanvas",
 }
 
 
@@ -108,7 +112,7 @@ class GraphicsRunner:
             self.screen, self.main, self.rect = data["Screen"], data.get("MainForm"), mapping["Rect"]
             self.allowed = set()
             addresses = sorted(set(mapping.values()))
-            for address in list(self.entries.values()) + [mapping["ComposeSprite"], mapping["SelectGraphicFrame"], self.rect] + [mapping[name] for name in helpers]:
+            for address in list(self.entries.values()) + [self.rect] + [mapping[name] for name in ("ComposeSprite", *helpers) if name in mapping]:
                 stop = next(a for a in addresses if a > address)
                 self.allowed.update(range(address, stop))
             # Delphi 2 emits CatN for long concatenations; explicitly modeled below.
@@ -275,6 +279,12 @@ class GraphicsRunner:
             self.trace.append(["bitmap_free", self.object_name(a)])
         elif name == "TBitmap.GetCanvas":
             self.ret(value=a + 0x200)
+            return
+        elif name == "TForm.GetCanvas":
+            pointer = a + 0x800
+            self.names[pointer] = "window_canvas"
+            self.canvas_objects[pointer] = dict(name="window_canvas", width=self.read32(a + 0x2C), height=self.read32(a + 0x30))
+            self.ret(value=pointer)
             return
         elif name.startswith("TBitmap.Get"):
             self.ret(value=self.bitmap_objects[a][name.split("Get")[1].lower()])
@@ -471,6 +481,9 @@ class PixelOracle:
                 self.blit(bitmap, self.lists[name][index], x, y)
             elif kind == "draw":
                 bitmap, x, y, source = event[1:]
+                if bitmap == "window_canvas":
+                    # Window delivery is compared as a request, not a pixel claim.
+                    continue
                 if bitmap not in self.bitmaps:
                     if bitmap != "Image31" or (x, y) != (0, 0):
                         raise ValueError("Unreviewed control canvas in pixel fixture")
@@ -486,7 +499,7 @@ def pixel_check(expected, path, region=None):
     with Image.open(path) as loaded:
         actual = loaded.convert("RGB")
     if expected.size != actual.size:
-        return dict(file=path.name, passed=False, expected_size=expected.size, actual_size=actual.size)
+        return dict(file=path.name, pixels=0, passed=False, expected_size=expected.size, actual_size=actual.size)
     if region:
         expected, actual = expected.crop(region), actual.crop(region)
     difference = ImageChops.difference(expected, actual)
@@ -498,7 +511,7 @@ def pixel_check(expected, path, region=None):
 
 
 def compare_native_pixels(original, build, assets):
-    from verify_delphi_flight import FlightRunner
+    from verify_delphi_doors import DoorRunner
     reports = []
     for case in build["builds"]["graphics"].get("native_cases", []):
         output = ROOT / case["output"]
@@ -514,7 +527,7 @@ def compare_native_pixels(original, build, assets):
         summary = next(r for r in rows if "graphics_startup" in r)
         if summary["counts"] != [218, 159, 4] or not rows[-1].get("graphics_smoke_passed") or not any(r.get("referenced_vcl_fields_verified") for r in rows):
             raise ValueError("Incomplete native graphics smoke")
-        runner = FlightRunner(original, original=True, assets=assets)
+        runner = DoorRunner(original, original=True, assets=assets)
         control_seeds = {r["control_seed"]: r["bounds"] for r in rows if "control_seed" in r}
         if len(control_seeds) != len([r for r in rows if "control" in r]) or not control_seeds:
             raise ValueError("Native control seeds incomplete")
@@ -578,6 +591,33 @@ def compare_native_pixels(original, build, assets):
             wanted = [runner.texts[name] for name in ("Memo8", "Memo5", "Memo6", "Memo7")]
             checks.append(dict(file=f"monster{row}.labels", pixels=0, expected=wanted, actual=native["labels"],
                                passed=wanted == native["labels"] and native["visible"] == (row >= 0)))
+        runner.write32(runner.storage["Hero"] + 16, 1)
+        for direction, delta in enumerate((11, -1, 1, -11), 1):
+            runner.u.mem_write(runner.storage["Maps"] + 123 + 2, bytes([6]) * 121)
+            runner.u.mem_write(runner.storage["Maps"] + 123 + 62, b"\x3d")
+            oracle.replay(runner.run("mhyouji"))
+            runner.write32(runner.storage["EventCursor"], 1)
+            runner.u.mem_write(runner.storage["EventStack"] + 6, struct.pack("<3H", 12, 60, 60 + delta))
+            oracle.replay(runner.run("monidou"))
+            for key, suffix in (("MapBitmap1", "a"), ("MapBitmap2", "b")):
+                checks.append(pixel_check(oracle.bitmaps[runner.object_name(runner.read32(runner.storage[key]))],
+                                          output / f"slide{direction}{suffix}.bmp"))
+        for frame, step in itertools.product(range(2), range(4)):
+            runner.write32(runner.storage["DoorOpened"], frame)
+            runner.write32(runner.storage["ScratchIndex"], step * summary["tile_width"] // 3)
+            oracle.replay(runner.run("banpaiawork"))
+            checks.append(pixel_check(oracle.bitmaps[runner.object_name(runner.read32(runner.storage["WorkBitmap1"]))],
+                                      output / f"vampire{frame}-{step}.bmp"))
+        doors, door_pixels = runner, oracle
+        doors.write32(doors.storage["Hero"] + 16, 1)
+        doors.run("speedhigh")
+        doors.write32(doors.storage["EventCursor"], 1)
+        for mode, (step, frame) in itertools.product(range(1, 13), enumerate((1, 8, 16))):
+            doors.u.mem_write(doors.storage["EventStack"], struct.pack("<6H", 0, 0, frame, 13, 60, mode))
+            door_pixels.replay(doors.run("dooropen"))
+            key = "WorkBitmap1" if mode == 6 else "WorkBitmap3"
+            checks.append(pixel_check(door_pixels.bitmaps[doors.object_name(doors.read32(doors.storage[key]))],
+                                      output / f"door{mode}-{step}.bmp"))
         reports.append(dict(scale=case["scale"], cycle=case["cycle"], checks=checks, control_bounds=bounds_checks,
                             passed=all(c["passed"] for c in checks + bounds_checks)))
     if len(reports) != 4:
@@ -659,6 +699,44 @@ def main():
                 for offset, value in ((16, floor), (24, position[0]), (28, position[1]), (352, facing)):
                     runner.write32(runner.storage["Hero"] + offset, value)
             compare("yusyahyouji1", dict(scale=scale, floor=floor, facing=facing, x=position[0], y=position[1]))
+        # Directional composers must preserve neighbor selection, source/target
+        # rectangles and raster-operation order, including rectangular tiles.
+        for direction, size, step, position in itertools.product(
+                range(1, 5), ((32, 32), (40, 40), (32, 40)), (0, 1, 8, 31), ((1, 1), (5, 5), (9, 9))):
+            for runner in [old, *runners.values()]:
+                runner.write32(runner.components["Image6"] + 0x2C, size[0])
+                runner.write32(runner.components["Image6"] + 0x30, size[1])
+                for offset, value in ((16, 1), (24, position[0]), (28, position[1])):
+                    runner.write32(runner.storage["Hero"] + offset, value)
+                runner.write32(runner.storage["ScratchIndex"], 184 + (direction - 1) * 8)
+                runner.write32(runner.storage["NeighborIndex"], step)
+            compare("yusyai" + str(direction), dict(scale=scale, size=size, step=step, position=position))
+        for direction, size, step in itertools.product(range(1, 5), ((32, 32), (40, 40), (32, 40)), (0, 1, 8, 31)):
+            for runner in [old, *runners.values()]:
+                runner.write32(runner.components["Image6"] + 0x2C, size[0])
+                runner.write32(runner.components["Image6"] + 0x30, size[1])
+                runner.write32(runner.storage["Damage"], direction)
+                runner.write32(runner.storage["ScratchIndex"], 60)
+                runner.write32(runner.storage["NeighborIndex"], step)
+                runner.u.mem_write(runner.storage["TargetRect"], struct.pack("<4i", 0, 0, *size))
+            compare("monidouwork", dict(scale=scale, direction=direction, size=size, step=step))
+        for size, delta in itertools.product(((32, 32), (40, 40), (32, 40)), (11, -1, 1, -11)):
+            for runner in [old, *runners.values()]:
+                runner.write32(runner.components["Image6"] + 0x2C, size[0])
+                runner.write32(runner.components["Image6"] + 0x30, size[1])
+                runner.write32(runner.storage["Hero"] + 16, 1)
+                runner.u.mem_write(runner.storage["Maps"] + 123 + 2, bytes([6]) * 121)
+                runner.u.mem_write(runner.storage["Maps"] + 123 + 62, b"\x3d")
+                runner.write32(runner.storage["EventCursor"], 1)
+                runner.u.mem_write(runner.storage["EventStack"] + 6, struct.pack("<3H", 12, 60, 60 + delta))
+            compare("monidou", dict(scale=scale, size=size, delta=delta))
+        for frame, step in itertools.product(range(2), (0, 1, 8, 16, 24, 32)):
+            for runner in [old, *runners.values()]:
+                runner.write32(runner.components["Image6"] + 0x2C, 32 + 8 * scale)
+                runner.write32(runner.components["Image6"] + 0x30, 32 + 8 * scale)
+                runner.write32(runner.storage["DoorOpened"], frame)
+                runner.write32(runner.storage["ScratchIndex"], step * (5 if scale else 4) // 4)
+            compare("banpaiawork", dict(scale=scale, frame=frame, step=step))
     print("Graphics state/drawing comparisons", len(cases), "passed", flush=True)
     native_pixels = compare_native_pixels(original, build, args.assets)
     passed = all(r["passed"] for r in native_pixels)
@@ -667,11 +745,11 @@ def main():
                   comparisons=len(cases), cases=cases, fixture_transcript_sha256=transcript.hexdigest(),
                   native_configurations=native_pixels, native_pixels_compared=sum(c["pixels"] for r in native_pixels for c in r["checks"]),
                   measured_graphics_passed=passed, full_game_recovered=False, pixel_equivalence_established=False,
-                  limits=["All six recovered graphics game bodies execute. Controls, strings, bitmap and image-list operations use explicit observer models during instruction comparisons.",
+                  limits=["All thirteen recovered graphics game bodies execute. Controls, strings, bitmap and image-list operations use explicit observer models during instruction comparisons.",
                           "Actual original/native bitmap VMT targets are authenticated. Every other runtime entry is rejected; no game callback is skipped.",
                           "The original normal startup post-finally epilogue is byte-authenticated because its Ghidra export omitted it.",
                           "Native hidden Delphi/Windows execution covers two display sizes and two cycle frame sets. Pixel results compare against an independent replay of original drawing requests.",
-                          "Pixels cover populated atlas cells, frame bitmaps, floors 1 and 49 in both animation frames and all four hero facings. Unwritten atlas tails and uninitialized pixels are excluded.",
+                          "Pixels cover populated atlas cells, frame bitmaps, floors 1 and 49, all hero facings, four monster-slide directions and bat/vampire composition in both animation frames. Unwritten atlas tails and uninitialized pixels are excluded.",
                           "Native control bounds use recorded initial streamed-control bounds; differences produced by unrelated component constructors are not classified by these game-body tests.",
                           "Main formactivate and other startup, input, story, timer and I/O paths remain unrecovered; these measurements do not establish full-window pixels or complete-game equivalence."])
     target = ROOT / "build/delphi-game/reports/graphics-comparison-report.json"

@@ -51,7 +51,9 @@ def initialization():
     lines = source.splitlines()
     if lines[0] != "{" or lines[-1] != "}":
         raise ValueError("Unreviewed initialization structure")
-    result = ["{ Generated floor maps and cycle-specific hero defaults. }"]
+    result = ["{ Original cycle reset, retained as individual stores for routine byte correspondence.",
+              "  Fresh cycles reset combat stats; later cycles preserve selected progress.",
+              "  Map columns 0/1 hold stair destinations; columns 2..122 are the 11x11 tiles. }"]
     conditions = assignments = 0
     for line in lines[1:-1]:
         stripped = line.strip()
@@ -65,6 +67,11 @@ def initialization():
             result.append(indent + "end;")
         elif re.fullmatch(r"(?:original_hero\.\w+|original_maps\[\d+\]\[\d+\]) = (?:0x[\da-f]+|\d+);", stripped):
             left, right = stripped.split(" = ")
+            floor = re.fullmatch(r"original_maps\[(\d+)\]\[0\]", left)
+            if floor:
+                result.append(indent + "{ Floor " + floor[1] + ": reset stair destinations and every map cell. }")
+            elif left == "original_hero._364_4_":
+                result.append(indent + "{ Reset persisted story flags and event progress before restoring the maps. }")
             result.append(indent + expression(left) + " := " + expression(right))
             assignments += 1
         else:
@@ -105,6 +112,10 @@ def forms(manifest, implemented):
         for method in form["methods"]:
             events = [e for e in manifest["events"] if e["form"] == cls and e["method"].lower() == method["name"].lower()]
             param = parameters(e["event"] for e in events)
+            if cls == "TForm2" and method["name"].lower() in ("hyouji", "scoreload"):
+                param = "(Category: Byte)"
+            if cls == "TTSW10" and method["name"].lower() == "itemichiwork":
+                param = "(Direction: Longint)"
             declaration.append(f"    procedure {method['name']}{param};")
             key = cls + "." + method["name"]
             recovered = key.lower() in implemented
@@ -114,7 +125,10 @@ def forms(manifest, implemented):
                                   events=[e["event"] for e in events],
                                   status="implemented"))
         if cls == "TTSW10":
-            declaration.extend(["  public", "    constructor Create(AOwner: TComponent); override;"])
+            declaration.extend(["  public", "    constructor Create(AOwner: TComponent); override;",
+                                "    procedure PortableActivate(Sender: TObject);"])
+        if cls == "TForm4":
+            declaration.extend(["  public", "    procedure SelectPortableFolder(Sender: TObject);"])
         declaration.extend(["  end;", ""])
     return "\n".join(declaration) + "\n", inventory
 
@@ -149,13 +163,10 @@ def generated():
             if event["form"] == cls:
                 smoke.append(f"    CheckBinding(Form, '{event['component']}', '{event['event']}', '{event['method']}');")
         smoke.extend(["  end;", ""])
-    from recover_delphi_layout import recover_layout, recover_hints
-    layout, layout_record = recover_layout(manifest)
-    report["graphics_layout"] = layout_record
+    from recover_delphi_layout import recover_hints
     from recover_delphi_ui import recovered_ui
-    from recover_delphi_ranking_layout import recover as ranking_layout
-    result = {"HeroFields.inc": record, "InitializeCycle.inc": init, "GraphicsLayout.inc": layout,
-            "GraphicsHints.inc": recover_hints(manifest), "RankingLayout.inc": ranking_layout(),
+    result = {"HeroFields.inc": record, "InitializeCycle.inc": init,
+            "GraphicsHints.inc": recover_hints(manifest),
             "FormDeclarations.inc": declarations,
             "FormChecks.inc": "\n".join(smoke) + "\n",
             "method-inventory.json": json.dumps(report, indent=2) + "\n", **recovered_ui(manifest)}

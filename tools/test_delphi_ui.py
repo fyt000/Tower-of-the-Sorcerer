@@ -8,6 +8,7 @@ import pefile
 from verify_delphi_ui import ROOT, WORK, UIRunner, HERO_OFFSETS
 from verify_delphi_graphics import symbols, data_symbols, first_difference
 from compare_delphi_binary import compare_resources, compare_sections
+import delphi_routine_layout as layout
 
 
 class UIIntegrityTests(unittest.TestCase):
@@ -25,7 +26,9 @@ class UIIntegrityTests(unittest.TestCase):
     def instructions(self, name):
         start = self.mapping[name]
         stop = next(a for a in sorted(set(self.mapping.values())) if a > start)
-        return list(self.md.disasm(self.pe.get_data(start - self.pe.OPTIONAL_HEADER.ImageBase, stop - start), start))
+        layout.DONE_EXCEPT = self.mapping["@DoneExcept"]
+        layout.DISPATCHERS |= {self.mapping[n] for n in ("@HandleAnyException", "@HandleFinally")}
+        return [next(self.md.disasm(raw, at)) for at, raw in layout.trace_layout(self.pe, start, stop)["records"]]
 
     def mutate(self, address, raw):
         data = bytearray(self.raw)
@@ -60,7 +63,10 @@ class UIIntegrityTests(unittest.TestCase):
 
     def test_item_presence_gate_change_is_detected(self):
         instructions = self.instructions("TTSW10.itemdisp")
-        index = next(i for i, ins in enumerate(instructions) if ins.mnemonic == "test" and ins.op_str == "ebp, ebp")
+        index = next(i for i, ins in enumerate(instructions) if ins.mnemonic == "cmp"
+                     and ins.operands[0].type == capstone.x86.X86_OP_MEM
+                     and ins.operands[0].mem.disp == self.data["Hero"] + HERO_OFFSETS["hero_orb"]
+                     and ins.operands[1].imm == 0)
         branch = instructions[index + 1]
         self.assertEqual(branch.bytes[0], 0x0F)
         self.assertEqual(branch.bytes[1], 0x84)
@@ -71,9 +77,10 @@ class UIIntegrityTests(unittest.TestCase):
 
     def test_timer_two_tick_gate_change_is_detected(self):
         ins = next(i for i in self.instructions("TTSW10.Timer1Timer") if i.mnemonic == "cmp"
-                   and i.operands[0].type == capstone.x86.X86_OP_MEM and i.operands[0].mem.disp == 608
-                   and i.operands[1].imm == 2)
-        old, new = self.runners(self.mutate(ins.address + ins.imm_offset, b"\x03"), True)
+                   and i.operands[0].type == capstone.x86.X86_OP_MEM
+                   and i.operands[0].mem.disp == self.data["Hero"] + HERO_OFFSETS["Word608"]
+                   and i.operands[1].imm == 1)
+        old, new = self.runners(self.mutate(ins.address + ins.imm_offset, b"\x02"), True)
         for runner in (old, new):
             for name, value in dict(floor=15, x=5, y=5, Word48=0, Word608=2, facing=1).items():
                 runner.write32(runner.storage["Hero"] + HERO_OFFSETS[name], value)

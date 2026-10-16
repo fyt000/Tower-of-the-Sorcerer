@@ -5,7 +5,6 @@ uses
   Forms,
   GameForms,
   GameState,
-  GameCore,
   GameContent,
   GameInstance;
 {$R GameResources.res}
@@ -46,5 +45,10 @@ begin
   Application.CreateForm(TAboutBox, AboutBox);
   Application.CreateForm(TForm2, RankingForm);
   Application.CreateForm(TForm4, DataHolderForm);
+  if PortableInstallation then
+  begin
+    MainForm.OnActivate := MainForm.PortableActivate;
+    DataHolderForm.Button1.OnClick := DataHolderForm.SelectPortableFolder;
+  end;
   Application.Run;
 end.

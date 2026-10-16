@@ -25,7 +25,7 @@ def recovered_ui(manifest):
                            lambda m: fields[cls][int(m[1], 0)] + ".Font", value)
             value = re.sub(r"\*\(int \*\*?\)\(param_1 \+ (0x[\da-f]+|\d+)\)",
                            lambda m: fields[cls][int(m[1], 0)], value)
-            value = value.replace("DAT_0048a760", "AboutBox").replace("_DAT_0048c50c", "DataHolderForm")
+            value = value.replace("DAT_0048a760", "AboutBox")
             value = value.replace(" == ", " = ").replace(" && ", " and ")
             value = value.replace("'\\x01'", "True")
             value = re.sub(r"\(uint\)DAT_00489b9([cd])", lambda m: "GameOptions[" + str(int(m[1], 16) - 12) + "]", value)
@@ -90,8 +90,6 @@ def recovered_ui(manifest):
 
     about = (ROOT / "reference/original/presentation/decompiled/0043416c_TAboutBox_formactivate.c").read_text()
     about = about[about.index("  FUN_004130d8("):about.index("  return;")]
-    holder = (ROOT / "reference/original/whole-program/decompiled/00440a98.c").read_text()
-    holder = holder[holder.index("  FUN_004130d8("):holder.index("  return;")]
     fonts = (ROOT / "reference/original/whole-program/decompiled/0047d4a4.c").read_text()
     fonts = fonts[fonts.index("  FUN_004102f0("):fonts.index("  FUN_0047f5a8(")]
     startup = (ROOT / "reference/original/whole-program/decompiled/00454de8.c").read_text()
@@ -99,6 +97,5 @@ def recovered_ui(manifest):
     if len(re.findall("FUN_00413500", startup)) != 73:
         raise ValueError("Startup hidden-control inventory changed")
     return {"AboutLayout.inc": translate(about, "TAboutBox"),
-            "DataHolderLayout.inc": translate(holder, "TForm4"),
             "FontLayout.inc": translate(fonts, "TTSW10"),
             "StartupHidden.inc": translate(startup, "TTSW10")}

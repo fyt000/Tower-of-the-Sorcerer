@@ -1,10 +1,11 @@
 # Whole-program accounting and runtime review — 2026-10-09
 
-Whole-executable bookkeeping is now retained. Complete recovery of original
-Pascal source, discovery of every executable path, and behavioral equivalence
-remain unestablished. The campaign is stopped. This work reads the pinned EXE,
-performs temporary analysis in a read-only Ghidra project, and writes research
-artifacts. It does not launch the game, alter its installation, or reload MCP.
+This dated audit retains whole-executable accounting and runtime evidence.
+Its unresolved-byte counts describe this analysis snapshot. Current Pascal
+recovery and routine comparisons are documented in the
+[Delphi README](../../../delphi/README.md#recovery-status); all 230 published
+methods now have reconstructed bodies and reviewed boundaries. Exhaustive
+whole-program behavior remains unverified.
 
 ## What is now accounted for
 
@@ -177,7 +178,7 @@ These are concrete reasons that isolated callback agreement did not establish
 legal entry, timer schedules, focus transfer, default-button behavior or
 transitive state effects. Runtime recognition does not make such calls pure.
 
-## What remains open
+## Remaining limits of this accounting
 
 - **14,369 unresolved CODE bytes** and **101 bytes of metadata/instruction
   conflicts** remain enumerated by address and hash. No complete-code claim is
@@ -200,12 +201,9 @@ transitive state effects. Runtime recognition does not make such calls pure.
   outside exhaustive verification. No additional floor-access bypass was
   established by this accounting work.
 
-The next behavioral review should prioritize timer/input sequences and
-focus/default-button gates, then failed file/ranking I/O and interrupted
-continuations. Each should execute the original entry, preserve state across
-callbacks, observe downstream effects, and compare the complete sequence.
-The retained **6,808** comparisons remain bounded evidence for their listed
-scenarios; these research exports add zero behavioral agreement cases.
+The **6,808** comparisons recorded by this audit cover their listed scenarios;
+these research exports add zero behavioral agreement cases. Subsequent Delphi
+verification is listed in the [current guide](../../../delphi/README.md#verification).
 
 ## Reproduction and guards
 

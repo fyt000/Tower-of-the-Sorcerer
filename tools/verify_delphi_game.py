@@ -28,6 +28,14 @@ ENTRIES = dict(InitializeCycle=0x455CB8, ClassifyNeighbor=0x451C20, ClassifyInte
                CountBattleEnemyStrikes=0x480340, BattleDamage=0x48028C,
                DoorAnimation=0x4660D0, MattockWall=0x451B98, CrystalLava=0x451D3C,
                CheckSpecialDoors=0x47BEAC)
+CORE_METHODS = dict(zip(ENTRIES, (
+    "syokidata", "mmmes", "mmes", "kaidanupcheck", "kaidandowncheck",
+    "damecount", "damecount2", "ydamecount", "ydameiji", "imagework",
+    "ydameiji2", "damei3", "ydamei3", "dameiji2", "doorstackin", "matokwork",
+    "yukiwork", "doorcheck")))
+CORE_STORAGE_NAMES = dict(Map="Maps", Monster="Monsters", Scratch="ScratchIndex",
+                          Neighbor="NeighborIndex", Strike="StrikeCount",
+                          Graphic="GraphicTile", Door="DoorOpened", Contact="ContactIndex")
 STORAGE = dict(Hero=0x4B8688, Map=0x4B8934, Monster=0x489910, Scratch=0x48C558,
                Neighbor=0x48C55C, TileClass=0x48C58C, MonsterIndex=0x48C5B8,
                RemainingHP=0x48C5B4, Strike=0x48C56C, Damage=0x48C568,
@@ -400,6 +408,13 @@ def main():
     records = verify_form_resources(main_pe, build["original_form_resources"])
     content_records = verify_form_resources(main_pe, build["original_content_resources"])
     runners = {"original": Runner(original, ENTRIES, STORAGE)}
+    # Exercise the actual published bodies in Tower.exe as well as the isolated
+    # probes. These routines do not dereference Self; recursive calls retain it.
+    from verify_delphi_graphics import data_symbols
+    main_data = data_symbols(main_pe, WORK / "game/Tower.map")
+    runners["production-methods"] = Runner(main_pe,
+        {name: main_symbols["TTSW10." + method] for name, method in CORE_METHODS.items()},
+        {name: main_data[CORE_STORAGE_NAMES.get(name, name)] for name in STORAGE})
     byte_matches = {}
     for name in ("emulator", "core-probe"):
         candidate = pefile.PE(str(ROOT / build["builds"][name]["artifact"]))
@@ -415,7 +430,7 @@ def main():
     evidence = hashlib.sha256()
     for name, inputs, state in cases(original):
         old, old_calls, old_writes, old_effects = runners["original"].run(name, state)
-        for variant in ("emulator", "core-probe"):
+        for variant in ("emulator", "core-probe", "production-methods"):
             new, new_calls, new_writes, new_effects = runners[variant].run(name, state)
             same = old == new and old_effects == new_effects
             if not same:
@@ -441,8 +456,8 @@ def main():
                   linked_framework_fixture_comparisons=dict(comparisons=len(original_framework),
                       passed=True, original=original_framework, compiled=compiled_framework,
                       boundary="Synthetic object/message trees; only Windows GetKeyState and observer event are modeled. No framework call is skipped."),
-                  compared_variants=["original-addresses", "production-storage"],
-                  comparisons=sum(counts.values()) * 2, state_and_core_call_effects_passed=not disagreements,
+                  compared_variants=["original-addresses", "production-storage", "production-methods"],
+                  comparisons=sum(counts.values()) * 3, state_and_core_call_effects_passed=not disagreements,
                   ordered_interleaved_state_effects_passed=not disagreements,
                   disagreements=disagreements[:100], disagreement_count=len(disagreements),
                   ordered_cpu_write_trace_differences=trace_differences,
@@ -454,7 +469,7 @@ def main():
                   full_game_recovered=False, pixel_equivalence_established=False,
                   queue_records_compared=512,
                   limits=["Fixtures establish final recovered-state bytes, a 512-record event prefix and transitive core entry sequences, not whole-game input reachability.",
-                          "Only ClassifyNeighbor has literal byte correspondence. All measured state-write addresses, sizes, values and their ordering must agree; instruction correspondence for other routines remains unestablished.",
+                          "All measured state-write addresses, sizes, values and their ordering must agree. Strict routine byte correspondence is checked separately by compare_delphi_routines.py.",
                           "Strike fixtures use positive penetration and bounded recursion; nonterminating original inputs are outside this measured domain.",
                           "Original Delphi resources are exact; native form streaming is validated on this host without activating the game.",
                           "IME is an authorized exception; other library and unrecovered gameplay differences are not accepted."])

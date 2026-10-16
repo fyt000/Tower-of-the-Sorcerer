@@ -71,5 +71,5 @@ Comparisons use the unpatched original executable. These rules are intentional:
 | Enemy-first Lucky Gold | Income doubles. Delphi displays the undoubled amount; C++ displays the credited gold. |
 
 The implementations' safety and presentation differences are documented in
-the [Delphi README](../delphi/README.md#known-differences-and-limits) and
+the [Delphi README](../delphi/README.md#recovery-status) and
 [C++ fidelity notes](../cpp/FIDELITY.md).

@@ -166,6 +166,7 @@ def resources(original):
     content_records.append(dict(name="RENDER_ORDER", language=0, bytes=len(blob),
                                 sha256=hashlib.sha256(blob).hexdigest()))
     icons = []
+    calendar = []
     for kind in original.DIRECTORY_ENTRY_RESOURCE.entries:
         if kind.id not in (3, 14):
             continue
@@ -177,8 +178,24 @@ def resources(original):
                 raw += resource_record(kind.id, identifier, language.id, blob)
                 icons.append(dict(kind=kind.id, name=identifier, language=language.id,
                                   bytes=len(blob), sha256=hashlib.sha256(blob).hexdigest()))
+    # Japanese RTL weekday/era tables, absent from the English compiler's RTL.
+    # Preserve their original payloads; this does not add Japanese RTL code.
+    for kind in original.DIRECTORY_ENTRY_RESOURCE.entries:
+        if kind.id != 6:
+            continue
+        for name in kind.directory.entries:
+            if name.id not in (4073, 4074):
+                continue
+            for language in name.directory.entries:
+                data = language.data.struct
+                blob = original.get_data(data.OffsetToData, data.Size)
+                raw += resource_record(6, name.id, language.id, blob)
+                calendar.append(dict(kind=6, name=name.id, language=language.id,
+                                     bytes=len(blob), sha256=hashlib.sha256(blob).hexdigest()))
+    if {(r["name"], r["language"], r["bytes"]) for r in calendar} != {(4073, 0, 120), (4074, 0, 128)}:
+        raise ValueError("Original Japanese calendar resource inventory changed")
     (WORK / "GameResources.res").write_bytes(raw)
-    return records, content_records, icons
+    return records, content_records, icons, calendar
 
 
 def main():
@@ -209,10 +226,11 @@ def main():
         inputs.append(stage(path, target))
     compiler = toolchain / "base/bin/DCC32.EXE"
     lib = os.path.relpath(toolchain / "base/lib", WORK)
-    form_resources, content_resources, icons = resources(pefile.PE(str(original_path)))
+    form_resources, content_resources, icons, calendar = resources(pefile.PE(str(original_path)))
     report = dict(schema_version=1, original_sha256=ORIGINAL_HASH, compiler_sha256=digest(compiler),
                   inputs=inputs, original_form_resources=form_resources,
-                  original_content_resources=content_resources, original_icon_resources=icons, builds={})
+                  original_content_resources=content_resources, original_icon_resources=icons,
+                  original_calendar_resources=calendar, builds={})
     if args.smoke:
         report["graphics_assets"] = [dict(path=str(path.resolve()), sha256=digest(path))
             for folder in ("Data", "Data3") for name in ("center.bmp", "left.bmp", "leftr.bmp", "right.bmp", "rightr.bmp", "title05.bmp", "title05R.bmp", "chtable.oz", "chtableb.oz", "key.oz")

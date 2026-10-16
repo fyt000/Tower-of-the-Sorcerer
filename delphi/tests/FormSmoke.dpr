@@ -201,6 +201,7 @@ begin
     );
     if Form is TTSW10 then
     begin
+      MainForm := TTSW10(Form);
       TestGates(TTSW10(Form));
       Require(TTSW10(Form).Image21.Picture.Bitmap.Width = 640, 'Ending story width');
       Require(TTSW10(Form).Image33.Picture.Bitmap.Height = 400, 'Ending card height');
@@ -208,12 +209,18 @@ begin
       Require(Assigned(TTSW10(Form).Button9.OnClick), 'Flight down binding');
       Require(Assigned(TTSW10(Form).Button10.OnClick), 'Flight confirmation binding');
       EventCursor := 0;
-      TTSW10(Form).stackwork;
-      Require(EventCursor = 0, 'Empty dispatcher preserves queue');
-      WriteLn('{"empty_dispatcher_safe":true,"passed":true}');
+      EventPaused := 1;
+      TTSW10(Form).Timer2.Enabled := True;
+      TTSW10(Form).timer2timer(nil);
+      Require(
+          (EventCursor = 0) and (EventPaused = 1) and not TTSW10(Form).Timer2.Enabled,
+          'Empty timer preserves paused dialogue'
+      );
+      WriteLn('{"empty_timer_safe":true,"passed":true}');
     end;
   finally
     Form.Free;
+    MainForm := nil;
   end;
 end;
 

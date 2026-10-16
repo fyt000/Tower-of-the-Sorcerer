@@ -466,12 +466,19 @@ begin
       MainForm.Image32.Picture.Bitmap.SaveToFile(
           ParamStr(2) + '\key-display' + IntToStr(Scale) + '.bmp'
       );
-      AnimationFrame := 1;
+      AnimationFrame := True;
       KeysPainted := 0;
       Painter.Gameplay := True;
       Capture(MainForm, 'main-gameplay' + IntToStr(Scale));
       Capture(MainForm, 'main-animation' + IntToStr(Scale));
       Snapshot(MainForm, 'main-gameplay' + IntToStr(Scale));
+      MainForm.Show;
+      MainForm.img6work;
+      Snapshot(MainForm, 'orb-open' + IntToStr(Scale));
+      Capture(MainForm, 'orb-open' + IntToStr(Scale));
+      MainForm.Button36Click(nil);
+      Snapshot(MainForm, 'orb-close' + IntToStr(Scale));
+      MainForm.Hide;
       MainForm.OnPaint := nil;
       ReleaseGraphics;
     end;

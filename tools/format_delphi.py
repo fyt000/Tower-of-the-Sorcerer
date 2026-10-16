@@ -14,9 +14,8 @@ ARCHIVE_NAME = f"pasfmt-{VERSION}-x86_64-pc-windows-msvc"
 ARCHIVE_SHA256 = "58703093b194e50d87a997bdf26743a0e12127a70c4b5420d46b32c0c7fc098c"
 CONFIG = ROOT / "delphi/pasfmt.toml"
 STATEMENT_INCLUDES = {
-    "InitializeCycle.inc", "GraphicsLayout.inc", "GraphicsHints.inc", "FormChecks.inc",
-    "AboutLayout.inc", "DataHolderLayout.inc", "FontLayout.inc", "StartupHidden.inc",
-    "RankingLayout.inc",
+    "InitializeCycle.inc", "GraphicsHints.inc", "FormChecks.inc",
+    "AboutLayout.inc", "FontLayout.inc", "StartupHidden.inc",
 }
 
 

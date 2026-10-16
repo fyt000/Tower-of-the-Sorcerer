@@ -1,4 +1,6 @@
-  { Generated floor maps and cycle-specific hero defaults. }
+  { Original cycle reset, retained as individual stores for routine byte correspondence.
+  Fresh cycles reset combat stats; later cycles preserve selected progress.
+  Map columns 0/1 hold stair destinations; columns 2..122 are the 11x11 tiles. }
   if Hero.cycle_factor_minus_one = 0 then
   begin
     Hero.hp := 1000;
@@ -101,6 +103,7 @@
   Hero.Word348 := 0;
   Hero.facing := 4;
   Hero.music_track := 0;
+  { Reset persisted story flags and event progress before restoring the maps. }
   Hero.Word364 := 0;
   Hero.Word368 := 0;
   Hero.Word372 := 0;
@@ -177,6 +180,7 @@
   Hero.Word668 := 0;
   Hero.Word672 := 0;
   Hero.Word676 := 0;
+  { Floor 0: reset stair destinations and every map cell. }
   Maps[0, 0] := 0;
   Maps[0, 1] := 1;
   Maps[0, 2] := $B;
@@ -300,6 +304,7 @@
   Maps[0, 120] := 6;
   Maps[0, 121] := 6;
   Maps[0, 122] := 6;
+  { Floor 1: reset stair destinations and every map cell. }
   Maps[1, 0] := 1;
   Maps[1, 1] := 1;
   Maps[1, 2] := $B;
@@ -423,6 +428,7 @@
   Maps[1, 120] := $3D;
   Maps[1, 121] := $21;
   Maps[1, 122] := $3D;
+  { Floor 2: reset stair destinations and every map cell. }
   Maps[2, 0] := $B;
   Maps[2, 1] := 99;
   Maps[2, 2] := $C;
@@ -546,6 +552,7 @@
   Maps[2, 120] := 5;
   Maps[2, 121] := 6;
   Maps[2, 122] := 6;
+  { Floor 3: reset stair destinations and every map cell. }
   Maps[3, 0] := $6F;
   Maps[3, 1] := $77;
   Maps[3, 2] := $1D;
@@ -669,6 +676,7 @@
   Maps[3, 120] := 1;
   Maps[3, 121] := 6;
   Maps[3, 122] := $B;
+  { Floor 4: reset stair destinations and every map cell. }
   Maps[4, 0] := $6D;
   Maps[4, 1] := 99;
   Maps[4, 2] := 6;
@@ -792,6 +800,7 @@
   Maps[4, 120] := 6;
   Maps[4, 121] := 8;
   Maps[4, 122] := $C;
+  { Floor 5: reset stair destinations and every map cell. }
   Maps[5, 0] := $6F;
   Maps[5, 1] := $B;
   Maps[5, 2] := $B;
@@ -915,6 +924,7 @@
   Maps[5, 120] := 9;
   Maps[5, 121] := 6;
   Maps[5, 122] := $33;
+  { Floor 6: reset stair destinations and every map cell. }
   Maps[6, 0] := $B;
   Maps[6, 1] := $6D;
   Maps[6, 2] := $C;
@@ -1038,6 +1048,7 @@
   Maps[6, 120] := $20;
   Maps[6, 121] := 8;
   Maps[6, 122] := $B;
+  { Floor 7: reset stair destinations and every map cell. }
   Maps[7, 0] := $6D;
   Maps[7, 1] := $B;
   Maps[7, 2] := $B;
@@ -1161,6 +1172,7 @@
   Maps[7, 120] := $1D;
   Maps[7, 121] := 8;
   Maps[7, 122] := $C;
+  { Floor 8: reset stair destinations and every map cell. }
   Maps[8, 0] := $B;
   Maps[8, 1] := $10;
   Maps[8, 2] := $C;
@@ -1284,6 +1296,7 @@
   Maps[8, 120] := 1;
   Maps[8, 121] := $4F;
   Maps[8, 122] := 6;
+  { Floor 9: reset stair destinations and every map cell. }
   Maps[9, 0] := $10;
   Maps[9, 1] := 99;
   Maps[9, 2] := 6;
@@ -1407,6 +1420,7 @@
   Maps[9, 120] := $45;
   Maps[9, 121] := 6;
   Maps[9, 122] := $20;
+  { Floor 10: reset stair destinations and every map cell. }
   Maps[10, 0] := 99;
   Maps[10, 1] := $68;
   Maps[10, 2] := 6;
@@ -1530,6 +1544,7 @@
   Maps[10, 120] := 6;
   Maps[10, 121] := 8;
   Maps[10, 122] := $21;
+  { Floor 11: reset stair destinations and every map cell. }
   Maps[11, 0] := $68;
   Maps[11, 1] := $6D;
   Maps[11, 2] := 6;
@@ -1653,6 +1668,7 @@
   Maps[11, 120] := $53;
   Maps[11, 121] := 8;
   Maps[11, 122] := $B;
+  { Floor 12: reset stair destinations and every map cell. }
   Maps[12, 0] := $77;
   Maps[12, 1] := $6F;
   Maps[12, 2] := $13;
@@ -1776,6 +1792,7 @@
   Maps[12, 120] := 6;
   Maps[12, 121] := 6;
   Maps[12, 122] := $C;
+  { Floor 13: reset stair destinations and every map cell. }
   Maps[13, 0] := $6F;
   Maps[13, 1] := $77;
   Maps[13, 2] := $D;
@@ -1899,6 +1916,7 @@
   Maps[13, 120] := 6;
   Maps[13, 121] := 6;
   Maps[13, 122] := $B;
+  { Floor 14: reset stair destinations and every map cell. }
   Maps[14, 0] := $77;
   Maps[14, 1] := $68;
   Maps[14, 2] := $57;
@@ -2022,6 +2040,7 @@
   Maps[14, 120] := 6;
   Maps[14, 121] := 6;
   Maps[14, 122] := $C;
+  { Floor 15: reset stair destinations and every map cell. }
   Maps[15, 0] := $68;
   Maps[15, 1] := $10;
   Maps[15, 2] := $23;
@@ -2145,6 +2164,7 @@
   Maps[15, 120] := $43;
   Maps[15, 121] := 6;
   Maps[15, 122] := $13;
+  { Floor 16: reset stair destinations and every map cell. }
   Maps[16, 0] := $10;
   Maps[16, 1] := $68;
   Maps[16, 2] := $1D;
@@ -2268,6 +2288,7 @@
   Maps[16, 120] := $8F;
   Maps[16, 121] := 9;
   Maps[16, 122] := 10;
+  { Floor 17: reset stair destinations and every map cell. }
   Maps[17, 0] := $68;
   Maps[17, 1] := $10;
   Maps[17, 2] := 6;
@@ -2391,6 +2412,7 @@
   Maps[17, 120] := 6;
   Maps[17, 121] := 6;
   Maps[17, 122] := $20;
+  { Floor 18: reset stair destinations and every map cell. }
   Maps[18, 0] := $10;
   Maps[18, 1] := $B;
   Maps[18, 2] := $B;
@@ -2514,6 +2536,7 @@
   Maps[18, 120] := 8;
   Maps[18, 121] := $23;
   Maps[18, 122] := $20;
+  { Floor 19: reset stair destinations and every map cell. }
   Maps[19, 0] := $B;
   Maps[19, 1] := $68;
   Maps[19, 2] := $C;
@@ -2637,6 +2660,7 @@
   Maps[19, 120] := 6;
   Maps[19, 121] := $43;
   Maps[19, 122] := 6;
+  { Floor 20: reset stair destinations and every map cell. }
   Maps[20, 0] := $68;
   Maps[20, 1] := $10;
   Maps[20, 2] := 6;
@@ -2760,6 +2784,7 @@
   Maps[20, 120] := 6;
   Maps[20, 121] := 6;
   Maps[20, 122] := $20;
+  { Floor 21: reset stair destinations and every map cell. }
   Maps[21, 0] := $10;
   Maps[21, 1] := $68;
   Maps[21, 2] := 6;
@@ -2883,6 +2908,7 @@
   Maps[21, 120] := 6;
   Maps[21, 121] := 6;
   Maps[21, 122] := 6;
+  { Floor 22: reset stair destinations and every map cell. }
   Maps[22, 0] := $68;
   Maps[22, 1] := $47;
   Maps[22, 2] := 8;
@@ -3006,6 +3032,7 @@
   Maps[22, 120] := 8;
   Maps[22, 121] := 8;
   Maps[22, 122] := 8;
+  { Floor 23: reset stair destinations and every map cell. }
   Maps[23, 0] := $B;
   Maps[23, 1] := $15;
   Maps[23, 2] := $C;
@@ -3129,6 +3156,7 @@
   Maps[23, 120] := 6;
   Maps[23, 121] := 6;
   Maps[23, 122] := $19;
+  { Floor 24: reset stair destinations and every map cell. }
   Maps[24, 0] := $6F;
   Maps[24, 1] := $6F;
   Maps[24, 2] := 6;
@@ -3252,6 +3280,7 @@
   Maps[24, 120] := 6;
   Maps[24, 121] := 6;
   Maps[24, 122] := 6;
+  { Floor 25: reset stair destinations and every map cell. }
   Maps[25, 0] := $6F;
   Maps[25, 1] := $6F;
   Maps[25, 2] := 6;
@@ -3375,6 +3404,7 @@
   Maps[25, 120] := 6;
   Maps[25, 121] := 6;
   Maps[25, 122] := 6;
+  { Floor 26: reset stair destinations and every map cell. }
   Maps[26, 0] := $6F;
   Maps[26, 1] := $6F;
   Maps[26, 2] := 6;
@@ -3498,6 +3528,7 @@
   Maps[26, 120] := 6;
   Maps[26, 121] := 6;
   Maps[26, 122] := 6;
+  { Floor 27: reset stair destinations and every map cell. }
   Maps[27, 0] := $6F;
   Maps[27, 1] := $77;
   Maps[27, 2] := 8;
@@ -3621,6 +3652,7 @@
   Maps[27, 120] := 6;
   Maps[27, 121] := 6;
   Maps[27, 122] := $B;
+  { Floor 28: reset stair destinations and every map cell. }
   Maps[28, 0] := $77;
   Maps[28, 1] := $6F;
   Maps[28, 2] := 6;
@@ -3744,6 +3776,7 @@
   Maps[28, 120] := 6;
   Maps[28, 121] := 6;
   Maps[28, 122] := $C;
+  { Floor 29: reset stair destinations and every map cell. }
   Maps[29, 0] := 99;
   Maps[29, 1] := $68;
   Maps[29, 2] := 6;
@@ -3867,6 +3900,7 @@
   Maps[29, 120] := 8;
   Maps[29, 121] := 8;
   Maps[29, 122] := 8;
+  { Floor 30: reset stair destinations and every map cell. }
   Maps[30, 0] := $68;
   Maps[30, 1] := $10;
   Maps[30, 2] := 8;
@@ -3990,6 +4024,7 @@
   Maps[30, 120] := 8;
   Maps[30, 121] := 8;
   Maps[30, 122] := 8;
+  { Floor 31: reset stair destinations and every map cell. }
   Maps[31, 0] := $10;
   Maps[31, 1] := $68;
   Maps[31, 2] := 6;
@@ -4113,6 +4148,7 @@
   Maps[31, 120] := $1D;
   Maps[31, 121] := 6;
   Maps[31, 122] := 6;
+  { Floor 32: reset stair destinations and every map cell. }
   Maps[32, 0] := $68;
   Maps[32, 1] := 9;
   Maps[32, 2] := $23;
@@ -4236,6 +4272,7 @@
   Maps[32, 120] := 6;
   Maps[32, 121] := 6;
   Maps[32, 122] := 6;
+  { Floor 33: reset stair destinations and every map cell. }
   Maps[33, 0] := 9;
   Maps[33, 1] := 1;
   Maps[33, 2] := $B;
@@ -4359,6 +4396,7 @@
   Maps[33, 120] := 6;
   Maps[33, 121] := 6;
   Maps[33, 122] := 6;
+  { Floor 34: reset stair destinations and every map cell. }
   Maps[34, 0] := 1;
   Maps[34, 1] := $68;
   Maps[34, 2] := $C;
@@ -4482,6 +4520,7 @@
   Maps[34, 120] := 6;
   Maps[34, 121] := $1D;
   Maps[34, 122] := $22;
+  { Floor 35: reset stair destinations and every map cell. }
   Maps[35, 0] := $68;
   Maps[35, 1] := 9;
   Maps[35, 2] := 8;
@@ -4605,6 +4644,7 @@
   Maps[35, 120] := 8;
   Maps[35, 121] := 8;
   Maps[35, 122] := 8;
+  { Floor 36: reset stair destinations and every map cell. }
   Maps[36, 0] := $15;
   Maps[36, 1] := $6D;
   Maps[36, 2] := $19;
@@ -4728,6 +4768,7 @@
   Maps[36, 120] := $89;
   Maps[36, 121] := 6;
   Maps[36, 122] := $B;
+  { Floor 37: reset stair destinations and every map cell. }
   Maps[37, 0] := $6D;
   Maps[37, 1] := 1;
   Maps[37, 2] := $B;
@@ -4851,6 +4892,7 @@
   Maps[37, 120] := $8D;
   Maps[37, 121] := 6;
   Maps[37, 122] := $C;
+  { Floor 38: reset stair destinations and every map cell. }
   Maps[38, 0] := 1;
   Maps[38, 1] := 9;
   Maps[38, 2] := $C;
@@ -4974,6 +5016,7 @@
   Maps[38, 120] := $8B;
   Maps[38, 121] := 6;
   Maps[38, 122] := $21;
+  { Floor 39: reset stair destinations and every map cell. }
   Maps[39, 0] := $15;
   Maps[39, 1] := $77;
   Maps[39, 2] := 6;
@@ -5097,6 +5140,7 @@
   Maps[39, 120] := $20;
   Maps[39, 121] := 6;
   Maps[39, 122] := $B;
+  { Floor 40: reset stair destinations and every map cell. }
   Maps[40, 0] := $77;
   Maps[40, 1] := 4;
   Maps[40, 2] := 6;
@@ -5220,6 +5264,7 @@
   Maps[40, 120] := 6;
   Maps[40, 121] := 6;
   Maps[40, 122] := $C;
+  { Floor 41: reset stair destinations and every map cell. }
   Maps[41, 0] := $10;
   Maps[41, 1] := $68;
   Maps[41, 2] := $20;
@@ -5343,6 +5388,7 @@
   Maps[41, 120] := $1D;
   Maps[41, 121] := 8;
   Maps[41, 122] := $21;
+  { Floor 42: reset stair destinations and every map cell. }
   Maps[42, 0] := $68;
   Maps[42, 1] := 1;
   Maps[42, 2] := $B;
@@ -5466,6 +5512,7 @@
   Maps[42, 120] := $1D;
   Maps[42, 121] := $1F;
   Maps[42, 122] := $1D;
+  { Floor 43: reset stair destinations and every map cell. }
   Maps[43, 0] := $B;
   Maps[43, 1] := 99;
   Maps[43, 2] := $C;
@@ -5589,6 +5636,7 @@
   Maps[43, 120] := 6;
   Maps[43, 121] := 6;
   Maps[43, 122] := $1F;
+  { Floor 44: reset stair destinations and every map cell. }
   Maps[44, 0] := 0;
   Maps[44, 1] := 0;
   Maps[44, 2] := $B;
@@ -5712,6 +5760,7 @@
   Maps[44, 120] := 6;
   Maps[44, 121] := 6;
   Maps[44, 122] := 6;
+  { Floor 45: reset stair destinations and every map cell. }
   Maps[45, 0] := 1;
   Maps[45, 1] := 9;
   Maps[45, 2] := $C;
@@ -5835,6 +5884,7 @@
   Maps[45, 120] := 8;
   Maps[45, 121] := 6;
   Maps[45, 122] := $21;
+  { Floor 46: reset stair destinations and every map cell. }
   Maps[46, 0] := $15;
   Maps[46, 1] := $6D;
   Maps[46, 2] := 6;
@@ -5958,6 +6008,7 @@
   Maps[46, 120] := 1;
   Maps[46, 121] := 6;
   Maps[46, 122] := $B;
+  { Floor 47: reset stair destinations and every map cell. }
   Maps[47, 0] := $77;
   Maps[47, 1] := $B;
   Maps[47, 2] := $B;
@@ -6081,6 +6132,7 @@
   Maps[47, 120] := 6;
   Maps[47, 121] := 6;
   Maps[47, 122] := $C;
+  { Floor 48: reset stair destinations and every map cell. }
   Maps[48, 0] := $6D;
   Maps[48, 1] := 99;
   Maps[48, 2] := 7;
@@ -6204,6 +6256,7 @@
   Maps[48, 120] := 6;
   Maps[48, 121] := 8;
   Maps[48, 122] := $C;
+  { Floor 49: reset stair destinations and every map cell. }
   Maps[49, 0] := $6F;
   Maps[49, 1] := 0;
   Maps[49, 2] := 8;
@@ -6327,6 +6380,7 @@
   Maps[49, 120] := 6;
   Maps[49, 121] := 6;
   Maps[49, 122] := 6;
+  { Floor 50: reset stair destinations and every map cell. }
   Maps[50, 0] := $47;
   Maps[50, 1] := 0;
   Maps[50, 2] := $E;

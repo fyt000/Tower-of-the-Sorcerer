@@ -3,8 +3,8 @@ unit Audio;
 { Track IDs 5..21 select MIDI files; zero disables background music. }
 interface
 var
-  EffectRequests, MusicRequests, AudioFailures: Longint;
-  LastEffect, LastMusic: Integer;
+  EffectRequests, AudioFailures: Longint;
+  LastEffect: Integer;
 function MusicFileName(Track: Integer): string;
 function MusicTrackForFloor(Floor: Integer): Integer;
 

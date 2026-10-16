@@ -1,0 +1,1848 @@
+{
+  "schema_version": 2,
+  "original_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "reviewed_routines": [
+    {
+      "method": "TAboutBox.OKButtonClick",
+      "entry": "0x434084",
+      "code_bytes": 16,
+      "literal_pool_bytes": 0,
+      "successor": "0x434094",
+      "assembly_sha256": "802193f9437afd35dbc7fed596c23d39dff4df19291bc580319dbde5f773ddc3"
+    },
+    {
+      "method": "TAboutBox.image1onclick",
+      "entry": "0x434094",
+      "code_bytes": 31,
+      "literal_pool_bytes": 0,
+      "successor": "0x4340b4",
+      "assembly_sha256": "fd58b147d9b38510e0a21f35c57a82b824f413f49831367cf5a0895cbe7cfdb4"
+    },
+    {
+      "method": "TAboutBox.image2onclick",
+      "entry": "0x4340b4",
+      "code_bytes": 44,
+      "literal_pool_bytes": 0,
+      "successor": "0x4340e0",
+      "assembly_sha256": "a40c885c3994ccfb7833eb6c7c4661b224b48877f27f78edb01207edce94f942"
+    },
+    {
+      "method": "TAboutBox.Timer1Timer",
+      "entry": "0x4340e0",
+      "code_bytes": 77,
+      "literal_pool_bytes": 0,
+      "successor": "0x434130",
+      "assembly_sha256": "b6da85e3d002b7517a8eacf692461207965efed1032415a8653b1446956ce5f1"
+    },
+    {
+      "method": "TAboutBox.programicononclick",
+      "entry": "0x434130",
+      "code_bytes": 44,
+      "literal_pool_bytes": 0,
+      "successor": "0x43415c",
+      "assembly_sha256": "92284bbf049d0c705245032ab18141e43e98f80e4cddbe4c854151ddfa019d1f"
+    },
+    {
+      "method": "TAboutBox.AboutBoxonclose",
+      "entry": "0x43415c",
+      "code_bytes": 16,
+      "literal_pool_bytes": 0,
+      "successor": "0x43416c",
+      "assembly_sha256": "8c280d4cea52ad5511d0e9c1c119b7c4ca194bb9a74ded5fe306fd969c45236b"
+    },
+    {
+      "method": "TAboutBox.formactivate",
+      "entry": "0x43416c",
+      "code_bytes": 1078,
+      "literal_pool_bytes": 0,
+      "successor": "0x4345a4",
+      "assembly_sha256": "f5f5e14823bd012dae52ee0ec4d97358c619de9ee3b43c85d5834bf477627719"
+    },
+    {
+      "method": "TAboutBox.copyrightonclick",
+      "entry": "0x4345a4",
+      "code_bytes": 40,
+      "literal_pool_bytes": 60,
+      "successor": "0x434608",
+      "assembly_sha256": "e5098d706a5cab422a9b8738894f520cf90ffdaf43efe06679c29696abd4c5e8"
+    },
+    {
+      "method": "TForm2.formactivate",
+      "entry": "0x434bc4",
+      "code_bytes": 8088,
+      "literal_pool_bytes": 148,
+      "successor": "0x436bf0",
+      "assembly_sha256": "80a40927e8d6939bc7f3b41dad579fcf9a643bb654b72956913a37fc0bdd1aa2"
+    },
+    {
+      "method": "TForm2.Button6Click",
+      "entry": "0x436bf0",
+      "code_bytes": 34,
+      "literal_pool_bytes": 0,
+      "successor": "0x436c14",
+      "assembly_sha256": "f9ab94342b1f719750b65116dc04b3fa3be321920dfe3acef3092a258c038e3d"
+    },
+    {
+      "method": "TForm2.hyouji",
+      "entry": "0x436c14",
+      "code_bytes": 2435,
+      "literal_pool_bytes": 65,
+      "successor": "0x4375d8",
+      "assembly_sha256": "ae15807fb86cce86698e19e3a74d9530cef98839f9ece66e3fc7f9d1aaf5457b"
+    },
+    {
+      "method": "TForm2.optionload",
+      "entry": "0x4375d8",
+      "code_bytes": 2365,
+      "literal_pool_bytes": 23,
+      "successor": "0x437f2c",
+      "assembly_sha256": "ff1d73860e5f9e95acdd7c48e962cce0534b82b577faf0d95188b35ec574aa7a"
+    },
+    {
+      "method": "TForm2.scoreload",
+      "entry": "0x437f2c",
+      "code_bytes": 7163,
+      "literal_pool_bytes": 441,
+      "successor": "0x439ce0",
+      "assembly_sha256": "379c00d0c949b3e5ce93f3911e1e2b88fb00c278eeeb245be970b57434d4176a"
+    },
+    {
+      "method": "TForm2.scoresave",
+      "entry": "0x439ce0",
+      "code_bytes": 1560,
+      "literal_pool_bytes": 260,
+      "successor": "0x43a3fc",
+      "assembly_sha256": "c249b97694cd8432f7233acf6886b499e49900db221fc31f8f39fd49d8e82a47"
+    },
+    {
+      "method": "TForm2.loadwork",
+      "entry": "0x43a3fc",
+      "code_bytes": 241,
+      "literal_pool_bytes": 23,
+      "successor": "0x43a504",
+      "assembly_sha256": "826dd8e48aa5e45961381fb8da4fd3c3264a992200790a134eed7589df9b9145"
+    },
+    {
+      "method": "TForm2.form2onclose",
+      "entry": "0x43a504",
+      "code_bytes": 34,
+      "literal_pool_bytes": 0,
+      "successor": "0x43a528",
+      "assembly_sha256": "2bcab53d48fe4aeac1d85a726aea81073aff7bbb0b4df2f3cbacaadaefa3120e"
+    },
+    {
+      "method": "TForm2.BitBtn1Click",
+      "entry": "0x43a528",
+      "code_bytes": 37,
+      "literal_pool_bytes": 0,
+      "successor": "0x43a550",
+      "assembly_sha256": "e1ad17afab9de0cc26d780d8187c5f9b5c48f246482c63893e49d706718b009c"
+    },
+    {
+      "method": "TForm2.BitBtn2Click",
+      "entry": "0x43a550",
+      "code_bytes": 37,
+      "literal_pool_bytes": 0,
+      "successor": "0x43a578",
+      "assembly_sha256": "6d6c74c9be9b73252112668c1117fbec3d416d206d64c4a3bc5cca770e80d970"
+    },
+    {
+      "method": "TForm2.BitBtn3Click",
+      "entry": "0x43a578",
+      "code_bytes": 37,
+      "literal_pool_bytes": 0,
+      "successor": "0x43a5a0",
+      "assembly_sha256": "43ed21e7ce0e7fb052360697229bf542cb85ed05ac1edf2acc07064b1b3f1e45"
+    },
+    {
+      "method": "TForm2.BitBtn4Click",
+      "entry": "0x43a5a0",
+      "code_bytes": 37,
+      "literal_pool_bytes": 0,
+      "successor": "0x43a5c8",
+      "assembly_sha256": "88f1aedf3bcdda6bdaa1e1fd981a0a66b6048b11eabb61fb45c1c6bf1d83900b"
+    },
+    {
+      "method": "TForm2.BitBtn5Click",
+      "entry": "0x43a5c8",
+      "code_bytes": 37,
+      "literal_pool_bytes": 0,
+      "successor": "0x43a5f0",
+      "assembly_sha256": "11d96f8f41d5e39172868f02c3e2fced899d6e59026574638005130a05ca717e"
+    },
+    {
+      "method": "TForm2.Button1Click",
+      "entry": "0x43a5f0",
+      "code_bytes": 5592,
+      "literal_pool_bytes": 1280,
+      "successor": "0x43c0c8",
+      "assembly_sha256": "15f888faaa664e0da27e722972a549da73a936da96d05bebae42628295c23694"
+    },
+    {
+      "method": "TForm4.DriveComboBox1Change",
+      "entry": "0x440298",
+      "code_bytes": 24,
+      "literal_pool_bytes": 0,
+      "successor": "0x4402b0",
+      "assembly_sha256": "7ddd8250024bbc422836f007416465da6bc5b6a5bce4a03cff8efe025d822224"
+    },
+    {
+      "method": "TForm4.DirectoryListBox1Change",
+      "entry": "0x4402b0",
+      "code_bytes": 54,
+      "literal_pool_bytes": 0,
+      "successor": "0x4402e8",
+      "assembly_sha256": "e4df279c175d9b131accf686f912b3e40d6c7c62be3365a4ce578e2ca817389f"
+    },
+    {
+      "method": "TForm4.Button1Click",
+      "entry": "0x4402e8",
+      "code_bytes": 1395,
+      "literal_pool_bytes": 281,
+      "successor": "0x440974",
+      "assembly_sha256": "abce735c79497fc78f255136a7470feafe3a5e468f43edd3ec75ed4050847688"
+    },
+    {
+      "method": "TForm4.Button2Click",
+      "entry": "0x440974",
+      "code_bytes": 16,
+      "literal_pool_bytes": 0,
+      "successor": "0x440984",
+      "assembly_sha256": "0663bc728e6a0399847385507247807f123582063ae1504c6464fcfb5362d674"
+    },
+    {
+      "method": "TForm4.Button3Click",
+      "entry": "0x440984",
+      "code_bytes": 181,
+      "literal_pool_bytes": 79,
+      "successor": "0x440a88",
+      "assembly_sha256": "36be2fcc23027027347613727773db252ca6af559daf362c3fd8e32460c9080d"
+    },
+    {
+      "method": "TForm4.form4onclose",
+      "entry": "0x440a88",
+      "code_bytes": 16,
+      "literal_pool_bytes": 0,
+      "successor": "0x440a98",
+      "assembly_sha256": "6e1b6e46f09f9a81b4b5e660611e047ed80dc583282d79ccdcea28bb99cab0ce"
+    },
+    {
+      "method": "TForm4.form4activate",
+      "entry": "0x440a98",
+      "code_bytes": 1170,
+      "literal_pool_bytes": 0,
+      "successor": "0x440f2c",
+      "assembly_sha256": "b12fba25a82502f83eac2f341e10afdbbb32081c6d683df0d259e5bcc50e78eb"
+    },
+    {
+      "method": "TTSW10.formactivate",
+      "entry": "0x44280c",
+      "code_bytes": 938,
+      "literal_pool_bytes": 130,
+      "successor": "0x442c38",
+      "assembly_sha256": "aeaa6cb23b3deec283bce04b3dfe3043d815b141c347c207640e7cb29c35a129"
+    },
+    {
+      "method": "TTSW10.mhyouji",
+      "entry": "0x442c38",
+      "code_bytes": 279,
+      "literal_pool_bytes": 0,
+      "successor": "0x442d50",
+      "assembly_sha256": "7f690a8e2db826a3af7334bf65e7c72923785882a10a6260840f79931890453e"
+    },
+    {
+      "method": "TTSW10.buttonfocus",
+      "entry": "0x442d50",
+      "code_bytes": 117,
+      "literal_pool_bytes": 0,
+      "successor": "0x442dc8",
+      "assembly_sha256": "1efa0b41d93d8cd564900a2d765cb61864dfe49fc5b75dca8d9a2bd6c8c0c29f"
+    },
+    {
+      "method": "TTSW10.kaidanwork",
+      "entry": "0x442dc8",
+      "code_bytes": 437,
+      "literal_pool_bytes": 0,
+      "successor": "0x442f80",
+      "assembly_sha256": "670e02409a555f1b45f68c25341c3adc0b61018c8cbe94c1a0ae6a5417820319"
+    },
+    {
+      "method": "TTSW10.kaidanupcheck",
+      "entry": "0x442f80",
+      "code_bytes": 208,
+      "literal_pool_bytes": 0,
+      "successor": "0x443050",
+      "assembly_sha256": "06a1146b5c87ba4457ac24f63dad53b93f1c12171315999fb3b98ddef875357d"
+    },
+    {
+      "method": "TTSW10.kaidandowncheck",
+      "entry": "0x443050",
+      "code_bytes": 208,
+      "literal_pool_bytes": 0,
+      "successor": "0x443120",
+      "assembly_sha256": "a9b90a9d789c154203faab8427289146d2c2db7d8ada0ab2a0d8378b620bc9af"
+    },
+    {
+      "method": "TTSW10.Timer1Timer",
+      "entry": "0x443120",
+      "code_bytes": 642,
+      "literal_pool_bytes": 0,
+      "successor": "0x4433a4",
+      "assembly_sha256": "ff3b0d6ba9aafac228759b9b189aa4002eab4ed45bad6d2ffa24b2a215f76874"
+    },
+    {
+      "method": "TTSW10.yusyahyouji1",
+      "entry": "0x4433a4",
+      "code_bytes": 673,
+      "literal_pool_bytes": 0,
+      "successor": "0x443648",
+      "assembly_sha256": "abd6eee5417c4c1a9273be2f9d4f86f98fdb62f12233dfe506b56236ddf86795"
+    },
+    {
+      "method": "TTSW10.yusyahyouji",
+      "entry": "0x443648",
+      "code_bytes": 447,
+      "literal_pool_bytes": 0,
+      "successor": "0x443808",
+      "assembly_sha256": "44ba3440c1c0d5da70dab76799f26b20258a549a0f0ef7df8e17211ff8e6780f"
+    },
+    {
+      "method": "TTSW10.yusyaidou",
+      "entry": "0x443808",
+      "code_bytes": 556,
+      "literal_pool_bytes": 0,
+      "successor": "0x443a34",
+      "assembly_sha256": "391d30119e55caa39676ec085f9596720d60c8e954e3552e96915d9b3526d1c6"
+    },
+    {
+      "method": "TTSW10.yusyai3",
+      "entry": "0x443a34",
+      "code_bytes": 465,
+      "literal_pool_bytes": 0,
+      "successor": "0x443c08",
+      "assembly_sha256": "de58883068ac21b970235062cf2270b4a0cb3011afae93ddf305de8192738b2d"
+    },
+    {
+      "method": "TTSW10.yusyai2",
+      "entry": "0x443c08",
+      "code_bytes": 480,
+      "literal_pool_bytes": 0,
+      "successor": "0x443de8",
+      "assembly_sha256": "e29f9e54c2199981470a63cae30708ee357716ba6fe065e30cca0a65bf3e33e6"
+    },
+    {
+      "method": "TTSW10.yusyai1",
+      "entry": "0x443de8",
+      "code_bytes": 768,
+      "literal_pool_bytes": 0,
+      "successor": "0x4440e8",
+      "assembly_sha256": "b02b405d4a2d5851ad5df354e0532513a6e1d0d5f962a81e23a1b0fc25a5cea5"
+    },
+    {
+      "method": "TTSW10.yusyai4",
+      "entry": "0x4440e8",
+      "code_bytes": 692,
+      "literal_pool_bytes": 0,
+      "successor": "0x44439c",
+      "assembly_sha256": "ec823397a7514b72d42e41e5f1ad331b6c17779566d1f8f5bb6197f408dbb40d"
+    },
+    {
+      "method": "TTSW10.kasanegaki",
+      "entry": "0x44439c",
+      "code_bytes": 242,
+      "literal_pool_bytes": 0,
+      "successor": "0x444490",
+      "assembly_sha256": "9ead8794ab1c6a2fcad161590d856be8c5a51d498eb9c71fcf9df088d28c3a89"
+    },
+    {
+      "method": "TTSW10.handan",
+      "entry": "0x444490",
+      "code_bytes": 19285,
+      "literal_pool_bytes": 47,
+      "successor": "0x449014",
+      "assembly_sha256": "97096245b897c73125798919d7eaa18566b75cd9dc84ec2da8750e57b3159a93"
+    },
+    {
+      "method": "TTSW10.syounin",
+      "entry": "0x449014",
+      "code_bytes": 1766,
+      "literal_pool_bytes": 14,
+      "successor": "0x449708",
+      "assembly_sha256": "21f05110d94dd900ea3759be6cbd7bcd5042aab8ffdb7d7803260cae5f12c9bc"
+    },
+    {
+      "method": "TTSW10.roujin",
+      "entry": "0x449708",
+      "code_bytes": 1794,
+      "literal_pool_bytes": 14,
+      "successor": "0x449e18",
+      "assembly_sha256": "6b1ac68de9e870c88725305891554fb6129cd10707febf8d3b3b4fff3220ac0a"
+    },
+    {
+      "method": "TTSW10.zyouout",
+      "entry": "0x449e18",
+      "code_bytes": 1581,
+      "literal_pool_bytes": 59,
+      "successor": "0x44a480",
+      "assembly_sha256": "e0d3698b5c713546d98abdc6347d92c2282698c9c808df0aeb0e7323b30ec9a0"
+    },
+    {
+      "method": "TTSW10.taisen",
+      "entry": "0x44a480",
+      "code_bytes": 4699,
+      "literal_pool_bytes": 25,
+      "successor": "0x44b6f4",
+      "assembly_sha256": "236aab4c059d0384c860d32322c5fd39aea2b062a651c4b81267b34bb18f0da6"
+    },
+    {
+      "method": "TTSW10.monswork",
+      "entry": "0x44b6f4",
+      "code_bytes": 149,
+      "literal_pool_bytes": 0,
+      "successor": "0x44b78c",
+      "assembly_sha256": "45d36a19568342cc110c96244aff04b8838e91cca529e0c5cc5f63885ac3eb0f"
+    },
+    {
+      "method": "TTSW10.monshyouji",
+      "entry": "0x44b78c",
+      "code_bytes": 1151,
+      "literal_pool_bytes": 0,
+      "successor": "0x44bc0c",
+      "assembly_sha256": "82ab4d280a84f4b85cf2d3733e2d23abd10e6cb7c412f95eaefe10ff74b25204"
+    },
+    {
+      "method": "TTSW10.timer2on",
+      "entry": "0x44bc0c",
+      "code_bytes": 38,
+      "literal_pool_bytes": 0,
+      "successor": "0x44bc34",
+      "assembly_sha256": "08cf47f99bb410cb7d5226343aa253479d3e7cd09cdb423da8ebd1a953d71c39"
+    },
+    {
+      "method": "TTSW10.toroad2",
+      "entry": "0x44bc34",
+      "code_bytes": 675,
+      "literal_pool_bytes": 0,
+      "successor": "0x44bed8",
+      "assembly_sha256": "c362314ddcda359af9a8c1f61e8eef6894d493cc882c31144cba3e3b95621dc8"
+    },
+    {
+      "method": "TTSW10.keydisplay",
+      "entry": "0x44bed8",
+      "code_bytes": 370,
+      "literal_pool_bytes": 0,
+      "successor": "0x44c04c",
+      "assembly_sha256": "a8dd544600d890120dc6a60254d3c4ac2161821513bd7d83a3e200896e14db37"
+    },
+    {
+      "method": "TTSW10.idou",
+      "entry": "0x44c04c",
+      "code_bytes": 1045,
+      "literal_pool_bytes": 0,
+      "successor": "0x44c464",
+      "assembly_sha256": "95dfa10f0a30bfd58ae5fb26e13c028871b192a686f5865dbb3c0ed8c04d51cd"
+    },
+    {
+      "method": "TTSW10.madoushi1",
+      "entry": "0x44c464",
+      "code_bytes": 350,
+      "literal_pool_bytes": 0,
+      "successor": "0x44c5c4",
+      "assembly_sha256": "a7fa482bb16dd6f08c55d36ce853ae57963f92b0990ebb6617a24f60ae4a26a6"
+    },
+    {
+      "method": "TTSW10.mazyutu1",
+      "entry": "0x44c5c4",
+      "code_bytes": 1066,
+      "literal_pool_bytes": 0,
+      "successor": "0x44c9f0",
+      "assembly_sha256": "edc53c925105be09ed1e3ca5cb57e945404a7da81e604cfdc8228b500d6d2188"
+    },
+    {
+      "method": "TTSW10.mmes",
+      "entry": "0x44c9f0",
+      "code_bytes": 321,
+      "literal_pool_bytes": 0,
+      "successor": "0x44cb34",
+      "assembly_sha256": "4f71770c961be01a012e75b9e92791a11578358171d9bc40622aa6e88947bcf4"
+    },
+    {
+      "method": "TTSW10.disp",
+      "entry": "0x44cb34",
+      "code_bytes": 395,
+      "literal_pool_bytes": 25,
+      "successor": "0x44ccd8",
+      "assembly_sha256": "f03989b65ef636a3d0fd2c932e9ce146fab3e1bd3097083881cc2eefdf4e23c6"
+    },
+    {
+      "method": "TTSW10.itemdisp",
+      "entry": "0x44ccd8",
+      "code_bytes": 3062,
+      "literal_pool_bytes": 322,
+      "successor": "0x44da10",
+      "assembly_sha256": "7d155143c680f53132ba120bef34c01e2730d4eb933659fdd3be14d0d7e1e7bf"
+    },
+    {
+      "method": "TTSW10.Button1Click",
+      "entry": "0x44da10",
+      "code_bytes": 1978,
+      "literal_pool_bytes": 0,
+      "successor": "0x44e1cc",
+      "assembly_sha256": "5f7ed1d4c5ce5f9c488eed537a2e1195eb3c38f7ee35b06e4b4863ab8cee4482"
+    },
+    {
+      "method": "TTSW10.Button2Click",
+      "entry": "0x44e1cc",
+      "code_bytes": 2230,
+      "literal_pool_bytes": 14,
+      "successor": "0x44ea90",
+      "assembly_sha256": "2d2ede37de09e1776191cee0c1be416d92a7b4a0c551ca8c0d22f0879eb39ae5"
+    },
+    {
+      "method": "TTSW10.Button7Click",
+      "entry": "0x44ea90",
+      "code_bytes": 90,
+      "literal_pool_bytes": 0,
+      "successor": "0x44eaec",
+      "assembly_sha256": "f99fafc3baf9abc54328366fc4ee0295202d6fc441323dad17ec1cd4bf022b97"
+    },
+    {
+      "method": "TTSW10.Image4Click",
+      "entry": "0x44eaec",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x44eaf4",
+      "assembly_sha256": "746379193d6b3b76d1a3593940f680c46e2b3f462081de31a6ddd7f8af6f99a8"
+    },
+    {
+      "method": "TTSW10.Button10Click",
+      "entry": "0x44eaf4",
+      "code_bytes": 550,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ed1c",
+      "assembly_sha256": "37367f34081cc74d51794026881a1fd527533d47ed26c15c78fcb1f6f7810a06"
+    },
+    {
+      "method": "TTSW10.Button9Click",
+      "entry": "0x44ed1c",
+      "code_bytes": 117,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ed94",
+      "assembly_sha256": "810c4da696e115e5a983872a958b7a1a6c55fd8c9640e83aa166d1891df7744f"
+    },
+    {
+      "method": "TTSW10.Button8Click",
+      "entry": "0x44ed94",
+      "code_bytes": 176,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ee44",
+      "assembly_sha256": "29130330093aae59d8de5de2a9afe9b26e7479dbb08685d4643619f21895cc7d"
+    },
+    {
+      "method": "TTSW10.Image5Click",
+      "entry": "0x44ee44",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ee4c",
+      "assembly_sha256": "d261c0bcffb8bd7cb7c101dedf7bfa9bee94c325ae70fd66f50fcd535e60a1fd"
+    },
+    {
+      "method": "TTSW10.Button11Click",
+      "entry": "0x44ee4c",
+      "code_bytes": 24,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ee64",
+      "assembly_sha256": "1e2670b7d3ec46e5663019ca9d63a38d504e1e451912f4bf293feb34bbec4594"
+    },
+    {
+      "method": "TTSW10.Button12Click",
+      "entry": "0x44ee64",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ee80",
+      "assembly_sha256": "12c72c39d8fd3facc647022949c95fc1bbc3fd04626d3f54c360b4351a7acc1b"
+    },
+    {
+      "method": "TTSW10.Button13Click",
+      "entry": "0x44ee80",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ee9c",
+      "assembly_sha256": "2c68e9d7afc57cdd4899af12b418437e465b924656a359e73882619f4f9d8252"
+    },
+    {
+      "method": "TTSW10.Button14Click",
+      "entry": "0x44ee9c",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44eeb8",
+      "assembly_sha256": "c0a1161beab6830a853b8f1726eb72393b4616847f123bd578c4b457a458f1a3"
+    },
+    {
+      "method": "TTSW10.Button15Click",
+      "entry": "0x44eeb8",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44eed4",
+      "assembly_sha256": "bcf8757e2f5d911456ad09618a5c3743a636f82bf217e90cb70443f45773a320"
+    },
+    {
+      "method": "TTSW10.Button16Click",
+      "entry": "0x44eed4",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44eef0",
+      "assembly_sha256": "29fc1a277eb4936c2a88bd10171223d21ae2fdc4eeed593b767595af78ee2b7c"
+    },
+    {
+      "method": "TTSW10.Button17Click",
+      "entry": "0x44eef0",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ef0c",
+      "assembly_sha256": "e968ab0f442d0ba64c37e8a73929913336f88f949a30c886f12ca40d66024e17"
+    },
+    {
+      "method": "TTSW10.Button18Click",
+      "entry": "0x44ef0c",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ef28",
+      "assembly_sha256": "4766b96f1beec38e83a0a03581c6c64f6e28cd0a44ec2080a82e084b52bb00f5"
+    },
+    {
+      "method": "TTSW10.Button19Click",
+      "entry": "0x44ef28",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ef44",
+      "assembly_sha256": "99618f6003311321085486dd10e6889b1f41ba8bcab52fcd95fe224cee842f68"
+    },
+    {
+      "method": "TTSW10.Button20Click",
+      "entry": "0x44ef44",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ef60",
+      "assembly_sha256": "79e74fbba1be2bd42eb6d663f02c651e4c117e1d870aa006846bc908481c9c38"
+    },
+    {
+      "method": "TTSW10.Button21Click",
+      "entry": "0x44ef60",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ef7c",
+      "assembly_sha256": "636c778af902e41690b51d62adceb341a17979bb65bb840b547b2978c8ba19db"
+    },
+    {
+      "method": "TTSW10.Button22Click",
+      "entry": "0x44ef7c",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ef98",
+      "assembly_sha256": "f23aa928e24d5aeae65ad319e954d46b921db45000d315b9476b860a6605d6c6"
+    },
+    {
+      "method": "TTSW10.Button23Click",
+      "entry": "0x44ef98",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44efb4",
+      "assembly_sha256": "ca5a9bfe211734309770ab5e171cb5b2eaca1035436972911c09d8aef49a28f8"
+    },
+    {
+      "method": "TTSW10.Button24Click",
+      "entry": "0x44efb4",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44efd0",
+      "assembly_sha256": "d77093eab1fd68571dbe35573dc35493a85071a4d17a6b3b91a140db81d53a2e"
+    },
+    {
+      "method": "TTSW10.Button25Click",
+      "entry": "0x44efd0",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44efec",
+      "assembly_sha256": "ef12706fa560412bf116845559eb6e58253259c2bbc46a90774b6434291b4fba"
+    },
+    {
+      "method": "TTSW10.Button26Click",
+      "entry": "0x44efec",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f008",
+      "assembly_sha256": "60d64969978b3e248f58b07ff0401dc30977fbb9d3c88809273a5fb3f5a30162"
+    },
+    {
+      "method": "TTSW10.Button27Click",
+      "entry": "0x44f008",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f024",
+      "assembly_sha256": "c390da2f16a7100dd2da71593998d820cdd63f1d22ba3303343302a98fb4ea3e"
+    },
+    {
+      "method": "TTSW10.Button28Click",
+      "entry": "0x44f024",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f040",
+      "assembly_sha256": "c66c52293ec3eb7c23955452b7986fec082fb654f0d92619d2fee336ebd487ac"
+    },
+    {
+      "method": "TTSW10.Button29Click",
+      "entry": "0x44f040",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f05c",
+      "assembly_sha256": "5f4154fb871b322a480acc99a90699bc240821e5d9029ec30dea0b6a3694f991"
+    },
+    {
+      "method": "TTSW10.Button30Click",
+      "entry": "0x44f05c",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f078",
+      "assembly_sha256": "4ff37f5f75f8c24358a25b3cab47242213e09d1d6c54c17aeee671405d4584c8"
+    },
+    {
+      "method": "TTSW10.Button31Click",
+      "entry": "0x44f078",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f094",
+      "assembly_sha256": "906fb0282638528cabc46e48abbd3fe601dde9af87ea750d6fcbd80f564a339e"
+    },
+    {
+      "method": "TTSW10.Button32Click",
+      "entry": "0x44f094",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f0b0",
+      "assembly_sha256": "8f1e9d8b2199691bb1374c21549f08fa62fd4dcdb9c8b95a92b3726a178374af"
+    },
+    {
+      "method": "TTSW10.Button33Click",
+      "entry": "0x44f0b0",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f0cc",
+      "assembly_sha256": "fa04ccfe9e33f10e2e797add8fa1495891b65533c8c617f950e977dc4480c2a4"
+    },
+    {
+      "method": "TTSW10.Button34Click",
+      "entry": "0x44f0cc",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f0e8",
+      "assembly_sha256": "9c7ffa35ba3f3a1c58504b1f3eb3e635953e944b6f236614d11ed9c359ce3413"
+    },
+    {
+      "method": "TTSW10.Button35Click",
+      "entry": "0x44f0e8",
+      "code_bytes": 377,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f264",
+      "assembly_sha256": "eb1bf2382a95dda9f65b50e8ff21697cdb5495c9f93eea3b0b0aa7af98a90722"
+    },
+    {
+      "method": "TTSW10.Image6Click",
+      "entry": "0x44f264",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f26c",
+      "assembly_sha256": "a47712ba79c9f4966a91a5e6aeca918811b7460855d70671a0de9674ef4a42ff"
+    },
+    {
+      "method": "TTSW10.yousya",
+      "entry": "0x44f26c",
+      "code_bytes": 3219,
+      "literal_pool_bytes": 13,
+      "successor": "0x44ff0c",
+      "assembly_sha256": "2a9bc24c9ca0929bd7e8a9c27f4d9a67c0926338e07f56be80ee1bdad42a0a0a"
+    },
+    {
+      "method": "TTSW10.obudameiji",
+      "entry": "0x44ff0c",
+      "code_bytes": 332,
+      "literal_pool_bytes": 12,
+      "successor": "0x450064",
+      "assembly_sha256": "4fc6d39e1ccc6e70295ffe288d041372258416155200c1ee3b14c706bcd18e97"
+    },
+    {
+      "method": "TTSW10.dameiji",
+      "entry": "0x450064",
+      "code_bytes": 535,
+      "literal_pool_bytes": 13,
+      "successor": "0x450288",
+      "assembly_sha256": "610e8f8fe38e1a1346f9fec3cc1dfec15c234d215b80978190102381692a303c"
+    },
+    {
+      "method": "TTSW10.ydameiji",
+      "entry": "0x450288",
+      "code_bytes": 72,
+      "literal_pool_bytes": 0,
+      "successor": "0x4502d0",
+      "assembly_sha256": "b554da646d4a9c797da15e165aa4814c926c7aafa866172587daf82046051c54"
+    },
+    {
+      "method": "TTSW10.ydameiji2",
+      "entry": "0x4502d0",
+      "code_bytes": 74,
+      "literal_pool_bytes": 0,
+      "successor": "0x45031c",
+      "assembly_sha256": "4e52c4cb33e7d38b29dae0fb342812e6f0595f2c92b3329988187a4a50d55398"
+    },
+    {
+      "method": "TTSW10.damecount",
+      "entry": "0x45031c",
+      "code_bytes": 66,
+      "literal_pool_bytes": 0,
+      "successor": "0x450360",
+      "assembly_sha256": "26ec1937578fcd6ea9d609dcbddbbe7cc0dcf2f60e1439375ab57388ec99ca06"
+    },
+    {
+      "method": "TTSW10.damecount2",
+      "entry": "0x450360",
+      "code_bytes": 72,
+      "literal_pool_bytes": 0,
+      "successor": "0x4503a8",
+      "assembly_sha256": "3b06041ac08beee3f13b5e1e9f3b6a06ea5d5615f280290c7c399787430ab453"
+    },
+    {
+      "method": "TTSW10.ydamecount",
+      "entry": "0x4503a8",
+      "code_bytes": 66,
+      "literal_pool_bytes": 0,
+      "successor": "0x4503ec",
+      "assembly_sha256": "7c6b103b5e80b337dd7165a002e40aea35e46e002009ae3f0bd726929fbfb9da"
+    },
+    {
+      "method": "TTSW10.Button36Click",
+      "entry": "0x4503ec",
+      "code_bytes": 876,
+      "literal_pool_bytes": 0,
+      "successor": "0x450758",
+      "assembly_sha256": "179133b80e38279d23e852f2799fddd7c93fd19cb2adbd43c4fe8dd7c7b51557"
+    },
+    {
+      "method": "TTSW10.itemdel",
+      "entry": "0x450758",
+      "code_bytes": 286,
+      "literal_pool_bytes": 0,
+      "successor": "0x450878",
+      "assembly_sha256": "ff6bc0c656d791ba19ce5f04e0fabf0ae5fc093407c0ffd33e17d495a0a4a85e"
+    },
+    {
+      "method": "TTSW10.Image8Click",
+      "entry": "0x450878",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x450880",
+      "assembly_sha256": "100ae1c3a101e5152a27c163a43086c40a509279d2c2637c6eecae818ab8573f"
+    },
+    {
+      "method": "TTSW10.itemlive",
+      "entry": "0x450880",
+      "code_bytes": 758,
+      "literal_pool_bytes": 0,
+      "successor": "0x450b78",
+      "assembly_sha256": "a11edfefe3a042e8799931986e23298f4e4e0042bc04650d35c6a7a51cf3a1af"
+    },
+    {
+      "method": "TTSW10.Button37Click",
+      "entry": "0x450b78",
+      "code_bytes": 38,
+      "literal_pool_bytes": 0,
+      "successor": "0x450ba0",
+      "assembly_sha256": "5d2d09e2beba5999005ea87d826971f7645a6cd32c3517593a8adfe1c4616326"
+    },
+    {
+      "method": "TTSW10.Button38Click",
+      "entry": "0x450ba0",
+      "code_bytes": 4043,
+      "literal_pool_bytes": 13,
+      "successor": "0x451b78",
+      "assembly_sha256": "d681d4baed603d5a53c70925923287deec2329ccadd57267c18b67d454cbff20"
+    },
+    {
+      "method": "TTSW10.Image9Click",
+      "entry": "0x451b78",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451b80",
+      "assembly_sha256": "b98bb217a3149510635f4ea38933a11e239dec35bbb91630e3bb293e4bd06e01"
+    },
+    {
+      "method": "TTSW10.Image10Click",
+      "entry": "0x451b80",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451b88",
+      "assembly_sha256": "6143d6d3205759489a95aaece8e793181eaf061862bc92abd2bc6844c1677b4c"
+    },
+    {
+      "method": "TTSW10.Image12Click",
+      "entry": "0x451b88",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451b90",
+      "assembly_sha256": "9804a260b449417abee3b4183497dc31caed1a84007a68dfc6af885ec6046f96"
+    },
+    {
+      "method": "TTSW10.Image13Click",
+      "entry": "0x451b90",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451b98",
+      "assembly_sha256": "94bb8523a3df2183accc6b0963908c5cbe734e6da4da002b4c3994a9b58f21dd"
+    },
+    {
+      "method": "TTSW10.matokwork",
+      "entry": "0x451b98",
+      "code_bytes": 133,
+      "literal_pool_bytes": 0,
+      "successor": "0x451c20",
+      "assembly_sha256": "cdb8e96426d13b238eb5a3569627185caeef827a6d088d0b5489bf53340df8d8"
+    },
+    {
+      "method": "TTSW10.mmmes",
+      "entry": "0x451c20",
+      "code_bytes": 282,
+      "literal_pool_bytes": 0,
+      "successor": "0x451d3c",
+      "assembly_sha256": "4558416bc5f082f54fb757efaf787683480882e1c52b94daa75059e9085fc19a"
+    },
+    {
+      "method": "TTSW10.yukiwork",
+      "entry": "0x451d3c",
+      "code_bytes": 190,
+      "literal_pool_bytes": 0,
+      "successor": "0x451dfc",
+      "assembly_sha256": "4fceb4e7d2a466e124aa9affc19c8bf9ba0dfc211e5cea725af57e50618bfad9"
+    },
+    {
+      "method": "TTSW10.Image15Click",
+      "entry": "0x451dfc",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451e04",
+      "assembly_sha256": "9631c03809863c3e38687432153c91c7433704dc1a43bd4cd36a2c8c0271a6b9"
+    },
+    {
+      "method": "TTSW10.Image16Click",
+      "entry": "0x451e04",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451e0c",
+      "assembly_sha256": "f0877bbdc0b36d2cb61018998b221d961812e675fb8fe769426cba4fdc51ae9b"
+    },
+    {
+      "method": "TTSW10.Image17Click",
+      "entry": "0x451e0c",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451e14",
+      "assembly_sha256": "14fa0f376e4906837eec67c12a5360926040c0a23884c8ca25e6be67809f2c4e"
+    },
+    {
+      "method": "TTSW10.Image11Click",
+      "entry": "0x451e14",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451e1c",
+      "assembly_sha256": "d91b5c33554d29718fb8ae9ed663bcd8dd35092c65a04d917bb7ee08643ed42c"
+    },
+    {
+      "method": "TTSW10.Button39Click",
+      "entry": "0x451e1c",
+      "code_bytes": 650,
+      "literal_pool_bytes": 14,
+      "successor": "0x4520b4",
+      "assembly_sha256": "9898c32f9c812f3ff7e97d4cb404b9de1a2e1a2112c59bf21be640a0ce763f51"
+    },
+    {
+      "method": "TTSW10.Button40Click",
+      "entry": "0x4520b4",
+      "code_bytes": 670,
+      "literal_pool_bytes": 14,
+      "successor": "0x452360",
+      "assembly_sha256": "103c8813f8daa928f291e8274fac03284f4809c32ed991a37a187b4863a4e42b"
+    },
+    {
+      "method": "TTSW10.Button41Click",
+      "entry": "0x452360",
+      "code_bytes": 672,
+      "literal_pool_bytes": 12,
+      "successor": "0x45260c",
+      "assembly_sha256": "97db997cf2b301e448c515262d9f6f2c0ee1806139f9b117585291687df927f3"
+    },
+    {
+      "method": "TTSW10.Button42Click",
+      "entry": "0x45260c",
+      "code_bytes": 77,
+      "literal_pool_bytes": 0,
+      "successor": "0x45265c",
+      "assembly_sha256": "b0d913ec31014ebc54a4c78cfb103a2b9245d2e6de70f2b70d7a7b513d5216d6"
+    },
+    {
+      "method": "TTSW10.timer2timer",
+      "entry": "0x45265c",
+      "code_bytes": 99,
+      "literal_pool_bytes": 0,
+      "successor": "0x4526c0",
+      "assembly_sha256": "69445b88e555cc37b55942a75843c1f37d1a6d43f9188194780f2e1c898d95ef"
+    },
+    {
+      "method": "TTSW10.stackwork",
+      "entry": "0x4526c0",
+      "code_bytes": 8530,
+      "literal_pool_bytes": 142,
+      "successor": "0x4548a0",
+      "assembly_sha256": "95f26a0a863956bb04038e179878ff37e86ae3ca757e8a1e0be2b2ee9490e3f5"
+    },
+    {
+      "method": "TTSW10.takowork1",
+      "entry": "0x4548a0",
+      "code_bytes": 437,
+      "literal_pool_bytes": 0,
+      "successor": "0x454a58",
+      "assembly_sha256": "7340441619bc378b2c6ee02c409f761e6c9e42ce583fd5daac91ff53c1122cf5"
+    },
+    {
+      "method": "TTSW10.takowork2",
+      "entry": "0x454a58",
+      "code_bytes": 437,
+      "literal_pool_bytes": 0,
+      "successor": "0x454c10",
+      "assembly_sha256": "2eb5b017a4224be359c68fd40488ec1ca069a284785f3e8db5553e2811c49865"
+    },
+    {
+      "method": "TTSW10.imagework",
+      "entry": "0x454c10",
+      "code_bytes": 399,
+      "literal_pool_bytes": 0,
+      "successor": "0x454da0",
+      "assembly_sha256": "480e9d5afc6a0572021d43add402c949bb1f4cd5c497ac9e0b68930f9feb513c"
+    },
+    {
+      "method": "TTSW10.gameover",
+      "entry": "0x454da0",
+      "code_bytes": 71,
+      "literal_pool_bytes": 0,
+      "successor": "0x454de8",
+      "assembly_sha256": "e767aada08fb908081fc00dd2cbaefb39c663ea881f2e35ebbc24abb34db9d4c"
+    },
+    {
+      "method": "TTSW10.syokidata2",
+      "entry": "0x454de8",
+      "code_bytes": 3547,
+      "literal_pool_bytes": 245,
+      "successor": "0x455cb8",
+      "assembly_sha256": "f5ae013bdaabcd6e5aee2595d8abd79a2c3e7679793cced6e02b44b80863c872"
+    },
+    {
+      "method": "TTSW10.syokidata",
+      "entry": "0x455cb8",
+      "code_bytes": 44832,
+      "literal_pool_bytes": 0,
+      "successor": "0x460bd8",
+      "assembly_sha256": "940444fbefe22f941244da42920ebd47e5c0a08cba1d2c0d3282b63022ee605b"
+    },
+    {
+      "method": "TTSW10.formkeydown",
+      "entry": "0x460bd8",
+      "code_bytes": 1259,
+      "literal_pool_bytes": 0,
+      "successor": "0x4610c4",
+      "assembly_sha256": "5bceea398abca2f81ea167741288deb350a71e14b88d122e98791682b712ba67"
+    },
+    {
+      "method": "TTSW10.itemichiwork",
+      "entry": "0x4610c4",
+      "code_bytes": 1622,
+      "literal_pool_bytes": 0,
+      "successor": "0x46171c",
+      "assembly_sha256": "8e3f5d6a0cad41c6054dd36ee27d4fa649079af758470891d2233946e67c3336"
+    },
+    {
+      "method": "TTSW10.itemichiwork2",
+      "entry": "0x46171c",
+      "code_bytes": 66,
+      "literal_pool_bytes": 0,
+      "successor": "0x461760",
+      "assembly_sha256": "696c3c719997da5acaa7a40d7cecb317525ae1efa6bb15578dd170cff5fdfbfa"
+    },
+    {
+      "method": "TTSW10.timer3ontimer",
+      "entry": "0x461760",
+      "code_bytes": 410,
+      "literal_pool_bytes": 0,
+      "successor": "0x4618fc",
+      "assembly_sha256": "91f1e9e45aa60aed84a5f380710740584091fcd3c7070a4cf9102ab310fec285"
+    },
+    {
+      "method": "TTSW10.button8onmousedown",
+      "entry": "0x4618fc",
+      "code_bytes": 72,
+      "literal_pool_bytes": 0,
+      "successor": "0x461944",
+      "assembly_sha256": "c05253c89cfd45591d53252aab38810fe177eb090829f1af4bd679d4ea865fbd"
+    },
+    {
+      "method": "TTSW10.button8onmouseup",
+      "entry": "0x461944",
+      "code_bytes": 62,
+      "literal_pool_bytes": 0,
+      "successor": "0x461984",
+      "assembly_sha256": "3b0ff73a31b4a2254636f99b999757bafc6e013bc2fc7aea117e2bbcfaf6c013"
+    },
+    {
+      "method": "TTSW10.button9onmousedown",
+      "entry": "0x461984",
+      "code_bytes": 72,
+      "literal_pool_bytes": 0,
+      "successor": "0x4619cc",
+      "assembly_sha256": "57e202b5a6802affd4b08306fdb115c8d956e6715a49895242450628321768a6"
+    },
+    {
+      "method": "TTSW10.button9onmouseup",
+      "entry": "0x4619cc",
+      "code_bytes": 62,
+      "literal_pool_bytes": 0,
+      "successor": "0x461a0c",
+      "assembly_sha256": "4298fdc675a0e70e9b14e3efab8da7289094dbd8d2cf884001d6768c23fb50f7"
+    },
+    {
+      "method": "TTSW10.zenolivework",
+      "entry": "0x461a0c",
+      "code_bytes": 1255,
+      "literal_pool_bytes": 0,
+      "successor": "0x461ef4",
+      "assembly_sha256": "99ef10b06b58f4db566e6b272756e5e65cf672c9cbc12270ffa3e337bbf7a75e"
+    },
+    {
+      "method": "TTSW10.madoushilivework",
+      "entry": "0x461ef4",
+      "code_bytes": 1642,
+      "literal_pool_bytes": 0,
+      "successor": "0x462560",
+      "assembly_sha256": "9e8f8c7499d119cc8172b1b1f09744d28d030688b2e7c465552a9ff40ae4786a"
+    },
+    {
+      "method": "TTSW10.madoushi2",
+      "entry": "0x462560",
+      "code_bytes": 4742,
+      "literal_pool_bytes": 0,
+      "successor": "0x4637e8",
+      "assembly_sha256": "b49f9037591d03361e412f10172b656f6125ad297090accd24f1108e0df4c863"
+    },
+    {
+      "method": "TTSW10.GameStart1Click",
+      "entry": "0x4637e8",
+      "code_bytes": 94,
+      "literal_pool_bytes": 46,
+      "successor": "0x463874",
+      "assembly_sha256": "ad5182edbc0bdc6cd1120a2f33b56c1f204092578175ec850dc73ef0f01384be"
+    },
+    {
+      "method": "TTSW10.GameQuit1Click",
+      "entry": "0x463874",
+      "code_bytes": 124,
+      "literal_pool_bytes": 44,
+      "successor": "0x46391c",
+      "assembly_sha256": "be4d66b2f6cac3991e69cd666643c7d3ffba85d196a0c29ac6ee3b60af3e7d83"
+    },
+    {
+      "method": "TTSW10.Exit1Click",
+      "entry": "0x46391c",
+      "code_bytes": 94,
+      "literal_pool_bytes": 0,
+      "successor": "0x46397c",
+      "assembly_sha256": "7cd8c279a4c2014dfbb0da754c88b2f952e2860665c1c083d03c43ac643c7b95"
+    },
+    {
+      "method": "TTSW10.mevent",
+      "entry": "0x46397c",
+      "code_bytes": 1739,
+      "literal_pool_bytes": 0,
+      "successor": "0x464048",
+      "assembly_sha256": "76d1e08d98119e27d9e8778433a3c8e6d935e3c9a3791b63c708fb4db686d898"
+    },
+    {
+      "method": "TTSW10.openning2",
+      "entry": "0x464048",
+      "code_bytes": 4973,
+      "literal_pool_bytes": 0,
+      "successor": "0x4653b8",
+      "assembly_sha256": "7f8d6ccac1037ea6d9cf3943903eb892524aa22c7fa0114835e630c4c79ac8ce"
+    },
+    {
+      "method": "TTSW10.openning31",
+      "entry": "0x4653b8",
+      "code_bytes": 1240,
+      "literal_pool_bytes": 112,
+      "successor": "0x465900",
+      "assembly_sha256": "c33f374a6c505c0c1415a3daecf1f60abd865cc7af8129458f07d862636c5f13"
+    },
+    {
+      "method": "TTSW10.touzoku",
+      "entry": "0x465900",
+      "code_bytes": 1987,
+      "literal_pool_bytes": 13,
+      "successor": "0x4660d0",
+      "assembly_sha256": "1be34e8666cb14aa1b035bc44331435637156ba9ff69564d8a7bfd398fd82c10"
+    },
+    {
+      "method": "TTSW10.doorstackin",
+      "entry": "0x4660d0",
+      "code_bytes": 1043,
+      "literal_pool_bytes": 0,
+      "successor": "0x4664e4",
+      "assembly_sha256": "3feaabf82f96fa8a6a0b264a5379a783aad4397a0f1951acaccc44b7a67cb881"
+    },
+    {
+      "method": "TTSW10.moncheck",
+      "entry": "0x4664e4",
+      "code_bytes": 26154,
+      "literal_pool_bytes": 14,
+      "successor": "0x46cb1c",
+      "assembly_sha256": "c839327ae5b5871d2205d50c2428f67fe7501f66216ad273a85e1bf2b641e0fe"
+    },
+    {
+      "method": "TTSW10.ichicheck",
+      "entry": "0x46cb1c",
+      "code_bytes": 42422,
+      "literal_pool_bytes": 14,
+      "successor": "0x4770e0",
+      "assembly_sha256": "46ca3803e7c53cd09dad9e795dc631e4ff299fe940840694b1e79db03f58d593"
+    },
+    {
+      "method": "TTSW10.dooropen",
+      "entry": "0x4770e0",
+      "code_bytes": 7723,
+      "literal_pool_bytes": 0,
+      "successor": "0x478f0c",
+      "assembly_sha256": "c3530ff2c9ec3c6ba8ba6ed761dc00ecb8d12cbd5387238178beff6af78bbbe8"
+    },
+    {
+      "method": "TTSW10.yousei",
+      "entry": "0x478f0c",
+      "code_bytes": 11826,
+      "literal_pool_bytes": 366,
+      "successor": "0x47beac",
+      "assembly_sha256": "4205cc2361a7203b090a7b7fc94655ea64e65201a88db38c53f1dc7fb9490fed"
+    },
+    {
+      "method": "TTSW10.doorcheck",
+      "entry": "0x47beac",
+      "code_bytes": 863,
+      "literal_pool_bytes": 0,
+      "successor": "0x47c20c",
+      "assembly_sha256": "29e96d321fd3da97e54f94f569d8f22e25ecdf762c25ee4c6dc0922d396cf877"
+    },
+    {
+      "method": "TTSW10.wavon1Click",
+      "entry": "0x47c20c",
+      "code_bytes": 75,
+      "literal_pool_bytes": 0,
+      "successor": "0x47c258",
+      "assembly_sha256": "0f53293dd01cb84c2e25a72b1221e9d59f3c9c1484a7634fee9d13b101262c31"
+    },
+    {
+      "method": "TTSW10.BGMON1Click",
+      "entry": "0x47c258",
+      "code_bytes": 100,
+      "literal_pool_bytes": 0,
+      "successor": "0x47c2bc",
+      "assembly_sha256": "75f5d9cfd3ce654225774279450c98edc3540394c19cf51a6a32a1d7f9073ae2"
+    },
+    {
+      "method": "TTSW10.soundplay",
+      "entry": "0x47c2bc",
+      "code_bytes": 1117,
+      "literal_pool_bytes": 479,
+      "successor": "0x47c8f8",
+      "assembly_sha256": "c8ee25433b5114545aab2d06417ead64a00359e5c679a401c6c22bc7e48501c1"
+    },
+    {
+      "method": "TTSW10.soundcheck",
+      "entry": "0x47c8f8",
+      "code_bytes": 126,
+      "literal_pool_bytes": 0,
+      "successor": "0x47c978",
+      "assembly_sha256": "31e44ca3936e85b2d143662e11b50a086f90a267baf32e8cfbcbd6ca99d5f31e"
+    },
+    {
+      "method": "TTSW10.banpaiawork",
+      "entry": "0x47c978",
+      "code_bytes": 2399,
+      "literal_pool_bytes": 0,
+      "successor": "0x47d2d8",
+      "assembly_sha256": "cedd5949b89f193c2bb0c5a46edc1fdfc4ab8bec3ff50b901d77286ef6c204c0"
+    },
+    {
+      "method": "TTSW10.Help2Click",
+      "entry": "0x47d2d8",
+      "code_bytes": 40,
+      "literal_pool_bytes": 24,
+      "successor": "0x47d318",
+      "assembly_sha256": "ca0777e9b2166f2d9bae8be01688957c9d2568b227d89ccec0ab372c1e6224ed"
+    },
+    {
+      "method": "TTSW10.About1Click",
+      "entry": "0x47d318",
+      "code_bytes": 11,
+      "literal_pool_bytes": 0,
+      "successor": "0x47d324",
+      "assembly_sha256": "22307c54b2105ee3f7ab9ec09c760c545dabf8e9cae7187a30761fad3f1dbaab"
+    },
+    {
+      "method": "TTSW10.OptionSave1Click",
+      "entry": "0x47d324",
+      "code_bytes": 307,
+      "literal_pool_bytes": 77,
+      "successor": "0x47d4a4",
+      "assembly_sha256": "c4ed87f71be6611915f2c483cc1e9128870e43a67a8b76c421cab04ca61fd076"
+    },
+    {
+      "method": "TTSW10.optionl1",
+      "entry": "0x47d4a4",
+      "code_bytes": 1328,
+      "literal_pool_bytes": 0,
+      "successor": "0x47d9d4",
+      "assembly_sha256": "8a2e4d83e897ceaef9e90a4a651ea665c1e9adefd83e4c2d11a2193fd72968ef"
+    },
+    {
+      "method": "TTSW10.Load11Click",
+      "entry": "0x47d9d4",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47db94",
+      "assembly_sha256": "71b63848242863cd1f5e1bea58b4350b08b7bab1ce25852ce17f0aab2bbf8061"
+    },
+    {
+      "method": "TTSW10.Load21Click",
+      "entry": "0x47db94",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47dd54",
+      "assembly_sha256": "6f9f216cecefc7338d12feb8fae39a2e860a000dab7771cbdfb2343fbf5af2bc"
+    },
+    {
+      "method": "TTSW10.Load31Click",
+      "entry": "0x47dd54",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47df14",
+      "assembly_sha256": "11e92861e5cb04cdbda3e51782f9b3150db810012cb7cc835f393cdbc746a819"
+    },
+    {
+      "method": "TTSW10.Load41Click",
+      "entry": "0x47df14",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47e0d4",
+      "assembly_sha256": "366b53577ba8edce69bf080428c5faacd9a91350d5278d037d6dfea39da56d88"
+    },
+    {
+      "method": "TTSW10.Load51Click",
+      "entry": "0x47e0d4",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47e294",
+      "assembly_sha256": "3f9d3004407879c959c351c3e79fd4b66feb7981e33d4dffde2ea17c1187a0cb"
+    },
+    {
+      "method": "TTSW10.Load61Click",
+      "entry": "0x47e294",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47e454",
+      "assembly_sha256": "76dc14e435c21951ec4b9c92942cf7535aa9cd1feb9b083bf734724c699fa64d"
+    },
+    {
+      "method": "TTSW10.Load71Click",
+      "entry": "0x47e454",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47e614",
+      "assembly_sha256": "f334a42ec32d2701d9a6eaedd6b90617becfdcb2f233147ca5dcf9fd35b86dd0"
+    },
+    {
+      "method": "TTSW10.Load81Click",
+      "entry": "0x47e614",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47e7d4",
+      "assembly_sha256": "e959549512d619b5b315d9e012c4cd02655eeda579ca489e3548248c66397ff0"
+    },
+    {
+      "method": "TTSW10.loadwork",
+      "entry": "0x47e7d4",
+      "code_bytes": 717,
+      "literal_pool_bytes": 59,
+      "successor": "0x47eadc",
+      "assembly_sha256": "dfe50e2c22a1679c836b16d2a5cf446000dd3c3783a33aac16e77b3b888ac0ba"
+    },
+    {
+      "method": "TTSW10.savework",
+      "entry": "0x47eadc",
+      "code_bytes": 449,
+      "literal_pool_bytes": 39,
+      "successor": "0x47ecc4",
+      "assembly_sha256": "3f94b9cbe7ada4364e86a4550ae77fa55928350a9af0a4d039fcdd2880245679"
+    },
+    {
+      "method": "TTSW10.Save11Click",
+      "entry": "0x47ecc4",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47edb8",
+      "assembly_sha256": "5dbe0afd709562498d95cba3e65751a94f7a52871034722eff3be72d86932d61"
+    },
+    {
+      "method": "TTSW10.Save21Click",
+      "entry": "0x47edb8",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47eeac",
+      "assembly_sha256": "e5ddc41bbb7e58f551f70164fe24ce19089f56ab2bfc6f8e4329a99c3d01b5bb"
+    },
+    {
+      "method": "TTSW10.Save31Click",
+      "entry": "0x47eeac",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47efa0",
+      "assembly_sha256": "530213098a386c6c09a8d936e0580e851953756791ec70cdef6877e134d7a36a"
+    },
+    {
+      "method": "TTSW10.Save41Click",
+      "entry": "0x47efa0",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47f094",
+      "assembly_sha256": "df71b1a8b973e231304a29c235116f5c20dc8a363a0c311a52fa97ff3d1bbd7b"
+    },
+    {
+      "method": "TTSW10.Save51Click",
+      "entry": "0x47f094",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47f188",
+      "assembly_sha256": "5823c0eeca3f2324747ea10b8e283dc4e4958bcf2feefcdf844a850b331f7a1b"
+    },
+    {
+      "method": "TTSW10.Save61Click",
+      "entry": "0x47f188",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47f27c",
+      "assembly_sha256": "0ec7ffc2839e5d1fad98c7bd27a49deb2489f6fa7eaa30f6b5eb076f0de0e1de"
+    },
+    {
+      "method": "TTSW10.Save71Click",
+      "entry": "0x47f27c",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47f370",
+      "assembly_sha256": "78e5e88024b3b9e1bee35adc74af9021fd24f88102d4110d115a32447be02622"
+    },
+    {
+      "method": "TTSW10.Save81Click",
+      "entry": "0x47f370",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47f464",
+      "assembly_sha256": "67497ed7a0c32bb08af816a357b0c9a3ff437d488eb9d28083c26a89dc7482d7"
+    },
+    {
+      "method": "TTSW10.High1Click",
+      "entry": "0x47f464",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f46c",
+      "assembly_sha256": "592069fce2b1721063047a1bde738a7ff55833fb716a0b3abcfcefeb10f6d28f"
+    },
+    {
+      "method": "TTSW10.Middle1Click",
+      "entry": "0x47f46c",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f474",
+      "assembly_sha256": "6f94eec655da778f53fa5b41eb79937ba51530a3f7b4cd85c1f823d87a01f4b0"
+    },
+    {
+      "method": "TTSW10.Low1Click",
+      "entry": "0x47f474",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f47c",
+      "assembly_sha256": "9b146291a5ae93016a6743bc94a6c43afc7cd85407bf91788d4613243970fd1c"
+    },
+    {
+      "method": "TTSW10.speedhigh",
+      "entry": "0x47f47c",
+      "code_bytes": 99,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f4e0",
+      "assembly_sha256": "e9bfa2ef1f8a4db5d988073a22a3a8cb8cfa2c8fa096e05ae80e08b95e809423"
+    },
+    {
+      "method": "TTSW10.speedmiddle",
+      "entry": "0x47f4e0",
+      "code_bytes": 99,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f544",
+      "assembly_sha256": "eb9956d9e7a2305f1addec06228026b5f16fe2a216add6b6e0a3edf60c796280"
+    },
+    {
+      "method": "TTSW10.speedlow",
+      "entry": "0x47f544",
+      "code_bytes": 99,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f5a8",
+      "assembly_sha256": "dada59adaa711ee681c7f0be21f3bba07615f71d893bd4f8fb495adcbbc3002f"
+    },
+    {
+      "method": "TTSW10.timerin",
+      "entry": "0x47f5a8",
+      "code_bytes": 62,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f5e8",
+      "assembly_sha256": "b4633462a5d1fc4ffdc4e3248cf1a65f7c7cb74458fdad0973f5e67532550bab"
+    },
+    {
+      "method": "TTSW10.NormalOption1Click",
+      "entry": "0x47f5e8",
+      "code_bytes": 184,
+      "literal_pool_bytes": 44,
+      "successor": "0x47f6cc",
+      "assembly_sha256": "501ba018eb7735f6830615c22a0d3e445a691d061470e53b7fc48fc31009877f"
+    },
+    {
+      "method": "TTSW10.Large1Click",
+      "entry": "0x47f6cc",
+      "code_bytes": 85,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f724",
+      "assembly_sha256": "7869fc2364b2308da092136607a2e4d4e9a12f136706b43a66e4a2f3618958ce"
+    },
+    {
+      "method": "TTSW10.Small1Click",
+      "entry": "0x47f724",
+      "code_bytes": 85,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f77c",
+      "assembly_sha256": "bfe1f8e514f393920fc9974c09f2d62869d6a5b494287c3f6ca0aa975d1aadc7"
+    },
+    {
+      "method": "TTSW10.Normal1Click",
+      "entry": "0x47f77c",
+      "code_bytes": 85,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f7d4",
+      "assembly_sha256": "1f32b8ad9093edb0949957bc17ec7e7e57241822abf92a3831c0879dfc168ef5"
+    },
+    {
+      "method": "TTSW10.taisen2",
+      "entry": "0x47f7d4",
+      "code_bytes": 2718,
+      "literal_pool_bytes": 26,
+      "successor": "0x48028c",
+      "assembly_sha256": "90a2f124a55156488bde87c63d4a75990f6c06d1ee8e7f0bf69d9a1904035650"
+    },
+    {
+      "method": "TTSW10.dameiji2",
+      "entry": "0x48028c",
+      "code_bytes": 110,
+      "literal_pool_bytes": 0,
+      "successor": "0x4802fc",
+      "assembly_sha256": "18fab6121152511f7da1cc76afe6acd39a329454b3f315fa8179cc4991be6033"
+    },
+    {
+      "method": "TTSW10.damei3",
+      "entry": "0x4802fc",
+      "code_bytes": 66,
+      "literal_pool_bytes": 0,
+      "successor": "0x480340",
+      "assembly_sha256": "df925bd98007053f67e52fa8b16586ca2a0ecee1a19eb20c08b337394628caeb"
+    },
+    {
+      "method": "TTSW10.ydamei3",
+      "entry": "0x480340",
+      "code_bytes": 66,
+      "literal_pool_bytes": 0,
+      "successor": "0x480384",
+      "assembly_sha256": "88a5a9942b8c63621aaa138bb2240c3fbb823948b3137668dbd7bb89b99f1a76"
+    },
+    {
+      "method": "TTSW10.monidou",
+      "entry": "0x480384",
+      "code_bytes": 1804,
+      "literal_pool_bytes": 0,
+      "successor": "0x480a90",
+      "assembly_sha256": "d376d94eb04bc12a92f84a9dd431f5e9c75ae243254494ee6549b57afebb41c0"
+    },
+    {
+      "method": "TTSW10.monidouwork",
+      "entry": "0x480a90",
+      "code_bytes": 889,
+      "literal_pool_bytes": 0,
+      "successor": "0x480e0c",
+      "assembly_sha256": "51dac77d40ee21d9218ff9b4a8cf165cd6008586900da5a4cdd035f6e47f5c4d"
+    },
+    {
+      "method": "TTSW10.tiny1Click",
+      "entry": "0x480e0c",
+      "code_bytes": 85,
+      "literal_pool_bytes": 0,
+      "successor": "0x480e64",
+      "assembly_sha256": "c8d39001fe755d41508383eeb77ed59101dd8492eab5abd7f548b5aa2f38aced"
+    },
+    {
+      "method": "TTSW10.KeyboardControl1Click",
+      "entry": "0x480e64",
+      "code_bytes": 123,
+      "literal_pool_bytes": 0,
+      "successor": "0x480ee0",
+      "assembly_sha256": "d73ac4672c818a4de26447ed59345c4ed3b84189c05839cbb67b65aa2de2e278"
+    },
+    {
+      "method": "TTSW10.MouseControl1Click",
+      "entry": "0x480ee0",
+      "code_bytes": 128,
+      "literal_pool_bytes": 0,
+      "successor": "0x480f60",
+      "assembly_sha256": "512a17b394813e42d8bd589d5fade47a7b575093d1f9be0088cb49d7f603bcd8"
+    },
+    {
+      "method": "TTSW10.img6work",
+      "entry": "0x480f60",
+      "code_bytes": 2604,
+      "literal_pool_bytes": 0,
+      "successor": "0x48198c",
+      "assembly_sha256": "857ddfa69717493b10ba9672e2e288a75d03cef36c0f1ca8b6f59b157ca25738"
+    },
+    {
+      "method": "TTSW10.img5work",
+      "entry": "0x48198c",
+      "code_bytes": 1266,
+      "literal_pool_bytes": 0,
+      "successor": "0x481e80",
+      "assembly_sha256": "c6e953f4c4db64fc75a47df962fbc4692922b99d894138b716bddbe73c9b0c02"
+    },
+    {
+      "method": "TTSW10.img4work",
+      "entry": "0x481e80",
+      "code_bytes": 412,
+      "literal_pool_bytes": 0,
+      "successor": "0x48201c",
+      "assembly_sha256": "76bd5697c01fc7ff33a4b73489f0d2eda1d1febe55fd0f3feb9aa3bcb9da6899"
+    },
+    {
+      "method": "TTSW10.img8work",
+      "entry": "0x48201c",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x482128",
+      "assembly_sha256": "4cf5cc3b16723ed706daf318e7c1dea923b18368464dc45a09cc4934d96f3624"
+    },
+    {
+      "method": "TTSW10.img9work",
+      "entry": "0x482128",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x482234",
+      "assembly_sha256": "fb59a3a6cb71e5eedb33426993ba65f7883a8efb70d115c12b12b17ba1ba0a2b"
+    },
+    {
+      "method": "TTSW10.img10work",
+      "entry": "0x482234",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x482340",
+      "assembly_sha256": "fc2ed4358a682a6c3d3d495e9a7379b4f386e726805423a0349d645b1fbb991e"
+    },
+    {
+      "method": "TTSW10.img11work",
+      "entry": "0x482340",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x48244c",
+      "assembly_sha256": "49d924ea4dbdf509cd4736aa5accb09853f6401c8da665adaeb3f6582b9ba572"
+    },
+    {
+      "method": "TTSW10.img12work",
+      "entry": "0x48244c",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x482558",
+      "assembly_sha256": "7cea61dad595a83ab90fb62668bb8b8952dcb5250fbd63b6da0af392de9c0e35"
+    },
+    {
+      "method": "TTSW10.img13work",
+      "entry": "0x482558",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x482664",
+      "assembly_sha256": "0c82a86a629347180dbac8a69b0bf2164779a72ea4885d7f00cae06707099d4f"
+    },
+    {
+      "method": "TTSW10.img15work",
+      "entry": "0x482664",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x482770",
+      "assembly_sha256": "346e7748daa0609b153648be437f31dc1b3a434ff59b3e8af24da84f7eb97b5c"
+    },
+    {
+      "method": "TTSW10.img16work",
+      "entry": "0x482770",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x48287c",
+      "assembly_sha256": "3cb1a6ea6bc24ac4c1a61b38b1de2e421c62dfa11a0249831c015d668e1259d2"
+    },
+    {
+      "method": "TTSW10.img17work",
+      "entry": "0x48287c",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x482988",
+      "assembly_sha256": "798ca996314b8aefef6a246d38d842ef4c97387fd803f99af511838b9bdde260"
+    },
+    {
+      "method": "TTSW10.HighScore1Click",
+      "entry": "0x482988",
+      "code_bytes": 228,
+      "literal_pool_bytes": 20,
+      "successor": "0x482a80",
+      "assembly_sha256": "fc398bddcb8b85c1d1d6b8d8e279687aab9d58e4c731c7093bd730a2b1939986"
+    },
+    {
+      "method": "TTSW10.mediaplayer5onnotify",
+      "entry": "0x482a80",
+      "code_bytes": 21,
+      "literal_pool_bytes": 0,
+      "successor": "0x482a98",
+      "assembly_sha256": "462bd91807db0e1940b8fade5c6be9de3277cca8d637891d7c7947dba2adba53"
+    },
+    {
+      "method": "TTSW10.timer4ontimer",
+      "entry": "0x482a98",
+      "code_bytes": 948,
+      "literal_pool_bytes": 20,
+      "successor": "0x482e60",
+      "assembly_sha256": "8c7782409e65ef32f8a46e7dc062e035d5841198a3cbeba7ee590bfbc0cd5f59"
+    },
+    {
+      "method": "TTSW10.openning9",
+      "entry": "0x482e60",
+      "code_bytes": 6381,
+      "literal_pool_bytes": 723,
+      "successor": "0x484a20",
+      "assembly_sha256": "80f8fe8d09d7cdf753ee77a5f125e14811871880bb8002bce90c6cd13e29c46a"
+    },
+    {
+      "method": "TTSW10.K5Click",
+      "entry": "0x484a20",
+      "code_bytes": 46,
+      "literal_pool_bytes": 0,
+      "successor": "0x484a50",
+      "assembly_sha256": "11d6a64334a63d1309f7780404fed9e8b2a9c8424c7208b9b442be2ed9af922a"
+    },
+    {
+      "method": "TTSW10.K6Click",
+      "entry": "0x484a50",
+      "code_bytes": 193,
+      "literal_pool_bytes": 0,
+      "successor": "0x484b14",
+      "assembly_sha256": "8e9ada9d514dd359492a5cf56ed2e7c66d3ccc579162c52c713fd8a1efbf64cb"
+    },
+    {
+      "method": "TTSW10.TSW10close",
+      "entry": "0x484b14",
+      "code_bytes": 71,
+      "literal_pool_bytes": 0,
+      "successor": "0x484b5c",
+      "assembly_sha256": "a2a92e2ce43ca205510c92b666b220ebeb72f1b39d35d0f50a2ec4959a8e9f5b"
+    },
+    {
+      "method": "TTSW10.BitBtn1Click",
+      "entry": "0x484b5c",
+      "code_bytes": 83,
+      "literal_pool_bytes": 0,
+      "successor": "0x484bb0",
+      "assembly_sha256": "26f166b5a46e67d64a8e10834282e2a0ab42bd2012b326b279de153eab61c202"
+    },
+    {
+      "method": "TTSW10.BitBtn2Click",
+      "entry": "0x484bb0",
+      "code_bytes": 81,
+      "literal_pool_bytes": 0,
+      "successor": "0x484c04",
+      "assembly_sha256": "2235638ab910abc461ec868aa1fa6eab54b09f67b7e090413ffb504123795607"
+    },
+    {
+      "method": "TTSW10.BitBtn3Click",
+      "entry": "0x484c04",
+      "code_bytes": 82,
+      "literal_pool_bytes": 0,
+      "successor": "0x484c58",
+      "assembly_sha256": "d7637b37996107668ca5e4bee36e687619d4072502ba893194de655c74bc3bd6"
+    },
+    {
+      "method": "TTSW10.BitBtn4Click",
+      "entry": "0x484c58",
+      "code_bytes": 84,
+      "literal_pool_bytes": 0,
+      "successor": "0x484cac",
+      "assembly_sha256": "ab2e5648b562041cda8656740703619e1b7250b626b21b192881f62de6cb4cec"
+    },
+    {
+      "method": "TTSW10.N800x5001Click",
+      "entry": "0x484cac",
+      "code_bytes": 154,
+      "literal_pool_bytes": 46,
+      "successor": "0x484d74",
+      "assembly_sha256": "c67a966d05685d422b18439bef1b8d562e0f65421615d069a6561f0f85f61603"
+    },
+    {
+      "method": "TTSW10.N640x4001Click",
+      "entry": "0x484d74",
+      "code_bytes": 108,
+      "literal_pool_bytes": 0,
+      "successor": "0x484de0",
+      "assembly_sha256": "479ac6e295e2a835dfcbd468c1bf48d08f48fd06233ad1b1f96a9f3ad78ac6b6"
+    },
+    {
+      "method": "TTSW10.image34click",
+      "entry": "0x484de0",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x484de8",
+      "assembly_sha256": "112bcbde45573dfc1166b06066218a54a9f28049ae30c211b3395b518d992153"
+    },
+    {
+      "method": "TTSW10.append",
+      "entry": "0x484de8",
+      "code_bytes": 350,
+      "literal_pool_bytes": 0,
+      "successor": "0x484f48",
+      "assembly_sha256": "6a8e312d8141752259aad9a983dd9efa827c4e14d84071665a4f42453bb787e4"
+    },
+    {
+      "method": "TTSW10.syokidata0",
+      "entry": "0x484f48",
+      "code_bytes": 14600,
+      "literal_pool_bytes": 1280,
+      "successor": "0x488d50",
+      "assembly_sha256": "6977b0fa8137f34f7c06058188cc6316528a5668e5c813fa88e738ac8976377d"
+    }
+  ],
+  "metadata_sha256": "21321a16fbbf8f790459f7d6e5eb9210afeea3d5731f665f7d2a0a25a90414da",
+  "function_inventory_sha256": "b4383e5998def086aea0cbe2cd71f4ba91904d4e25b3c79dc41972f1633daa75"
+}

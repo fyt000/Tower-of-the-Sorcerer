@@ -99,8 +99,8 @@
     Button6: TButton;
     Button1: TButton;
     procedure scoresave;
-    procedure scoreload;
-    procedure hyouji;
+    procedure scoreload(Category: Byte);
+    procedure hyouji(Category: Byte);
     procedure loadwork;
     procedure optionload;
     procedure formactivate(Sender: TObject);
@@ -132,6 +132,8 @@
     procedure Button3Click(Sender: TObject);
     procedure form4onclose(Sender: TObject; var Action: TCloseAction);
     procedure form4activate(Sender: TObject);
+  public
+    procedure SelectPortableFolder(Sender: TObject);
   end;
 
   TOKBottomDlg = class(TForm)
@@ -346,7 +348,7 @@
     procedure img5work;
     procedure img6work;
     procedure itemichiwork2;
-    procedure itemichiwork;
+    procedure itemichiwork(Direction: Longint);
     procedure takowork2;
     procedure takowork1;
     procedure monidouwork;
@@ -550,4 +552,5 @@
     procedure image34click(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
+    procedure PortableActivate(Sender: TObject);
   end;

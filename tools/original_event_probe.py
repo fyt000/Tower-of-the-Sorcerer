@@ -14,7 +14,7 @@ md=capstone.Cs(capstone.CS_ARCH_X86,capstone.CS_MODE_32)
 MAP=0x4b8934
 RAW=(ROOT/'data/original-map-bytes.bin').read_bytes()
 
-def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presentation=False,registers=(),follow_calls=(),watch_globals=(),state=None,return_state=False,observe_controls=False,observe_effects=False,call_returns=None,observe_arguments=()):
+def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presentation=False,registers=(),follow_calls=(),watch_globals=(),state=None,return_state=False,observe_controls=False,observe_effects=False,call_returns=None,observe_arguments=(),observe_scene_ui=False):
     u=unicorn.Uc(unicorn.UC_ARCH_X86,unicorn.UC_MODE_32)
     u.mem_map(0,0x300000); u.mem_map(0x400000,0x300000)
     u.mem_write(0x400000,pe.get_memory_mapped_image())
@@ -33,6 +33,17 @@ def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presenta
         for address, data in state.items():u.mem_write(address,data)
     for f,tx,ty,tile in changes:u.mem_write(MAP+f*123+2+ty*11+tx,bytes([tile]))
     for address,value in globals:u.mem_write(address,struct.pack('<I',value))
+    scene_ui = dict(caption='unchanged', timer2_enabled=0, timer3_enabled=1, timer_calls=[])
+    if observe_scene_ui:
+        # Explicit observers for scene/capture captions and timer2on.
+        # Original VCL offsets are from the DFM/class manifest and x86 callers.
+        for address,value in [(0x20044c,0x210000),(0x210100,0x211000),
+                              (0x211000,0x212000),(0x21200c,0x213000),(0x2001d0,0x214000)]:
+            u.mem_write(address,struct.pack('<I',value))
+        text=b'scene-probe-caption'
+        u.mem_write(0x215000,struct.pack('<iI',-1,len(text))+text+b'\0')
+        text=b'capture-probe-caption'
+        u.mem_write(0x215100,struct.pack('<iI',-1,len(text))+text+b'\0')
     initial=bytes(u.mem_read(MAP,len(RAW)))
     initial_monsters=bytes(u.mem_read(0x489910,528))
     read=set();written=set(); skipped=set();followed=set();cache={};stopped=False;controls={}
@@ -53,6 +64,21 @@ def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presenta
         ins=cache.setdefault(a,next(md.disasm(bytes(uc.mem_read(a,size)),a),None))
         if ins and ins.mnemonic=='call':
             target=ins.op_str
+            if observe_scene_ui:
+                if target == 'dword ptr [edi + 0xc]' and uc.reg_read(UC_X86_REG_EAX) == 0x211000:
+                    index=uc.reg_read(UC_X86_REG_EDX)
+                    if index not in (218,219):
+                        raise ValueError('Unreviewed scene caption string index')
+                    uc.mem_write(uc.reg_read(UC_X86_REG_ECX),struct.pack('<I',0x215008+(index-218)*0x100))
+                elif target == '0x4135d4':
+                    if uc.reg_read(UC_X86_REG_EAX) != 0x214000:
+                        raise ValueError('Scene text setter targeted a different control')
+                    pointer=uc.reg_read(UC_X86_REG_EDX)
+                    scene_ui['caption']=bytes(uc.mem_read(pointer,128)).split(b'\0',1)[0].decode('ascii') if pointer else ''
+                elif target == '0x44bc0c':
+                    scene_ui['timer2_enabled']=1
+                    scene_ui['timer3_enabled']=0
+                    scene_ui['timer_calls'].append(dict(site=hex(a),cursor=struct.unpack('<i',uc.mem_read(0x48c5ac,4))[0]))
             if target.startswith('0x') and int(target,16) in observe_arguments:
                 arguments.append(dict(site=hex(a),target=target,
                                       eax=uc.reg_read(UC_X86_REG_EAX),
@@ -102,6 +128,7 @@ def probe(addr,floor,x=0,y=0,changes=(),end=0x6ffff0,globals=(),include_presenta
             'later_cycle_flag':struct.unpack('<I',u.mem_read(0x4b8908,4))[0],
             'calls':sorted(skipped),'followed_calls':sorted(followed),
             'skipped_call_sites':[dict(site=hex(a),target=target) for a,target in sorted(call_sites)],
+            **({'scene_ui':scene_ui} if observe_scene_ui else {}),
             **({'effect_writes':effect_writes,'modeled_returns':modeled} if observe_effects else {}),
             **({'call_arguments':arguments} if observe_arguments else {}),
             **({'watched_globals':{hex(address):struct.unpack('<I',u.mem_read(address,4))[0]

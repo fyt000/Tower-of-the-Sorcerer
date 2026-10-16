@@ -121,6 +121,6 @@ python tools/verify_delphi2_ime.py --check
 python tools/test_delphi2_reference.py
 ```
 
-The compiler/private framework probes run on Windows; recovery DLLs and the
-game run only in emulation. Inputs, downloaded documentation, and binaries
-stay under ignored `build/`.
+The compiler/private framework probes run on Windows; recovery DLLs and original
+instruction comparisons run in emulation. Inputs, downloaded documentation,
+and binaries stay under ignored `build/`.

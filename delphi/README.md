@@ -2,9 +2,8 @@
 
 ## Build and run
 
-Prepare the compiler under `build/research/delphi2/` using the
-[compiler guide](../reference/delphi2/README.md), install
-`tools/requirements.txt`, and supply game assets. From the repository root:
+Prepare the compiler using the [compiler guide](../reference/delphi2/README.md),
+supply the original game assets, then run from the repository root:
 
 ```powershell
 python -m pip install -r tools/requirements.txt
@@ -19,58 +18,67 @@ Defaults are `D:\Program Files (x86)\Tower of the Sorcerer` for assets and
 uses portable `TSW12.INI` beside the executable; without it, settings use
 the Windows-directory convention. Explicit save paths override folder selection.
 
-## Architecture
+## Recovery status
 
-| Module | Responsibility |
+All **230 published methods** are reconstructed in Pascal and reviewed against
+the original machine code. Comparison covers complete routine bodies, including
+exception continuations, switch tables and literals. Only verified address
+relocations are normalized; VCL field and virtual-call offsets remain differences.
+
+| Reviewed code | Result |
 |---|---|
-| [GameState.pas](src/GameState.pas) | Persisted records, options, globals and event storage |
-| [GameCore.pas](src/GameCore.pas), [Gameplay.pas](src/Gameplay.pas) | Classification, combat arithmetic, field access and clues |
-| [GameForms.pas](src/GameForms.pas), `*Methods.inc`, [EventScenes.inc](src/EventScenes.inc) | VCL handlers, floor triggers and story scripts |
-| [GameGraphics.pas](src/GameGraphics.pas), [GameContent.pas](src/GameContent.pas) | Canvases, masks, monster tables and render order |
-| [Persistence.pas](src/Persistence.pas), [Audio.pas](src/Audio.pas) | Saves/rankings and MCI routing |
-| [GameInstance.pas](src/GameInstance.pas) | Duplicate-launch check |
-| [generated/](src/generated/) | DFM bindings, fields, initialization and layouts |
+| 73 published methods, 53,255 code bytes | Match after verified relocation |
+| 156 published methods | Reviewed English/Japanese VCL differences remain |
+| `madoushi2` | Retains the floor-49 fix |
 
-Original form resources and icons are embedded unchanged. Component and
-published-handler names are serialization keys. Unknown persisted fields use
-`WordN`, where `N` is their byte offset. Signed arithmetic wraps at 32 bits;
-story commands execute newest first. See [mechanics](../docs/mechanics.md)
-and the [save layout](../docs/original-data.md#original-saves).
+The source-structure differences are resolved, including `doorcheck` and
+`roujin`. Matching the original Delphi 2.0J compiler and libraries is expected
+to close the VCL differences, but that build remains untested and the original
+patch level is unknown. The available compiler is English Delphi 2.
 
-## Known differences and limits
+Production logic lives in `GameForms.pas` and its includes; `GameCore.pas` is
+for isolated probes. Expanded event writes retain `PushCommand(...)` comments
+and `TEventOpcode` names without changing generated instructions or record layout.
 
-- The supplied English Delphi 2 libraries differ from the original Japanese
-  edition, including IME support and message resources. Accepted differences
-  are recorded in [comparison-policy.json](comparison-policy.json).
-- Oversized battles stream turns, invalid slot loads preserve the running
-  state, and the 49F summon omits an unwritten stale command.
-- Some control styling and geometry differ. Graphics, fonts, DPI, focus and
-  timer delivery are not exhaustively compared.
-- Handler comparisons and seeded integration scenarios do not establish
-  binary equality or every natural campaign sequence.
+Original forms, icons and both Japanese calendar string tables are preserved.
+The calendar tables contain weekdays and Meiji–Heisei era definitions;
+the English RTL still lacks their Japanese initialization routines.
 
-## Formatting and verification
+The **sole intentional gameplay fix** removes an extra floor-49 summon cursor
+increment that exposes a stale command inside the buffer. All 128 valid summon
+records are preserved. Battle queues, timer/reset handling, inventory scanning
+and save rollback retain original behavior, including failure paths. See
+[comparison-policy.json](comparison-policy.json).
 
-The formatter wrapper uses [pasfmt.toml](pasfmt.toml), caches a pinned release
-under `build/`, and formats includes in their enclosing context:
+Whole-EXE equality and complete natural campaign coverage remain unverified.
+Drawing/UI checks pass within their measured scope; original drive-combo height,
+full-window appearance across fonts/DPI, and actual Windows focus/timer delivery
+still need comparison.
+
+## Verification
+
+The current build passes **452 native runtime assertions**, **2,888 non-audio
+dialogue/item/battle comparisons**, and **1,526 contact comparisons**. These
+include original battle-queue and save-failure behavior; the floor-49 exception
+has a separate regression check.
 
 ```powershell
-python tools/format_delphi.py
 python tools/format_delphi.py --check
 python tools/reconstruct_delphi_project.py --check
+python tools/compare_delphi_routines.py
+python tools/verify_delphi_game.py
+python tools/verify_delphi_dialogue.py --skip-audio
+python tools/verify_delphi_contact.py
+python tools/test_delphi_dialogue.py DialogueIntegrityTests.test_floor49_summon_does_not_execute_stale_slot_130
+python tools/test_delphi_events.py
+python tools/test_delphi_routines.py
+python tools/review_delphi_calendar.py
 ```
 
-`build_delphi_game.py --smoke` builds and runs native checks. Add `--audio-smoke`
-only for audio-related changes. Tools under `tools/` compare the game with the
-original executable:
+Run `format_delphi.py` without `--check` to format. Rebuild after Pascal changes;
+add `--audio-smoke` only for audio-related changes. Other `verify_delphi_*.py`
+tools cover graphics, Flight, UI, startup and runtime behavior.
 
-| Tools | Purpose |
-|---|---|
-| `verify_delphi_game.py`, `verify_delphi_runtime.py` | Gameplay and connected runtime behavior |
-| `verify_delphi_entry.py`, `verify_delphi_startup.py` | Program entry and settings |
-| `verify_delphi_graphics.py`, `verify_delphi_flight.py`, `verify_delphi_ui.py` | Rendering, Flight and controls |
-| `test_delphi_*.py` | Regressions and comparison integrity |
-| `compare_delphi_binary.py`, `audit_delphi_exception_paths.py` | Binary differences and exception paths |
-
-Comparison tools accept `--check` for stale reports. Regenerate bindings and
-rebuild after source changes; generated output stays in `build/`.
+Detailed results, byte differences and calendar call traces are generated under
+`build/delphi-game/reports/`. Comparison tools accept `--check` for stale reports.
+See also [mechanics](../docs/mechanics.md) and the [save layout](../docs/original-data.md#original-saves).

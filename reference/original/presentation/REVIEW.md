@@ -1,8 +1,8 @@
 # Presentation and input review — 2026-10-09
 
-The campaign is stopped. This audit reads the pinned executable and executes
-selected original instructions in isolated emulator memory. It does not advance
-the campaign or run the original Windows game.
+This dated audit records original-code extraction and C++ presentation checks.
+Current Pascal recovery and routine comparisons are documented in the
+[Delphi README](../../../delphi/README.md#recovery-status).
 
 The old boundary between gameplay and presentation was unsound. Form handlers
 select legal actions, drawing can reset gameplay fields, timers dispatch

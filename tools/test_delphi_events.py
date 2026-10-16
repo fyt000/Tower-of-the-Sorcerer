@@ -15,6 +15,7 @@ import subprocess
 import build_delphi_game
 from build_delphi2_reference import stage
 from original_event_probe import probe, RAW, pe
+from recovery_evidence import ORIGINAL_HASH
 from unicorn.x86_const import UC_X86_REG_EBP, UC_X86_REG_EBX, UC_X86_REG_ESI
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,7 +27,7 @@ def native(case, raw):
     output_path = WORK / 'output.bin'
     input_path.write_bytes(raw)
     result = subprocess.run([str(WORK / 'EventQueueSmoke.exe'), str(case['builder']),
-                             str(input_path), str(output_path), '40'], cwd=WORK,
+                             str(input_path), str(output_path), str(case.get('width', 40))], cwd=WORK,
                             capture_output=True, timeout=20,
                             creationflags=subprocess.CREATE_NO_WINDOW)
     if result.returncode:
@@ -35,10 +36,14 @@ def native(case, raw):
     count, = struct.unpack_from('<I', out)
     queue = [list(struct.unpack_from('<HHH', out, 4 + index * 6)) for index in range(count)]
     position = 4 + count * 6
-    return queue, out[position:position + 684], out[position + 684:position + 684 + 6273], out[-528:]
+    rows = [json.loads(line) for line in result.stdout.decode('ascii').splitlines() if line.startswith('{')]
+    ui = next(row for row in rows if 'caption' in row)
+    return queue, out[position:position + 684], out[position + 684:position + 684 + 6273], out[-528:], ui
 
 
 def main():
+    if hashlib.sha256(pe.__data__).hexdigest() != ORIGINAL_HASH:
+        raise ValueError('Original scene executable differs from pin')
     WORK.mkdir(parents=True, exist_ok=True)
     for source in (ROOT / 'delphi/src').rglob('*'):
         if source.suffix.lower() not in ('.pas', '.inc'):
@@ -77,6 +82,10 @@ def main():
               dict(name='capture', builder=6, address=0x464048, floor=3, x=4, y=8),
               dict(name='ending', builder=7, address=0x4463a1, floor=50, x=5, y=4,
                    end=0x448fbc)]
+    cases += [dict(name=f'capture-{width}-facing-{facing}', builder=6, address=0x464048,
+                   floor=3, x=4, y=8, width=width, words={352: facing})
+              for width in (32, 40) for facing in (1, 2, 3, 4)
+              if (width, facing) != (40, 4)]
     for floor in (2, 8, 10, 11, 14, 15, 17, 20, 25, 30, 32, 33, 34, 35, 38, 40, 41, 45, 48, 49, 50):
         cases.append(dict(name=f'guards-{floor}', builder=2, address=0x4664e4,
                           floor=floor, x=5, y=5))
@@ -104,6 +113,9 @@ def main():
                    floor=24, x=5, y=5, words={624: 1, 360: 17}),
               dict(name='arrival-20-music', builder=1, address=0x46cb1c,
                    floor=20, x=5, y=5, words={360: 16})]
+    cases.append(dict(name='arrival-no-scene', builder=1, address=0x46cb1c, floor=1, x=5, y=5))
+    cases.append(dict(name='golden-knight-caption', builder=2, address=0x4664e4, floor=32, x=5, y=5,
+                      words={480: 1}, changes=[(32, 5, 5, 6)]))
     report = []
     failures = []
     monster_bytes = pe.get_data(0x489910 - pe.OPTIONAL_HEADER.ImageBase, 528)
@@ -117,9 +129,10 @@ def main():
             maps[floor * 123 + 2 + y * 11 + x] = tile
         indices = case.get('indices', (0, 0, 0, 0))
         raw = hero + maps + monster_bytes + struct.pack('<4i', *indices)
-        actual, native_hero, native_maps, native_monsters = native(case, raw)
+        actual, native_hero, native_maps, native_monsters, native_ui = native(case, raw)
         globals_ = [(0x48c558, indices[0]), (0x48c55c, indices[1]),
-                    (0x48c560, indices[2]), (0x48c564, indices[3])]
+                    (0x48c560, indices[2]), (0x48c564, indices[3]),
+                    (0x20102c, case.get('width', 40)), (0x201030, case.get('width', 40))]
         registers = []
         if case['builder'] == 7:
             globals_ += [(0x6ffdfc, 0x200000)]
@@ -129,7 +142,8 @@ def main():
                          state={0x4b8688: bytes(hero), 0x4b8934: bytes(maps),
                                 0x489910: monster_bytes}, globals=globals_, registers=registers,
                          end=case.get('end', 0x6ffff0), include_presentation=True,
-                         follow_calls=[0x4660d0, 0x461a0c, 0x461ef4], return_state=True)
+                         follow_calls=[0x4660d0, 0x461a0c, 0x461ef4], return_state=True,
+                         observe_scene_ui=case['builder'] in (1, 2, 6))
         expected = original['queue']
         raw_queue_equal = actual == expected
         # The 49F summon has a documented stray INC exposing an unwritten
@@ -146,11 +160,15 @@ def main():
         hero_slots = list(range(0, 48, 4)) + list(range(364, 644, 4))
         hero_diffs = [offset for offset in hero_slots if
                       native_hero[offset:offset + 4] != original['state'][0x4b8688][offset:offset + 4]]
-        okay = same_queue and same_map and same_monsters and not hero_diffs
+        same_ui = (all(native_ui[key] == original['scene_ui'][key] for key in native_ui)
+                   if case['builder'] in (1, 2, 6) else None)
+        okay = same_queue and same_map and same_monsters and not hero_diffs and same_ui is not False
         row = dict(fixture=case['name'], passed=okay, queue_records=len(actual),
                    raw_queue_equal=raw_queue_equal, scoped_queue_equal=same_queue,
                    maps_equal=same_map, monsters_equal=same_monsters,
                    story_hero_differences=hero_diffs, original_skipped_calls=original['calls'])
+        if same_ui is not None:
+            row.update(scene_ui_equal=same_ui, native_scene_ui=native_ui, original_scene_ui=original['scene_ui'])
         if omitted_stale_record:
             row['original_stale_record_omitted'] = dict(address='0x004637DD', record=[0, 0, 0])
         if not same_queue:
@@ -172,11 +190,14 @@ def main():
                   native_executable_sha256=hashlib.sha256((WORK / 'EventQueueSmoke.exe').read_bytes()).hexdigest(),
                   source_sha256={str(path.relative_to(ROOT)).replace('\\', '/'):
                                  hashlib.sha256(path.read_bytes()).hexdigest()
-                                 for path in [ROOT / 'delphi/src/EventMethods.inc',
-                                              ROOT / 'delphi/src/EventScenes.inc',
-                                              ROOT / 'delphi/tests/EventQueueSmoke.dpr']},
+                                 for path in sorted([p for p in (ROOT / 'delphi/src').rglob('*')
+                                                     if p.suffix in ('.pas', '.inc')] +
+                                                    [ROOT / 'delphi/tests/EventQueueSmoke.dpr',
+                                                     ROOT / 'tools/original_event_probe.py',
+                                                     Path(__file__)])},
                   scope='Native hidden VCL queue builders versus original x86 emulation; VCL and audio original callees skipped.',
                   limits=['Does not establish pixel identity, manual UI usability, or a complete campaign playthrough.',
+                          'Arrival/combat builders additionally compare caption and final timer states against explicit original VCL observers; timer delivery is not emulated.',
                           'Only compared the stated fixture inputs; original stale 49F summon record explicitly omitted.'],
                   fixtures=report, failures=failures)
     encoded = json.dumps(output, indent=2) + '\n'

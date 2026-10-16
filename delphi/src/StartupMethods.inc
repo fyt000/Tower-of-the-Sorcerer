@@ -1,13 +1,5 @@
 procedure TTSW10.formactivate(Sender: TObject); { $0044280C }
-var
-  Path: string;
-  NameBuffer: string[255];
 begin
-  if PortableInstallation then
-  begin
-    ActivatePortableInstallation(Self);
-    Exit;
-  end;
   Hero.Word628 := -4;
   Hero.cycle_factor_minus_one := 0;
   Hero.later_cycle := 0;
@@ -23,10 +15,8 @@ begin
     Memo12.Lines.LoadFromFile(IOPath);
     SaveDirectory := Memo12.Lines[0];
     AssetDirectory := Memo12.Lines[1];
-    NameBuffer := Memo12.Lines[2];
-    PlayerName := NameBuffer;
-    Path := Memo12.Lines[1] + '\data\center.bmp';
-    Image1.Picture.LoadFromFile(Path);
+    PlayerName := Memo12.Lines[2];
+    Image1.Picture.LoadFromFile(Memo12.Lines[1] + '\data\center.bmp');
   except
     { Missing settings or artwork resets paths to the working directory. }
     Memo12.Lines.Clear;
@@ -44,7 +34,7 @@ begin
   BlockRead(SettingsFile, GameOptions, 10);
   CloseFile(SettingsFile);
   syokidata0;
-  if K5.Checked then
+  if K5.Checked = True then
   begin
     Timer4.Enabled := True;
     optionl1;
@@ -55,8 +45,13 @@ begin
     optionl1;
   syokidata;
   syokidata2;
-  if not K5.Checked then
+  if K5.Checked = False then
     itemlive;
+end;
+
+procedure TTSW10.PortableActivate(Sender: TObject);
+begin
+  ActivatePortableInstallation(Self);
 end;
 
 { Installation paths, saved options and initial gameplay state. }
@@ -139,27 +134,62 @@ begin
 end;
 
 procedure TTSW10.syokidata2; { $00454DE8 }
-var
-  I, Factor: Longint;
-  Items: array[0..14] of TImage;
-  ItemValues: array[0..14] of Longint;
 begin
-  CancelBattle;
-  PrepareSceneGraphics(Self);
-  InitializeAudio(Self);
-  MouseRepeat := 0;
+  {$I StartupHidden.inc}
+  if Hero.cycle_factor_minus_one = 0 then
+    Image2.Picture.LoadFromFile(Memo12.Lines[1] + DataDirectory + '\left.bmp')
+  else
+    Image2.Picture.LoadFromFile(Memo12.Lines[1] + DataDirectory + '\leftr.bmp');
+  if Hero.cycle_factor_minus_one = 0 then
+    Image3.Picture.LoadFromFile(Memo12.Lines[1] + DataDirectory + '\right.bmp')
+  else
+    Image3.Picture.LoadFromFile(Memo12.Lines[1] + DataDirectory + '\rightr.bmp');
+  TargetRect := Rect(0, 0, Image2.Width, Image2.Height);
+  FrameBitmap.Canvas.CopyRect(TargetRect, Image2.Canvas, TargetRect);
+  TargetRect := Rect(Image2.Width, 0, Image2.Width + Image1.Width, Image1.Height);
+  SourceRect := Rect(0, 0, Image1.Width, Image1.Height);
+  Image23.Width := Image1.Width;
+  Image23.Height := Image1.Height;
+  if Hero.cycle_factor_minus_one = 0 then
+    Image23.Picture.LoadFromFile(Memo12.Lines[1] + DataDirectory + '\title05.bmp')
+  else
+    Image23.Picture.LoadFromFile(Memo12.Lines[1] + DataDirectory + '\title05R.bmp');
+  FrameBitmap.Canvas.CopyRect(TargetRect, Image23.Canvas, SourceRect);
+  TargetRect :=
+      Rect(
+          Image2.Width + Image1.Width,
+          0,
+          Image2.Width + Image1.Width + Image3.Width,
+          Image3.Height
+      );
+  SourceRect := Rect(0, 0, Image3.Width, Image3.Height);
+  FrameBitmap.Canvas.CopyRect(TargetRect, Image3.Canvas, SourceRect);
+  MediaPlayer1.DeviceType := dtWaveAudio;
+  MediaPlayer1.FileName := Memo12.Lines[1] + '\wav\open.wav';
+  MediaPlayer1.Open;
+  MediaPlayer2.DeviceType := dtWaveAudio;
+  MediaPlayer2.FileName := Memo12.Lines[1] + '\wav\get.wav';
+  MediaPlayer2.Open;
+  MediaPlayer3.DeviceType := dtWaveAudio;
+  MediaPlayer3.FileName := Memo12.Lines[1] + '\wav\taisen.wav';
+  MediaPlayer3.Open;
+  MediaPlayer4.DeviceType := dtWaveAudio;
+  MediaPlayer4.FileName := Memo12.Lines[1] + '\wav\zeno.wav';
+  MediaPlayer4.Open;
+  MediaPlayer6.DeviceType := dtWaveAudio;
+  KeysPainted := 0;
   DrawIndex := 1;
-  SceneReady := 1;
+  AnimationFrame := True;
   PreviousCell := 0;
-  HeroCell := Hero.y * 11 + Hero.x;
+  FlightCell := Hero.y * 11 + Hero.x;
   TileClass := 0;
   FacingRequest := 1;
   DialogueStage := 0;
   EventCursor := 0;
-  EventPaused := False;
-  if not Timer4.Enabled then
-  begin
+  if Timer4.Enabled = False then
     mhyouji;
+  if Timer4.Enabled = False then
+  begin
     Image1.Picture.LoadFromFile(Memo12.Lines[1] + DataDirectory + '\center.bmp');
     Image1.Visible := True;
     Image2.Visible := True;
@@ -195,42 +225,45 @@ begin
     monshyouji;
     keydisplay;
     itemdisp;
-    Items[0] := Image6;
-    Items[1] := Image5;
-    Items[2] := Image4;
-    Items[3] := Image7;
-    Items[4] := Image8;
-    Items[5] := Image9;
-    Items[6] := Image10;
-    Items[7] := Image11;
-    Items[8] := Image12;
-    Items[9] := Image13;
-    Items[10] := Image14;
-    Items[11] := Image15;
-    Items[12] := Image16;
-    Items[13] := Image17;
-    Items[14] := Image18;
-    ItemValues[0] := Hero.hero_orb;
-    ItemValues[1] := Hero.wisdom_orb;
-    ItemValues[2] := Hero.flight_orb;
-    ItemValues[3] := Hero.cross;
-    ItemValues[4] := Hero.elixir;
-    ItemValues[5] := Hero.mattock;
-    ItemValues[6] := Hero.bomb;
-    ItemValues[7] := Hero.warp_staff;
-    ItemValues[8] := Hero.ascent_wing;
-    ItemValues[9] := Hero.descent_wing;
-    ItemValues[10] := Hero.dragon_slayer;
-    ItemValues[11] := Hero.snow_crystal;
-    ItemValues[12] := Hero.magic_key;
-    ItemValues[13] := Hero.super_mattock;
-    ItemValues[14] := Hero.lucky_gold;
-    for I := 0 to 14 do
-      Items[I].Visible := True;
-    { Cross, Dragon Slayer and Lucky Gold are passive. Warp Staff stores charges. }
-    for I := 0 to 14 do
-      if not (I in [3, 10, 14]) and ((ItemValues[I] = 1) or ((I = 7) and (ItemValues[I] > 0))) then
-        Items[I].Enabled := True;
+    Image4.Visible := True;
+    if Hero.flight_orb = 1 then
+      Image4.Enabled := True;
+    Image5.Visible := True;
+    if Hero.wisdom_orb = 1 then
+      Image5.Enabled := True;
+    Image6.Visible := True;
+    if Hero.hero_orb = 1 then
+      Image6.Enabled := True;
+    Image7.Visible := True;
+    Image8.Visible := True;
+    if Hero.elixir = 1 then
+      Image8.Enabled := True;
+    Image9.Visible := True;
+    if Hero.mattock = 1 then
+      Image9.Enabled := True;
+    Image10.Visible := True;
+    if Hero.bomb = 1 then
+      Image10.Enabled := True;
+    Image11.Visible := True;
+    if Hero.warp_staff >= 1 then
+      Image11.Enabled := True;
+    Image12.Visible := True;
+    if Hero.ascent_wing = 1 then
+      Image12.Enabled := True;
+    Image13.Visible := True;
+    if Hero.descent_wing = 1 then
+      Image13.Enabled := True;
+    Image14.Visible := True;
+    Image15.Visible := True;
+    if Hero.snow_crystal = 1 then
+      Image15.Enabled := True;
+    Image16.Visible := True;
+    if Hero.magic_key = 1 then
+      Image16.Enabled := True;
+    Image17.Visible := True;
+    if Hero.super_mattock = 1 then
+      Image17.Enabled := True;
+    Image18.Visible := True;
     disp;
   end;
   if Hero.effects_muted = 0 then
@@ -247,18 +280,19 @@ begin
   DrawY := ((Hero.y * 11 + Hero.x) div (Image6.Height * 11)) * Image6.Height;
   if not Timer4.Enabled then
     yusyahyouji1;
-  if Hero.zeno_sealed = 0 then
-  begin
-    Monsters[15].HP := 8000;
-    Monsters[15].Attack := 5000;
-    Monsters[15].Defense := 1000;
-  end
-  else if Hero.zeno_sealed = 1 then
-  begin
-    { Sealed Zeno uses one-tenth stats multiplied by the current cycle factor. }
-    Factor := Hero.cycle_factor_minus_one + 1;
-    Monsters[15].HP := Factor * 800;
-    Monsters[15].Attack := Factor * 500;
-    Monsters[15].Defense := Factor * 100;
+  case Hero.zeno_sealed of
+    0:
+    begin
+      Monsters[15].HP := 8000;
+      Monsters[15].Attack := 5000;
+      Monsters[15].Defense := 1000;
+    end;
+    1:
+    begin
+      { Sealed Zeno uses one-tenth stats multiplied by the current cycle factor. }
+      Monsters[15].HP := (Hero.cycle_factor_minus_one + 1) * 800;
+      Monsters[15].Attack := (Hero.cycle_factor_minus_one + 1) * 500;
+      Monsters[15].Defense := (Hero.cycle_factor_minus_one + 1) * 100;
+    end;
   end;
 end;

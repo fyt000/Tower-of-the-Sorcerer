@@ -5,7 +5,7 @@ for Windows 1.2** by Oz & Kenichi.
 
 | Project | Focus | Start here |
 |---|---|---|
-| Delphi 2 | Closest reconstruction of the original game | [Build, run and tools](delphi/README.md) |
+| Delphi 2 | Pascal source recovery targeting routine-level byte equivalence | [Recovery status, build and tools](delphi/README.md) |
 | C++ | Desktop UI, headless CLI/MCP and quality-of-life features | [Build, run and controls](cpp/README.md) |
 | Rust | Desktop/browser UI and campaign editor | [Build and run](rust/README.md) |
 

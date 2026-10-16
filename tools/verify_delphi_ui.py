@@ -26,8 +26,12 @@ _HERO_FIELDS = hero_fields()
 HERO_OFFSETS = {_HERO_FIELDS.get(offset, "Word" + str(offset)): offset for offset in range(0, 684, 4)}
 
 UI_GAME = dict(keydisplay=0x44BED8, itemdisp=0x44CCD8, Timer1Timer=0x443120,
-               takowork1=0x4548A0, takowork2=0x454A58)
-UI_STATE = dict(AnimationFrame=(0x48C5D2, 1), KeysPainted=(0x48C5C4, 2))
+               takowork1=0x4548A0, takowork2=0x454A58, K5Click=0x484A20,
+               buttonfocus=0x442D50,
+               **{f"img{image}work": 0x48201C + i * 0x10C
+                  for i, image in enumerate((8, 9, 10, 11, 12, 13, 15, 16, 17))})
+UI_STATE = dict(AnimationFrame=(0x48C5D2, 1), KeysPainted=(0x48C5C4, 2),
+                GameplayItemChoice=(0x48C574, 4), FacingRequest=(0x48C590, 4))
 UI_BOUNDARIES = {0x419E4C: "TFont.SetSize", 0x419E30: "TFont.GetSize",
                  0x4102F0: "TMenuItem.SetChecked", 0x421A54: "TForm.GetCanvas"}
 EXTRAS = {"about_activate": (0x43416C, "TAboutBox.formactivate"),
@@ -36,15 +40,17 @@ EXTRAS = {"about_activate": (0x43416C, "TAboutBox.formactivate"),
           "about_image2_click": (0x4340B4, "TAboutBox.image2onclick"),
           "about_timer": (0x4340E0, "TAboutBox.Timer1Timer"),
           "holder_activate": (0x440A98, "TForm4.form4activate"),
-          "font_prefix": (0x47D4A4, "ApplyFontLayout"),
+          "font_prefix": (0x47D4A4, "TTSW10.optionl1"),
           "visual_prefix": (0x454DE8, "PrepareSceneGraphics")}
 PREFIX_STOPS = {"font_prefix": 0x47F5A8, "visual_prefix": 0x431C8C}
 
 
 class UIRunner(FlightRunner):
-    def __init__(self, pe, original=False, map_path=None, assets=None, include_prefixes=True):
-        super().__init__(pe, original, map_path, assets, extra_game=UI_GAME,
-                         extra_storage=UI_STATE, extra_boundaries=UI_BOUNDARIES)
+    def __init__(self, pe, original=False, map_path=None, assets=None, include_prefixes=True,
+                 extra_game=None, extra_storage=None, extra_boundaries=None):
+        super().__init__(pe, original, map_path, assets, extra_game={**UI_GAME, **(extra_game or {})},
+                         extra_storage={**UI_STATE, **(extra_storage or {})},
+                         extra_boundaries={**UI_BOUNDARIES, **(extra_boundaries or {})})
         self.font_sizes, self.control_properties, self.menu_checks = {}, {}, {}
         self.free_bitmap_slots, self.bitmap_serial = [], 0
         self.running, self.prefix_reached = None, False
@@ -79,7 +85,8 @@ class UIRunner(FlightRunner):
                 raise ValueError("Original image1onclick completion changed")
             md = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)
             self.allowed.update(i.address for i in md.disasm(body, 0x434094))
-            self.boundaries.update({at: "PREFIX:" + name for name, at in PREFIX_STOPS.items()})
+            if include_prefixes:
+                self.boundaries.update({at: "PREFIX:" + name for name, at in PREFIX_STOPS.items()})
         else:
             mapping, data = symbols(pe, map_path), data_symbols(pe, map_path)
             self.dialog_globals = {"TAboutBox": data["AboutBox"], "TForm4": data["DataHolderForm"]}
@@ -91,6 +98,10 @@ class UIRunner(FlightRunner):
                 self.entries[name] = at
                 self.allowed.update(range(at, next(a for a in addresses if a > at)))
         self.entry_names = {v: k for k, v in self.entries.items()}
+        self.prefix_stops = ((PREFIX_STOPS if original else
+                              {"font_prefix": mapping["TTSW10.timerin"]}) if include_prefixes else {})
+        if not original and include_prefixes:
+            self.boundaries[mapping["TTSW10.timerin"]] = "PREFIX:font_prefix"
         self.base_names = self.names.copy()
 
     def seed(self, *args, **kwargs):
@@ -145,7 +156,7 @@ class UIRunner(FlightRunner):
         return pointer
 
     def step(self, u, at, size, data):
-        if self.original and self.running in PREFIX_STOPS and at == PREFIX_STOPS[self.running]:
+        if self.running in self.prefix_stops and at == self.prefix_stops[self.running]:
             self.prefix_reached = True
             u.emu_stop()
             return
@@ -195,7 +206,7 @@ class UIRunner(FlightRunner):
         elif name.startswith("holder_"):
             self.self = self.forms["TForm4"]
         try:
-            if not self.original or name not in PREFIX_STOPS:
+            if name not in self.prefix_stops:
                 return super().run(name)
             start, stack, stop = len(self.trace), 0x3FE000, 0x3FF000
             self.u.mem_write(0x3FD000, bytes(0x2000))
@@ -205,7 +216,7 @@ class UIRunner(FlightRunner):
                 self.u.reg_write(reg, value)
             self.u.emu_start(self.entries[name], stop, count=500000)
             if not self.prefix_reached:
-                raise ValueError("Original UI prefix did not reach its declared checkpoint")
+                raise ValueError("UI prefix did not reach its declared checkpoint")
             # The installed finally frame is live at this checkpoint. No claim
             # about its continuation/cleanup is made; reset only the test frame.
             self.write32(0, 0)
@@ -450,6 +461,30 @@ def main():
             runner.run("syokidata0")
         compare("visual_prefix", dict(scale=scale, cycle=cycle))
     print("Startup visual prefixes passed", flush=True)
+    for direction, visible, enabled in itertools.product(range(6), (0, 1), (0, 1)):
+        for runner in runners:
+            runner.seed()
+            runner.write32(runner.storage["FacingRequest"], direction)
+            for name in ("BitBtn1", "BitBtn2", "BitBtn3", "BitBtn4"):
+                runner.write32(runner.components[name], runner.button_vmt)
+                runner.u.mem_write(runner.components[name] + 0x37, bytes([visible, enabled]))
+        compare("buttonfocus", dict(direction=direction, visible=visible, enabled=enabled))
+    for checked in (0, 1):
+        for runner in runners:
+            runner.seed()
+            runner.u.mem_write(runner.components["K5"] + 0x28, bytes([checked]))
+        compare("K5Click", dict(checked=checked))
+    for image, field in ((8, "elixir"), (9, "mattock"), (10, "bomb"), (11, "warp_staff"),
+                         (12, "ascent_wing"), (13, "descent_wing"), (15, "snow_crystal"),
+                         (16, "magic_key"), (17, "super_mattock")):
+        for value, size, mouse in itertools.product((-1, 0, 1, 2, 3), ((32, 32), (40, 40), (31, 39)), (0, 1)):
+            for runner in runners:
+                runner.seed(controls={"Image6": (7, 11, *size), f"Image{image}": (71, 53, 23, 29)})
+                runner.write32(runner.storage["Hero"] + HERO_OFFSETS[field], value)
+                runner.u.mem_write(runner.components["MouseControl1"] + 0x28, bytes([mouse]))
+                runner.write32(runner.components["Button37"], runner.button_vmt)
+            compare(f"img{image}work", dict(value=value, size=size, mouse=mouse))
+    print("Inventory prompts and focus requests passed", flush=True)
     for scale in (0, 1):
         for runner in runners:
             runner.seed(scale)

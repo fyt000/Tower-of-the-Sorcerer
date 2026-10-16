@@ -43,7 +43,7 @@ class GraphicsIntegrityTests(unittest.TestCase):
         self.assertIsNotNone(first_difference(old.run("syokidata0"), new.run("syokidata0")))
 
     def test_raster_operation_mutation_is_detected(self):
-        ins = next(i for i in self.instructions("ComposeSprite") if i.mnemonic == "mov"
+        ins = next(i for i in self.instructions("TTSW10.kasanegaki") if i.mnemonic == "mov"
                    and i.operands[-1].type == capstone.x86.X86_OP_IMM and i.operands[-1].imm == 0x8800C6)
         mutant = self.mutate(ins.address + ins.imm_offset, struct.pack("<I", 0xCC0020))
         old = GraphicsRunner(self.original, original=True)

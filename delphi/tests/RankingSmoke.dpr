@@ -6,6 +6,7 @@ uses
   Classes,
   Forms,
   StdCtrls,
+  ExtCtrls,
   FileCtrl,
   GameForms,
   GameState,
@@ -17,6 +18,8 @@ begin
   if not Value then
     raise Exception.Create(Message);
 end;
+
+{$I RankingHandlerChecks.inc}
 
 procedure Run;
 var
@@ -39,7 +42,26 @@ begin
   Holder := TForm4.Create(nil);
   DataHolderForm := Holder;
   try
+    Form.Timer1.Enabled := False;
     Form.Timer2.Enabled := False;
+    Form.Timer3.Enabled := False;
+    Form.Timer4.Enabled := False;
+    Form.Memo12.Lines.Clear;
+    Form.Memo12.Lines.Add(SaveDirectory);
+    Form.Memo12.Lines.Add(AssetDirectory);
+    Form.Memo12.Lines.Add('');
+    with TFileStream.Create(SaveDataPath('option.dat'), fmCreate) do
+      try
+        WriteBuffer(GameOptions, 10);
+      finally
+        Free;
+      end;
+    Ranking.OnActivate := nil;
+    Ranking.OnClose := nil;
+    Ranking.Position := poDesigned;
+    Ranking.Left := -10000;
+    Ranking.Top := -10000;
+    Ranking.Show;
     FillChar(Hero, SizeOf(Hero), 0);
     FillChar(Maps, SizeOf(Maps), 0);
     Hero.hp := 100;
@@ -54,7 +76,7 @@ begin
       WriteRanking(I, -4, Rows, Names);
     end;
     Ranking.formactivate(nil);
-    Require(not Ranking.Visible, 'Ranking fixture must stay hidden');
+    Require(Ranking.Visible, 'Ranking controls need a visible parent for original focus calls');
     Require(
         (Ranking.Memo1.Text = '1')
             and (Ranking.Memo10.Text = '10')
@@ -86,6 +108,7 @@ begin
           'All five ranking menu categories'
       );
     end;
+    RankingHandlerChecks(Ranking);
     Ranking.Button6Click(nil);
     Require(Form.Timer2.Enabled and (Ranking.ModalResult = mrOk), 'Ranking close resumes game');
     Destination := SaveDirectory + '\relocated';
@@ -95,7 +118,8 @@ begin
     );
     Holder.DirectoryListBox1.Directory := Destination;
     PortableInstallation := True;
-    Holder.Button1Click(nil);
+    Holder.Button1.OnClick := Holder.SelectPortableFolder;
+    Holder.Button1.Click;
     Require(
         (SaveDirectory = Destination) and (Form.Memo12.Lines[0] = Destination),
         'Data-folder selection updates live installation'

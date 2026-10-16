@@ -37,8 +37,7 @@ class FlightRunner(GraphicsRunner):
                  extra_game=None, extra_storage=None, extra_boundaries=None):
         super().__init__(pe, original, map_path, assets, game={**FLIGHT_GAME, **(extra_game or {})},
                          storage={**FLIGHT_STATE, **(extra_storage or {})},
-                         boundaries={**FLIGHT_BOUNDARIES, **(extra_boundaries or {})},
-                         helpers=("ClassifyInteraction", "FaceUpLanding", "FaceDownLanding"))
+                         boundaries={**FLIGHT_BOUNDARIES, **(extra_boundaries or {})})
         self.string_globals.update(("FloorSpacing", "MonsterText", "MessageText"))
         self.items_vmt, self.items = 0x607000, 0x608000
         self.texts = {}

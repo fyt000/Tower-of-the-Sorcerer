@@ -78,6 +78,8 @@ begin
 end;
 
 procedure Run;
+const
+  SlideOffsets: array[1..4] of Integer = (11, -1, 1, -11);
 var
   Form: TTSW10;
   Cycle, Scale, Facing, I, Row: Integer;
@@ -89,6 +91,7 @@ begin
   Application.Initialize;
   LoadGameContent;
   Form := TTSW10.Create(nil);
+  MainForm := Form;
   try
     Require(not Form.Visible, 'Graphics form must remain hidden');
     Form.Memo12.Lines.Clear;
@@ -230,11 +233,122 @@ begin
           '}'
       );
     end;
+    { Both animation buffers must retain the original moving-monster frames. }
+    Hero.floor := 1;
+    for Facing := 1 to 4 do
+    begin
+      for I := 2 to 122 do
+        Maps[1, I] := 6;
+      Maps[1, 62] := 61;
+      Form.mhyouji;
+      EventCursor := 1;
+      EventStack[1].Opcode := Ord(evMoveMonster);
+      EventStack[1].A := 60;
+      EventStack[1].B := 60 + SlideOffsets[Facing];
+      Form.monidou;
+      Require(
+          (Maps[1, 62] = 6)
+              and (Maps[1, 62 + SlideOffsets[Facing]] = 61)
+              and (NeighborIndex = Form.Image6.Width)
+              and (DoorOpened = 1),
+          'Monster slide map and animation state'
+      );
+      SaveBitmap(MapBitmap1, 'slide' + IntToStr(Facing) + 'a');
+      SaveBitmap(MapBitmap2, 'slide' + IntToStr(Facing) + 'b');
+    end;
+    { Four positions cover the bat convergence and its central reveal mask. }
+    for Row := 0 to 1 do
+      for I := 0 to 3 do
+      begin
+        DoorOpened := Row;
+        ScratchIndex := I * Form.Image6.Width div 3;
+        Form.banpaiawork;
+        SaveBitmap(WorkBitmap1, 'vampire' + IntToStr(Row) + '-' + IntToStr(I));
+      end;
+    { Every door, wall, fence and road effect, including its final frame. }
+    Form.speedhigh;
+    EventCursor := 1;
+    EventStack[1].Opcode := Ord(evDoorFrame);
+    EventStack[1].A := 60;
+    for Row := 1 to 12 do
+      for I := 0 to 2 do
+      begin
+        if I = 0 then
+          EventStack[0].B := 1
+        else
+          EventStack[0].B := I * 8;
+        EventStack[1].B := Row;
+        Form.dooropen;
+        if Row = 5 then
+          Require(Maps[1, 62] = 4, 'Closing wall map tile')
+        else if Row = 8 then
+          Require(Maps[1, 62] = 8, 'Closing gate map tile')
+        else
+          Require(Maps[1, 62] = 6, 'Opening map tile');
+        if I = 2 then
+          Require(Form.Timer2.Interval = 150, 'Door restores selected timer speed')
+        else
+          Require(Form.Timer2.Interval = 8, 'Door uses frame timer speed');
+        if Row = 6 then
+          SaveBitmap(WorkBitmap1, 'door' + IntToStr(Row) + '-' + IntToStr(I))
+        else
+          SaveBitmap(WorkBitmap3, 'door' + IntToStr(Row) + '-' + IntToStr(I));
+      end;
+    StrikeCount := 5;
+    Form.timer4ontimer(nil);
+    if GameOptions[8] = 0 then
+      Require(
+          (SourceRect.Left = 309)
+              and (SourceRect.Top = 373)
+              and (SourceRect.Right = 336)
+              and (SourceRect.Bottom = 400),
+          'Small opening sprite must shrink against the fixed bottom/right corner'
+      )
+    else
+      Require(
+          (SourceRect.Left = 385)
+              and (SourceRect.Top = 465)
+              and (SourceRect.Right = 420)
+              and (SourceRect.Bottom = 500),
+          'Large opening sprite must shrink against the fixed bottom/right corner'
+      );
+    Require((StrikeCount = 6) and (Form.Timer4.Interval = 350), 'Opening frame/timing');
+    { The title fade ends one frame after the capture fade. }
+    EventCursor := 1;
+    EventStack[0].A := 2;
+    EventStack[1].B := 247;
+    GameOptions[3] := 1;
+    Form.Timer2.Interval := 777;
+    Form.openning9;
+    Require(Form.Timer2.Interval = 777, 'Title fade must not finish at capture frame 247');
+    EventStack[1].B := 248;
+    Form.openning9;
+    Require((Form.Timer2.Interval = 150) and Form.Image23.Visible, 'Title fade finishes at 248');
+    EventStack[0].A := 1;
+    EventStack[1].B := 0;
+    Form.openning9;
+    Require(Form.Timer2.Interval = 30, 'Capture wipe frame timing');
+    Form.RichEdit1.Visible := False;
+    Form.Image4.Visible := False;
+    Form.Image18.Visible := False;
+    if Scale = 0 then
+      EventStack[1].B := 400
+    else
+      EventStack[1].B := 500;
+    Form.openning9;
+    Require(
+        (Form.Timer2.Interval = 130)
+            and Form.Image4.Visible
+            and Form.Image18.Visible
+            and not Form.RichEdit1.Visible,
+        'Capture completion restores original controls and timing'
+    );
     Require(not Form.Visible, 'Graphics form became visible');
     WriteLn('{"graphics_smoke_passed":true}');
   finally
     ReleaseGraphics;
     Form.Free;
+    MainForm := nil;
   end;
 end;
 

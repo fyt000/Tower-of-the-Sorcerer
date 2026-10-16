@@ -99,59 +99,62 @@ begin
 end;
 
 procedure TTSW10.soundcheck; { $0047C8F8 }
-var
-  Track: Integer;
 begin
-  Track := MusicTrackForFloor(Hero.floor);
-  if Track <> 0 then
-    Hero.music_track := Track;
+  case Hero.floor of
+    0: Hero.music_track := 21;
+    1..10: Hero.music_track := 5;
+    11..20: Hero.music_track := 6;
+    21..30: Hero.music_track := 17;
+    31..40: Hero.music_track := 8;
+    41..49: Hero.music_track := 9;
+    50: Hero.music_track := 10;
+  end;
 end;
 
 procedure TTSW10.soundplay; { $0047C2BC }
-var
-  Name: string;
 begin
-  { Close/reopen also resets playback to the beginning for the loop callback. }
   MediaPlayer5.Close;
   MediaPlayer5.DeviceType := dtSequencer;
-  Name := MusicFileName(Hero.music_track);
-  if Name = '' then
-    Exit;
-  Inc(MusicRequests);
-  LastMusic := Hero.music_track;
-  MediaPlayer5.FileName := AssetDirectory + '\midi\' + Name;
-  if not FileExists(MediaPlayer5.FileName) then
-  begin
-    Inc(AudioFailures);
-    Exit;
+  case Hero.music_track of
+    5: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\b_067xgw.mid';
+    6: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\b_058xgw.mid';
+    7: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\a_008xgw.mid';
+    8: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\a_118xgw.mid';
+    9: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\a_019xgw.mid';
+    10: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\b_018xgw.mid';
+    11: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\a_050xgw.mid';
+    12: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\a_085xgw.mid';
+    13: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\a_032xgw.mid';
+    14: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\a_046xgw.mid';
+    15: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\a_005xgw.mid';
+    16: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\a_007xgw.mid';
+    17: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\b_110xgw.mid';
+    18: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\a_023xgw.mid';
+    19: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\b_117xgw.mid';
+    20: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\b_014xgw.mid';
+    21: MediaPlayer5.FileName := Memo12.Lines[1] + '\midi\A_027xgw.mid';
   end;
-  try
-    MediaPlayer5.Open;
-    MediaPlayer5.Notify := True;
-    MediaPlayer5.Wait := False;
-    MediaPlayer5.Play;
-    if MediaPlayer5.Error <> 0 then
-    begin
-      Inc(AudioFailures);
-      MediaPlayer5.Close;
-    end;
-  except
-    on E: EMCIDeviceError do
-    begin
-      Inc(AudioFailures);
-      MediaPlayer5.Close;
-    end;
-  end;
+  MediaPlayer5.Open;
+  MediaPlayer5.Notify := True;
+  MediaPlayer5.Play;
 end;
 
 procedure TTSW10.wavon1Click(Sender: TObject); { $0047C20C }
 begin
-  if Hero.effects_muted = 0 then
-    Hero.effects_muted := 1
-  else
-    Hero.effects_muted := 0;
-  GameOptions[7] := Hero.effects_muted;
-  wavon1.Checked := Hero.effects_muted = 0;
+  case Hero.effects_muted of
+    0:
+    begin
+      Hero.effects_muted := 1;
+      GameOptions[7] := 1;
+      wavon1.Checked := False;
+    end;
+    1:
+    begin
+      Hero.effects_muted := 0;
+      GameOptions[7] := 0;
+      wavon1.Checked := True;
+    end;
+  end;
 end;
 
 procedure TTSW10.BGMON1Click(Sender: TObject); { $0047C258 }
@@ -177,7 +180,6 @@ end;
 
 procedure TTSW10.mediaplayer5onnotify(Sender: TObject); { $00482A80 }
 begin
-  { Close or a replaced command also notifies; only completion should loop. }
-  if (MediaPlayer5.NotifyValue = nvSuccessful) and (Hero.music_track <> 0) and BGMON1.Checked then
+  if MediaPlayer5.NotifyValue = nvSuccessful then
     soundplay;
 end;

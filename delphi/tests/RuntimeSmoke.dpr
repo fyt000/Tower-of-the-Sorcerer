@@ -6,6 +6,9 @@ uses
   Classes,
   Controls,
   Forms,
+  StdCtrls,
+  ExtCtrls,
+  Menus,
   GameForms,
   GameState,
   GameCore,
@@ -38,11 +41,9 @@ begin
     Inc(Tick);
     if Tick > 20000 then
       raise Exception.Create('Command queue did not finish');
-    if EventPaused then
+    if MainForm.Button1.Visible and not MainForm.Timer2.Enabled then
     begin
       MainForm.Button1Click(nil);
-      if EventPaused then
-        raise Exception.Create('Dialogue did not resume');
       if (EventCursor > 0) and not MainForm.Timer2.Enabled then
         raise Exception.Create('Dialogue left event timer stopped');
     end
@@ -51,6 +52,9 @@ begin
     else
       MainForm.timer2timer(nil);
   end;
+  { The original timer performs its empty-queue completion on the next tick. }
+  if MainForm.Timer2.Enabled then
+    MainForm.timer2timer(nil);
   MainForm.Timer2.Enabled := False;
 end;
 
@@ -140,6 +144,8 @@ end;
 
 {$I GameplayChecks.inc}
 {$I LargeBattleChecks.inc}
+{$I PersistenceHandlerChecks.inc}
+{$I DialogueChecks.inc}
 
 begin
   try
@@ -161,6 +167,12 @@ begin
     SkipIntroduction := True;
     ConfigurePaths(ParamStr(1), Fixtures);
     ActivatePortableInstallation(MainForm);
+    { Original item prompts request real focus. Keep the fixture offscreen,
+      but give its controls a visible parent as they have during play. }
+    MainForm.Position := poDesigned;
+    MainForm.Left := -10000;
+    MainForm.Top := -10000;
+    MainForm.Show;
     MainForm.KeyboardControl1Click(nil);
     MainForm.Timer1.Enabled := False;
     Require(
@@ -226,6 +238,7 @@ begin
     MoveUp;
     Require(Hero.attack = 102, 'middle-band-red-gem');
     PersistenceChecks;
+    PersistenceHandlerChecks;
     Room(1);
     Hero.hp := 2;
     Hero.attack := 1;
@@ -241,7 +254,9 @@ begin
     Drain;
     Require((Hero.bomb = 0) and (Maps[1, 61] = 6), 'bomb-consumed-and-clears-enemy');
     GameplayChecks;
-    CombatOverflowChecks;
+    OriginalBattleChecks;
+    CounterattackChecks;
+    DialogueChecks;
     LargeBattleChecks;
     Room(49);
     Hero.cycle_factor_minus_one := 0;

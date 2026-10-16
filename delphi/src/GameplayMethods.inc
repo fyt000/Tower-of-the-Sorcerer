@@ -1,14 +1,7 @@
 { Movement, combat, shops and item interaction. Address comments identify
   the corresponding executable handlers. }
 var
-  GameplayItemChoice, GameplayInventoryCursor: Longint;
-  GameplayWalkingFrom, GameplayWalkingStep, GameplayWalkingTotal: Longint;
-  GameplayOrbEnemies: array[0..32] of Longint;
-  GameplayOrbCount: Longint;
-  GameplayFight: record
-    Active, Fatal, EnemyFirst: Boolean;
-    Target, Tile, Underlying, BaseCursor, Total, Turn: Longint;
-  end;
+  GameplayItemChoice: Longint;
 
 procedure GameplayRefresh(Form: TTSW10);
 begin
@@ -51,648 +44,1927 @@ begin
     Form.Button1.SetFocus;
 end;
 
-procedure GameplayPose(Cell: Longint);
-var
-  Color: Longint;
-begin
-  { Damage poses occupy four atlas groups, eight frames apart. }
-  Color := 191 + (Hero.facing - 1) * 8;
-  PushEvent(0, 6, Color);
-  PushEvent(9, Cell, Color + 1);
-end;
-
-procedure CancelBattle;
-begin
-  GameplayFight.Active := False;
-  GameplayFight.Turn := 0;
-  GameplayEnemyFirst := False;
-end;
-
-function BattleNeedsRefill: Boolean;
-begin
-  { A streamed turn may refill only after its previous records are consumed. }
-  BattleNeedsRefill := GameplayFight.Active and (EventCursor = GameplayFight.BaseCursor);
-end;
-
-procedure GameplayStrike(
-    Target, Tile, Underlying, Turn, Total: Longint;
-    Fatal, EnemyFirst: Boolean
-);
-var
-  EnemyTurn, FinalHero: Boolean;
-  Operand: Longint;
-begin
-  EnemyTurn := (Turn mod 2 = 0) = EnemyFirst;
-  FinalHero := (Turn = Total - 1) and not Fatal and not EnemyFirst;
-  Operand := 0;
-  if EnemyTurn and Fatal then
-  begin
-    if Turn = Total - 1 then
-      Operand := Underlying
-    else if EnemyFirst then
-      Operand := 250
-    else
-      Operand := 184;
-  end
-  else if not EnemyTurn then
-  begin
-    if EnemyFirst and not Fatal then
-      Operand := 193
-    else if not FinalHero and not Fatal then
-      Operand := 183;
-  end;
-  PushEvent(0, 0, 0);
-  if EnemyTurn then
-    PushEvent(4, Target, Operand)
-  else
-    PushEvent(5, Target, Operand);
-  if EnemyTurn then
-    GameplayPose(Target)
-  else
-  begin
-    PushEvent(0, Underlying, 184);
-    if FinalHero and ((Tile = 104) or (Tile = 122)) then
-      PushEvent(14, Target, 183)
-    else
-      PushEvent(9, Target, 183);
-  end;
-  PushEvent(0, 0, 0);
-  PushEvent(1, 3, 0);
-end;
-
-procedure QueueNextBattleTurn(Form: TTSW10);
-begin
-  if not BattleNeedsRefill then
-    Exit;
-  if GameplayFight.Turn >= GameplayFight.Total then
-  begin
-    GameplayFight.Active := False;
-    Exit;
-  end;
-  GameplayStrike(
-      GameplayFight.Target,
-      GameplayFight.Tile,
-      GameplayFight.Underlying,
-      GameplayFight.Turn,
-      GameplayFight.Total,
-      GameplayFight.Fatal,
-      GameplayFight.EnemyFirst
-  );
-  Inc(GameplayFight.Turn);
-end;
-
 procedure TTSW10.obudameiji; { $0044FF0C; Orb deliberately ignores Cross/Slayer }
 begin
-  Damage := ForecastDamage(MonsterIndex, False, True, StrikeCount);
-  if not AttackPenetrates(MonsterIndex) then
-  begin
-    DamageMode := 1;
-    MonsterText := GameplayText(Self, $B9);
-  end
+  DamageMode := 0;
+  if Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1) - Hero.attack >= 0 then
+    DamageMode := 1
   else
   begin
-    DamageMode := 0;
-    MonsterText := GameplayText(Self, $B8) + ' ' + IntToStr(Damage);
+    StrikeCount := 0;
+    RemainingHP := Monsters[MonsterIndex].HP * (Hero.cycle_factor_minus_one + 1);
+    damecount;
+    if Hero.defense - Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1) >= 0 then
+      Damage := 0
+    else
+      Damage :=
+          (Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1) - Hero.defense)
+              * (StrikeCount - 1);
+  end;
+  case DamageMode of
+    1: DamageText := ListBox2.Items[$B9];
+    0: DamageText := ListBox2.Items[$B8] + ' ' + IntToStr(Damage);
   end;
 end;
 
 procedure TTSW10.dameiji; { $00450064 }
 begin
-  Damage := ForecastDamage(MonsterIndex, False, False, StrikeCount);
-  DamageMode := Ord(not AttackPenetrates(MonsterIndex));
-  if DamageMode <> 0 then
-    MonsterText := GameplayText(Self, $B9)
+  DamageMode := 0;
+  if Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1) - Hero.attack >= 0 then
+    DamageMode := 1
   else
-    MonsterText := GameplayText(Self, $B8) + ' ' + IntToStr(Damage);
+  begin
+    StrikeCount := 0;
+    RemainingHP := Monsters[MonsterIndex].HP * (Hero.cycle_factor_minus_one + 1);
+
+    case MonsterIndex of
+      0..11: damecount;
+      12..13:
+        if Hero.cross = 0 then
+          damecount
+        else
+          damecount2;
+      14..16: damecount;
+      17:
+        if Hero.cross = 0 then
+          damecount
+        else
+          damecount2;
+      18: damecount;
+      19:
+        if Hero.dragon_slayer = 0 then
+          damecount
+        else
+          damecount2;
+      20..32: damecount;
+    end;
+    if Hero.defense - Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1) >= 0 then
+      Damage := 0
+    else
+      Damage :=
+          (Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1) - Hero.defense)
+              * (StrikeCount - 1);
+  end;
+  case DamageMode of
+    1: DamageText := ListBox2.Items[$B9];
+    0: DamageText := ListBox2.Items[$B8] + ' ' + IntToStr(Damage);
+  end;
 end;
 
-procedure GameplayBattle(Form: TTSW10; EnemyFirst: Boolean);
-{ The octopus and dragon occupy a 3-by-3 body above their attackable cell. }
-const
-  BodyOffsets: array[0..8] of Longint = (-21, -22, -23, -12, -11, -10, -1, 0, 1);
+procedure TTSW10.taisen; { $0044A480 }
 var
-  T,
-  Enemy,
-  Hits,
-  Expected,
-  EnemyHit,
-  HeroTurns,
-  EnemyTurns,
-  Turn,
-  Cell,
-  Reward,
-  I,
-  Underlying,
-  Total: Longint;
-  Fatal: Boolean;
+  I: Longint;
 begin
-  if (ContactIndex < 0) or (ContactIndex > 120) then
-    Exit;
-  T := Maps[Hero.floor, ContactIndex + 2];
-  Enemy := MonsterForTile(T);
-  if Enemy < 0 then
-    Exit;
-  MonsterIndex := Enemy;
-  GameplayEnemyFirst := EnemyFirst;
-  Expected := ForecastDamage(Enemy, EnemyFirst, False, Hits);
-  Form.monshyouji;
-  if not AttackPenetrates(Enemy) then
-  begin
-    GameplayMessage(Form, 113);
-    Exit;
+  case Maps[Hero.floor, ContactIndex + 2] of
+    61..95: DoorOpened := (Maps[Hero.floor, ContactIndex + 2] + 1) div 2 - 30 + 197;
+    97..105: DoorOpened := 216;
+    115..123: DoorOpened := 217;
+    132..157: DoorOpened := (Maps[Hero.floor, ContactIndex + 2] + 1) div 2 - 46 + 197;
   end;
-  if not EnemyFirst then
-    Form.idou;
-  MonsterIndex := Enemy;
-  BattleHP := Monsters[Enemy].HP * (Hero.cycle_factor_minus_one + 1);
-  Hero.Word48 := 1;
-  Cell := Hero.y * 11 + Hero.x;
-  Underlying := Maps[Hero.floor, Cell + 2];
-  Fatal := Expected >= Hero.hp;
-  EnemyHit := Monsters[Enemy].Attack * (Hero.cycle_factor_minus_one + 1) - Hero.defense;
-  if EnemyHit < 0 then
-    EnemyHit := 0;
-  if Fatal and (EnemyHit > 0) then
+  NeighborIndex := DoorOpened - 198;
+  MonsterIndex := NeighborIndex;
+  monshyouji;
+  if Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1) - Hero.attack < 0 then
   begin
-    { Round up the lethal enemy strikes; stop before another hero turn. }
-    EnemyTurns := Hero.hp div EnemyHit;
-    if Hero.hp mod EnemyHit <> 0 then
-      Inc(EnemyTurns);
-    HeroTurns := EnemyTurns;
-    if EnemyFirst then
-      Dec(HeroTurns);
+    idou;
+    Hero.Word48 := 1;
+  end;
+  NeighborIndex := MonsterIndex;
+  BattleHP := Monsters[MonsterIndex].HP * (Hero.cycle_factor_minus_one + 1);
+  if Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1) - Hero.attack >= 0 then
+  begin
+    TileClass := 1;
+    MessageText := ListBox2.Items[217];
+    disp;
   end
   else
   begin
-    HeroTurns := Hits;
-    EnemyTurns := Hits;
-    if not EnemyFirst then
-      Dec(EnemyTurns);
-  end;
-  if Fatal then
-  begin
-    if EnemyFirst then
-      PushEvent(0, 0, 0);
-    PushEvent(3, 0, 0);
-    for I := 1 to 6 do
-      PushEvent(0, 0, 0);
-    if EnemyFirst then
-      for I := 1 to 12 do
-        PushEvent(0, 0, 0);
-  end
-  else
-  begin
-    Reward := Monsters[Enemy].Gold;
-    { Octopus body pieces yield half the mouth's reward. }
-    if (Enemy = 18) and (T <> 104) then
-      Reward := Reward div 2;
-    PushEvent(11, 5, 5);
-    PushEvent(7, Reward, 0);
-    MessageText :=
-        GameplayText(Form, 199)
-            + ' '
-            + GameplayText(Form, Enemy + 94)
-            + ' '
-            + GameplayText(Form, 200)
-            + ' '
-            + IntToStr(Reward * (Hero.lucky_gold + 1))
-            + ' '
-            + GameplayText(Form, 201);
-    PushEvent(2, 1, 0);
-    if not EnemyFirst and (((Enemy = 18) and (T = 104)) or ((Enemy = 19) and (T = 122))) then
+    dameiji;
+    if Hero.hp <= Damage then
     begin
-      for I := 0 to 8 do
-        if (Cell + BodyOffsets[I] >= 0) and (Cell + BodyOffsets[I] <= 120) then
-          PushEvent(17, Cell + BodyOffsets[I], 6);
+      { PushCommand(3, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evDefeat);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+
+      case MonsterIndex of
+        0..11: ydameiji;
+        12..13:
+          if Hero.cross = 0 then
+            ydameiji
+          else
+            ydameiji2;
+        14..16: ydameiji;
+        17:
+          if Hero.cross = 0 then
+            ydameiji
+          else
+            ydameiji2;
+        18: ydameiji;
+        19:
+          if Hero.dragon_slayer = 0 then
+            ydameiji
+          else
+            ydameiji2;
+        20..32: ydameiji;
+      end;
+      for I := 1 to StrikeCount do
+      begin
+        ScratchIndex := I;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(4, ContactIndex, unchanged). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evEnemyAttack);
+        EventStack[EventCursor].A := ContactIndex;
+        if ScratchIndex = 1 then
+          EventStack[EventCursor].B := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2]
+        else
+          EventStack[EventCursor].B := 184;
+        { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], (Hero.facing - 1) * 8 + 257 - 66). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+        EventStack[EventCursor].B := (Hero.facing - 1) * 8 + 257 - 66;
+        { PushCommand(9, ContactIndex, (Hero.facing - 1) * 8 + 258 - 66). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evOverlay);
+        EventStack[EventCursor].A := ContactIndex;
+        EventStack[EventCursor].B := (Hero.facing - 1) * 8 + 258 - 66;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(1, 3, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evSound);
+        EventStack[EventCursor].A := 3;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(5, ContactIndex, unchanged). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evHeroAttack);
+        EventStack[EventCursor].A := ContactIndex;
+        { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], 184). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+        EventStack[EventCursor].B := 184;
+        { PushCommand(9, ContactIndex, 183). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evOverlay);
+        EventStack[EventCursor].A := ContactIndex;
+        EventStack[EventCursor].B := 183;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(1, 3, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evSound);
+        EventStack[EventCursor].A := 3;
+        EventStack[EventCursor].B := 0;
+      end;
     end
     else
-      PushEvent(17, Cell, 6);
-    PushEvent(0, 0, 0);
-    PushEvent(11, 9, 0);
+    begin
+      Hero.Word48 := 0;
+      dameiji;
+      { PushCommand(11, 5, 5). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evSceneAction);
+      EventStack[EventCursor].A := 5;
+      EventStack[EventCursor].B := 5;
+      { PushCommand(7, Monsters[MonsterIndex].Gold, unchanged). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evAwardGold);
+      EventStack[EventCursor].A := Monsters[MonsterIndex].Gold;
+      { PushCommand(2, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      monswork;
+      TileClass := 1;
+      MessageText :=
+          ListBox2.Items[199]
+              + ' '
+              + MonsterText
+              + '. '
+              + ListBox2.Items[200]
+              + ' '
+              + IntToStr(Monsters[MonsterIndex].Gold * (Hero.lucky_gold + 1))
+              + ListBox2.Items[201];
+      case Maps[Hero.floor, ContactIndex + 2] of
+        97..103:
+        begin
+          if Hero.lucky_gold = 0 then
+          begin
+            MessageText :=
+                ListBox2.Items[240]
+                    + ' '
+                    + MonsterText
+                    + '. '
+                    + ListBox2.Items[200]
+                    + ' '
+                    + IntToStr(Monsters[MonsterIndex].Gold div 2)
+                    + ListBox2.Items[201];
+            EventStack[EventCursor - 1].A := Smallint(EventStack[EventCursor - 1].A) div 2;
+          end
+          else
+          begin
+            MessageText :=
+                ListBox2.Items[240]
+                    + ' '
+                    + MonsterText
+                    + '. '
+                    + ListBox2.Items[200]
+                    + ' '
+                    + IntToStr(Monsters[MonsterIndex].Gold)
+                    + ListBox2.Items[201];
+            EventStack[EventCursor - 1].A := Smallint(EventStack[EventCursor - 1].A) div 2;
+          end;
+        end;
+        105:
+        begin
+          if Hero.lucky_gold = 0 then
+          begin
+            MessageText :=
+                ListBox2.Items[240]
+                    + ' '
+                    + MonsterText
+                    + '. '
+                    + ListBox2.Items[200]
+                    + ' '
+                    + IntToStr(Monsters[MonsterIndex].Gold div 2)
+                    + ListBox2.Items[201];
+            EventStack[EventCursor - 1].A := Smallint(EventStack[EventCursor - 1].A) div 2;
+          end
+          else
+          begin
+            MessageText :=
+                ListBox2.Items[240]
+                    + ' '
+                    + MonsterText
+                    + '. '
+                    + ListBox2.Items[200]
+                    + ' '
+                    + IntToStr(Monsters[MonsterIndex].Gold)
+                    + ListBox2.Items[201];
+            EventStack[EventCursor - 1].A := Smallint(EventStack[EventCursor - 1].A) div 2;
+          end;
+        end;
+      end;
+      { PushCommand(17, Hero.y * 11 + Hero.x, 6). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+      EventStack[EventCursor].A := Hero.y * 11 + Hero.x;
+      EventStack[EventCursor].B := 6;
+      case MonsterIndex of
+        18:
+        begin
+          if Maps[Hero.floor, ContactIndex + 2] = 104 then
+          begin
+            { PushCommand(17, Hero.y * 11 + Hero.x - 21, 6). }
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 21;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x - 22, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 22;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x - 23, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 23;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x - 12, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 12;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x - 11, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 11;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x - 10, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 10;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x - 1, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 1;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x + 1, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x + 1;
+            EventStack[EventCursor].B := 6;
+          end;
+        end;
+        19:
+        begin
+          if Maps[Hero.floor, ContactIndex + 2] = 122 then
+          begin
+            { PushCommand(17, Hero.y * 11 + Hero.x - 21, 6). }
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 21;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x - 22, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 22;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x - 23, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 23;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x - 12, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 12;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x - 11, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 11;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x - 10, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 10;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x - 1, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 1;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(17, Hero.y * 11 + Hero.x + 1, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+            EventStack[EventCursor].A := Hero.y * 11 + Hero.x + 1;
+            EventStack[EventCursor].B := 6;
+          end;
+        end;
+      end;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(11, 9, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evSceneAction);
+      EventStack[EventCursor].A := 9;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(5, ContactIndex, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evHeroAttack);
+      EventStack[EventCursor].A := ContactIndex;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], 184). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+      EventStack[EventCursor].B := 184;
+      { PushCommand(9, ContactIndex, 183). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evOverlay);
+      EventStack[EventCursor].A := ContactIndex;
+      EventStack[EventCursor].B := 183;
+      case MonsterIndex of
+        18:
+        begin
+          if Maps[Hero.floor, ContactIndex + 2] = 104 then
+            EventStack[EventCursor].Opcode := Ord(evHeroAttackOverlay);
+        end;
+        19:
+        begin
+          if Maps[Hero.floor, ContactIndex + 2] = 122 then
+            EventStack[EventCursor].Opcode := Ord(evHeroAttackOverlay);
+        end;
+      end;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(1, 3, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evSound);
+      EventStack[EventCursor].A := 3;
+      EventStack[EventCursor].B := 0;
+      if StrikeCount > 1 then
+        for I := 1 to StrikeCount - 1 do
+        begin
+          ScratchIndex := I;
+          { PushCommand(0, 0, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evWait);
+          EventStack[EventCursor].A := 0;
+          EventStack[EventCursor].B := 0;
+          { PushCommand(4, ContactIndex, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evEnemyAttack);
+          EventStack[EventCursor].A := ContactIndex;
+          EventStack[EventCursor].B := 0;
+          { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], (Hero.facing - 1) * 8 + 257 - 66). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evWait);
+          EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+          EventStack[EventCursor].B := (Hero.facing - 1) * 8 + 257 - 66;
+          { PushCommand(9, ContactIndex, (Hero.facing - 1) * 8 + 258 - 66). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evOverlay);
+          EventStack[EventCursor].A := ContactIndex;
+          EventStack[EventCursor].B := (Hero.facing - 1) * 8 + 258 - 66;
+          { PushCommand(0, 0, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evWait);
+          EventStack[EventCursor].A := 0;
+          EventStack[EventCursor].B := 0;
+          { PushCommand(1, 3, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evSound);
+          EventStack[EventCursor].A := 3;
+          EventStack[EventCursor].B := 0;
+          { PushCommand(0, 0, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evWait);
+          EventStack[EventCursor].A := 0;
+          EventStack[EventCursor].B := 0;
+          { PushCommand(5, ContactIndex, 183). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evHeroAttack);
+          EventStack[EventCursor].A := ContactIndex;
+          EventStack[EventCursor].B := 183;
+          { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], 184). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evWait);
+          EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+          EventStack[EventCursor].B := 184;
+          { PushCommand(9, ContactIndex, 183). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evOverlay);
+          EventStack[EventCursor].A := ContactIndex;
+          EventStack[EventCursor].B := 183;
+          { PushCommand(0, 0, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evWait);
+          EventStack[EventCursor].A := 0;
+          EventStack[EventCursor].B := 0;
+          { PushCommand(1, 3, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evSound);
+          EventStack[EventCursor].A := 3;
+          EventStack[EventCursor].B := 0;
+        end;
+    end;
   end;
-  Total := HeroTurns + EnemyTurns;
-  GameplayFight.Active := False;
-  if Total <= (High(EventStack) - EventCursor) div 6 then
+  timer2on;
+end;
+procedure TTSW10.taisen2; { $0047F7D4 }
+var
+  I: Longint;
+begin
+  ContactIndex := Smallint(EventStack[EventCursor + 1].B);
+  case Maps[Hero.floor, ContactIndex + 2] of
+    61..95: DoorOpened := (Maps[Hero.floor, ContactIndex + 2] + 1) div 2 - 30 + 197;
+    132..157: DoorOpened := (Maps[Hero.floor, ContactIndex + 2] + 1) div 2 - 46 + 197;
+  end;
+  NeighborIndex := DoorOpened - 198;
+  MonsterIndex := NeighborIndex;
+  monshyouji;
+  Hero.Word48 := 1;
+  NeighborIndex := MonsterIndex;
+  BattleHP := Monsters[MonsterIndex].HP * (Hero.cycle_factor_minus_one + 1);
+  dameiji2;
+  if Hero.hp <= Damage then
   begin
-    { Each strike occupies six records. Append the last turn first for LIFO. }
-    for Turn := Total - 1 downto 0 do
-      GameplayStrike(ContactIndex, T, Underlying, Turn, Total, Fatal, EnemyFirst);
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(3, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evDefeat);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+
+    StrikeCount := 0;
+    RemainingHP := Hero.hp;
+    ydamei3;
+    Damage :=
+        (Hero.attack - Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1))
+            * (StrikeCount - 1);
+    for I := 1 to StrikeCount do
+    begin
+      ScratchIndex := I;
+      if ScratchIndex <> 1 then
+      begin
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(5, ContactIndex, unchanged). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evHeroAttack);
+        EventStack[EventCursor].A := ContactIndex;
+        { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], 184). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+        EventStack[EventCursor].B := 184;
+        { PushCommand(9, ContactIndex, 183). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evOverlay);
+        EventStack[EventCursor].A := ContactIndex;
+        EventStack[EventCursor].B := 183;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(1, 3, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evSound);
+        EventStack[EventCursor].A := 3;
+        EventStack[EventCursor].B := 0;
+      end
+      else
+      begin
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+      end;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(4, ContactIndex, unchanged). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evEnemyAttack);
+      EventStack[EventCursor].A := ContactIndex;
+      if ScratchIndex = 1 then
+        EventStack[EventCursor].B := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2]
+      else
+        EventStack[EventCursor].B := 250;
+      { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], (Hero.facing - 1) * 8 + 257 - 66). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+      EventStack[EventCursor].B := (Hero.facing - 1) * 8 + 257 - 66;
+      { PushCommand(9, ContactIndex, (Hero.facing - 1) * 8 + 258 - 66). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evOverlay);
+      EventStack[EventCursor].A := ContactIndex;
+      EventStack[EventCursor].B := (Hero.facing - 1) * 8 + 258 - 66;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(1, 3, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evSound);
+      EventStack[EventCursor].A := 3;
+      EventStack[EventCursor].B := 0;
+    end;
   end
   else
   begin
-    { Refill one turn at a time when the complete fight exceeds stack capacity. }
-    GameplayFight.Active := True;
-    GameplayFight.Fatal := Fatal;
-    GameplayFight.EnemyFirst := EnemyFirst;
-    GameplayFight.Target := ContactIndex;
-    GameplayFight.Tile := T;
-    GameplayFight.Underlying := Underlying;
-    GameplayFight.BaseCursor := EventCursor;
-    GameplayFight.Total := Total;
-    GameplayFight.Turn := 0;
-    QueueNextBattleTurn(Form);
+    Hero.Word48 := 0;
+    { PushCommand(11, 5, 5). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evSceneAction);
+    EventStack[EventCursor].A := 5;
+    EventStack[EventCursor].B := 5;
+    { PushCommand(7, Monsters[MonsterIndex].Gold, unchanged). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evAwardGold);
+    EventStack[EventCursor].A := Monsters[MonsterIndex].Gold;
+    { PushCommand(2, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    TileClass := 1;
+    monswork;
+    MessageText :=
+        ListBox2.Items[199]
+            + ' '
+            + MonsterText
+            + '. '
+            + ListBox2.Items[200]
+            + ' '
+            + IntToStr(Monsters[MonsterIndex].Gold)
+            + ListBox2.Items[201];
+    { PushCommand(17, Hero.y * 11 + Hero.x, 6). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
+    EventStack[EventCursor].A := Hero.y * 11 + Hero.x;
+    EventStack[EventCursor].B := 6;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(11, 9, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evSceneAction);
+    EventStack[EventCursor].A := 9;
+    EventStack[EventCursor].B := 0;
+    if StrikeCount >= 1 then
+      for I := 1 to StrikeCount do
+      begin
+        ScratchIndex := I;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(5, ContactIndex, 193). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evHeroAttack);
+        EventStack[EventCursor].A := ContactIndex;
+        EventStack[EventCursor].B := 193;
+        { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], 184). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+        EventStack[EventCursor].B := 184;
+        { PushCommand(9, ContactIndex, 183). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evOverlay);
+        EventStack[EventCursor].A := ContactIndex;
+        EventStack[EventCursor].B := 183;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(1, 3, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evSound);
+        EventStack[EventCursor].A := 3;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(4, ContactIndex, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evEnemyAttack);
+        EventStack[EventCursor].A := ContactIndex;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], (Hero.facing - 1) * 8 + 257 - 66). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+        EventStack[EventCursor].B := (Hero.facing - 1) * 8 + 257 - 66;
+        { PushCommand(9, ContactIndex, (Hero.facing - 1) * 8 + 258 - 66). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evOverlay);
+        EventStack[EventCursor].A := ContactIndex;
+        EventStack[EventCursor].B := (Hero.facing - 1) * 8 + 258 - 66;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(1, 3, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evSound);
+        EventStack[EventCursor].A := 3;
+        EventStack[EventCursor].B := 0;
+      end;
   end;
-  Form.timer2on;
-end;
-
-procedure TTSW10.taisen;
-begin
-  GameplayBattle(Self, False);
-end;
-procedure TTSW10.taisen2;
-begin
-  GameplayBattle(Self, True);
+  timer2on;
 end;
 
 procedure TTSW10.madoushi1; { $0044C464, pincer loses half current HP }
 begin
-  PushEvent(0, 0, 0);
-  PushEvent(19, 0, 0);
-  PushEvent(0, 0, 0);
-  PushEvent(2, 112, 0);
-  GameplayPose(Hero.y * 11 + Hero.x);
-  PushEvent(0, 0, 0);
-  PushEvent(1, 1, 0);
+  { PushCommand(0, 0, 0). }
+  Inc(EventCursor);
+  EventStack[EventCursor].Opcode := Ord(evWait);
+  EventStack[EventCursor].A := 0;
+  EventStack[EventCursor].B := 0;
+  { PushCommand(19, 0, 0). }
+  Inc(EventCursor);
+  EventStack[EventCursor].Opcode := Ord(evHalveHP);
+  EventStack[EventCursor].A := 0;
+  EventStack[EventCursor].B := 0;
+  { PushCommand(0, 0, 0). }
+  Inc(EventCursor);
+  EventStack[EventCursor].Opcode := Ord(evWait);
+  EventStack[EventCursor].A := 0;
+  EventStack[EventCursor].B := 0;
+  { PushCommand(2, 112, 0). }
+  Inc(EventCursor);
+  EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+  EventStack[EventCursor].A := 112;
+  EventStack[EventCursor].B := 0;
+  { PushCommand(0, 6, facing damage frame). }
+  Inc(EventCursor);
+  EventStack[EventCursor].Opcode := Ord(evWait);
+  EventStack[EventCursor].A := 6;
+  case Hero.facing of
+    1: EventStack[EventCursor].B := 191;
+    2: EventStack[EventCursor].B := 199;
+    3: EventStack[EventCursor].B := 207;
+    4: EventStack[EventCursor].B := 215;
+  end;
+  { PushCommand(9, ScratchIndex, facing damage frame). }
+  Inc(EventCursor);
+  EventStack[EventCursor].Opcode := Ord(evOverlay);
+  EventStack[EventCursor].A := ScratchIndex;
+  case Hero.facing of
+    1: EventStack[EventCursor].B := 192;
+    2: EventStack[EventCursor].B := 200;
+    3: EventStack[EventCursor].B := 208;
+    4: EventStack[EventCursor].B := 216;
+  end;
+  { PushCommand(0, 0, 0). }
+  Inc(EventCursor);
+  EventStack[EventCursor].Opcode := Ord(evWait);
+  EventStack[EventCursor].A := 0;
+  EventStack[EventCursor].B := 0;
+  { PushCommand(1, 1, 0). }
+  Inc(EventCursor);
+  EventStack[EventCursor].Opcode := Ord(evSound);
+  EventStack[EventCursor].A := 1;
+  EventStack[EventCursor].B := 0;
   timer2on;
+  TileClass := 0;
+  NeighborY := 1;
 end;
 
 procedure TTSW10.syounin; { $00449014 }
-const
-  Floors: array[0..11] of Longint = (2, 6, 7, 12, 12, 15, 28, 31, 38, 39, 45, 47);
-  Costs: array[0..11] of Longint = (0, 50, 50, 800, 1000, 200, 0, 1000, 200, 2000, 1000, 4000);
-  Hints: array[0..11] of Longint = (29, 2, 3, 4, -1, 5, -1, 11, 15, 17, 20, 22);
+type
+  THeroWords = array[0..170] of Longint;
 var
-  I, Hint, Offset, Speech: Longint;
+  HeroWords: THeroWords absolute Hero;
 begin
-  GameplayShopID := -1;
-  for I := 0 to 11 do
-    if (Floors[I] = Hero.floor) and ((Hero.floor <> 12) or ((Hero.x = 9) = (I = 4))) then
+  Button1.Caption := 'OK';
+  itemdel;
+  RichEdit1.Font.Size := GameOptions[1];
+  case GameOptions[8] of
+    0:
     begin
-      GameplayShopID := I;
-      Break;
+      RichEdit1.Height := 200;
+      RichEdit1.Width := 382;
+      RichEdit1.Top := 45;
+      RichEdit1.Left := 129;
     end;
-  if GameplayShopID < 0 then
-    Exit;
-  Hint := Hints[GameplayShopID];
-  { Completed one-time trades turn their merchant into a source of clues. }
-  if (ReadHeroField(168 + GameplayShopID * 4) <> 0) and (Hint >= 0) then
-  begin
-    if Hint = 29 then
-      Offset := 216
-    else
-      Offset := ClueFieldOffset(Hint);
-    if ReadHeroField(Offset) = 0 then
+    1:
     begin
-      if Hero.wisdom_orb = 1 then
-        WriteHeroField(Offset, 2)
-      else
-        WriteHeroField(Offset, 1);
-      if Hint = 29 then
-        Speech := 91
-      else
-        Speech := 62 + Hint;
-    end
-    else if Hint = 29 then
-      Speech := 91
-    else
-      Speech := 90;
-    GameplayDialogue(Self, Speech, 0);
-    Exit;
+      RichEdit1.Height := 250;
+      RichEdit1.Width := 478;
+      RichEdit1.Top := 56;
+      RichEdit1.Left := 161;
+    end;
   end;
-  GameplayShopKind := 2;
-  GameplayShopCost := Costs[GameplayShopID];
-  GameplayDialogue(Self, 246 + GameplayShopID, 0);
-  Button1.Visible := False;
-  Button2.Left := RichEdit1.Left;
-  Button2.Top := RichEdit1.Top + RichEdit1.Height + 4;
-  Button2.Visible := True;
-  Button2.Enabled := True;
-  Button7.Left := Button2.Left + Button2.Width + 8;
-  Button7.Top := Button2.Top;
-  Button7.Visible := True;
-  Button7.Enabled := True;
-  if Visible then
-    Button2.SetFocus;
-end;
-
-procedure TTSW10.roujin; { $00449708 }
-var
-  Hint, Speech, Special, Offset: Longint;
-begin
-  Hint := -1;
-  Speech := 90;
-  Special := -1;
+  Button1.Top := RichEdit1.Top + RichEdit1.Height - Button1.Height - Image6.Height div 2;
+  Button1.Left := RichEdit1.Left + RichEdit1.Width - Button1.Width - Image6.Width div 2;
+  Button7.Top := RichEdit1.Top + RichEdit1.Height - Button7.Height - Image6.Height div 2;
+  Button7.Left := RichEdit1.Left + RichEdit1.Width - Button7.Width - Image6.Width div 2;
+  Button2.Top := RichEdit1.Top + RichEdit1.Height - Button2.Height - Image6.Height div 2;
+  Button2.Left := Button7.Left - Button2.Width - Image6.Width div 2;
+  ShopMode := 0;
+  DialogueStage := 0;
   case Hero.floor of
     2:
     begin
-      Speech := 87;
-      Special := 0;
+      GameplayHintIndex := 29;
+      ScratchIndex := 0;
+      MerchantTradeWord := 42;
+      MerchantClueWord := 54;
+      GameplayShopCost := 0;
+      StrikeCount := 92;
+    end;
+    6:
+    begin
+      GameplayHintIndex := 2;
+      ScratchIndex := 1;
+      MerchantTradeWord := 43;
+      MerchantClueWord := 55;
+      GameplayShopCost := 50;
+      StrikeCount := 65;
+    end;
+    7:
+    begin
+      GameplayHintIndex := 3;
+      ScratchIndex := 2;
+      MerchantTradeWord := 44;
+      MerchantClueWord := 56;
+      GameplayShopCost := 50;
+      StrikeCount := 66;
+    end;
+    12:
+    begin
+      case Hero.x of
+        1:
+        begin
+          GameplayHintIndex := 4;
+          ScratchIndex := 3;
+          MerchantTradeWord := 45;
+          MerchantClueWord := 57;
+          GameplayShopCost := 800;
+          StrikeCount := 67;
+        end;
+        9:
+        begin
+          ScratchIndex := 4;
+          MerchantTradeWord := 46;
+          GameplayShopCost := 1000;
+        end;
+      end;
+    end;
+    15:
+    begin
+      GameplayHintIndex := 5;
+      ScratchIndex := 5;
+      MerchantTradeWord := 47;
+      MerchantClueWord := 59;
+      GameplayShopCost := 200;
+      StrikeCount := 68;
+    end;
+    28:
+    begin
+      ScratchIndex := 6;
+      MerchantTradeWord := 48;
+      GameplayShopCost := 0;
+    end;
+    31:
+    begin
+      GameplayHintIndex := 11;
+      ScratchIndex := 7;
+      MerchantTradeWord := 49;
+      MerchantClueWord := 61;
+      GameplayShopCost := 1000;
+      StrikeCount := 74;
+    end;
+    38:
+    begin
+      GameplayHintIndex := 15;
+      ScratchIndex := 8;
+      MerchantTradeWord := 50;
+      MerchantClueWord := 62;
+      GameplayShopCost := 200;
+      StrikeCount := 78;
+    end;
+    39:
+    begin
+      GameplayHintIndex := 17;
+      ScratchIndex := 9;
+      MerchantTradeWord := 51;
+      MerchantClueWord := 63;
+      GameplayShopCost := 2000;
+      StrikeCount := 80;
+    end;
+    45:
+    begin
+      GameplayHintIndex := 20;
+      ScratchIndex := 10;
+      MerchantTradeWord := 52;
+      MerchantClueWord := 64;
+      GameplayShopCost := 1000;
+      StrikeCount := 83;
+    end;
+    47:
+    begin
+      GameplayHintIndex := 22;
+      ScratchIndex := 11;
+      MerchantTradeWord := 53;
+      MerchantClueWord := 65;
+      GameplayShopCost := 4000;
+      StrikeCount := 85;
+    end;
+  end;
+  NeighborY := 0;
+  case HeroWords[MerchantTradeWord] of
+    0:
+    begin
+      case ScratchIndex of
+        0..11: RichEdit1.Text := ListBox2.Items[ScratchIndex + 246];
+      end;
+      RichEdit1.Visible := True;
+      Button2.Visible := True;
+      Button7.Visible := True;
+      if Hero.floor = 2 then
+        Button7.Enabled := False;
+      Button2.SetFocus;
+    end;
+    1:
+    begin
+      case HeroWords[MerchantClueWord] of
+        0:
+        begin
+          RichEdit1.Text := ListBox2.Items[StrikeCount - 1];
+          case Hero.wisdom_orb of
+            0: HeroWords[MerchantClueWord] := 1;
+            1: HeroWords[MerchantClueWord] := 2;
+          end;
+          RichEdit1.Visible := True;
+          Button1.Visible := True;
+          Button1.SetFocus;
+        end;
+        1..2:
+        begin
+          if Hero.floor <> 2 then
+          begin
+            GameplayHintIndex := 28;
+            zyouout;
+          end
+          else
+          begin
+            GameplayHintIndex := 29;
+            zyouout;
+          end;
+        end;
+      end;
+    end;
+  end;
+end;
+
+procedure TTSW10.roujin; { $00449708 }
+type
+  THeroWords = array[0..170] of Longint;
+var
+  HeroWords: THeroWords absolute Hero;
+begin
+  Button1.Caption := 'OK';
+  RichEdit1.Font.Size := GameOptions[1];
+  itemdel;
+  DialogueStage := 0;
+  DamageMode := 0;
+  case Hero.floor of
+    2:
+    begin
+      GameplayHintIndex := 25;
+      NeighborIndex := 66;
       if Hero.Word392 = 0 then
       begin
         Hero.Word392 := 1;
         Inc(Hero.attack, Hero.attack * 3 div 100);
         Inc(Hero.defense, Hero.defense * 3 div 100);
-        PushEvent(0, 0, 0);
-        PushEvent(2, 0, 0);
-        PushEvent(0, 0, 0);
-        PushEvent(1, 2, 0);
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(2, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(1, 2, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evSound);
+        EventStack[EventCursor].A := 2;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        timer2on;
       end;
     end;
     3:
     begin
-      Speech := 88;
-      Special := 1;
+      GameplayHintIndex := 26;
+      NeighborIndex := 67;
     end;
-    4: Hint := 0;
-    6: Hint := 1;
+    4:
+    begin
+      GameplayHintIndex := 0;
+      NeighborIndex := 68;
+    end;
+    6:
+    begin
+      GameplayHintIndex := 1;
+      NeighborIndex := 69;
+    end;
     16:
-      if Hero.x = 9 then
+    begin
+      if Hero.x <> 9 then
       begin
-        Speech := 89;
-        Special := 2;
-        if Hero.Word436 = 0 then
-        begin
-          Hero.Word436 := 1;
-          Hero.elixir := 1;
-          PushEvent(0, 0, 0);
-          PushEvent(8, 0, 0);
-          PushEvent(0, 0, 0);
-          PushEvent(1, 2, 0);
-        end;
+        GameplayHintIndex := 6;
+        NeighborIndex := 70;
       end
       else
-        Hint := 6;
-    18: Hint := 7;
-    21: Hint := 8;
-    23: Speech := 61;
-    27: Hint := 9;
-    31: Hint := 10;
-    33: Hint := 12;
-    36: Hint := 13;
-    37: Hint := 14;
-    39: Hint := 16;
-    42: Hint := 18;
-    45: Hint := 19;
-    46: Hint := 21;
-    48: Hint := 23;
-  end;
-  if Hint >= 0 then
-  begin
-    Offset := ClueFieldOffset(Hint);
-    if ReadHeroField(Offset) <> 0 then
-      Speech := 86
-    else
+      begin
+        GameplayHintIndex := 27;
+        NeighborIndex := 71;
+      end;
+    end;
+    18:
     begin
-      if Hero.wisdom_orb = 1 then
-        WriteHeroField(Offset, 2)
-      else
-        WriteHeroField(Offset, 1);
-      Speech := 62 + Hint;
+      GameplayHintIndex := 7;
+      NeighborIndex := 72;
+    end;
+    21:
+    begin
+      GameplayHintIndex := 8;
+      NeighborIndex := 73;
+    end;
+    23:
+    begin
+      DamageMode := 1;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(10, 61, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evDialogue);
+      EventStack[EventCursor].A := 61;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      timer2on;
+    end;
+    27:
+    begin
+      GameplayHintIndex := 9;
+      NeighborIndex := 74;
+    end;
+    31:
+    begin
+      GameplayHintIndex := 10;
+      NeighborIndex := 75;
+    end;
+    33:
+    begin
+      GameplayHintIndex := 12;
+      NeighborIndex := 76;
+    end;
+    36:
+    begin
+      GameplayHintIndex := 13;
+      NeighborIndex := 77;
+    end;
+    37:
+    begin
+      GameplayHintIndex := 14;
+      NeighborIndex := 78;
+    end;
+    39:
+    begin
+      GameplayHintIndex := 16;
+      NeighborIndex := 79;
+    end;
+    42:
+    begin
+      GameplayHintIndex := 18;
+      NeighborIndex := 80;
+    end;
+    45:
+    begin
+      GameplayHintIndex := 19;
+      NeighborIndex := 81;
+    end;
+    46:
+    begin
+      GameplayHintIndex := 21;
+      NeighborIndex := 82;
+    end;
+    48:
+    begin
+      GameplayHintIndex := 23;
+      NeighborIndex := 83;
     end;
   end;
-  if Special >= 0 then
+  if DamageMode <> 1 then
   begin
-    { The three gift conversations have separate first-hearing flags. }
-    if Special = 0 then
-      Offset := 264
-    else if Special = 1 then
-      Offset := 268
-    else
-      Offset := 284;
-    if ReadHeroField(Offset) <> 0 then
-      Speech := 86
-    else
+    { Keep nested: combining these checks changes Delphi 2 register allocation. }
+    if GameplayHintIndex = 27 then
     begin
-      if Hero.wisdom_orb = 1 then
-        WriteHeroField(Offset, 2)
-      else
-        WriteHeroField(Offset, 1);
-      if Hero.floor = 3 then
+      if Hero.Word436 = 0 then
       begin
-        Hero.hero_orb := 2;
-        PushEvent(0, 0, 0);
-        PushEvent(8, 0, 0);
-        PushEvent(0, 0, 0);
-        PushEvent(1, 2, 0);
-        PushEvent(0, 0, 0);
-        PushEvent(2, 11, 0);
+        Hero.elixir := 1;
+        Hero.Word436 := 1;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(8, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evShowPanels);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(1, 2, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evSound);
+        EventStack[EventCursor].A := 2;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        timer2on;
+      end;
+    end;
+    case HeroWords[NeighborIndex] of
+      0:
+      begin
+        case Hero.wisdom_orb of
+          0: HeroWords[NeighborIndex] := 1;
+          1: HeroWords[NeighborIndex] := 2;
+        end;
+        zyouout;
+        case Hero.floor of
+          3:
+          begin
+            Hero.hero_orb := 2;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(8, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evShowPanels);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(2, 11, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+            EventStack[EventCursor].A := 11;
+            EventStack[EventCursor].B := 0;
+            timer2on;
+          end;
+        end;
+      end;
+      1:
+      begin
+        GameplayHintIndex := 24;
+        zyouout;
+      end;
+      2:
+      begin
+        GameplayHintIndex := 24;
+        zyouout;
       end;
     end;
   end;
-  GameplayDialogue(Self, Speech, 0);
 end;
 
 procedure TTSW10.Button1Click(Sender: TObject); { $0044DA10 }
+type
+  THeroWords = array[0..170] of Longint;
 var
-  Stage: Longint;
+  HeroWords: THeroWords absolute Hero;
 begin
-  Stage := DialogueStage;
-  EventPaused := False;
-  { Stages 11..67 persist as flags after the 320-byte state prefix. }
-  if (Stage > 10) and (Stage < 68) then
-    WriteHeroField(320 + Stage * 4, 1);
-  Button1.Visible := False;
-  RichEdit1.Visible := False;
-  RichEdit1.Clear;
-  case Stage of
+  if (DialogueStage > 10) and (DialogueStage < 68) then
+    HeroWords[DialogueStage + 80] := 1;
+  case DialogueStage of
     0:
+    begin
       if Hero.hero_orb = 2 then
         Hero.hero_orb := 1;
+      itemlive;
+      if MouseControl1.Checked = True then
+        buttonfocus;
+    end;
     1:
     begin
-      Button35.Visible := True;
-      Exit;
+      Button35.Enabled := True;
+      Button35.SetFocus;
     end;
-    2..10, 22:;
+    103:
+    begin
+      Button1.Visible := False;
+      RichEdit1.Visible := False;
+      RichEdit1.Text := '';
+      Timer2.Enabled := True;
+    end;
+    11:
+    begin
+      Button1.Visible := False;
+      Timer2.Enabled := True;
+    end;
+    12:
+    begin
+      Button1.Visible := False;
+      Timer2.Enabled := True;
+    end;
     13:
     begin
+      Button1.Visible := False;
+      Timer2.Enabled := False;
+      Timer1.Enabled := True;
       Hero.Word48 := 0;
       EventCursor := 0;
-      Timer2.Enabled := False;
-      GameplayRefresh(Self);
+      mhyouji;
+      RichEdit1.Visible := False;
+      RichEdit1.Text := '';
+      itemlive;
     end;
     14:
     begin
-      PushEvent(0, 0, 0);
-      PushEvent(12, 66, 77);
-      PushEvent(0, 0, 0);
-      PushEvent(12, 67, 66);
-      PushEvent(0, 0, 0);
-      PushEvent(12, 68, 67);
+      Button1.Visible := False;
+      RichEdit1.Visible := False;
+      RichEdit1.Text := '';
+      Timer2.Enabled := False;
+      timer2on;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(12, 66, 77). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evMoveMonster);
+      EventStack[EventCursor].A := 66;
+      EventStack[EventCursor].B := 77;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(12, 67, 66). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evMoveMonster);
+      EventStack[EventCursor].A := 67;
+      EventStack[EventCursor].B := 66;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(12, 68, 67). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evMoveMonster);
+      EventStack[EventCursor].A := 68;
+      EventStack[EventCursor].B := 67;
     end;
     15:
     begin
-      PushEvent(0, 0, 0);
-      PushEvent(6, 99, 6);
-      PushEvent(0, 0, 0);
-      PushEvent(1, 2, 0);
-      PushEvent(0, 0, 0);
-      PushEvent(12, 88, 99);
-      PushEvent(0, 0, 0);
-      PushEvent(12, 77, 88);
+      Button1.Visible := False;
+      RichEdit1.Visible := False;
+      RichEdit1.Text := '';
+      Timer2.Enabled := False;
+      timer2on;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(6, 99, 6). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evSetTile);
+      EventStack[EventCursor].A := 99;
+      EventStack[EventCursor].B := 6;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(1, 2, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evSound);
+      EventStack[EventCursor].A := 2;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(12, 88, 99). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evMoveMonster);
+      EventStack[EventCursor].A := 88;
+      EventStack[EventCursor].B := 99;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(12, 77, 88). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evMoveMonster);
+      EventStack[EventCursor].A := 77;
+      EventStack[EventCursor].B := 88;
     end;
     16:
     begin
+      Button1.Visible := False;
+      RichEdit1.Visible := False;
+      RichEdit1.Text := '';
+      Timer2.Enabled := False;
       Maps[35, 105] := 21;
       Maps[35, 93] := 6;
-      GameplayRefresh(Self);
+      itemlive;
+    end;
+    17..19:
+    begin
+      Button1.Visible := False;
+      RichEdit1.Visible := False;
+      RichEdit1.Text := '';
+      Timer2.Enabled := False;
+      itemlive;
     end;
     20:
     begin
+      Button1.Visible := False;
+      RichEdit1.Visible := False;
+      RichEdit1.Text := '';
       openning2;
-      Exit;
+    end;
+    21:
+    begin
+      Button1.Visible := False;
+      RichEdit1.Visible := False;
+      RichEdit1.Text := '';
+      Timer2.Enabled := True;
+    end;
+    23..25, 27..31, 33, 35..49, 51..56, 58..67:
+    begin
+      Button1.Visible := False;
+      RichEdit1.Visible := False;
+      RichEdit1.Text := '';
+      Timer2.Enabled := True;
+    end;
+    71, 274:
+    begin
+      Button1.Visible := False;
+      RichEdit1.Visible := False;
+      RichEdit1.Text := '';
+      Timer2.Enabled := False;
+      itemlive;
     end;
     26, 32, 34, 50, 57:
     begin
+      Button1.Visible := False;
+      RichEdit1.Visible := False;
+      RichEdit1.Text := '';
       TileClass := 0;
-      if (Hero.cycle_factor_minus_one = 0) and (RankingForm <> nil) then
-        RankingForm.ShowModal;
+      if Hero.cycle_factor_minus_one = 0 then
+        RankingForm.ShowModal
+      else
+        Timer2.Enabled := True;
+    end;
+    72:
+    begin
+      Button1.Visible := False;
+      RichEdit1.Visible := False;
+      RichEdit1.Text := '';
+      Timer2.Enabled := True;
     end;
   end;
-  DialogueStage := 0;
-  if EventCursor > 0 then
-    timer2on
-  else
-    itemlive;
-  if not Timer2.Enabled then
-    Timer1.Enabled := True;
+  Button1.Visible := False;
+  if DialogueStage <= 1 then
+  begin
+    RichEdit1.Lines.Clear;
+    RichEdit1.Visible := False;
+  end;
+  disp;
 end;
 
 procedure TTSW10.Button2Click(Sender: TObject); { $0044E1CC }
+type
+  THeroWords = array[0..170] of Longint;
+var
+  HeroWords: THeroWords absolute Hero;
 begin
   Button2.Visible := False;
   Button7.Visible := False;
-  if GameplayShopKind = 1 then
-  begin
-    Button39.Caption := GameplayText(Self, 204);
-    Button40.Caption := GameplayText(Self, 205);
-    Button41.Caption := GameplayText(Self, 206);
-    Button42.Caption := GameplayText(Self, 207);
-    Button39.Left := RichEdit1.Left;
-    Button39.Top := RichEdit1.Top + RichEdit1.Height + 4;
-    Button40.Left := Button39.Left;
-    Button40.Top := Button39.Top + Button39.Height + 4;
-    Button41.Left := Button39.Left + Button39.Width + 8;
-    Button41.Top := Button39.Top;
-    Button42.Left := Button41.Left;
-    Button42.Top := Button40.Top;
-    Button39.Visible := True;
-    Button40.Visible := True;
-    Button41.Visible := True;
-    Button42.Visible := True;
-    if Visible then
-      Button39.SetFocus;
-    Exit;
-  end;
-  if (GameplayShopID = 6) and (Hero.yellow_keys = 0) then
-  begin
-    GameplayDialogue(Self, 262, 0);
-    Exit;
-  end;
-  if Hero.gold < GameplayShopCost then
-  begin
-    GameplayDialogue(Self, 258, 0);
-    Exit;
-  end;
-  Dec(Hero.gold, GameplayShopCost);
-  case GameplayShopID of
-    0: Inc(Hero.gold, 1000);
-    1, 5: Inc(Hero.blue_keys);
-    2: Inc(Hero.yellow_keys, 5);
-    3: Inc(Hero.red_keys);
-    4: Inc(Hero.yellow_keys);
-    6:
+  if Button7.Enabled = False then
+    Button7.Enabled := True;
+  RichEdit1.Text := '';
+  if ShopMode = 0 then
+    RichEdit1.Visible := False;
+  disp;
+  case ShopMode of
+    0:
     begin
-      Dec(Hero.yellow_keys);
-      Inc(Hero.gold, 100);
+      if Hero.floor <> 28 then
+      begin
+        if Hero.gold < GameplayShopCost then
+        begin
+          RichEdit1.Text := ListBox2.Items[258];
+          RichEdit1.Visible := True;
+          Button1.Visible := True;
+          Button1.SetFocus;
+          DialogueStage := 0;
+        end
+        else
+        begin
+          Dec(Hero.gold, GameplayShopCost);
+          DialogueStage := 0;
+          case MerchantTradeWord of
+            42..45: HeroWords[MerchantTradeWord] := 1;
+            47: HeroWords[MerchantTradeWord] := 1;
+            49..53: HeroWords[MerchantTradeWord] := 1;
+          end;
+          case MerchantTradeWord of
+            42: Inc(Hero.gold, 1000);
+            43: Inc(Hero.blue_keys);
+            44: Inc(Hero.yellow_keys, 5);
+            45: Inc(Hero.red_keys);
+            46: Inc(Hero.yellow_keys);
+            47: Inc(Hero.blue_keys);
+            48:
+            begin
+              Dec(Hero.yellow_keys);
+              Inc(Hero.gold, 100);
+            end;
+            49:
+            begin
+              Inc(Hero.yellow_keys, 4);
+              Inc(Hero.blue_keys);
+            end;
+            50: Inc(Hero.yellow_keys, 3);
+            51: Inc(Hero.blue_keys, 3);
+            52: Inc(Hero.hp, 2000);
+            53: Hero.super_mattock := 1;
+          end;
+          RichEdit1.Text := ListBox2.Items[259];
+          RichEdit1.Visible := True;
+          Button1.Visible := True;
+          Button1.SetFocus;
+          { PushCommand(2, 0, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+          EventStack[EventCursor].A := 0;
+          EventStack[EventCursor].B := 0;
+          { PushCommand(8, 0, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evShowPanels);
+          EventStack[EventCursor].A := 0;
+          EventStack[EventCursor].B := 0;
+          { PushCommand(0, 0, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evWait);
+          EventStack[EventCursor].A := 0;
+          EventStack[EventCursor].B := 0;
+          { PushCommand(1, 2, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evSound);
+          EventStack[EventCursor].A := 2;
+          EventStack[EventCursor].B := 0;
+          timer2on;
+        end;
+      end
+      else
+      begin
+        if Hero.yellow_keys = 0 then
+        begin
+          RichEdit1.Text := ListBox2.Items[262];
+          RichEdit1.Visible := True;
+          Button1.Visible := True;
+          Button1.SetFocus;
+          DialogueStage := 0;
+        end
+        else
+        begin
+          Dec(Hero.yellow_keys);
+          Inc(Hero.gold, 100);
+          DialogueStage := 0;
+          RichEdit1.Text := ListBox2.Items[259];
+          RichEdit1.Visible := True;
+          Button1.Visible := True;
+          Button1.SetFocus;
+          { PushCommand(2, 0, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+          EventStack[EventCursor].A := 0;
+          EventStack[EventCursor].B := 0;
+          { PushCommand(8, 0, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evShowPanels);
+          EventStack[EventCursor].A := 0;
+          EventStack[EventCursor].B := 0;
+          { PushCommand(0, 0, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evWait);
+          EventStack[EventCursor].A := 0;
+          EventStack[EventCursor].B := 0;
+          { PushCommand(1, 2, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evSound);
+          EventStack[EventCursor].A := 2;
+          EventStack[EventCursor].B := 0;
+          timer2on;
+        end;
+      end;
     end;
-    7:
+    1:
     begin
-      Inc(Hero.yellow_keys, 4);
-      Inc(Hero.blue_keys);
+      { Altar choices form four full-width rows inside the dialogue panel. }
+      Button39.Height := Image6.Height;
+      Button39.Width := RichEdit1.Width - Image6.Width;
+      if Button39.Width > RichEdit1.Width then
+        Button39.Width := RichEdit1.Width;
+      Button39.Top := RichEdit1.Top + Image6.Height + Image6.Height div 2;
+      Button39.Left := RichEdit1.Left + Image6.Width div 2;
+      Button40.Height := Button39.Height;
+      Button40.Width := Button39.Width;
+      Button40.Top := Button39.Top + Button39.Height;
+      Button40.Left := Button39.Left;
+      Button41.Height := Button39.Height;
+      Button41.Width := Button39.Width;
+      Button41.Top := Button40.Top + Button40.Height;
+      Button41.Left := Button39.Left;
+      Button42.Height := Button39.Height;
+      Button42.Width := Button39.Width;
+      Button42.Top := Button41.Top + Button41.Height;
+      Button42.Left := Button39.Left;
+      RichEdit1.Text := ListBox2.Items[204];
+      Button39.Caption :=
+          ListBox2.Items[205]
+              + ' '
+              + IntToStr((Hero.Word44 + 1) * 100 * (Hero.cycle_factor_minus_one + 1))
+              + ' '
+              + ListBox2.Items[206];
+      Button40.Caption :=
+          ListBox2.Items[207]
+              + ' '
+              + IntToStr((Hero.floor + 10) div 10 * 2 * (Hero.cycle_factor_minus_one + 1))
+              + ' '
+              + ListBox2.Items[208];
+      Button41.Caption :=
+          ListBox2.Items[209]
+              + ' '
+              + IntToStr((Hero.floor + 10) div 10 * 4 * (Hero.cycle_factor_minus_one + 1))
+              + ' '
+              + ListBox2.Items[208];
+      Button42.Caption := ListBox2.Items[210];
+      Button39.Visible := True;
+      Button40.Visible := True;
+      Button41.Visible := True;
+      Button42.Visible := True;
+      Button42.SetFocus;
     end;
-    8: Inc(Hero.yellow_keys, 3);
-    9: Inc(Hero.blue_keys, 3);
-    10: Inc(Hero.hp, 2000);
-    11: Hero.super_mattock := 1;
   end;
-  if (GameplayShopID <> 4) and (GameplayShopID <> 6) then
-    WriteHeroField(168 + GameplayShopID * 4, 1);
-  GameplayShopKind := 0;
-  PushEvent(2, 0, 0);
-  PushEvent(8, 0, 0);
-  PushEvent(0, 0, 0);
-  PushEvent(1, 2, 0);
-  GameplayDialogue(Self, 259, 0);
 end;
 
 procedure TTSW10.Button7Click(Sender: TObject);
 begin
-  GameplayShopKind := 0;
   Button2.Visible := False;
   Button7.Visible := False;
-  RichEdit1.Visible := False;
-  RichEdit1.Clear;
-  DialogueStage := 0;
   itemlive;
-end;
-
-procedure GameplayAltar(Form: TTSW10; Choice: Longint);
-var
-  Scale, Area, Amount: Longint;
-begin
-  Form.Button39.Visible := False;
-  Form.Button40.Visible := False;
-  Form.Button41.Visible := False;
-  Form.Button42.Visible := False;
-  Form.RichEdit1.Visible := False;
-  if Hero.gold < GameplayShopCost then
-  begin
-    GameplayDialogue(Form, 211, 0);
-    Exit;
-  end;
-  Scale := Hero.cycle_factor_minus_one + 1;
-  Area := (Hero.floor + 10) div 10;
-  case Choice of
-    0:
-    begin
-      Amount := 100 * (Hero.Word44 + 1) * Scale;
-      Inc(Hero.hp, Amount);
-    end;
-    1:
-    begin
-      Amount := 2 * Area * Scale;
-      Inc(Hero.attack, Amount);
-    end;
-    2:
-    begin
-      Amount := 4 * Area * Scale;
-      Inc(Hero.defense, Amount);
-    end;
-  end;
-  Inc(Hero.Word44);
-  Dec(Hero.gold, GameplayShopCost);
-  GameplayShopKind := 0;
-  MessageText :=
-      GameplayText(Form, 180 + Choice) + ' ' + IntToStr(Amount) + ' ' + GameplayText(Form, 166);
-  PushEvent(0, 0, 0);
-  PushEvent(2, 1, 0);
-  PushEvent(0, 0, 0);
-  PushEvent(1, 2, 0);
-  Form.timer2on;
+  if MouseControl1.Checked = True then
+    buttonfocus;
+  RichEdit1.Text := '';
+  RichEdit1.Visible := False;
+  disp;
 end;
 
 procedure TTSW10.Button39Click(Sender: TObject);
 begin
-  GameplayAltar(Self, 0);
+  Button39.Visible := False;
+  Button40.Visible := False;
+  Button41.Visible := False;
+  Button42.Visible := False;
+  RichEdit1.Visible := False;
+  if Hero.gold >= GameplayShopCost then
+  begin
+    TileClass := 1;
+    MessageText :=
+        ListBox2.Items[181]
+            + ' '
+            + IntToStr((Hero.Word44 + 1) * 100 * (Hero.cycle_factor_minus_one + 1))
+            + ListBox2.Items[166];
+    Inc(Hero.Word44);
+    Dec(Hero.gold, GameplayShopCost);
+    Inc(Hero.hp, Hero.Word44 * 100 * (Hero.cycle_factor_minus_one + 1));
+    timer2on;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(2, 1, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+    EventStack[EventCursor].A := 1;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(1, 2, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evSound);
+    EventStack[EventCursor].A := 2;
+    EventStack[EventCursor].B := 0;
+    EventPaused := 0;
+  end
+  else
+  begin
+    RichEdit1.Text := ListBox2.Items[211];
+    DialogueStage := 0;
+    Button1.Top := RichEdit1.Top + RichEdit1.Height - Button1.Height - 16;
+    Button1.Left := RichEdit1.Left + RichEdit1.Width - Button1.Width - 16;
+    RichEdit1.Visible := True;
+    Button1.Visible := True;
+    Button1.SetFocus;
+  end;
 end;
 procedure TTSW10.Button40Click(Sender: TObject);
 begin
-  GameplayAltar(Self, 1);
+  Button39.Visible := False;
+  Button40.Visible := False;
+  Button41.Visible := False;
+  Button42.Visible := False;
+  RichEdit1.Visible := False;
+  if Hero.gold >= GameplayShopCost then
+  begin
+    TileClass := 1;
+    MessageText :=
+        ListBox2.Items[182]
+            + ' '
+            + IntToStr(((Hero.floor + 10) div 10) * 2 * (Hero.cycle_factor_minus_one + 1))
+            + ListBox2.Items[166];
+    Inc(Hero.Word44);
+    Dec(Hero.gold, GameplayShopCost);
+    Inc(Hero.attack, ((Hero.floor + 10) div 10) * 2 * (Hero.cycle_factor_minus_one + 1));
+    timer2on;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(2, 1, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+    EventStack[EventCursor].A := 1;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(1, 2, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evSound);
+    EventStack[EventCursor].A := 2;
+    EventStack[EventCursor].B := 0;
+    EventPaused := 0;
+  end
+  else
+  begin
+    RichEdit1.Text := ListBox2.Items[211];
+    DialogueStage := 0;
+    Button1.Top := RichEdit1.Top + RichEdit1.Height - Button1.Height - 16;
+    Button1.Left := RichEdit1.Left + RichEdit1.Width - Button1.Width - 16;
+    RichEdit1.Visible := True;
+    Button1.Visible := True;
+    Button1.SetFocus;
+  end;
 end;
 procedure TTSW10.Button41Click(Sender: TObject);
 begin
-  GameplayAltar(Self, 2);
+  Button39.Visible := False;
+  Button40.Visible := False;
+  Button41.Visible := False;
+  Button42.Visible := False;
+  RichEdit1.Visible := False;
+  if Hero.gold >= GameplayShopCost then
+  begin
+    TileClass := 1;
+    MessageText :=
+        ListBox2.Items[183]
+            + ' '
+            + IntToStr(((Hero.floor + 10) div 10) * 4 * (Hero.cycle_factor_minus_one + 1))
+            + ListBox2.Items[166];
+    Inc(Hero.Word44);
+    Dec(Hero.gold, GameplayShopCost);
+    Inc(Hero.defense, ((Hero.floor + 10) div 10) * 4 * (Hero.cycle_factor_minus_one + 1));
+    timer2on;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(2, 1, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+    EventStack[EventCursor].A := 1;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(1, 2, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evSound);
+    EventStack[EventCursor].A := 2;
+    EventStack[EventCursor].B := 0;
+    EventPaused := 0;
+  end
+  else
+  begin
+    RichEdit1.Text := ListBox2.Items[211];
+    DialogueStage := 0;
+    Button1.Top := RichEdit1.Top + RichEdit1.Height - Button1.Height - 16;
+    Button1.Left := RichEdit1.Left + RichEdit1.Width - Button1.Width - 16;
+    RichEdit1.Visible := True;
+    Button1.Visible := True;
+    Button1.SetFocus;
+  end;
 end;
 procedure TTSW10.Button42Click(Sender: TObject);
 begin
@@ -701,711 +1973,1920 @@ begin
   Button41.Visible := False;
   Button42.Visible := False;
   RichEdit1.Visible := False;
-  GameplayShopKind := 0;
   itemlive;
 end;
 
 procedure TTSW10.zyouout; { $00449E18; wisdom and queued story dialogue }
-var
-  Stage, Speech: Longint;
 begin
   if DialogueStage = 9 then
   begin
-    EventPaused := False;
-    PushEvent(0, 0, 0);
-    PushEvent(22, 0, 0);
-    PushEvent(0, 0, 0);
-    PushEvent(10, 93, 0);
+    if Hero.music_track <> 0 then
+      Hero.music_track := 14;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(22, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evResetCycle);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(10, 93, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evDialogue);
+    EventStack[EventCursor].A := 93;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    { PushCommand(0, 0, 0). }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWait);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 0;
+    if Hero.music_track <> 0 then
+    begin
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(1, 5, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evSound);
+      EventStack[EventCursor].A := 5;
+      EventStack[EventCursor].B := 0;
+    end;
     timer2on;
-    Exit;
-  end;
-  Stage := DialogueStage;
-  if Stage >= 10 then
+  end
+  else
   begin
-    { Queued speech IDs are one-based; continuation stages add ten. }
-    Speech := Stage - 10;
-    GameplayDialogue(Self, Speech - 1, Stage);
-    if (Speech = 16) or (Speech = 22) or (Speech = 24) or (Speech = 40) or (Speech = 47) then
-      RichEdit1.Text :=
-          GameplayText(Self, Speech - 1)
-              + #13#10#13#10
-              + 'Score: '
-              + IntToStr(Hero.Word340)
-              + #13#10
-              + 'Rank: '
-              + IntToStr(Hero.Word344);
-    if Speech = 5 then
-      RichEdit1.Text := RichEdit1.Text + GameplayText(Self, Speech + 52)
-    else if Speech = 17 then
-      RichEdit1.Text := RichEdit1.Text + GameplayText(Self, Speech + 41)
-    else if Speech = 55 then
-      RichEdit1.Text := RichEdit1.Text + GameplayText(Self, Speech + 4);
-    Exit;
-  end;
-  if (GameplayHintIndex >= 0) and (GameplayHintIndex <= 23) then
-  begin
-    GameplayDialogue(Self, 62 + GameplayHintIndex, 1);
-    Hero.Word668 := 1;
+    RichEdit1.Font.Size := GameOptions[1];
+    case GameOptions[8] of
+      0:
+      begin
+        RichEdit1.Height := 200;
+        RichEdit1.Width := 382;
+        RichEdit1.Top := 45;
+        RichEdit1.Left := 129;
+      end;
+      1:
+      begin
+        RichEdit1.Height := 250;
+        RichEdit1.Width := 478;
+        RichEdit1.Top := 56;
+        RichEdit1.Left := 161;
+      end;
+    end;
+    Button1.Top := RichEdit1.Top + RichEdit1.Height - Button1.Height - 16;
+    Button1.Left := RichEdit1.Left + RichEdit1.Width - Button1.Width - 16;
+    if DialogueStage < 10 then
+      RichEdit1.Text := ListBox2.Items[GameplayHintIndex + 62]
+    else
+    begin
+      { Ranking speeches keep the text prepared by yousei. }
+      if (DialogueSpeech <> 16)
+          and (DialogueSpeech <> 22)
+          and (DialogueSpeech <> 24)
+          and (DialogueSpeech <> 40)
+          and (DialogueSpeech <> 47) then
+        RichEdit1.Text := ListBox2.Items[DialogueSpeech - 1];
+      case DialogueSpeech of
+        5: RichEdit1.Text := RichEdit1.Text + ListBox2.Items[DialogueSpeech + 53 - 1];
+        17: RichEdit1.Text := RichEdit1.Text + ListBox2.Items[DialogueSpeech + 42 - 1];
+        55: RichEdit1.Text := RichEdit1.Text + ListBox2.Items[DialogueSpeech + 5 - 1];
+      end;
+    end;
+    if (Hero.Word668 <> 1) and (DialogueSpeech = 93) and (DialogueStage >= 10) then
+    begin
+      if MessageDlg('You have no life point. Do you try again?', mtInformation, [mbYes, mbNo], 0)
+          = mrYes then
+        timer2on
+      else
+        GameLoad1.Enabled := True;
+    end
+    else
+    begin
+      RichEdit1.Visible := True;
+      case Hero.Word668 of
+        0:
+        begin
+          Button1.Visible := True;
+          Button1.SetFocus;
+        end;
+      end;
+    end;
   end;
 end;
 
 procedure TTSW10.img5work; { $0048198C }
-var
-  I: Longint;
-  Buttons: array[0..23] of TButton;
 begin
-  if Hero.wisdom_orb <> 1 then
-    Exit;
-  Buttons[0] := Button11;
-  Buttons[1] := Button12;
-  Buttons[2] := Button13;
-  Buttons[3] := Button14;
-  Buttons[4] := Button15;
-  Buttons[5] := Button16;
-  Buttons[6] := Button17;
-  Buttons[7] := Button18;
-  Buttons[8] := Button19;
-  Buttons[9] := Button20;
-  Buttons[10] := Button21;
-  Buttons[11] := Button22;
-  Buttons[12] := Button23;
-  Buttons[13] := Button24;
-  Buttons[14] := Button25;
-  Buttons[15] := Button26;
-  Buttons[16] := Button27;
-  Buttons[17] := Button28;
-  Buttons[18] := Button29;
-  Buttons[19] := Button30;
-  Buttons[20] := Button31;
-  Buttons[21] := Button32;
-  Buttons[22] := Button33;
-  Buttons[23] := Button34;
-  itemdel;
-  DialogueStage := 1;
-  for I := 0 to 23 do
+  if Hero.wisdom_orb = 1 then
   begin
-    Buttons[I].Left := UiSpan + 8 + (I mod 4) * (Image6.Width * 11 div 4);
-    Buttons[I].Top := UiStep + 8 + (I div 4) * (Buttons[I].Height + 4);
-    Buttons[I].Visible := True;
-    Buttons[I].Enabled := ReadHeroField(ClueFieldOffset(I)) = 2;
-  end;
-  Button35.Left := UiSpan + Image6.Width * 11 - Button35.Width - 8;
-  Button35.Top := UiStep + Image6.Height * 11 - Button35.Height - 8;
-  Button35.Visible := True;
-  Button35.Enabled := True;
-  if Visible then
+    DialogueStage := 1;
+    itemdel;
+    { The form owns the clue-grid geometry; only heard and recorded clues enable. }
+    Button11.Visible := True;
+    Button12.Visible := True;
+    Button13.Visible := True;
+    Button14.Visible := True;
+    Button15.Visible := True;
+    Button16.Visible := True;
+    Button17.Visible := True;
+    Button18.Visible := True;
+    Button19.Visible := True;
+    Button20.Visible := True;
+    Button21.Visible := True;
+    Button22.Visible := True;
+    Button23.Visible := True;
+    Button24.Visible := True;
+    Button25.Visible := True;
+    Button26.Visible := True;
+    Button27.Visible := True;
+    Button28.Visible := True;
+    Button29.Visible := True;
+    Button30.Visible := True;
+    Button31.Visible := True;
+    Button32.Visible := True;
+    Button33.Visible := True;
+    Button34.Visible := True;
+    if Hero.Word272 = 2 then
+      Button11.Enabled := True
+    else
+      Button11.Enabled := False;
+    if Hero.Word276 = 2 then
+      Button12.Enabled := True
+    else
+      Button12.Enabled := False;
+    if Hero.Word220 = 2 then
+      Button13.Enabled := True
+    else
+      Button13.Enabled := False;
+    if Hero.Word224 = 2 then
+      Button14.Enabled := True
+    else
+      Button14.Enabled := False;
+    if Hero.Word228 = 2 then
+      Button15.Enabled := True
+    else
+      Button15.Enabled := False;
+    if Hero.Word236 = 2 then
+      Button16.Enabled := True
+    else
+      Button16.Enabled := False;
+    if Hero.Word280 = 2 then
+      Button17.Enabled := True
+    else
+      Button17.Enabled := False;
+    if Hero.Word288 = 2 then
+      Button18.Enabled := True
+    else
+      Button18.Enabled := False;
+    if Hero.Word292 = 2 then
+      Button19.Enabled := True
+    else
+      Button19.Enabled := False;
+    if Hero.Word296 = 2 then
+      Button20.Enabled := True
+    else
+      Button20.Enabled := False;
+    if Hero.Word300 = 2 then
+      Button21.Enabled := True
+    else
+      Button21.Enabled := False;
+    if Hero.Word244 = 2 then
+      Button22.Enabled := True
+    else
+      Button22.Enabled := False;
+    if Hero.Word304 = 2 then
+      Button23.Enabled := True
+    else
+      Button23.Enabled := False;
+    if Hero.Word308 = 2 then
+      Button24.Enabled := True
+    else
+      Button24.Enabled := False;
+    if Hero.Word312 = 2 then
+      Button25.Enabled := True
+    else
+      Button25.Enabled := False;
+    if Hero.Word248 = 2 then
+      Button26.Enabled := True
+    else
+      Button26.Enabled := False;
+    if Hero.Word316 = 2 then
+      Button27.Enabled := True
+    else
+      Button27.Enabled := False;
+    if Hero.Word252 = 2 then
+      Button28.Enabled := True
+    else
+      Button28.Enabled := False;
+    if Hero.Word320 = 2 then
+      Button29.Enabled := True
+    else
+      Button29.Enabled := False;
+    if Hero.Word324 = 2 then
+      Button30.Enabled := True
+    else
+      Button30.Enabled := False;
+    if Hero.Word256 = 2 then
+      Button31.Enabled := True
+    else
+      Button31.Enabled := False;
+    if Hero.Word328 = 2 then
+      Button32.Enabled := True
+    else
+      Button32.Enabled := False;
+    if Hero.Word260 = 2 then
+      Button33.Enabled := True
+    else
+      Button33.Enabled := False;
+    if Hero.Word332 = 2 then
+      Button34.Enabled := True
+    else
+      Button34.Enabled := False;
+    Button35.Visible := True;
     Button35.SetFocus;
+  end;
 end;
 
-procedure GameplayClue(Form: TTSW10; Index: Longint);
-begin
-  GameplayHintIndex := Index;
-  Form.zyouout;
-end;
 procedure TTSW10.Button11Click(Sender: TObject);
 begin
-  GameplayClue(Self, 0);
+  GameplayHintIndex := 0;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button12Click(Sender: TObject);
 begin
-  GameplayClue(Self, 1);
+  GameplayHintIndex := 1;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button13Click(Sender: TObject);
 begin
-  GameplayClue(Self, 2);
+  GameplayHintIndex := 2;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button14Click(Sender: TObject);
 begin
-  GameplayClue(Self, 3);
+  GameplayHintIndex := 3;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button15Click(Sender: TObject);
 begin
-  GameplayClue(Self, 4);
+  GameplayHintIndex := 4;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button16Click(Sender: TObject);
 begin
-  GameplayClue(Self, 5);
+  GameplayHintIndex := 5;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button17Click(Sender: TObject);
 begin
-  GameplayClue(Self, 6);
+  GameplayHintIndex := 6;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button18Click(Sender: TObject);
 begin
-  GameplayClue(Self, 7);
+  GameplayHintIndex := 7;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button19Click(Sender: TObject);
 begin
-  GameplayClue(Self, 8);
+  GameplayHintIndex := 8;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button20Click(Sender: TObject);
 begin
-  GameplayClue(Self, 9);
+  GameplayHintIndex := 9;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button21Click(Sender: TObject);
 begin
-  GameplayClue(Self, 10);
+  GameplayHintIndex := 10;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button22Click(Sender: TObject);
 begin
-  GameplayClue(Self, 11);
+  GameplayHintIndex := 11;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button23Click(Sender: TObject);
 begin
-  GameplayClue(Self, 12);
+  GameplayHintIndex := 12;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button24Click(Sender: TObject);
 begin
-  GameplayClue(Self, 13);
+  GameplayHintIndex := 13;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button25Click(Sender: TObject);
 begin
-  GameplayClue(Self, 14);
+  GameplayHintIndex := 14;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button26Click(Sender: TObject);
 begin
-  GameplayClue(Self, 15);
+  GameplayHintIndex := 15;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button27Click(Sender: TObject);
 begin
-  GameplayClue(Self, 16);
+  GameplayHintIndex := 16;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button28Click(Sender: TObject);
 begin
-  GameplayClue(Self, 17);
+  GameplayHintIndex := 17;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button29Click(Sender: TObject);
 begin
-  GameplayClue(Self, 18);
+  GameplayHintIndex := 18;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button30Click(Sender: TObject);
 begin
-  GameplayClue(Self, 19);
+  GameplayHintIndex := 19;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button31Click(Sender: TObject);
 begin
-  GameplayClue(Self, 20);
+  GameplayHintIndex := 20;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button32Click(Sender: TObject);
 begin
-  GameplayClue(Self, 21);
+  GameplayHintIndex := 21;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button33Click(Sender: TObject);
 begin
-  GameplayClue(Self, 22);
+  GameplayHintIndex := 22;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 procedure TTSW10.Button34Click(Sender: TObject);
 begin
-  GameplayClue(Self, 23);
+  GameplayHintIndex := 23;
+  Hero.Word668 := 1;
+  zyouout;
 end;
 
 procedure TTSW10.Button35Click(Sender: TObject);
-var
-  I: Longint;
-  Control: TComponent;
 begin
-  for I := 11 to 35 do
-  begin
-    Control := FindComponent('Button' + IntToStr(I));
-    if Control <> nil then
-      TButton(Control).Visible := False;
-  end;
-  Button1.Visible := False;
   RichEdit1.Visible := False;
-  RichEdit1.Clear;
+  RichEdit1.Text := '';
   DialogueStage := 0;
   Hero.Word668 := 0;
+  { Close every clue button, then restore item controls. }
+  Button11.Visible := False;
+  Button12.Visible := False;
+  Button13.Visible := False;
+  Button14.Visible := False;
+  Button15.Visible := False;
+  Button16.Visible := False;
+  Button17.Visible := False;
+  Button18.Visible := False;
+  Button19.Visible := False;
+  Button20.Visible := False;
+  Button21.Visible := False;
+  Button22.Visible := False;
+  Button23.Visible := False;
+  Button24.Visible := False;
+  Button25.Visible := False;
+  Button26.Visible := False;
+  Button27.Visible := False;
+  Button28.Visible := False;
+  Button29.Visible := False;
+  Button30.Visible := False;
+  Button31.Visible := False;
+  Button32.Visible := False;
+  Button33.Visible := False;
+  Button34.Visible := False;
+  Button35.Visible := False;
   itemlive;
 end;
 
 procedure TTSW10.yousya; { $0044F26C, append a unique Orb row }
 var
-  I: Longint;
+  I, Tile: Longint;
 begin
   MonsterIndex := NeighborIndex;
-  if (MonsterIndex < 0) or (MonsterIndex > 32) then
-    Exit;
-  for I := 0 to GameplayOrbCount - 1 do
-    if GameplayOrbEnemies[I] = MonsterIndex then
-      Exit;
-  GameplayOrbEnemies[GameplayOrbCount] := MonsterIndex;
-  Inc(GameplayOrbCount);
-  obudameiji;
-  RichEdit1.Lines.Add(GameplayText(Self, 94 + MonsterIndex));
-  RichEdit1.Lines.Add(
-      'HP '
-          + IntToStr(Monsters[MonsterIndex].HP * (Hero.cycle_factor_minus_one + 1))
-          + '   ATK '
-          + IntToStr(Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1))
-          + '   DEF '
-          + IntToStr(Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1))
-  );
-  RichEdit1.Lines.Add(MonsterText);
-  RichEdit1.Lines.Add('');
+  NeighborY := 0;
+  { Seven rows, in first map-occurrence order; repeated enemies share a row. }
+  if OrbRow <> 1 then
+    if OrbRow <= 7 then
+      for I := 1 to OrbRow - 1 do
+        if OrbEnemies[I] = MonsterIndex then
+          NeighborY := 1;
+  if NeighborY = 0 then
+  begin
+    if OrbRow <= 7 then
+    begin
+      Tile := 0;
+      case MonsterIndex of
+        0..17: Tile := MonsterIndex * 2 + 60;
+        18: Tile := 103;
+        19: Tile := 121;
+        20..32: Tile := MonsterIndex * 2 + 92;
+      end;
+      ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, Tile);
+      case OrbRow of
+        1:
+        begin
+          Image24.Picture.Bitmap := WorkBitmap3;
+          Image24.Visible := True;
+        end;
+        2:
+        begin
+          Image25.Picture.Bitmap := WorkBitmap3;
+          Image25.Visible := True;
+        end;
+        3:
+        begin
+          Image26.Picture.Bitmap := WorkBitmap3;
+          Image26.Visible := True;
+        end;
+        4:
+        begin
+          Image27.Picture.Bitmap := WorkBitmap3;
+          Image27.Visible := True;
+        end;
+        5:
+        begin
+          Image28.Picture.Bitmap := WorkBitmap3;
+          Image28.Visible := True;
+        end;
+        6:
+        begin
+          Image29.Picture.Bitmap := WorkBitmap3;
+          Image29.Visible := True;
+        end;
+        7:
+        begin
+          Image30.Picture.Bitmap := WorkBitmap3;
+          Image30.Visible := True;
+        end;
+      end;
+    end;
+    case OrbRow of
+      1:
+      begin
+        monswork;
+        Edit13.Text := MonsterText;
+        Edit14.Text :=
+            ListBox2.Items[214]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].HP * (Hero.cycle_factor_minus_one + 1))
+                + ' '
+                + ListBox2.Items[215]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1))
+                + ' '
+                + ListBox2.Items[216]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1));
+        obudameiji;
+        Edit27.Text := DamageText;
+      end;
+      2:
+      begin
+        monswork;
+        Edit15.Text := MonsterText;
+        Edit16.Text :=
+            ListBox2.Items[214]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].HP * (Hero.cycle_factor_minus_one + 1))
+                + ' '
+                + ListBox2.Items[215]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1))
+                + ' '
+                + ListBox2.Items[216]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1));
+        obudameiji;
+        Edit28.Text := DamageText;
+      end;
+      3:
+      begin
+        monswork;
+        Edit17.Text := MonsterText;
+        Edit18.Text :=
+            ListBox2.Items[214]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].HP * (Hero.cycle_factor_minus_one + 1))
+                + ' '
+                + ListBox2.Items[215]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1))
+                + ' '
+                + ListBox2.Items[216]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1));
+        obudameiji;
+        Edit29.Text := DamageText;
+      end;
+      4:
+      begin
+        monswork;
+        Edit19.Text := MonsterText;
+        Edit20.Text :=
+            ListBox2.Items[214]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].HP * (Hero.cycle_factor_minus_one + 1))
+                + ' '
+                + ListBox2.Items[215]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1))
+                + ' '
+                + ListBox2.Items[216]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1));
+        obudameiji;
+        Edit30.Text := DamageText;
+      end;
+      5:
+      begin
+        monswork;
+        Edit21.Text := MonsterText;
+        Edit22.Text :=
+            ListBox2.Items[214]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].HP * (Hero.cycle_factor_minus_one + 1))
+                + ' '
+                + ListBox2.Items[215]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1))
+                + ' '
+                + ListBox2.Items[216]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1));
+        obudameiji;
+        Edit31.Text := DamageText;
+      end;
+      6:
+      begin
+        monswork;
+        Edit23.Text := MonsterText;
+        Edit24.Text :=
+            ListBox2.Items[214]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].HP * (Hero.cycle_factor_minus_one + 1))
+                + ' '
+                + ListBox2.Items[215]
+                + ''
+                + IntToStr(Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1))
+                + ' '
+                + ListBox2.Items[216]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1));
+        obudameiji;
+        Edit32.Text := DamageText;
+      end;
+      7:
+      begin
+        monswork;
+        Edit25.Text := MonsterText;
+        Edit26.Text :=
+            ListBox2.Items[214]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].HP * (Hero.cycle_factor_minus_one + 1))
+                + ' '
+                + ListBox2.Items[215]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1))
+                + ' '
+                + ListBox2.Items[216]
+                + ' '
+                + IntToStr(Monsters[MonsterIndex].Defense * (Hero.cycle_factor_minus_one + 1));
+        obudameiji;
+        Edit33.Text := DamageText;
+      end;
+    end;
+    if OrbRow <= 7 then
+    begin
+      OrbEnemies[OrbRow] := NeighborIndex;
+      Inc(OrbRow);
+    end;
+  end;
 end;
 
 procedure TTSW10.img6work; { $00480F60 }
 var
-  I, Enemy: Longint;
+  I: Longint;
 begin
-  if Hero.hero_orb <> 1 then
-    Exit;
-  itemdel;
-  Hero.Word48 := 1;
-  GameplayOrbCount := 0;
-  RichEdit1.Clear;
-  RichEdit1.Left := UiSpan + 8;
-  RichEdit1.Top := UiStep + 8;
-  RichEdit1.Width := Image6.Width * 11 - 16;
-  RichEdit1.Height := Image6.Height * 10 - 16;
-  RichEdit1.Visible := True;
-  for I := 0 to 120 do
-  begin
-    Enemy := MonsterForTile(Maps[Hero.floor, I + 2]);
-    if Enemy >= 0 then
+  RichEdit1.Font.Size := GameOptions[1];
+  case GameOptions[8] of
+    0:
     begin
-      NeighborIndex := Enemy;
-      yousya;
+      RichEdit1.Height := 56;
+      RichEdit1.Width := 358;
+      RichEdit1.Top := 16;
+      RichEdit1.Left := 141;
+      Image23.Top := 24;
+      Image23.Left := 144;
+    end;
+    1:
+    begin
+      RichEdit1.Height := 70;
+      RichEdit1.Width := 448;
+      RichEdit1.Top := 20;
+      RichEdit1.Left := 176;
+      Image23.Top := 30;
+      Image23.Left := 180;
     end;
   end;
-  if GameplayOrbCount = 0 then
-    RichEdit1.Text := GameplayText(Self, 93);
-  RichEdit1.SelStart := 0;
-  Button36.Left := UiSpan + Image6.Width * 11 - Button36.Width - 8;
-  Button36.Top := UiStep + Image6.Height * 11 - Button36.Height - 4;
-  Button36.Visible := True;
-  Button36.Enabled := True;
-  if Visible then
+  Image23.Height := Image6.Height * 11;
+  Image23.Width := Image6.Width * 11;
+  if Hero.hero_orb = 1 then
+  begin
+    Timer1.Enabled := False;
+    itemdel;
+    { Align the original fixed rows, portraits and damage column. }
+    case GameOptions[8] of
+      0: Edit13.Left := RichEdit1.Left + 40;
+      1: Edit13.Left := RichEdit1.Left + 50;
+    end;
+    Edit14.Left := Edit13.Left;
+    Edit15.Left := Edit13.Left;
+    Edit16.Left := Edit13.Left;
+    Edit17.Left := Edit13.Left;
+    Edit18.Left := Edit13.Left;
+    Edit19.Left := Edit13.Left;
+    Edit20.Left := Edit13.Left;
+    Edit21.Left := Edit13.Left;
+    Edit22.Left := Edit13.Left;
+    Edit23.Left := Edit13.Left;
+    Edit24.Left := Edit13.Left;
+    Edit25.Left := Edit13.Left;
+    Edit26.Left := Edit13.Left;
+    Edit27.Left := Edit13.Left + Edit13.Width;
+    Edit28.Left := Edit15.Left + Edit15.Width;
+    Edit29.Left := Edit17.Left + Edit17.Width;
+    Edit30.Left := Edit19.Left + Edit19.Width;
+    Edit31.Left := Edit21.Left + Edit21.Width;
+    Edit32.Left := Edit23.Left + Edit23.Width;
+    Edit33.Left := Edit25.Left + Edit25.Width;
+    Panel1.Width := Image1.Width;
+    Panel1.Height := Image1.Height - 3;
+    Panel1.Top := Image1.Top;
+    Panel1.Left := Image1.Left;
+    Image24.Top := Edit13.Top - Panel1.Top + (Edit13.Height + Edit14.Height - Image24.Height) div 2;
+    Image24.Left := RichEdit1.Left - Panel1.Left;
+    Image25.Top := Edit15.Top - Panel1.Top + (Edit13.Height + Edit14.Height - Image24.Height) div 2;
+    Image25.Left := RichEdit1.Left - Panel1.Left;
+    Image26.Top := Edit17.Top - Panel1.Top + (Edit13.Height + Edit14.Height - Image24.Height) div 2;
+    Image26.Left := RichEdit1.Left - Panel1.Left;
+    Image27.Top := Edit19.Top - Panel1.Top + (Edit13.Height + Edit14.Height - Image24.Height) div 2;
+    Image27.Left := RichEdit1.Left - Panel1.Left;
+    Image28.Top := Edit21.Top - Panel1.Top + (Edit13.Height + Edit14.Height - Image24.Height) div 2;
+    Image28.Left := RichEdit1.Left - Panel1.Left;
+    Image29.Top := Edit23.Top - Panel1.Top + (Edit13.Height + Edit14.Height - Image24.Height) div 2;
+    Image29.Left := RichEdit1.Left - Panel1.Left;
+    Image30.Top := Edit25.Top - Panel1.Top + (Edit13.Height + Edit14.Height - Image24.Height) div 2;
+    Image30.Left := RichEdit1.Left - Panel1.Left;
+    Button36.Left := Edit26.Left + Edit26.Width - Button36.Width;
+    Button36.Top :=
+        (Edit26.Top + Edit26.Height)
+            + (Panel1.Top + Panel1.Height - (Edit26.Top + Edit26.Height) - Button36.Height) div 2;
+    WorkBitmap3.Width := Image6.Width;
+    WorkBitmap3.Height := Image6.Height;
+    ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 162);
+    for I := 1 to 7 do
+    begin
+      DamageMode := I;
+      OrbEnemies[DamageMode] := 0;
+      case DamageMode of
+        1: Image24.Picture.Bitmap := WorkBitmap3;
+        2: Image25.Picture.Bitmap := WorkBitmap3;
+        3: Image26.Picture.Bitmap := WorkBitmap3;
+        4: Image27.Picture.Bitmap := WorkBitmap3;
+        5: Image28.Picture.Bitmap := WorkBitmap3;
+        6: Image29.Picture.Bitmap := WorkBitmap3;
+        7: Image30.Picture.Bitmap := WorkBitmap3;
+      end;
+    end;
+    RichEdit1.Text := ListBox2.Items[180];
+    OrbRow := 1;
+    for I := 1 to 121 do
+    begin
+      DrawIndex := I;
+      case Maps[Hero.floor, DrawIndex + 1] of
+        61..95:
+        begin
+          NeighborIndex := (Maps[Hero.floor, DrawIndex + 1] - 61) div 2;
+          yousya;
+        end;
+        104:
+        begin
+          NeighborIndex := 18;
+          yousya;
+        end;
+        122:
+        begin
+          NeighborIndex := 19;
+          yousya;
+        end;
+        133..157:
+        begin
+          NeighborIndex := (Maps[Hero.floor, DrawIndex + 1] - 133) div 2 + 20;
+          yousya;
+        end;
+      end;
+    end;
+    Panel1.Visible := True;
+    RichEdit1.Visible := True;
+    Edit13.Visible := True;
+    Edit14.Visible := True;
+    Edit15.Visible := True;
+    Edit16.Visible := True;
+    Edit17.Visible := True;
+    Edit18.Visible := True;
+    Edit19.Visible := True;
+    Edit20.Visible := True;
+    Edit21.Visible := True;
+    Edit22.Visible := True;
+    Edit23.Visible := True;
+    Edit24.Visible := True;
+    Edit25.Visible := True;
+    Edit26.Visible := True;
+    Edit27.Visible := True;
+    Edit28.Visible := True;
+    Edit29.Visible := True;
+    Edit30.Visible := True;
+    Edit31.Visible := True;
+    Edit32.Visible := True;
+    Edit33.Visible := True;
+    Button36.Visible := True;
     Button36.SetFocus;
+  end;
 end;
 
 procedure TTSW10.Button36Click(Sender: TObject);
 begin
-  Button36.Visible := False;
   RichEdit1.Visible := False;
-  RichEdit1.Clear;
-  Hero.Word48 := 0;
-  GameplayRefresh(Self);
+  Image24.Visible := False;
+  Image25.Visible := False;
+  Image26.Visible := False;
+  Image27.Visible := False;
+  Image28.Visible := False;
+  Image29.Visible := False;
+  Image30.Visible := False;
+  Edit13.Visible := False;
+  Edit14.Visible := False;
+  Edit15.Visible := False;
+  Edit16.Visible := False;
+  Edit17.Visible := False;
+  Edit18.Visible := False;
+  Edit19.Visible := False;
+  Edit20.Visible := False;
+  Edit21.Visible := False;
+  Edit22.Visible := False;
+  Edit23.Visible := False;
+  Edit24.Visible := False;
+  Edit25.Visible := False;
+  Edit26.Visible := False;
+  Edit27.Visible := False;
+  Edit28.Visible := False;
+  Edit29.Visible := False;
+  Edit30.Visible := False;
+  Edit31.Visible := False;
+  Edit32.Visible := False;
+  Edit33.Visible := False;
+  Edit13.Text := '';
+  Edit14.Text := '';
+  Edit15.Text := '';
+  Edit16.Text := '';
+  Edit17.Text := '';
+  Edit18.Text := '';
+  Edit19.Text := '';
+  Edit20.Text := '';
+  Edit21.Text := '';
+  Edit22.Text := '';
+  Edit23.Text := '';
+  Edit24.Text := '';
+  Edit25.Text := '';
+  Edit26.Text := '';
+  Edit27.Text := '';
+  Edit28.Text := '';
+  Edit29.Text := '';
+  Edit30.Text := '';
+  Edit31.Text := '';
+  Edit32.Text := '';
+  Edit33.Text := '';
+  case GameOptions[8] of
+    0:
+    begin
+      RichEdit1.Height := 200;
+      RichEdit1.Width := 382;
+      RichEdit1.Top := 45;
+      RichEdit1.Left := 129;
+    end;
+    1:
+    begin
+      RichEdit1.Height := 250;
+      RichEdit1.Width := 478;
+      RichEdit1.Top := 56;
+      RichEdit1.Left := 161;
+    end;
+  end;
+  Button36.Visible := False;
+  Panel1.Visible := False;
   itemlive;
   keydisplay;
   Timer1.Enabled := True;
+  RichEdit1.Font.Size := GameOptions[1];
 end;
 
 procedure TTSW10.mazyutu1; { $0044C5C4 }
-var
-  Offset, Target, Amount, Message: Longint;
 begin
-  Offset := Damage;
-  Target := Hero.y * 11 + Hero.x + Offset;
-  { On 47F, magician A retreats two cells from the hero when that cell is road.
-    The y guard also applies to horizontal retreats. }
-  if (TileClass = 110)
-      and (Hero.floor = 47)
-      and (Hero.y > 0)
-      and (Hero.y < 10)
-      and (Target >= 0)
-      and (Target < 121)
-      and (Maps[47, Target + 2] = 6) then
-  begin
-    PushEvent(0, 0, 0);
-    PushEvent(12, NeighborIndex, Target);
-    PushEvent(0, 0, 0);
-    PushEvent(1, 2, 0);
+  case TileClass of
+    110:
+    begin
+      case Hero.floor of
+        47:
+        begin
+          case Hero.y of
+            1..9:
+            begin
+              case Hero.x + Hero.y * 11 + Damage of
+                0..121:
+                begin
+                  if Maps[Hero.floor, Hero.x + Hero.y * 11 + Damage + 2] = 6 then
+                  begin
+                    { PushCommand(0, 0, 0). }
+                    Inc(EventCursor);
+                    EventStack[EventCursor].Opcode := Ord(evWait);
+                    EventStack[EventCursor].A := 0;
+                    EventStack[EventCursor].B := 0;
+                    { PushCommand(12, Hero.y * 11 + Hero.x + Damage div 2, Hero.y * 11 + Hero.x + Damage). }
+                    Inc(EventCursor);
+                    EventStack[EventCursor].Opcode := Ord(evMoveMonster);
+                    EventStack[EventCursor].A := Hero.y * 11 + Hero.x + Damage div 2;
+                    EventStack[EventCursor].B := Hero.y * 11 + Hero.x + Damage;
+                    { PushCommand(0, 0, 0). }
+                    Inc(EventCursor);
+                    EventStack[EventCursor].Opcode := Ord(evWait);
+                    EventStack[EventCursor].A := 0;
+                    EventStack[EventCursor].B := 0;
+                    { PushCommand(1, 2, 0). }
+                    Inc(EventCursor);
+                    EventStack[EventCursor].Opcode := Ord(evSound);
+                    EventStack[EventCursor].A := 2;
+                    EventStack[EventCursor].B := 0;
+                  end;
+                end;
+              end;
+            end;
+          end;
+        end;
+      end;
+      if Hero.sacred_shield = 0 then
+      begin
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(16, Smallint((Hero.cycle_factor_minus_one + 1) * (-200)), 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evChangeHP);
+        EventStack[EventCursor].A := Smallint((Hero.cycle_factor_minus_one + 1) * (-200));
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(2, magician message for this cycle, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+        if Hero.cycle_factor_minus_one = 0 then
+          EventStack[EventCursor].A := TileClass
+        else
+          EventStack[EventCursor].A := TileClass + 28;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 6, facing damage frame). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 6;
+        case Hero.facing of
+          1: EventStack[EventCursor].B := 191;
+          2: EventStack[EventCursor].B := 199;
+          3: EventStack[EventCursor].B := 207;
+          4: EventStack[EventCursor].B := 215;
+        end;
+        { PushCommand(9, ScratchIndex, facing damage frame). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evOverlay);
+        EventStack[EventCursor].A := ScratchIndex;
+        case Hero.facing of
+          1: EventStack[EventCursor].B := 192;
+          2: EventStack[EventCursor].B := 200;
+          3: EventStack[EventCursor].B := 208;
+          4: EventStack[EventCursor].B := 216;
+        end;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(1, 1, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evSound);
+        EventStack[EventCursor].A := 1;
+        EventStack[EventCursor].B := 0;
+      end;
+      timer2on;
+      TileClass := 0;
+      NeighborY := 1;
+    end;
+    111:
+    begin
+      if Hero.sacred_shield = 0 then
+      begin
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(16, Smallint((Hero.cycle_factor_minus_one + 1) * (-100)), 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evChangeHP);
+        EventStack[EventCursor].A := Smallint((Hero.cycle_factor_minus_one + 1) * (-100));
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(2, magician message for this cycle, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+        if Hero.cycle_factor_minus_one = 0 then
+          EventStack[EventCursor].A := TileClass
+        else
+          EventStack[EventCursor].A := TileClass + 28;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 6, facing damage frame). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 6;
+        case Hero.facing of
+          1: EventStack[EventCursor].B := 191;
+          2: EventStack[EventCursor].B := 199;
+          3: EventStack[EventCursor].B := 207;
+          4: EventStack[EventCursor].B := 215;
+        end;
+        { PushCommand(9, ScratchIndex, facing damage frame). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evOverlay);
+        EventStack[EventCursor].A := ScratchIndex;
+        case Hero.facing of
+          1: EventStack[EventCursor].B := 192;
+          2: EventStack[EventCursor].B := 200;
+          3: EventStack[EventCursor].B := 208;
+          4: EventStack[EventCursor].B := 216;
+        end;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(1, 1, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evSound);
+        EventStack[EventCursor].A := 1;
+        EventStack[EventCursor].B := 0;
+      end;
+      timer2on;
+      TileClass := 0;
+      NeighborY := 1;
+    end;
   end;
-  { Sacred Shield immunity suppresses damage, including backside scaling. }
-  if Hero.sacred_shield = 0 then
-  begin
-    if TileClass = 110 then
-      Amount := 200
-    else
-      Amount := 100;
-    Message := TileClass;
-    if Hero.cycle_factor_minus_one <> 0 then
-      Inc(Message, 28);
-    PushEvent(0, 0, 0);
-    PushEvent(16, -Amount * (Hero.cycle_factor_minus_one + 1), 0);
-    PushEvent(0, 0, 0);
-    PushEvent(2, Message, 0);
-    GameplayPose(Hero.y * 11 + Hero.x);
-    PushEvent(0, 0, 0);
-    PushEvent(1, 1, 0);
-  end;
-  if EventCursor > 0 then
-    timer2on;
-  TileClass := 0;
 end;
 
 procedure TTSW10.yusyaidou; { $00443808; walking frame }
-var
-  OldX, OldY, NewX, NewY, PixelX, PixelY, Frame: Longint;
 begin
-  if (MapBitmap1 = nil) or (GameplayWalkingTotal = 0) then
-    Exit;
-  OldX := GameplayWalkingFrom mod 11;
-  OldY := GameplayWalkingFrom div 11;
-  NewX := ContactIndex mod 11;
-  NewY := ContactIndex div 11;
-  PixelX :=
-      Image6.Width * OldX
-          + Image6.Width * (NewX - OldX) * GameplayWalkingStep div GameplayWalkingTotal;
-  PixelY :=
-      Image6.Height * OldY
-          + Image6.Height * (NewY - OldY) * GameplayWalkingStep div GameplayWalkingTotal;
-  Canvas.Draw(UiSpan, UiStep, MapBitmap1);
-  { Facing selects an eight-frame atlas group; the walk changes every four steps. }
-  Frame := 184 + (Hero.facing - 1) * 8;
-  if (GameplayWalkingStep div 4) mod 2 = 0 then
-    Inc(Frame, 2);
-  WorkBitmap1.Width := Image6.Width;
-  WorkBitmap1.Height := Image6.Height;
-  WorkBitmap2.Width := Image6.Width;
-  WorkBitmap2.Height := Image6.Height;
-  WorkBitmap3.Width := Image6.Width;
-  WorkBitmap3.Height := Image6.Height;
-  ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, 5);
-  ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, Frame);
-  ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, Frame);
-  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
-  SourceRect := TargetRect;
-  kasanegaki;
-  Canvas.Draw(UiSpan + PixelX, UiStep + PixelY, WorkBitmap1);
+  if NeighborIndex mod (Image6.Width div 4) = 0 then
+  begin
+    case Hero.facing of
+      1:
+      begin
+        ScratchIndex := 184;
+        DoorOpened := 0;
+        yusyai1;
+      end;
+      2:
+      begin
+        ScratchIndex := 192;
+        DoorOpened := 0;
+        yusyai2;
+      end;
+      3:
+      begin
+        ScratchIndex := 200;
+        DoorOpened := 0;
+        yusyai3;
+      end;
+      4:
+      begin
+        ScratchIndex := 208;
+        DoorOpened := 0;
+        yusyai4;
+      end;
+    end;
+    MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap1);
+  end
+  else
+  begin
+    case Hero.facing of
+      1:
+      begin
+        ScratchIndex := 186;
+        DoorOpened := 1;
+        yusyai1;
+      end;
+      2:
+      begin
+        ScratchIndex := 194;
+        DoorOpened := 1;
+        yusyai2;
+      end;
+      3:
+      begin
+        ScratchIndex := 202;
+        DoorOpened := 1;
+        yusyai3;
+      end;
+      4:
+      begin
+        ScratchIndex := 210;
+        DoorOpened := 1;
+        yusyai4;
+      end;
+    end;
+    MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap1);
+  end;
+  if NeighborIndex = Image6.Width then
+  begin
+    case Hero.facing of
+      1:
+      begin
+        ScratchIndex := 186;
+        DoorOpened := 1;
+        yusyai1;
+      end;
+      2:
+      begin
+        ScratchIndex := 194;
+        DoorOpened := 1;
+        yusyai2;
+      end;
+      3:
+      begin
+        ScratchIndex := 202;
+        DoorOpened := 1;
+        yusyai3;
+      end;
+      4:
+      begin
+        ScratchIndex := 210;
+        DoorOpened := 1;
+        yusyai4;
+      end;
+    end;
+    MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap1);
+  end;
 end;
 procedure TTSW10.yusyai1;
 begin
-  yusyaidou;
+  { Prepare the two neighboring tiles and composite the moving hero. }
+  WorkBitmap1.Height := Image6.Height * 2;
+  WorkBitmap1.Width := Image6.Width;
+  WorkBitmap2.Height := Image6.Height;
+  WorkBitmap2.Width := WorkBitmap1.Width;
+  WorkBitmap3.Height := WorkBitmap2.Height;
+  WorkBitmap3.Width := WorkBitmap1.Width;
+  WorkBitmap1.Canvas.CopyMode := cmSrcCopy;
+  WorkBitmap2.Canvas.CopyMode := cmSrcCopy;
+  WorkBitmap3.Canvas.CopyMode := cmSrcCopy;
+  ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, ScratchIndex);
+  ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, ScratchIndex + 1);
+  ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2] - 1);
+  ImageList1.Draw(
+      WorkBitmap1.Canvas,
+      0,
+      Image6.Height,
+      Maps[Hero.floor, Hero.y * 11 + Hero.x + 2 + 11] - 1
+  );
+  WorkBitmap2.Canvas.CopyMode := cmSrcPaint;
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  WorkBitmap2.Canvas.CopyRect(TargetRect, WorkBitmap3.Canvas, TargetRect);
+  WorkBitmap3.Canvas.CopyMode := cmNotSrcCopy;
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  WorkBitmap3.Canvas.CopyRect(TargetRect, WorkBitmap3.Canvas, TargetRect);
+  WorkBitmap1.Canvas.CopyMode := cmSrcPaint;
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  SourceRect := Rect(0, NeighborIndex, Image6.Width, Image6.Height + NeighborIndex);
+  WorkBitmap1.Canvas.CopyRect(SourceRect, WorkBitmap3.Canvas, TargetRect);
+  WorkBitmap1.Canvas.CopyMode := cmSrcAnd;
+  WorkBitmap1.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+  WorkBitmap2.Canvas.CopyMode := cmSrcCopy;
 end;
 procedure TTSW10.yusyai2;
 begin
-  yusyaidou;
+  { Prepare the two neighboring tiles and composite the moving hero. }
+  WorkBitmap1.Height := Image6.Height;
+  WorkBitmap1.Width := Image6.Width * 2;
+  WorkBitmap2.Height := WorkBitmap1.Height;
+  WorkBitmap2.Width := Image6.Width;
+  WorkBitmap3.Height := WorkBitmap1.Height;
+  WorkBitmap3.Width := WorkBitmap2.Width;
+  WorkBitmap1.Canvas.CopyMode := cmSrcCopy;
+  WorkBitmap2.Canvas.CopyMode := cmSrcCopy;
+  WorkBitmap3.Canvas.CopyMode := cmSrcCopy;
+  ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, ScratchIndex);
+  ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, ScratchIndex + 1);
+  ImageList1
+      .Draw(WorkBitmap1.Canvas, Image6.Width, 0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2] - 1);
+  ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2 - 1] - 1);
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  SourceRect :=
+      Rect(Image6.Width - NeighborIndex, 0, Image6.Width * 2 - NeighborIndex, Image6.Height);
+  kasanegaki;
 end;
 procedure TTSW10.yusyai3;
 begin
-  yusyaidou;
+  { Prepare the two neighboring tiles and composite the moving hero. }
+  WorkBitmap1.Height := Image6.Height;
+  WorkBitmap1.Width := Image6.Width * 2;
+  WorkBitmap2.Height := WorkBitmap1.Height;
+  WorkBitmap2.Width := Image6.Width;
+  WorkBitmap3.Height := WorkBitmap1.Height;
+  WorkBitmap3.Width := WorkBitmap2.Height;
+  WorkBitmap1.Canvas.CopyMode := cmSrcCopy;
+  WorkBitmap2.Canvas.CopyMode := cmSrcCopy;
+  WorkBitmap3.Canvas.CopyMode := cmSrcCopy;
+  ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, ScratchIndex);
+  ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, ScratchIndex + 1);
+  ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2] - 1);
+  ImageList1.Draw(
+      WorkBitmap1.Canvas,
+      Image6.Width,
+      0,
+      Maps[Hero.floor, Hero.y * 11 + Hero.x + 2 + 1] - 1
+  );
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  SourceRect := Rect(NeighborIndex, 0, Image6.Width + NeighborIndex, Image6.Height);
+  kasanegaki;
 end;
 procedure TTSW10.yusyai4;
 begin
-  yusyaidou;
+  { Prepare the two neighboring tiles and composite the moving hero. }
+  WorkBitmap1.Height := Image6.Height * 2;
+  WorkBitmap1.Width := Image6.Width;
+  WorkBitmap2.Height := Image6.Height;
+  WorkBitmap2.Width := WorkBitmap1.Width;
+  WorkBitmap3.Height := WorkBitmap2.Height;
+  WorkBitmap3.Width := WorkBitmap1.Width;
+  WorkBitmap1.Canvas.CopyMode := cmSrcCopy;
+  WorkBitmap2.Canvas.CopyMode := cmSrcCopy;
+  WorkBitmap3.Canvas.CopyMode := cmSrcCopy;
+  ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, ScratchIndex);
+  ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, ScratchIndex + 1);
+  ImageList1
+      .Draw(WorkBitmap1.Canvas, 0, Image6.Height, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2] - 1);
+  ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2 - 11] - 1);
+  WorkBitmap3.Canvas.CopyMode := cmNotSrcCopy;
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  WorkBitmap3.Canvas.CopyRect(TargetRect, WorkBitmap3.Canvas, TargetRect);
+  WorkBitmap1.Canvas.CopyMode := cmSrcPaint;
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  SourceRect :=
+      Rect(0, Image6.Height - NeighborIndex, Image6.Width, Image6.Height * 2 - NeighborIndex);
+  WorkBitmap1.Canvas.CopyRect(SourceRect, WorkBitmap3.Canvas, TargetRect);
+  WorkBitmap1.Canvas.CopyMode := cmSrcAnd;
+  WorkBitmap1.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+  WorkBitmap2.Canvas.CopyMode := cmSrcCopy;
 end;
 
 procedure TTSW10.idou; { $0044C04C }
-const
-  Offsets: array[0..3] of Longint = (-11, -1, 1, 11);
 var
-  I, Cell, Tile, SavedClass: Longint;
+  Steps, I: Longint;
 begin
-  if (ContactIndex < 0) or (ContactIndex > 120) then
-    Exit;
-  GameplayWalkingFrom := Hero.y * 11 + Hero.x;
-  GameplayWalkingTotal := Image6.Width;
-  if High1.Checked then
-    GameplayWalkingTotal := Image6.Width div 4
-  else if Middle1.Checked then
-    GameplayWalkingTotal := Image6.Width div 2;
-  if GameplayWalkingTotal < 1 then
-    GameplayWalkingTotal := 1;
-  if MapBitmap1 <> nil then
+  HeroCell := Hero.y * 11 + Hero.x;
+  DrawX := (Hero.y * 11 + Hero.x) * Image6.Width mod (Image6.Width * 11);
+  DrawY := ((Hero.y * 11 + Hero.x) * Image6.Height div (Image6.Height * 11)) * Image6.Height;
+  case Hero.facing of
+    2: Dec(DrawX, Image6.Width);
+    4: Dec(DrawY, Image6.Height);
+  end;
+  Steps := Image6.Width;
+  if High1.Checked = True then
+    Steps := Steps div 4;
+  if Middle1.Checked = True then
+    Steps := Steps div 2;
+  for I := 1 to Steps do
   begin
-    mhyouji;
-    for I := 1 to GameplayWalkingTotal do
-    begin
-      GameplayWalkingStep := I;
-      yusyaidou;
-    end;
+    StrikeCount := I;
+    NeighborIndex := I;
+    if Steps = Image6.Width div 4 then
+      NeighborIndex := NeighborIndex * 4;
+    if Steps = Image6.Width div 2 then
+      NeighborIndex := NeighborIndex * 2;
+    yusyaidou;
+    MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
   end;
   Hero.x := ContactIndex mod 11;
   Hero.y := ContactIndex div 11;
-  Cell := Hero.y * 11 + Hero.x;
-  ScratchIndex := Cell;
-  GameplayRefresh(Self);
-  { Test each boundary before adding an offset, so east/west cannot wrap rows. }
-  for I := 0 to 3 do
-  begin
-    NeighborIndex := Cell + Offsets[I];
-    if ((I = 0) and (Hero.y = 0))
-        or ((I = 1) and (Hero.x = 0))
-        or ((I = 2) and (Hero.x = 10))
-        or ((I = 3) and (Hero.y = 10)) then
-      Continue;
-    Tile := Maps[Hero.floor, NeighborIndex + 2];
-    TileClass := 0;
-    mmes;
-    if (Tile = 151) or (Tile = 152) or (Tile = 153) or (Tile = 154) then
+  DrawX := Image6.Width * ContactIndex mod (Image6.Width * 11);
+  DrawY := (Image6.Height * ContactIndex div (Image6.Height * 11)) * Image6.Height;
+  yusyahyouji1;
+  NeighborY := 0;
+  Damage := 0;
+  TileClass := 0;
+  ScratchIndex := Hero.y * 11 + Hero.x;
+  { Classify each neighbor before applying magician or pincer damage. }
+  NeighborIndex := ScratchIndex - 11;
+  case Hero.y of
+    1..10:
     begin
-      Damage := Offsets[I] * 2;
-      mazyutu1;
+      mmes;
+      if (TileClass = 110) or (TileClass = 111) then
+      begin
+        Damage := -22;
+        mazyutu1;
+      end;
+    end;
+  end;
+  NeighborIndex := ScratchIndex - 1;
+  case Hero.x of
+    1..10:
+    begin
+      mmes;
+      if (TileClass = 110) or (TileClass = 111) then
+      begin
+        Damage := -2;
+        mazyutu1;
+      end;
+    end;
+  end;
+  NeighborIndex := ScratchIndex + (1);
+  case Hero.x of
+    0..9:
+    begin
+      mmes;
+      if (TileClass = 110) or (TileClass = 111) then
+      begin
+        Damage := 2;
+        mazyutu1;
+      end;
+    end;
+  end;
+  NeighborIndex := ScratchIndex + (11);
+  case Hero.y of
+    0..9:
+    begin
+      mmes;
+      if (TileClass = 110) or (TileClass = 111) then
+      begin
+        Damage := 22;
+        mazyutu1;
+      end;
     end;
   end;
   if Hero.sacred_shield = 0 then
   begin
-    if (Hero.x > 0)
-        and (Hero.x < 10)
-        and (Maps[Hero.floor, Cell + 1] = 93)
-        and (Maps[Hero.floor, Cell + 3] = 93) then
-      madoushi1;
-    if (Hero.y > 0)
-        and (Hero.y < 10)
-        and (Maps[Hero.floor, Cell - 9] = 93)
-        and (Maps[Hero.floor, Cell + 13] = 93) then
-      madoushi1;
+    case Hero.x of
+      1..9:
+      begin
+        if Maps[Hero.floor, ScratchIndex - 1 + 2] = 93 then
+          if Maps[Hero.floor, ScratchIndex + 1 + 2] = 93 then
+            madoushi1;
+      end;
+    end;
+    case Hero.y of
+      1..9:
+      begin
+        if Maps[Hero.floor, ScratchIndex - 11 + 2] = 93 then
+          if Maps[Hero.floor, ScratchIndex + 11 + 2] = 93 then
+            madoushi1;
+      end;
+    end;
   end;
-  if not Timer2.Enabled then
+  if NeighborY = 0 then
   begin
     TileClass := 0;
-    for I := 0 to 3 do
-    begin
-      NeighborIndex := Cell + Offsets[I];
-      if ((I = 0) and (Hero.y = 0))
-          or ((I = 1) and (Hero.x = 0))
-          or ((I = 2) and (Hero.x = 10))
-          or ((I = 3) and (Hero.y = 10)) then
-        Continue;
-      mmes;
+    ScratchIndex := Hero.y * 11 + Hero.x;
+    NeighborIndex := ScratchIndex - 11;
+    case Hero.y of
+      1..10: mmes;
+    end;
+    NeighborIndex := ScratchIndex - 1;
+    case Hero.x of
+      1..10: mmes;
+    end;
+    NeighborIndex := ScratchIndex + (1);
+    case Hero.x of
+      0..9: mmes;
+    end;
+    NeighborIndex := ScratchIndex + (11);
+    case Hero.y of
+      0..9: mmes;
     end;
     disp;
   end;
-  ScratchIndex := Cell;
 end;
 
 procedure TTSW10.kaidanwork; { $00442DC8; spiral stair transition }
 var
   I: Longint;
 begin
-  soundcheck;
-  for I := 121 downto 1 do
+  MapBitmap1.Free;
+  MapBitmap2.Free;
+  MapBitmap1 := TBitmap.Create;
+  MapBitmap2 := TBitmap.Create;
+  MapBitmap1.Height := Image6.Height * 11;
+  MapBitmap1.Width := Image6.Width * 11;
+  MapBitmap2.Height := MapBitmap1.Height;
+  MapBitmap2.Width := MapBitmap1.Width;
+  Timer1.Enabled := False;
+  { Queue the new-floor reveal before the old-floor cover: commands run backwards. }
+  for I := 1 to 121 do
   begin
-    if (Hero.music_track <> 0) and (I = 102) then
-      PushEvent(15, 0, 0);
-    PushEvent(21, 1, I);
+    if (Hero.music_track <> 0) and (I = 20) then
+    begin
+      { PushCommand(15, 0, 0): change music during the reveal. }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evFloorMusic);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+    end;
+    { PushCommand(21, 1, 122 - I): reveal the destination floor. }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWipe);
+    EventStack[EventCursor].A := 1;
+    EventStack[EventCursor].B := 122 - I;
   end;
-  for I := 121 downto 1 do
-    PushEvent(21, 0, I);
-  PushEvent(0, 0, 0);
-  PushEvent(1, 9, 0);
-  GameplayRefresh(Self);
+  for I := 1 to 121 do
+  begin
+    { PushCommand(21, 0, 122 - I): cover the departing floor. }
+    Inc(EventCursor);
+    EventStack[EventCursor].Opcode := Ord(evWipe);
+    EventStack[EventCursor].A := 0;
+    EventStack[EventCursor].B := 122 - I;
+  end;
+  { PushCommand(0, 0, 0) }
+  Inc(EventCursor);
+  EventStack[EventCursor].Opcode := Ord(evWait);
+  EventStack[EventCursor].A := 0;
+  EventStack[EventCursor].B := 0;
+  { PushCommand(1, 9, 0): stair sound. }
+  Inc(EventCursor);
+  EventStack[EventCursor].Opcode := Ord(evSound);
+  EventStack[EventCursor].A := 9;
+  EventStack[EventCursor].B := 0;
+  if High1.Checked = True then
+    Timer2.Interval := 2;
+  if Middle1.Checked = True then
+    Timer2.Interval := 6;
+  if Low1.Checked = True then
+    Timer2.Interval := 10;
+  timer2on;
 end;
 
 procedure TTSW10.handan; { $00444490 }
-const
-  Gain: array[0..4] of Longint = (10, 20, 40, 50, 100);
 var
-  Tile, Scale, Area, KeyCount, Destination, Index, Reveal, OldFloor: Longint;
+  I: Longint;
 begin
-  if (ContactIndex < 0) or (ContactIndex > 120) or (Hero.floor < 0) or (Hero.floor > 50) then
-    Exit;
-  Tile := Maps[Hero.floor, ContactIndex + 2];
-  Scale := Hero.cycle_factor_minus_one + 1;
-  Area := (Hero.floor + 9) div 10;
-  case Tile of
+  case Ord(Maps[Hero.floor, ContactIndex + 2]) of
     1..3:
     begin
       DoorOpened := 0;
-      case Tile of
+      case Maps[Hero.floor, ContactIndex + 2] of
         1:
         begin
-          KeyCount := Hero.yellow_keys;
-          if KeyCount > 0 then
+          TileClass := 16;
+          if Hero.yellow_keys > 0 then
+          begin
+            DoorOpened := 1;
             Dec(Hero.yellow_keys);
+            TileClass := 4;
+          end;
         end;
         2:
         begin
-          KeyCount := Hero.blue_keys;
-          if KeyCount > 0 then
+          TileClass := 17;
+          if Hero.blue_keys > 0 then
+          begin
+            DoorOpened := 1;
             Dec(Hero.blue_keys);
+            TileClass := 5;
+          end;
         end;
         3:
         begin
-          KeyCount := Hero.red_keys;
-          if KeyCount > 0 then
+          TileClass := 18;
+          if Hero.red_keys > 0 then
+          begin
+            DoorOpened := 1;
             Dec(Hero.red_keys);
+            TileClass := 6;
+          end;
         end;
       end;
-      DoorOpened := Ord(KeyCount > 0);
-      TileClass := Tile + 15;
-      if DoorOpened = 1 then
-        TileClass := Tile + 3;
       doorcheck;
-      PushEvent(2, TileClass, 0);
       if DoorOpened = 1 then
       begin
-        PushEvent(8, 0, 0);
-        PushEvent(13, ContactIndex, Tile);
+        { PushCommand(2, TileClass, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+        EventStack[EventCursor].A := TileClass;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(8, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evShowPanels);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(13, ContactIndex, Maps[Hero.floor, ContactIndex + 2]). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evDoorFrame);
+        EventStack[EventCursor].A := ContactIndex;
+        EventStack[EventCursor].B := Maps[Hero.floor, ContactIndex + 2];
         doorstackin;
-        PushEvent(0, 0, 0);
-        PushEvent(1, 1, 0);
-      end;
-      timer2on;
-      Exit;
-    end;
-    6:
-    begin
-      idou;
-      Exit;
-    end;
-    7:
-    begin
-      mevent;
-      Exit;
-    end;
-    9:
-    begin
-      MessageText := GameplayText(Self, $89);
-      PushEvent(0, 0, 0);
-      PushEvent(2, 1, 0);
-      PushEvent(0, 0, 0);
-      PushEvent(13, ContactIndex, 7);
-      doorstackin;
-      PushEvent(0, 0, 0);
-      PushEvent(1, 1, 0);
-      timer2on;
-      Exit;
-    end;
-    10:
-    begin
-      Reveal := -1;
-      Index := ContactIndex;
-      if (Hero.floor = 12) and (Index = 10) then
-        Reveal := 19
-      else if (Hero.floor = 16) and (Index = 120) then
-        Reveal := 25
-      else if (Hero.floor = 19) and (Index = 27) then
-        Reveal := 39
-      else if (Hero.floor = 41) and (Maps[41, 14] = 6) then
-      begin
-        Index := 20;
-        Reveal := 151;
-      end;
-      if Reveal >= 0 then
-      begin
-        PushEvent(0, 0, 0);
-        PushEvent(6, Index, Reveal);
-        PushEvent(0, 0, 0);
-        PushEvent(1, 2, 0);
-        PushEvent(0, 0, 0);
-        PushEvent(0, 0, 0);
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(1, 1, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evSound);
+        EventStack[EventCursor].A := 1;
+        EventStack[EventCursor].B := 0;
         timer2on;
-      end;
-      Exit;
-    end;
-    11, 12:
-    begin
-      OldFloor := Hero.floor;
-      { Stairs connect 43F directly to 45F; the flight orb uses the same gap. }
-      if Tile = 11 then
-      begin
-        if Hero.floor = 43 then
-          Destination := 45
-        else
-          Destination := Hero.floor + 1;
-        if Destination > 50 then
-          Exit;
-        if (OldFloor = 20) and (Maps[20, 51] = 23) then
-          Maps[20, 51] := 6;
-        if (OldFloor = 25) and (Maps[25, 73] = 23) then
-          Maps[25, 73] := 6;
-        if (OldFloor = 40) and (Maps[40, 62] = 23) then
-          Maps[40, 62] := 6;
       end
       else
       begin
-        if Hero.floor = 45 then
-          Destination := 43
-        else
-          Destination := Hero.floor - 1;
-        if Destination < 0 then
-          Exit;
-        if (OldFloor = 25) and (Maps[25, 73] = 23) then
-          Maps[25, 73] := 6;
-        if (OldFloor = 49) and (Maps[49, 18] = 23) then
-          Maps[49, 18] := 6;
+        { PushCommand(2, TileClass, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+        EventStack[EventCursor].A := TileClass;
+        EventStack[EventCursor].B := 0;
+        timer2on;
       end;
-      Hero.floor := Destination;
-      if Hero.floor > Hero.highest_floor then
-      begin
-        Hero.highest_floor := Hero.floor;
-        if (Hero.Word140 = 35) and (Maps[35, 93] + Maps[2, 122] = 27) then
-          Maps[2, 122] := 6;
-      end;
-      if (Tile = 12) and (OldFloor = 29) and (Hero.floor = 28) and (Hero.highest_floor = 29) then
-      begin
-        Maps[29, 40] := 6;
-        Maps[29, 29] := 6;
-        Maps[29, 19] := 21;
-      end;
-      if Tile = 11 then
-        Index := Maps[Hero.floor, 0]
-      else
-        Index := Maps[Hero.floor, 1];
-      Hero.x := Index mod 11;
-      Hero.y := Index div 11;
-      if Tile = 11 then
-        kaidanupcheck
-      else
-        kaidandowncheck;
-      if (Tile = 11) and (Hero.floor = 32) and (Hero.floor32_arrival_seen = 0) then
-      begin
-        mevent;
-        Hero.floor32_arrival_seen := 1;
-      end;
-      if (Tile = 11) and (Hero.floor = 42) and (Hero.Word524 = 0) then
-      begin
-        mevent;
-        Hero.Word524 := 1;
-      end;
-      PushEvent(0, 0, 0);
-      PushEvent(0, 0, 0);
-      PushEvent(0, 0, 0);
-      if Tile = 11 then
-        PushEvent(2, 7, 0)
-      else
-        PushEvent(2, 8, 0);
-      kaidanwork;
+    end;
+    6: idou;
+    7: mevent;
+    9:
+    begin
       timer2on;
-      Exit;
+      TileClass := 1;
+      MessageText := ListBox2.Items[137];
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(2, 1, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+      EventStack[EventCursor].A := 1;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(13, ContactIndex, 7). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evDoorFrame);
+      EventStack[EventCursor].A := ContactIndex;
+      EventStack[EventCursor].B := 7;
+      doorstackin;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(1, 1, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evSound);
+      EventStack[EventCursor].A := 1;
+      EventStack[EventCursor].B := 0;
+    end;
+    10:
+    begin
+      case Hero.floor of
+        12:
+        begin
+          if ContactIndex = 10 then
+          begin
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(6, 10, 19). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTile);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 19;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            timer2on;
+          end;
+        end;
+        16:
+        begin
+          if ContactIndex = 120 then
+          begin
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(6, 120, 25). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTile);
+            EventStack[EventCursor].A := 120;
+            EventStack[EventCursor].B := 25;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            timer2on;
+          end;
+        end;
+        19:
+        begin
+          if ContactIndex = 27 then
+          begin
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(6, 27, 39). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTile);
+            EventStack[EventCursor].A := 27;
+            EventStack[EventCursor].B := 39;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            timer2on;
+          end;
+        end;
+        41:
+        begin
+          if Maps[41, 14] = 6 then
+          begin
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(6, 20, 151). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTile);
+            EventStack[EventCursor].A := 20;
+            EventStack[EventCursor].B := 151;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            timer2on;
+          end;
+        end;
+      end;
+    end;
+    11..12:
+    begin
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      if Hero.music_track <> 0 then
+      begin
+        Timer1.Enabled := False;
+        MediaPlayer5.Close;
+      end;
+      case Maps[Hero.floor, ContactIndex + 2] of
+        11:
+        begin
+          MonsterIndex := -1;
+          monshyouji;
+          TileClass := 1;
+          MessageText := ListBox2.Items[243];
+          disp;
+          if (Hero.floor = 20) and (Maps[20, 51] = 23) then
+            Maps[20, 51] := 6;
+          if (Hero.floor = 25) and (Maps[25, 73] = 23) then
+            Maps[25, 73] := 6;
+          if (Hero.floor = 40) and (Maps[40, 62] = 23) then
+            Maps[40, 62] := 6;
+          if Hero.floor = 43 then
+            Hero.floor := 45
+          else
+            Inc(Hero.floor);
+          if Hero.highest_floor < Hero.floor then
+          begin
+            Hero.highest_floor := Hero.floor;
+            if Hero.Word140 = 35 then
+              if Maps[35, 93] + Maps[2, 122] = 27 then
+                Maps[2, 122] := 6;
+          end;
+          Hero.x := Maps[Hero.floor, 0] mod 11;
+          Hero.y := Maps[Hero.floor, 0] div 11;
+          kaidanupcheck;
+          if (Hero.floor = 32) and (Hero.floor32_arrival_seen = 0) then
+          begin
+            mevent;
+            Hero.floor32_arrival_seen := 1;
+          end;
+          if (Hero.floor = 42) and (Hero.Word524 = 0) then
+          begin
+            mevent;
+            Hero.Word524 := 1;
+          end;
+          { PushCommand(0, 0, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evWait);
+          EventStack[EventCursor].A := 0;
+          EventStack[EventCursor].B := 0;
+          { PushCommand(2, 7, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+          EventStack[EventCursor].A := 7;
+          EventStack[EventCursor].B := 0;
+        end;
+        12:
+        begin
+          MonsterIndex := -1;
+          monshyouji;
+          TileClass := 1;
+          MessageText := ListBox2.Items[243];
+          disp;
+          if (Hero.floor = 25) and (Maps[25, 73] = 23) then
+            Maps[25, 73] := 6;
+          if (Hero.floor = 49) and (Maps[49, 18] = 23) then
+            Maps[49, 18] := 6;
+          if Hero.floor = 45 then
+            Hero.floor := 43
+          else
+            Dec(Hero.floor);
+          if (Hero.highest_floor = 29) and (Hero.floor = 28) then
+          begin
+            Maps[29, 40] := 6;
+            Maps[29, 29] := 6;
+            Maps[29, 19] := 21;
+          end;
+          Hero.x := Maps[Hero.floor, 1] mod 11;
+          Hero.y := Maps[Hero.floor, 1] div 11;
+          kaidandowncheck;
+          { PushCommand(0, 0, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evWait);
+          EventStack[EventCursor].A := 0;
+          EventStack[EventCursor].B := 0;
+          { PushCommand(2, 8, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+          EventStack[EventCursor].A := 8;
+          EventStack[EventCursor].B := 0;
+        end;
+      end;
+      kaidanwork;
+      MonsterIndex := -1;
+      monshyouji;
+      itemlive;
+      timer2on;
     end;
     16:
     begin
-      GameplayShopKind := 1;
-      { With n altar purchases, the next price is 10 * (n*n + n + 2). }
-      GameplayShopCost := 10 * (Hero.Word44 * Hero.Word44 + Hero.Word44 + 2);
-      GameplayDialogue(Self, 202, 2);
+      RichEdit1.Font.Size := GameOptions[1];
+      ShopMode := 1;
+      itemdel;
+      GameplayShopCost := ((Hero.Word44 + 1) * (Hero.Word44 + 1) - (Hero.Word44 + 1) + 2) * 10;
       RichEdit1.Text :=
-          RichEdit1.Text + ' ' + IntToStr(GameplayShopCost) + ' ' + GameplayText(Self, 203);
-      Button1.Visible := False;
+          ListBox2.Items[202] + ' ' + IntToStr(GameplayShopCost) + ' ' + ListBox2.Items[203];
+      DialogueStage := 2;
+      case GameOptions[8] of
+        0:
+        begin
+          RichEdit1.Height := 200;
+          RichEdit1.Width := 382;
+          RichEdit1.Top := 45;
+          RichEdit1.Left := 129;
+        end;
+        1:
+        begin
+          RichEdit1.Height := 250;
+          RichEdit1.Width := 478;
+          RichEdit1.Top := 56;
+          RichEdit1.Left := 161;
+        end;
+      end;
+      Button7.Top := RichEdit1.Top + RichEdit1.Height - Button7.Height - Image6.Height div 2;
+      Button7.Left := RichEdit1.Left + RichEdit1.Width - Button7.Width - Image6.Height div 2;
+      Button2.Top := RichEdit1.Top + RichEdit1.Height - Button2.Height - Image6.Height div 2;
+      Button2.Left := Button7.Left - Button2.Width - 16;
+      RichEdit1.Visible := True;
       Button2.Visible := True;
       Button7.Visible := True;
-      Button2.Left := RichEdit1.Left;
-      Button2.Top := RichEdit1.Top + RichEdit1.Height + 4;
-      Button7.Left := Button2.Left + Button2.Width + 8;
-      Button7.Top := Button2.Top;
-      Exit;
+      Button2.SetFocus;
     end;
-    19, 20:
-    begin
-      syounin;
-      Exit;
-    end;
-    21, 22:
-    begin
-      touzoku;
-      Exit;
-    end;
-    23, 24:
-    begin
-      yousei;
-      Exit;
-    end;
-    25, 26:
-    begin
-      roujin;
-      Exit;
-    end;
-    27, 28:
+    19..20: syounin;
+    21..22: touzoku;
+    23..24: yousei;
+    25..26: roujin;
+    27..28:
     begin
       if Hero.music_track <> 0 then
-      begin
-        Hero.music_track := 13;
-        soundplay;
-      end;
+        if Hero.music_track <> 13 then
+        begin
+          MediaPlayer5.Close;
+          Hero.music_track := 13;
+          soundplay;
+        end;
       if Maps[25, 62] = 6 then
       begin
         Maps[24, 6] := 8;
@@ -1416,316 +3897,2614 @@ begin
         Maps[24, 7] := 7;
       end;
       Maps[50, 51] := 21;
-      PushEvent(0, 0, 0);
-      PushEvent(6, 60, 27);
-      PushEvent(0, 0, 0);
-      PushEvent(10, 26, 0);
-      PushEvent(0, 0, 0);
-      PushEvent(10, 25, 0);
-      PushEvent(0, 0, 0);
-      PushEvent(0, 0, 0);
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(6, 60, 27). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evSetTile);
+      EventStack[EventCursor].A := 60;
+      EventStack[EventCursor].B := 27;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(10, 26, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evDialogue);
+      EventStack[EventCursor].A := 26;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(10, 25, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evDialogue);
+      EventStack[EventCursor].A := 25;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
       timer2on;
-      Exit;
+      Button1.Caption := 'OK';
     end;
-    29: Inc(Hero.yellow_keys);
-    30: Inc(Hero.red_keys);
-    31: Inc(Hero.blue_keys);
-    32: Inc(Hero.hp, 50 * Area * Scale);
-    33: Inc(Hero.hp, 200 * Area * Scale);
-    34: Inc(Hero.attack, Area * Scale);
-    35: Inc(Hero.defense, Area * Scale);
-    37..50:
+    29..31:
     begin
-      { Inventory occupies four-byte fields beginning at byte 68. }
-      if Tile = 43 then
-        WriteHeroField(68 + (Tile - 36) * 4, 3)
-      else
-        WriteHeroField(68 + (Tile - 36) * 4, 1);
+      case Maps[Hero.floor, ContactIndex + 2] of
+        29:
+        begin
+          Inc(Hero.yellow_keys);
+          TileClass := 1;
+          MessageText := ListBox2.Items[128];
+        end;
+        30:
+        begin
+          Inc(Hero.red_keys);
+          TileClass := 1;
+          MessageText := ListBox2.Items[130];
+        end;
+        31:
+        begin
+          Inc(Hero.blue_keys);
+          TileClass := 1;
+          MessageText := ListBox2.Items[129];
+        end;
+      end;
+      timer2on;
+      { PushCommand(2, TileClass, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+      EventStack[EventCursor].A := TileClass;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(8, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evShowPanels);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(1, 2, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evSound);
+      EventStack[EventCursor].A := 2;
+      EventStack[EventCursor].B := 0;
+      Maps[Hero.floor, ContactIndex + 2] := 6;
+      idou;
+    end;
+    32..50:
+    begin
+      case Maps[Hero.floor, ContactIndex + 2] of
+        32:
+        begin
+          Hero.hp := Hero.hp + (Hero.floor + 9) div 10 * 50 * (Hero.cycle_factor_minus_one + 1);
+          TileClass := 1;
+          MessageText :=
+              ListBox2.Items[162]
+                  + ' '
+                  + IntToStr((Hero.floor + 9) div 10 * 50 * (Hero.cycle_factor_minus_one + 1))
+                  + ListBox2.Items[166];
+        end;
+        33:
+        begin
+          Hero.hp := Hero.hp + (Hero.floor + 9) div 10 * 200 * (Hero.cycle_factor_minus_one + 1);
+          TileClass := 1;
+          MessageText :=
+              ListBox2.Items[163]
+                  + ' '
+                  + IntToStr((Hero.floor + 9) div 10 * 200 * (Hero.cycle_factor_minus_one + 1))
+                  + ListBox2.Items[166];
+        end;
+        34:
+        begin
+          Hero.attack := Hero.attack + (Hero.floor + 9) div 10 * (Hero.cycle_factor_minus_one + 1);
+          TileClass := 1;
+          if (Hero.floor + 9) div 10 * (Hero.cycle_factor_minus_one + 1) = 1 then
+            MessageText :=
+                ListBox2.Items[164]
+                    + ' '
+                    + IntToStr((Hero.floor + 9) div 10 * (Hero.cycle_factor_minus_one + 1))
+                    + ' point up!'
+          else
+            MessageText :=
+                ListBox2.Items[164]
+                    + ' '
+                    + IntToStr((Hero.floor + 9) div 10 * (Hero.cycle_factor_minus_one + 1))
+                    + ListBox2.Items[166];
+        end;
+        35:
+        begin
+          Hero.defense :=
+              Hero.defense + (Hero.floor + 9) div 10 * (Hero.cycle_factor_minus_one + 1);
+          TileClass := 1;
+          if (Hero.floor + 9) div 10 * (Hero.cycle_factor_minus_one + 1) = 1 then
+            MessageText :=
+                ListBox2.Items[165]
+                    + ' '
+                    + IntToStr((Hero.floor + 9) div 10 * (Hero.cycle_factor_minus_one + 1))
+                    + ' point up!'
+          else
+            MessageText :=
+                ListBox2.Items[165]
+                    + ' '
+                    + IntToStr((Hero.floor + 9) div 10 * (Hero.cycle_factor_minus_one + 1))
+                    + ListBox2.Items[166];
+        end;
+        37:
+        begin
+          Hero.wisdom_orb := 1;
+          TileClass := 22;
+        end;
+        38:
+        begin
+          Hero.flight_orb := 1;
+          TileClass := 21;
+        end;
+        39:
+        begin
+          Hero.cross := 1;
+          TileClass := 40;
+        end;
+        40:
+        begin
+          Hero.elixir := 1;
+          TileClass := 41;
+        end;
+        41:
+        begin
+          Hero.mattock := 1;
+          TileClass := 42;
+        end;
+        42:
+        begin
+          Hero.bomb := 1;
+          TileClass := 43;
+        end;
+        43:
+        begin
+          Hero.warp_staff := 3;
+          TileClass := 44;
+        end;
+        44:
+        begin
+          Hero.ascent_wing := 1;
+          TileClass := 45;
+        end;
+        45:
+        begin
+          Hero.descent_wing := 1;
+          TileClass := 46;
+        end;
+        46:
+        begin
+          Hero.dragon_slayer := 1;
+          TileClass := 47;
+        end;
+        47:
+        begin
+          Hero.snow_crystal := 1;
+          TileClass := 48;
+        end;
+        48:
+        begin
+          Hero.magic_key := 1;
+          TileClass := 49;
+        end;
+        49:
+        begin
+          Hero.super_mattock := 1;
+          TileClass := 50;
+        end;
+        50:
+        begin
+          Hero.lucky_gold := 1;
+          TileClass := 51;
+        end;
+      end;
+      { PushCommand(2, TileClass, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+      EventStack[EventCursor].A := TileClass;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(8, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evShowPanels);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(1, 2, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evSound);
+      EventStack[EventCursor].A := 2;
+      EventStack[EventCursor].B := 0;
+      timer2on;
+      Maps[Hero.floor, ContactIndex + 2] := 6;
+      idou;
     end;
     51..60:
     begin
-      Index := (Tile - 51) mod 5;
-      if Tile < 56 then
-      begin
-        Inc(Hero.attack, Gain[Index] * Scale);
-        Hero.sword := Index + 1;
-      end
-      else
-      begin
-        Inc(Hero.defense, Gain[Index] * Scale);
-        Hero.shield := Index + 1;
-      end;
-      WriteHeroField(128 + (Tile - 51) * 4, 1);
-    end;
-    91, 92:
-    begin
-      if (Hero.floor = 50) and (Hero.cycle_factor_minus_one = 0) then
-        QueueEnding(Self)
-      else if (Hero.floor = 49) or (Hero.floor = 50) then
-      begin
-        if (Hero.floor = 50) and (Hero.later_cycle = 0) then
+      case Maps[Hero.floor, ContactIndex + 2] of
+        51:
         begin
-          Monsters[15].HP := 1000;
-          Monsters[15].Attack := 625;
-          Monsters[15].Defense := 125;
+          Hero.attack := Hero.attack + (Hero.cycle_factor_minus_one + 1) * 10;
+          Hero.sword := 1;
+          Hero.Word128 := 1;
+          TileClass := 1;
+          MessageText :=
+              ListBox2.Items[152]
+                  + ' '
+                  + IntToStr((Hero.cycle_factor_minus_one + 1) * 10)
+                  + ListBox2.Items[166];
         end;
-        taisen;
+        52:
+        begin
+          Hero.attack := Hero.attack + (Hero.cycle_factor_minus_one + 1) * 20;
+          Hero.sword := 2;
+          Hero.Word132 := 1;
+          TileClass := 1;
+          MessageText :=
+              ListBox2.Items[153]
+                  + ' '
+                  + IntToStr((Hero.cycle_factor_minus_one + 1) * 20)
+                  + ListBox2.Items[166];
+        end;
+        53:
+        begin
+          Hero.attack := Hero.attack + (Hero.cycle_factor_minus_one + 1) * 40;
+          Hero.sword := 3;
+          Hero.Word136 := 1;
+          TileClass := 1;
+          MessageText :=
+              ListBox2.Items[154]
+                  + ' '
+                  + IntToStr((Hero.cycle_factor_minus_one + 1) * 40)
+                  + ListBox2.Items[166];
+        end;
+        54:
+        begin
+          Hero.attack := Hero.attack + (Hero.cycle_factor_minus_one + 1) * 50;
+          Hero.sword := 4;
+          Hero.Word140 := 1;
+          TileClass := 1;
+          MessageText :=
+              ListBox2.Items[155]
+                  + ' '
+                  + IntToStr((Hero.cycle_factor_minus_one + 1) * 50)
+                  + ListBox2.Items[166];
+        end;
+        55:
+        begin
+          Hero.attack := Hero.attack + (Hero.cycle_factor_minus_one + 1) * 100;
+          Hero.sword := 5;
+          Hero.Word144 := 1;
+          TileClass := 1;
+          MessageText :=
+              ListBox2.Items[156]
+                  + ' '
+                  + IntToStr((Hero.cycle_factor_minus_one + 1) * 100)
+                  + ListBox2.Items[166];
+        end;
+        56:
+        begin
+          Hero.defense := Hero.defense + (Hero.cycle_factor_minus_one + 1) * 10;
+          Hero.shield := 1;
+          Hero.Word148 := 1;
+          TileClass := 1;
+          MessageText :=
+              ListBox2.Items[157]
+                  + ' '
+                  + IntToStr((Hero.cycle_factor_minus_one + 1) * 10)
+                  + ListBox2.Items[166];
+        end;
+        57:
+        begin
+          Hero.defense := Hero.defense + (Hero.cycle_factor_minus_one + 1) * 20;
+          Hero.shield := 2;
+          Hero.Word152 := 1;
+          TileClass := 1;
+          MessageText :=
+              ListBox2.Items[158]
+                  + ' '
+                  + IntToStr((Hero.cycle_factor_minus_one + 1) * 20)
+                  + ListBox2.Items[166];
+        end;
+        58:
+        begin
+          Hero.defense := Hero.defense + (Hero.cycle_factor_minus_one + 1) * 40;
+          Hero.shield := 3;
+          Hero.Word156 := 1;
+          TileClass := 1;
+          MessageText :=
+              ListBox2.Items[159]
+                  + ' '
+                  + IntToStr((Hero.cycle_factor_minus_one + 1) * 40)
+                  + ListBox2.Items[166];
+        end;
+        59:
+        begin
+          Hero.defense := Hero.defense + (Hero.cycle_factor_minus_one + 1) * 50;
+          Hero.shield := 4;
+          Hero.Word160 := 1;
+          TileClass := 1;
+          MessageText :=
+              ListBox2.Items[160]
+                  + ' '
+                  + IntToStr((Hero.cycle_factor_minus_one + 1) * 50)
+                  + ListBox2.Items[166];
+        end;
+        60:
+        begin
+          Hero.defense := Hero.defense + (Hero.cycle_factor_minus_one + 1) * 100;
+          Hero.shield := 5;
+          Hero.sacred_shield := 1;
+          TileClass := 1;
+          MessageText :=
+              ListBox2.Items[161]
+                  + ' '
+                  + IntToStr((Hero.cycle_factor_minus_one + 1) * 100)
+                  + ListBox2.Items[166];
+        end;
       end;
-      Exit;
+      timer2on;
+      { PushCommand(2, TileClass, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+      EventStack[EventCursor].A := TileClass;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(8, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evShowPanels);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(1, 2, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evSound);
+      EventStack[EventCursor].A := 2;
+      EventStack[EventCursor].B := 0;
+      Maps[Hero.floor, ContactIndex + 2] := 6;
+      idou;
     end;
-  else
-    if MonsterForTile(Tile) >= 0 then
-      taisen;
-    Exit;
+    61..90: taisen;
+    91..92:
+    begin
+      case Hero.floor of
+        49: taisen;
+        50:
+        begin
+          if Hero.cycle_factor_minus_one <> 0 then
+          begin
+            if Hero.later_cycle = 0 then
+            begin
+              Monsters[15].HP := 1000;
+              Monsters[15].Attack := 625;
+              Monsters[15].Defense := 125;
+            end;
+            taisen;
+          end
+          else
+          begin
+            if Hero.music_track <> 0 then
+            begin
+              Timer1.Enabled := False;
+              MediaPlayer5.Close;
+            end;
+            Timer1.Enabled := False;
+            timer2on;
+            Button1.Caption := 'OK';
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 8, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 8;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 7, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 7;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 0;
+            { The first-cycle ending is queued backwards: collapse, flashes, then dialogue. }
+            for I := 1 to 400 do
+            begin
+              { PushCommand(0, 5, 0). }
+              Inc(EventCursor);
+              EventStack[EventCursor].Opcode := Ord(evWait);
+              EventStack[EventCursor].A := 5;
+              EventStack[EventCursor].B := 0;
+              { PushCommand(11, 12, 401 - I). }
+              Inc(EventCursor);
+              EventStack[EventCursor].Opcode := Ord(evSceneAction);
+              EventStack[EventCursor].A := 12;
+              EventStack[EventCursor].B := 401 - I;
+            end;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 400). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 400;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 399). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 399;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 396). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 396;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 393). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 393;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 390). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 390;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 387). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 387;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 384). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 384;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 381). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 381;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 378). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 378;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 375). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 375;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 372). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 372;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 369). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 369;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 366). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 366;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 363). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 363;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 360). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 360;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 357). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 357;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 354). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 354;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 351). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 351;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 348). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 348;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 345). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 345;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 342). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 342;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 339). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 339;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 336). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 336;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 333). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 333;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 330). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 330;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 327). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 327;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 324). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 324;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 321). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 321;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 318). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 318;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 315). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 315;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 312). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 312;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 309). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 309;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 306). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 306;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 303). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 303;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 300). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 300;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 295). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 295;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 290). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 290;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 285). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 285;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 280). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 280;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 275). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 275;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 270). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 270;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 265). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 265;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 260). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 260;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 255). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 255;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 250). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 250;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 245). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 245;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 240). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 240;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 235). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 235;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 230). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 230;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 225). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 225;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 220). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 220;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 215). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 215;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 210). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 210;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 205). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 205;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 197). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 197;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 189). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 189;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 181). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 181;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 173). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 173;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 165). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 165;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 157). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 157;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 149). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 149;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 141). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 141;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 133). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 133;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 125). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 125;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 117). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 117;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 109). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 109;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 101). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 101;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 91). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 91;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 81). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 81;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 71). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 71;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 61). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 61;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 51). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 51;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 41). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 41;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 31). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 31;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 21). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 21;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 11). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 11;
+            { PushCommand(0, 4, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 4;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 1). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 1;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 17). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 17;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 16). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 16;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 15). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 15;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 14). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 14;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 13). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 13;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 12). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 12;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 11). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 11;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 10). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 10;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 9). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 9;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 8). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 8;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 7). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 7;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 5). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 5;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 4). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 4;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 3). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 3;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 2). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 2;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 10, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 10;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 6, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 6;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 1). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 1;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 247). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 247;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 246). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 246;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 245). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 245;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 244). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 244;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 243). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 243;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 242). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 242;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 241). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 241;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 240). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 240;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 239). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 239;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 238). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 238;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 237). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 237;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 236). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 236;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 235). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 235;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 234). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 234;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 233). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 233;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 12, 232). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 12;
+            EventStack[EventCursor].B := 232;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 1, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 1;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 15, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 15;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(11, 14, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSceneAction);
+            EventStack[EventCursor].A := 14;
+            EventStack[EventCursor].B := 0;
+          end;
+        end;
+      end;
+    end;
+    93..114: taisen;
+    122: taisen;
+    133..157: taisen;
   end;
-  MessageText := GameplayText(Self, $89);
-  TileClass := 1;
-  if (Tile >= 37) and (Tile <= 50) then
-    if Tile = 37 then
-      TileClass := 22
-    else if Tile = 38 then
-      TileClass := 21
-    else
-      TileClass := Tile + 1;
-  PushEvent(2, TileClass, 0);
-  PushEvent(8, 0, 0);
-  PushEvent(0, 0, 0);
-  PushEvent(1, 2, 0);
-  Maps[Hero.floor, ContactIndex + 2] := 6;
-  idou;
-  timer2on;
-end;
-
-procedure GameplayConfirmItem(Form: TTSW10; Item: Longint);
-begin
-  if ReadHeroField(68 + (Item - 1) * 4) <= 0 then
-    Exit;
-  GameplayItemChoice := Item;
-  Form.itemdel;
-  TileClass := Item + 35;
-  Form.disp;
-  Form.Button37.Left := UiSpan + 8;
-  Form.Button37.Top := UiStep + Form.Image6.Height * 10;
-  Form.Button38.Left := Form.Button37.Left + Form.Button37.Width + 8;
-  Form.Button38.Top := Form.Button37.Top;
-  Form.Button37.Visible := True;
-  Form.Button37.Enabled := True;
-  Form.Button38.Visible := True;
-  Form.Button38.Enabled := True;
-  if Form.Visible then
-    Form.Button37.SetFocus;
 end;
 
 procedure TTSW10.img8work;
 begin
-  GameplayConfirmItem(Self, 5);
+  if Hero.elixir = 1 then
+  begin
+    itemdel;
+    GameplayItemChoice := 5;
+    Button37.Height := Image6.Height div 2;
+    Button37.Width := Image6.Width * 2;
+    Button37.Left := Image8.Left - Image6.Width div 2;
+    Button37.Top := Image8.Top + Image8.Height;
+    Button38.Height := Button37.Height;
+    Button38.Width := Button37.Width;
+    Button38.Left := Button37.Left;
+    Button38.Top := Button37.Top + Button37.Height;
+    Button37.Visible := True;
+    Button38.Visible := True;
+    Button37.SetFocus;
+  end;
 end;
 procedure TTSW10.img9work;
 begin
-  GameplayConfirmItem(Self, 6);
+  if Hero.mattock = 1 then
+  begin
+    itemdel;
+    GameplayItemChoice := 6;
+    Button37.Height := Image6.Height div 2;
+    Button37.Width := Image6.Width * 2;
+    Button37.Left := Image9.Left - Image6.Width div 2;
+    Button37.Top := Image9.Top + Image9.Height;
+    Button38.Height := Button37.Height;
+    Button38.Width := Button37.Width;
+    Button38.Left := Button37.Left;
+    Button38.Top := Button37.Top + Button37.Height;
+    Button37.Visible := True;
+    Button38.Visible := True;
+    Button37.SetFocus;
+  end;
 end;
 procedure TTSW10.img10work;
 begin
-  GameplayConfirmItem(Self, 7);
+  if Hero.bomb = 1 then
+  begin
+    itemdel;
+    GameplayItemChoice := 7;
+    Button37.Height := Image6.Height div 2;
+    Button37.Width := Image6.Width * 2;
+    Button37.Left := Image10.Left - Image6.Width div 2;
+    Button37.Top := Image10.Top + Image10.Height;
+    Button38.Height := Button37.Height;
+    Button38.Width := Button37.Width;
+    Button38.Left := Button37.Left;
+    Button38.Top := Button37.Top + Button37.Height;
+    Button37.Visible := True;
+    Button38.Visible := True;
+    Button37.SetFocus;
+  end;
 end;
 procedure TTSW10.img11work;
 begin
-  GameplayConfirmItem(Self, 8);
+  if Hero.warp_staff >= 1 then
+  begin
+    itemdel;
+    GameplayItemChoice := 8;
+    Button37.Height := Image6.Height div 2;
+    Button37.Width := Image6.Width * 2;
+    Button37.Left := Image11.Left - Image6.Width div 2;
+    Button37.Top := Image11.Top + Image11.Height;
+    Button38.Height := Button37.Height;
+    Button38.Width := Button37.Width;
+    Button38.Left := Button37.Left;
+    Button38.Top := Button37.Top + Button37.Height;
+    Button37.Visible := True;
+    Button38.Visible := True;
+    Button37.SetFocus;
+  end;
 end;
 procedure TTSW10.img12work;
 begin
-  GameplayConfirmItem(Self, 9);
+  if Hero.ascent_wing = 1 then
+  begin
+    itemdel;
+    GameplayItemChoice := 9;
+    Button37.Height := Image6.Height div 2;
+    Button37.Width := Image6.Width * 2;
+    Button37.Left := Image12.Left - Image6.Width div 2;
+    Button37.Top := Image12.Top + Image12.Height;
+    Button38.Height := Button37.Height;
+    Button38.Width := Button37.Width;
+    Button38.Left := Button37.Left;
+    Button38.Top := Button37.Top + Button37.Height;
+    Button37.Visible := True;
+    Button38.Visible := True;
+    Button37.SetFocus;
+  end;
 end;
 procedure TTSW10.img13work;
 begin
-  GameplayConfirmItem(Self, 10);
+  if Hero.descent_wing = 1 then
+  begin
+    itemdel;
+    GameplayItemChoice := 10;
+    Button37.Height := Image6.Height div 2;
+    Button37.Width := Image6.Width * 2;
+    Button37.Left := Image13.Left - Image6.Width div 2;
+    Button37.Top := Image13.Top + Image13.Height;
+    Button38.Height := Button37.Height;
+    Button38.Width := Button37.Width;
+    Button38.Left := Button37.Left;
+    Button38.Top := Button37.Top + Button37.Height;
+    Button37.Visible := True;
+    Button38.Visible := True;
+    Button37.SetFocus;
+  end;
 end;
 procedure TTSW10.img15work;
 begin
-  GameplayConfirmItem(Self, 12);
+  if Hero.snow_crystal = 1 then
+  begin
+    itemdel;
+    GameplayItemChoice := 12;
+    Button37.Height := Image6.Height div 2;
+    Button37.Width := Image6.Width * 2;
+    Button37.Left := Image15.Left - Image6.Width div 2;
+    Button37.Top := Image15.Top + Image15.Height;
+    Button38.Height := Button37.Height;
+    Button38.Width := Button37.Width;
+    Button38.Left := Button37.Left;
+    Button38.Top := Button37.Top + Button37.Height;
+    Button37.Visible := True;
+    Button38.Visible := True;
+    Button37.SetFocus;
+  end;
 end;
 procedure TTSW10.img16work;
 begin
-  GameplayConfirmItem(Self, 13);
+  if Hero.magic_key = 1 then
+  begin
+    itemdel;
+    GameplayItemChoice := 13;
+    Button37.Height := Image6.Height div 2;
+    Button37.Width := Image6.Width * 2;
+    Button37.Left := Image16.Left - Image6.Width div 2;
+    Button37.Top := Image16.Top + Image16.Height;
+    Button38.Height := Button37.Height;
+    Button38.Width := Button37.Width;
+    Button38.Left := Button37.Left;
+    Button38.Top := Button37.Top + Button37.Height;
+    Button37.Visible := True;
+    Button38.Visible := True;
+    Button37.SetFocus;
+  end;
 end;
 procedure TTSW10.img17work;
 begin
-  GameplayConfirmItem(Self, 14);
+  if Hero.super_mattock = 1 then
+  begin
+    itemdel;
+    GameplayItemChoice := 14;
+    Button37.Height := Image6.Height div 2;
+    Button37.Width := Image6.Width * 2;
+    Button37.Left := Image17.Left - Image6.Width div 2;
+    Button37.Top := Image17.Top + Image17.Height;
+    Button38.Height := Button37.Height;
+    Button38.Width := Button37.Width;
+    Button38.Left := Button37.Left;
+    Button38.Top := Button37.Top + Button37.Height;
+    Button37.Visible := True;
+    Button38.Visible := True;
+    Button37.SetFocus;
+  end;
 end;
 
 procedure TTSW10.Button38Click(Sender: TObject); { $00450BA0 }
-const
-  Offsets: array[0..3] of Longint = (11, 1, -1, -11);
-  Motions: array[0..3] of Longint = (11, 10, 9, 12);
 var
-  Item, Position, Target, I, X, Y, Enemy, Tile, Destination, Found: Longint;
+  X, Y: Longint;
 begin
-  Item := GameplayItemChoice;
   Button37.Visible := False;
   Button38.Visible := False;
-  if (Item < 5) or (Item > 14) or (ReadHeroField(68 + (Item - 1) * 4) <= 0) then
-  begin
-    itemlive;
-    Exit;
-  end;
-  Position := Hero.y * 11 + Hero.x;
-  case Item of
+  case GameplayItemChoice of
     5:
     begin
+      TileClass := 1;
+      timer2on;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(2, TileClass, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+      EventStack[EventCursor].A := TileClass;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(8, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evShowPanels);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(1, 2, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evSound);
+      EventStack[EventCursor].A := 2;
+      EventStack[EventCursor].B := 0;
+
       ScratchIndex := Hero.attack * 10 + Hero.defense * 5;
-      Inc(Hero.hp, ScratchIndex);
+      MessageText := ListBox2.Items[186] + ' ' + IntToStr(ScratchIndex) + ListBox2.Items[166];
+      Hero.hp := Hero.hp + ScratchIndex;
       Hero.elixir := 0;
-      MessageText :=
-          GameplayText(Self, 186) + ' ' + IntToStr(ScratchIndex) + ' ' + GameplayText(Self, 166);
-      PushEvent(0, 0, 0);
-      PushEvent(2, 1, 0);
-      PushEvent(0, 0, 0);
-      PushEvent(8, 0, 0);
-      PushEvent(0, 0, 0);
-      PushEvent(1, 2, 0);
+      EventPaused := 0;
     end;
-    6, 7, 12:
+    6:
     begin
-      if Item = 6 then
-      begin
-        Hero.mattock := 0;
-        PushEvent(2, 60, 0);
-      end;
-      if Item = 7 then
-      begin
-        Hero.bomb := 0;
-        PushEvent(0, 0, 0);
-        PushEvent(11, 5, 0);
-        PushEvent(2, 0, 0);
-      end;
-      PushEvent(8, 0, 0);
-      Found := 0;
-      for I := 0 to 3 do
-      begin
-        if ((I = 0) and (Hero.y = 10))
-            or ((I = 1) and (Hero.x = 10))
-            or ((I = 2) and (Hero.x = 0))
-            or ((I = 3) and (Hero.y = 0)) then
-          Continue;
-        Target := Position + Offsets[I];
-        NeighborIndex := Target;
-        ContactIndex := Target;
-        Tile := Maps[Hero.floor, Target + 2];
-        mmmes;
-        if (Item = 6) and (TileClass = 1) then
-          matokwork
-        else if (Item = 7) and (TileClass = 2) then
+      timer2on;
+      { PushCommand(2, 60, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+      EventStack[EventCursor].A := 60;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(8, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evShowPanels);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      TileClass := 0;
+      { Inspect south, east, west, north in the original order. }
+      ScratchIndex := Hero.y * 11 + Hero.x;
+      NeighborIndex := ScratchIndex + 11;
+      ContactIndex := NeighborIndex;
+      case Hero.y of
+        0..9:
         begin
-          Enemy := MonsterIndex;
-          Inc(Hero.gold, Monsters[Enemy].Gold);
-          toroad2;
-        end
-        else if (Item = 12) and (TileClass = 3) then
-        begin
-          Found := 1;
-          DamageMode := Motions[I];
-          yukiwork;
+          mmmes;
+          if TileClass = 1 then
+          begin
+            matokwork;
+          end;
         end;
       end;
-      if Item = 12 then
-      begin
-        if Found = 1 then
+      ScratchIndex := Hero.y * 11 + Hero.x;
+      NeighborIndex := ScratchIndex + 1;
+      ContactIndex := NeighborIndex;
+      case Hero.x of
+        0..9:
         begin
-          MessageText := GameplayText(Self, 198);
-          PushEvent(2, 1, 0);
-        end
-        else
-          PushEvent(2, 65, 0);
+          mmmes;
+          if TileClass = 1 then
+          begin
+            matokwork;
+          end;
+        end;
       end;
+      ScratchIndex := Hero.y * 11 + Hero.x;
+      NeighborIndex := ScratchIndex - 1;
+      ContactIndex := NeighborIndex;
+      case Hero.x of
+        1..10:
+        begin
+          mmmes;
+          if TileClass = 1 then
+          begin
+            matokwork;
+          end;
+        end;
+      end;
+      ScratchIndex := Hero.y * 11 + Hero.x;
+      NeighborIndex := ScratchIndex - 11;
+      ContactIndex := NeighborIndex;
+      case Hero.y of
+        1..10:
+        begin
+          mmmes;
+          if TileClass = 1 then
+          begin
+            matokwork;
+          end;
+        end;
+      end;
+      Hero.mattock := 0;
+    end;
+    7:
+    begin
+      timer2on;
+      { PushCommand(0, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evWait);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(11, 5, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evSceneAction);
+      EventStack[EventCursor].A := 5;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(2, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(8, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evShowPanels);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      GameplayShopCost := 0;
+      TileClass := 0;
+      { Inspect south, east, west, north in the original order. }
+      ScratchIndex := Hero.y * 11 + Hero.x;
+      NeighborIndex := ScratchIndex + 11;
+      ContactIndex := NeighborIndex;
+      case Hero.y of
+        0..9:
+        begin
+          mmmes;
+          if TileClass = 2 then
+          begin
+            GameplayShopCost := GameplayShopCost + Monsters[MonsterIndex].Gold;
+            toroad2;
+          end;
+        end;
+      end;
+      NeighborIndex := ScratchIndex + 1;
+      ContactIndex := NeighborIndex;
+      case Hero.x of
+        0..9:
+        begin
+          mmmes;
+          if TileClass = 2 then
+          begin
+            GameplayShopCost := GameplayShopCost + Monsters[MonsterIndex].Gold;
+            toroad2;
+          end;
+        end;
+      end;
+      NeighborIndex := ScratchIndex - 1;
+      ContactIndex := NeighborIndex;
+      case Hero.x of
+        1..10:
+        begin
+          mmmes;
+          if TileClass = 2 then
+          begin
+            GameplayShopCost := GameplayShopCost + Monsters[MonsterIndex].Gold;
+            toroad2;
+          end;
+        end;
+      end;
+      NeighborIndex := ScratchIndex - 11;
+      ContactIndex := NeighborIndex;
+      case Hero.y of
+        1..10:
+        begin
+          mmmes;
+          if TileClass = 2 then
+          begin
+            GameplayShopCost := GameplayShopCost + Monsters[MonsterIndex].Gold;
+            toroad2;
+          end;
+        end;
+      end;
+      Hero.gold := Hero.gold + GameplayShopCost;
+      Hero.bomb := 0;
+      TileClass := 1;
+      MessageText :=
+          ListBox2.Items[188]
+              + ListBox2.Items[200]
+              + ' '
+              + IntToStr(GameplayShopCost)
+              + ListBox2.Items[201];
     end;
     8:
     begin
       Dec(Hero.warp_staff);
-      { Opposite cell on the 11-by-11 board, equivalent to a half-turn. }
-      Target := 120 - Position;
-      if Maps[Hero.floor, Target + 2] = 6 then
-      begin
-        Hero.x := Target mod 11;
-        Hero.y := Target div 11;
-        GameplayRefresh(Self);
-        PlayEffect(Self, 2);
-        GameplayMessage(Self, 62);
-      end
-      else
-        GameplayMessage(Self, 68);
-      itemdisp;
-      itemlive;
-      Exit;
-    end;
-    9, 10:
-    begin
-      if Item = 9 then
-        Destination := Hero.floor + 1
-      else
-        Destination := Hero.floor - 1;
-      { Wings preserve coordinates and are consumed only for a road landing. }
-      if (Destination >= 0) and (Destination <= 50) and (Maps[Destination, Position + 2] = 6) then
-      begin
-        if Item = 9 then
-          Hero.ascent_wing := 0
-        else
-          Hero.descent_wing := 0;
-        Hero.floor := Destination;
-        soundcheck;
-        soundplay;
-        GameplayRefresh(Self);
-        if Item = 9 then
-          PushEvent(2, 63, 0)
-        else
-          PushEvent(2, 64, 0);
-        PushEvent(8, 0, 0);
-        PushEvent(0, 0, 0);
-        PushEvent(1, 2, 0);
-      end
+      TileClass := 62;
+      FlightCell := Hero.y * 11 + Hero.x;
+      ContactIndex := 120 - FlightCell;
+      if Maps[Hero.floor, ContactIndex + 2] <> 6 then
+        TileClass := 68
       else
       begin
-        if Item = 9 then
-          GameplayMessage(Self, 69)
-        else
-          GameplayMessage(Self, 70);
-        itemlive;
-        Exit;
+        DrawX := (FlightCell * Image6.Width) mod (Image6.Width * 11);
+        DrawY := (FlightCell * Image6.Height) div (Image6.Height * 11) * Image6.Height;
+        ImageList1.Draw(MapBitmap1.Canvas, DrawX, DrawY, Maps[Hero.floor, FlightCell + 2] - 1);
+        GraphicTile := Maps[Hero.floor, FlightCell + 2];
+        imagework;
+        ImageList1.Draw(
+            MapBitmap2.Canvas,
+            DrawX,
+            DrawY,
+            Maps[Hero.floor, FlightCell + 2] - 1 + DoorOpened
+        );
+        Hero.x := ContactIndex mod 11;
+        Hero.y := ContactIndex div 11;
+        DrawX := (ContactIndex * Image6.Width) mod (Image6.Width * 11);
+        DrawY := (ContactIndex * Image6.Height) div (Image6.Height * 11) * Image6.Height;
+        yusyahyouji1;
+        MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
+        timer2on;
+        { PushCommand(1, 2, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evSound);
+        EventStack[EventCursor].A := 2;
+        EventStack[EventCursor].B := 0;
       end;
+      itemlive;
+      disp;
+    end;
+    9:
+    begin
+      if (Hero.floor <> 50) and (Maps[Hero.floor + 1, Hero.y * 11 + Hero.x + 2] = 6) then
+      begin
+        Hero.ascent_wing := 0;
+        TileClass := 63;
+        Inc(Hero.floor);
+        if Hero.music_track <> 0 then
+        begin
+          soundcheck;
+          soundplay;
+        end;
+        mhyouji;
+        timer2on;
+        { PushCommand(2, TileClass, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+        EventStack[EventCursor].A := TileClass;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(8, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evShowPanels);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(0, 0, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evWait);
+        EventStack[EventCursor].A := 0;
+        EventStack[EventCursor].B := 0;
+        { PushCommand(1, 2, 0). }
+        Inc(EventCursor);
+        EventStack[EventCursor].Opcode := Ord(evSound);
+        EventStack[EventCursor].A := 2;
+        EventStack[EventCursor].B := 0;
+        itemlive;
+        disp;
+      end
+      else
+      begin
+        TileClass := 69;
+        disp;
+        itemlive;
+      end;
+    end;
+    10:
+    begin
+      case Hero.floor of
+        0:
+        begin
+          TileClass := 70;
+          disp;
+          itemlive;
+        end;
+      else
+        begin
+          if Maps[Hero.floor - 1, Hero.y * 11 + Hero.x + 2] = 6 then
+          begin
+            Hero.descent_wing := 0;
+            TileClass := 64;
+            Dec(Hero.floor);
+            if Hero.music_track <> 0 then
+            begin
+              soundcheck;
+              soundplay;
+            end;
+            mhyouji;
+            timer2on;
+            { PushCommand(2, TileClass, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+            EventStack[EventCursor].A := TileClass;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(8, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evShowPanels);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
+          end
+          else
+            TileClass := 70;
+          disp;
+          itemlive;
+        end;
+      end;
+    end;
+    12:
+    begin
+      timer2on;
+      { PushCommand(8, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evShowPanels);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      NeighborY := 0;
+      { Inspect south, east, west, north in the original order. }
+      ScratchIndex := Hero.y * 11 + Hero.x;
+      NeighborIndex := ScratchIndex + 11;
+      ContactIndex := NeighborIndex;
+      case Hero.y of
+        0..9:
+        begin
+          mmmes;
+          if TileClass = 3 then
+          begin
+            NeighborY := 1;
+            DamageMode := 11;
+            yukiwork;
+          end;
+        end;
+      end;
+      ScratchIndex := Hero.y * 11 + Hero.x;
+      NeighborIndex := ScratchIndex + 1;
+      ContactIndex := NeighborIndex;
+      case Hero.x of
+        0..9:
+        begin
+          mmmes;
+          if TileClass = 3 then
+          begin
+            NeighborY := 1;
+            DamageMode := 10;
+            yukiwork;
+          end;
+        end;
+      end;
+      ScratchIndex := Hero.y * 11 + Hero.x;
+      NeighborIndex := ScratchIndex - 1;
+      ContactIndex := NeighborIndex;
+      case Hero.x of
+        1..10:
+        begin
+          mmmes;
+          if TileClass = 3 then
+          begin
+            NeighborY := 1;
+            DamageMode := 9;
+            yukiwork;
+          end;
+        end;
+      end;
+      ScratchIndex := Hero.y * 11 + Hero.x;
+      NeighborIndex := ScratchIndex - 11;
+      ContactIndex := NeighborIndex;
+      case Hero.y of
+        1..10:
+        begin
+          mmmes;
+          if TileClass = 3 then
+          begin
+            NeighborY := 1;
+            DamageMode := 12;
+            yukiwork;
+          end;
+        end;
+      end;
+      if NeighborY = 1 then
+      begin
+        TileClass := 1;
+        MessageText := ListBox2.Items[192] + ListBox2.Items[198];
+      end
+      else
+        TileClass := 65;
+      { PushCommand(2, TileClass, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+      EventStack[EventCursor].A := TileClass;
+      EventStack[EventCursor].B := 0;
     end;
     13:
     begin
       Hero.magic_key := 0;
-      PushEvent(2, 66, 0);
-      PushEvent(8, 0, 0);
-      for Target := 120 downto 0 do
-        if Maps[Hero.floor, Target + 2] = 1 then
+      TileClass := 66;
+      timer2on;
+      { PushCommand(2, TileClass, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+      EventStack[EventCursor].A := TileClass;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(8, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evShowPanels);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
+      for X := 120 downto 0 do
+      begin
+        DrawIndex := X;
+        if Maps[Hero.floor, DrawIndex + 2] = 1 then
         begin
-          PushEvent(13, Target, 1);
+          { PushCommand(13, DrawIndex, 1). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evDoorFrame);
+          EventStack[EventCursor].A := DrawIndex;
+          EventStack[EventCursor].B := 1;
           doorstackin;
-          PushEvent(0, 0, 0);
-          PushEvent(1, 1, 0);
+          { PushCommand(0, 0, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evWait);
+          EventStack[EventCursor].A := 0;
+          EventStack[EventCursor].B := 0;
+          { PushCommand(1, 1, 0). }
+          Inc(EventCursor);
+          EventStack[EventCursor].Opcode := Ord(evSound);
+          EventStack[EventCursor].A := 1;
+          EventStack[EventCursor].B := 0;
         end;
+      end;
     end;
     14:
     begin
       Hero.super_mattock := 0;
-      PushEvent(2, 67, 0);
-      PushEvent(8, 0, 0);
+      TileClass := 67;
+      timer2on;
+      { PushCommand(2, TileClass, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evRefreshStatus);
+      EventStack[EventCursor].A := TileClass;
+      EventStack[EventCursor].B := 0;
+      { PushCommand(8, 0, 0). }
+      Inc(EventCursor);
+      EventStack[EventCursor].Opcode := Ord(evShowPanels);
+      EventStack[EventCursor].A := 0;
+      EventStack[EventCursor].B := 0;
       for X := 10 downto 0 do
         for Y := 10 downto 0 do
         begin
-          Target := Y * 11 + X;
-          if Maps[Hero.floor, Target + 2] = 8 then
+          DrawIndex := Y * 11 + X;
+          if Maps[Hero.floor, DrawIndex + 2] = 8 then
           begin
-            PushEvent(0, 0, 0);
-            PushEvent(6, Target, 6);
-            PushEvent(0, 0, 0);
-            PushEvent(1, 2, 0);
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(6, DrawIndex, 6). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSetTile);
+            EventStack[EventCursor].A := DrawIndex;
+            EventStack[EventCursor].B := 6;
+            { PushCommand(0, 0, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evWait);
+            EventStack[EventCursor].A := 0;
+            EventStack[EventCursor].B := 0;
+            { PushCommand(1, 2, 0). }
+            Inc(EventCursor);
+            EventStack[EventCursor].Opcode := Ord(evSound);
+            EventStack[EventCursor].A := 2;
+            EventStack[EventCursor].B := 0;
           end;
         end;
     end;
   end;
-  timer2on;
 end;
 
 procedure TTSW10.Image4Click(Sender: TObject);
@@ -1777,83 +6556,212 @@ begin
   img17work;
 end;
 
-procedure TTSW10.itemichiwork2; { $0046171C; scan at most all fifteen inventory slots }
+procedure TTSW10.itemichiwork2; { $0046171C }
+type
+  THeroWords = array[0..170] of Longint;
 var
-  I: Longint;
+  HeroWords: THeroWords absolute Hero;
 begin
-  for I := 0 to 14 do
+  if DrawFlag2 < 0 then
+    DrawFlag2 := DrawFlag2 + 15;
+  if DrawFlag2 >= 15 then
+    DrawFlag2 := DrawFlag2 - 15;
+  if HeroWords[DrawFlag2 + 17] = 0 then
   begin
-    GameplayInventoryCursor := (GameplayInventoryCursor + 15) mod 15;
-    if ReadHeroField(68 + GameplayInventoryCursor * 4) <> 0 then
-      Exit;
-    Inc(GameplayInventoryCursor);
+    Inc(DrawFlag2);
+    itemichiwork2;
   end;
-  GameplayInventoryCursor := 0;
 end;
 
-procedure TTSW10.itemichiwork; { $004610C4 }
+procedure TTSW10.itemichiwork(Direction: Longint); { $004610C4 }
+type
+  THeroWords = array[0..170] of Longint;
 var
-  ItemImage: TImage;
-  Count, Step, I: Longint;
+  HeroWords: THeroWords absolute Hero;
 begin
-  Count := 0;
-  for I := 0 to 14 do
-    Inc(Count, ReadHeroField(68 + I * 4));
-  if Count = 0 then
+  if DrawFlag2 < 0 then
+    DrawFlag2 := DrawFlag2 + 15;
+  if DrawFlag2 >= 15 then
+    DrawFlag2 := DrawFlag2 - 15;
+  { Try the remaining four rows/columns, then scan forward if all are empty. }
+  if HeroWords[DrawFlag2 + 17] = 0 then
   begin
-    Image22.Visible := False;
-    Exit;
+    case Direction of
+      0: DrawFlag2 := DrawFlag2 - 3;
+      1: DrawFlag2 := DrawFlag2 + 3;
+      2: Inc(DrawFlag2);
+      3: Dec(DrawFlag2);
+    end;
+    if DrawFlag2 < 0 then
+      DrawFlag2 := DrawFlag2 + 15;
+    if DrawFlag2 >= 15 then
+      DrawFlag2 := DrawFlag2 - 15;
+    if HeroWords[DrawFlag2 + 17] = 0 then
+    begin
+      case Direction of
+        0: DrawFlag2 := DrawFlag2 - 3;
+        1: DrawFlag2 := DrawFlag2 + 3;
+        2: Inc(DrawFlag2);
+        3: Dec(DrawFlag2);
+      end;
+      if DrawFlag2 < 0 then
+        DrawFlag2 := DrawFlag2 + 15;
+      if DrawFlag2 >= 15 then
+        DrawFlag2 := DrawFlag2 - 15;
+      if HeroWords[DrawFlag2 + 17] = 0 then
+      begin
+        case Direction of
+          0: DrawFlag2 := DrawFlag2 - 3;
+          1: DrawFlag2 := DrawFlag2 + 3;
+          2: Inc(DrawFlag2);
+          3: Dec(DrawFlag2);
+        end;
+        if DrawFlag2 < 0 then
+          DrawFlag2 := DrawFlag2 + 15;
+        if DrawFlag2 >= 15 then
+          DrawFlag2 := DrawFlag2 - 15;
+        if HeroWords[DrawFlag2 + 17] = 0 then
+        begin
+          case Direction of
+            0: DrawFlag2 := DrawFlag2 - 3;
+            1: DrawFlag2 := DrawFlag2 + 3;
+            2: Inc(DrawFlag2);
+            3: Dec(DrawFlag2);
+          end;
+          if DrawFlag2 < 0 then
+            DrawFlag2 := DrawFlag2 + 15;
+          if DrawFlag2 >= 15 then
+            DrawFlag2 := DrawFlag2 - 15;
+        end;
+      end;
+    end;
   end;
-  case FacingRequest of
-    1: Step := -3;
-    2: Step := -1;
-    3: Step := 1;
-    4: Step := 3;
-  else
-    Step := 1;
-  end;
-  for I := 0 to 14 do
+  if Hero.hero_orb
+          + Hero.wisdom_orb
+          + Hero.flight_orb
+          + Hero.cross
+          + Hero.elixir
+          + Hero.mattock
+          + Hero.bomb
+          + Hero.warp_staff
+          + Hero.ascent_wing
+          + Hero.descent_wing
+          + Hero.dragon_slayer
+          + Hero.snow_crystal
+          + Hero.magic_key
+          + Hero.super_mattock
+          + Hero.lucky_gold
+      <> 0 then
   begin
-    GameplayInventoryCursor := (GameplayInventoryCursor + 15) mod 15;
-    if ReadHeroField(68 + GameplayInventoryCursor * 4) <> 0 then
-      Break;
-    Inc(GameplayInventoryCursor, Step);
-  end;
-  { A vertical step visits only five slots. Fall back to the next occupied
-    slot when that entire column is empty. }
-  GameplayInventoryCursor := (GameplayInventoryCursor + 15) mod 15;
-  if ReadHeroField(68 + GameplayInventoryCursor * 4) = 0 then
     itemichiwork2;
-  case GameplayInventoryCursor of
-    0: ItemImage := Image6;
-    1: ItemImage := Image5;
-    2: ItemImage := Image4;
-    3: ItemImage := Image7;
-    4: ItemImage := Image8;
-    5: ItemImage := Image9;
-    6: ItemImage := Image10;
-    7: ItemImage := Image11;
-    8: ItemImage := Image12;
-    9: ItemImage := Image13;
-    10: ItemImage := Image14;
-    11: ItemImage := Image15;
-    12: ItemImage := Image16;
-    13: ItemImage := Image17;
-  else
-    ItemImage := Image18;
+    case DrawFlag2 of
+      0:
+      begin
+        Image22.Top := Image6.Top;
+        Image22.Left := Image6.Left;
+      end;
+      1:
+      begin
+        Image22.Top := Image5.Top;
+        Image22.Left := Image5.Left;
+      end;
+      2:
+      begin
+        Image22.Top := Image4.Top;
+        Image22.Left := Image4.Left;
+      end;
+      3:
+      begin
+        Image22.Top := Image7.Top;
+        Image22.Left := Image7.Left;
+      end;
+      4:
+      begin
+        Image22.Top := Image8.Top;
+        Image22.Left := Image8.Left;
+      end;
+      5:
+      begin
+        Image22.Top := Image9.Top;
+        Image22.Left := Image9.Left;
+      end;
+      6:
+      begin
+        Image22.Top := Image10.Top;
+        Image22.Left := Image10.Left;
+      end;
+      7:
+      begin
+        Image22.Top := Image11.Top;
+        Image22.Left := Image11.Left;
+      end;
+      8:
+      begin
+        Image22.Top := Image12.Top;
+        Image22.Left := Image12.Left;
+      end;
+      9:
+      begin
+        Image22.Top := Image13.Top;
+        Image22.Left := Image13.Left;
+      end;
+      10:
+      begin
+        Image22.Top := Image14.Top;
+        Image22.Left := Image14.Left;
+      end;
+      11:
+      begin
+        Image22.Top := Image15.Top;
+        Image22.Left := Image15.Left;
+      end;
+      12:
+      begin
+        Image22.Top := Image16.Top;
+        Image22.Left := Image16.Left;
+      end;
+      13:
+      begin
+        Image22.Top := Image17.Top;
+        Image22.Left := Image17.Left;
+      end;
+      14:
+      begin
+        Image22.Top := Image18.Top;
+        Image22.Left := Image18.Left;
+      end;
+    end;
+    WorkBitmap3.Height := Image6.Height;
+    WorkBitmap3.Width := Image6.Width;
+    WorkBitmap3.Canvas.CopyMode := cmSrcCopy;
+    WorkBitmap2.Height := WorkBitmap3.Height;
+    WorkBitmap2.Width := WorkBitmap3.Width;
+    WorkBitmap2.Canvas.CopyMode := cmSrcCopy;
+    WorkBitmap1.Height := WorkBitmap3.Height;
+    WorkBitmap1.Width := WorkBitmap3.Width;
+    WorkBitmap1.Canvas.CopyMode := cmSrcCopy;
+    { Compose the selected item over the original highlight frame and mask. }
+    ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, 162);
+    ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, DrawFlag2 + 35);
+    ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, DrawFlag2 + 35);
+    TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+    SourceRect := TargetRect;
+    kasanegaki;
+    WorkBitmap2.Canvas.CopyRect(TargetRect, WorkBitmap1.Canvas, TargetRect);
+    ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, 164);
+    ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, 158);
+    kasanegaki;
+    Image22.Picture.Bitmap := WorkBitmap1;
+    Image22.Visible := True;
+    k1.Enabled := False;
   end;
-  Image22.Left := ItemImage.Left;
-  Image22.Top := ItemImage.Top;
-  Image22.Width := ItemImage.Width;
-  Image22.Height := ItemImage.Height;
-  Image22.Visible := True;
 end;
 
 procedure GameplayMove(Form: TTSW10; Direction: Longint);
 var
   X, Y: Longint;
 begin
-  if (InputEnabled = 0) or (EventCursor > 0) or EventPaused or (Hero.hp <= 0) then
+  if (InputEnabled = 0) or (EventCursor > 0) or (EventPaused <> 0) or (Hero.hp <= 0) then
     Exit;
   X := Hero.x;
   Y := Hero.y;
@@ -1890,277 +6798,891 @@ end;
 
 procedure TTSW10.BitBtn1Click(Sender: TObject);
 begin
-  GameplayMove(Self, 1);
+  if EventCursor <= 0 then
+  begin
+    EventCursor := 0;
+    FacingRequest := 1;
+    Hero.facing := 4;
+    FlightCell := Hero.y * 11 + Hero.x;
+    ContactIndex := FlightCell - 11;
+    if Hero.y <> 0 then
+      handan;
+  end;
 end;
 procedure TTSW10.BitBtn2Click(Sender: TObject);
 begin
-  GameplayMove(Self, 2);
+  if EventCursor <= 0 then
+  begin
+    EventCursor := 0;
+    FacingRequest := 2;
+    Hero.facing := 2;
+    FlightCell := Hero.y * 11 + Hero.x;
+    ContactIndex := FlightCell - 1;
+    if Hero.x <> 0 then
+      handan;
+  end;
 end;
 procedure TTSW10.BitBtn3Click(Sender: TObject);
 begin
-  GameplayMove(Self, 3);
+  if EventCursor <= 0 then
+  begin
+    EventCursor := 0;
+    FacingRequest := 3;
+    Hero.facing := 3;
+    FlightCell := Hero.y * 11 + Hero.x;
+    ContactIndex := FlightCell + 1;
+    if Hero.x <> 10 then
+      handan;
+  end;
 end;
 procedure TTSW10.BitBtn4Click(Sender: TObject);
 begin
-  GameplayMove(Self, 4);
+  if EventCursor <= 0 then
+  begin
+    EventCursor := 0;
+    FacingRequest := 4;
+    Hero.facing := 1;
+    FlightCell := Hero.y * 11 + Hero.x;
+    ContactIndex := FlightCell + 11;
+    if Hero.y <> 10 then
+      handan;
+  end;
 end;
 
 procedure TTSW10.formkeydown(Sender: TObject; var Key: Word; Shift: TShiftState);
+type
+  THeroWords = array[0..170] of Longint;
 var
-  Direction, Step: Longint;
+  I: Longint;
+  HeroWords: THeroWords absolute Hero;
 begin
-  if Key = VK_ESCAPE then
-  begin
-    if Image22.Visible then
-      Image22.Visible := False
-    else if Button37.Visible then
-      Button37Click(Self)
-    else if Button36.Visible then
-      Button36Click(Self)
-    else if Button35.Visible then
-      Button35Click(Self)
-    else if Button10.Visible then
-      Button10Click(Self)
-    else if Button7.Visible then
-      Button7Click(Self);
-    Key := 0;
-    Exit;
-  end;
-  if Key = VK_RETURN then
-  begin
-    if Button1.Visible then
-      Button1Click(Self)
-    else if Button38.Visible then
-      Button38Click(Self)
-    else if Button10.Visible then
-      Button10Click(Self)
-    else if Button36.Visible then
-      Button36Click(Self)
-    else if Button35.Visible then
-      Button35Click(Self)
-    else if Button2.Visible then
-      Button2Click(Self)
-    else if (InputEnabled <> 0) and (EventCursor = 0) then
-    begin
-      if not Image22.Visible then
-        itemichiwork
-      else
+  if EventCursor < 0 then
+    EventCursor := 0;
+  if (Option1.Enabled = True) and (EventCursor = 0) then
+    case Key of
+      VK_UP:
       begin
-        Image22.Visible := False;
-        case GameplayInventoryCursor of
-          0: img6work;
-          1: img5work;
-          2: img4work;
-          4: img8work;
-          5: img9work;
-          6: img10work;
-          7: img11work;
-          8: img12work;
-          9: img13work;
-          11: img15work;
-          12: img16work;
-          13: img17work;
-        end;
+        if Image22.Visible = False then
+        begin
+          FacingRequest := 1;
+          FlightCell := Hero.y * 11 + Hero.x;
+          Hero.facing := 4;
+          ContactIndex := FlightCell - 11;
+          if Hero.y <> 0 then
+            handan;
+        end
+        else
+          case DrawFlag1 of
+            0:
+              case DrawFlag2 of
+                4..9:
+                  if Button37.Visible = True then
+                    Button37.SetFocus;
+                11..13:
+                  if Button37.Visible = True then
+                    Button37.SetFocus;
+              end;
+            1:
+            begin
+              NeighborIndex := 0;
+              for I := 1 to 15 do
+                NeighborIndex := NeighborIndex + HeroWords[16 + I];
+              if NeighborIndex <> 0 then
+              begin
+                DrawFlag2 := DrawFlag2 - 3;
+                itemichiwork(0);
+              end;
+            end;
+          end;
       end;
+      VK_LEFT:
+      begin
+        if Image22.Visible = False then
+        begin
+          FacingRequest := 2;
+          FlightCell := Hero.y * 11 + Hero.x;
+          Hero.facing := 2;
+          ContactIndex := FlightCell - 1;
+          if Hero.x <> 0 then
+            handan;
+        end
+        else
+          case DrawFlag1 of
+            1:
+            begin
+              NeighborIndex := 0;
+              for I := 1 to 15 do
+                NeighborIndex := NeighborIndex + HeroWords[16 + I];
+              if NeighborIndex <> 0 then
+              begin
+                Dec(DrawFlag2);
+                itemichiwork(3);
+              end;
+            end;
+          end;
+      end;
+      VK_RIGHT:
+      begin
+        if Image22.Visible = False then
+        begin
+          FacingRequest := 3;
+          FlightCell := Hero.y * 11 + Hero.x;
+          Hero.facing := 3;
+          ContactIndex := FlightCell + 1;
+          if Hero.x <> 10 then
+            handan;
+        end
+        else
+          case DrawFlag1 of
+            1:
+            begin
+              NeighborIndex := 0;
+              for I := 1 to 15 do
+                NeighborIndex := NeighborIndex + HeroWords[16 + I];
+              if NeighborIndex <> 0 then
+              begin
+                Inc(DrawFlag2);
+                itemichiwork(2);
+              end;
+            end;
+          end;
+      end;
+      VK_DOWN:
+      begin
+        if Image22.Visible = False then
+        begin
+          FacingRequest := 4;
+          FlightCell := Hero.y * 11 + Hero.x;
+          Hero.facing := 1;
+          ContactIndex := FlightCell + 11;
+          if Hero.y <> 10 then
+            handan;
+        end
+        else
+          case DrawFlag1 of
+            1:
+            begin
+              NeighborIndex := 0;
+              for I := 1 to 15 do
+                NeighborIndex := NeighborIndex + HeroWords[16 + I];
+              if NeighborIndex <> 0 then
+              begin
+                DrawFlag2 := DrawFlag2 + 3;
+                itemichiwork(1);
+              end;
+            end;
+          end;
+      end;
+      VK_RETURN:
+      begin
+        if Image22.Visible = False then
+          itemichiwork(4)
+        else
+        begin
+          case DrawFlag2 of
+            0: img6work;
+            1: img5work;
+            2: img4work;
+            4: img8work;
+            5: img9work;
+            6: img10work;
+            7: img11work;
+            8: img12work;
+            9: img13work;
+            11: img15work;
+            12: img16work;
+            13: img17work;
+          end;
+          Image22.Visible := False;
+          k1.Enabled := True;
+        end;
+        DrawFlag1 := 1 - DrawFlag1;
+      end;
+      VK_ESCAPE:
+        if DrawFlag1 = 1 then
+        begin
+          Image22.Visible := False;
+          k1.Enabled := True;
+          DrawFlag1 := 0;
+        end;
     end;
-    Key := 0;
-    Exit;
-  end;
-  Direction := 0;
-  case Key of
-    VK_UP: Direction := 1;
-    VK_LEFT: Direction := 2;
-    VK_RIGHT: Direction := 3;
-    VK_DOWN: Direction := 4;
-  end;
-  if Direction = 0 then
-    Exit;
-  if Image22.Visible then
-  begin
-    FacingRequest := Direction;
-    case Direction of
-      1: Step := -3;
-      2: Step := -1;
-      3: Step := 1;
-    else
-      Step := 3;
-    end;
-    Inc(GameplayInventoryCursor, Step);
-    itemichiwork;
-  end
-  else if Button10.Visible then
-  begin
-    if (Direction = 1) and Button8.Enabled then
-      Button8Click(Self)
-    else if (Direction = 4) and Button9.Enabled then
-      Button9Click(Self);
-  end
-  else if Button37.Visible then
-  begin
-    if Direction = 1 then
-      Button37Click(Self)
-    else if Direction = 4 then
-      Button38Click(Self);
-  end
-  else
-    GameplayMove(Self, Direction);
-  Key := 0;
+  if (Image34.Visible = True) and (Key = VK_RETURN) then
+    append;
 end;
 
 procedure TTSW10.monidou; { $00480384; cardinal tile slide }
 var
-  FromCell, ToCell, OldContact, OldDirection, OldX, OldY, I, Tile: Longint;
+  I: Longint;
 begin
-  FromCell := Smallint(EventStack[EventCursor].A);
-  ToCell := Smallint(EventStack[EventCursor].B);
-  if (FromCell < 0) or (FromCell > 120) or (ToCell < 0) or (ToCell > 120) then
-    Exit;
-  Tile := Maps[Hero.floor, FromCell + 2];
-  OldContact := ContactIndex;
-  OldDirection := Hero.facing;
-  OldX := Hero.x;
-  OldY := Hero.y;
-  GameplayWalkingFrom := FromCell;
-  GameplayWalkingTotal := Image6.Width;
-  if GameplayWalkingTotal < 1 then
-    GameplayWalkingTotal := 1;
-  ContactIndex := ToCell;
-  ScratchIndex := Tile - 1;
-  case ToCell - FromCell of
-    -11: Damage := 4;
-    -1: Damage := 2;
-    1: Damage := 3;
-    11: Damage := 1;
-  else
-    Damage := 0;
-  end;
-  for I := 1 to GameplayWalkingTotal do
+  DrawX := Smallint(EventStack[EventCursor].A) * Image6.Width mod (Image6.Width * 11);
+  DrawY :=
+      (Smallint(EventStack[EventCursor].A) * Image6.Height div (Image6.Height * 11))
+          * Image6.Height;
+
+  { Alternate the monster frames while updating the two map-animation buffers. }
+  for I := 1 to Image6.Width do
   begin
-    GameplayWalkingStep := I;
-    monidouwork;
+    StrikeCount := I;
+    NeighborIndex := StrikeCount;
+    if NeighborIndex mod (Image6.Width div 4) = 0 then
+      ScratchIndex := Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] - 1
+    else
+      ScratchIndex := Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] - 1 + 1;
+    TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+    case Smallint(EventStack[EventCursor].B) - Smallint(EventStack[EventCursor].A) of
+      11:
+      begin
+        Damage := 1;
+        if NeighborIndex mod (Image6.Width div 4) = 0 then
+          DoorOpened := 0
+        else
+          DoorOpened := 1;
+        monidouwork;
+        DrawX := Smallint(EventStack[EventCursor].A) * Image6.Width mod (Image6.Width * 11);
+        DrawY :=
+            (Smallint(EventStack[EventCursor].A) * Image6.Height div (Image6.Height * 11))
+                * Image6.Height;
+      end;
+      -1:
+      begin
+        Damage := 2;
+        if NeighborIndex mod (Image6.Width div 4) = 0 then
+          DoorOpened := 0
+        else
+          DoorOpened := 1;
+        monidouwork;
+        DrawX := Smallint(EventStack[EventCursor].B) * Image6.Width mod (Image6.Width * 11);
+        DrawY :=
+            (Smallint(EventStack[EventCursor].B) * Image6.Height div (Image6.Height * 11))
+                * Image6.Height;
+      end;
+      1:
+      begin
+        Damage := 3;
+        if NeighborIndex mod (Image6.Width div 4) = 0 then
+          DoorOpened := 0
+        else
+          DoorOpened := 1;
+        monidouwork;
+        DrawX := Smallint(EventStack[EventCursor].A) * Image6.Width mod (Image6.Width * 11);
+        DrawY :=
+            (Smallint(EventStack[EventCursor].A) * Image6.Height div (Image6.Height * 11))
+                * Image6.Height;
+      end;
+      -11:
+      begin
+        Damage := 4;
+        if NeighborIndex mod (Image6.Width div 4) = 0 then
+          DoorOpened := 0
+        else
+          DoorOpened := 1;
+        monidouwork;
+        DrawX := Smallint(EventStack[EventCursor].B) * Image6.Width mod (Image6.Width * 11);
+        DrawY :=
+            (Smallint(EventStack[EventCursor].B) * Image6.Height div (Image6.Height * 11))
+                * Image6.Height;
+      end;
+    end;
+
+    if NeighborIndex mod (Image6.Width div 4) = 0 then
+      MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap1)
+    else
+      MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap1);
+    MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
   end;
-  Maps[Hero.floor, ToCell + 2] := Tile;
-  Maps[Hero.floor, FromCell + 2] := 6;
-  ContactIndex := OldContact;
-  Hero.facing := OldDirection;
-  Hero.x := OldX;
-  Hero.y := OldY;
-  GameplayRefresh(Self);
+  NeighborIndex := Image6.Width;
+  ScratchIndex := Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] - 1 + 1;
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  case Smallint(EventStack[EventCursor].B) - Smallint(EventStack[EventCursor].A) of
+    11:
+    begin
+      Damage := 1;
+      DoorOpened := 1;
+      monidouwork;
+      DrawX := Smallint(EventStack[EventCursor].A) * Image6.Width mod (Image6.Width * 11);
+      DrawY :=
+          (Smallint(EventStack[EventCursor].A) * Image6.Height div (Image6.Height * 11))
+              * Image6.Height;
+    end;
+    -1:
+    begin
+      Damage := 2;
+      DoorOpened := 1;
+      monidouwork;
+      DrawX := Smallint(EventStack[EventCursor].B) * Image6.Width mod (Image6.Width * 11);
+      DrawY :=
+          (Smallint(EventStack[EventCursor].B) * Image6.Height div (Image6.Height * 11))
+              * Image6.Height;
+    end;
+    1:
+    begin
+      Damage := 3;
+      DoorOpened := 1;
+      monidouwork;
+      DrawX := Smallint(EventStack[EventCursor].A) * Image6.Width mod (Image6.Width * 11);
+      DrawY :=
+          (Smallint(EventStack[EventCursor].A) * Image6.Height div (Image6.Height * 11))
+              * Image6.Height;
+    end;
+    -11:
+    begin
+      Damage := 4;
+      DoorOpened := 1;
+      monidouwork;
+      DrawX := Smallint(EventStack[EventCursor].B) * Image6.Width mod (Image6.Width * 11);
+      DrawY :=
+          (Smallint(EventStack[EventCursor].B) * Image6.Height div (Image6.Height * 11))
+              * Image6.Height;
+    end;
+  end;
+
+  MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap1);
+  Maps[Hero.floor, Smallint(EventStack[EventCursor].B) + 2] :=
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2];
+  Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
 end;
 
 procedure TTSW10.monidouwork; { $00480A90 }
-var
-  PixelX, PixelY, FromX, FromY, ToX, ToY: Longint;
 begin
-  if (MapBitmap1 = nil) or (GameplayWalkingTotal = 0) then
-    Exit;
-  FromX := GameplayWalkingFrom mod 11;
-  FromY := GameplayWalkingFrom div 11;
-  ToX := ContactIndex mod 11;
-  ToY := ContactIndex div 11;
-  PixelX :=
-      FromX * Image6.Width
-          + (ToX - FromX) * Image6.Width * GameplayWalkingStep div GameplayWalkingTotal;
-  PixelY :=
-      FromY * Image6.Height
-          + (ToY - FromY) * Image6.Height * GameplayWalkingStep div GameplayWalkingTotal;
-  Canvas.Draw(UiSpan, UiStep, MapBitmap1);
-  WorkBitmap1.Width := Image6.Width;
-  WorkBitmap1.Height := Image6.Height;
-  WorkBitmap2.Width := Image6.Width;
+  case Damage of
+    1:
+    begin
+      WorkBitmap1.Height := Image6.Height * 2;
+      WorkBitmap1.Width := Image6.Width;
+    end;
+    2:
+    begin
+      WorkBitmap1.Height := Image6.Height;
+      WorkBitmap1.Width := Image6.Width * 2;
+    end;
+    3:
+    begin
+      WorkBitmap1.Height := Image6.Height;
+      WorkBitmap1.Width := Image6.Width * 2;
+    end;
+    4:
+    begin
+      WorkBitmap1.Height := Image6.Height * 2;
+      WorkBitmap1.Width := Image6.Width;
+    end;
+  end;
   WorkBitmap2.Height := Image6.Height;
-  WorkBitmap3.Width := Image6.Width;
-  WorkBitmap3.Height := Image6.Height;
-  ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, 5);
+  WorkBitmap2.Width := Image6.Width;
+  WorkBitmap3.Height := WorkBitmap2.Height;
+  WorkBitmap3.Width := WorkBitmap2.Width;
+  WorkBitmap1.Canvas.CopyMode := cmSrcCopy;
+  WorkBitmap2.Canvas.CopyMode := cmSrcCopy;
+  WorkBitmap3.Canvas.CopyMode := cmSrcCopy;
   ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, ScratchIndex);
   ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, ScratchIndex);
-  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
-  SourceRect := TargetRect;
+  { Compose the moving sprite over two road cells, using the caller's pixel step. }
+  ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, 5);
+  case Damage of
+    1: ImageList1.Draw(WorkBitmap1.Canvas, 0, Image6.Height, 5);
+    2: ImageList1.Draw(WorkBitmap1.Canvas, Image6.Width, 0, 5);
+    3: ImageList1.Draw(WorkBitmap1.Canvas, Image6.Width, 0, 5);
+    4: ImageList1.Draw(WorkBitmap1.Canvas, 0, Image6.Height, 5);
+  end;
+  case Damage of
+    1: SourceRect := Rect(0, NeighborIndex, Image6.Width, Image6.Height + NeighborIndex);
+    2:
+      SourceRect :=
+          Rect(Image6.Width - NeighborIndex, 0, Image6.Width * 2 - NeighborIndex, Image6.Height);
+    3: SourceRect := Rect(NeighborIndex, 0, Image6.Width + NeighborIndex, Image6.Height);
+    4:
+      SourceRect :=
+          Rect(0, Image6.Height - NeighborIndex, Image6.Width, Image6.Height * 2 - NeighborIndex);
+  end;
   kasanegaki;
-  Canvas.Draw(UiSpan + PixelX, UiStep + PixelY, WorkBitmap1);
 end;
 
 procedure TTSW10.dooropen; { $004770E0; sixteen-frame door/wall movement }
-var
-  Cell, Motion, Frame, Tile, PixelX, PixelY, Part: Longint;
 begin
-  Cell := Smallint(EventStack[EventCursor].A);
-  Motion := Smallint(EventStack[EventCursor].B);
-  if (Cell < 0) or (Cell > 120) then
-    Exit;
-  if EventCursor > 0 then
-    Frame := Smallint(EventStack[EventCursor - 1].B)
-  else
-    Frame := 16;
-  if Frame = 16 then
-  begin
-    if Motion = 5 then
-      Maps[Hero.floor, Cell + 2] := 4
-    else if Motion = 8 then
-      Maps[Hero.floor, Cell + 2] := 8
-    else
-      Maps[Hero.floor, Cell + 2] := 6;
-    GameplayRefresh(Self);
-    Exit;
+  WorkBitmap1.Canvas.CopyMode := cmSrcCopy;
+  WorkBitmap2.Canvas.CopyMode := cmSrcCopy;
+  WorkBitmap3.Canvas.CopyMode := cmSrcCopy;
+  case Smallint(EventStack[EventCursor].B) of
+    1..3:
+    begin
+      { Split colored doors horizontally. }
+      if High1.Checked = True then
+        Timer2.Interval := 8;
+      if Middle1.Checked = True then
+        Timer2.Interval := 10;
+      if Low1.Checked = True then
+        Timer2.Interval := 12;
+      ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
+      if ScratchIndex = 16 then
+        timerin;
+      if GameOptions[8] = 1 then
+        ScratchIndex := ScratchIndex * 5 div 4;
+      WorkBitmap2.Height := Image6.Height;
+      WorkBitmap2.Width := Image6.Width;
+      WorkBitmap3.Height := WorkBitmap2.Height;
+      WorkBitmap3.Width := WorkBitmap2.Width;
+      ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 5);
+      ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, Smallint(EventStack[EventCursor].B) - 1);
+      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      TargetRect := Rect(ScratchIndex, 0, Image6.Width div 2, Image6.Height);
+      SourceRect := Rect(0, 0, Image6.Width div 2 - ScratchIndex, Image6.Height);
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      TargetRect := Rect(Image6.Width div 2, 0, Image6.Width - ScratchIndex, Image6.Height);
+      SourceRect := Rect(Image6.Width div 2 + ScratchIndex, 0, Image6.Width, Image6.Height);
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+    end;
+    4:
+    begin
+      { Open a wall into four quadrants. }
+      WorkBitmap2.Height := Image6.Height;
+      WorkBitmap2.Width := Image6.Width;
+      WorkBitmap3.Height := WorkBitmap2.Height;
+      WorkBitmap3.Width := WorkBitmap2.Width;
+      if High1.Checked = True then
+        Timer2.Interval := 8;
+      if Middle1.Checked = True then
+        Timer2.Interval := 10;
+      if Low1.Checked = True then
+        Timer2.Interval := 12;
+      ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
+      if ScratchIndex = 16 then
+        timerin;
+      if GameOptions[8] = 1 then
+        ScratchIndex := ScratchIndex * 5 div 4;
+      ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 5);
+      ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 3);
+      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      TargetRect := Rect(ScratchIndex, ScratchIndex, Image6.Width div 2, Image6.Height div 2);
+      SourceRect :=
+          Rect(0, 0, Image6.Width div 2 - ScratchIndex, Image6.Height div 2 - ScratchIndex);
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      TargetRect :=
+          Rect(Image6.Width div 2, ScratchIndex, Image6.Width - ScratchIndex, Image6.Height div 2);
+      SourceRect :=
+          Rect(
+              Image6.Width div 2 + ScratchIndex,
+              0,
+              Image6.Width,
+              Image6.Height div 2 - ScratchIndex
+          );
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      TargetRect :=
+          Rect(ScratchIndex, Image6.Height div 2, Image6.Width div 2, Image6.Height - ScratchIndex);
+      SourceRect :=
+          Rect(
+              0,
+              Image6.Height div 2 + ScratchIndex,
+              Image6.Width div 2 - ScratchIndex,
+              Image6.Height
+          );
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      TargetRect :=
+          Rect(
+              Image6.Width div 2,
+              Image6.Height div 2,
+              Image6.Width - ScratchIndex,
+              Image6.Height - ScratchIndex
+          );
+      SourceRect :=
+          Rect(
+              Image6.Width div 2 + ScratchIndex,
+              Image6.Height div 2 + ScratchIndex,
+              Image6.Width,
+              Image6.Height
+          );
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+    end;
+    5:
+    begin
+      { Close a wall from four quadrants. }
+      WorkBitmap2.Height := Image6.Height;
+      WorkBitmap2.Width := Image6.Width;
+      WorkBitmap3.Height := WorkBitmap2.Height;
+      WorkBitmap3.Width := WorkBitmap2.Width;
+      if High1.Checked = True then
+        Timer2.Interval := 8;
+      if Middle1.Checked = True then
+        Timer2.Interval := 10;
+      if Low1.Checked = True then
+        Timer2.Interval := 12;
+      ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
+      if ScratchIndex = 16 then
+        timerin;
+      if GameOptions[8] = 1 then
+        ScratchIndex := ScratchIndex * 5 div 4;
+      ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 5);
+      ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 3);
+      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      TargetRect :=
+          Rect(
+              Image6.Width div 2 - ScratchIndex,
+              Image6.Height div 2 - ScratchIndex,
+              Image6.Width div 2,
+              Image6.Height div 2
+          );
+      SourceRect := Rect(0, 0, ScratchIndex, ScratchIndex);
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      TargetRect :=
+          Rect(
+              Image6.Width div 2,
+              Image6.Height div 2 - ScratchIndex,
+              Image6.Width div 2 + ScratchIndex,
+              Image6.Height div 2
+          );
+      SourceRect := Rect(Image6.Width - ScratchIndex, 0, Image6.Width, ScratchIndex);
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      TargetRect :=
+          Rect(
+              Image6.Width div 2 - ScratchIndex,
+              Image6.Height div 2,
+              Image6.Width div 2,
+              Image6.Height div 2 + ScratchIndex
+          );
+      SourceRect := Rect(0, Image6.Height - ScratchIndex, ScratchIndex, Image6.Height);
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      TargetRect :=
+          Rect(
+              Image6.Width div 2,
+              Image6.Height div 2,
+              Image6.Width div 2 + ScratchIndex,
+              Image6.Height div 2 + ScratchIndex
+          );
+      SourceRect :=
+          Rect(
+              Image6.Width - ScratchIndex,
+              Image6.Height - ScratchIndex,
+              Image6.Width,
+              Image6.Height
+          );
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 4;
+    end;
+    6:
+    begin
+      { Lift the masked fence. }
+      WorkBitmap2.Height := Image6.Height;
+      WorkBitmap2.Width := Image6.Width;
+      WorkBitmap3.Height := WorkBitmap2.Height;
+      WorkBitmap3.Width := WorkBitmap2.Width;
+      if High1.Checked = True then
+        Timer2.Interval := 8;
+      if Middle1.Checked = True then
+        Timer2.Interval := 10;
+      if Low1.Checked = True then
+        Timer2.Interval := 12;
+      ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
+      if ScratchIndex = 16 then
+        timerin;
+      if GameOptions[8] = 1 then
+        ScratchIndex := ScratchIndex * 5 div 4;
+      ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, 4);
+      ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 4);
+      ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, 5);
+      TargetRect := Rect(0, ScratchIndex * 2, Image6.Width, Image6.Height);
+      SourceRect := Rect(0, 0, Image6.Width, Image6.Height - ScratchIndex * 2);
+      kasanegaki;
+      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap1);
+      MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap1);
+      MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+    end;
+    7:
+    begin
+      { Lower the gate out of view. }
+      WorkBitmap2.Height := Image6.Height;
+      WorkBitmap2.Width := Image6.Width;
+      WorkBitmap3.Height := WorkBitmap2.Height;
+      WorkBitmap3.Width := WorkBitmap2.Width;
+      if High1.Checked = True then
+        Timer2.Interval := 8;
+      if Middle1.Checked = True then
+        Timer2.Interval := 10;
+      if Low1.Checked = True then
+        Timer2.Interval := 12;
+      ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
+      if ScratchIndex = 16 then
+        timerin;
+      if GameOptions[8] = 1 then
+        ScratchIndex := ScratchIndex * 5 div 4;
+      ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 5);
+      ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 7);
+      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      TargetRect := Rect(0, 0, Image6.Width, Image6.Height - ScratchIndex * 2);
+      SourceRect := Rect(0, ScratchIndex * 2, Image6.Width, Image6.Height);
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+    end;
+    8:
+    begin
+      { Raise the gate into view. }
+      WorkBitmap2.Height := Image6.Height;
+      WorkBitmap2.Width := Image6.Width;
+      WorkBitmap3.Height := WorkBitmap2.Height;
+      WorkBitmap3.Width := WorkBitmap2.Width;
+      if High1.Checked = True then
+        Timer2.Interval := 8;
+      if Middle1.Checked = True then
+        Timer2.Interval := 10;
+      if Low1.Checked = True then
+        Timer2.Interval := 12;
+      ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
+      if ScratchIndex = 16 then
+        timerin;
+      if GameOptions[8] = 1 then
+        ScratchIndex := ScratchIndex * 5 div 4;
+      ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 5);
+      ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 7);
+      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      TargetRect := Rect(0, 0, Image6.Width, ScratchIndex * 2);
+      SourceRect := Rect(0, (Image6.Width div 2 - ScratchIndex) * 2, Image6.Width, Image6.Height);
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 8;
+    end;
+    9:
+    begin
+      { Reveal road from the right. }
+      WorkBitmap2.Height := Image6.Height;
+      WorkBitmap2.Width := Image6.Width;
+      WorkBitmap3.Height := WorkBitmap2.Height;
+      WorkBitmap3.Width := WorkBitmap2.Width;
+      if High1.Checked = True then
+        Timer2.Interval := 8;
+      if Middle1.Checked = True then
+        Timer2.Interval := 10;
+      if Low1.Checked = True then
+        Timer2.Interval := 12;
+      ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
+      if ScratchIndex = 16 then
+        timerin;
+      if GameOptions[8] = 1 then
+        ScratchIndex := ScratchIndex * 5 div 4;
+      ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 12);
+      ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 5);
+      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      TargetRect := Rect(0, 0, ScratchIndex * 2, Image6.Height);
+      SourceRect := Rect((Image6.Width div 2 - ScratchIndex) * 2, 0, Image6.Width, Image6.Height);
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+    end;
+    10:
+    begin
+      { Reveal road from the left. }
+      WorkBitmap2.Height := Image6.Height;
+      WorkBitmap2.Width := Image6.Width;
+      WorkBitmap3.Height := WorkBitmap2.Height;
+      WorkBitmap3.Width := WorkBitmap2.Width;
+      if High1.Checked = True then
+        Timer2.Interval := 8;
+      if Middle1.Checked = True then
+        Timer2.Interval := 10;
+      if Low1.Checked = True then
+        Timer2.Interval := 12;
+      ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
+      if ScratchIndex = 16 then
+        timerin;
+      if GameOptions[8] = 1 then
+        ScratchIndex := ScratchIndex * 5 div 4;
+      ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 12);
+      ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 5);
+      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      TargetRect := Rect(0, 0, ScratchIndex * 2, Image6.Height);
+      SourceRect := Rect(0, 0, ScratchIndex * 2, Image6.Height);
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+    end;
+    11:
+    begin
+      { Reveal road from the top. }
+      WorkBitmap2.Height := Image6.Height;
+      WorkBitmap2.Width := Image6.Width;
+      WorkBitmap3.Height := WorkBitmap2.Height;
+      WorkBitmap3.Width := WorkBitmap2.Width;
+      if High1.Checked = True then
+        Timer2.Interval := 8;
+      if Middle1.Checked = True then
+        Timer2.Interval := 10;
+      if Low1.Checked = True then
+        Timer2.Interval := 12;
+      ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
+      if ScratchIndex = 16 then
+        timerin;
+      if GameOptions[8] = 1 then
+        ScratchIndex := ScratchIndex * 5 div 4;
+      ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 12);
+      ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 5);
+      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      TargetRect := Rect(0, 0, Image6.Width, ScratchIndex * 2);
+      SourceRect := Rect(0, 0, Image6.Width, ScratchIndex * 2);
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+    end;
+    12:
+    begin
+      { Reveal road from the bottom. }
+      WorkBitmap2.Height := Image6.Height;
+      WorkBitmap2.Width := Image6.Width;
+      WorkBitmap3.Height := WorkBitmap2.Height;
+      WorkBitmap3.Width := WorkBitmap2.Width;
+      if High1.Checked = True then
+        Timer2.Interval := 8;
+      if Middle1.Checked = True then
+        Timer2.Interval := 10;
+      if Low1.Checked = True then
+        Timer2.Interval := 12;
+      ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
+      if ScratchIndex = 16 then
+        timerin;
+      if GameOptions[8] = 1 then
+        ScratchIndex := ScratchIndex * 5 div 4;
+      ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 12);
+      ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 5);
+      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      TargetRect := Rect(0, (Image6.Height div 2 - ScratchIndex) * 2, Image6.Width, Image6.Height);
+      SourceRect := Rect(0, (Image6.Height div 2 - ScratchIndex) * 2, Image6.Width, Image6.Height);
+      WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
+      MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
+      MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+    end;
   end;
-  if MapBitmap1 = nil then
-    Exit;
-  Tile := Maps[Hero.floor, Cell + 2];
-  PixelX := (Cell mod 11) * Image6.Width;
-  PixelY := (Cell div 11) * Image6.Height;
-  Part := Image6.Height * Frame div 16;
-  WorkBitmap1.Width := Image6.Width;
-  WorkBitmap1.Height := Image6.Height;
-  WorkBitmap2.Width := Image6.Width;
-  WorkBitmap2.Height := Image6.Height;
-  ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, 5);
-  if (Motion = 5) or (Motion = 8) then
-  begin
-    if Motion = 5 then
-      Tile := 4
-    else
-      Tile := 8;
-    ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, Tile - 1);
-    TargetRect := Rect(0, Image6.Height - Part, Image6.Width, Image6.Height);
-    SourceRect := Rect(0, 0, Image6.Width, Part);
-  end
-  else
-  begin
-    ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, Tile - 1);
-    TargetRect := Rect(0, Part, Image6.Width, Image6.Height);
-    SourceRect := Rect(0, 0, Image6.Width, Image6.Height - Part);
-  end;
-  WorkBitmap1.Canvas.CopyRect(TargetRect, WorkBitmap2.Canvas, SourceRect);
-  MapBitmap1.Canvas.Draw(PixelX, PixelY, WorkBitmap1);
-  MapBitmap2.Canvas.Draw(PixelX, PixelY, WorkBitmap1);
-  Canvas.Draw(UiSpan + PixelX, UiStep + PixelY, WorkBitmap1);
 end;
 
 procedure TTSW10.banpaiawork; { $0047C978; transformation raster tile }
-var
-  Cell, Frame, PixelX, PixelY: Longint;
 begin
-  if MapBitmap1 = nil then
-    Exit;
-  Cell := ContactIndex;
-  if (Cell < 0) or (Cell > 120) then
-    Cell := 27;
-  Frame := DoorOpened + 82;
-  if (Frame < 0) or (Frame >= ImageList1.Count) then
-    Exit;
-  WorkBitmap1.Width := Image6.Width;
-  WorkBitmap1.Height := Image6.Height;
-  WorkBitmap2.Width := Image6.Width;
+  { Assemble the eight bats around the central vampire in a three-by-three patch. }
+  WorkBitmap1.Height := Image6.Height * 3;
+  WorkBitmap1.Width := Image6.Width * 3;
   WorkBitmap2.Height := Image6.Height;
-  WorkBitmap3.Width := Image6.Width;
-  WorkBitmap3.Height := Image6.Height;
+  WorkBitmap2.Width := Image6.Width;
+  WorkBitmap3.Height := WorkBitmap2.Height;
+  WorkBitmap3.Width := WorkBitmap2.Width;
+  WorkBitmap1.Canvas.CopyMode := cmSrcCopy;
+  WorkBitmap2.Canvas.CopyMode := cmSrcCopy;
+  WorkBitmap3.Canvas.CopyMode := cmSrcCopy;
   ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, 5);
-  ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, Frame);
-  ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, Frame);
+  ImageList1.Draw(WorkBitmap1.Canvas, Image6.Width, 0, 5);
+  ImageList1.Draw(WorkBitmap1.Canvas, Image6.Width * 2, 0, 5);
+  ImageList1.Draw(WorkBitmap1.Canvas, 0, Image6.Height, 5);
+  ImageList1.Draw(WorkBitmap1.Canvas, Image6.Width, Image6.Height, 5);
+  ImageList1.Draw(WorkBitmap1.Canvas, Image6.Width * 2, Image6.Height, 5);
+  ImageList1.Draw(WorkBitmap1.Canvas, 0, Image6.Height * 2, 5);
+  ImageList1.Draw(WorkBitmap1.Canvas, Image6.Width, Image6.Height * 2, 5);
+  ImageList1.Draw(WorkBitmap1.Canvas, Image6.Width * 2, Image6.Height * 2, 5);
+  ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, DoorOpened + 82);
+  ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, DoorOpened + 82);
   TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
-  SourceRect := TargetRect;
+  SourceRect :=
+      Rect(ScratchIndex, ScratchIndex, Image6.Width + ScratchIndex, Image6.Height + ScratchIndex);
   kasanegaki;
-  PixelX := (Cell mod 11) * Image6.Width;
-  PixelY := (Cell div 11) * Image6.Height;
-  Canvas.Draw(UiSpan + PixelX, UiStep + PixelY, WorkBitmap1);
+  ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, DoorOpened + 82);
+  ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, DoorOpened + 82);
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  SourceRect :=
+      Rect(
+          ScratchIndex,
+          Image6.Height * 2 - ScratchIndex,
+          Image6.Width + ScratchIndex,
+          Image6.Height * 3 - ScratchIndex
+      );
+  kasanegaki;
+  ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, DoorOpened + 82);
+  ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, DoorOpened + 82);
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  SourceRect :=
+      Rect(
+          Image6.Width * 2 - ScratchIndex,
+          ScratchIndex,
+          Image6.Width * 2 - ScratchIndex + Image6.Width,
+          Image6.Height + ScratchIndex
+      );
+  kasanegaki;
+  ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, DoorOpened + 82);
+  ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, DoorOpened + 82);
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  SourceRect :=
+      Rect(
+          Image6.Width * 2 - ScratchIndex,
+          Image6.Height * 2 - ScratchIndex,
+          Image6.Width * 2 - ScratchIndex + Image6.Width,
+          Image6.Height * 3 - ScratchIndex
+      );
+  kasanegaki;
+  ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, DoorOpened + 82);
+  ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, DoorOpened + 82);
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  SourceRect := Rect(Image6.Width, ScratchIndex, Image6.Width * 2, Image6.Height + ScratchIndex);
+  kasanegaki;
+  ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, DoorOpened + 82);
+  ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, DoorOpened + 82);
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  SourceRect :=
+      Rect(
+          Image6.Width,
+          Image6.Height * 2 - ScratchIndex,
+          Image6.Width * 2,
+          Image6.Height * 3 - ScratchIndex
+      );
+  kasanegaki;
+  ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, DoorOpened + 82);
+  ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, DoorOpened + 82);
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  SourceRect := Rect(ScratchIndex, Image6.Height, Image6.Width + ScratchIndex, Image6.Height * 2);
+  kasanegaki;
+  ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, DoorOpened + 82);
+  ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, DoorOpened + 82);
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  SourceRect :=
+      Rect(
+          Image6.Width * 2 - ScratchIndex,
+          Image6.Height,
+          Image6.Width * 2 - ScratchIndex + Image6.Width,
+          Image6.Height * 2
+      );
+  kasanegaki;
+  case GameOptions[8] of
+    0: NeighborIndex := ScratchIndex div 2 + 231 - 66;
+    1: NeighborIndex := ScratchIndex * 4 div 5 div 2 + 231 - 66;
+  end;
+  ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, NeighborIndex);
+  ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, DoorOpened + 94);
+  TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
+  SourceRect := Rect(Image6.Width, Image6.Height, Image6.Width * 2, Image6.Height * 2);
+  kasanegaki;
 end;
