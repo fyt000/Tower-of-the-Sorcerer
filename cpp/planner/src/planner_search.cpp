@@ -13,7 +13,8 @@ using namespace detail;
 SearchResult search(const Route& source, const SearchOptions& options, std::ostream& progress) {
     if ((options.goal_floor != 11 && options.goal_floor != 21) || options.max_purchases < 0 ||
         options.width < 1 || options.depth < 1 || !std::isfinite(options.seconds) || options.seconds <= 0 ||
-        options.max_results < 1 || options.policy < 0 || options.policy > 2)
+        options.max_results < 1 || options.policy < SearchPolicy::Balanced ||
+        options.policy > SearchPolicy::Defense)
         throw std::invalid_argument(
             "Search needs goal 11 or 21 and positive width, depth, seconds and results");
     if (source.flight != -1 || source.game.dialogue || source.game.busy())
@@ -30,7 +31,7 @@ SearchResult search(const Route& source, const SearchOptions& options, std::ostr
     root.game = source.game;
     auto initial = source.inputs;
     engine.normalize(root.game, initial);
-    root.inputs = int(initial.size());
+    root.input_count = int(initial.size());
     root.history = std::make_shared<History>(History{nullptr, std::move(initial)});
     root.score = engine.rank(root.game);
     Node best = root;

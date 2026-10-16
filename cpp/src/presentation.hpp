@@ -1,6 +1,7 @@
 #pragma once
 #include "assets.hpp"
 #include "raylib.h"
+#include "raylib_resources.hpp"
 #include "tsw/game.hpp"
 #include "tsw/hero_orb.hpp"
 #include "tsw/mouse_walk.hpp"
@@ -32,7 +33,7 @@ enum class SavePicker { None, Save, Load };
 
 struct DesktopUi {
     Language language = Language::English;
-    int flight = -1, selected_item = -1, speed_index{}, enemy_first_row{};
+    int flight = -1, selected_item = -1, game_speed_index{}, enemy_first_row{};
     int selected_slot = 1;
     SavePicker save_picker = SavePicker::None;
     SaveSlots save_slots;
@@ -156,9 +157,10 @@ class Presentation {
   private:
     struct Art;
     std::unique_ptr<Art> art_;
-    RenderTexture2D canvas_{}, scene_cache_{};
-    Shader dissolve_{};
-    int dissolve_mask_location_{}, previous_raster_ = -1;
+    detail::UniqueRenderTexture canvas_, scene_cache_;
+    detail::UniqueShader dissolve_;
+    int dissolve_mask_location_{};
+    RasterMode previous_raster_ = RasterMode::Inactive;
     bool hide_panels_{}, cache_requested_{}, cache_valid_{};
     float walking_remaining_{};
     float animation_seconds_{};

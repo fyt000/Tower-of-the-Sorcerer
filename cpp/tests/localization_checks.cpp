@@ -35,9 +35,27 @@ int verify_localization(Presentation& renderer, const std::filesystem::path& out
         ui.help = true;
         capture("help");
         ui.help = false;
-        game.dialogue = Dialogue{std::string(Game::original_dialogue(52)), 0, false, {}};
+        game.dialogue = Dialogue{std::string(Game::original_dialogue(static_cast<DialogueId>(52))),
+                                 ContinuationStage::None,
+                                 false,
+                                 {}};
         capture("dialogue");
         game.dialogue.reset();
+        game.hero.floor = 10;
+        game.hero.x = game.hero.y = 5;
+        game.hero.music_track = MusicTrack::Disabled;
+        game.floors[10].tiles.fill(Road);
+        game.tile_at(10, 5, 4) = Fairy;
+        game.move(Direction::Up);
+        game.finish_commands();
+        if (!game.dialogue || game.dialogue->text.empty())
+            throw std::runtime_error("Fairy evaluation dialogue is missing");
+        capture("fairy");
+        // Long ranked speeches scroll; retain the title/closing in visual checks.
+        ui.dialogue_scroll = 10000.f;
+        capture("fairy-title");
+        ui.dialogue_scroll = 0;
+        game.new_game();
         for (int i = 0; i < 15; ++i)
             game.hero.items[i] = 1;
         ui.inventory = true;
@@ -52,17 +70,17 @@ int verify_localization(Presentation& renderer, const std::filesystem::path& out
         ui.realtime_hero_orb = true;
         capture("realtime-orb");
         ui.realtime_hero_orb = false;
-        game.visual.raster_mode = 1;
+        game.visual.raster_mode = RasterMode::OpeningStory;
         game.visual.raster_frame = ContentHeight;
         capture("opening");
-        game.visual.raster_mode = 5;
+        game.visual.raster_mode = RasterMode::EndingStory;
         game.visual.raster_frame = 400;
         capture("ending");
         game.hero.zeno_sealed = true;
         game.hero.altar_purchases = 21;
         game.hero.red_keys = 5;
-        game.hero.sword = 3;
-        game.hero.shield = 4;
+        game.hero.sword = EquipmentTier::Knight;
+        game.hero.shield = EquipmentTier::Holy;
         game.inventory(Item::DragonSlayer) = 0;
         game.run_history.dragon_defeated = true;
         game.ending_summary = EndingSummary{game.hero, game.run_history};

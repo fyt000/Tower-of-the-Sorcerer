@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 namespace tsw {
-namespace achievement_detail {
+namespace detail::achievement {
 struct Companion {
     int version = 1;
     std::uint64_t save_fingerprint{};
@@ -27,9 +27,9 @@ AchievementStatus avoidance(bool violated, bool complete, bool requirement = tru
         return AchievementStatus::Missed;
     return complete ? AchievementStatus::Earned : AchievementStatus::Unverified;
 }
-} // namespace achievement_detail
+} // namespace detail::achievement
 
-using namespace achievement_detail;
+using namespace detail::achievement;
 
 std::array<Achievement, 6> ending_achievements(const EndingSummary& summary) {
     const auto& h = summary.hero;
@@ -90,6 +90,7 @@ void write_run_history(const std::filesystem::path& path, std::span<const std::u
     std::string text;
     if (const auto error = glz::write_json(Companion{1, fingerprint(bytes), history}, text))
         throw std::runtime_error(glz::format_error(error));
-    save_detail::write_file(achievement_path(path), {text.begin(), text.end()});
+    detail::save::write_file(achievement_path(path),
+                             {reinterpret_cast<const std::uint8_t*>(text.data()), text.size()});
 }
 } // namespace tsw

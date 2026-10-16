@@ -1,14 +1,11 @@
 #include "tsw/game.hpp"
+#include "fairy_dialogue.hpp"
 #include "original_constants.hpp"
 #include <algorithm>
 #include <stdexcept>
 
 namespace tsw {
 namespace {
-constexpr std::array<std::string_view, 15> ItemNames{
-    "Orb of the Hero", "Orb of Wisdom", "Orb of Flight", "Cross",         "Elixir",
-    "Mattock",         "Bomb",          "Warp Staff",    "Ascent Wing",   "Descent Wing",
-    "Dragon Slayer",   "Snow Crystal",  "Magic Key",     "Super Mattock", "Lucky Gold"};
 
 constexpr std::array<int, CellCount> spiral() {
     std::array<int, CellCount> result{};
@@ -53,7 +50,7 @@ void Game::new_game() {
     visual = Visual{};
     sounds.clear();
     stopped_ = false;
-    shop_kind_ = 0;
+    shop_kind_ = ShopKind::None;
     checkpoint_requested = false;
     contact_index = cell(hero.x, hero.y);
     scratch_index = neighbor_index = message_code = door_opened = 0;
@@ -93,15 +90,15 @@ void Game::next_cycle() {
 }
 
 std::string_view Game::item_name(Item item) {
-    return ItemNames.at(static_cast<int>(item));
+    return item_definition(item).name;
 }
 
 std::string_view Game::monster_name(int index) {
     return original::MonsterNames.at(index);
 }
 
-std::string_view Game::original_dialogue(int id) {
-    return original::Dialogue.at(id);
+std::string_view Game::original_dialogue(DialogueId id) {
+    return original::Dialogue.at(std::to_underlying(id));
 }
 
 void Game::push(Op op, int a, int b) {
@@ -152,24 +149,28 @@ void Game::expand_door() {
 
 void Game::update_status(int code) {
     message_code = code;
-    if (code > 1 && code + 127 < int(original::Dialogue.size()))
-        status = original::Dialogue[code + 127];
+    if (code > 1 && std::to_underlying(DialogueId::StatusOffset + code) < std::ssize(original::Dialogue))
+        status = original_dialogue(DialogueId::StatusOffset + code);
 }
 
-void Game::show_dialogue(int id) {
-    if (id < 1 || id > int(original::Dialogue.size()))
+void Game::show_dialogue(SpeechId id) {
+    if (std::to_underlying(id) < 1 || std::to_underlying(id) > std::ssize(original::Dialogue))
         throw std::runtime_error("Invalid original speech ID");
-    dialogue = Dialogue{std::string(original::Dialogue[id - 1]), id + 10, false, {}};
+    dialogue = Dialogue{std::string(original_dialogue(dialogue_for(id))), continuation_for(id), false, {}};
+    if (is_fairy_speech(id))
+        dialogue->text =
+            detail::compose_fairy_dialogue(hero.fairy_score, hero.fairy_rank, hero.fairy_visits,
+                                           [](DialogueId index) { return original_dialogue(index); });
     // These conversations store their final paragraph in a separate text entry.
     switch (id) {
-    case 5:
-        dialogue->text += original::Dialogue[57];
+    case SpeechId::ThiefFirstDeparture:
+        dialogue->text += original_dialogue(DialogueId::ThiefFirstEquipmentAdvice);
         break;
-    case 17:
-        dialogue->text += original::Dialogue[58];
+    case SpeechId::ThiefSecondDeparture:
+        dialogue->text += original_dialogue(DialogueId::ThiefSecondEquipmentAdvice);
         break;
-    case 55:
-        dialogue->text += original::Dialogue[59];
+    case SpeechId::ZenoRevealsPlan:
+        dialogue->text += original_dialogue(DialogueId::ZenoPlan);
         break;
     }
 }
@@ -177,7 +178,7 @@ void Game::show_dialogue(int id) {
 bool Game::continue_dialogue() {
     if (!dialogue || dialogue->shop)
         return false;
-    const int stage = dialogue->continuation;
+    const auto stage = dialogue->continuation;
     dialogue.reset();
     continue_original(stage);
     return true;
@@ -232,13 +233,13 @@ bool Game::run_one(Command* executed) {
         status = "The hero has fallen. Restore a saved game or start again.";
         break;
     case Op::EnemyStrike: {
-        const int enemy_hit = std::max(
-            0, monsters.at(visual.enemy_index).attack * (hero.cycle_factor_minus_one + 1) - hero.defense);
-        hero.hp = std::max(0, hero.hp - enemy_hit);
+        const int enemy_damage_per_strike = std::max(
+            0, monsters.at(visual.monster_index).attack * (hero.cycle_factor_minus_one + 1) - hero.defense);
+        hero.hp = std::max(0, hero.hp - enemy_damage_per_strike);
         break;
     }
     case Op::HeroStrike: {
-        const int enemy = visual.enemy_index;
+        const int enemy = visual.monster_index;
         const int hit = std::max(0, hero.attack * attack_multiplier(enemy, visual.enemy_first) -
                                         monsters.at(enemy).defense * (hero.cycle_factor_minus_one + 1));
         visual.enemy_hp = std::max(0, visual.enemy_hp - hit);
@@ -266,12 +267,12 @@ bool Game::run_one(Command* executed) {
         visual.layers.at(a) = {visual.mask, visual.color, visual.underlying};
         break;
     case Op::Dialogue:
-        show_dialogue(a);
+        show_dialogue(static_cast<SpeechId>(a));
         break;
     case Op::Callback:
         switch (static_cast<Callback>(a)) {
         case Callback::Capture: {
-            hero.sword = hero.shield = 0;
+            hero.sword = hero.shield = EquipmentTier::None;
             hero.equipment_found[4] = hero.equipment_found[SacredShieldFlag] = 0;
             if (!hero.cycle_factor_minus_one) {
                 hero.hp = 400;
@@ -282,18 +283,18 @@ bool Game::run_one(Command* executed) {
             hero.x = 2;
             hero.y = 7;
             visual.hide_hero = false;
-            visual.raster_mode = -1;
+            visual.raster_mode = RasterMode::Inactive;
             change_music_for_floor();
             push(Op::Wait);
             push(Op::Callback, Callback::RestoreBoard);
             push(Op::Wait);
-            push(Op::Dialogue, 3);
+            queue_speech(SpeechId::ThiefWakesHero);
             push(Op::Wait);
-            push(Op::Dialogue, 2);
+            queue_speech(SpeechId::ThiefCallsHero);
             push(Op::Wait);
-            push(Op::Dialogue, 1);
+            queue_speech(SpeechId::Unconscious);
             push(Op::Wait);
-            push(Op::Dialogue, 1);
+            queue_speech(SpeechId::Unconscious);
             push(Op::UpdateInventory);
             push(Op::Message);
             break;
@@ -316,10 +317,10 @@ bool Game::run_one(Command* executed) {
             next_cycle();
             break;
         case Callback::Title:
-            visual.raster_mode = 9;
+            visual.raster_mode = RasterMode::Title;
             break;
         case Callback::RestoreBoard:
-            visual.raster_mode = -1;
+            visual.raster_mode = RasterMode::Inactive;
             visual.hide_hero = false;
             break;
         case Callback::BattleEnd:
@@ -331,17 +332,19 @@ bool Game::run_one(Command* executed) {
             break;
         case Callback::Teleport:
             hero.floor = b;
-            hero.highest_floor_stair = 0; // Original floor-change callback redraws the map.
+            hero.highest_floor_stair_kind =
+                StairKind::None; // Original floor-change callback redraws the map.
             if (b == 50) {
                 hero.x = floors.at(b).up_landing % BoardWidth;
                 hero.y = floors.at(b).up_landing / BoardWidth;
                 hero.facing = Direction::Up;
             }
-            visual.raster_mode = -1;
+            visual.raster_mode = RasterMode::Inactive;
             break;
         case Callback::RasterScene:
             visual.raster_frame = b;
-            visual.raster_mode = commands.empty() ? 0 : commands.back().a;
+            visual.raster_mode =
+                commands.empty() ? RasterMode::OpeningDissolve : static_cast<RasterMode>(commands.back().a);
             break;
         case Callback::HideHero:
             visual.hide_hero = true;
@@ -372,9 +375,9 @@ bool Game::run_one(Command* executed) {
         break;
     }
     case Op::LargeMonsterStrike:
-        visual.enemy_hp =
-            std::max(0, visual.enemy_hp - std::max(0, hero.attack - monsters.at(visual.enemy_index).defense *
-                                                                        (hero.cycle_factor_minus_one + 1)));
+        visual.enemy_hp = std::max(
+            0, visual.enemy_hp - std::max(0, hero.attack - monsters.at(visual.monster_index).defense *
+                                                               (hero.cycle_factor_minus_one + 1)));
         break;
     case Op::FloorMusic:
         change_music_for_floor();
@@ -391,17 +394,17 @@ bool Game::run_one(Command* executed) {
         break;
     case Op::SetHeroValue:
         // Original (&hero.hp)[a] write. Keep explicit slot names instead of pointer arithmetic.
-        switch (a) {
-        case 0:
+        switch (static_cast<HeroField>(a)) {
+        case HeroField::HitPoints:
             hero.hp = b;
             break;
-        case 1:
+        case HeroField::Attack:
             hero.attack = b;
             break;
-        case 2:
+        case HeroField::Defense:
             hero.defense = b;
             break;
-        case 3:
+        case HeroField::Gold:
             hero.gold = b;
             break;
         default:
@@ -440,7 +443,7 @@ int Game::animation_offset(int t) const {
         return 2;
     // Completing the second gate conversation freezes its two map frames.
     if (t == TimeGate || t == TimeGate2)
-        return hero.dialogue_seen[36] == 1 ? 0 : 1;
+        return hero.speech_seen(SpeechId::HeroFindsDoll) == 1 ? 0 : 1;
     if ((t >= Merchant && t <= OldMan2) || (t >= GreenSlime && t <= Vampire + 1) ||
         (t >= GoldenKnight && t <= 157))
         return 1;

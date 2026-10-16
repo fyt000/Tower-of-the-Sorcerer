@@ -363,9 +363,9 @@ Route improve_pickups(const Route& route, std::size_t end, double seconds, std::
                 best_hp = candidate.game.hero.hp;
                 best = std::move(complete);
                 progress << "improved before_input=" << split + 1 << " pickup=" << pickup.floor << ':'
-                         << pickup.position % 11 << ',' << pickup.position / 11 << " boundary_hp=" << best_hp
-                         << " gain=" << best_hp - baseline.game.hero.hp << " final_hp=" << best.game.hero.hp
-                         << std::endl;
+                         << pickup.position % BoardWidth << ',' << pickup.position / BoardWidth
+                         << " boundary_hp=" << best_hp << " gain=" << best_hp - baseline.game.hero.hp
+                         << " final_hp=" << best.game.hero.hp << std::endl;
             } catch (const std::exception&) {
                 ++rejected;
             }

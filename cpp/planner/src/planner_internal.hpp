@@ -13,7 +13,7 @@ struct History {
 struct Node {
     Game game;
     std::shared_ptr<const History> history;
-    int inputs{};
+    int input_count{};
     double score{};
     std::uint64_t allocation{};
 };
@@ -26,7 +26,7 @@ struct Paths {
 struct Policy {
     int goal = 51;
     int max_purchases = 1;
-    int early_policy = 0;
+    SearchPolicy early_policy = SearchPolicy::Balanced;
     bool hp_buys = false;
     bool atomic_events = true;
     bool defer_merchant_hp = true;

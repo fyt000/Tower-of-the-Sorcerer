@@ -307,7 +307,7 @@ TEST_CASE("Mouse movement records and replays ordinary native inputs", "[mouse][
     walking.start(game, cell(6, 9));
     for (int step = 0; step < CellCount && walking.active(); ++step) {
         walking.advance(game, MouseWalk::StepSeconds, [&](Direction direction) {
-            const PlayerInput input{InputKind::Move, direction};
+            const PlayerInput input = PlayerInput::move(direction);
             REQUIRE(apply_input(game, flight, input));
             recorder.append(input);
         });

@@ -8,6 +8,8 @@
 #include <vector>
 
 namespace tsw::planner {
+enum class SearchPolicy { Balanced, Attack, Defense };
+
 // These bounds limit a heuristic search; exhausting them does not prove impossibility.
 struct SearchOptions {
     int goal_floor = 11;
@@ -16,7 +18,7 @@ struct SearchOptions {
     int depth = 120;
     double seconds = 60;
     int max_results = 8;
-    int policy = 0; // 0: balanced, 1: attack, 2: defense.
+    SearchPolicy policy = SearchPolicy::Balanced;
 };
 
 struct Route {

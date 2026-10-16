@@ -10,7 +10,7 @@ struct GameState {
     RunHistory run_history;
     std::optional<EndingSummary> ending_summary;
     std::array<Floor, FloorCount> floors;
-    std::array<Monster, 33> monsters;
+    std::array<Monster, MonsterCount> monsters;
     RankingTables rankings;
     std::vector<Command> commands;
     std::optional<Dialogue> dialogue;
@@ -21,7 +21,8 @@ struct GameState {
     int contact_index{}, scratch_index{}, neighbor_index{}, message_code{}, door_opened{};
     std::optional<std::array<std::uint32_t, OriginalHeroWordCount>> original_save_record;
     std::optional<Fight> fight;
-    int shop_kind{}, shop_cost{}, shop_hint{}, shop_id{}, shop_npc_cell{};
+    ShopKind shop_kind{};
+    int shop_cost{}, shop_hint{}, shop_id{}, shop_npc_cell{};
     bool stopped{};
 
     static GameState capture(const Game&);

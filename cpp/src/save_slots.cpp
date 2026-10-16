@@ -1,11 +1,12 @@
 #include "tsw/save_slots.hpp"
+#include <format>
 #include <stdexcept>
 
 namespace tsw {
 std::filesystem::path save_slot_path(const std::filesystem::path& directory, int number) {
     if (number < 1 || number > ManualSaveSlotCount)
         throw std::out_of_range("Save slot must be between 1 and 8");
-    return directory / ("save" + std::to_string(number) + ".dat");
+    return directory / std::format("save{}.dat", number);
 }
 
 SaveSlots inspect_save_slots(const std::filesystem::path& directory) {

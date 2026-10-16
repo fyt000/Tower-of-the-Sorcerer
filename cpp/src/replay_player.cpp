@@ -1,4 +1,5 @@
 #include "tsw/replay.hpp"
+#include <format>
 #include <stdexcept>
 #include <utility>
 
@@ -27,7 +28,7 @@ void ReplayPlayer::seek(Game& game, int& flight, std::size_t position, const Inp
             if (observer)
                 observer(inputs_[i], outcome);
         } catch (const std::exception& error) {
-            throw std::runtime_error("Replay input " + std::to_string(i + 1) + ": " + error.what());
+            throw std::runtime_error(std::format("Replay input {}: {}", i + 1, error.what()));
         }
     }
     game = std::move(restored);

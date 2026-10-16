@@ -1,6 +1,7 @@
 #include "tsw/replay.hpp"
 #include <algorithm>
 #include <charconv>
+#include <format>
 #include <glaze/json.hpp>
 #include <map>
 #include <sstream>
@@ -71,17 +72,13 @@ struct GameplayValues {
 
 namespace {
 using namespace replay_json;
-constexpr std::array<std::string_view, 15> ItemIds{
-    "hero_orb",      "wisdom_orb",   "flying_orb", "cross",         "elixir",
-    "mattock",       "bomb",         "warp_staff", "ascent_wing",   "descent_wing",
-    "dragon_slayer", "snow_crystal", "magic_key",  "super_mattock", "lucky_gold"};
 
 struct ReadOptions : glz::opts {
     bool validate_skipped = true;
     bool validate_trailing_whitespace = true;
 };
 
-template <typename T, bool AllowUnknown = false> T read_input(std::string_view source) {
+template <class T, bool AllowUnknown = false> T read_input(std::string_view source) {
     constexpr auto options = [] {
         ReadOptions result;
         result.null_terminated = false;
@@ -95,7 +92,7 @@ template <typename T, bool AllowUnknown = false> T read_input(std::string_view s
     return input;
 }
 
-template <typename T> std::string write_json(const T& value) {
+template <class T> std::string write_json(const T& value) {
     std::string result;
     if (const auto error = glz::write<glz::opts{.skip_null_members = false}>(value, result))
         throw std::runtime_error(glz::format_error(error));
@@ -164,10 +161,10 @@ PlayerInput parse_input(std::string_view source) {
         auto item = read_input<ItemInput, true>(source).item;
         if (item == "orb_of_flying")
             item = "flying_orb";
-        const auto found = std::find(ItemIds.begin(), ItemIds.end(), item);
-        if (found == ItemIds.end())
+        const auto found = item_from_id(item);
+        if (!found)
             throw std::runtime_error("Unknown item: " + item);
-        action.item = static_cast<Item>(found - ItemIds.begin());
+        action.item = *found;
         if (action.item == Item::FlightOrb)
             action.value = read_input<FlightInput>(source).floor;
         else
@@ -234,7 +231,7 @@ std::string input_json(const PlayerInput& action) {
     case InputKind::UseItem:
         if (action.item == Item::FlightOrb)
             return write_json(FlightInput{"use_item", "flying_orb", action.value});
-        return write_json(ItemInput{"use_item", std::string(ItemIds.at(static_cast<int>(action.item)))});
+        return write_json(ItemInput{"use_item", std::string(item_definition(action.item).id)});
     case InputKind::Choose:
         return write_json(ChoiceInput{"choose", action.value < 0 ? "leave" : std::to_string(action.value)});
     case InputKind::OpenFlight:
@@ -290,7 +287,7 @@ bool apply_input(Game& game, int& flight, const PlayerInput& input) {
             throw std::runtime_error("Flight selector is not open");
         const bool up = input.kind == InputKind::FlightUp;
         const int next = up ? (flight == 43 ? 45 : flight + 1) : (flight == 45 ? 43 : flight - 1);
-        if (!game.flight_preview(next, up ? 1 : 2))
+        if (!game.flight_preview(next, up ? FlightDirection::Up : FlightDirection::Down))
             return false;
         flight = next;
         return true;
@@ -359,8 +356,8 @@ std::string gameplay_json(const Game& game, int flight, int map_floor) {
                         std::nullopt,
                         h.hp <= 0 || game.visual.dead,
                         game.status};
-    for (std::size_t i = 0; i < ItemIds.size(); ++i)
-        view.inventory.emplace(ItemIds[i], h.items[i]);
+    for (std::size_t i = 0; i < ItemDefinitions.size(); ++i)
+        view.inventory.emplace(ItemDefinitions[i].id, h.items[i]);
     if (game.dialogue) {
         const auto& d = *game.dialogue;
         view.dialogue = DialogueValues{d.text, d.shop, {d.choices[0], d.choices[1], d.choices[2]}};
@@ -407,7 +404,7 @@ std::optional<PlayerInput> read_replay_input(std::istream& stream, std::size_t& 
         try {
             return parse_input(line);
         } catch (const std::exception& error) {
-            throw std::runtime_error("Line " + std::to_string(number) + ": " + error.what());
+            throw std::runtime_error(std::format("Line {}: {}", number, error.what()));
         }
     }
     if (stream.bad())

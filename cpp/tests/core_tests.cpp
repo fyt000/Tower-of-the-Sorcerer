@@ -28,7 +28,7 @@ TEST_CASE("Defeated enemy panel retains encounter statistics", "[combat]") {
     g.move(Direction::Up);
     g.finish_commands();
     UNSCOPED_INFO("Successful battle retains the defeated enemy's encounter statistics");
-    REQUIRE((g.visual.last_defeated && g.visual.last_defeated->row == 0 &&
+    REQUIRE((g.visual.last_defeated && g.visual.last_defeated->monster_index == 0 &&
              g.visual.last_defeated->stats.hp == 35 && g.visual.last_defeated->damage == 0));
     g.monsters[0].hp = 999;
     g.move(Direction::Left);
@@ -42,7 +42,7 @@ TEST_CASE("Defeated enemy panel retains encounter statistics", "[combat]") {
     g.move(Direction::Up);
     g.finish_commands();
     UNSCOPED_INFO("A fatal encounter does not replace the last defeated enemy");
-    REQUIRE((g.visual.dead && g.visual.last_defeated->row == 0));
+    REQUIRE((g.visual.dead && g.visual.last_defeated->monster_index == 0));
     g.new_game();
     UNSCOPED_INFO("A new game clears the defeated enemy panel");
     REQUIRE(!g.visual.last_defeated);
@@ -291,7 +291,7 @@ TEST_CASE("Long original fights complete with bounded command memory", "[combat]
         g.tile(1, cell(5, 4)) = std::uint8_t(enemy_tile);
         const auto forecast = g.forecast(enemy_tile);
         UNSCOPED_INFO("Exercise an actual original overflow-triggering fight");
-        REQUIRE(forecast.hero_hits >= 2500);
+        REQUIRE(forecast.hero_strike_count >= 2500);
         g.move(Direction::Up);
         std::size_t maximum = 0;
         std::int64_t hero_strikes = 0;
@@ -301,7 +301,7 @@ TEST_CASE("Long original fights complete with bounded command memory", "[combat]
             hero_strikes += executed.op == Op::HeroStrike;
         }
         UNSCOPED_INFO("Long fights retain every round with bounded command memory");
-        REQUIRE((maximum < 20 && hero_strikes == forecast.hero_hits && !g.busy()));
+        REQUIRE((maximum < 20 && hero_strikes == forecast.hero_strike_count && !g.busy()));
         UNSCOPED_INFO("Overflow-length fights finish without corrupting hero or map state");
         REQUIRE((g.hero.hp == 100000 && g.hero.gold == enemy.gold && g.tile_at(1, 5, 4) == Road));
     }
@@ -354,23 +354,24 @@ TEST_CASE("Old Man dialogue rewards are granted only once", "[npcs]") {
     UNSCOPED_INFO("Old-man gift shares original continuation slot 18");
     REQUIRE((g.hero.attack == 103 && g.hero.defense == 103 && g.hero.dialogue_seen[18] == 1));
     UNSCOPED_INFO("First hearing without Wisdom is retained");
-    REQUIRE(g.hero.old_man_heard[0] == 1);
+    REQUIRE(g.hero.old_man_heard[0] == HintState::Heard);
     g.inventory(Item::WisdomOrb) = 1;
     g.move(Direction::Up);
     g.finish_commands(true);
     UNSCOPED_INFO("Repeated hearing does not grant or record the gift again");
-    REQUIRE((g.hero.attack == 103 && g.hero.old_man_heard[0] == 1));
+    REQUIRE((g.hero.attack == 103 && g.hero.old_man_heard[0] == HintState::Heard));
 }
 
 TEST_CASE("Fairy checkpoint follows dialogue and scene completion", "[saves]") {
     auto g = room(10);
     g.tile(10, cell(5, 4)) = Fairy;
-    g.hero.music_track = 0;
+    g.hero.music_track = MusicTrack::Disabled;
     g.move(Direction::Up);
     UNSCOPED_INFO("Fairy requests a checkpoint while her scene is pending");
     REQUIRE((g.checkpoint_requested && g.busy()));
     UNSCOPED_INFO("Fairy score and default rank retain disabled music");
-    REQUIRE((g.hero.fairy_score == 415 && g.hero.fairy_rank == 1 && g.hero.music_track == 0));
+    REQUIRE(
+        (g.hero.fairy_score == 415 && g.hero.fairy_rank == 1 && g.hero.music_track == MusicTrack::Disabled));
     g.finish_commands(true);
     UNSCOPED_INFO("Fairy checkpoint becomes saveable after her scene");
     REQUIRE((!g.busy() && g.tile(10, 27) == Road));
@@ -416,7 +417,8 @@ TEST_CASE("Fairy snapshots keep the original raw records and validate bounds", "
     game.hero.hp = 1234;
     game.hero.fairy_visits = 1;
     game.hero.fairy_score = 415;
-    game.hero.fairy_rank = game.hero.fairy_category = 1;
+    game.hero.fairy_rank = 1;
+    game.hero.fairy_category = FairyCategory::Floor10;
     game.save(checkpoint, SaveKind::Checkpoint);
     const auto bytes = read(checkpoint);
     REQUIRE(bytes.size() == SaveBytes);
@@ -725,8 +727,8 @@ TEST_CASE("Queued conversations include their equipment clues and Zeno explanati
         REQUIRE(g.move(Direction::Up));
         g.finish_commands();
         REQUIRE(g.dialogue);
-        REQUIRE(g.dialogue->continuation == 15);
-        REQUIRE(g.dialogue->text.starts_with(Game::original_dialogue(4)));
+        REQUIRE(g.dialogue->continuation == static_cast<ContinuationStage>(15));
+        REQUIRE(g.dialogue->text.starts_with(Game::original_dialogue(static_cast<DialogueId>(4))));
         REQUIRE(g.dialogue->text.find("sword on the 5th floor and a shield on the 9th") != std::string::npos);
         REQUIRE(g.continue_dialogue());
         g.finish_commands();
@@ -742,8 +744,8 @@ TEST_CASE("Queued conversations include their equipment clues and Zeno explanati
         REQUIRE(g.move(Direction::Up));
         g.finish_commands();
         REQUIRE(g.dialogue);
-        REQUIRE(g.dialogue->continuation == 27);
-        REQUIRE(g.dialogue->text.starts_with(Game::original_dialogue(16)));
+        REQUIRE(g.dialogue->continuation == static_cast<ContinuationStage>(27));
+        REQUIRE(g.dialogue->text.starts_with(Game::original_dialogue(static_cast<DialogueId>(16))));
         REQUIRE(g.dialogue->text.find("shield on the 11th floor and a sword on the 17th") !=
                 std::string::npos);
         REQUIRE(g.continue_dialogue());
@@ -760,13 +762,13 @@ TEST_CASE("Queued conversations include their equipment clues and Zeno explanati
         g.finish_commands();
         for (int speech = 48; speech < 55; ++speech) {
             REQUIRE(g.dialogue);
-            REQUIRE(g.dialogue->continuation == speech + 10);
+            REQUIRE(g.dialogue->continuation == static_cast<ContinuationStage>(speech + 10));
             REQUIRE(g.continue_dialogue());
             g.finish_commands();
         }
         REQUIRE(g.dialogue);
-        REQUIRE(g.dialogue->continuation == 65);
-        REQUIRE(g.dialogue->text.starts_with(Game::original_dialogue(54)));
+        REQUIRE(g.dialogue->continuation == static_cast<ContinuationStage>(65));
+        REQUIRE(g.dialogue->text.starts_with(Game::original_dialogue(static_cast<DialogueId>(54))));
         REQUIRE(g.dialogue->text.find("false information, set various traps in this tower") !=
                 std::string::npos);
         REQUIRE(g.dialogue->text.find("as arranged beforehand") != std::string::npos);

@@ -1,5 +1,6 @@
 #include "tsw/game.hpp"
 #include <algorithm>
+#include <format>
 
 namespace tsw {
 // handan, 0x444490. Door contact opens the cell; a second step enters it.
@@ -72,15 +73,15 @@ void Game::contact() {
         return;
     case Altar: {
         const int n = hero.altar_purchases;
-        shop_kind_ = 1;
+        shop_kind_ = ShopKind::Altar;
         shop_cost_ = 10 * (n * n + n + 2);
         const int area = (hero.floor + 10) / 10;
-        dialogue = Dialogue{
-            "Altar: each purchase increases the next price. Cost: " + std::to_string(shop_cost_) + " gold.",
-            2,
-            true,
-            {"HP +" + std::to_string(100 * (n + 1) * scale), "ATK +" + std::to_string(2 * area * scale),
-             "DEF +" + std::to_string(4 * area * scale)}};
+        dialogue =
+            Dialogue{std::format("Altar: each purchase increases the next price. Cost: {} gold.", shop_cost_),
+                     ContinuationStage::Altar,
+                     true,
+                     {std::format("HP +{}", 100 * (n + 1) * scale), std::format("ATK +{}", 2 * area * scale),
+                      std::format("DEF +{}", 4 * area * scale)}};
         return;
     }
     case Merchant:
@@ -101,7 +102,7 @@ void Game::contact() {
         return;
     case TimeGate:
     case TimeGate2:
-        hero.music_track = 13;
+        hero.music_track = MusicTrack::TimeGate;
         if (tile(25, 60) == Road) {
             tile(24, 4) = tile(24, 6) = Wall;
             tile(24, 16) = tile(24, 27) = tile(24, 38) = Road;
@@ -111,9 +112,9 @@ void Game::contact() {
         push(Op::Wait);
         push(Op::SetTile, 60, TimeGate);
         push(Op::Wait);
-        push(Op::Dialogue, 26);
+        queue_speech(SpeechId::HeroFindsDoll);
         push(Op::Wait);
-        push(Op::Dialogue, 25);
+        queue_speech(SpeechId::TimeGateInvitation);
         waits(2);
         return;
     case YellowKey:
@@ -137,22 +138,25 @@ void Game::contact() {
     case BlueGem:
         hero.defense += ((hero.floor + 9) / 10) * scale;
         break;
+    case HeroOrb:
+        // The recovered 32..50 pickup branch clears tile 36 without granting an item.
+        break;
     default:
         if (target >= WisdomOrb && target <= LuckyGold) {
             const auto item = static_cast<Item>(target - HeroOrb);
             inventory(item) = item == Item::WarpStaff ? 3 : 1;
             if (item == Item::DragonSlayer)
                 run_history.dragon_slayer_acquired = true;
-            status = "Found " + std::string(item_name(item)) + ".";
+            status = std::format("Found {}.", item_name(item));
         } else if (target >= IronSword && target <= SacredShield) {
             constexpr std::array<int, 5> Gain{10, 20, 40, 50, 100};
             const int equipment = target - IronSword, tier = equipment % 5;
             if (equipment < 5) {
                 hero.attack += Gain[tier] * scale;
-                hero.sword = tier + 1;
+                hero.sword = static_cast<EquipmentTier>(tier + 1);
             } else {
                 hero.defense += Gain[tier] * scale;
-                hero.shield = tier + 1;
+                hero.shield = static_cast<EquipmentTier>(tier + 1);
             }
             hero.equipment_found[equipment] = 1;
         } else if (target == Zeno || target == Zeno + 1) {
@@ -164,7 +168,8 @@ void Game::contact() {
                 battle();
             }
             return;
-        } else if (monster_for_tile(target) >= 0) {
+        } else if (target != GateKeeperA + 1 && monster_for_tile(target) >= 0) {
+            // Contact ends at 157; the shared Bomb/forecast classifier also accepts 158.
             battle();
             return;
         } else
@@ -193,7 +198,7 @@ void Game::walk_to_contact() {
         neighbor_index = cell(x, y);
         const int t = tile(hero.floor, neighbor_index);
         if (hero.floor == hero.highest_floor && (t == StairsUp || t == StairsDown))
-            hero.highest_floor_stair = t == StairsUp ? 1 : 2;
+            hero.highest_floor_stair_kind = t == StairsUp ? StairKind::Up : StairKind::Down;
         if (t == MagicianA || t == MagicianA + 1 || t == MagicianB || t == MagicianB + 1)
             hazard(neighbor_index, cell(hero.x + dx * 2, hero.y + dy * 2));
     }
@@ -273,14 +278,14 @@ void Game::stair(bool up) {
         special_road();
         hero.floor32_arrival_seen = true;
     }
-    if (up && destination == 42 && !hero.dialogue_seen[51]) {
+    if (up && destination == 42 && !hero.speech_seen(SpeechId::GoldenKnightReportsFailure)) {
         special_road();
-        hero.dialogue_seen[51] = 1;
+        hero.speech_seen(SpeechId::GoldenKnightReportsFailure) = 1;
     }
     push(Op::Wait);
     push(Op::Message, up ? 7 : 8);
     for (int index = CellCount; index >= 1; --index) {
-        if (hero.music_track && index == 102)
+        if (music_enabled(hero.music_track) && index == 102)
             push(Op::FloorMusic);
         push(Op::StairFrame, 1, index);
     }
@@ -324,7 +329,7 @@ void Game::special_road() {
     case 3:
         walk_to_contact();
         tile(hero.floor, cell(hero.x, hero.y)) = Road;
-        push(Op::Dialogue, 10);
+        queue_speech(SpeechId::ZenoCaptureChallenge);
         waits(4);
         summon(70, Zeno);
         push(Op::Wait);
@@ -359,13 +364,13 @@ void Game::special_road() {
         if (hero.floor != 20 || cell(hero.x, hero.y) == 82) {
             tile(hero.floor, cell(hero.x, hero.y)) = Road;
             if (hero.floor == 20)
-                hero.music_track = 16;
+                hero.music_track = MusicTrack::Floor20;
             if (hero.floor == 25)
-                hero.music_track = 7;
+                hero.music_track = MusicTrack::Floor25Arrival;
             if (hero.floor == 40)
-                hero.music_track = 18;
+                hero.music_track = MusicTrack::Floor40;
             if (hero.floor == 49)
-                hero.music_track = 19;
+                hero.music_track = MusicTrack::Floor49;
             check_floor();
         }
         break;
@@ -375,21 +380,21 @@ void Game::special_road() {
 }
 
 void Game::change_music_for_floor() {
-    if (!hero.music_track)
+    if (!music_enabled(hero.music_track))
         return;
     if (hero.floor == 0)
-        hero.music_track = 21;
+        hero.music_track = MusicTrack::Floor0;
     else if (hero.floor <= 10)
-        hero.music_track = 5;
+        hero.music_track = MusicTrack::Floors1To10;
     else if (hero.floor <= 20)
-        hero.music_track = 6;
+        hero.music_track = MusicTrack::Floors11To20;
     else if (hero.floor <= 30)
-        hero.music_track = 17;
+        hero.music_track = MusicTrack::Floors21To30;
     else if (hero.floor <= 40)
-        hero.music_track = 8;
+        hero.music_track = MusicTrack::Floors31To40;
     else if (hero.floor <= 49)
-        hero.music_track = 9;
+        hero.music_track = MusicTrack::Floors41To49;
     else
-        hero.music_track = 10;
+        hero.music_track = MusicTrack::Floor50;
 }
 } // namespace tsw

@@ -1,4 +1,5 @@
 #pragma once
+#include "tsw/dialogue_ids.hpp"
 #include <array>
 #include <functional>
 #include <string>
@@ -14,7 +15,9 @@ inline constexpr std::array<Language, 5> Languages{
 std::string_view language_id(Language);
 std::string_view language_label(Language);
 Language parse_language(std::string_view);
-std::string_view localized_dialogue(Language, int id);
+// Zero-based catalog index, unlike the one-based Op::Dialogue speech ID.
+std::string_view localized_dialogue(Language, DialogueId id);
+std::string localized_fairy_dialogue(Language, int score, int rank, int visits);
 std::string localized_text(Language, std::string_view);
 std::string_view localized_opening(Language);
 std::string_view localized_ending(Language);

@@ -7,22 +7,22 @@ namespace tsw::planner::detail {
 constexpr std::array<Direction, 4> Dirs{Direction::Up, Direction::Left, Direction::Right, Direction::Down};
 
 int neighbor(int pos, Direction d) {
-    int x = pos % 11, y = pos / 11;
+    int x = pos % BoardWidth, y = pos / BoardWidth;
     x += d == Direction::Left ? -1 : d == Direction::Right ? 1 : 0;
     y += d == Direction::Up ? -1 : d == Direction::Down ? 1 : 0;
-    return x >= 0 && x < 11 && y >= 0 && y < 11 ? cell(x, y) : -1;
+    return x >= 0 && x < BoardWidth && y >= 0 && y < BoardWidth ? cell(x, y) : -1;
 }
 
 PlayerInput move(Direction d) {
-    return {InputKind::Move, d};
+    return PlayerInput::move(d);
 }
 
 PlayerInput use(Item i, int value) {
-    return {InputKind::UseItem, Direction::Up, i, value};
+    return PlayerInput::use_item(i, value);
 }
 
 PlayerInput choose(int value) {
-    return {InputKind::Choose, Direction::Up, Item::HeroOrb, value};
+    return PlayerInput::choose(value);
 }
 
 bool input(Game& game, const PlayerInput& action, std::vector<PlayerInput>& history) {
@@ -364,10 +364,11 @@ std::string Engine::signature(const Game& game) const {
     // the hash. Numeric resources are compared on the Pareto frontier below.
     const auto& h = game.hero;
     for (int value :
-         {h.floor, h.highest_floor, h.sword, h.shield, h.fairy_visits, h.cycle_factor_minus_one,
-          h.later_cycle, int(h.zeno_sealed), int(h.floor34_reward_created), int(h.floor35_reward_created),
-          int(h.floor40_reward_created), int(h.floor41_reward_created), int(h.floor32_arrival_seen),
-          h.merchant2_heard, h.flight_direction, h.highest_floor_stair})
+         {h.floor, h.highest_floor, std::to_underlying(h.sword), std::to_underlying(h.shield), h.fairy_visits,
+          h.cycle_factor_minus_one, h.later_cycle, int(h.zeno_sealed), int(h.floor34_reward_created),
+          int(h.floor35_reward_created), int(h.floor40_reward_created), int(h.floor41_reward_created),
+          int(h.floor32_arrival_seen), std::to_underlying(h.merchant2_heard),
+          std::to_underlying(h.flight_direction), std::to_underlying(h.highest_floor_stair_kind)})
         append_value(hash, value);
     for (int value : h.items)
         append_value(hash, value);
@@ -375,10 +376,10 @@ std::string Engine::signature(const Game& game) const {
         append_value(hash, value);
     for (int value : h.dialogue_seen)
         append_value(hash, value);
-    for (int value : h.wisdom_hints)
-        append_value(hash, value);
-    for (int value : h.old_man_heard)
-        append_value(hash, value);
+    for (auto value : h.wisdom_hints)
+        append_value(hash, std::to_underlying(value));
+    for (auto value : h.old_man_heard)
+        append_value(hash, std::to_underlying(value));
     for (int value : h.merchant_used)
         append_value(hash, value);
     auto reachable = roads(game);
@@ -450,13 +451,9 @@ double Engine::rank(const Game& game) const {
                 milestone += game.tile_at(16, 5, 7) == Road ? 2000 : 0;
             }
         }
-        if (config.early_policy == 3) {
-            if (!h.equipment_found[6])
-                for (int p : {cell(0, 4), cell(2, 4)})
-                    milestone += game.tile(11, p) == Road ? 4000 : 0;
-        }
         if (config.goal <= 11)
-            milestone += (h.sword > 0 ? 1800 : 0) + (h.shield > 0 ? 2400 : 0);
+            milestone +=
+                (h.sword > EquipmentTier::None ? 1800 : 0) + (h.shield > EquipmentTier::None ? 2400 : 0);
         else {
             milestone += game.inventory(Item::Cross) * 8000;
             if (h.highest_floor >= 18 && h.attack > 68)
@@ -473,8 +470,12 @@ double Engine::rank(const Game& game) const {
             if (boss.penetrates && h.hp <= boss.damage)
                 survival_priority -= 2500 + (boss.damage + 1 - h.hp) * 8;
         }
-        const int attack_weight = config.early_policy == 1 ? 180 : config.early_policy == 2 ? 90 : 45;
-        const int defense_weight = config.early_policy == 1 ? 25 : config.early_policy == 2 ? 65 : 45;
+        const int attack_weight = config.early_policy == SearchPolicy::Attack    ? 180
+                                  : config.early_policy == SearchPolicy::Defense ? 90
+                                                                                 : 45;
+        const int defense_weight = config.early_policy == SearchPolicy::Attack    ? 25
+                                   : config.early_policy == SearchPolicy::Defense ? 65
+                                                                                  : 45;
         return h.highest_floor * 2000 + h.attack * attack_weight + h.defense * defense_weight + h.gold * .6 +
                h.yellow_keys * 100 + h.blue_keys * 450 + h.red_keys * 1800 + h.hp * .4 + reserve * .1 +
                milestone + survival_priority;
@@ -486,7 +487,7 @@ double Engine::rank(const Game& game) const {
 
 void Engine::attach(Node& child, const Node& parent, std::vector<PlayerInput> inputs) const {
     child.allocation = parent.allocation;
-    child.inputs = parent.inputs + int(inputs.size());
+    child.input_count = parent.input_count + int(inputs.size());
     child.history = std::make_shared<History>(History{parent.history, std::move(inputs)});
     child.score = rank(child.game);
 }

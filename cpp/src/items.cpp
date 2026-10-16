@@ -1,3 +1,4 @@
+#include "tsw/dialogue_ids.hpp"
 #include "tsw/game.hpp"
 #include <array>
 
@@ -5,32 +6,56 @@ namespace tsw {
 namespace {
 // 0x481E80 scans north, west, east, south through 0x44C9F0. Some
 // classified neighbors overwrite an earlier stair result; road/wall do not.
-std::pair<int, int> flight_neighbors(const Game& game) {
+// The original classifier returned 19/52/24/13/15/14/12/110/111.
+// Only the last classified neighbor is tested, even after finding stairs.
+enum class FlightNeighbor {
+    Other,
+    Stairs,
+    Lava,
+    Altar,
+    Merchant,
+    Thief,
+    Fairy,
+    OldMan,
+    MagicianA,
+    MagicianB
+};
+
+struct FlightScan {
+    FlightNeighbor last_classified = FlightNeighbor::Other;
+    StairKind highest_floor_stair = StairKind::None;
+};
+
+FlightScan flight_neighbors(const Game& game) {
     const auto& h = game.hero;
     const int position = cell(h.x, h.y);
-    const std::array<int, 4> neighbors{h.y > 0 ? position - 11 : -1, h.x > 0 ? position - 1 : -1,
-                                       h.x < 10 ? position + 1 : -1, h.y < 10 ? position + 11 : -1};
-    int classification = 0, stair = 0;
+    const std::array<int, 4> neighbors{h.y > 0 ? position - BoardWidth : -1, h.x > 0 ? position - 1 : -1,
+                                       h.x < BoardWidth - 1 ? position + 1 : -1,
+                                       h.y < BoardWidth - 1 ? position + BoardWidth : -1};
+    FlightScan result;
     for (int index : neighbors) {
         if (index < 0)
             continue;
         const int tile = game.tile(h.floor, index);
         if (tile == StairsUp || tile == StairsDown) {
-            classification = 19;
+            result.last_classified = FlightNeighbor::Stairs;
             if (h.floor == h.highest_floor)
-                stair = tile == StairsUp ? 1 : 2;
+                result.highest_floor_stair = tile == StairsUp ? StairKind::Up : StairKind::Down;
         } else if (tile == Lava)
-            classification = 52;
-        else if (tile == 16 || tile == 18)
-            classification = 24;
-        else if (tile >= 19 && tile <= 26)
-            classification = tile < 21 ? 13 : tile < 23 ? 15 : tile < 25 ? 14 : 12;
-        else if (tile == 151 || tile == 152)
-            classification = 110;
-        else if (tile == 153 || tile == 154)
-            classification = 111;
+            result.last_classified = FlightNeighbor::Lava;
+        else if (tile == Altar || tile == AltarSide)
+            result.last_classified = FlightNeighbor::Altar;
+        else if (tile >= Merchant && tile <= OldMan2)
+            result.last_classified = tile < Thief    ? FlightNeighbor::Merchant
+                                     : tile < Fairy  ? FlightNeighbor::Thief
+                                     : tile < OldMan ? FlightNeighbor::Fairy
+                                                     : FlightNeighbor::OldMan;
+        else if (tile == MagicianA || tile == MagicianA + 1)
+            result.last_classified = FlightNeighbor::MagicianA;
+        else if (tile == MagicianB || tile == MagicianB + 1)
+            result.last_classified = FlightNeighbor::MagicianB;
     }
-    return {classification, stair};
+    return result;
 }
 } // namespace
 
@@ -59,32 +84,34 @@ void Game::bomb_dissolve(int index) {
 }
 
 bool Game::can_open_flight() const {
-    return !busy() && inventory(Item::FlightOrb) == 1 && flight_neighbors(*this).first == 19;
+    return !busy() && inventory(Item::FlightOrb) == 1 &&
+           flight_neighbors(*this).last_classified == FlightNeighbor::Stairs;
 }
 
 bool Game::open_flight() {
     if (busy())
         return false;
-    hero.flight_direction = hero.highest_floor_stair = 0;
+    hero.flight_direction = FlightDirection::None;
+    hero.highest_floor_stair_kind = StairKind::None;
     if (inventory(Item::FlightOrb) != 1)
         return false;
-    const auto [classification, stair] = flight_neighbors(*this);
-    hero.highest_floor_stair = stair;
-    if (classification != 19) {
+    const auto scan = flight_neighbors(*this);
+    hero.highest_floor_stair_kind = scan.highest_floor_stair;
+    if (scan.last_classified != FlightNeighbor::Stairs) {
         update_status(20);
         return false;
     }
     // The original map draw (0x442C38) clears the marker after the scan.
-    hero.highest_floor_stair = 0;
+    hero.highest_floor_stair_kind = StairKind::None;
     return true;
 }
 
-bool Game::flight_preview(int destination, int direction) {
+bool Game::flight_preview(int destination, FlightDirection direction) {
     if (destination < 1 || destination > hero.highest_floor || destination == 44)
         return false;
     hero.flight_direction = direction;
-    hero.highest_floor_stair = 0; // 0x442C38 runs on every successful preview.
-    if (direction == 1 && destination == 35 && tile(35, 91) + tile(2, 120) == 27)
+    hero.highest_floor_stair_kind = StairKind::None; // 0x442C38 runs on every successful preview.
+    if (direction == FlightDirection::Up && destination == 35 && tile(35, 91) + tile(2, 120) == 27)
         tile(2, 120) = Road;
     return true;
 }
@@ -93,7 +120,7 @@ bool Game::confirm_flight(int destination) {
     if (busy() || inventory(Item::FlightOrb) <= 0 || destination < 1 || destination > hero.highest_floor ||
         destination == 44)
         return false;
-    if (hero.flight_direction) {
+    if (hero.flight_direction != FlightDirection::None) {
         if (destination != 25 && tile(25, 71) == Fairy)
             tile(25, 71) = Road;
         if (destination != 49 && tile(49, 16) == Fairy)
@@ -103,18 +130,20 @@ bool Game::confirm_flight(int destination) {
             tile(29, 17) = Thief;
         }
         if (destination == hero.highest_floor) {
-            if (hero.flight_direction == 1 && hero.highest_floor_stair == 1)
-                hero.flight_direction = 2;
-            else if (hero.flight_direction == 2 && hero.highest_floor_stair != 1)
-                hero.flight_direction = 1;
+            if (hero.flight_direction == FlightDirection::Up &&
+                hero.highest_floor_stair_kind == StairKind::Up)
+                hero.flight_direction = FlightDirection::Down;
+            else if (hero.flight_direction == FlightDirection::Down &&
+                     hero.highest_floor_stair_kind != StairKind::Up)
+                hero.flight_direction = FlightDirection::Up;
         }
-        const int landing =
-            hero.flight_direction == 1 ? floors[destination].up_landing : floors[destination].down_landing;
+        const int landing = hero.flight_direction == FlightDirection::Up ? floors[destination].up_landing
+                                                                         : floors[destination].down_landing;
         hero.floor = destination;
-        hero.x = landing % 11;
-        hero.y = landing / 11;
+        hero.x = landing % BoardWidth;
+        hero.y = landing / BoardWidth;
         change_music_for_floor();
-        face_away_from_stair(hero.flight_direction == 1);
+        face_away_from_stair(hero.flight_direction == FlightDirection::Up);
     }
     push(Op::Wait);
     push(Op::Sound, SoundCue::Get);
@@ -125,9 +154,9 @@ bool Game::use(Item item, int destination) {
     if (busy() || inventory(item) <= 0)
         return false;
     const int position = cell(hero.x, hero.y);
-    const auto cardinal =
-        std::array<int, 4>{hero.y < 10 ? position + 11 : -1, hero.x < 10 ? position + 1 : -1,
-                           hero.x > 0 ? position - 1 : -1, hero.y > 0 ? position - 11 : -1};
+    const auto cardinal = std::array<int, 4>{
+        hero.y < BoardWidth - 1 ? position + BoardWidth : -1, hero.x < BoardWidth - 1 ? position + 1 : -1,
+        hero.x > 0 ? position - 1 : -1, hero.y > 0 ? position - BoardWidth : -1};
     switch (item) {
     case Item::HeroOrb:
         status = "The Orb reveals this floor's enemy statistics and predicted battle damage.";
@@ -135,9 +164,12 @@ bool Game::use(Item item, int destination) {
     case Item::WisdomOrb: {
         std::string clues;
         for (int i = 0; i < 24; ++i)
-            if (hero.wisdom_hints[i] == 2)
-                clues += std::string(original_dialogue(62 + i)) + "\n\n";
-        dialogue = Dialogue{clues.empty() ? "No recorded clues yet." : clues, 0, false, {}};
+            if (hero.wisdom_hints[i] == HintState::Recorded) {
+                clues += original_dialogue(DialogueId::WisdomHintBase + i);
+                clues += "\n\n";
+            }
+        dialogue =
+            Dialogue{clues.empty() ? "No recorded clues yet." : clues, ContinuationStage::None, false, {}};
         return true;
     }
     case Item::FlightOrb:
@@ -149,7 +181,7 @@ bool Game::use(Item item, int destination) {
             floor += step;
             if (floor == 44)
                 floor += step;
-            flight_preview(floor, step > 0 ? 1 : 2);
+            flight_preview(floor, step > 0 ? FlightDirection::Up : FlightDirection::Down);
         }
         return confirm_flight(destination);
     case Item::Elixir:
@@ -193,10 +225,10 @@ bool Game::use(Item item, int destination) {
         return true;
     case Item::WarpStaff:
         --inventory(item);
-        contact_index = 120 - position;
+        contact_index = CellCount - 1 - position;
         if (tile(hero.floor, contact_index) == Road) {
-            hero.x = contact_index % 11;
-            hero.y = contact_index / 11;
+            hero.x = contact_index % BoardWidth;
+            hero.y = contact_index / BoardWidth;
             push(Op::Sound, SoundCue::Get);
             update_status(62);
         } else
@@ -211,7 +243,7 @@ bool Game::use(Item item, int destination) {
         }
         inventory(item) = 0;
         hero.floor = floor;
-        hero.highest_floor_stair = 0; // Successful wings redraw through 0x442C38.
+        hero.highest_floor_stair_kind = StairKind::None; // Successful wings redraw through 0x442C38.
         change_music_for_floor();
         push(Op::Message, item == Item::AscentWing ? 63 : 64);
         push(Op::UpdateInventory);
@@ -243,7 +275,7 @@ bool Game::use(Item item, int destination) {
         inventory(item) = 0;
         push(Op::Message, 66);
         push(Op::UpdateInventory);
-        for (int index = 120; index >= 0; --index)
+        for (int index = CellCount - 1; index >= 0; --index)
             if (tile(hero.floor, index) == YellowDoor) {
                 push(Op::DoorFrame, index, DoorMotion::Yellow);
                 expand_door();
@@ -255,8 +287,8 @@ bool Game::use(Item item, int destination) {
         inventory(item) = 0;
         push(Op::Message, 67);
         push(Op::UpdateInventory);
-        for (int x = 10; x >= 0; --x)
-            for (int y = 10; y >= 0; --y)
+        for (int x = BoardWidth - 1; x >= 0; --x)
+            for (int y = BoardWidth - 1; y >= 0; --y)
                 if (tile_at(hero.floor, x, y) == Wall) {
                     push(Op::Wait);
                     push(Op::SetTile, cell(x, y), Road);

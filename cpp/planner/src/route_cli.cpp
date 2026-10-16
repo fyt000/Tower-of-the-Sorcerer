@@ -139,7 +139,7 @@ int main(int argc, char** argv) try {
             else if (flag == "--results")
                 options.max_results = integer(value);
             else if (flag == "--policy")
-                options.policy = integer(value);
+                options.policy = static_cast<route::SearchPolicy>(integer(value));
             else
                 throw std::invalid_argument("Unknown search option: " + flag);
         }

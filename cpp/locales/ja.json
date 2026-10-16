@@ -447,7 +447,7 @@
     "Inspect enemy statistics and predicted battle damage for this floor. The battle panel keeps the last defeated enemy.": "この階の敵の能力と予想ダメージを調べる。最後に倒した敵は右側に表示。",
     "Read the clues recorded from old men and merchants. Scroll through long passages with the mouse wheel.": "老人や商人から聞いたヒントを読む。長い文章はホイールでスクロール。",
     "Travel between visited floors. Use Up and Down to preview a floor, then Enter to travel.": "訪れた階へ移動。上下キーで階を選び、Enterで移動。",
-    "Works automatically in ordinary battles against Zombies and Zombie Knights.": "ゾンビやゾンビナイトとの通常戦闘で自動的に働く。",
+    "Works automatically in ordinary battles against Zombies, Zombie Knights and Vampires.": "ゾンビ、ゾンビナイト、ヴァンパイアとの通常戦闘で自動的に働く。",
     "Restores life equal to ten times your attack plus five times your defense. Consumed when used.": "攻撃力の10倍と防御力の5倍の合計だけ生命力を回復。使うとなくなる。",
     "Lowers ordinary walls directly above, below, left and right of you. Consumed when used.": "上下左右の普通の壁を崩す。使うとなくなる。",
     "Destroys eligible monsters directly above, below, left and right of you. Consumed when used.": "上下左右に隣接する、破壊可能な敵を倒す。使うとなくなる。",

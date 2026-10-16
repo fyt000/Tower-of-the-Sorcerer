@@ -1,4 +1,4 @@
-#include "tsw/game_state.hpp"
+#include "../src/runtime_schema.hpp"
 #include "tsw/mcp.hpp"
 #include "tsw/replay.hpp"
 #include <catch2/catch_test_macros.hpp>
@@ -165,13 +165,14 @@ TEST_CASE("MCP forecasts and owned item clues use native values", "[mcp]") {
     game.monsters[0] = {100, 80, 20, 12};
     game.tile_at(1, 5, 4) = GreenSlime;
     game.inventory(Item::WisdomOrb) = 1;
-    game.hero.wisdom_hints[0] = 2;
+    game.hero.wisdom_hints[0] = HintState::Recorded;
     Client client(false, game);
     const auto tile = client.tool("inspect_tile", Json{{"x", 5}, {"y", 4}});
     REQUIRE(tile["enemy"]["forecast"]["damage"].as<int>() == game.forecast(GreenSlime).damage);
     REQUIRE(tile["enemy"]["forecast"]["hero_hits"].as<int>() == 4);
     const auto state = client.tool("game_state");
-    REQUIRE(state["wisdom_clues"][0]["text"].get<std::string>() == Game::original_dialogue(62));
+    REQUIRE(state["wisdom_clues"][0]["text"].get<std::string>() ==
+            Game::original_dialogue(static_cast<DialogueId>(62)));
     REQUIRE(state["inventory_items"].get_array().size() == 2);
     REQUIRE(state["inventory_items"][0]["usage"].is_string());
     const auto forecast = tile["enemy"]["forecast"]["damage"].as<int>();
@@ -412,8 +413,10 @@ TEST_CASE("MCP retains automatically settled speech", "[mcp]") {
     Client client(false, game);
     const auto state = client.act(R"({"type":"move","direction":"up"})");
     REQUIRE(state["dialogue"].is_null());
-    REQUIRE(state["last_action"]["messages"][0].get<std::string>() == Game::original_dialogue(62));
-    REQUIRE(state["log"][0]["text"].get<std::string>() == Game::original_dialogue(62));
+    REQUIRE(state["last_action"]["messages"][0].get<std::string>() ==
+            Game::original_dialogue(static_cast<DialogueId>(62)));
+    REQUIRE(state["log"][0]["text"].get<std::string>() ==
+            Game::original_dialogue(static_cast<DialogueId>(62)));
     REQUIRE(state["wisdom_clues"].get_array().size() == 1);
 }
 
@@ -817,7 +820,7 @@ TEST_CASE("MCP runtime restore rejects corrupt incompatible and incomplete files
     const auto wrong_mode = normal.rpc("runtime/restore", Json{{"path", path}});
     REQUIRE(wrong_mode["error"]["data"]["kind"].get<std::string>() == "session_incompatible");
     REQUIRE_FALSE(wrong_mode["error"]["data"]["session_continuable"].get<bool>());
-    for (int problem = 0; problem < 12; ++problem) {
+    for (int problem = 0; problem < 14; ++problem) {
         auto broken = valid;
         if (problem == 0)
             broken["version"] = 99;
@@ -843,6 +846,10 @@ TEST_CASE("MCP runtime restore rejects corrupt incompatible and incomplete files
             broken["session"]["game"]["visual"]["last_defeated"]["row"] = 999;
         } else if (problem == 11)
             broken["session"]["game"].get_object().erase("rankings");
+        else if (problem == 12)
+            broken["session"]["game"]["visual"]["raster_mode"] = 3;
+        else if (problem == 13)
+            broken["session"]["game"]["hero"]["music_track"] = 22;
         std::ofstream(path, std::ios::binary | std::ios::trunc)
             << (problem == 6 ? "{broken" : encode(broken));
         INFO(problem);
@@ -878,13 +885,47 @@ TEST_CASE("Complete game snapshots preserve pending combat speech and death", "[
     game.finish_commands();
     REQUIRE(GameState::capture(game).restore().hero.hp == 0);
     game.new_game();
-    game.push(Op::Dialogue, 1);
+    game.queue_speech(SpeechId::Unconscious);
     game.finish_commands();
     auto speech = GameState::capture(game).restore();
     game.finish_commands(true);
     speech.finish_commands(true);
     REQUIRE(glz::write_json(GameState::capture(speech)).value() ==
             glz::write_json(GameState::capture(game)).value());
+}
+
+TEST_CASE("Runtime v3 retains legacy keys and numeric state domains", "[mcp][runtime]") {
+    Directory directory;
+    const auto path = directory.file("runtime.json");
+    auto game = room();
+    game.hero.wisdom_hints[0] = HintState::Recorded;
+    game.hero.flight_direction = FlightDirection::Down;
+    game.hero.highest_floor_stair_kind = StairKind::Up;
+    game.tile_at(1, 5, 4) = GreenSlime;
+    game.monsters[0] = {1000, 120, 20, 17};
+    REQUIRE(game.move(Direction::Up));
+    REQUIRE(game.run_one());
+    Client source(true, game, true), target(true, Game{}, true);
+    REQUIRE(source.rpc("runtime/checkpoint", Json{{"path", path}}).contains("result"));
+    std::ifstream file(path);
+    const auto wire = decode(std::string{std::istreambuf_iterator<char>(file), {}});
+    const auto& saved = wire["session"]["game"];
+    REQUIRE(wire["version"].as<int>() == 3);
+    REQUIRE(saved["hero"]["highest_floor_stair"].as<int>() == 1);
+    REQUIRE_FALSE(saved["hero"].contains("highest_floor_stair_kind"));
+    REQUIRE(saved["hero"]["flight_direction"].as<int>() == 2);
+    REQUIRE(saved["hero"]["wisdom_hints"][0].as<int>() == 2);
+    REQUIRE(saved["hero"]["music_track"].as<int>() == 5);
+    REQUIRE(saved["hero"]["sword"].as<int>() == 5);
+    REQUIRE(saved["visual"]["raster_mode"].as<int>() == -1);
+    REQUIRE(saved["visual"]["enemy_index"].as<int>() == 0);
+    REQUIRE(saved["visual"]["battle_enemy"]["row"].as<int>() == 0);
+    REQUIRE(saved["fight"]["enemy"].as<int>() == 0);
+    REQUIRE(saved["fight"].contains("hero_hits"));
+    REQUIRE(saved["fight"].contains("enemy_hits"));
+    REQUIRE_FALSE(saved["fight"].contains("monster_index"));
+    REQUIRE(target.rpc("runtime/restore", Json{{"path", path}}).contains("result"));
+    REQUIRE(encode(target.tool("game_state")) == encode(source.tool("game_state")));
 }
 
 TEST_CASE("MCP altar decorations are omitted from interaction destinations", "[mcp][navigation][tiles]") {
@@ -914,7 +955,7 @@ TEST_CASE("MCP altar decorations are omitted from interaction destinations", "[m
     REQUIRE(opened["pending_interaction"]["choices"].get_array().size() == 4);
 }
 
-TEST_CASE("MCP alternate monster pieces expose forecasts and navigate into combat", "[mcp][combat][tiles]") {
+TEST_CASE("MCP alternate monster forecasts retain the recovered contact boundary", "[mcp][combat][tiles]") {
     for (int tile : {106, 107, 108, 109, 110, 111, 112, 113, 114, 158}) {
         CAPTURE(tile);
         auto game = room();
@@ -939,16 +980,26 @@ TEST_CASE("MCP alternate monster pieces expose forecasts and navigate into comba
         REQUIRE(compact["floor"]["points"][0]["reachable"].get<bool>());
         const auto type = compact["tile_types"][std::to_string(tile)];
         REQUIRE(type["kind"].get<std::string>() == "enemy");
-        REQUIRE(type["available"].get<bool>());
+        REQUIRE(type["available"].get<bool>() == (tile != GateKeeperA + 1));
         REQUIRE(type["enemy"]["forecast"]["damage"].as<int>() == 60);
         const auto after = client.tool("navigate", Json{{"x", 5}, {"y", 4}});
+        if (tile == GateKeeperA + 1) {
+            REQUIRE_FALSE(after["navigation"]["reached"].get<bool>());
+            REQUIRE(after["navigation"]["reason"].get<std::string>() == "refused");
+            REQUIRE(after["navigation"]["inputs"].as<int>() == 1);
+            REQUIRE(after["hero"]["y"].as<int>() == 5);
+            REQUIRE(after["hero"]["hp"].as<int>() == 1000);
+            REQUIRE(after["hero"]["gold"].as<int>() == 100);
+            REQUIRE(client.tool("game_state")["map"][cell(5, 4)].as<int>() == tile);
+            continue;
+        }
         REQUIRE(after["navigation"]["reached"].get<bool>());
         REQUIRE(after["navigation"]["inputs"].as<int>() == 1);
         REQUIRE(after["phase"].get<std::string>() == "playing");
         REQUIRE(after["hero"]["x"].as<int>() == 5);
         REQUIRE(after["hero"]["y"].as<int>() == 4);
         REQUIRE(after["hero"]["hp"].as<int>() == 940);
-        REQUIRE(after["hero"]["gold"].as<int>() == 100 + (tile == 158 ? 44 : 22));
+        REQUIRE(after["hero"]["gold"].as<int>() == 100 + 22);
         const auto completed = client.tool("game_state");
         REQUIRE(completed["map"][cell(5, 4)].as<int>() == Road);
         REQUIRE(completed["last_encounter"]["name"].get<std::string>() == Game::monster_name(expected_row));

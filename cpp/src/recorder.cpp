@@ -98,7 +98,7 @@ void Recorder::save(Game& game, const std::filesystem::path& path, SaveKind kind
     std::string achievement_error;
     if (previous && !std::filesystem::is_regular_file(companion))
         throw std::runtime_error("Replay companion must be a regular file");
-    const PlayerInput saved{InputKind::Save, Direction::Up, Item::HeroOrb, -1, kind};
+    const PlayerInput saved = PlayerInput::save(kind);
 
     if (!path.parent_path().empty())
         std::filesystem::create_directories(path.parent_path());
@@ -169,7 +169,7 @@ void Recorder::load(Game& game, const std::filesystem::path& path, SaveKind kind
         if (history.empty() || history.front().kind != InputKind::NewGame ||
             history.back().kind != InputKind::Save || history.back().save_kind != kind)
             throw std::runtime_error("Recording is not a complete history for this save kind");
-        history.push_back({InputKind::Reload, Direction::Up, Item::HeroOrb, -1, kind});
+        history.push_back(PlayerInput::reload(kind));
         history_ = std::move(history);
         game.status += " Replay recording resumed.";
     } catch (const std::exception& error) {

@@ -307,7 +307,7 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         draw(game);
         constexpr Rectangle EnemyPanel{656, MenuHeight + 278, 128, 168};
         const auto last_enemy = fingerprint(renderer, EnemyPanel);
-        require(game.visual.last_defeated && game.visual.last_defeated->row == 0,
+        require(game.visual.last_defeated && game.visual.last_defeated->monster_index == 0,
                 "The battle panel receives a completed real combat result");
         snapshot("last-defeated-enemy");
         renderer.draw(game, ui, {BoardX + 8 * TileSize + 20, BoardY + 8 * TileSize + 20});
@@ -337,7 +337,7 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         snapshot("hero-orb-last-page");
         game.floors[1].tiles.fill(Road);
         draw(game);
-        require(ui.enemy_first_row == 0 && game.visual.last_defeated->row == 0,
+        require(ui.enemy_first_row == 0 && game.visual.last_defeated->monster_index == 0,
                 "An empty Hero Orb overlay resets scrolling without erasing the last victory");
         snapshot("hero-orb-empty");
         ui.close_overlays();
@@ -504,7 +504,8 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
             if (game.dialogue)
                 game.continue_dialogue();
         }
-        require(frames == 32 && first != middle && middle != last && game.visual.raster_mode == -1,
+        require(frames == 32 && first != middle && middle != last &&
+                    game.visual.raster_mode == RasterMode::Inactive,
                 "Vampire transformation retains all 32 frames and restores the board");
     }
     {
@@ -523,15 +524,16 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
             renderer.command(command);
             if (command.op == Op::Callback) {
                 draw(game);
-                if (game.visual.raster_mode == 9 || game.visual.raster_mode == 0 ||
-                    game.visual.raster_mode == 1)
+                if (game.visual.raster_mode == RasterMode::Title ||
+                    game.visual.raster_mode == RasterMode::OpeningDissolve ||
+                    game.visual.raster_mode == RasterMode::OpeningStory)
                     capture_music = capture_music && Audio::track_for_scene(game) == 11;
                 if (command.a == int(Callback::HidePanels)) {
                     title = fingerprint(renderer, ContentArea);
                     snapshot("capture-title");
                 }
                 if (command.a == int(Callback::RasterScene)) {
-                    if (game.visual.raster_mode == 0) {
+                    if (game.visual.raster_mode == RasterMode::OpeningDissolve) {
                         ++dissolve;
                         if (command.b == 232) {
                             first = fingerprint(renderer, ContentArea);
@@ -543,7 +545,7 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
                         }
                         if (command.b == 247)
                             final = fingerprint(renderer, ContentArea);
-                    } else if (game.visual.raster_mode == 1) {
+                    } else if (game.visual.raster_mode == RasterMode::OpeningStory) {
                         ++wipe;
                         if (command.b == 0)
                             opening = fingerprint(renderer, ContentArea);
@@ -559,9 +561,10 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         require(dissolve == 16 && wipe == 308 && first != title && first != middle && middle != final &&
                     final == opening,
                 "Capture uses the cached title, all dissolve masks and ordered horizontal wipes");
-        require(game.hero.floor == 2 && game.hero.hp == 400 && game.visual.raster_mode == -1,
+        require(game.hero.floor == 2 && game.hero.hp == 400 &&
+                    game.visual.raster_mode == RasterMode::Inactive,
                 "Capture compositor returns to the prison without changing the gameplay outcome");
-        require(capture_music && Audio::track_for_scene(game) == game.hero.music_track,
+        require(capture_music && Audio::track_for_scene(game) == std::to_underlying(game.hero.music_track),
                 "Capture title music persists through its scenes, then returns to floor music");
         snapshot("capture-prison");
     }
@@ -579,7 +582,7 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
             renderer.command(command);
             if (command.op == Op::Callback) {
                 draw(game);
-                const int mode = game.visual.raster_mode;
+                const int mode = std::to_underlying(game.visual.raster_mode);
                 if (command.a == int(Callback::RasterScene) && mode >= 0 && mode <= 8) {
                     ++modes[mode];
                     if (mode == 6 && command.b == 9)
@@ -613,7 +616,8 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         require(modes[2] == 16 && modes[6] == 17 && modes[4] > 50 && modes[5] == 400 && modes[7] == 1 &&
                     modes[8] == 1,
                 "Ending executes dissolve, tower frames, collapse, story wipe and closing callbacks");
-        require(game.hero.cycle_factor_minus_one == BacksideFactor - 1 && game.visual.raster_mode == -1,
+        require(game.hero.cycle_factor_minus_one == BacksideFactor - 1 &&
+                    game.visual.raster_mode == RasterMode::Inactive,
                 "Ending returns to the playable backside tower");
         draw(game);
         snapshot("ending-backside");
@@ -640,8 +644,8 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         game.hero.yellow_keys = 14;
         game.hero.blue_keys = 3;
         game.hero.red_keys = 5;
-        game.hero.sword = 3;
-        game.hero.shield = 4;
+        game.hero.sword = EquipmentTier::Knight;
+        game.hero.shield = EquipmentTier::Holy;
         game.ending_summary = EndingSummary{game.hero, game.run_history};
         draw(game);
         snapshot("ending-summary-all-achievements");
@@ -650,11 +654,11 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
             cards[i] = fingerprint(renderer, {32.f + i % 2 * 376, 272.f + i / 2 * 80, 360, 74});
         const Rectangle sword_icon{230, 119, 30, 30}, shield_icon{418, 119, 30, 30};
         const auto sword = fingerprint(renderer, sword_icon), shield = fingerprint(renderer, shield_icon);
-        game.hero.sword = game.hero.shield = 1;
+        game.hero.sword = game.hero.shield = EquipmentTier::Iron;
         draw(game);
         require(fingerprint(renderer, sword_icon) == sword && fingerprint(renderer, shield_icon) == shield,
                 "Ending equipment icons retain the captured sword and shield after live state changes");
-        game.ending_summary->hero.sword = game.ending_summary->hero.shield = 1;
+        game.ending_summary->hero.sword = game.ending_summary->hero.shield = EquipmentTier::Iron;
         draw(game);
         require(fingerprint(renderer, sword_icon) != sword && fingerprint(renderer, shield_icon) != shield,
                 "Ending equipment icons follow the latest obtained tiers instead of fixed Sacred icons");
@@ -728,7 +732,7 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
             fight.move(Direction::Up);
             draw(fight);
             const auto panel = fingerprint(renderer, EnemyPanel);
-            require(fight.visual.battle_enemy.row == ZenoRow && panel != previous,
+            require(fight.visual.battle_enemy.monster_index == ZenoRow && panel != previous,
                     "50F Zeno variant " + std::to_string(variant) + " renders its own encounter stats");
             previous = panel;
             snapshot(variant == 0   ? "zeno-50f-cycle2"
@@ -767,7 +771,8 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         draw(game);
         snapshot("save-slot-replace");
         ui.save_picker = SavePicker::Load;
-        game.dialogue = Dialogue{"Dialogue remains paused under the load picker.", 0, false, {}};
+        game.dialogue =
+            Dialogue{"Dialogue remains paused under the load picker.", ContinuationStage::None, false, {}};
         draw(game);
         const auto with_dialogue = fingerprint(renderer, BoardArea);
         game.dialogue.reset();
@@ -825,7 +830,7 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         game.choose(-1);
         game.finish_commands();
         game.inventory(Item::WisdomOrb) = 1;
-        game.hero.wisdom_hints.fill(2);
+        game.hero.wisdom_hints.fill(HintState::Recorded);
         game.use(Item::WisdomOrb);
         ui.dialogue_scroll = 200;
         draw(game);

@@ -1,5 +1,6 @@
 #include "tsw/rankings.hpp"
 #include <bit>
+#include <format>
 #include <fstream>
 #include <stdexcept>
 #include <string_view>
@@ -27,11 +28,11 @@ void check_category(int category) {
 }
 
 std::filesystem::path data_path(const std::filesystem::path& directory, int category) {
-    return directory / ("option" + std::to_string(category) + ".dat");
+    return directory / std::format("option{}.dat", category);
 }
 
 std::filesystem::path names_path(const std::filesystem::path& directory, int category) {
-    return directory / ("option" + std::to_string(category) + "1.dat");
+    return directory / std::format("option{}1.dat", category);
 }
 
 void checksums(RankingWords& words, int category) {

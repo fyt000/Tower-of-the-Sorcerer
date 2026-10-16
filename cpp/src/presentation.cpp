@@ -1,4 +1,5 @@
 #include "presentation.hpp"
+#include "fairy_dialogue.hpp"
 #include "rlgl.h"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -53,19 +54,28 @@ bool clicked(Rectangle rect, Vector2 mouse) {
     return CheckCollisionPointRec(mouse, rect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 }
 
+enum class TextAlignment { Center, Right };
+
+struct TextOptions {
+    TextAlignment alignment = TextAlignment::Center;
+    bool bold{};
+    bool translate = true;
+};
+
 struct Typography {
     struct Typeface {
         std::vector<unsigned char> bytes;
-        mutable std::unordered_map<int, Font> sizes;
+        mutable std::unordered_map<int, detail::UniqueFont> sizes;
         std::vector<int> codepoints;
 
         void load(const std::filesystem::path& path) {
             if (!std::filesystem::exists(path))
                 return;
             int count{};
-            if (auto* data = LoadFileData(path.string().c_str(), &count)) {
-                bytes.assign(data, data + count);
-                UnloadFileData(data);
+            if (std::unique_ptr<unsigned char, decltype(&UnloadFileData)> data(
+                    LoadFileData(path.string().c_str(), &count), UnloadFileData);
+                data) {
+                bytes.assign(data.get(), data.get() + count);
                 // raylib initializes stb_truetype at byte zero. Windows CJK fonts
                 // are collections; move the first face's directory to byte zero,
                 // retaining its absolute table offsets and the original table data.
@@ -83,15 +93,9 @@ struct Typography {
                         throw std::runtime_error("Invalid CJK font directory");
                     const std::vector<unsigned char> directory(bytes.begin() + offset,
                                                                bytes.begin() + offset + size);
-                    std::copy(directory.begin(), directory.end(), bytes.begin());
+                    std::ranges::copy(directory, bytes.begin());
                 }
             }
-        }
-
-        ~Typeface() {
-            for (const auto& [size, font] : sizes)
-                if (font.texture.id != GetFontDefault().texture.id)
-                    UnloadFont(font);
         }
 
         Font at(int size, float scale) const {
@@ -99,16 +103,15 @@ struct Typography {
                 return GetFontDefault();
             const int pixels = std::max(1, int(std::round(size * scale)));
             auto& font = sizes[size];
-            if (!font.texture.id || font.baseSize != pixels) {
-                if (font.texture.id && font.texture.id != GetFontDefault().texture.id)
-                    UnloadFont(font);
-                font = LoadFontFromMemory(".ttf", bytes.data(), int(bytes.size()), pixels,
-                                          codepoints.empty() ? nullptr : const_cast<int*>(codepoints.data()),
-                                          int(codepoints.size()));
+            if (!font.get().texture.id || font.get().baseSize != pixels) {
+                font.reset(
+                    LoadFontFromMemory(".ttf", bytes.data(), int(bytes.size()), pixels,
+                                       codepoints.empty() ? nullptr : const_cast<int*>(codepoints.data()),
+                                       int(codepoints.size())));
                 // Glyph alpha already contains antialiasing. Native pixel sampling avoids a second blur.
-                SetTextureFilter(font.texture, TEXTURE_FILTER_POINT);
+                SetTextureFilter(font.get().texture, TEXTURE_FILTER_POINT);
             }
-            return font;
+            return font.get();
         }
     };
 
@@ -136,8 +139,7 @@ struct Typography {
     }
 
     Font font(int size, bool bold = false, std::string_view value = {}) const {
-        const bool unicode =
-            std::any_of(value.begin(), value.end(), [](unsigned char c) { return c >= 128; });
+        const bool unicode = std::ranges::any_of(value, [](unsigned char c) { return c >= 128; });
         if (unicode) {
             const bool chinese_label = value == language_label(Language::ChineseFromJapanese) ||
                                        value == language_label(Language::ChineseFromEnglish);
@@ -179,24 +181,26 @@ struct Typography {
         }
     }
 
-    std::string wrap(const std::string& text, int limit, int size) const {
-        return wrap_localized_text(localized_text(language, text), float(limit), [&](std::string_view line) {
-            return float(width(std::string(line), size));
-        });
+    std::string wrap(const std::string& text, int limit, int size, bool translate = true) const {
+        return wrap_localized_text(
+            translate ? localized_text(language, text) : text, float(limit),
+            [&](std::string_view line) { return float(width(std::string(line), size)); });
     }
 
-    void fit(const std::string& value, Rectangle rect, int size, Color color = Ink, bool right = false,
-             bool bold = false, bool translate = true) const {
-        const auto text = translate ? localized_text(language, value) : value;
-        while (size > 10 && width(text, size, bold) > rect.width - 6)
+    void fit(const std::string& value, Rectangle rect, int size, Color color = Ink,
+             TextOptions options = {}) const {
+        const auto text = options.translate ? localized_text(language, value) : value;
+        while (size > 10 && width(text, size, options.bold) > rect.width - 6)
             --size;
         clip(rect);
-        const int measured = width(text, size, bold);
-        const auto face = font(size, bold, text);
-        DrawTextEx(face, text.c_str(),
-                   position(rect.x + (right ? rect.width - measured - 3 : (rect.width - measured) / 2),
-                            rect.y + (rect.height - size) / 2),
-                   font_size(face, size), 0, color);
+        const int measured = width(text, size, options.bold);
+        const auto face = font(size, options.bold, text);
+        DrawTextEx(
+            face, text.c_str(),
+            position(rect.x + (options.alignment == TextAlignment::Right ? rect.width - measured - 3
+                                                                         : (rect.width - measured) / 2),
+                     rect.y + (rect.height - size) / 2),
+            font_size(face, size), 0, color);
         EndScissorMode();
     }
 
@@ -247,7 +251,7 @@ struct Typography {
 
     void tooltip(Rectangle anchor, const std::string& text) const {
         const auto wrapped = wrap(text, 300, 16);
-        const float height = 20 + 22 * float(std::count(wrapped.begin(), wrapped.end(), '\n'));
+        const float height = 20 + 22 * float(std::ranges::count(wrapped, '\n'));
         const float x = std::clamp(anchor.x + anchor.width - 324, 8.f, CanvasWidth - 332.f);
         const float y = anchor.y + anchor.height + 6 + height < CanvasHeight - 8
                             ? anchor.y + anchor.height + 6
@@ -258,29 +262,6 @@ struct Typography {
         draw(wrapped, int(x + 12), int(y + 10), 16, Ink, false);
     }
 };
-
-bool passive(Item item) {
-    return item == Item::Cross || item == Item::DragonSlayer || item == Item::LuckyGold;
-}
-
-constexpr std::array<const char*, 15> ItemDescriptions{
-    "Inspect enemy statistics and predicted battle damage for this floor. The battle panel keeps the last "
-    "defeated enemy.",
-    "Read the clues recorded from old men and merchants. Scroll through long passages with the mouse wheel.",
-    "Travel between visited floors. Use Up and Down to preview a floor, then Enter to travel.",
-    "Works automatically in ordinary battles against Zombies and Zombie Knights.",
-    "Restores life equal to ten times your attack plus five times your defense. Consumed when used.",
-    "Lowers ordinary walls directly above, below, left and right of you. Consumed when used.",
-    "Destroys eligible monsters directly above, below, left and right of you. Consumed when used.",
-    "Warps to the opposite position on this floor when that position is a road. Each attempt uses one "
-    "charge.",
-    "Ascends one floor at the same map position if it is a road. Consumed on successful travel.",
-    "Descends one floor at the same map position if it is a road. Consumed on successful travel.",
-    "Works automatically in ordinary battles against the Dragon.",
-    "Turns adjacent lava into road. The crystal can be used repeatedly.",
-    "Opens every yellow door on the current floor. Consumed when used.",
-    "Removes ordinary walls across the current floor. Consumed when used.",
-    "Works automatically, increasing gold awarded by battle victories."};
 
 constexpr const char* DissolveShader = R"(#version 330
 in vec2 fragTexCoord;
@@ -300,43 +281,32 @@ void main() {
 
 struct Presentation::Art {
     Typography text;
-    Image atlas_image{}, background_image{};
-    Texture2D atlas{};
-    std::unordered_map<int, Texture2D> masked, icons;
-    std::unordered_map<std::string, Texture2D> scenes;
+    detail::UniqueImage atlas_image, background_image;
+    detail::UniqueTexture atlas;
+    std::unordered_map<int, detail::UniqueTexture> masked, icons;
+    std::unordered_map<std::string, detail::UniqueTexture> scenes;
 
     explicit Art(const Assets& assets) {
-        atlas_image = assets.image("original-atlas");
-        background_image = assets.image("original-background-atlas");
-        if (atlas_image.width != 440 || atlas_image.height != 800 || background_image.width != 440 ||
-            background_image.height != 600)
+        atlas_image.reset(assets.image("original-atlas"));
+        background_image.reset(assets.image("original-background-atlas"));
+        if (atlas_image.get().width != 440 || atlas_image.get().height != 800 ||
+            background_image.get().width != 440 || background_image.get().height != 600)
             throw std::runtime_error("Original color and mask atlases have unexpected dimensions.");
-        atlas = LoadTextureFromImage(atlas_image);
+        atlas.reset(LoadTextureFromImage(atlas_image.get()));
+        if (!IsTextureValid(atlas.get()))
+            throw std::runtime_error("Unable to upload original atlas");
         for (const auto name : SceneImageNames) {
-            auto image = assets.image(name);
-            auto texture = LoadTextureFromImage(image);
-            UnloadImage(image);
-            if (!IsTextureValid(texture))
+            detail::UniqueImage image(assets.image(name));
+            detail::UniqueTexture texture(LoadTextureFromImage(image.get()));
+            if (!IsTextureValid(texture.get()))
                 throw std::runtime_error("Unable to upload original scene artwork: " + std::string(name));
-            scenes.emplace(std::string(name), texture);
+            scenes.emplace(std::string(name), std::move(texture));
         }
-    }
-
-    ~Art() {
-        for (auto [key, texture] : masked)
-            UnloadTexture(texture);
-        for (auto [key, texture] : icons)
-            UnloadTexture(texture);
-        for (auto& [key, texture] : scenes)
-            UnloadTexture(texture);
-        UnloadTexture(atlas);
-        UnloadImage(atlas_image);
-        UnloadImage(background_image);
     }
 
     void tile(int value, int x, int y) const {
         if (value > 0 && value <= 220)
-            DrawTextureRec(atlas, sprite(value), {float(x), float(y)}, WHITE);
+            DrawTextureRec(atlas.get(), sprite(value), {float(x), float(y)}, WHITE);
         else
             DrawRectangle(x, y, TileSize, TileSize, BLACK);
     }
@@ -347,23 +317,23 @@ struct Presentation::Art {
         const auto origin = sprite(value);
         source.x += origin.x;
         source.y += origin.y;
-        DrawTextureRec(atlas, source, {float(x), float(y)}, WHITE);
+        DrawTextureRec(atlas.get(), source, {float(x), float(y)}, WHITE);
     }
 
     Texture2D transparent(int color, int mask, bool background = false) {
         auto& textures = background ? icons : masked;
         const int key = color * 256 + mask;
         if (auto found = textures.find(key); found != textures.end())
-            return found->second;
-        Image colored = ImageFromImage(atlas_image, sprite(color));
-        Image alpha = ImageFromImage(background ? background_image : atlas_image, sprite(mask));
-        ImageColorInvert(&alpha);
-        ImageAlphaMask(&colored, alpha);
-        Texture2D texture = LoadTextureFromImage(colored);
-        UnloadImage(colored);
-        UnloadImage(alpha);
-        textures.emplace(key, texture);
-        return texture;
+            return found->second.get();
+        detail::UniqueImage colored(ImageFromImage(atlas_image.get(), sprite(color)));
+        detail::UniqueImage alpha(
+            ImageFromImage(background ? background_image.get() : atlas_image.get(), sprite(mask)));
+        ImageColorInvert(alpha.address());
+        ImageAlphaMask(colored.address(), alpha.get());
+        detail::UniqueTexture texture(LoadTextureFromImage(colored.get()));
+        const auto borrowed = texture.get();
+        textures.emplace(key, std::move(texture));
+        return borrowed;
     }
 
     void icon(int value, Rectangle target, Color tint = WHITE) {
@@ -374,7 +344,7 @@ struct Presentation::Art {
         const auto found = scenes.find(name);
         if (found == scenes.end())
             throw std::runtime_error("Missing scene: " + name);
-        const auto texture = found->second;
+        const auto texture = found->second.get();
         DrawTexturePro(texture, {0, 0, float(texture.width), float(texture.height)}, target, {0, 0}, 0,
                        WHITE);
     }
@@ -382,13 +352,14 @@ struct Presentation::Art {
 
 Presentation::Presentation(const Assets& assets) : art_(std::make_unique<Art>(assets)) {
     resize_canvas(window_viewport());
-    scene_cache_ = LoadRenderTexture(CanvasWidth, ContentHeight);
-    SetTextureFilter(scene_cache_.texture, TEXTURE_FILTER_POINT);
-    dissolve_ = LoadShaderFromMemory(nullptr, DissolveShader);
-    dissolve_mask_location_ = GetShaderLocation(dissolve_, "maskOrigin");
-    if (!IsRenderTextureValid(canvas_) || !IsRenderTextureValid(scene_cache_) || dissolve_mask_location_ < 0)
+    scene_cache_.reset(LoadRenderTexture(CanvasWidth, ContentHeight));
+    SetTextureFilter(scene_cache_.get().texture, TEXTURE_FILTER_POINT);
+    dissolve_.reset(LoadShaderFromMemory(nullptr, DissolveShader));
+    dissolve_mask_location_ = GetShaderLocation(dissolve_.get(), "maskOrigin");
+    if (!IsRenderTextureValid(canvas_.get()) || !IsRenderTextureValid(scene_cache_.get()) ||
+        dissolve_mask_location_ < 0)
         throw std::runtime_error("Could not create the game canvas or scene compositor.");
-    BeginTextureMode(canvas_);
+    BeginTextureMode(canvas_.get());
     ClearBackground(BLACK);
     EndTextureMode();
 }
@@ -398,33 +369,28 @@ void Presentation::resize_canvas(const CanvasViewport& view) {
         std::max(1, int(std::round(view.area.width * view.framebuffer_width / view.window_width)));
     const int height =
         std::max(1, int(std::round(view.area.height * view.framebuffer_height / view.window_height)));
-    if (canvas_.texture.width == width && canvas_.texture.height == height)
+    if (canvas_.get().texture.width == width && canvas_.get().texture.height == height)
         return;
-    auto resized = LoadRenderTexture(width, height);
-    if (!IsRenderTextureValid(resized))
+    detail::UniqueRenderTexture resized(LoadRenderTexture(width, height));
+    if (!IsRenderTextureValid(resized.get()))
         throw std::runtime_error("Could not resize the game canvas");
-    SetTextureFilter(resized.texture, TEXTURE_FILTER_POINT);
-    BeginTextureMode(resized);
+    SetTextureFilter(resized.get().texture, TEXTURE_FILTER_POINT);
+    BeginTextureMode(resized.get());
     ClearBackground(BLACK);
-    if (canvas_.id)
-        DrawTexturePro(canvas_.texture, {0, 0, float(canvas_.texture.width), -float(canvas_.texture.height)},
+    if (canvas_.get().id)
+        DrawTexturePro(canvas_.get().texture,
+                       {0, 0, float(canvas_.get().texture.width), -float(canvas_.get().texture.height)},
                        {0, 0, float(width), float(height)}, {0, 0}, 0, WHITE);
     EndTextureMode();
-    if (canvas_.id)
-        UnloadRenderTexture(canvas_);
-    canvas_ = resized;
+    canvas_ = std::move(resized);
     art_->text.scale = {width / float(CanvasWidth), height / float(CanvasHeight)};
 }
 
-Presentation::~Presentation() {
-    UnloadShader(dissolve_);
-    UnloadRenderTexture(scene_cache_);
-    UnloadRenderTexture(canvas_);
-}
+Presentation::~Presentation() = default;
 
 void Presentation::reset() {
     hide_panels_ = cache_requested_ = cache_valid_ = false;
-    previous_raster_ = -1;
+    previous_raster_ = RasterMode::Inactive;
     walking_remaining_ = 0;
     animation_seconds_ = 0;
 }
@@ -461,19 +427,19 @@ void Presentation::command(const Command& command) {
 }
 
 void Presentation::cache_scene() {
-    const int width = canvas_.texture.width;
+    const int width = canvas_.get().texture.width;
     const int height = std::max(1, int(std::round(ContentHeight * art_->text.scale.y)));
-    if (scene_cache_.texture.width != width || scene_cache_.texture.height != height) {
-        UnloadRenderTexture(scene_cache_);
-        scene_cache_ = LoadRenderTexture(width, height);
-        if (!IsRenderTextureValid(scene_cache_))
+    if (scene_cache_.get().texture.width != width || scene_cache_.get().texture.height != height) {
+        detail::UniqueRenderTexture resized(LoadRenderTexture(width, height));
+        if (!IsRenderTextureValid(resized.get()))
             throw std::runtime_error("Could not resize the scene cache");
-        SetTextureFilter(scene_cache_.texture, TEXTURE_FILTER_POINT);
+        scene_cache_ = std::move(resized);
+        SetTextureFilter(scene_cache_.get().texture, TEXTURE_FILTER_POINT);
     }
-    BeginTextureMode(scene_cache_);
+    BeginTextureMode(scene_cache_.get());
     ClearBackground(BLACK);
     // Render textures are vertically inverted; preserve the content below the menu.
-    DrawTexturePro(canvas_.texture,
+    DrawTexturePro(canvas_.get().texture,
                    {0, StatusHeight * art_->text.scale.y, float(width), -ContentHeight * art_->text.scale.y},
                    {0, 0, float(width), float(height)}, {0, 0}, 0, WHITE);
     EndTextureMode();
@@ -591,13 +557,13 @@ void Presentation::draw_board(const Game& game, int floor, bool animated) {
         DrawTexture(art_->transparent(pose, pose + 1), BoardX + hero_x * TileSize, BoardY + hero_y * TileSize,
                     WHITE);
     }
-    if (active && v.raster_mode == 10)
+    if (active && v.raster_mode == RasterMode::VampireTransformation)
         draw_transformation(game, animation);
 }
 
 void Presentation::draw_realtime_orb(const Game& game, const DesktopUi& ui) {
     if (!ui.realtime_hero_orb || !game.inventory(Item::HeroOrb) || ui.modal() || ui.flight >= 0 ||
-        game.busy() || game.visual.raster_mode >= 0)
+        game.busy() || game.visual.raster_mode != RasterMode::Inactive)
         return;
     for (int index = 0; index < CellCount; ++index) {
         const auto info = orb_tile_info(game, game.hero.floor, index, ui.hero_orb_actual_damage);
@@ -623,23 +589,26 @@ void Presentation::draw_realtime_orb(const Game& game, const DesktopUi& ui) {
 }
 
 void Presentation::draw_scene(const Game& game) {
-    const int mode = game.visual.raster_mode, frame = game.visual.raster_frame;
-    if (mode == 9) {
+    const auto mode = game.visual.raster_mode;
+    const int frame = game.visual.raster_frame;
+    if (mode == RasterMode::Title) {
         art_->scene(game.hero.cycle_factor_minus_one ? "data3-title05r" : "data3-title05",
                     {SideWidth, MenuHeight, FrameWidth, ContentHeight});
-    } else if (mode == 0 || mode == 2) {
+    } else if (mode == RasterMode::OpeningDissolve || mode == RasterMode::EndingDissolve) {
         if (cache_valid_)
-            DrawTexturePro(scene_cache_.texture,
-                           {0, 0, float(scene_cache_.texture.width), -float(scene_cache_.texture.height)},
-                           Content, {0, 0}, 0, WHITE);
+            DrawTexturePro(
+                scene_cache_.get().texture,
+                {0, 0, float(scene_cache_.get().texture.width), -float(scene_cache_.get().texture.height)},
+                Content, {0, 0}, 0, WHITE);
         const auto mask = sprite(std::clamp(frame - 66 + 1, DissolveFirstMask, DissolveLastMask));
-        const Vector2 origin{mask.x / art_->atlas.width, mask.y / art_->atlas.height};
-        SetShaderValue(dissolve_, dissolve_mask_location_, &origin, SHADER_UNIFORM_VEC2);
-        BeginShaderMode(dissolve_);
-        SetShaderValueTexture(dissolve_, GetShaderLocation(dissolve_, "maskAtlas"), art_->atlas);
-        art_->scene(mode == 0 ? "data3-open1" : "data3-open0", Content);
+        const Vector2 origin{mask.x / art_->atlas.get().width, mask.y / art_->atlas.get().height};
+        SetShaderValue(dissolve_.get(), dissolve_mask_location_, &origin, SHADER_UNIFORM_VEC2);
+        BeginShaderMode(dissolve_.get());
+        SetShaderValueTexture(dissolve_.get(), GetShaderLocation(dissolve_.get(), "maskAtlas"),
+                              art_->atlas.get());
+        art_->scene(mode == RasterMode::OpeningDissolve ? "data3-open1" : "data3-open0", Content);
         EndShaderMode();
-    } else if (mode == 1) {
+    } else if (mode == RasterMode::OpeningStory) {
         art_->scene("data3-open1", Content);
         art_->text.clip({0, MenuHeight, CanvasWidth, float(std::clamp(frame, 0, ContentHeight))});
         if (art_->text.language == Language::English)
@@ -649,22 +618,21 @@ void Presentation::draw_scene(const Game& game) {
                 wrap_localized_text(localized_opening(art_->text.language), 650, [&](std::string_view line) {
                     return float(art_->text.width(std::string(line), 32));
                 });
-            const int lines = int(std::count(opening.begin(), opening.end(), '\n'));
+            const int lines = int(std::ranges::count(opening, '\n'));
             float y = Content.y + (Content.height - lines * 44) / 2;
             std::istringstream paragraphs(opening);
             for (std::string line; std::getline(paragraphs, line); y += 44)
-                art_->text.fit(line, {75, y, 650, 44}, 32, WHITE, false, false, false);
+                art_->text.fit(line, {75, y, 650, 44}, 32, WHITE, {.translate = false});
         }
         EndScissorMode();
-    } else if (mode == 6) {
+    } else if (mode == RasterMode::EndingImages) {
         if (frame == 1)
             art_->scene("data3-open0", Content);
         else {
             const int image = std::clamp(frame + 3, 5, 20);
-            art_->scene("data2-end" + (image < 10 ? std::string("0") : std::string()) + std::to_string(image),
-                        Content);
+            art_->scene(std::format("data2-end{:02}", image), Content);
         }
-    } else if (mode == 4) {
+    } else if (mode == RasterMode::EndingShrink) {
         DrawRectangleRec(Content, BLACK);
         if (frame < 400) {
             const float inset_y = std::clamp(frame / 2.f, 0.f, 200.f), inset_x = inset_y * 640 / 400;
@@ -672,7 +640,7 @@ void Presentation::draw_scene(const Game& game) {
                                         EndingArea.width - 2 * inset_x, EndingArea.height - 2 * inset_y});
         } else
             art_->scene("data2-end26", Content);
-    } else if (mode == 5) {
+    } else if (mode == RasterMode::EndingStory) {
         art_->scene("data2-end26", Content);
         art_->text.clip({EndingArea.x, EndingArea.y, EndingArea.width, float(std::clamp(frame, 0, 400))});
         if (art_->text.language == Language::English)
@@ -683,14 +651,14 @@ void Presentation::draw_scene(const Game& game) {
                 wrap_localized_text(localized_ending(art_->text.language), 610, [&](std::string_view line) {
                     return float(art_->text.width(std::string(line), 24));
                 });
-            const int lines = int(std::count(story.begin(), story.end(), '\n'));
+            const int lines = int(std::ranges::count(story, '\n'));
             float y = EndingArea.y + std::max(8.f, (EndingArea.height - lines * 28) / 2);
             std::istringstream paragraphs(story);
             for (std::string line; std::getline(paragraphs, line); y += 28)
-                art_->text.fit(line, {EndingArea.x + 15, y, 610, 28}, 24, BLACK, false, false, false);
+                art_->text.fit(line, {EndingArea.x + 15, y, 610, 28}, 24, BLACK, {.translate = false});
         }
         EndScissorMode();
-    } else if (mode == 7 || mode == 8) {
+    } else if (mode == RasterMode::EndingCard || mode == RasterMode::ClosingCard) {
         art_->scene("data-exe-ending-card", Content);
     }
 }
@@ -698,21 +666,21 @@ void Presentation::draw_scene(const Game& game) {
 float command_interval(const Game& game) {
     // Presentation pacing only; the command stack and gameplay order stay unchanged.
     switch (game.visual.raster_mode) {
-    case 0:
-    case 2:
+    case RasterMode::OpeningDissolve:
+    case RasterMode::EndingDissolve:
         return .05f;
-    case 1:
+    case RasterMode::OpeningStory:
         return .015f;
-    case 4:
+    case RasterMode::EndingShrink:
         return .05f;
-    case 5:
+    case RasterMode::EndingStory:
         return .03f;
-    case 6:
+    case RasterMode::EndingImages:
         return .225f;
-    case 7:
-    case 8:
+    case RasterMode::EndingCard:
+    case RasterMode::ClosingCard:
         return .3f;
-    case 9:
+    case RasterMode::Title:
         return .06f;
     default:
         return game.visual.battle ? .06f : .016f;
@@ -728,18 +696,19 @@ UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mous
             art_->text.fit(std::array<const char*, 4>{"HP", "ATK", "DEF", "Gold"}[i], label, 13);
         }
     }
-    art_->text.fit("Tower " + std::to_string(ui.flight >= 0 ? ui.flight : h.floor),
-                   {18, MenuHeight + 59, 124, 24}, 22, Ink, false, true);
+    art_->text.fit(std::format("Tower {}", ui.flight >= 0 ? ui.flight : h.floor),
+                   {18, MenuHeight + 59, 124, 24}, 22, Ink, {.bold = true});
     for (int i = 0; i < 4; ++i)
         art_->text.fit(std::to_string(std::array<int, 4>{h.hp, h.attack, h.defense, h.gold}[i]),
-                       {50, float(MenuHeight + 101 + i * 29), 92, 22}, 21, i == 3 ? Gold : Ink, true, true);
+                       {50, float(MenuHeight + 101 + i * 29), 92, 22}, 21, i == 3 ? Gold : Ink,
+                       {.alignment = TextAlignment::Right, .bold = true});
     art_->text.draw("ITEMS", 17, MenuHeight + 219, 14, Panel);
     if (art_->text.button({102, MenuHeight + 215, 40, 19}, "[I]", mouse,
                           !game.busy() && ui.flight < 0 && !ui.modal()))
         ui.inventory = true;
     UiAction action;
     int owned = 0;
-    for (int i = 0; i < 15; ++i) {
+    for (int i = 0; i < ItemCount; ++i) {
         const auto item = static_cast<Item>(i);
         const int count = game.inventory(item);
         if (count <= 0)
@@ -753,7 +722,8 @@ UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mous
         if (count > 1) {
             const auto label = std::to_string(count);
             DrawRectangle(int(rect.x + 18), int(rect.y + 24), 23, 15, Panel);
-            art_->text.fit(label, {rect.x + 18, rect.y + 24, 23, 15}, 12, Gold, true);
+            art_->text.fit(label, {rect.x + 18, rect.y + 24, 23, 15}, 12, Gold,
+                           {.alignment = TextAlignment::Right});
         }
         if (hover && !game.busy() && clicked(rect, mouse))
             ui.selected_item = i;
@@ -761,7 +731,8 @@ UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mous
     }
     constexpr std::array<const char*, 6> EquipmentNames{"None", "Iron", "Silver", "Knight", "Holy", "Sacred"};
     for (int i = 0; i < 2; ++i) {
-        const int equipment = std::clamp(i == 0 ? h.sword : h.shield, 0, 5);
+        const int equipment =
+            std::clamp(std::to_underlying(i == 0 ? h.sword : h.shield), 0, EquipmentTierCount);
         if (ui.language != Language::English) {
             const Rectangle label{RightX + 12, float(MenuHeight + 59 + i * 60), 82, 22};
             DrawRectangleRec(label, Panel);
@@ -777,12 +748,12 @@ UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mous
         art_->icon(std::array<int, 3>{YellowKey, BlueKey, RedKey}[i],
                    {RightX + 17, float(MenuHeight + 181 + i * 26), 25, 25});
         art_->text.fit(std::to_string(count), {RightX + 52, float(MenuHeight + 183 + i * 26), 80, 23}, 20,
-                       Ink, true);
+                       Ink, {.alignment = TextAlignment::Right});
     }
     if (ui.flight >= 0) {
         DrawRectangle(RightX + 12, MenuHeight + 278, 128, 162, Color{102, 102, 102, 255});
         art_->text.fit("ORB OF FLIGHT", {RightX + 12, MenuHeight + 282, 128, 22}, 15, Gold);
-        art_->text.fit("Floor " + std::to_string(ui.flight), {RightX + 12, MenuHeight + 311, 128, 24}, 19);
+        art_->text.fit(std::format("Floor {}", ui.flight), {RightX + 12, MenuHeight + 311, 128, 24}, 19);
         if (art_->text.button({RightX + 12, MenuHeight + 340, 60, 25}, "Up", mouse))
             action = {Action::FlightUp};
         if (art_->text.button({RightX + 80, MenuHeight + 340, 60, 25}, "Down", mouse))
@@ -802,13 +773,14 @@ UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mous
         art_->text.fit(game.visual.battle ? "Enemy life" : "Defeated",
                        {RightX + 58, MenuHeight + 281, 80, 22}, 16, Gold);
         art_->text.fit(game.visual.battle ? std::to_string(game.visual.enemy_hp)
-                                          : "Damage " + std::to_string(enemy->damage),
+                                          : std::format("Damage {}", enemy->damage),
                        {RightX + 58, MenuHeight + 305, 80, 22}, 17);
-        art_->text.fit(std::string(Game::monster_name(enemy->row)), {RightX + 12, MenuHeight + 338, 128, 22},
-                       18);
+        art_->text.fit(std::string(Game::monster_name(enemy->monster_index)),
+                       {RightX + 12, MenuHeight + 338, 128, 22}, 18);
         for (int i = 0; i < 3; ++i)
             art_->text.fit(std::to_string(std::array<int, 3>{monster.hp, monster.attack, monster.defense}[i]),
-                           {RightX + 52, float(MenuHeight + 366 + i * 24), 85, 22}, 20, Ink, true);
+                           {RightX + 52, float(MenuHeight + 366 + i * 24), 85, 22}, 20, Ink,
+                           {.alignment = TextAlignment::Right});
     } else {
         art_->text.fit("Defeated enemies", {RightX + 12, MenuHeight + 284, 128, 24}, 16, Muted);
         art_->text.fit("appear here", {RightX + 12, MenuHeight + 308, 128, 24}, 16, Muted);
@@ -818,7 +790,7 @@ UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mous
                            {RightX + 52, float(MenuHeight + 366 + i * 24), 85, 22}, 18);
     }
     if (h.fairy_visits)
-        art_->text.fit("Fairy rank " + std::to_string(h.fairy_rank), {RightX + 12, MenuHeight + 453, 128, 20},
+        art_->text.fit(std::format("Fairy rank {}", h.fairy_rank), {RightX + 12, MenuHeight + 453, 128, 20},
                        13, Panel);
     return action;
 }
@@ -827,12 +799,16 @@ UiAction Presentation::draw_dialogue(const Game& game, DesktopUi& ui, Vector2 mo
     const auto& dialogue = *game.dialogue;
     constexpr Rectangle rect{BoardX + 12, BoardY + 58, 416, 330};
     art_->text.modal(rect, dialogue.shop ? "An offer" : "Conversation");
-    const auto text = art_->text.wrap(dialogue.text, 376, 18);
-    const int lines = int(std::count(text.begin(), text.end(), '\n'));
+    const bool fairy = is_fairy_continuation(dialogue.continuation);
+    const auto content = fairy ? localized_fairy_dialogue(ui.language, game.hero.fairy_score,
+                                                          game.hero.fairy_rank, game.hero.fairy_visits)
+                               : dialogue.text;
+    const auto text = art_->text.wrap(content, 376, 18, !fairy);
+    const int lines = int(std::ranges::count(text, '\n'));
     constexpr int TextHeight = 188;
     ui.dialogue_scroll = std::clamp(ui.dialogue_scroll, 0.f, std::max(0.f, float(lines * 22 - TextHeight)));
     art_->text.clip({rect.x + 20, rect.y + 62, 376, TextHeight});
-    art_->text.draw(text.c_str(), int(rect.x + 20), int(rect.y + 62 - ui.dialogue_scroll), 18, Ink, false);
+    art_->text.draw(text, int(rect.x + 20), int(rect.y + 62 - ui.dialogue_scroll), 18, Ink, false);
     EndScissorMode();
     if (lines * 22 > TextHeight)
         art_->text.draw("Mouse wheel to scroll", int(rect.x + 20), int(rect.y + 252), 12, Muted);
@@ -851,7 +827,7 @@ UiAction Presentation::draw_dialogue(const Game& game, DesktopUi& ui, Vector2 mo
 UiAction Presentation::draw_inventory(const Game& game, DesktopUi& ui, Vector2 mouse) {
     constexpr Rectangle rect{BoardX + 4, BoardY + 9, 432, 420};
     art_->text.modal(rect, "Inventory");
-    for (int i = 0; i < 15; ++i) {
+    for (int i = 0; i < ItemCount; ++i) {
         const auto item = static_cast<Item>(i);
         const int count = game.inventory(item);
         const Rectangle row{rect.x + 12 + i / 8 * 204, rect.y + 57 + i % 8 * 39, 198, 35};
@@ -860,8 +836,8 @@ UiAction Presentation::draw_inventory(const Game& game, DesktopUi& ui, Vector2 m
         art_->icon(HeroOrb + i, {row.x + 2, row.y + 2, 31, 31}, count ? WHITE : Color{170, 170, 170, 130});
         art_->text.fit(std::string(Game::item_name(item)), {row.x + 37, row.y + 2, 158, 20}, 17,
                        count ? Ink : Muted);
-        art_->text.draw(count ? passive(item) ? "Passive" : "Use / inspect" : "Not found", int(row.x + 37),
-                        int(row.y + 21), 13, count ? Gold : Muted);
+        art_->text.draw(count ? item_definition(item).passive ? "Passive" : "Use / inspect" : "Not found",
+                        int(row.x + 37), int(row.y + 21), 13, count ? Gold : Muted);
         if (count && clicked(row, mouse)) {
             ui.inventory = false;
             ui.selected_item = i;
@@ -881,9 +857,8 @@ void Presentation::draw_enemies(const Game& game, DesktopUi& ui, Vector2 mouse) 
         const int row = Game::monster_for_tile(tile);
         if (row < 0)
             continue;
-        const auto found = std::find_if(enemies.begin(), enemies.end(), [&](auto entry) {
-            return Game::monster_for_tile(entry.first) == row;
-        });
+        const auto found = std::ranges::find_if(
+            enemies, [&](auto entry) { return Game::monster_for_tile(entry.first) == row; });
         if (found == enemies.end())
             enemies.emplace_back(tile, 1);
         else
@@ -891,7 +866,7 @@ void Presentation::draw_enemies(const Game& game, DesktopUi& ui, Vector2 mouse) 
     }
     const int last_row = std::max(0, int(enemies.size()) - VisibleRows);
     ui.enemy_first_row = std::clamp(ui.enemy_first_row, 0, last_row);
-    art_->text.modal(rect, "Orb of the Hero - floor " + std::to_string(game.hero.floor));
+    art_->text.modal(rect, std::format("Orb of the Hero - floor {}", game.hero.floor));
     for (const auto& [label, x, width] :
          std::array<std::tuple<const char*, int, int>, 5>{{{"Enemy", 52, 156},
                                                            {"Life", 216, 76},
@@ -900,7 +875,7 @@ void Presentation::draw_enemies(const Game& game, DesktopUi& ui, Vector2 mouse) 
                                                            {"Damage", 464, 116}}})
         art_->text.fit(label, {rect.x + x, rect.y + 57, float(width), 24}, 17, Gold);
     const int scale = game.hero.cycle_factor_minus_one + 1;
-    for (int visible = 0; visible < VisibleRows && ui.enemy_first_row + visible < int(enemies.size());
+    for (int visible = 0; visible < VisibleRows && ui.enemy_first_row + visible < std::ssize(enemies);
          ++visible) {
         const auto [tile, count] = enemies[ui.enemy_first_row + visible];
         const int row = Game::monster_for_tile(tile);
@@ -909,13 +884,13 @@ void Presentation::draw_enemies(const Game& game, DesktopUi& ui, Vector2 mouse) 
         DrawRectangle(int(rect.x + 16), int(y), int(rect.width - 32), 37,
                       visible % 2 ? Color{67, 63, 73, 255} : Color{77, 72, 80, 255});
         art_->icon(tile, {rect.x + 18, y + 3, 31, 31});
-        art_->text.fit(std::string(Game::monster_name(row)) +
-                           (count > 1 ? " (" + std::to_string(count) + ")" : ""),
+        art_->text.fit(count > 1 ? std::format("{} ({})", Game::monster_name(row), count)
+                                 : std::string(Game::monster_name(row)),
                        {rect.x + 52, y + 4, 156, 29}, 18);
         for (int i = 0; i < 3; ++i)
             art_->text.fit(
                 std::to_string(std::array<int, 3>{monster.hp, monster.attack, monster.defense}[i] * scale),
-                {rect.x + 216 + i * 82, y + 4, 76, 29}, 18, Ink, false, true);
+                {rect.x + 216 + i * 82, y + 4, 76, 29}, 18, Ink, {.bold = true});
         const auto forecast = ui.hero_orb_actual_damage ? game.forecast(tile) : game.orb_forecast(tile);
         art_->text.fit(
             forecast.penetrates ? std::to_string(forecast.damage) : "Blocked", {rect.x + 464, y + 4, 116, 29},
@@ -959,13 +934,13 @@ UiAction Presentation::draw_item(const Game& game, DesktopUi& ui, Vector2 mouse)
     constexpr Rectangle rect{BoardX + 18, BoardY + 98, 404, 250};
     art_->text.modal(rect, std::string(Game::item_name(item)));
     art_->icon(HeroOrb + ui.selected_item, {rect.x + 20, rect.y + 60, 40, 40});
-    art_->text.draw(
-        (passive(item) ? "Passive item" : "Owned: " + std::to_string(game.inventory(item))).c_str(),
-        int(rect.x + 76), int(rect.y + 68), 18, Gold);
-    const auto description = art_->text.wrap(ItemDescriptions[ui.selected_item], 364, 17);
+    art_->text.draw(item_definition(item).passive ? "Passive item"
+                                                  : std::format("Owned: {}", game.inventory(item)),
+                    int(rect.x + 76), int(rect.y + 68), 18, Gold);
+    const auto description = art_->text.wrap(std::string(item_definition(item).description), 364, 17);
     SetTextLineSpacing(22);
-    art_->text.draw(description.c_str(), int(rect.x + 20), int(rect.y + 112), 17, Ink, false);
-    if (passive(item)) {
+    art_->text.draw(description, int(rect.x + 20), int(rect.y + 112), 17, Ink, false);
+    if (item_definition(item).passive) {
         if (art_->text.button({rect.x + 20, rect.y + 203, 364, 29}, "Close  [Enter / Esc]", mouse))
             ui.selected_item = -1;
     } else {
@@ -991,7 +966,7 @@ void Presentation::draw_help(DesktopUi& ui, Vector2 mouse) {
                                                                        {"F8", "Fairy checkpoint"},
                                                                        {"F2", "New game"},
                                                                        {"M", "Music and effects"}}};
-    for (int i = 0; i < int(controls.size()); ++i) {
+    for (int i = 0; i < std::ssize(controls); ++i) {
         art_->text.draw(controls[i].first, int(rect.x + 20), int(rect.y + 60 + i * 24), 17, Ink);
         art_->text.draw(controls[i].second, int(rect.x + 170), int(rect.y + 60 + i * 24), 17, Ink);
     }
@@ -1017,19 +992,19 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
             Action::NewGame,      Action::OpenSaveSlots, Action::OpenLoadSlots,
             Action::Save,         Action::Load,          Action::FairyCheckpoint,
             Action::OpenRankings, Action::OpenReplays,   Action::MainMenu};
-        for (int i = 0; i < int(labels.size()); ++i)
+        for (int i = 0; i < std::ssize(labels); ++i)
             if (art_->text.button({rect.x + 6, rect.y + 6 + i * 33, rect.width - 12, 27}, labels[i], mouse,
                                   ((i != 1 && i != 3) || !game.busy()) &&
                                       (i < 1 || i > 5 || ui.file_controls_enabled()) &&
                                       (i != 6 || !game.busy()))) {
                 ui.menu = Menu::None;
-                return i < int(actions.size()) ? UiAction{actions[i]} : UiAction{};
+                return i < std::ssize(actions) ? UiAction{actions[i]} : UiAction{};
             }
     } else if (ui.menu == Menu::Options) {
         constexpr Rectangle rect{50, 34, 700, 484};
         art_->text.modal(rect, "Settings");
         art_->text.draw("Language", int(rect.x + 440), int(rect.y + 60), 19, Gold);
-        for (int i = 0; i < int(Languages.size()); ++i) {
+        for (int i = 0; i < std::ssize(Languages); ++i) {
             const Rectangle choice{rect.x + 440, rect.y + 94 + i * 62, 242, 48};
             if (art_->text.button(choice, std::string(language_label(Languages[i])), mouse))
                 return {Action::Language, i};
@@ -1043,11 +1018,11 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
         art_->text.draw("Walking and animation speed", int(rect.x + 18), int(rect.y + 112), 17, Muted);
         for (int i = 0; i < 3; ++i)
             if (art_->text.button({rect.x + 18 + i * 135, rect.y + 138, 130, 30},
-                                  std::format("{}x{}", GameSpeeds[i], ui.speed_index == i ? " *" : ""),
+                                  std::format("{}x{}", GameSpeeds[i], ui.game_speed_index == i ? " *" : ""),
                                   mouse))
                 return {Action::Speed, i};
         art_->text.draw("Replay and animation speed", int(rect.x + 18), int(rect.y + 188), 17, Muted);
-        for (int i = 0; i < int(ReplaySpeeds.size()); ++i)
+        for (int i = 0; i < std::ssize(ReplaySpeeds); ++i)
             if (art_->text.button(
                     {rect.x + 18 + i * 57, rect.y + 214, 54, 30},
                     std::format("{}x{}", ReplaySpeeds[i], ui.replay_speed_index == i ? " *" : ""), mouse))
@@ -1104,7 +1079,7 @@ UiAction Presentation::draw_rankings(const Game& game, DesktopUi& ui, Vector2 mo
     constexpr std::array<float, 6> Columns{128, 166, 318, 390, 484, 560};
     constexpr std::array<float, 6> Widths{32, 144, 64, 86, 68, 100};
     constexpr std::array<const char*, 6> Headers{"Rank", "Name", "Score", "HP", "ATK", "DEF"};
-    for (int column = 0; column < int(Headers.size()); ++column)
+    for (int column = 0; column < std::ssize(Headers); ++column)
         art_->text.fit(Headers[column], {Columns[column], 135, Widths[column], 22}, 16, Gold);
     const auto& table = game.rankings.at(ui.ranking_category - 1);
     for (int row = 0; row < RankingEntryCount; ++row) {
@@ -1112,9 +1087,9 @@ UiAction Presentation::draw_rankings(const Game& game, DesktopUi& ui, Vector2 mo
         const std::array<std::string, 6> cells{std::to_string(row + 1),      entry.name,
                                                std::to_string(entry.score),  std::to_string(entry.hp),
                                                std::to_string(entry.attack), std::to_string(entry.defense)};
-        for (int column = 0; column < int(cells.size()); ++column)
+        for (int column = 0; column < std::ssize(cells); ++column)
             art_->text.fit(cells[column], {Columns[column], 159.f + row * 22, Widths[column], 22}, 16, Ink,
-                           false, false, column != 1);
+                           {.translate = column != 1});
     }
     const bool submission =
         ui.ranking_entry && ui.ranking_entry_category == ui.ranking_category && ui.ranking_position > 0;
@@ -1159,16 +1134,17 @@ UiAction Presentation::draw_save_slots(const Game& game, DesktopUi& ui, Vector2 
         const bool hover = CheckCollisionPointRec(mouse, card);
         DrawRectangleRec(card, selected ? Color{84, 69, 65, 255} : Color{45, 43, 51, 255});
         DrawRectangleLinesEx(card, selected ? 2.f : 1.f, selected || hover ? Gold : Border);
-        art_->text.draw("Slot " + std::to_string(i + 1), int(card.x + 12), int(card.y + 7), 18, Gold);
+        art_->text.draw(std::format("Slot {}", i + 1), int(card.x + 12), int(card.y + 7), 18, Gold);
         if (info.state == SaveSlotState::Ready) {
             const std::string mode = !info.backside     ? "Frontside"
                                      : info.later_cycle ? "Backside 3+"
                                                         : "Backside 2";
-            art_->text.fit("Floor " + std::to_string(info.floor) + " / " + mode,
-                           {card.x + 72, card.y + 5, card.width - 84, 23}, 16, Muted, true);
-            art_->text.draw("HP " + std::to_string(info.hp), int(card.x + 12), int(card.y + 30), 16);
-            art_->text.draw("ATK " + std::to_string(info.attack) + "    DEF " + std::to_string(info.defense),
-                            int(card.x + 12), int(card.y + 51), 16);
+            art_->text.fit(std::format("Floor {} / {}", info.floor, mode),
+                           {card.x + 72, card.y + 5, card.width - 84, 23}, 16, Muted,
+                           {.alignment = TextAlignment::Right});
+            art_->text.draw(std::format("HP {}", info.hp), int(card.x + 12), int(card.y + 30), 16);
+            art_->text.draw(std::format("ATK {}    DEF {}", info.attack, info.defense), int(card.x + 12),
+                            int(card.y + 51), 16);
         } else if (info.state == SaveSlotState::Empty)
             art_->text.draw("Empty", int(card.x + 12), int(card.y + 33), 17, Muted);
         else {
@@ -1184,7 +1160,7 @@ UiAction Presentation::draw_save_slots(const Game& game, DesktopUi& ui, Vector2 
     const std::string label =
         saving ? (selected.state == SaveSlotState::Empty ? "Save to slot " : "Replace slot ") : "Load slot ";
     if (art_->text.button({rect.x + 18, rect.y + 430, 294, 28},
-                          label + std::to_string(ui.selected_slot) + " [Enter]", mouse,
+                          std::format("{}{} [Enter]", label, ui.selected_slot), mouse,
                           saving ? !game.busy() : selected.state == SaveSlotState::Ready))
         return {saving ? Action::SaveSlot : Action::LoadSlot, ui.selected_slot};
     if (art_->text.button({rect.x + 324, rect.y + 430, 294, 28}, "Cancel [Esc]", mouse))
@@ -1200,7 +1176,7 @@ UiAction Presentation::draw_home(const DesktopUi& ui, Vector2 mouse) {
                                             Action::OpenReplays, Action::OpenSettings};
     const int first = ui.game_started ? 0 : 1;
     constexpr int top = 48;
-    for (int i = first; i < int(labels.size()); ++i) {
+    for (int i = first; i < std::ssize(labels); ++i) {
         const Rectangle row{40, float(top + (i - first) * 52), 244, 44};
         const bool selected = ui.home_selection == i;
         const bool hover = CheckCollisionPointRec(mouse, row);
@@ -1236,7 +1212,7 @@ UiAction Presentation::draw_replays(DesktopUi& ui, Vector2 mouse) {
             ui.replay_path_focus = false;
         }
         DrawRectangleRec(button, Panel);
-        art_->text.fit(std::string(text.begin(), text.end()), button, 18, Ink, false, false, false);
+        art_->text.fit(std::string(text.begin(), text.end()), button, 18, Ink, {.translate = false});
         if (ui.replay_selected == index)
             DrawRectangleLinesEx(button, 2, Gold);
     }
@@ -1282,7 +1258,7 @@ UiAction Presentation::draw_replay_controls(const DesktopUi& ui, Vector2 mouse) 
     if (art_->text.button({450, 3, 24, 22}, "-", mouse, ui.replay_speed_index > 0))
         return {Action::ReplaySpeed, ui.replay_speed_index - 1};
     art_->text.fit(std::format("{}x", ReplaySpeeds[ui.replay_speed_index]), {480, 3, 66, 22}, 17, Gold);
-    if (art_->text.button({552, 3, 24, 22}, "+", mouse, ui.replay_speed_index + 1 < int(ReplaySpeeds.size())))
+    if (art_->text.button({552, 3, 24, 22}, "+", mouse, ui.replay_speed_index + 1 < std::ssize(ReplaySpeeds)))
         return {Action::ReplaySpeed, ui.replay_speed_index + 1};
     if (art_->text.button({584, 3, 76, 22}, "Settings", mouse))
         return {Action::OpenSettings};
@@ -1298,7 +1274,8 @@ UiAction Presentation::draw_ending_summary(const EndingSummary& summary, Desktop
     DrawLine(32, 86, 768, 86, Border);
     art_->text.draw("Tower cleared", 32, 43, 28, Gold);
 
-    const int sword = std::clamp(hero.sword, 0, 5), shield = std::clamp(hero.shield, 0, 5);
+    const int sword = std::clamp(std::to_underlying(hero.sword), 0, EquipmentTierCount),
+              shield = std::clamp(std::to_underlying(hero.shield), 0, EquipmentTierCount);
     const std::array<std::tuple<const char*, int, int>, 8> stats{
         {{"HP", hero.hp, RedPotion},
          {"ATK", hero.attack, sword ? IronSword + sword - 1 : 0},
@@ -1308,14 +1285,15 @@ UiAction Presentation::draw_ending_summary(const EndingSummary& summary, Desktop
          {"Yellow keys", hero.yellow_keys, YellowKey},
          {"Blue keys", hero.blue_keys, BlueKey},
          {"Red keys", hero.red_keys, RedKey}}};
-    for (int i = 0; i < int(stats.size()); ++i) {
+    for (int i = 0; i < std::ssize(stats); ++i) {
         const auto [label, value, icon] = stats[i];
         const float x = 32.f + (i % 4) * 188, y = 98.f + (i / 4) * 64;
         DrawRectangleRec({x, y, 172, 60}, Panel);
         if (icon)
             art_->icon(icon, {x + 10, y + 21, 30, 30});
         art_->text.fit(label, {x + 4, y + 3, 164, 19}, 15, Muted);
-        art_->text.fit(std::to_string(value), {x + 44, y + 23, 120, 29}, 23, Ink, false, true, false);
+        art_->text.fit(std::to_string(value), {x + 44, y + 23, 120, 29}, 23, Ink,
+                       {.bold = true, .translate = false});
     }
     art_->text.draw("Achievements", 32, 239, 21, Gold);
     int shown = 0;
@@ -1358,15 +1336,16 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
     SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     art_->text.language = ui.language;
     resize_canvas(window_viewport());
-    const int mode = game.visual.raster_mode;
+    const auto mode = game.visual.raster_mode;
     if (!ui.home) {
-        if ((mode == 0 || mode == 2) && previous_raster_ != mode && !cache_valid_)
+        if ((mode == RasterMode::OpeningDissolve || mode == RasterMode::EndingDissolve) &&
+            previous_raster_ != mode && !cache_valid_)
             cache_requested_ = true;
         if (cache_requested_)
             cache_scene();
         previous_raster_ = mode;
     }
-    BeginTextureMode(canvas_);
+    BeginTextureMode(canvas_.get());
     // Layout stays in original logical coordinates; rasterization uses the actual display pixels.
     rlMatrixMode(RL_PROJECTION);
     rlLoadIdentity();
@@ -1400,14 +1379,14 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
     art_->scene("data3-center", {SideWidth, MenuHeight, FrameWidth, ContentHeight});
     art_->scene(game.hero.cycle_factor_minus_one ? "data3-rightr" : "data3-right",
                 {RightX, MenuHeight, SideWidth, ContentHeight});
-    if (mode != 9)
+    if (mode != RasterMode::Title)
         draw_board(game, ui.flight >= 0 ? ui.flight : game.hero.floor, ui.flight < 0);
     draw_realtime_orb(game, ui);
     UiAction action;
     const auto game_mouse = ui.replay_active ? Vector2{-1, -1} : mouse;
     if (!hide_panels_)
         action = draw_panels(game, ui, game_mouse);
-    if (mode == 9 || (mode >= 0 && mode <= 8))
+    if (mode == RasterMode::Title || (mode >= RasterMode::OpeningDissolve && mode <= RasterMode::ClosingCard))
         draw_scene(game);
     if (ui.save_picker != SavePicker::None)
         action = draw_save_slots(game, ui, mouse);
@@ -1449,20 +1428,20 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
             ui.close_overlays();
             ui.help = true;
         }
-        const std::string label = (game.hero.cycle_factor_minus_one ? "Backside  /  " : "") +
-                                  std::to_string(int(GameSpeeds[ui.speed_index])) + "x  /  " +
-                                  (ui.muted ? "Music off" : "Music on") +
-                                  (ui.recording_active ? "  /  Recording" : "");
-        art_->text.fit(label, {440, 3, 350, 22}, 17, Muted, true);
+        const auto label =
+            std::format("{}{}x  /  {}{}", game.hero.cycle_factor_minus_one ? "Backside  /  " : "",
+                        int(GameSpeeds[ui.game_speed_index]), ui.muted ? "Music off" : "Music on",
+                        ui.recording_active ? "  /  Recording" : "");
+        art_->text.fit(label, {440, 3, 350, 22}, 17, Muted, {.alignment = TextAlignment::Right});
     }
     if (ui.menu != Menu::None)
         action = draw_menu(game, ui, mouse);
 
     DrawRectangle(0, MenuHeight + ContentHeight, CanvasWidth, StatusHeight, Color{82, 80, 83, 255});
     DrawLine(0, MenuHeight + ContentHeight, CanvasWidth, MenuHeight + ContentHeight, Border);
-    std::string status = ui.flight >= 0 ? "Previewing floor " + std::to_string(ui.flight) +
-                                              ". Up / Down to choose; Enter to travel."
-                                        : game.status;
+    std::string status =
+        ui.flight >= 0 ? std::format("Previewing floor {}. Up / Down to choose; Enter to travel.", ui.flight)
+                       : game.status;
     if (ui.ending_wait)
         status = "The End. Press Enter / Space to continue to the backside tower.";
     if (ui.replay_active) {
@@ -1476,7 +1455,7 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
     }
     if (!ui.replay_active && !ui.modal() && !game.dialogue && ui.flight < 0) {
         int owned = 0;
-        for (int i = 0; i < 15; ++i)
+        for (int i = 0; i < ItemCount; ++i)
             if (game.inventory(static_cast<Item>(i)) > 0) {
                 if (CheckCollisionPointRec(
                         mouse, {16.f + owned % 3 * 42, MenuHeight + 238.f + owned / 3 * 40, 42, 40}))
@@ -1489,15 +1468,15 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
         mouse.y < BoardY + BoardPixels) {
         const int index = cell(int((mouse.x - BoardX) / TileSize), int((mouse.y - BoardY) / TileSize));
         if (const auto info = orb_tile_info(game, game.hero.floor, index, ui.hero_orb_actual_damage))
-            status =
-                std::format("{} | HP {} | ATK {} | DEF {} | Gold {} | HP cost {}",
-                            Game::monster_name(info->row), info->hp, info->attack, info->defense, info->gold,
-                            info->forecast.penetrates ? std::to_string(info->forecast.damage) : "∞");
+            status = std::format("{} | HP {} | ATK {} | DEF {} | Gold {} | HP cost {}",
+                                 Game::monster_name(info->monster_index), info->hp, info->attack,
+                                 info->defense, info->gold,
+                                 info->forecast.penetrates ? std::to_string(info->forecast.damage) : "∞");
     }
     art_->text.fit(
         status,
         {7, MenuHeight + ContentHeight + 3, ui.ending_wait ? 643.f : CanvasWidth - 14.f, StatusHeight - 6},
-        17, Ink, false, false, !ui.replay_active);
+        17, Ink, {.translate = !ui.replay_active});
     if (ui.ending_wait && !ui.replay_active &&
         art_->text.button({658, MenuHeight + ContentHeight + 3, 135, StatusHeight - 6}, "Continue", mouse,
                           !ui.modal()))
@@ -1534,7 +1513,8 @@ void Presentation::present() const {
     rlMatrixMode(RL_MODELVIEW);
     rlLoadIdentity();
     ClearBackground(BLACK);
-    DrawTexturePro(canvas_.texture, {0, 0, float(canvas_.texture.width), -float(canvas_.texture.height)},
+    DrawTexturePro(canvas_.get().texture,
+                   {0, 0, float(canvas_.get().texture.width), -float(canvas_.get().texture.height)},
                    view.area, {0, 0}, 0, WHITE);
     EndDrawing();
 }
@@ -1546,34 +1526,31 @@ Image Presentation::capture_window() const {
 }
 
 Image Presentation::capture_native_canvas() const {
-    Image image = LoadImageFromTexture(canvas_.texture);
-    ImageFlipVertical(&image);
-    return image;
+    detail::UniqueImage image(LoadImageFromTexture(canvas_.get().texture));
+    ImageFlipVertical(image.address());
+    return image.release();
 }
 
 Image Presentation::capture_canvas() const {
-    auto image = capture_native_canvas();
-    if (image.width == CanvasWidth && image.height == CanvasHeight)
-        return image;
+    detail::UniqueImage image(capture_native_canvas());
+    if (image.get().width == CanvasWidth && image.get().height == CanvasHeight)
+        return image.release();
     // Sample logical pixel centers. ImageResizeNN samples left edges, which shifts
     // sprite pixels when the native canvas has a fractional scale such as 1.5x.
-    auto logical = GenImageColor(CanvasWidth, CanvasHeight, BLANK);
-    const auto* source = static_cast<const Color*>(image.data);
-    auto* destination = static_cast<Color*>(logical.data);
+    detail::UniqueImage logical(GenImageColor(CanvasWidth, CanvasHeight, BLANK));
+    const auto* source = static_cast<const Color*>(image.get().data);
+    auto* destination = static_cast<Color*>(logical.get().data);
     for (int y = 0; y < CanvasHeight; ++y)
         for (int x = 0; x < CanvasWidth; ++x) {
-            const int sx = (2 * x + 1) * image.width / (2 * CanvasWidth);
-            const int sy = (2 * y + 1) * image.height / (2 * CanvasHeight);
-            destination[y * CanvasWidth + x] = source[sy * image.width + sx];
+            const int sx = (2 * x + 1) * image.get().width / (2 * CanvasWidth);
+            const int sy = (2 * y + 1) * image.get().height / (2 * CanvasHeight);
+            destination[y * CanvasWidth + x] = source[sy * image.get().width + sx];
         }
-    UnloadImage(image);
-    return logical;
+    return logical.release();
 }
 
 bool Presentation::screenshot(const std::filesystem::path& path) const {
-    Image capture = capture_canvas();
-    const bool result = ExportImage(capture, path.string().c_str());
-    UnloadImage(capture);
-    return result;
+    detail::UniqueImage capture(capture_canvas());
+    return ExportImage(capture.get(), path.string().c_str());
 }
 } // namespace tsw

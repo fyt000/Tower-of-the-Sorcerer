@@ -1,5 +1,8 @@
 #pragma once
 #include "tsw/achievements.hpp"
+#include "tsw/dialogue_ids.hpp"
+#include "tsw/game_types.hpp"
+#include "tsw/items.hpp"
 #include "tsw/rankings.hpp"
 #include <array>
 #include <cstdint>
@@ -12,6 +15,8 @@
 
 namespace tsw {
 inline constexpr int BoardWidth = 11;
+inline constexpr int MonsterCount = 33, MaxMapTile = 165;
+inline constexpr int EquipmentTierCount = 5;
 inline constexpr int CellCount = BoardWidth * BoardWidth;
 inline constexpr int FloorCount = 51;
 inline constexpr int BacksideFactor = 44;
@@ -132,23 +137,7 @@ inline constexpr int VampireRow = 17, OctopusRow = 18, DragonRow = 19;
 inline constexpr int SacredShieldFlag = 9;
 enum class TileClass : int { Other, Wall, BombTarget, Lava };
 enum class Direction : int { Down = 1, Left = 2, Right = 3, Up = 4 };
-enum class Item : int {
-    HeroOrb,
-    WisdomOrb,
-    FlightOrb,
-    Cross,
-    Elixir,
-    Mattock,
-    Bomb,
-    WarpStaff,
-    AscentWing,
-    DescentWing,
-    DragonSlayer,
-    SnowCrystal,
-    MagicKey,
-    SuperMattock,
-    LuckyGold
-};
+
 // Three 16-bit words, as in the Delphi command stack. Operand interpretation depends on op.
 enum class Op : std::uint16_t {
     Wait,
@@ -225,13 +214,15 @@ struct Command {
     friend bool operator==(const Command&, const Command&) = default;
 };
 
+static_assert(sizeof(Command) == 3 * sizeof(std::uint16_t));
+
 struct Monster {
     std::int32_t hp{}, attack{}, defense{}, gold{};
     friend bool operator==(const Monster&, const Monster&) = default;
 };
 
 struct EnemyInfo {
-    int row = -1, tile{};
+    int monster_index = -1, tile{};
     Monster stats; // Encounter-time values, including the current cycle's scaling.
     std::int64_t damage{};
 };
@@ -246,28 +237,35 @@ struct Hero {
     std::int32_t hp = 1000, attack = 100, defense = 100, gold = 0;
     int floor = 1, highest_floor = 1, x = 5, y = 10;
     int yellow_keys{}, red_keys{}, blue_keys{}, altar_purchases{}, fairy_visits{};
-    int sword = 5, shield = 5;
-    std::array<int, 15> items{};
+    EquipmentTier sword = EquipmentTier::Sacred, shield = EquipmentTier::Sacred;
+    std::array<int, ItemCount> items{};
     std::array<int, 10> equipment_found{0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
     std::array<int, 68> dialogue_seen{};
-    std::array<int, 24> wisdom_hints{};
+    std::array<HintState, 24> wisdom_hints{};
     bool floor34_reward_created{}, floor35_reward_created{}, floor40_reward_created{},
         floor41_reward_created{};
     bool floor32_arrival_seen{}, zeno_sealed{};
-    std::array<int, 3> old_man_heard{}; // Original hint slots 66, 67 and 71.
-    int merchant2_heard{};
+    std::array<HintState, 3> old_man_heard{}; // Original hint slots 66, 67 and 71.
+    HintState merchant2_heard{};
     std::array<int, 12> merchant_used{};
     int cycle_factor_minus_one{}, later_cycle{};
     Direction facing = Direction::Up;
-    int music_track = 5;
-    int flight_direction{}, highest_floor_stair{};
-    int fairy_score{}, fairy_rank{}, fairy_category{};
+    MusicTrack music_track = MusicTrack::Floors1To10;
+    FlightDirection flight_direction{};
+    StairKind highest_floor_stair_kind{};
+    int fairy_score{}, fairy_rank{};
+    FairyCategory fairy_category{};
+
+    int& speech_seen(SpeechId id) { return dialogue_seen.at(std::to_underlying(continuation_for(id))); }
+
+    int speech_seen(SpeechId id) const { return dialogue_seen.at(std::to_underlying(continuation_for(id))); }
+
     friend bool operator==(const Hero&, const Hero&) = default;
 };
 
 struct Dialogue {
     std::string text;
-    int continuation{};
+    ContinuationStage continuation{};
     bool shop{};
     std::array<std::string, 3> choices{};
     friend bool operator==(const Dialogue&, const Dialogue&) = default;
@@ -287,9 +285,10 @@ struct Visual {
     std::array<Layer, CellCount> layers{};
     int overlay_cell = -1, mask{}, color{}, underlying = Road;
     int door_cell = -1, door_mode{}, door_frame{}, door_tile{};
-    int raster_mode = -1, raster_frame{};
+    RasterMode raster_mode = RasterMode::Inactive;
+    int raster_frame{};
     bool hide_hero{}, battle{}, dead{}, enemy_first{};
-    int enemy_hp{}, enemy_index = -1;
+    int enemy_hp{}, monster_index = -1;
     EnemyInfo battle_enemy;
     std::optional<EnemyInfo> last_defeated;
     std::array<bool, CellCount> stair_cover{};
@@ -303,8 +302,8 @@ struct Visual {
 struct Forecast {
     bool penetrates{};
     std::int64_t damage{};
-    std::int64_t hero_hits{};
-    int hero_hit{}, enemy_hit{};
+    std::int64_t hero_strike_count{};
+    int hero_damage_per_strike{}, enemy_damage_per_strike{};
 };
 
 class Game {
@@ -313,7 +312,7 @@ class Game {
     RunHistory run_history;
     std::optional<EndingSummary> ending_summary;
     std::array<Floor, FloorCount> floors{};
-    std::array<Monster, 33> monsters{};
+    std::array<Monster, MonsterCount> monsters{};
     RankingTables rankings = default_rankings();
     std::vector<Command> commands; // Insertion order; back() executes first.
     std::optional<Dialogue> dialogue;
@@ -333,9 +332,9 @@ class Game {
 
     int shop_cost() const { return dialogue && dialogue->shop ? shop_cost_ : -1; }
 
-    int& inventory(Item item) { return hero.items.at(static_cast<int>(item)); }
+    int& inventory(Item item) { return hero.items.at(std::to_underlying(item)); }
 
-    int inventory(Item item) const { return hero.items.at(static_cast<int>(item)); }
+    int inventory(Item item) const { return hero.items.at(std::to_underlying(item)); }
 
     std::uint8_t& tile(int floor, int index) { return floors.at(floor).tiles.at(index); }
 
@@ -353,14 +352,26 @@ class Game {
     int animation_offset(int tile_id) const;
     static std::string_view item_name(Item);
     static std::string_view monster_name(int index);
-    static std::string_view original_dialogue(int id);
+    // Zero-based recovered text-table index; Op::Dialogue uses one-based IDs.
+    static std::string_view original_dialogue(DialogueId id);
     void push(Op op, int a = 0, int b = 0);
 
-    void push(Op op, Callback a, int b = 0) { push(op, static_cast<int>(a), b); }
+    void push(Op op, Callback a, int b = 0) { push(op, std::to_underlying(a), b); }
 
-    void push(Op op, SoundCue a, int b = 0) { push(op, static_cast<int>(a), b); }
+    void push(Op op, SoundCue a, int b = 0) { push(op, std::to_underlying(a), b); }
 
-    void push(Op op, int a, DoorMotion b) { push(op, a, static_cast<int>(b)); }
+    void push(Op op, int a, DoorMotion b) { push(op, a, std::to_underlying(b)); }
+
+    void queue_speech(SpeechId id, int b = 0) { push(Op::Dialogue, std::to_underlying(id), b); }
+
+    void queue_hero_value(HeroField field, int value) {
+        push(Op::SetHeroValue, std::to_underlying(field), value);
+    }
+
+    void queue_raster(RasterMode mode, int frame = 0) {
+        push(Op::Wait, std::to_underlying(mode));
+        push(Op::Callback, Callback::RasterScene, frame);
+    }
 
     void waits(int count) {
         for (int i = 0; i < count; ++i)
@@ -380,7 +391,7 @@ class Game {
     void load(const std::filesystem::path&, SaveKind = SaveKind::Slot);
     void save(std::ostream&, SaveKind = SaveKind::Slot) const;
     void load(std::istream&, SaveKind = SaveKind::Slot);
-    bool flight_preview(int destination_floor, int direction = 1);
+    bool flight_preview(int destination_floor, FlightDirection direction = FlightDirection::Up);
     bool can_open_flight() const;
     bool open_flight();
     // Original selector callback; player inputs must enter through open_flight first.
@@ -394,13 +405,14 @@ class Game {
     mutable std::optional<std::array<std::uint32_t, OriginalHeroWordCount>> original_save_record_;
 
     struct Fight {
-        int target{}, enemy{}, hero_hits{}, enemy_hits{}, turn{}, underlying{};
+        int target{}, monster_index{}, hero_strike_count{}, enemy_strike_count{}, turn{}, underlying{};
         bool fatal{}, enemy_first{};
         std::size_t base_commands{};
     };
 
     std::optional<Fight> fight_;
-    int shop_kind_{}, shop_cost_{}, shop_hint_{}, shop_id_{}, shop_npc_cell_{};
+    ShopKind shop_kind_{};
+    int shop_cost_{}, shop_hint_{}, shop_id_{}, shop_npc_cell_{};
     bool stopped_{};
     void walk_to_contact();
     void stair(bool up);
@@ -411,12 +423,12 @@ class Game {
     void summon_guards();
     void summon_four_guards(int north, int south, int west, int east);
     void transform_vampire();
-    void show_dialogue(int one_based_id);
+    void show_dialogue(SpeechId id);
     void speak_old_man();
     void speak_merchant();
     void speak_thief();
     void speak_fairy();
-    void continue_original(int stage);
+    void continue_original(ContinuationStage stage);
     void bomb_dissolve(int cell_index);
     void battle_step();
     void battle_finished(const Fight&);

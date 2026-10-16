@@ -1,33 +1,14 @@
 #include "mcp_internal.hpp"
+#include "tsw/dialogue_ids.hpp"
 #include <algorithm>
 #include <cmath>
 #include <glaze/json.hpp>
 #include <set>
 #include <stdexcept>
 
-namespace tsw::mcp_detail {
+namespace tsw::detail::mcp {
 namespace {
-constexpr std::array<std::string_view, 15> ItemIds{
-    "hero_orb",      "wisdom_orb",   "flying_orb", "cross",         "elixir",
-    "mattock",       "bomb",         "warp_staff", "ascent_wing",   "descent_wing",
-    "dragon_slayer", "snow_crystal", "magic_key",  "super_mattock", "lucky_gold"};
-constexpr std::array<std::string_view, 15> ItemHelp{
-    "Reveals enemy statistics and combat forecasts; unlocks manual saves.",
-    "Shows clues recorded while owning the Orb of Wisdom.",
-    "Use beside a staircase to travel from 1 through highest_floor, except 44. Supply floor, or use the "
-    "flight selector.",
-    "Passive: doubles attack against Zombies, Zombie Knights and Vampires in ordinary combat.",
-    "Restores attack * 10 + defense * 5 HP; consumed on use.",
-    "Removes adjacent brick walls; consumed on use.",
-    "Destroys eligible adjacent enemies; consumed on use.",
-    "Attempts to warp to the opposite square (10-x, 10-y); each attempt consumes one charge.",
-    "Moves up one floor at the same coordinates if the destination is road; consumed on success.",
-    "Moves down one floor at the same coordinates if the destination is road; consumed on success.",
-    "Passive: doubles attack against the Dragon in ordinary combat.",
-    "Converts adjacent lava into road; reusable.",
-    "Opens every yellow door on the current floor; consumed on use.",
-    "Removes all ordinary brick walls on the current floor; consumed on use.",
-    "Passive: doubles ordinary combat gold rewards."};
+
 constexpr std::array<std::string_view, 10> EquipmentNames{
     "Iron Sword",  "Silver Sword",  "Knight Sword",  "Holy Sword",  "Sacred Sword",
     "Iron Shield", "Silver Shield", "Knight Shield", "Holy Shield", "Sacred Shield"};
@@ -210,7 +191,7 @@ Json tile_definition(const Game& game, int floor, int tile) {
     if (tile >= YellowKey && tile <= BlueKey)
         result["key"] = tile == YellowKey ? "yellow" : tile == BlueKey ? "blue" : "red";
     if (tile >= HeroOrb && tile <= LuckyGold)
-        result["item"] = ItemIds[tile - HeroOrb];
+        result["item"] = ItemDefinitions[tile - HeroOrb].id;
     return result;
 }
 
@@ -226,9 +207,9 @@ Json enemy_info(const Game& game, int tile) {
                 {"gold", m.gold},
                 {"forecast", Json{{"penetrates", f.penetrates},
                                   {"damage", f.penetrates ? Json(f.damage) : Json{}},
-                                  {"hero_hits", f.hero_hits},
-                                  {"hero_hit", f.hero_hit},
-                                  {"enemy_hit", f.enemy_hit},
+                                  {"hero_hits", f.hero_strike_count},
+                                  {"hero_hit", f.hero_damage_per_strike},
+                                  {"enemy_hit", f.enemy_damage_per_strike},
                                   {"survivable", f.penetrates && f.damage < game.hero.hp}}}};
 }
 } // namespace
@@ -315,7 +296,7 @@ Json inspect(const Game& game, bool developer, int floor, int x, int y) {
     return result;
 }
 
-Json observe(const Session& session, bool developer, int map_floor, std::string_view detail) {
+Json observe(const Session& session, bool developer, int map_floor, ObservationDetail detail) {
     const auto& game = session.game;
     const auto& h = game.hero;
     if (map_floor < 0)
@@ -346,9 +327,12 @@ Json observe(const Session& session, bool developer, int map_floor, std::string_
                                  {"x_increases", "right"},
                                  {"y_increases", "down"}};
     result["hero"]["facing"] = facing(h.facing);
-    result["equipment"] = Json{{"sword", h.sword ? Json(EquipmentNames.at(h.sword - 1)) : Json{}},
-                               {"shield", h.shield ? Json(EquipmentNames.at(h.shield + 4)) : Json{}},
-                               {"sacred_shield_protection", h.equipment_found[SacredShieldFlag] != 0}};
+    result["equipment"] = Json{
+        {"sword",
+         h.sword != EquipmentTier::None ? Json(EquipmentNames.at(std::to_underlying(h.sword) - 1)) : Json{}},
+        {"shield", h.shield != EquipmentTier::None ? Json(EquipmentNames.at(std::to_underlying(h.shield) + 4))
+                                                   : Json{}},
+        {"sacred_shield_protection", h.equipment_found[SacredShieldFlag] != 0}};
     result["cycle"] = Json{{"factor", h.cycle_factor_minus_one + 1}, {"later", h.later_cycle != 0}};
     result["steps"] = session.steps;
     result["phase"] = h.hp <= 0 || game.visual.dead ? "dead"
@@ -365,23 +349,23 @@ Json observe(const Session& session, bool developer, int map_floor, std::string_
     result["last_action"] = session.last_action;
     result["log"] = session.log;
     Json::array_t items, clues, destinations;
-    for (int i = 0; i < int(ItemIds.size()); ++i) {
+    for (int i = 0; i < std::ssize(ItemDefinitions); ++i) {
         if (!h.items[i])
             continue;
         const auto item = static_cast<Item>(i);
-        items.emplace_back(
-            Json{{"id", ItemIds[i]},
-                 {"name", Game::item_name(item)},
-                 {"charges", h.items[i]},
-                 {"usage", ItemHelp[i]},
-                 {"passive", item == Item::Cross || item == Item::DragonSlayer || item == Item::LuckyGold},
-                 {"usable", !game.busy() && session.flight < 0 &&
-                                (item != Item::FlightOrb || game.can_open_flight())}});
+        items.emplace_back(Json{{"id", ItemDefinitions[i].id},
+                                {"name", Game::item_name(item)},
+                                {"charges", h.items[i]},
+                                {"usage", ItemDefinitions[i].usage},
+                                {"passive", item_definition(item).passive},
+                                {"usable", !game.busy() && session.flight < 0 &&
+                                               (item != Item::FlightOrb || game.can_open_flight())}});
     }
     if (game.inventory(Item::WisdomOrb))
-        for (int i = 0; i < int(h.wisdom_hints.size()); ++i)
-            if (h.wisdom_hints[i] == 2)
-                clues.emplace_back(Json{{"id", i}, {"text", Game::original_dialogue(62 + i)}});
+        for (int i = 0; i < std::ssize(h.wisdom_hints); ++i)
+            if (h.wisdom_hints[i] == HintState::Recorded)
+                clues.emplace_back(
+                    Json{{"id", i}, {"text", Game::original_dialogue(DialogueId::WisdomHintBase + i)}});
     if (game.inventory(Item::FlightOrb))
         for (int floor = 1; floor <= h.highest_floor; ++floor)
             if (floor != 44)
@@ -405,11 +389,14 @@ Json observe(const Session& session, bool developer, int map_floor, std::string_
     result["last_encounter"] = Json{};
     if (game.visual.last_defeated) {
         const auto& e = *game.visual.last_defeated;
-        result["last_encounter"] =
-            Json{{"name", Game::monster_name(e.row)}, {"hp", e.stats.hp},     {"attack", e.stats.attack},
-                 {"defense", e.stats.defense},        {"gold", e.stats.gold}, {"damage", e.damage}};
+        result["last_encounter"] = Json{{"name", Game::monster_name(e.monster_index)},
+                                        {"hp", e.stats.hp},
+                                        {"attack", e.stats.attack},
+                                        {"defense", e.stats.defense},
+                                        {"gold", e.stats.gold},
+                                        {"damage", e.damage}};
     }
-    if (developer && detail == "full") {
+    if (developer && detail == ObservationDetail::Full) {
         Json::array_t floors, monsters;
         for (int i = 0; i < FloorCount; ++i) {
             Json::array_t tiles;
@@ -420,7 +407,7 @@ Json observe(const Session& session, bool developer, int map_floor, std::string_
                                      {"down_landing", int(game.floors[i].down_landing)},
                                      {"tiles", tiles}});
         }
-        for (int i = 0; i < int(game.monsters.size()); ++i) {
+        for (int i = 0; i < std::ssize(game.monsters); ++i) {
             const auto& m = game.monsters[i];
             monsters.emplace_back(Json{{"row", i},
                                        {"name", Game::monster_name(i)},
@@ -435,13 +422,13 @@ Json observe(const Session& session, bool developer, int map_floor, std::string_
         result["hero_state"] = parse(glz::write_json(h).value());
         result["pending_commands"] = parse(glz::write_json(game.commands).value());
     }
-    if (detail == "full")
+    if (detail == ObservationDetail::Full)
         return result;
     Json compact = Json::object_t{};
     for (auto key : {"hero", "equipment", "cycle", "steps", "phase", "forecasts_unlocked", "save_unlocked",
                      "file_save_ready", "recording", "last_action", "pending_interaction"})
         compact[key] = result[key];
-    compact["detail"] = detail;
+    compact["detail"] = observation_detail_name(detail);
     compact["developer"] = developer;
     compact["inventory"] = Json::object_t{};
     for (const auto& [key, value] : result["inventory"].get_object())
@@ -452,7 +439,7 @@ Json observe(const Session& session, bool developer, int map_floor, std::string_
         if (action["ok"].get<bool>() || !action["messages"].get_array().empty())
             action.erase("message");
     }
-    if (detail == "summary")
+    if (detail == ObservationDetail::Summary)
         return compact;
 
     // Descriptions, pickup values and forecasts occur once per type, not per square.
@@ -481,7 +468,8 @@ Json observe(const Session& session, bool developer, int map_floor, std::string_
                         type["blocked_reason"] = "missing_key";
                 }
                 if (type.contains("enemy")) {
-                    type["available"] = type["enemy"]["forecast"]["survivable"];
+                    type["available"] =
+                        raw != GateKeeperA + 1 && type["enemy"]["forecast"]["survivable"].get<bool>();
                     type["enemy"].get_object().erase("name");
                     type.get_object().erase("details_locked");
                 }
@@ -516,9 +504,9 @@ Json changes(const Session& before, const Session& after, bool developer) {
         if (delta)
             stats[key] = delta;
     }
-    for (int i = 0; i < int(ItemIds.size()); ++i)
+    for (int i = 0; i < std::ssize(ItemDefinitions); ++i)
         if (before.game.hero.items[i] != after.game.hero.items[i])
-            inventory[ItemIds[i]] = after.game.hero.items[i];
+            inventory[ItemDefinitions[i].id] = after.game.hero.items[i];
     Json::array_t tiles;
     const int floor = after.game.hero.floor;
     for (int i = 0; i < CellCount; ++i) {
@@ -601,7 +589,7 @@ Json navigate(Session& session, bool developer, int x, int y, bool interact) {
         return result;
     }
     auto step = [&](Direction direction) {
-        session.act({InputKind::Move, direction});
+        session.act(PlayerInput::move(direction));
         result["inputs"] = result["inputs"].as<int>() + 1;
         for (const auto& message : session.last_action["messages"].get_array())
             result["messages"].get_array().push_back(message);
@@ -674,9 +662,9 @@ Json action_schema() {
     alternatives.push_back(
         object(Json{{"type", type("move")}, {"direction", directions}}, {"type", "direction"}));
     Json::array_t item_ids;
-    for (auto id : ItemIds)
-        if (id != "flying_orb")
-            item_ids.emplace_back(id);
+    for (const auto& definition : ItemDefinitions)
+        if (definition.id != "flying_orb")
+            item_ids.emplace_back(definition.id);
     alternatives.push_back(
         object(Json{{"type", type("use_item")}, {"item", Json{{"type", "string"}, {"enum", item_ids}}}},
                {"type", "item"}));
@@ -692,4 +680,4 @@ Json action_schema() {
         alternatives.push_back(object(Json{{"type", type(name)}, {"kind", kinds}}, {"type", "kind"}));
     return Json{{"oneOf", alternatives}};
 }
-} // namespace tsw::mcp_detail
+} // namespace tsw::detail::mcp

@@ -6,9 +6,9 @@ void Game::check_floor() {
     if (hero.floor >= 10 && hero.floor < 50) {
         switch (hero.floor) {
         case 10:
-            if (hero.dialogue_seen[26] == 0) {
-                if (hero.music_track != 0) {
-                    hero.music_track = 15;
+            if (hero.speech_seen(SpeechId::FairyFloor10) == 0) {
+                if (hero.music_track != MusicTrack::Disabled) {
+                    hero.music_track = MusicTrack::Floor10;
                     push(Op::Wait);
                     push(Op::Sound, SoundCue::MusicStart);
                 }
@@ -211,8 +211,8 @@ void Game::check_floor() {
                 push(Op::Wait);
                 push(Op::Sound, SoundCue::Get);
                 push(Op::Wait);
-                push(Op::Dialogue, 13, 0);
-                if (hero.music_track != 0) {
+                queue_speech(SpeechId::SkeletonLordChallenge);
+                if (hero.music_track != MusicTrack::Disabled) {
                     push(Op::Wait);
                     push(Op::Sound, SoundCue::MusicStop);
                 }
@@ -222,7 +222,7 @@ void Game::check_floor() {
                 push(Op::Wait);
                 push(Op::Sound, SoundCue::Get);
                 push(Op::Wait);
-                push(Op::Dialogue, 17, 0);
+                queue_speech(SpeechId::ThiefSecondDeparture);
                 push(Op::Wait);
                 push(Op::MoveTile, cell(4, 9), cell(5, 9));
                 push(Op::Wait);
@@ -259,7 +259,7 @@ void Game::check_floor() {
             waits(2);
             break;
         case 20:
-            if (hero.music_track != 0) {
+            if (hero.music_track != MusicTrack::Disabled) {
                 push(Op::Wait);
                 push(Op::Sound, SoundCue::MusicStart);
             }
@@ -273,7 +273,7 @@ void Game::check_floor() {
             tile_at(hero.floor, 6, 6) = Road;
             tile_at(hero.floor, 5, 5) = Vampire;
             push(Op::Wait);
-            push(Op::Dialogue, 20, 0);
+            queue_speech(SpeechId::VampireChallenge);
             push(Op::Wait);
             push(Op::Callback, Callback::Transformation, 32);
             push(Op::Wait);
@@ -317,7 +317,7 @@ void Game::check_floor() {
             push(Op::Wait);
             push(Op::Callback, Callback::Transformation, 12);
             push(Op::Wait);
-            push(Op::Callback, Callback::Transformation, BoardWidth);
+            push(Op::Callback, Callback::Transformation, 11);
             push(Op::Wait);
             push(Op::Callback, Callback::Transformation, 10);
             push(Op::Wait);
@@ -345,7 +345,7 @@ void Game::check_floor() {
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             waits(2);
-            if (hero.music_track != 0) {
+            if (hero.music_track != MusicTrack::Disabled) {
                 push(Op::Wait);
                 push(Op::Sound, SoundCue::MusicStop);
             }
@@ -373,22 +373,22 @@ void Game::check_floor() {
                 push(Op::Sound, SoundCue::Get);
             }
             waits(3);
-            push(Op::Dialogue, 57, 0);
+            queue_speech(SpeechId::ZenoOffersAlliance);
             waits(5);
-            push(Op::Dialogue, 56, 0);
+            queue_speech(SpeechId::HeroQuestionsPrincessRumor);
             waits(5);
-            push(Op::Dialogue, 55, 0);
+            queue_speech(SpeechId::ZenoRevealsPlan);
             waits(5);
-            push(Op::Dialogue, 54, 0);
+            queue_speech(SpeechId::HeroQuestionsLegend);
             waits(5);
-            push(Op::Dialogue, 53, 0);
+            queue_speech(SpeechId::ZenoExplainsLegend);
             waits(5);
-            push(Op::Dialogue, 52, 0);
+            queue_speech(SpeechId::HeroQuestionsTest);
             waits(5);
-            push(Op::Dialogue, 51, 0);
+            queue_speech(SpeechId::ZenoExplainsTest);
             waits(5);
-            push(Op::Dialogue, 50, 0);
-            if (hero.music_track != 0) {
+            queue_speech(SpeechId::HeroRecognizesZeno);
+            if (hero.music_track != MusicTrack::Disabled) {
                 push(Op::FloorMusic, 0, 0);
             }
             push(Op::WriteTile, cell(5, 4), Zeno);
@@ -430,122 +430,122 @@ void Game::check_floor() {
             push(Op::Wait);
             push(Op::Sound, SoundCue::Floor3);
             waits(7);
-            push(Op::Dialogue, 49, 0);
+            queue_speech(SpeechId::ThiefRevealsDisguise);
             waits(5);
-            push(Op::Dialogue, 48, 0);
+            queue_speech(SpeechId::HeroFindsThief);
             waits(11);
-            push(Op::Callback, BoardWidth, 50);
+            push(Op::Callback, Callback::Teleport, 50);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 49);
+            push(Op::Callback, Callback::Teleport, 49);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 48);
+            push(Op::Callback, Callback::Teleport, 48);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 47);
+            push(Op::Callback, Callback::Teleport, 47);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 46);
+            push(Op::Callback, Callback::Teleport, 46);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 45);
+            push(Op::Callback, Callback::Teleport, 45);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 44);
+            push(Op::Callback, Callback::Teleport, 44);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 43);
+            push(Op::Callback, Callback::Teleport, 43);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 42);
+            push(Op::Callback, Callback::Teleport, 42);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 41);
+            push(Op::Callback, Callback::Teleport, 41);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 40);
+            push(Op::Callback, Callback::Teleport, 40);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 39);
+            push(Op::Callback, Callback::Teleport, 39);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 38);
+            push(Op::Callback, Callback::Teleport, 38);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 37);
+            push(Op::Callback, Callback::Teleport, 37);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 36);
+            push(Op::Callback, Callback::Teleport, 36);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 35);
+            push(Op::Callback, Callback::Teleport, 35);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 34);
+            push(Op::Callback, Callback::Teleport, 34);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 33);
+            push(Op::Callback, Callback::Teleport, 33);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 32);
+            push(Op::Callback, Callback::Teleport, 32);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 31);
+            push(Op::Callback, Callback::Teleport, 31);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 30);
+            push(Op::Callback, Callback::Teleport, 30);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 29);
+            push(Op::Callback, Callback::Teleport, 29);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 28);
+            push(Op::Callback, Callback::Teleport, 28);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 27);
+            push(Op::Callback, Callback::Teleport, 27);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 26);
+            push(Op::Callback, Callback::Teleport, 26);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
-            push(Op::Callback, BoardWidth, 25);
+            push(Op::Callback, Callback::Teleport, 25);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             waits(2);
-            if (hero.music_track != 0) {
+            if (hero.music_track != MusicTrack::Disabled) {
                 push(Op::Wait);
                 push(Op::Sound, SoundCue::MusicStop);
             }
             break;
         case 25:
             push(Op::Wait);
-            push(Op::Dialogue, 23, 0);
+            queue_speech(SpeechId::RockChallenge);
             push(Op::DoorFrame, cell(5, 9), DoorMotion::CloseGate);
             expand_door();
             push(Op::Wait);
@@ -575,7 +575,7 @@ void Game::check_floor() {
             waits(3);
             push(Op::MoveTile, cell(5, 5), cell(5, 6));
             waits(3);
-            push(Op::Dialogue, 30, 0);
+            queue_speech(SpeechId::GreatMagicMasterChallenge);
             waits(7);
             push(Op::MoveTile, cell(5, 4), cell(5, 5));
             waits(3);
@@ -690,9 +690,9 @@ void Game::check_floor() {
             push(Op::MoveTile, cell(5, 6), cell(5, 5));
             waits(6);
             push(Op::WriteTile, cell(5, 6), GoldenKnight);
-            push(Op::Dialogue, 39, 0);
+            queue_speech(SpeechId::GreatMagicMasterDefeated);
             push(Op::Wait);
-            push(Op::SetTile, cell(5, 0), BoardWidth);
+            push(Op::SetTile, cell(5, 0), StairsUp);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Get);
             waits(3);
@@ -715,7 +715,7 @@ void Game::check_floor() {
             push(Op::Wait);
             push(Op::MoveTile, cell(5, 1), cell(5, 2));
             push(Op::Wait);
-            push(Op::Dialogue, 38, 0);
+            queue_speech(SpeechId::GreatMagicMasterBattle);
             push(Op::Wait);
             push(Op::Callback, Callback::ForcedBattle, 71);
             push(Op::Wait);
@@ -771,7 +771,7 @@ void Game::check_floor() {
             push(Op::Wait);
             push(Op::MoveTile, cell(7, 1), cell(7, 2));
             push(Op::Wait);
-            push(Op::Dialogue, 37, 0);
+            queue_speech(SpeechId::GreatMagicMasterSummonsKnights);
             push(Op::Wait);
             push(Op::Callback, Callback::ForcedBattle, 71);
             push(Op::Wait);
@@ -827,7 +827,7 @@ void Game::check_floor() {
             push(Op::Wait);
             push(Op::MoveTile, cell(3, 1), cell(3, 2));
             push(Op::Wait);
-            push(Op::Dialogue, 36, 0);
+            queue_speech(SpeechId::GreatMagicMasterSummonsSwordsmen);
             push(Op::Wait);
             push(Op::Callback, Callback::ForcedBattle, 71);
             push(Op::Wait);
@@ -865,7 +865,7 @@ void Game::check_floor() {
             push(Op::Wait);
             push(Op::MoveTile, cell(6, 3), cell(6, 4));
             push(Op::Wait);
-            push(Op::Dialogue, 35, 0);
+            queue_speech(SpeechId::GreatMagicMasterSummonsSoldiers);
             push(Op::Wait);
             push(Op::Callback, Callback::ForcedBattle, 71);
             push(Op::Wait);
@@ -903,7 +903,7 @@ void Game::check_floor() {
             push(Op::Wait);
             push(Op::MoveTile, cell(4, 3), cell(4, 4));
             push(Op::Wait);
-            push(Op::Dialogue, 34, 0);
+            queue_speech(SpeechId::GreatMagicMasterFinalChallenge);
             push(Op::DoorFrame, cell(5, 7), DoorMotion::CloseGate);
             expand_door();
             push(Op::Wait);
@@ -917,7 +917,7 @@ void Game::check_floor() {
             push(Op::Wait);
             push(Op::Sound, SoundCue::Get);
             waits(7);
-            push(Op::Dialogue, 44, 0);
+            queue_speech(SpeechId::ZenoPromisesFairFight);
             waits(6);
             push(Op::SetTile, cell(6, 7), Road);
             push(Op::SetTile, cell(4, 7), Road);
@@ -931,14 +931,14 @@ void Game::check_floor() {
             push(Op::Wait);
             push(Op::Sound, SoundCue::Zeno);
             push(Op::Wait);
-            push(Op::Dialogue, 43, 0);
+            queue_speech(SpeechId::GoldenKnightPleads);
             scratch_index = 71;
             neighbor_index = 93;
             summon_four_guards(scratch_index, neighbor_index, 81, 83);
             waits(5);
-            push(Op::Dialogue, 42, 0);
+            queue_speech(SpeechId::ZenoRebukesGoldenKnight);
             waits(5);
-            push(Op::Dialogue, 41, 0);
+            queue_speech(SpeechId::GoldenKnightReportsFailure);
             scratch_index = 60;
             summon(scratch_index, Zeno);
             waits(6);
@@ -979,12 +979,12 @@ void Game::check_floor() {
             push(Op::Wait);
             push(Op::Callback, Callback::SummonGuards, 0);
             push(Op::Wait);
-            if (hero.music_track != 0) {
+            if (hero.music_track != MusicTrack::Disabled) {
                 push(Op::Wait);
                 push(Op::Sound, SoundCue::MusicStart);
             }
             push(Op::Wait);
-            push(Op::Dialogue, 45, 0);
+            queue_speech(SpeechId::ZenoFinalChallenge);
             waits(3);
             push(Op::Callback, Callback::SummonZeno, 0);
             push(Op::DoorFrame, cell(5, 6), DoorMotion::CloseGate);
@@ -992,7 +992,7 @@ void Game::check_floor() {
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             waits(2);
-            if (hero.music_track != 0) {
+            if (hero.music_track != MusicTrack::Disabled) {
                 push(Op::Wait);
                 push(Op::Sound, SoundCue::MusicStop);
             }
@@ -1037,25 +1037,24 @@ void Game::summon_guards() {
 
 void Game::transform_vampire() {
     // Gameplay writes precede the original 32 rendering frames in check_floor.
-    visual.raster_mode = 10;
+    visual.raster_mode = RasterMode::VampireTransformation;
     if (visual.raster_frame == 32)
-        visual.raster_mode = -1;
+        visual.raster_mode = RasterMode::Inactive;
 }
 
 void Game::capture() {
     // opening2, 0x464048. Select its original 40-pixel canvas branch.
     push(Op::Callback, Callback::Capture);
-    push(Op::Wait, 1);
-    push(Op::Callback, Callback::RasterScene, 500);
+    queue_raster(RasterMode::OpeningStory, 500);
     for (int group = 50; group >= 0; --group)
         for (int part = 5; part >= 0; --part) {
-            push(Op::Wait, 1);
-            push(Op::Callback, Callback::RasterScene, group * 6 + 100 + part);
+            queue_raster(RasterMode::OpeningStory, group * 6 + 100 + part);
         }
-    push(Op::Wait, 1);
-    push(Op::Callback, Callback::RasterScene, 0);
+    queue_raster(RasterMode::OpeningStory, 0);
     waits(3);
     for (int frame = 247; frame >= 232; --frame) {
+        // OpeningDissolve (0) is supplied by the preceding Wait record. The
+        // first frame deliberately reuses waits(3), preserving the stack length.
         if (frame != 247)
             push(Op::Wait);
         push(Op::Callback, Callback::RasterScene, frame);
@@ -1075,7 +1074,7 @@ void Game::capture() {
     push(Op::Wait);
     push(Op::Sound, SoundCue::Zeno);
     waits(5);
-    push(Op::Dialogue, 11);
+    queue_speech(SpeechId::HeroCaptured);
     summon_four_guards(81, 103, 91, 93);
 }
 
@@ -1084,42 +1083,32 @@ void Game::ending() {
     // handan's first-cycle Zeno contact: preserve the original stack of raster callbacks.
     push(Op::Wait);
     push(Op::Callback, Callback::NextCycle);
-    push(Op::Wait, 8);
-    push(Op::Callback, Callback::RasterScene);
-    push(Op::Wait, 7);
-    push(Op::Callback, Callback::RasterScene);
+    queue_raster(RasterMode::ClosingCard, 0);
+    queue_raster(RasterMode::EndingCard, 0);
     for (int frame = 400; frame >= 1; --frame) {
-        push(Op::Wait, 5);
-        push(Op::Callback, Callback::RasterScene, frame);
+        queue_raster(RasterMode::EndingStory, frame);
     }
-    push(Op::Wait, 4);
-    push(Op::Callback, Callback::RasterScene, 400);
+    queue_raster(RasterMode::EndingShrink, 400);
     for (int frame = 399; frame >= 300; frame -= 3) {
-        push(Op::Wait, 4);
-        push(Op::Callback, Callback::RasterScene, frame);
+        queue_raster(RasterMode::EndingShrink, frame);
     }
     for (int frame = 295; frame >= 205; frame -= 5) {
-        push(Op::Wait, 4);
-        push(Op::Callback, Callback::RasterScene, frame);
+        queue_raster(RasterMode::EndingShrink, frame);
     }
     for (int frame = 197; frame >= 101; frame -= 8) {
-        push(Op::Wait, 4);
-        push(Op::Callback, Callback::RasterScene, frame);
+        queue_raster(RasterMode::EndingShrink, frame);
     }
     for (int frame = 91; frame >= 1; frame -= 10) {
-        push(Op::Wait, 4);
-        push(Op::Callback, Callback::RasterScene, frame);
+        queue_raster(RasterMode::EndingShrink, frame);
     }
     waits(2);
     for (int frame = 17; frame >= 1; --frame) {
-        push(Op::Wait, 6);
-        push(Op::Callback, Callback::RasterScene, frame);
+        queue_raster(RasterMode::EndingImages, frame);
         push(Op::Wait);
         push(Op::Sound, frame == 1 ? SoundCue::Open : SoundCue::Stairs2);
     }
     for (int frame = 247; frame >= 232; --frame) {
-        push(Op::Wait, 2);
-        push(Op::Callback, Callback::RasterScene, frame);
+        queue_raster(RasterMode::EndingDissolve, frame);
         push(Op::Wait);
         push(Op::Sound, SoundCue::Open);
     }

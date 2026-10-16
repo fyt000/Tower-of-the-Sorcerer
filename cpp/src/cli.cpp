@@ -1,6 +1,7 @@
 #include "tsw/mcp.hpp"
 #include "tsw/replay.hpp"
 #include <charconv>
+#include <format>
 #include <fstream>
 #include <iostream>
 #include <limits>
@@ -99,7 +100,7 @@ int main(int argc, char** argv) try {
                 if (mode == "headless")
                     std::cout << gameplay_json(game, flight, map_floor) << '\n' << std::flush;
             } catch (const std::exception& error) {
-                throw std::runtime_error("Line " + std::to_string(line_number) + ": " + error.what());
+                throw std::runtime_error(std::format("Line {}: {}", line_number, error.what()));
             }
         }
         if (input.bad())

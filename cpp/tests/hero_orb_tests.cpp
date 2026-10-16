@@ -64,11 +64,11 @@ TEST_CASE("Realtime Hero Orb stats and gold follow cycle equipment and large mon
                 (tile == OctopusMouth ? game.monsters[OctopusRow].gold * 2 : game.monsters[OctopusRow].gold));
     }
     game.tile_at(1, 5, 4) = DragonHead;
-    REQUIRE(orb_tile_info(game, 1, cell(5, 4), true)->row == DragonRow);
+    REQUIRE(orb_tile_info(game, 1, cell(5, 4), true)->monster_index == DragonRow);
     game.tile_at(1, 5, 4) = DragonFirst;
     REQUIRE_FALSE(orb_tile_info(game, 1, cell(5, 4), true));
     game.tile_at(1, 5, 4) = GreenSlime + 1;
-    REQUIRE(orb_tile_info(game, 1, cell(5, 4), true)->row == 0);
+    REQUIRE(orb_tile_info(game, 1, cell(5, 4), true)->monster_index == 0);
 }
 
 TEST_CASE("Realtime Hero Orb abbreviations keep large numbers compact", "[orb]") {

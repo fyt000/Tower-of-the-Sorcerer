@@ -31,6 +31,19 @@ Switching language works during a conversation or replay. No Rust source or Rust
 translation catalog is used. Unknown diagnostics retain their original text;
 user-entered ranking names and replay paths bypass translation.
 
+Recovered text-table indices are zero-based; queued `Op::Dialogue` speech IDs
+are one-based, and their continuation stages add 10. Named entries and range
+offsets in `src/dialogue_ids.hpp` document the IDs used for dynamic dialogue,
+Wisdom Orb hints, merchant offers and status messages.
+
+The Fairy assembles score evaluations from entries 220–236 and leaderboard
+announcements from 244–245. `src/fairy_dialogue.hpp` names each fragment and
+preserves the recovered score thresholds. Composition normalizes padding at
+word/sentence joins: the two English catalogs use a single space, while Japanese
+and Chinese join directly. Numeric suffixes retain their catalog punctuation and
+spacing (for example, ` points.`, `. I'll record...` or `点です。`). The recovered
+catalogs themselves remain unchanged.
+
 Japanese glyphs come from Windows Yu Gothic (fallback: MS Gothic), and Chinese
 glyphs from Microsoft YaHei. The first face of a `.ttc` collection is adapted in
 memory for raylib; font files are not modified or redistributed. For portable

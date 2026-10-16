@@ -27,7 +27,7 @@ constexpr std::array<const char*, 11> EffectFiles{nullptr, "open", "get", "taise
                                                   nullptr, "3f",   "20f", "kai",    "kai2"};
 
 bool valid_track(int track) {
-    return track >= 5 && track < int(Tracks.size());
+    return track >= 5 && track < std::ssize(Tracks);
 }
 
 struct MidiDeleter {
@@ -165,7 +165,7 @@ struct Effect {
     }
 
     void play() {
-        auto voice = std::find_if(voices.begin(), voices.end(), [](const auto& v) { return !v.playing; });
+        auto voice = std::ranges::find_if(voices, [](const auto& v) { return !v.playing; });
         if (voice == voices.end())
             voice = std::min_element(voices.begin(), voices.end(),
                                      [](const auto& a, const auto& b) { return a.started < b.started; });
@@ -199,10 +199,10 @@ struct AudioMixer::Impl {
     std::uint64_t previous_request{};
 
     explicit Impl(const Assets& assets) : synth(assets.soundfont()) {
-        for (int i = 5; i < int(Tracks.size()); ++i)
+        for (int i = 5; i < std::ssize(Tracks); ++i)
             if (!tracks[i].load(assets.midi(Tracks[i])))
                 throw std::runtime_error("Cannot parse MIDI track: " + std::string(Tracks[i]));
-        for (int i = 1; i < int(EffectFiles.size()); ++i)
+        for (int i = 1; i < std::ssize(EffectFiles); ++i)
             if (EffectFiles[i])
                 effects[i].load(assets.wave(EffectFiles[i]));
     }
@@ -265,20 +265,19 @@ void AudioMixer::restart(Game& game) {
 }
 
 int AudioMixer::track_for_scene(const Game& game) {
-    if (!game.hero.music_track)
+    if (!music_enabled(game.hero.music_track))
         return 0;
     // 0x4526C0 title callback and 0x482E60 closing card select their own MIDI.
-    constexpr int CaptureTitleTrack = 11, ClosingTrack = 20;
     switch (game.visual.raster_mode) {
-    case 9:
-    case 0:
-    case 1:
-        return CaptureTitleTrack;
-    case 7:
-    case 8:
-        return ClosingTrack;
+    case RasterMode::Title:
+    case RasterMode::OpeningDissolve:
+    case RasterMode::OpeningStory:
+        return std::to_underlying(MusicTrack::CaptureTitle);
+    case RasterMode::EndingCard:
+    case RasterMode::ClosingCard:
+        return std::to_underlying(MusicTrack::Closing);
     default:
-        return game.hero.music_track;
+        return std::to_underlying(game.hero.music_track);
     }
 }
 
@@ -293,7 +292,7 @@ void AudioMixer::update(Game& game) {
         const int cue = int(sound);
         if (sound == SoundCue::MusicStop || sound == SoundCue::MusicStart)
             impl_->requested_playing = sound == SoundCue::MusicStart;
-        else if (cue > 0 && cue < int(EffectFiles.size()) && EffectFiles[cue])
+        else if (cue > 0 && cue < std::ssize(EffectFiles) && EffectFiles[cue])
             impl_->cues.push(cue); // Drop excess cues when the fixed queue is full.
     }
     impl_->publish();

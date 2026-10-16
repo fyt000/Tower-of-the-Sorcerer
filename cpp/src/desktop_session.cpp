@@ -1,5 +1,6 @@
 #include "desktop_session.hpp"
 #include <algorithm>
+#include <format>
 #include <fstream>
 #include <stdexcept>
 #include <utility>
@@ -34,8 +35,8 @@ DesktopSession::DesktopSession(const Assets& assets, const std::filesystem::path
         game.status = error.what();
         ui.notice = error.what();
     }
-    ui.speed_index = settings.game_speed;
-    ui.replay_speed_index = settings.replay_speed;
+    ui.game_speed_index = settings.game_speed_index;
+    ui.replay_speed_index = settings.replay_speed_index;
     ui.muted = settings.muted;
     ui.hero_orb_actual_damage = settings.hero_orb_actual_damage;
     ui.mouse_walking = settings.mouse_walking;
@@ -70,7 +71,7 @@ float DesktopSession::scaled_seconds(float real_seconds) const {
     if (ui.modal() || (ui.replay_active && ui.replay_paused))
         return 0;
     return real_seconds *
-           (ui.replay_active ? ReplaySpeeds[ui.replay_speed_index] : GameSpeeds[ui.speed_index]);
+           (ui.replay_active ? ReplaySpeeds[ui.replay_speed_index] : GameSpeeds[ui.game_speed_index]);
 }
 
 void DesktopSession::move(Direction direction) {
@@ -90,7 +91,7 @@ void DesktopSession::move_step(Direction direction) {
             refresh_rankings();
     }
     const auto before = game.hero;
-    play({InputKind::Move, direction});
+    play(PlayerInput::move(direction));
     renderer.moved(before, game.hero);
 }
 
@@ -116,10 +117,14 @@ void DesktopSession::recording_status() {
 }
 
 void DesktopSession::preferences() {
-    save_settings(save_directory_ / "settings.json",
-                  {ui.speed_index, ui.replay_speed_index, recorder_.enabled(), ui.muted,
-                   ui.hero_orb_actual_damage, std::string(language_id(ui.language)), ui.mouse_walking,
-                   ui.realtime_hero_orb});
+    save_settings(save_directory_ / "settings.json", {.game_speed_index = ui.game_speed_index,
+                                                      .replay_speed_index = ui.replay_speed_index,
+                                                      .recording = recorder_.enabled(),
+                                                      .muted = ui.muted,
+                                                      .hero_orb_actual_damage = ui.hero_orb_actual_damage,
+                                                      .language = std::string(language_id(ui.language)),
+                                                      .mouse_walking = ui.mouse_walking,
+                                                      .realtime_hero_orb = ui.realtime_hero_orb});
 }
 
 void DesktopSession::open_home(bool startup) {
@@ -134,7 +139,7 @@ void DesktopSession::open_home(bool startup) {
     if (replay_)
         ui.replay_paused = true;
     Game opening;
-    opening.visual.raster_mode = 9;
+    opening.visual.raster_mode = RasterMode::Title;
     audio.suspend(false);
     audio.restart(opening);
     recording_status();
@@ -170,7 +175,7 @@ void DesktopSession::open_rankings(bool submission) {
     if (!ui.replay_active)
         refresh_rankings();
     ui.rankings = true;
-    ui.ranking_category = std::clamp(game.hero.fairy_category, 1, RankingCategoryCount);
+    ui.ranking_category = std::clamp(std::to_underlying(game.hero.fairy_category), 1, RankingCategoryCount);
     if (submission && game.hero.fairy_rank > 0) {
         const auto& hero = game.hero;
         ui.ranking_entry = RankingEntry{hero.fairy_score, hero.hp, hero.attack, hero.defense, {}};
@@ -240,7 +245,7 @@ bool DesktopSession::advance_queue(float seconds) {
         renderer.command(command);
         // 0x482E60 mode 8 stops the original timer until the player continues.
         if (command.op == Op::Callback && command.a == int(Callback::RasterScene) &&
-            game.visual.raster_mode == 8) {
+            game.visual.raster_mode == RasterMode::ClosingCard) {
             ui.ending_wait = true;
             replay_speech_ = 0;
         }
@@ -290,8 +295,7 @@ void DesktopSession::advance_replay(float seconds) {
         const bool blocked = advance_queue(seconds);
         if (game.checkpoint_requested && !game.busy()) {
             game.checkpoint_requested = false;
-            apply_input(game, ui.flight,
-                        {InputKind::Save, Direction::Up, Item::HeroOrb, -1, SaveKind::Checkpoint});
+            apply_input(game, ui.flight, PlayerInput::save(SaveKind::Checkpoint));
         }
         const bool shop = game.dialogue && game.dialogue->shop;
         // The empty-queue run also clears transient layers/door frames before a paused boundary.
@@ -306,7 +310,7 @@ void DesktopSession::advance_replay(float seconds) {
         }
     } catch (const std::exception& error) {
         ui.replay_error =
-            "Step " + std::to_string(replay_->position() + (replay_action_ ? 0 : 1)) + ": " + error.what();
+            std::format("Step {}: {}", replay_->position() + (replay_action_ ? 0 : 1), error.what());
         ui.replay_paused = true;
     }
 }
@@ -430,7 +434,7 @@ void DesktopSession::apply(UiAction action) {
             for (const auto& entry : std::filesystem::directory_iterator(save_directory_))
                 if (entry.is_regular_file() && entry.path().extension() == ".jsonl")
                     ui.replay_files.push_back(entry.path());
-        std::sort(ui.replay_files.begin(), ui.replay_files.end());
+        std::ranges::sort(ui.replay_files);
         ui.replay_selected = ui.replay_first_row = 0;
         ui.replay_path = ui.replay_files.empty() ? "" : path_text(ui.replay_files.front());
         ui.replay_path_focus = true;
@@ -533,7 +537,7 @@ void DesktopSession::apply(UiAction action) {
         recorder_.save(game, save_slot_path(save_directory_, action.value));
         ui.selected_slot = action.value;
         ui.close_overlays();
-        game.status = "Saved to slot " + std::to_string(action.value) + ".";
+        game.status = std::format("Saved to slot {}.", action.value);
         break;
     case Action::Load:
     case Action::FairyCheckpoint:
@@ -544,13 +548,12 @@ void DesktopSession::apply(UiAction action) {
              action.kind == Action::FairyCheckpoint ? SaveKind::Checkpoint : SaveKind::Slot);
         if (action.kind == Action::LoadSlot) {
             ui.selected_slot = action.value;
-            game.status = "Restored slot " + std::to_string(action.value) + ". " + game.status;
+            game.status = std::format("Restored slot {}. {}", action.value, game.status);
         }
         break;
     case Action::Continue: {
-        const int stage = game.dialogue ? game.dialogue->continuation : 0;
-        const bool fairy = !game.hero.cycle_factor_minus_one &&
-                           (stage == 26 || stage == 32 || stage == 34 || stage == 50 || stage == 57);
+        const auto stage = game.dialogue ? game.dialogue->continuation : ContinuationStage::None;
+        const bool fairy = !game.hero.cycle_factor_minus_one && is_fairy_continuation(stage);
         game.continue_dialogue();
         if (fairy)
             open_rankings(true);
@@ -560,18 +563,18 @@ void DesktopSession::apply(UiAction action) {
         accumulator_ = 0;
         break;
     case Action::Choose:
-        play({InputKind::Choose, Direction::Up, Item::HeroOrb, action.value});
+        play(PlayerInput::choose(action.value));
         break;
     case Action::UseItem: {
         const auto item = static_cast<Item>(action.value);
         ui.close_overlays();
         if (item == Item::FlightOrb)
             play({InputKind::OpenFlight});
-        else if (item == Item::HeroOrb && play({InputKind::UseItem, Direction::Up, item})) {
+        else if (item == Item::HeroOrb && play(PlayerInput::use_item(item))) {
             ui.enemies = true;
             ui.enemy_first_row = 0;
         } else if (item != Item::HeroOrb)
-            play({InputKind::UseItem, Direction::Up, item});
+            play(PlayerInput::use_item(item));
         break;
     }
     case Action::FlightUp:
@@ -590,7 +593,7 @@ void DesktopSession::apply(UiAction action) {
         preferences();
         break;
     case Action::Speed:
-        ui.speed_index = std::clamp(action.value, 0, int(GameSpeeds.size()) - 1);
+        ui.game_speed_index = std::clamp(action.value, 0, int(GameSpeeds.size()) - 1);
         preferences();
         break;
     case Action::Recording:

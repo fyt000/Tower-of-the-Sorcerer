@@ -4,34 +4,37 @@
 #include <stdexcept>
 
 namespace tsw {
-void save_detail::validate(const Game& game) {
+void detail::save::validate(const Game& game) {
     const auto& h = game.hero;
     constexpr int MaxSavedValue = 100000000;
-    if (h.floor < 0 || h.floor >= FloorCount || h.x < 0 || h.x >= 11 || h.y < 0 || h.y >= 11 ||
-        h.highest_floor < 0 || h.highest_floor > 50 ||
-        (h.cycle_factor_minus_one != 0 && h.cycle_factor_minus_one != 43) || h.hp <= 0 || h.attack < 0 ||
-        h.defense < 0 || h.gold < 0 || h.yellow_keys < 0 || h.red_keys < 0 || h.blue_keys < 0 ||
-        h.hp > MaxSavedValue || h.attack > MaxSavedValue || h.defense > MaxSavedValue ||
+    if (h.floor < 0 || h.floor >= FloorCount || h.x < 0 || h.x >= BoardWidth || h.y < 0 ||
+        h.y >= BoardWidth || h.highest_floor < 0 || h.highest_floor >= FloorCount ||
+        (h.cycle_factor_minus_one != 0 && h.cycle_factor_minus_one != BacksideFactor - 1) || h.hp <= 0 ||
+        h.attack < 0 || h.defense < 0 || h.gold < 0 || h.yellow_keys < 0 || h.red_keys < 0 ||
+        h.blue_keys < 0 || h.hp > MaxSavedValue || h.attack > MaxSavedValue || h.defense > MaxSavedValue ||
         h.gold > MaxSavedValue || h.yellow_keys > 1000000 || h.red_keys > 1000000 || h.blue_keys > 1000000 ||
         h.altar_purchases < 0 || h.altar_purchases > 4000 || h.fairy_visits < 0 || h.fairy_visits > 1000000 ||
-        h.later_cycle < 0 || h.later_cycle > 1 || h.flight_direction < 0 || h.flight_direction > 2 ||
-        h.highest_floor_stair < 0 || h.highest_floor_stair > 2 || h.fairy_score < 0 ||
-        h.fairy_score > MaxSavedValue || h.fairy_rank < 0 || h.fairy_rank > 10 || h.fairy_category < 0 ||
-        h.fairy_category > 5 || h.sword < 0 || h.sword > 5 || h.shield < 0 || h.shield > 5 ||
-        int(h.facing) < 1 || int(h.facing) > 4 || h.music_track < 0 || h.music_track > 21)
+        h.later_cycle < 0 || h.later_cycle > 1 || h.flight_direction < FlightDirection::None ||
+        h.flight_direction > FlightDirection::Down || h.highest_floor_stair_kind < StairKind::None ||
+        h.highest_floor_stair_kind > StairKind::Down || h.fairy_score < 0 || h.fairy_score > MaxSavedValue ||
+        h.fairy_rank < 0 || h.fairy_rank > 10 || h.fairy_category < FairyCategory::None ||
+        h.fairy_category > FairyCategory::Floor49 || h.sword < EquipmentTier::None ||
+        h.sword > EquipmentTier::Sacred || h.shield < EquipmentTier::None ||
+        h.shield > EquipmentTier::Sacred || int(h.facing) < 1 || int(h.facing) > 4 ||
+        !valid_music_track(h.music_track))
         throw std::runtime_error("Invalid hero state in save");
     for (const auto& floor : game.floors) {
         if (floor.up_landing >= CellCount || floor.down_landing >= CellCount)
             throw std::runtime_error("Invalid stair landing in save");
         for (auto t : floor.tiles)
-            if (t > 165)
+            if (t > MaxMapTile)
                 throw std::runtime_error("Invalid map tile in save");
     }
     for (const auto& m : game.monsters)
         if (m.hp <= 0 || m.hp > 1000000 || m.attack < 0 || m.attack > 1000000 || m.defense < 0 ||
             m.defense > 1000000 || m.gold < 0 || m.gold > 32767)
             throw std::runtime_error("Invalid monster row in save");
-    for (int i = 0; i < int(h.items.size()); ++i)
+    for (int i = 0; i < std::ssize(h.items); ++i)
         if (h.items[i] < 0 || h.items[i] > (i == int(Item::WarpStaff) ? 3 : i == int(Item::HeroOrb) ? 2 : 1))
             throw std::runtime_error("Invalid inventory in save");
     for (int flag : h.equipment_found)
@@ -40,20 +43,20 @@ void save_detail::validate(const Game& game) {
     for (int flag : h.dialogue_seen)
         if (flag < 0 || flag > 1)
             throw std::runtime_error("Invalid dialogue flag");
-    for (int flag : h.wisdom_hints)
-        if (flag < 0 || flag > 2)
+    for (auto flag : h.wisdom_hints)
+        if (flag < HintState::Unheard || flag > HintState::Recorded)
             throw std::runtime_error("Invalid clue flag");
-    for (int flag : h.old_man_heard)
-        if (flag < 0 || flag > 2)
+    for (auto flag : h.old_man_heard)
+        if (flag < HintState::Unheard || flag > HintState::Recorded)
             throw std::runtime_error("Invalid NPC clue flag");
     for (int flag : h.merchant_used)
         if (flag < 0 || flag > 1)
             throw std::runtime_error("Invalid merchant flag");
-    if (h.merchant2_heard < 0 || h.merchant2_heard > 2)
+    if (h.merchant2_heard < HintState::Unheard || h.merchant2_heard > HintState::Recorded)
         throw std::runtime_error("Invalid merchant clue flag");
 }
 
-void save_detail::write_file(const std::filesystem::path& path, const std::vector<std::uint8_t>& bytes) {
+void detail::save::write_file(const std::filesystem::path& path, std::span<const std::uint8_t> bytes) {
     if (!path.parent_path().empty())
         std::filesystem::create_directories(path.parent_path());
     auto temporary = path;
@@ -83,7 +86,7 @@ void save_detail::write_file(const std::filesystem::path& path, const std::vecto
 
 void Game::save(const std::filesystem::path& path, SaveKind kind) const {
     const auto bytes =
-        save_detail::encode_original(*this, original_save_record_ ? &*original_save_record_ : nullptr, kind);
+        detail::save::encode_original(*this, original_save_record_ ? &*original_save_record_ : nullptr, kind);
     const auto companion = achievement_path(path);
     auto pending = companion;
     pending += ".pending";
@@ -99,14 +102,14 @@ void Game::save(const std::filesystem::path& path, SaveKind kind) const {
         std::filesystem::rename(companion, pending);
     }
     try {
-        save_detail::write_file(path, bytes);
+        detail::save::write_file(path, bytes);
     } catch (...) {
         if (previous)
             std::filesystem::rename(pending, companion);
         throw;
     }
     // The original manual writer updates the live checksum words before a later Fairy snapshot.
-    original_save_record_ = save_detail::hero_record(bytes);
+    original_save_record_ = detail::save::hero_record(bytes);
     try {
         std::filesystem::remove(achievement_path(backup));
         if (previous && previous_save)
@@ -127,7 +130,7 @@ void Game::load(const std::filesystem::path& path, SaveKind kind) {
     load(input, kind);
     input.clear();
     input.seekg(0);
-    std::vector<std::uint8_t> bytes(save_detail::OriginalSaveBytes);
+    std::vector<std::uint8_t> bytes(detail::save::OriginalSaveBytes);
     input.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
     if (input)
         if (const auto history = read_run_history(path, bytes))
@@ -136,21 +139,21 @@ void Game::load(const std::filesystem::path& path, SaveKind kind) {
 
 void Game::save(std::ostream& output, SaveKind kind) const {
     const auto bytes =
-        save_detail::encode_original(*this, original_save_record_ ? &*original_save_record_ : nullptr, kind);
+        detail::save::encode_original(*this, original_save_record_ ? &*original_save_record_ : nullptr, kind);
     output.write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
     if (!output)
         throw std::runtime_error("Unable to write save");
-    original_save_record_ = save_detail::hero_record(bytes);
+    original_save_record_ = detail::save::hero_record(bytes);
 }
 
 void Game::load(std::istream& input, SaveKind kind) {
     // Original BlockRead consumes two fixed records and ignores trailing data.
-    std::vector<std::uint8_t> bytes(save_detail::OriginalSaveBytes);
+    std::vector<std::uint8_t> bytes(detail::save::OriginalSaveBytes);
     input.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
     if (!input)
         throw std::runtime_error("Truncated original save: expected 6957 bytes");
-    save_detail::OriginalRecord record;
-    Game restored = save_detail::decode_original(bytes, record, kind);
+    detail::save::OriginalRecord record;
+    Game restored = detail::save::decode_original(bytes, record, kind);
     restored.run_history.complete = false;
     restored.run_history.dragon_slayer_acquired = restored.inventory(Item::DragonSlayer) > 0;
     // Rankings belong to the save directory, not to an individual game slot.
@@ -158,7 +161,7 @@ void Game::load(std::istream& input, SaveKind kind) {
     restored.original_save_record_ = record;
     // The original load refresh (0x454DE8 -> 0x442C38) clears this live marker
     // after reading the raw record. Runtime snapshots bypass file loading.
-    restored.hero.highest_floor_stair = 0;
+    restored.hero.highest_floor_stair_kind = StairKind::None;
     *this = std::move(restored); // A malformed file never partially changes the live game.
 }
 } // namespace tsw

@@ -50,7 +50,7 @@ void Game::check_guards() {
                 tile_at(hero.floor, 4, 4) + tile_at(hero.floor, 6, 4) + tile_at(hero.floor, 4, 5) +
                 tile_at(hero.floor, 5, 5) + tile_at(hero.floor, 6, 5) + tile_at(hero.floor, 5, 2) ==
             52) {
-            if (hero.music_track != 0) {
+            if (hero.music_track != MusicTrack::Disabled) {
                 push(Op::Wait);
                 push(Op::Sound, SoundCue::MusicStart);
             }
@@ -59,7 +59,7 @@ void Game::check_guards() {
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             waits(3);
-            push(Op::Dialogue, 14, 0);
+            queue_speech(SpeechId::SkeletonLordBattle);
             waits(2);
         }
         sum = tile_at(hero.floor, 3, 3);
@@ -67,7 +67,7 @@ void Game::check_guards() {
             push(Op::Wait);
             push(Op::SetTile, cell(5, 8), SpecialRoad);
             push(Op::Wait);
-            push(Op::SetTile, cell(5, 10), BoardWidth);
+            push(Op::SetTile, cell(5, 10), StairsUp);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Get);
             push(Op::Wait);
@@ -135,9 +135,9 @@ void Game::check_guards() {
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             waits(3);
-            push(Op::Dialogue, 15, 0);
+            queue_speech(SpeechId::SkeletonLordDefeated);
             waits(2);
-            if (hero.music_track != 0) {
+            if (hero.music_track != MusicTrack::Disabled) {
                 push(Op::Wait);
                 push(Op::Sound, SoundCue::MusicStop);
             }
@@ -219,7 +219,7 @@ void Game::check_guards() {
               tile_at(hero.floor, 5, 2) + tile_at(hero.floor, 5, 8);
         if (sum == 62) {
             push(Op::Wait);
-            push(Op::SetTile, cell(5, 0), BoardWidth);
+            push(Op::SetTile, cell(5, 0), StairsUp);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Get);
             push(Op::Wait);
@@ -274,12 +274,12 @@ void Game::check_guards() {
             push(Op::SetTile, cell(5, 4), Fairy);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Get);
-            if (hero.music_track != 0) {
+            if (hero.music_track != MusicTrack::Disabled) {
                 push(Op::Wait);
                 push(Op::Sound, SoundCue::MusicStop);
             }
             push(Op::Wait);
-            push(Op::Dialogue, 21, 0);
+            queue_speech(SpeechId::VampireDefeated);
             push(Op::DoorFrame, cell(5, 8), DoorMotion::OpenGate);
             expand_door();
             push(Op::Wait);
@@ -294,7 +294,7 @@ void Game::check_guards() {
     case 25:
         sum = tile_at(hero.floor, 5, 5) + tile_at(hero.floor, 5, 9);
         if (sum == 10) {
-            if (hero.dialogue_seen[36] == 1) {
+            if (hero.speech_seen(SpeechId::HeroFindsDoll) == 1) {
                 tile_at(24, 4, 0) = Wall;
                 tile_at(24, 6, 0) = Wall;
                 tile_at(24, 5, 1) = Road;
@@ -339,7 +339,7 @@ void Game::check_guards() {
               tile_at(hero.floor, 5, 3) + tile_at(hero.floor, 5, 6);
         if (sum == 44) {
             push(Op::Wait);
-            push(Op::SetTile, cell(5, 0), BoardWidth);
+            push(Op::SetTile, cell(5, 0), StairsUp);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Get);
             push(Op::DoorFrame, cell(5, 6), DoorMotion::OpenGate);
@@ -361,7 +361,8 @@ void Game::check_guards() {
             push(Op::Sound, SoundCue::Open);
             waits(2);
         }
-        sum = tile_at(hero.floor, 5, 5) + hero.dialogue_seen[40] + hero.dialogue_seen[41];
+        sum = tile_at(hero.floor, 5, 5) + hero.speech_seen(SpeechId::GreatMagicMasterChallenge) +
+              hero.speech_seen(SpeechId::GreatMagicMasterRetreat);
         if (sum == 7) {
             tile_at(29, 6, 1) = Road;
             tile_at(2, 10, 10) = Thief;
@@ -398,7 +399,7 @@ void Game::check_guards() {
             push(Op::Wait);
             push(Op::WriteTile, cell(5, 9), GoldenKnight);
             waits(5);
-            push(Op::Dialogue, 31, 0);
+            queue_speech(SpeechId::GreatMagicMasterRetreat);
             waits(2);
         }
         break;
@@ -536,7 +537,7 @@ void Game::check_guards() {
             push(Op::Wait);
             push(Op::Sound, SoundCue::Get);
             waits(2);
-            if (hero.music_track != 0) {
+            if (hero.music_track != MusicTrack::Disabled) {
                 push(Op::Wait);
                 push(Op::Sound, SoundCue::MusicStop);
             }
@@ -639,13 +640,13 @@ void Game::check_guards() {
                 monsters[ZenoRow].attack = monsters[ZenoRow].attack / 10;
                 monsters[ZenoRow].defense = monsters[ZenoRow].defense / 10;
             }
-            if (hero.music_track != 0) {
+            if (hero.music_track != MusicTrack::Disabled) {
                 push(Op::Wait);
                 push(Op::Sound, SoundCue::MusicStart);
             }
             push(Op::Wait);
-            push(Op::Dialogue, 46, 0);
-            if (hero.music_track != 0) {
+            queue_speech(SpeechId::ZenoDefeated);
+            if (hero.music_track != MusicTrack::Disabled) {
                 push(Op::Wait);
                 push(Op::Sound, SoundCue::MusicStop);
             }
@@ -712,7 +713,7 @@ void Game::check_guards() {
             push(Op::SetTile, cell(6, 1), Road);
             push(Op::SetTile, cell(4, 1), Road);
             waits(2);
-            if (hero.music_track != 0) {
+            if (hero.music_track != MusicTrack::Disabled) {
                 push(Op::Wait);
                 push(Op::Sound, SoundCue::MusicStop);
             }
@@ -722,68 +723,52 @@ void Game::check_guards() {
         if (hero.cycle_factor_minus_one != 0) {
             push(Op::Wait);
             push(Op::Callback, Callback::NextCycle, 0);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 247);
+            queue_raster(RasterMode::EndingDissolve, 247);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 246);
+            queue_raster(RasterMode::EndingDissolve, 246);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 245);
+            queue_raster(RasterMode::EndingDissolve, 245);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 244);
+            queue_raster(RasterMode::EndingDissolve, 244);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 243);
+            queue_raster(RasterMode::EndingDissolve, 243);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 242);
+            queue_raster(RasterMode::EndingDissolve, 242);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 241);
+            queue_raster(RasterMode::EndingDissolve, 241);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 240);
+            queue_raster(RasterMode::EndingDissolve, 240);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 239);
+            queue_raster(RasterMode::EndingDissolve, 239);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 238);
+            queue_raster(RasterMode::EndingDissolve, 238);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 237);
+            queue_raster(RasterMode::EndingDissolve, 237);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 236);
+            queue_raster(RasterMode::EndingDissolve, 236);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 235);
+            queue_raster(RasterMode::EndingDissolve, 235);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 234);
+            queue_raster(RasterMode::EndingDissolve, 234);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 233);
+            queue_raster(RasterMode::EndingDissolve, 233);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
-            push(Op::Wait, 2, 0);
-            push(Op::Callback, Callback::RasterScene, 232);
+            queue_raster(RasterMode::EndingDissolve, 232);
             push(Op::Wait);
             push(Op::Sound, SoundCue::Open);
             push(Op::Wait);
@@ -795,7 +780,7 @@ void Game::check_guards() {
             push(Op::Wait);
             push(Op::Message, 140, 0);
             waits(3);
-            push(Op::Dialogue, 62, 99);
+            queue_speech(SpeechId::BacksideZenoDefeated, 99);
         }
     }
     return;

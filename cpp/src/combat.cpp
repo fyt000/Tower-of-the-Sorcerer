@@ -1,5 +1,6 @@
 #include "tsw/game.hpp"
 #include <algorithm>
+#include <format>
 #include <stdexcept>
 
 namespace tsw {
@@ -40,11 +41,13 @@ Forecast Game::forecast(int t, bool enemy_first) const {
     // 0x44A480 tests unmodified ATK before applying Cross/Slayer bonuses.
     if (hero.attack <= std::int64_t(row.defense) * scale)
         return {};
-    const std::int64_t hero_hit =
+    const std::int64_t hero_damage_per_strike =
         std::int64_t(hero.attack) * attack_multiplier(enemy, enemy_first) - std::int64_t(row.defense) * scale;
-    const std::int64_t hits = (std::int64_t(row.hp) * scale + hero_hit - 1) / hero_hit;
-    const int enemy_hit = std::max(0, row.attack * scale - hero.defense);
-    return {true, enemy_hit * (hits - (enemy_first ? 0 : 1)), hits, static_cast<int>(hero_hit), enemy_hit};
+    const std::int64_t hits =
+        (std::int64_t(row.hp) * scale + hero_damage_per_strike - 1) / hero_damage_per_strike;
+    const int enemy_damage_per_strike = std::max(0, row.attack * scale - hero.defense);
+    return {true, enemy_damage_per_strike * (hits - (enemy_first ? 0 : 1)), hits,
+            static_cast<int>(hero_damage_per_strike), enemy_damage_per_strike};
 }
 
 Forecast Game::orb_forecast(int t) const {
@@ -59,8 +62,8 @@ Forecast Game::orb_forecast(int t) const {
     if (hit <= 0)
         return {};
     const auto hits = (std::int64_t(row.hp) * scale + hit - 1) / hit;
-    const int enemy_hit = std::max(0, row.attack * scale - hero.defense);
-    return {true, enemy_hit * (hits - 1), hits, static_cast<int>(hit), enemy_hit};
+    const int enemy_damage_per_strike = std::max(0, row.attack * scale - hero.defense);
+    return {true, enemy_damage_per_strike * (hits - 1), hits, static_cast<int>(hit), enemy_damage_per_strike};
 }
 
 void Game::damage_pose(int index, int underlying) {
@@ -81,7 +84,7 @@ void Game::battle(bool enemy_first) {
     if (!enemy_first)
         walk_to_contact();
     visual.battle = true;
-    visual.enemy_index = enemy;
+    visual.monster_index = enemy;
     visual.enemy_first = enemy_first;
     visual.enemy_hp = monsters[enemy].hp * (hero.cycle_factor_minus_one + 1);
     const auto& row = monsters[enemy];
@@ -89,21 +92,28 @@ void Game::battle(bool enemy_first) {
     visual.battle_enemy = {
         enemy, t, {row.hp * scale, row.attack * scale, row.defense * scale, row.gold}, expected.damage};
     const bool fatal = expected.damage >= hero.hp;
-    const int enemy_turns = fatal && expected.enemy_hit
-                                ? (hero.hp + expected.enemy_hit - 1) / expected.enemy_hit
-                                : int(expected.hero_hits) - (enemy_first ? 0 : 1);
-    const int hero_turns = fatal ? enemy_turns - (enemy_first ? 1 : 0) : int(expected.hero_hits);
+    const int enemy_turns =
+        fatal && expected.enemy_damage_per_strike
+            ? (hero.hp + expected.enemy_damage_per_strike - 1) / expected.enemy_damage_per_strike
+            : int(expected.hero_strike_count) - (enemy_first ? 0 : 1);
+    const int hero_turns = fatal ? enemy_turns - (enemy_first ? 1 : 0) : int(expected.hero_strike_count);
     // Emit one strike at a time. A large fight has constant queue memory and identical beats.
-    fight_ = Fight{contact_index, enemy,       hero_turns,
-                   enemy_turns,   0,           tile(hero.floor, cell(hero.x, hero.y)),
-                   fatal,         enemy_first, commands.size()};
+    fight_ = Fight{.target = contact_index,
+                   .monster_index = enemy,
+                   .hero_strike_count = hero_turns,
+                   .enemy_strike_count = enemy_turns,
+                   .turn = 0,
+                   .underlying = tile(hero.floor, cell(hero.x, hero.y)),
+                   .fatal = fatal,
+                   .enemy_first = enemy_first,
+                   .base_commands = commands.size()};
 }
 
 void Game::battle_step() {
     if (!fight_)
         return;
     auto& fight = *fight_;
-    const int strikes = fight.hero_hits + fight.enemy_hits;
+    const int strikes = fight.hero_strike_count + fight.enemy_strike_count;
     if (fight.turn >= strikes) {
         const Fight done = fight;
         fight_.reset();
@@ -152,23 +162,23 @@ void Game::battle_finished(const Fight& fight) {
     }
     // The original 0x44B78C panel retains battle information between encounters.
     visual.last_defeated = visual.battle_enemy;
-    int reward = monsters[fight.enemy].gold;
+    int reward = monsters[fight.monster_index].gold;
     const int target_tile = tile(hero.floor, fight.target);
-    if (fight.enemy == OctopusRow && target_tile != OctopusMouth)
+    if (fight.monster_index == OctopusRow && target_tile != OctopusMouth)
         run_history.octopus_parts_defeated = true;
-    if (fight.enemy == DragonRow) {
+    if (fight.monster_index == DragonRow) {
         run_history.dragon_defeated = true;
         run_history.dragon_slayer_acquired |= inventory(Item::DragonSlayer) > 0;
     }
     // 0x44A480: eight pieces award 50 raw gold; mouth awards 100 and clears the body.
-    if (fight.enemy == OctopusRow && target_tile != OctopusMouth)
+    if (fight.monster_index == OctopusRow && target_tile != OctopusMouth)
         reward /= 2;
     push(Op::Callback, Callback::CheckGuards, 5);
     push(Op::Reward, reward);
     push(Op::Message);
     const int position = cell(hero.x, hero.y);
-    if (!fight.enemy_first && ((fight.enemy == OctopusRow && target_tile == OctopusMouth) ||
-                               (fight.enemy == DragonRow && target_tile == DragonHead))) {
+    if (!fight.enemy_first && ((fight.monster_index == OctopusRow && target_tile == OctopusMouth) ||
+                               (fight.monster_index == DragonRow && target_tile == DragonHead))) {
         for (int offset : {-21, -22, -23, -12, -11, -10, -1, 0, 1}) {
             const int index = position + offset;
             // Saves permit edge placements; retain only body cells in the flat floor array.
@@ -180,7 +190,6 @@ void Game::battle_finished(const Fight& fight) {
     push(Op::Wait);
     push(Op::Callback, Callback::BattleEnd);
     const int earned = reward * (inventory(Item::LuckyGold) + 1);
-    status = "Defeated " + std::string(monster_name(fight.enemy)) + ". Received " + std::to_string(earned) +
-             " gold.";
+    status = std::format("Defeated {}. Received {} gold.", monster_name(fight.monster_index), earned);
 }
 } // namespace tsw

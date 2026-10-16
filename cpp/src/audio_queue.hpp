@@ -19,7 +19,7 @@ struct AudioCueQueue {
         return true;
     }
 
-    template <typename Play> void consume(Play play) {
+    template <class Play> void consume(Play play) {
         auto begin = read.load(std::memory_order_relaxed);
         const auto end = written.load(std::memory_order_acquire);
         while (begin != end)

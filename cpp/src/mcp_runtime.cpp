@@ -1,14 +1,16 @@
 #include "mcp_internal.hpp"
+#include "runtime_schema.hpp"
 #include "tsw/game_state.hpp"
 #include <algorithm>
 #include <charconv>
 #include <concepts>
+#include <format>
 #include <fstream>
 #include <glaze/json.hpp>
 #include <limits>
 #include <stdexcept>
 
-namespace tsw::mcp_detail {
+namespace tsw::detail::mcp {
 namespace runtime_wire {
 constexpr std::uint32_t RuntimeVersion = 3;
 constexpr std::uintmax_t MaxRuntimeBytes = 128 * 1024 * 1024;
@@ -33,16 +35,16 @@ struct RuntimeState {
 
 // Glaze permits short std::arrays and omitted nullable members when reading
 // ordinary records. A migration must include every field and array element.
-template <typename T> void complete_shape(const T& value, const Json& source) {
+template <class T> void complete_shape(const T& value, const Json& source) {
     if constexpr (std::same_as<T, Json>) {
         return; // Action feedback and logs have their own validation below.
-    } else if constexpr (glz::reflectable<T>) {
-        const auto members = glz::to_tie(value);
-        glz::for_each<glz::reflect<T>::size>([&]<std::size_t I> {
-            const auto key = glz::reflect<T>::keys[I];
+    } else if constexpr (glz::reflectable<T> || glz::glaze_object_t<T>) {
+        std::size_t index{};
+        glz::for_each_field(value, [&](const auto& member) {
+            const auto key = glz::reflect<T>::keys[index++];
             if (!source.is_object() || !source.contains(key))
                 throw IncompatibleRuntimeCheckpoint("Incomplete runtime object: " + std::string(key));
-            complete_shape(glz::get<I>(members), source[key]);
+            complete_shape(member, source[key]);
         });
     } else if constexpr (glz::nullable_t<T>) {
         if (value)
@@ -179,7 +181,7 @@ void restore_runtime(const std::filesystem::path& path, bool developer, Session&
         const auto suffix = std::string_view(id).substr(std::min(id.size(), prefix.size()));
         const auto [end, error] = std::from_chars(suffix.data(), suffix.data() + suffix.size(), number);
         if (!id.starts_with(prefix) || error != std::errc{} || end != suffix.data() + suffix.size() ||
-            number == 0 || number > state.next_checkpoint || id != "checkpoint-" + std::to_string(number))
+            number == 0 || number > state.next_checkpoint || id != std::format("checkpoint-{}", number))
             throw std::runtime_error("Invalid runtime checkpoint ID");
         restored_checkpoints.emplace(id, restore(saved));
     }
@@ -188,4 +190,4 @@ void restore_runtime(const std::filesystem::path& path, bool developer, Session&
     checkpoints = std::move(restored_checkpoints);
     next = state.next_checkpoint;
 }
-} // namespace tsw::mcp_detail
+} // namespace tsw::detail::mcp

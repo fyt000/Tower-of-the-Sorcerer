@@ -175,6 +175,28 @@ commands; CLI, replay and MCP share input execution.
 | `src/desktop.cpp`, `src/presentation.cpp`, `src/assets.cpp` | Window loop, rendering and media |
 | `src/audio.cpp`, `src/audio_mixer.cpp` | Audio device and prepared MIDI/effect playback |
 
+Use `PascalCase` for types, enum values and constants, `snake_case` for functions
+and data, and a trailing underscore for private class data. Templates use
+`template <class T>`. Clang-format owns whitespace and layout.
+
+`game_types.hpp` names recovered state domains; `dialogue_ids.hpp` separates
+one-based speech IDs, zero-based catalog indices and saved continuation stages.
+Convert enums with `std::to_underlying` at numeric boundaries. Keep the original
+three-word `Command` layout, stack order, data-bearing `Wait` records and scripted
+numeric-sum predicates intact. `Game::queue_speech`, `queue_raster` and
+`queue_hero_value` make operand domains explicit.
+
+Use `PlayerInput` factories and designated initializers for records with optional
+payloads. Item IDs, names, passive flags and help text live in `ItemDefinitions`.
+Renderer handles use move-only owners from `raylib_resources.hpp`; `get()` borrows
+a handle and `release()` explicitly transfers ownership. These owners must die
+before the graphics context closes.
+
+Member renames must preserve existing settings and runtime checkpoint keys.
+`settings.cpp` and `runtime_schema.hpp` contain the Glaze key mappings; recovered
+enum values remain numeric on the wire. The original save adapter maps fields
+explicitly and does not serialize C++ struct layouts.
+
 ## Validate and package
 
 After a successful build, run the formatting command above from `cpp/`.

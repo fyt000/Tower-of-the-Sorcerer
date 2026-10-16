@@ -28,7 +28,7 @@ RankingTables winners() {
 void fairy_room(Game& game) {
     game.hero.floor = game.hero.highest_floor = 10;
     game.hero.x = game.hero.y = 5;
-    game.hero.music_track = 0;
+    game.hero.music_track = MusicTrack::Disabled;
     game.floors[10].tiles.fill(Road);
     game.tile_at(10, 5, 4) = Fairy;
 }
@@ -119,9 +119,9 @@ TEST_CASE("Ranking replay input only changes in-memory ranking tables", "[rankin
 TEST_CASE("Ranking snapshots restore Fairy outcomes after replay steps and seeks", "[rankings][replay]") {
     const std::vector<PlayerInput> inputs{{InputKind::NewGame},
                                           ranking_input(winners()),
-                                          {InputKind::Move, Direction::Up},
+                                          PlayerInput::move(Direction::Up),
                                           ranking_input(default_rankings()),
-                                          {InputKind::Move, Direction::Up}};
+                                          PlayerInput::move(Direction::Up)};
     for (bool seek : {false, true}) {
         CAPTURE(seek);
         ReplayPlayer player(inputs);
@@ -163,7 +163,7 @@ TEST_CASE("Ranking recording updates are sparse and retain legacy defaults", "[r
     REQUIRE(recorder.history().size() == 2);
     recorder.rankings(winners());
     REQUIRE(recorder.history().size() == 2);
-    recorder.append({InputKind::Move, Direction::Up});
+    recorder.append(PlayerInput::move(Direction::Up));
     recorder.rankings(winners());
     REQUIRE(recorder.history().size() == 3);
     recorder.rankings(default_rankings());
@@ -195,7 +195,7 @@ TEST_CASE("Recorded ranking environments reproduce exact save bytes", "[rankings
         Recorder recorder(true);
         recorder.new_game(game.rankings);
         int flight = -1;
-        const PlayerInput move{InputKind::Move, Direction::Up};
+        const PlayerInput move = PlayerInput::move(Direction::Up);
         execute_input(game, flight, move);
         recorder.append(move);
         auto current = default_rankings();

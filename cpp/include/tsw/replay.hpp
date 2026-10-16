@@ -30,6 +30,22 @@ struct PlayerInput {
     SaveKind save_kind = SaveKind::Slot;
     std::shared_ptr<const RankingTables> rankings;
 
+    static PlayerInput move(Direction direction) { return {.kind = InputKind::Move, .direction = direction}; }
+
+    static PlayerInput use_item(Item item, int floor = -1) {
+        return {.kind = InputKind::UseItem, .item = item, .value = floor};
+    }
+
+    static PlayerInput choose(int choice) { return {.kind = InputKind::Choose, .value = choice}; }
+
+    static PlayerInput save(SaveKind kind = SaveKind::Slot) {
+        return {.kind = InputKind::Save, .save_kind = kind};
+    }
+
+    static PlayerInput reload(SaveKind kind = SaveKind::Slot) {
+        return {.kind = InputKind::Reload, .save_kind = kind};
+    }
+
     friend bool operator==(const PlayerInput& left, const PlayerInput& right) {
         return left.kind == right.kind && left.direction == right.direction && left.item == right.item &&
                left.value == right.value && left.save_kind == right.save_kind &&

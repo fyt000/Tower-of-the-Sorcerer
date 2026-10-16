@@ -182,7 +182,7 @@ TEST_CASE("All original tracks synthesize and loop across varied callback sizes"
     for (std::size_t track = 0; track < Tracks.size(); ++track) {
         CAPTURE(Tracks[track]);
         Midi midi(Tracks[track]);
-        game.hero.music_track = int(track) + 5;
+        game.hero.music_track = static_cast<MusicTrack>(int(track) + 5);
         mixer.restart(game);
         std::uint64_t remaining = midi.frames;
         std::size_t index = 0;
@@ -271,7 +271,7 @@ TEST_CASE("New game and same-track restart recover from a music stop", "[playbac
 TEST_CASE("WAV bursts overlap with sixteen voices and a bounded cue queue", "[effects]") {
     AudioMixer mixer(media()), single(media());
     Game game, reference;
-    game.hero.music_track = reference.hero.music_track = 0;
+    game.hero.music_track = reference.hero.music_track = MusicTrack::Disabled;
     for (auto effect : Effects) {
         CAPTURE(int(effect));
         reference.sounds.push_back(effect);
@@ -297,18 +297,18 @@ TEST_CASE("WAV bursts overlap with sixteen voices and a bounded cue queue", "[ef
 TEST_CASE("Scenes select title and ending music without changing saved music", "[playback]") {
     Game game;
     for (int mode : {9, 0, 1}) {
-        game.visual.raster_mode = mode;
+        game.visual.raster_mode = static_cast<RasterMode>(mode);
         REQUIRE(AudioMixer::track_for_scene(game) == 11);
     }
     for (int mode : {7, 8}) {
-        game.visual.raster_mode = mode;
+        game.visual.raster_mode = static_cast<RasterMode>(mode);
         REQUIRE(AudioMixer::track_for_scene(game) == 20);
     }
-    game.visual.raster_mode = -1;
-    REQUIRE(AudioMixer::track_for_scene(game) == game.hero.music_track);
-    game.hero.music_track = 0;
+    game.visual.raster_mode = RasterMode::Inactive;
+    REQUIRE(AudioMixer::track_for_scene(game) == std::to_underlying(game.hero.music_track));
+    game.hero.music_track = MusicTrack::Disabled;
     for (int mode : {-1, 0, 7}) {
-        game.visual.raster_mode = mode;
+        game.visual.raster_mode = static_cast<RasterMode>(mode);
         REQUIRE(AudioMixer::track_for_scene(game) == 0);
     }
 }
@@ -316,7 +316,7 @@ TEST_CASE("Scenes select title and ending music without changing saved music", "
 TEST_CASE("Invalid cues and disabled music leave the mixer silent", "[playback]") {
     AudioMixer mixer(media());
     Game game;
-    game.hero.music_track = 0;
+    game.hero.music_track = MusicTrack::Disabled;
     game.sounds = {SoundCue(0), SoundCue(99)};
     mixer.restart(game);
     REQUIRE(game.sounds.empty());
@@ -331,7 +331,7 @@ TEST_CASE("The native audio device starts, switches tracks and shuts down", "[de
         Game game;
         audio.restart(game);
         for (int track = 5; track <= 21; ++track) {
-            game.hero.music_track = track;
+            game.hero.music_track = static_cast<MusicTrack>(track);
             game.sounds = {SoundCue::MusicStop, SoundCue::MusicStart, Effects[track % Effects.size()]};
             audio.update(game);
             std::this_thread::sleep_for(std::chrono::milliseconds(20));
@@ -381,7 +381,7 @@ TEST_CASE("Prepared playback performs no heap operations", "[allocation]") {
     std::array<float, 512 * 2> block{};
     std::size_t operations = 0;
     for (std::size_t track = 0; track < Tracks.size(); ++track) {
-        game.hero.music_track = int(track) + 5;
+        game.hero.music_track = static_cast<MusicTrack>(int(track) + 5);
         game.sounds.assign(AudioCueQueue::Capacity, Effects[track % Effects.size()]);
         mixer.restart(game);
         {

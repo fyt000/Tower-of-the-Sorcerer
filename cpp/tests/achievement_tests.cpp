@@ -327,7 +327,7 @@ TEST_CASE("A committed save keeps its replay even when achievement metadata fail
     std::filesystem::create_directory(blocked);
     std::ofstream(blocked / "occupied") << "Prevent backup removal";
     int flight = -1;
-    const PlayerInput move{InputKind::Move, Direction::Up};
+    const PlayerInput move = PlayerInput::move(Direction::Up);
     apply_input(game, flight, move);
     game.finish_commands(true);
     recorder.append(move);

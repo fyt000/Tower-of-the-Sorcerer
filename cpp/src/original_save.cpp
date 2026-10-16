@@ -5,7 +5,7 @@
 #include <tuple>
 #include <type_traits>
 
-namespace tsw::save_detail {
+namespace tsw::detail::save {
 namespace {
 // Byte offsets in the original hero record, verified against its handlers and x86 save/load loops.
 enum Field : std::size_t {
@@ -83,7 +83,7 @@ template <class Archive> void fields(Archive& archive, Hero& h) {
     archive(Arrival32, h.floor32_arrival_seen);
     archive(ZenoSealed, h.zeno_sealed);
     archive(FlightDirection, h.flight_direction);
-    archive(HighestStair, h.highest_floor_stair);
+    archive(HighestStair, h.highest_floor_stair_kind);
     archive(Cycle, h.cycle_factor_minus_one);
     archive(LaterCycle, h.later_cycle);
 }
@@ -98,7 +98,7 @@ void reconstruct_monsters(Game& game) {
     }
 }
 
-OriginalRecord hero_record(const std::vector<std::uint8_t>& bytes) {
+OriginalRecord hero_record(std::span<const std::uint8_t> bytes) {
     if (bytes.size() != OriginalSaveBytes)
         throw std::runtime_error("Original save must contain exactly 6957 bytes");
     OriginalRecord record;
@@ -110,7 +110,7 @@ OriginalRecord hero_record(const std::vector<std::uint8_t>& bytes) {
     return record;
 }
 
-Game decode_original(const std::vector<std::uint8_t>& bytes, OriginalRecord& record, SaveKind kind) {
+Game decode_original(std::span<const std::uint8_t> bytes, OriginalRecord& record, SaveKind kind) {
     record = hero_record(bytes);
     if (kind == SaveKind::Slot) {
         const auto [sum, alternating] = sums(record);
@@ -174,4 +174,4 @@ std::vector<std::uint8_t> encode_original(const Game& game, const OriginalRecord
             bytes.push_back(static_cast<std::uint8_t>(word >> (8 * byte)));
     return bytes;
 }
-} // namespace tsw::save_detail
+} // namespace tsw::detail::save

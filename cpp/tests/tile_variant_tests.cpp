@@ -22,26 +22,28 @@ Game combat_room(int floor = 1) {
 }
 } // namespace
 
-TEST_CASE("Every accepted monster tile reaches its forecast and battle row", "[combat][tiles]") {
+TEST_CASE("Supported monster contacts reach their forecast and battle row", "[combat][tiles]") {
     // One first tile per monster row; the octopus has eighteen pieces and the dragon one contact.
     constexpr std::array<int, 33> first_tiles{61,  63,  65,  67,  69,  71,  73,  75,  77,  79,  81,
                                               83,  85,  87,  89,  91,  93,  95,  97,  122, 133, 135,
                                               137, 139, 141, 143, 145, 147, 149, 151, 153, 155, 157};
     for (int row = 0; row < int(first_tiles.size()); ++row) {
         const int first = first_tiles[row];
-        const int last = row == OctopusRow ? 114 : row == DragonRow ? 122 : first + 1;
+        const int last = row == OctopusRow                          ? 114
+                         : row == DragonRow || first == GateKeeperA ? first
+                                                                    : first + 1;
         for (int tile = first; tile <= last; ++tile) {
             CAPTURE(row, tile);
             auto game = combat_room(row == ZenoRow ? 49 : 1);
             game.tile_at(game.hero.floor, 5, 4) = static_cast<std::uint8_t>(tile);
             for (const auto forecast : {game.forecast(tile), game.orb_forecast(tile)}) {
                 REQUIRE(forecast.penetrates);
-                REQUIRE(forecast.hero_hits == 3);
+                REQUIRE(forecast.hero_strike_count == 3);
                 REQUIRE(forecast.damage == 60);
             }
             REQUIRE(game.move(Direction::Up));
             REQUIRE(game.visual.battle);
-            REQUIRE(game.visual.battle_enemy.row == row);
+            REQUIRE(game.visual.battle_enemy.monster_index == row);
             REQUIRE(game.visual.battle_enemy.tile == tile);
             game.finish_commands();
             REQUIRE_FALSE(game.busy());
@@ -52,9 +54,63 @@ TEST_CASE("Every accepted monster tile reaches its forecast and battle row", "[c
             REQUIRE(game.hero.gold == 123 + reward);
             REQUIRE(game.tile_at(game.hero.floor, 5, 4) == Road);
             REQUIRE(game.visual.last_defeated);
-            REQUIRE(game.visual.last_defeated->row == row);
+            REQUIRE(game.visual.last_defeated->monster_index == row);
         }
     }
+}
+
+TEST_CASE("Hero Orb map tiles clear without granting inventory", "[movement][tiles][save]") {
+    for (int owned : {0, 1, 2}) {
+        CAPTURE(owned);
+        auto saved = combat_room();
+        saved.inventory(Item::HeroOrb) = owned;
+        saved.tile_at(1, 5, 4) = HeroOrb;
+        std::stringstream bytes;
+        saved.save(bytes);
+        Game game;
+        game.load(bytes);
+        const auto items = game.hero.items;
+        REQUIRE(game.move(Direction::Up));
+        REQUIRE(game.commands.size() == 4);
+        game.finish_commands();
+        REQUIRE_FALSE(game.busy());
+        REQUIRE(game.hero.x == 5);
+        REQUIRE(game.hero.y == 4);
+        REQUIRE(game.tile_at(1, 5, 4) == Road);
+        REQUIRE(game.hero.items == items);
+        REQUIRE(game.hero.hp == 1000);
+        REQUIRE(game.hero.gold == 123);
+        REQUIRE_FALSE(game.visual.battle);
+    }
+}
+
+TEST_CASE("Alternate Gate-Keeper A tiles block contact but remain Bomb targets", "[combat][tiles][items]") {
+    auto saved = combat_room();
+    saved.hero.attack = saved.hero.defense = 10000;
+    saved.tile_at(1, 5, 4) = GateKeeperA + 1;
+    std::stringstream bytes;
+    saved.save(bytes);
+    Game game;
+    game.load(bytes);
+    REQUIRE(game.forecast(GateKeeperA + 1).penetrates);
+    REQUIRE(game.orb_forecast(GateKeeperA + 1).damage == 0);
+    REQUIRE(game.move(Direction::Up));
+    REQUIRE_FALSE(game.busy());
+    REQUIRE_FALSE(game.visual.battle);
+    REQUIRE(game.hero.x == 5);
+    REQUIRE(game.hero.y == 5);
+    REQUIRE(game.hero.hp == 1000);
+    REQUIRE(game.hero.gold == 123);
+    REQUIRE(game.tile_at(1, 5, 4) == GateKeeperA + 1);
+
+    game.inventory(Item::Bomb) = 1;
+    REQUIRE(game.use(Item::Bomb));
+    game.finish_commands();
+    REQUIRE_FALSE(game.busy());
+    REQUIRE(game.inventory(Item::Bomb) == 0);
+    REQUIRE(game.tile_at(1, 5, 4) == Road);
+    REQUIRE(game.hero.gold == 123 + 200);
+    REQUIRE(game.hero.y == 5);
 }
 
 TEST_CASE("Octopus pieces retain their exact reward and body clearing rules", "[combat][tiles]") {
@@ -68,7 +124,7 @@ TEST_CASE("Octopus pieces retain their exact reward and body clearing rules", "[
             REQUIRE(game.forecast(tile).damage == 60);
             REQUIRE(game.orb_forecast(tile).damage == 60);
             REQUIRE(game.move(Direction::Up));
-            REQUIRE(game.visual.battle_enemy.row == OctopusRow);
+            REQUIRE(game.visual.battle_enemy.monster_index == OctopusRow);
             int large_strikes = 0;
             Command executed;
             while (game.run_one(&executed))
@@ -131,7 +187,7 @@ TEST_CASE("Large monster cleanup remains within accepted edge placement saves", 
 
 TEST_CASE("Dragon and altar decorations retain contact boundaries", "[movement][tiles]") {
     // These are drawn atlas variants, but Pascal's contact dispatch keeps them inert.
-    for (int tile : {17,  18,  36,  115, 116, 117, 118, 119, 120, 121, 123, 124,
+    for (int tile : {17,  18,  115, 116, 117, 118, 119, 120, 121, 123, 124,
                      125, 126, 127, 128, 129, 130, 131, 132, 159, 160, 161}) {
         CAPTURE(tile);
         auto game = combat_room();
@@ -178,12 +234,12 @@ TEST_CASE("Both Zeno frames retain their floor and cycle contact branches", "[co
             battle.tile_at(50, 5, 4) = static_cast<std::uint8_t>(tile);
             REQUIRE(battle.move(Direction::Up));
             REQUIRE(battle.visual.battle);
-            REQUIRE(battle.visual.battle_enemy.row == ZenoRow);
+            REQUIRE(battle.visual.battle_enemy.monster_index == ZenoRow);
             REQUIRE(battle.visual.battle_enemy.stats.hp == (later_cycle ? 11000 : 44000));
             battle.finish_commands();
             // The defeated boss opens the ending speech before the queued cycle reset.
             REQUIRE(battle.dialogue);
-            REQUIRE(battle.dialogue->continuation == 72);
+            REQUIRE(battle.dialogue->continuation == static_cast<ContinuationStage>(72));
             REQUIRE(battle.hero.y == 4);
             REQUIRE(battle.hero.hp == 1000);
             REQUIRE(battle.hero.gold == 161);

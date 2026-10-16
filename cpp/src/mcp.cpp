@@ -1,6 +1,7 @@
 #include "tsw/mcp.hpp"
 #include "mcp_internal.hpp"
 #include <algorithm>
+#include <format>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -9,7 +10,7 @@
 
 namespace tsw {
 namespace {
-using namespace mcp_detail;
+using namespace detail::mcp;
 constexpr std::size_t MaxMessageBytes = 8 * 1024 * 1024;
 constexpr std::size_t MaxCheckpoints = 64, MaxReplayInputs = 100000;
 
@@ -18,7 +19,7 @@ void object_arguments(const Json& args, std::initializer_list<std::string_view> 
         throw std::runtime_error("Arguments must be an object");
     for (const auto& [key, value] : args.get_object()) {
         (void)value;
-        if (std::find(allowed.begin(), allowed.end(), key) == allowed.end())
+        if (std::ranges::find(allowed, key) == allowed.end())
             throw std::runtime_error("Unknown argument: " + key);
     }
 }
@@ -42,19 +43,25 @@ int integer_field(const Json& args, std::string_view name, int minimum, int maxi
         (value.holds<std::uint64_t>() && value.get<std::uint64_t>() > std::uint64_t(maximum)) ||
         (value.holds<std::int64_t>() &&
          (value.get<std::int64_t>() < minimum || value.get<std::int64_t>() > maximum)))
-        throw std::runtime_error(std::string(name) + " must be an integer from " + std::to_string(minimum) +
-                                 " through " + std::to_string(maximum));
+        throw std::runtime_error(
+            std::format("{} must be an integer from {} through {}", name, minimum, maximum));
     const int result = value.as<int>();
     if (result < minimum)
-        throw std::runtime_error(std::string(name) + " is out of range");
+        throw std::runtime_error(std::format("{} is out of range", name));
     return result;
 }
 
-std::string detail_field(const Json& args, std::string_view fallback) {
-    const auto detail = args.contains("detail") ? string_field(args, "detail") : std::string(fallback);
-    if (detail != "summary" && detail != "compact" && detail != "full")
-        throw std::runtime_error("detail must be summary, compact or full");
-    return detail;
+ObservationDetail detail_field(const Json& args, ObservationDetail fallback) {
+    if (!args.contains("detail"))
+        return fallback;
+    const auto detail = string_field(args, "detail");
+    if (detail == "summary")
+        return ObservationDetail::Summary;
+    if (detail == "compact")
+        return ObservationDetail::Compact;
+    if (detail == "full")
+        return ObservationDetail::Full;
+    throw std::runtime_error("detail must be summary, compact or full");
 }
 
 SaveKind save_kind(const Json& args) {
@@ -281,13 +288,12 @@ struct McpServer::Impl {
             else
                 ++restored.steps;
         }
-        restored.last_action =
-            Json{{"action", parse(input_json({InputKind::Reload, Direction::Up, Item::HeroOrb, -1, kind}))},
-                 {"ok", true},
-                 {"accepted", true},
-                 {"moved", false},
-                 {"messages", Json::array_t{restored.game.status}},
-                 {"message", restored.game.status}};
+        restored.last_action = Json{{"action", parse(input_json(PlayerInput::reload(kind)))},
+                                    {"ok", true},
+                                    {"accepted", true},
+                                    {"moved", false},
+                                    {"messages", Json::array_t{restored.game.status}},
+                                    {"message", restored.game.status}};
         session = std::move(restored);
     }
 
@@ -301,7 +307,8 @@ struct McpServer::Impl {
     Json call(std::string_view name, const Json& args) {
         if (name == "game_state") {
             object_arguments(args, {"map_floor", "detail"});
-            return observe(session, developer, map_floor(args), detail_field(args, "compact"));
+            return observe(session, developer, map_floor(args),
+                           detail_field(args, ObservationDetail::Compact));
         }
         if (name == "inspect_tile") {
             object_arguments(args, {"x", "y", "map_floor"});
@@ -318,17 +325,18 @@ struct McpServer::Impl {
                 throw std::runtime_error("Navigation floor does not match the current hero floor");
             if (args.contains("interact") && !args["interact"].is_boolean())
                 throw std::runtime_error("interact must be a boolean");
-            const auto detail = detail_field(args, "summary");
+            const auto detail = detail_field(args, ObservationDetail::Summary);
             auto next = session;
             const auto navigation =
                 navigate(next, developer, integer_field(args, "x", 0, 10), integer_field(args, "y", 0, 10),
                          !args.contains("interact") || args["interact"].get<bool>());
             const bool floor_changed = next.game.hero.floor != session.game.hero.floor;
-            auto result =
-                observe(next, developer, -1, detail == "summary" && floor_changed ? "compact" : detail);
+            auto result = observe(
+                next, developer, -1,
+                detail == ObservationDetail::Summary && floor_changed ? ObservationDetail::Compact : detail);
             result["navigation"] = navigation;
             result["changes"] = changes(session, next, developer);
-            if (detail != "full")
+            if (detail != ObservationDetail::Full)
                 result.get_object().erase("last_action"); // Aggregate all movement feedback once.
             session = std::move(next);
             return result;
@@ -337,23 +345,25 @@ struct McpServer::Impl {
             object_arguments(args, name == "new_game"
                                        ? std::initializer_list<std::string_view>{"detail"}
                                        : std::initializer_list<std::string_view>{"action", "detail"});
-            const auto detail = detail_field(args, name == "new_game" ? "compact" : "summary");
+            const auto detail = detail_field(args, name == "new_game" ? ObservationDetail::Compact
+                                                                      : ObservationDetail::Summary);
             const auto input = name == "new_game"
                                    ? PlayerInput{}
                                    : player_action(field(args, "action"), developer, session.game);
             auto next = session;
             next.act(input);
             const bool floor_changed = next.game.hero.floor != session.game.hero.floor;
-            auto result =
-                observe(next, developer, -1, detail == "summary" && floor_changed ? "compact" : detail);
-            if (detail != "full" && name != "new_game")
+            auto result = observe(
+                next, developer, -1,
+                detail == ObservationDetail::Summary && floor_changed ? ObservationDetail::Compact : detail);
+            if (detail != ObservationDetail::Full && name != "new_game")
                 result["changes"] = changes(session, next, developer);
             session = std::move(next);
             return result;
         }
         if (name == "run_steps") {
             object_arguments(args, {"steps", "detail"});
-            const auto detail = detail_field(args, "summary");
+            const auto detail = detail_field(args, ObservationDetail::Summary);
             const auto& steps = field(args, "steps");
             if (!steps.is_array() || steps.get_array().empty() || steps.get_array().size() > 32)
                 throw std::runtime_error("steps must contain 1-32 entries");
@@ -432,9 +442,11 @@ struct McpServer::Impl {
                     break;
                 }
             }
-            auto result = observe(
-                next, developer, -1,
-                detail == "summary" && next.game.hero.floor != session.game.hero.floor ? "compact" : detail);
+            auto result = observe(next, developer, -1,
+                                  detail == ObservationDetail::Summary &&
+                                          next.game.hero.floor != session.game.hero.floor
+                                      ? ObservationDetail::Compact
+                                      : detail);
             result["changes"] = changes(session, next, developer);
             result["batch"] = Json{{"complete", stopped_at < 0},
                                    {"reason", reason},
@@ -446,7 +458,7 @@ struct McpServer::Impl {
         }
         if (name == "simulate_actions") {
             object_arguments(args, {"actions", "detail"});
-            const auto detail = detail_field(args, "compact");
+            const auto detail = detail_field(args, ObservationDetail::Compact);
             const auto& actions = field(args, "actions");
             if (!actions.is_array() || actions.get_array().size() > 1000)
                 throw std::runtime_error("actions must be an array with at most 1000 inputs");
@@ -475,13 +487,12 @@ struct McpServer::Impl {
                 const auto kind = save_kind(args);
                 next.recorder.save(next.game, path, kind);
                 ++next.steps;
-                next.last_action = Json{
-                    {"action", parse(input_json({InputKind::Save, Direction::Up, Item::HeroOrb, -1, kind}))},
-                    {"ok", true},
-                    {"accepted", true},
-                    {"moved", false},
-                    {"messages", Json::array_t{}},
-                    {"message", "Native save written."}};
+                next.last_action = Json{{"action", parse(input_json(PlayerInput::save(kind)))},
+                                        {"ok", true},
+                                        {"accepted", true},
+                                        {"moved", false},
+                                        {"messages", Json::array_t{}},
+                                        {"message", "Native save written."}};
                 result["path"] = string_field(args, "path");
                 result["kind"] = kind == SaveKind::Slot ? "slot" : "checkpoint";
                 result["recording"] = next.recorder.active();
@@ -489,7 +500,7 @@ struct McpServer::Impl {
                 throw std::runtime_error(
                     "kind requires path; a session checkpoint is a complete native copy");
             if (checkpoint_available) {
-                const auto id = "checkpoint-" + std::to_string(next_checkpoint + 1);
+                const auto id = std::format("checkpoint-{}", next_checkpoint + 1);
                 checkpoints.emplace(id, next);
                 ++next_checkpoint;
                 result["checkpoint"] = id;
@@ -499,7 +510,7 @@ struct McpServer::Impl {
         }
         if (name == "load_game") {
             object_arguments(args, {"checkpoint", "path", "kind", "detail"});
-            const auto detail = detail_field(args, "compact");
+            const auto detail = detail_field(args, ObservationDetail::Compact);
             if (args.contains("checkpoint") == args.contains("path"))
                 throw std::runtime_error("Supply exactly one of checkpoint or path");
             if (args.contains("checkpoint")) {
@@ -518,7 +529,7 @@ struct McpServer::Impl {
         }
         if (name == "replay_game") {
             object_arguments(args, {"path", "replay", "limit", "detail"});
-            const auto detail = detail_field(args, "compact");
+            const auto detail = detail_field(args, ObservationDetail::Compact);
             if (args.contains("path") == args.contains("replay"))
                 throw std::runtime_error("Supply exactly one of path or replay");
             const auto source =
@@ -583,7 +594,7 @@ void McpServer::load(const std::filesystem::path& path, SaveKind kind) {
 }
 
 std::optional<std::string> McpServer::respond(std::string_view source) {
-    using namespace mcp_detail;
+    using namespace detail::mcp;
     Json request;
     try {
         if (source.size() > MaxMessageBytes)
@@ -627,7 +638,7 @@ std::optional<std::string> McpServer::respond(std::string_view source) {
             string_field(params["clientInfo"], "version");
             constexpr std::array<std::string_view, 4> versions{"2024-11-05", "2025-03-26", "2025-06-18",
                                                                "2025-11-25"};
-            if (std::find(versions.begin(), versions.end(), version) == versions.end())
+            if (std::ranges::find(versions, version) == versions.end())
                 version = "2025-11-25";
             result = Json{
                 {"protocolVersion", version},
@@ -697,7 +708,7 @@ std::optional<std::string> McpServer::respond(std::string_view source) {
             const auto uri = string_field(params, "uri");
             std::string content, mime = "application/json";
             if (uri == "tos://state")
-                content = dump(observe(impl_->session, impl_->developer, -1, "compact"));
+                content = dump(observe(impl_->session, impl_->developer, -1, ObservationDetail::Compact));
             else if (uri == "tos://rules")
                 content = dump(Json{{"action_schema", action_schema()},
                                     {"save_formats", Json::array_t{"slot", "checkpoint"}},

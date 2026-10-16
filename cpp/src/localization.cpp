@@ -1,7 +1,9 @@
 #include "tsw/localization.hpp"
+#include "fairy_dialogue.hpp"
 #include "localization_data.hpp"
 #include <algorithm>
 #include <cctype>
+#include <format>
 #include <set>
 #include <stdexcept>
 
@@ -40,11 +42,19 @@ Language parse_language(std::string_view id) {
     for (const auto language : Languages)
         if (language_id(language) == id)
             return language;
-    throw std::invalid_argument("Unknown language: " + std::string(id));
+    throw std::invalid_argument(std::format("Unknown language: {}", id));
 }
 
-std::string_view localized_dialogue(Language language, int id) {
-    return localization_data::Dialogues.at(index(language)).at(id);
+std::string_view localized_dialogue(Language language, DialogueId id) {
+    return localization_data::Dialogues.at(index(language)).at(std::to_underlying(id));
+}
+
+std::string localized_fairy_dialogue(Language language, int score, int rank, int visits) {
+    const auto separator =
+        language == Language::English || language == Language::EnglishFromJapanese ? " " : "";
+    return detail::compose_fairy_dialogue(
+        score, rank, visits, [language](DialogueId id) { return localized_dialogue(language, id); },
+        separator);
 }
 
 std::string_view localized_opening(Language language) {

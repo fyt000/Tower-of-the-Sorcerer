@@ -3,7 +3,7 @@
 
 namespace tsw {
 struct OrbTileInfo {
-    int row{};
+    int monster_index{};
     std::int64_t hp{}, attack{}, defense{}, gold{};
     Forecast forecast;
 };

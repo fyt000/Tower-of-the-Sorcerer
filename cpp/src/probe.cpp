@@ -15,7 +15,10 @@ template <class Range> void array(const Range& range) {
         if (!first)
             std::cout << ',';
         first = false;
-        std::cout << +value;
+        if constexpr (std::is_enum_v<std::remove_cvref_t<decltype(value)>>)
+            std::cout << std::to_underlying(value);
+        else
+            std::cout << +value;
     }
     std::cout << ']';
 }
@@ -25,7 +28,8 @@ void snapshot(const Game& game, int selector) {
     std::cout << "{\"hero\":";
     array(std::array<int, 17>{h.hp, h.attack, h.defense, h.gold, h.floor, h.highest_floor, h.x, h.y,
                               h.yellow_keys, h.red_keys, h.blue_keys, h.altar_purchases,
-                              int(game.visual.battle), 0, h.fairy_visits, h.sword, h.shield});
+                              int(game.visual.battle), 0, h.fairy_visits, std::to_underlying(h.sword),
+                              std::to_underlying(h.shield)});
     std::cout << ",\"items\":";
     array(h.items);
     std::cout << ",\"equipment\":";
@@ -38,12 +42,12 @@ void snapshot(const Game& game, int selector) {
     array(h.merchant_used);
     std::cout << ",\"old_man_heard\":";
     array(h.old_man_heard);
-    std::cout << ",\"flight\":[" << h.flight_direction << ',' << h.highest_floor_stair << ',' << int(h.facing)
-              << ']';
+    std::cout << ",\"flight\":[" << std::to_underlying(h.flight_direction) << ','
+              << std::to_underlying(h.highest_floor_stair_kind) << ',' << int(h.facing) << ']';
     std::cout << ",\"selector\":" << selector;
-    std::cout << ",\"music\":" << h.music_track;
-    std::cout << ",\"fairy\":[" << h.fairy_score << ',' << h.fairy_rank << ',' << h.fairy_category << ','
-              << game.checkpoint_requested << ']';
+    std::cout << ",\"music\":" << std::to_underlying(h.music_track);
+    std::cout << ",\"fairy\":[" << h.fairy_score << ',' << h.fairy_rank << ','
+              << std::to_underlying(h.fairy_category) << ',' << game.checkpoint_requested << ']';
     std::cout << ",\"cycle\":[" << h.cycle_factor_minus_one << ',' << h.later_cycle << ',' << h.zeno_sealed
               << ']';
     std::cout << ",\"reward_flags\":[" << h.floor34_reward_created << ',' << h.floor35_reward_created << ','
@@ -55,7 +59,7 @@ void snapshot(const Game& game, int selector) {
         array(game.floors[f].tiles);
     }
     std::cout << "],\"monsters\":[";
-    for (int i = 0; i < 33; ++i) {
+    for (int i = 0; i < MonsterCount; ++i) {
         if (i)
             std::cout << ',';
         const auto& m = game.monsters[i];
@@ -69,7 +73,8 @@ void snapshot(const Game& game, int selector) {
         first = false;
         array(std::array<int, 3>{int(it->op), it->a, it->b});
     }
-    std::cout << "],\"dialogue\":" << (game.dialogue ? game.dialogue->continuation : -1) << "}\n"
+    std::cout << "],\"dialogue\":" << (game.dialogue ? std::to_underlying(game.dialogue->continuation) : -1)
+              << "}\n"
               << std::flush;
 }
 
@@ -110,7 +115,7 @@ void set(Game& game, const std::string& name, int value) {
     else if (name == "facing")
         h.facing = static_cast<Direction>(value);
     else if (name == "music")
-        h.music_track = value;
+        h.music_track = static_cast<MusicTrack>(value);
     else if (name == "reward34")
         h.floor34_reward_created = value;
     else if (name == "reward35")
@@ -120,9 +125,9 @@ void set(Game& game, const std::string& name, int value) {
     else if (name == "reward41")
         h.floor41_reward_created = value;
     else if (name == "flight_direction")
-        h.flight_direction = value;
+        h.flight_direction = static_cast<FlightDirection>(value);
     else if (name == "highest_stair")
-        h.highest_floor_stair = value;
+        h.highest_floor_stair_kind = static_cast<StairKind>(value);
     else
         throw std::runtime_error("Unknown probe field: " + name);
 }
@@ -146,7 +151,9 @@ int main() {
                 game.hero = Hero{};
                 game.hero.hp = 400;
                 game.hero.attack = game.hero.defense = 10;
-                game.hero.highest_floor = game.hero.sword = game.hero.shield = game.hero.music_track = 0;
+                game.hero.highest_floor = 0;
+                game.hero.sword = game.hero.shield = EquipmentTier::None;
+                game.hero.music_track = MusicTrack::Disabled;
                 game.hero.equipment_found.fill(0);
                 game.hero.x = game.hero.y = 0;
                 game.hero.facing = static_cast<Direction>(0);
@@ -162,13 +169,13 @@ int main() {
                 game.hero.dialogue_seen.at(a) = b;
             } else if (command == "hint") {
                 input >> a >> b;
-                game.hero.wisdom_hints.at(a) = b;
+                game.hero.wisdom_hints.at(a) = static_cast<HintState>(b);
             } else if (command == "merchant") {
                 input >> a >> b;
                 game.hero.merchant_used.at(a) = b;
             } else if (command == "heard") {
                 input >> a >> b;
-                game.hero.old_man_heard.at(a) = b;
+                game.hero.old_man_heard.at(a) = static_cast<HintState>(b);
             } else if (command == "item") {
                 input >> a >> b;
                 game.hero.items.at(a) = b;
@@ -207,7 +214,7 @@ int main() {
                     throw std::runtime_error("Unknown probe handler");
             } else if (command == "continue") {
                 input >> a;
-                game.dialogue = Dialogue{"", a, false, {}};
+                game.dialogue = Dialogue{"", static_cast<ContinuationStage>(a), false, {}};
                 game.continue_dialogue();
             } else if (command == "use") {
                 input >> a;
@@ -226,7 +233,7 @@ int main() {
                 game.confirm_flight(a);
             } else if (command == "preview") {
                 input >> a >> b;
-                game.flight_preview(a, b);
+                game.flight_preview(a, static_cast<tsw::FlightDirection>(b));
             } else if (command == "choose") {
                 input >> a;
                 game.choose(a);
@@ -267,7 +274,7 @@ int main() {
                 input >> a >> b;
                 const auto f = command == "orb_forecast" ? game.orb_forecast(a) : game.forecast(a, b != 0);
                 std::cout << "{\"penetrates\":" << f.penetrates << ",\"damage\":" << f.damage
-                          << ",\"hits\":" << f.hero_hits << "}\n"
+                          << ",\"hits\":" << f.hero_strike_count << "}\n"
                           << std::flush;
             } else if (!command.empty())
                 throw std::runtime_error("Unknown probe command");

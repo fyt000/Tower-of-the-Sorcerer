@@ -111,7 +111,7 @@ int verify_smoke(DesktopSession& session, const std::string& name, const std::fi
             session.dispatch({Action::Mute});
         session.dispatch({Action::HeroOrbActualDamage});
         const auto settings = load_settings(output / "saves/settings.json");
-        require(settings.game_speed == 2 && settings.replay_speed == 4 && settings.recording &&
+        require(settings.game_speed_index == 2 && settings.replay_speed_index == 4 && settings.recording &&
                     settings.muted && settings.hero_orb_actual_damage,
                 "All menu preferences must be saved");
         renderer.draw(game, ui, {-1, -1});
@@ -398,9 +398,9 @@ int verify_smoke(DesktopSession& session, const std::string& name, const std::fi
         game.tile(1, cell(5, 4)) = Altar;
         Game shop_expected = game;
         flight = -1;
-        apply_input(shop_expected, flight, {InputKind::Move, Direction::Up});
+        apply_input(shop_expected, flight, PlayerInput::move(Direction::Up));
         settle_action(shop_expected);
-        apply_input(shop_expected, flight, {InputKind::Choose, Direction::Up, Item::HeroOrb, 1});
+        apply_input(shop_expected, flight, PlayerInput::choose(1));
         settle_action(shop_expected);
         session.dispatch({Action::ReplayPause});
         for (int i = 0; i < 30; ++i)
@@ -431,7 +431,7 @@ int verify_smoke(DesktopSession& session, const std::string& name, const std::fi
         game.tile(50, cell(5, 4)) = Zeno;
         Game ending_expected = game;
         flight = -1;
-        apply_input(ending_expected, flight, {InputKind::Move, Direction::Up});
+        apply_input(ending_expected, flight, PlayerInput::move(Direction::Up));
         settle_action(ending_expected);
         session.dispatch({Action::ReplayNext});
         for (int i = 0; i < 4000 && !ui.ending_wait; ++i)
@@ -558,7 +558,7 @@ int verify_smoke(DesktopSession& session, const std::string& name, const std::fi
         if (ui.ending_wait) {
             const auto commands = game.commands;
             session.advance_commands(1.f);
-            ending_pause = game.busy() && game.visual.raster_mode == 8 &&
+            ending_pause = game.busy() && game.visual.raster_mode == RasterMode::ClosingCard &&
                            game.hero.cycle_factor_minus_one == 0 && game.commands == commands;
             session.dispatch({Action::ContinueEnding});
         }

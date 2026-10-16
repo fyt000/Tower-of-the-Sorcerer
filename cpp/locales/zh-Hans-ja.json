@@ -447,7 +447,7 @@
     "Inspect enemy statistics and predicted battle damage for this floor. The battle panel keeps the last defeated enemy.": "查看本层敌人的能力与预计战斗伤害。右侧面板保留最近击败的敌人。",
     "Read the clues recorded from old men and merchants. Scroll through long passages with the mouse wheel.": "阅读老人和商人提供的提示。长文本可用鼠标滚轮翻页。",
     "Travel between visited floors. Use Up and Down to preview a floor, then Enter to travel.": "在去过的楼层间移动。上下键预览楼层，按Enter前往。",
-    "Works automatically in ordinary battles against Zombies and Zombie Knights.": "在与丧尸和丧尸武士的普通战斗中自动生效。",
+    "Works automatically in ordinary battles against Zombies, Zombie Knights and Vampires.": "在与丧尸、丧尸武士和吸血鬼的普通战斗中自动生效。",
     "Restores life equal to ten times your attack plus five times your defense. Consumed when used.": "恢复生命，数值为攻击力的10倍加防御力的5倍。使用后消耗。",
     "Lowers ordinary walls directly above, below, left and right of you. Consumed when used.": "破坏上下左右相邻的普通墙壁。使用后消耗。",
     "Destroys eligible monsters directly above, below, left and right of you. Consumed when used.": "消灭上下左右相邻且可被炸毁的怪物。使用后消耗。",

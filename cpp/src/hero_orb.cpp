@@ -1,5 +1,6 @@
 #include "tsw/hero_orb.hpp"
 #include <array>
+#include <format>
 #include <utility>
 
 namespace tsw {
@@ -32,13 +33,14 @@ std::string compact_orb_number(std::int64_t value) {
         auto leading = value;
         for (int i = 0; i < exponent; ++i)
             leading /= 10;
-        return std::to_string(leading) + "e" + std::to_string(exponent);
+        return std::format("{}e{}", leading, exponent);
     }
     for (const auto [unit, suffix] : std::array<std::pair<std::int64_t, const char*>, 4>{
              {{1000000000000LL, "T"}, {1000000000, "B"}, {1000000, "M"}, {1000, "k"}}}) {
         if (value >= unit) {
             const auto whole = value / unit, tenth = value % unit / (unit / 10);
-            return std::to_string(whole) + (whole < 10 && tenth ? "." + std::to_string(tenth) : "") + suffix;
+            return whole < 10 && tenth ? std::format("{}.{}{}", whole, tenth, suffix)
+                                       : std::format("{}{}", whole, suffix);
         }
     }
     return std::to_string(value);

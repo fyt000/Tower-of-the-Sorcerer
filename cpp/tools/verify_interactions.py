@@ -45,7 +45,7 @@ def main():
     scenarios = []
     for f in (1, 12, 47):
         for cycle in (0, 43):
-            for t in (1, 2, 3, 6, 9, *range(29, 36), *range(37, 61)):
+            for t in (1, 2, 3, 6, 9, *range(29, 36), *range(37, 61), 158):
                 scenarios.append((f'contact/{f}/{cycle}/{t}', 'contact', f, t,
                                   dict(hp=100000, attack=100, defense=100, cycle=cycle, yellow=1, red=1, blue=1), []))
     rows = [struct.unpack_from('<4i', pe.get_memory_mapped_image(), 0x489910-0x400000+i*16) for i in range(33)]

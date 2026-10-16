@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace tsw::mcp_detail {
+namespace tsw::detail::mcp {
 using Json = glz::generic_u64;
 Json parse(std::string_view);
 std::string dump(const Json&);
@@ -31,7 +31,22 @@ struct Session {
     void record(const PlayerInput&, const InputOutcome&);
 };
 
-Json observe(const Session&, bool developer, int map_floor = -1, std::string_view detail = "full");
+enum class ObservationDetail { Summary, Compact, Full };
+
+constexpr std::string_view observation_detail_name(ObservationDetail detail) {
+    switch (detail) {
+    case ObservationDetail::Summary:
+        return "summary";
+    case ObservationDetail::Compact:
+        return "compact";
+    case ObservationDetail::Full:
+        return "full";
+    }
+    return {};
+}
+
+Json observe(const Session&, bool developer, int map_floor = -1,
+             ObservationDetail detail = ObservationDetail::Full);
 Json changes(const Session& before, const Session& after, bool developer);
 Json navigate(Session&, bool developer, int x, int y, bool interact);
 Json inspect(const Game&, bool developer, int floor, int x, int y);
@@ -41,4 +56,4 @@ void checkpoint_runtime(const std::filesystem::path&, bool developer, const Sess
                         const std::map<std::string, Session>&, std::uint64_t next_checkpoint);
 void restore_runtime(const std::filesystem::path&, bool developer, Session&, std::map<std::string, Session>&,
                      std::uint64_t& next_checkpoint);
-} // namespace tsw::mcp_detail
+} // namespace tsw::detail::mcp

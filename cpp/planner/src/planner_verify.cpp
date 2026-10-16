@@ -28,7 +28,7 @@ void verify_challenge(std::span<const PlayerInput> actions, std::ostream& report
     int flight = -1, octopus_kills = 0, octopus_gold = 0, hp_purchases = 0;
     int dragon = 0, sword = 0, master = 0, first50 = 0, descent = 0, seal = 0, ascent = 0;
     int post_sword_fights = 0;
-    for (int i = 0; i < int(actions.size()); ++i) {
+    for (int i = 0; i < std::ssize(actions); ++i) {
         const auto& action = actions[i];
         require(i == 0 || action.kind != InputKind::NewGame, "Mid-route reset");
         require(action.kind != InputKind::Reload && action.kind != InputKind::Rankings,
@@ -114,7 +114,7 @@ void verify_challenge(std::span<const PlayerInput> actions, std::ostream& report
            << " seal=" << seal << " ascent=" << ascent << " hp_altar_buys=" << hp_purchases
            << " post_sword_fights=" << post_sword_fights << '\n';
     report << "Zeno HP=" << zeno.hp << " ATK=" << zeno.attack << " DEF=" << zeno.defense
-           << " hero_hits=" << forecast.hero_hits << " damage=" << forecast.damage
+           << " hero_hits=" << forecast.hero_strike_count << " damage=" << forecast.damage
            << " margin=" << game.hero.hp - forecast.damage << '\n';
     report << gameplay_json(game) << '\n';
 }
