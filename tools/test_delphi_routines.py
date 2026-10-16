@@ -171,7 +171,7 @@ class RoutineComparisonTests(unittest.TestCase):
         original_open = Path.open
 
         def open_without_exports(path, *args, **kwargs):
-            if path.is_relative_to(ROOT / "reference/original/whole-program"):
+            if path.is_relative_to(ROOT / "build/research/decompilation/whole-program"):
                 raise AssertionError("Routine comparison must not depend on generated exports")
             return original_open(path, *args, **kwargs)
 

@@ -46,7 +46,7 @@ def expression(text):
 
 
 def initialization():
-    path = ROOT / "reference/original/whole-program/decompiled/00455cb8.c"
+    path = ROOT / "build/research/decompilation/whole-program/decompiled/00455cb8.c"
     source = path.read_text()
     source = source.split("void initialize_cycle(void)", 1)[1].strip()
     lines = source.splitlines()
@@ -135,7 +135,7 @@ def forms(manifest, implemented):
 
 
 def generated():
-    manifest = json.loads((ROOT / "reference/original/presentation/ui-manifest.json").read_text())
+    manifest = json.loads((ROOT / "build/research/decompilation/presentation/ui-manifest.json").read_text())
     manual = "\n".join(path.read_text() for path in (ROOT / "delphi/src").glob("*")
                        if path.suffix in (".pas", ".inc"))
     implemented = {name.lower() for name in re.findall(r"^procedure (T\w+\.\w+)", manual, re.M)}

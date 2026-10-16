@@ -1,5 +1,5 @@
 // Export reviewable C-like source from the original, read-only PE image.
-// Run as a Ghidra headless post-script; see reference/original/README.md.
+// Run as a Ghidra headless post-script; see docs/decompilation.md.
 // @category TSW
 import ghidra.app.script.GhidraScript;
 import ghidra.app.decompiler.DecompInterface;
@@ -89,7 +89,7 @@ public class ExportOriginal extends GhidraScript {
              .append(ghidra.framework.Application.getApplicationVersion()).append(".\n\n")
              .append("C-like decompiler output for every detected function entering 0x440000..0x488FFF. ")
              .append("This is an inspection corpus, not compilable game source or proof that each branch is verified. ")
-             .append("Unknown fields and helper names remain explicit. Reviewed routines and probe evidence are indexed in ../README.md.\n\n")
+             .append("Unknown fields and helper names remain explicit. See [the recovery guide](../../../../docs/decompilation.md) for reviewed scope.\n\n")
              .append("| Entry | Function | Source | Result |\n|---|---|---|---|\n");
         StringBuilder calls = new StringBuilder("# Original direct-call inventory\n\n");
         calls.append("Detected direct calls from the exported function range. Indirect calls through Delphi objects, ")

@@ -85,7 +85,7 @@ class GraphicsRunner:
         self.bitmap_vmt, self.lines_vmt = 0x601000, 0x602000
         self.lines, self.font = 0x603000, 0x604000
         self.assets = assets or Path(r"D:\Program Files (x86)\Tower of the Sorcerer")
-        manifest = json.loads((ROOT / "reference/original/presentation/ui-manifest.json").read_text())
+        manifest = json.loads((ROOT / "build/research/decompilation/presentation/ui-manifest.json").read_text())
         self.form = next(f for f in manifest["forms"] if f["class_name"] == "TTSW10")
         self.components = {f["name"]: 0x610000 + i * 0x400 for i, f in enumerate(self.form["fields"])}
         self.names = {v: k for k, v in self.components.items()} | {self.self: "form"}
@@ -97,7 +97,7 @@ class GraphicsRunner:
             self.rect = 0x40923C
             self.allowed = set()
             for address in list(self.game.values()) + [self.rect]:
-                path = ROOT / f"reference/original/whole-program/decompiled/{address:08x}.asm"
+                path = ROOT / f"build/research/decompilation/whole-program/decompiled/{address:08x}.asm"
                 self.allowed.update(int(at, 16) for at in re.findall(r"^([\da-f]{8})  ", path.read_text(), re.M))
             # Ghidra's syokidata0 export omits its normal post-finally epilogue.
             if pe.get_data(0x488849 - pe.OPTIONAL_HEADER.ImageBase, 7) != bytes.fromhex("5f5e5b8be55dc3"):

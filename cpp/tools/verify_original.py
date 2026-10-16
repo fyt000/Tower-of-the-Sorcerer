@@ -48,7 +48,7 @@ def main():
     if result.returncode:
         return result.returncode
     manifest = dict(cpp_probe_sha256=digest, reports=reports,
-                    presentation_inventory_sha256=hashlib.sha256((ROOT / "reference/original/presentation/effect-inventory.json").read_bytes()).hexdigest(),
+                    presentation_inventory_sha256=hashlib.sha256((ROOT / "build/research/decompilation/presentation/effect-inventory.json").read_bytes()).hexdigest(),
                     boundary_policy_sha256=hashlib.sha256(Path(__file__).with_name("comparison_boundary.py").read_bytes()).hexdigest())
     (ROOT / "build/cpp/reports/original-suite.json").write_text(json.dumps(manifest, indent=2)+"\n", encoding="utf-8")
     print("All retained original comparisons and boundary checks passed against one compiled probe")

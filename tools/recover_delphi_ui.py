@@ -88,11 +88,11 @@ def recovered_ui(manifest):
                 result.append(target + "." + prop + " := " + value + ";")
         return "\n".join("  " + line for line in result) + "\n"
 
-    about = (ROOT / "reference/original/presentation/decompiled/0043416c_TAboutBox_formactivate.c").read_text()
+    about = (ROOT / "build/research/decompilation/presentation/decompiled/0043416c_TAboutBox_formactivate.c").read_text()
     about = about[about.index("  FUN_004130d8("):about.index("  return;")]
-    fonts = (ROOT / "reference/original/whole-program/decompiled/0047d4a4.c").read_text()
+    fonts = (ROOT / "build/research/decompilation/whole-program/decompiled/0047d4a4.c").read_text()
     fonts = fonts[fonts.index("  FUN_004102f0("):fonts.index("  FUN_0047f5a8(")]
-    startup = (ROOT / "reference/original/whole-program/decompiled/00454de8.c").read_text()
+    startup = (ROOT / "build/research/decompilation/whole-program/decompiled/00454de8.c").read_text()
     startup = startup[startup.index("  FUN_00413500("):startup.index("  if (original_hero.cycle_factor_minus_one")]
     if len(re.findall("FUN_00413500", startup)) != 73:
         raise ValueError("Startup hidden-control inventory changed")

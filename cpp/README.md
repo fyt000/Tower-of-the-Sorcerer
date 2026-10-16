@@ -1,17 +1,9 @@
 # Tower of the Sorcerer — C++
 
-- [Mechanics](../docs/mechanics.md) and [fidelity notes](FIDELITY.md): game rules,
-  intentional differences and verification limits.
-- [Replay and CLI](../docs/replay-verification.md): recording, playback and inputs.
-- [MCP](../docs/cpp-mcp.md): client setup, tools and worker reload.
-- [Original data and recovery](../docs/original-data.md): assets, saves and comparisons.
-
 ## Build on Windows
 
-Use a Visual Studio developer shell matching [the CMake presets](CMakePresets.json),
-with the C++ workload, Windows SDK, CMake, clang-format, Python and vcpkg.
-Python with `pefile` and Pillow extracts ending pictures during the build.
-From the repository root:
+Use a Visual Studio developer shell with the C++ workload, Windows SDK, CMake,
+clang-format, Python and vcpkg. From the repository root:
 
 ```powershell
 $env:VCPKG_ROOT = 'D:/projects/vcpkg'
@@ -25,11 +17,10 @@ ctest --preset release -LE audio
 & ../build/cpp/vs/Release/tsw_game.exe
 ```
 
-The source EXE must match the supported 1.2 hash. Override its path with
-`-DTSW_ORIGINAL_EXE=PATH` when configuring. Build output and dependencies stay
-under `build/`; `asan` presets select MSVC AddressSanitizer.
+The EXE must be the supported English 1.2 version. Alternatively configure
+`-DTSW_ORIGINAL_EXE=PATH`. [Presets](CMakePresets.json) include ASan builds.
 
-Headless builds need C++23 and CMake 3.25+. From the repository root:
+Headless build (C++23, CMake 3.25+), from the repository root:
 
 ```sh
 cmake -S cpp -B build/cpp/core -DTSW_GUI=OFF
@@ -37,185 +28,66 @@ cmake --build build/cpp/core --config Release
 ctest --test-dir build/cpp/core -C Release -LE audio --output-on-failure
 ```
 
-Glaze and Catch2 are fetched if installed packages are unavailable.
-`-DBUILD_TESTING=OFF` omits test runners and `tsw_verify`.
-
 ## Run and controls
 
-Run `tsw_game.exe` beside the original `Data3/`, `Data2/`, `Midi/` and `Wav/`
-folders, or select assets with `--assets DIRECTORY`. Extracted PNGs also work.
-Local extraction writes PNGs, MIDI and WAV files to `build/assets/`; see the
-[extraction commands](../docs/original-data.md#assets-and-extraction).
-Ending pictures and the MIDI soundfont are embedded. When replacing an installed
-EXE, preserve the original as `TSW.original.exe`.
-
-The startup menu offers **New game**, **Load game**, **Play replay** and
-**Settings**. Use the mouse or Up/Down and Enter. Esc returns to the menu;
-**Continue** resumes the session. `--load FILE` starts from a save.
+Run beside the original `Data3/`, `Data2/`, `Midi/` and `Wav/` folders, or pass
+`--assets DIRECTORY`. Preserve the original EXE when replacing an installation.
+`--load FILE` starts from a save; `--save-dir DIRECTORY` overrides `Savedat/`.
 
 | Control | Action |
 |---|---|
 | Arrows / WASD | Walk; hold to repeat |
-| Click a map tile | Walk to it; contact only the selected event |
-| Enter / Space | Continue dialogue or the ending card |
-| Click an item / I | Inspect or use items / open inventory |
-| Flight: Up / Down, Enter, Esc | Preview, travel, cancel |
-| F6 / F7 | Eight manual save / load slots |
-| Slot picker: 1–8 or arrows, Enter, Esc | Select, confirm, close |
+| Map click | Walk/contact a destination when Mouse walking is enabled |
+| Enter / Space | Continue dialogue or ending |
+| Item click / I | Inspect/use items / open inventory |
+| Flight: Up/Down, Enter, Esc | Preview, travel, cancel |
+| F6 / F7 | Manual save/load; select slot with 1–8 or arrows |
 | F5 / F9 / F8 | Quick save / quick restore / Fairy checkpoint |
-| F2 / M | New game / mute |
-| R / Game > Rankings | Open Fairy rankings |
-| Esc | Main menu or close the current overlay |
+| F2 / M / R | New game / mute / rankings |
+| Esc | Close overlay or open main menu |
 
-Shop choices are clickable; Esc cancels. Dialogue and Wisdom clues scroll
-with the wheel. Settings include speeds, recording, mute and **Hero Orb actual
-damage**, an optional forecast that includes Cross and Dragon Slayer bonuses.
+Settings include language, speed, recording, Mouse walking, Realtime Hero Orb
+and bonus-aware **Hero Orb actual damage**. The last three default off. Mouse
+routes stop at unexpected events/hazards; other inputs cancel the route.
+See [languages](locales/README.md) for catalog IDs and `--language` overrides.
 
-Enable **Settings → Mouse walking** to use mouse movement (default: off).
-Mouse walking follows the shortest route through apparent floor. Doors, monsters,
-items, NPCs and stairs block routes unless they are the clicked destination.
-Clicking a door or hidden wall makes one contact; click again to enter after it
-opens. Each hidden wall in a tunnel needs its own click. Hidden floor triggers
-look and route like ordinary floor, but trigger their normal event and stop the
-walk immediately. Hazards also stop the walk. A new map click replaces the route;
-keyboard movement, overlays, loading and the main menu cancel it. Mouse steps use
-the normal game speed and are recorded as ordinary movement inputs.
+## Saves and replay
 
-After the tower collapses, the ending summary shows final HP, attack, defense,
-gold, total altar purchases, and remaining yellow, blue and red keys. Achievements
-use the original game icons and relevant item overlays. Only earned achievements
-appear, in a single grid with two columns and up to three rows. Sword and shield
-icons match the equipment held at the ending. Enter/Space or **Next cycle**
-continues. Backside victories also show a summary
-after their closing scene, including the final Zeno reward.
+Manual slots are `save1.dat`–`save8.dat`, quick save is `quick.save`, and the
+Fairy checkpoint is `save0.dat`. Saves retain the original format; replacement
+keeps a `.bak`. Invalid loads preserve the running game. Rankings persist
+independently; settings are in `settings.json`.
 
-The initial achievement list checks an active Zeno seal at the ending, no outer
-Octopus part victories, slaying the Dragon without ever acquiring Dragon Slayer,
-not bombing either of the Sacred Shield's two 44F guards (even if the shield is never collected),
-at least 21 altar purchases, and finishing with at least five red keys.
-Results apply to the cleared cycle; carried Dragon Slayer counts as acquired.
+Copy `.replay.jsonl` and `.achievements.json` companions with a save to retain
+recording and achievement history. Missing/invalid achievement history hides
+unverified history-dependent awards without blocking loading.
 
-**Settings → Realtime Hero Orb** (default: off) shows compact stats on monster
-tiles once you own the Hero Orb. HP cost appears at the top: green for zero,
-amber for damage, red for a lethal fight, and purple **∞** when your attack cannot
-penetrate defense. Attack appears in orange at the left, defense in blue at the
-right, and earned gold at the bottom. Labels use small outlined numbers inside
-the tile; large values use k/M/B/T abbreviations. Hover a monster for exact HP,
-attack, defense, gold and HP cost in the status bar. Forecasts follow **Hero Orb
-actual damage**, and refresh as the hero's stats, equipment or monsters change.
-Labels are hidden during events, combat, floor previews and overlays.
-
-**Settings → Language** offers original English, original Japanese, English
-retranslated from Japanese, simplified Chinese retranslated from Japanese, and
-simplified Chinese translated from current English. Chinese item and monster
-names follow TSWH5. Use `--language ja`, `en-ja`, `zh-Hans-ja`, `zh-Hans-en` or `en`
-to override the saved language for one launch. See the
-[translation sources and catalogs](locales/README.md) for extracted text and
-alignment notes.
-
-## Saves and recording
-
-Saves and `settings.json` live in `Savedat/` beside the executable, overridden
-by `--save-dir DIRECTORY`. Manual slots use `save1.dat`–`save8.dat`, quick save
-uses `quick.save`, and the Fairy checkpoint uses `save0.dat`. Save after the
-current action finishes. Replacement keeps a `.bak`; invalid loads preserve
-the running game.
-
-Game saves and Fairy ranking tables retain their original formats. Rankings
-survive game loads and new cycles. Legacy preferences are not imported.
-See [data formats](../docs/original-data.md#original-saves) for file layouts.
-
-Achievement history lives in a separate `SAVE.achievements.json` companion (for
-example `save1.dat.achievements.json`), including quick saves and Fairy checkpoints.
-Copy it along with the save to retain run evidence. It is bound to the original
-save bytes and has a corresponding companion for `.bak` saves. Original save
-records and checksums contain no achievement fields. Missing, stale, malformed,
-or incompatible companions do not block loading: history-dependent achievements
-remain unverified and hidden unless their requirements can be established. Saving that game again
-preserves the incomplete history. New games and new cycles start fresh tracking;
-replays and in-process checkpoints preserve their recorded evidence.
-
-## Visual replay, recording and headless CLI
-
-Choose **Play replay** or launch with `--replay FILE`. Enable **Record new
-games** or `--record` before a fresh game. Recorded saves have a
-`.replay.jsonl` companion; copy both files when moving a save.
-
-| Replay control | Action |
-|---|---|
-| Space | Pause/resume |
-| Left / Right | Previous boundary / finish the next input, then pause |
-| Home | Restart paused |
-| T | Take over |
-| − / + | Change speed |
-| O / Esc | Settings / main menu |
-
-`tsw_cli` works without media or an audio device. From the repository root:
-
-```powershell
-./build/cpp/vs/Release/tsw_cli.exe state
-./build/cpp/vs/Release/tsw_cli.exe replay tests/replays/first-floor-door.jsonl --limit 3
-./build/cpp/vs/Release/tsw_cli.exe mcp
-```
-
-See [replay and CLI](../docs/replay-verification.md) for recording rules and
-[MCP](../docs/cpp-mcp.md) for client configuration.
+Choose **Play replay** or pass `--replay FILE`. Enable **Record new games** or
+`--record` before starting. [Replay controls, CLI and format](../docs/replay-verification.md).
 
 ## Development
 
-`tsw_core` owns game state and executes queued commands without graphics,
-audio or Windows dependencies. Actions append opcode/operand records, executed
-newest first. Combat produces bounded turns. `DesktopSession` schedules these
-commands; CLI, replay and MCP share input execution.
+`tsw_core` owns state and the reverse-order command queue. Desktop, CLI, replay
+and [MCP](../docs/cpp-mcp.md) share the input executor. Core logic is split among
+`game.cpp`, `contact.cpp`, `combat.cpp`, `items.cpp`, `npcs.cpp`, `floor_checks.cpp`
+and `scenes.cpp`; persistence uses `original_save.cpp` and `save*.cpp`.
 
-| Files under `cpp/` | Responsibility |
-|---|---|
-| `include/tsw/game.hpp`, `src/game.cpp` | State, movement, command interpreter and cycles |
-| `src/contact.cpp`, `src/combat.cpp`, `src/items.cpp`, `src/npcs.cpp` | Encounters, combat, items and dialogue |
-| `src/floor_checks.cpp`, `src/scenes.cpp` | Floor triggers and story scripts |
-| `src/original_save.cpp`, `src/save*.cpp`, `src/rankings.cpp` | Persistence |
-| `src/desktop.cpp`, `src/presentation.cpp`, `src/assets.cpp` | Window loop, rendering and media |
-| `src/audio.cpp`, `src/audio_mixer.cpp` | Audio device and prepared MIDI/effect playback |
+Preserve command layout/order, numeric enum values and serialized keys
+(`settings.cpp`, `runtime_schema.hpp`). Renderer resource owners must die before
+the graphics context. Clang-format owns layout; see [AGENTS.md](../AGENTS.md)
+for formatting and audio-test rules.
 
-Use `PascalCase` for types, enum values and constants, `snake_case` for functions
-and data, and a trailing underscore for private class data. Templates use
-`template <class T>`. Clang-format owns whitespace and layout.
-
-`game_types.hpp` names recovered state domains; `dialogue_ids.hpp` separates
-one-based speech IDs, zero-based catalog indices and saved continuation stages.
-Convert enums with `std::to_underlying` at numeric boundaries. Keep the original
-three-word `Command` layout, stack order, data-bearing `Wait` records and scripted
-numeric-sum predicates intact. `Game::queue_speech`, `queue_raster` and
-`queue_hero_value` make operand domains explicit.
-
-Use `PlayerInput` factories and designated initializers for records with optional
-payloads. Item IDs, names, passive flags and help text live in `ItemDefinitions`.
-Renderer handles use move-only owners from `raylib_resources.hpp`; `get()` borrows
-a handle and `release()` explicitly transfers ownership. These owners must die
-before the graphics context closes.
-
-Member renames must preserve existing settings and runtime checkpoint keys.
-`settings.cpp` and `runtime_schema.hpp` contain the Glaze key mappings; recovered
-enum values remain numeric on the wire. The original save adapter maps fields
-explicitly and does not serialize C++ struct layouts.
+See [mechanics](../docs/mechanics.md), [fidelity](FIDELITY.md),
+[research comparisons](../docs/decompilation.md#verification), and the optional
+[route planner](../docs/route-planner.md).
 
 ## Validate and package
 
-After a successful build, run the formatting command above from `cpp/`.
-Run `ctest -LE audio` unless changes touch audio code, assets, dependencies or
-configuration. See [AGENTS.md](../AGENTS.md) for the repository rules.
-
-`tsw_tests` covers the core, saves, replay and MCP; `tsw_verify` checks desktop
-presentation and assets. Research comparisons use `tsw_probe`, as described
-in the [recovery guide](../docs/original-data.md#comparison-workflow).
-Fixtures belong under `tests/`, generated reports under `build/`.
-
-Packaging requires current research comparisons and CTest renderer, asset and
-window reports. From the repository root:
+`tsw_tests` covers core/saves/replay/MCP; `tsw_verify` covers presentation/assets.
+Packaging requires fresh research comparisons and renderer/window reports:
 
 ```powershell
 python cpp/tools/package.py --original-dir "D:/Program Files (x86)/Tower of the Sorcerer"
 ```
 
-Packages go under `build/packages/`, with full-media and drop-in ZIPs.
-See [third-party notices](THIRD_PARTY.md) for attribution and licenses.
+Output: `build/packages/`. [Dependency notices](THIRD_PARTY.md).

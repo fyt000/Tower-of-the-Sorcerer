@@ -26,7 +26,7 @@ ENTRY = {4: 0x48201C, 5: 0x482128, 6: 0x482234, 7: 0x482340,
 
 
 def controls():
-    manifest = json.loads((ROOT / "reference/original/presentation/ui-manifest.json").read_text())
+    manifest = json.loads((ROOT / "build/research/decompilation/presentation/ui-manifest.json").read_text())
     form = next(form for form in manifest["forms"] if form["class_name"] == "TTSW10")
     return [(0x200000 + int(field["offset"], 16), CONTROL_BASE + int(field["offset"], 16) * 16)
             for field in form["fields"] if field["offset"] != "0x254"]

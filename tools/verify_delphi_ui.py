@@ -56,7 +56,7 @@ class UIRunner(FlightRunner):
         self.running, self.prefix_reached = None, False
         self.forms = {"TAboutBox": 0x650000, "TForm4": 0x660000}
         self.dialog_components = {}
-        manifest = json.loads((ROOT / "reference/original/presentation/ui-manifest.json").read_text())
+        manifest = json.loads((ROOT / "build/research/decompilation/presentation/ui-manifest.json").read_text())
         self.dialogs = {f["class_name"]: f for f in manifest["forms"] if f["class_name"] in self.forms}
         published = {f["class_name"] + "." + m["name"]: int(m["address"], 16)
                      for f in manifest["forms"] for m in f["methods"]}
@@ -73,9 +73,9 @@ class UIRunner(FlightRunner):
             self.dialog_globals = {"TAboutBox": 0x48A760, "TForm4": 0x48C50C}
             for name, (at, _) in EXTRAS.items():
                 self.entries[name] = at
-                path = ROOT / f"reference/original/whole-program/decompiled/{at:08x}.asm"
+                path = ROOT / f"build/research/decompilation/whole-program/decompiled/{at:08x}.asm"
                 if not path.exists():
-                    path = ROOT / f"reference/original/presentation/decompiled/{at:08x}_{EXTRAS[name][1].replace('.', '_')}.asm"
+                    path = ROOT / f"build/research/decompilation/presentation/decompiled/{at:08x}_{EXTRAS[name][1].replace('.', '_')}.asm"
                 self.allowed.update(int(x, 16) for x in re.findall(r"^([\da-f]{8})  ", path.read_text(), re.M))
             # Both retained image1onclick exports lose the final setter/return;
             # the whole-program export even decodes bytes at $4340B0 as CALLF.

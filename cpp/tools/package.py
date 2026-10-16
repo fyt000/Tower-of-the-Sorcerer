@@ -34,7 +34,7 @@ def main():
         raise RuntimeError('Original comparison suite belongs to another build; run verify_original.py')
     if suite['boundary_policy_sha256'] != hashlib.sha256(Path(__file__).with_name('comparison_boundary.py').read_bytes()).hexdigest():
         raise RuntimeError('Comparison exclusions changed after verification; run verify_original.py')
-    inventory = ROOT / 'reference/original/presentation/effect-inventory.json'
+    inventory = ROOT / 'build/research/decompilation/presentation/effect-inventory.json'
     if suite.get('presentation_inventory_sha256') != hashlib.sha256(inventory.read_bytes()).hexdigest():
         raise RuntimeError('Presentation recovery/review inventory changed; run verify_original.py')
     if output == original or output.is_relative_to(original):

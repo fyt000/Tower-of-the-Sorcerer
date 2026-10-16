@@ -11,8 +11,8 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE = ROOT / "reference/original/decompiled"
-PRESENTATION_SOURCE = ROOT / "reference/original/presentation/decompiled"
+SOURCE = ROOT / "build/research/decompilation/decompiled"
+PRESENTATION_SOURCE = ROOT / "build/research/decompilation/presentation/decompiled"
 
 # Reviewed RTL/VCL call sites outside the exported gameplay corpus. This
 # records the boundary, not a proof that arbitrary invocations can be ignored.

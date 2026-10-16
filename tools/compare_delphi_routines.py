@@ -267,7 +267,7 @@ def report_for(path, map_path):
         raise ValueError("Original executable pin changed")
     original, candidate = pefile.PE(str(original_path)), pefile.PE(str(path))
     mapping, data = symbols(candidate, map_path), data_symbols(candidate, map_path)
-    manifest_path = ROOT / "reference/original/presentation/ui-manifest.json"
+    manifest_path = ROOT / "build/research/decompilation/presentation/ui-manifest.json"
     manifest = json.loads(manifest_path.read_text())
     methods = [(form["class_name"] + "." + method["name"], int(method["address"], 16))
                for form in manifest["forms"] for method in form["methods"]]

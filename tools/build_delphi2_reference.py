@@ -48,7 +48,7 @@ def main():
         work = toolchain / ("probe-" + name)
         work.mkdir(exist_ok=True)
         record = dict(updates=updates, inputs=[])
-        record["inputs"].append(stage(ROOT / "reference/delphi2/probes/RuntimeProbe.dpr", work / "RuntimeProbe.dpr"))
+        record["inputs"].append(stage(ROOT / "tools/delphi2/probes/RuntimeProbe.dpr", work / "RuntimeProbe.dpr"))
         lib = work / "override"
         lib.mkdir(exist_ok=True)
         if set(p.name for p in lib.iterdir()) - set(updates):
@@ -80,8 +80,8 @@ def main():
     work.mkdir(exist_ok=True)
     record = report["recovery"]
     record["inputs"] = [stage(ROOT / source, work / Path(source).name) for source in
-                        ("reference/delphi2/probes/RecoveryProbe.dpr",
-                         "reference/delphi2/recovered/RecoveredNeighbor.pas")]
+                        ("tools/delphi2/probes/RecoveryProbe.dpr",
+                         "tools/delphi2/recovered/RecoveredNeighbor.pas")]
     command = [str(compiler), "-B", "-U..\\base\\lib", "-GD", "RecoveryProbe.dpr"]
     result = subprocess.run(command, cwd=work, capture_output=True, timeout=30)
     (work / "compile.log").write_bytes(result.stdout + result.stderr)

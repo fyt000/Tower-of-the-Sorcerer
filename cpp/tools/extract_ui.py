@@ -77,7 +77,9 @@ def main():
                               bitmap_bytes=length, bitmap_sha256=hashlib.sha256(bitmap).hexdigest(),
                               output=target.name, size=[640, 400]))
         print(f'Recovered {component}: {target}')
-    (ROOT / 'reference/original/ui-extraction-manifest.json').write_text(
+    manifest = ROOT / 'build/research/decompilation/ui-extraction-manifest.json'
+    manifest.parent.mkdir(parents=True, exist_ok=True)
+    manifest.write_text(
         json.dumps(dict(original_sha256=ORIGINAL_HASH, pictures=recovered, manual_save_slots=slots),
                    indent=2) + '\n', encoding='utf-8')
     print(f'Verified {len(slots)} paired manual Save/Load slots in {RESOURCE_NAME}')

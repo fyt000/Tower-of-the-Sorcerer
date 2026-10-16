@@ -16,7 +16,7 @@ from capstone import Cs, CS_ARCH_X86, CS_MODE_32, CS_OP_MEM, CS_OP_IMM
 
 from account_original_program import Image, HASH, HEX, ROOT
 
-OUTPUT = ROOT / 'reference/original/whole-program'
+OUTPUT = ROOT / 'build/research/decompilation/whole-program'
 
 
 def sha(path):
@@ -245,7 +245,7 @@ def build(exe):
                 resources.append(dict(path=ancestry + [key], rva=HEX(data.OffsetToData), bytes=data.Size,
                     sha256=hashlib.sha256(image.pe.get_data(data.OffsetToData, data.Size)).hexdigest()))
     resource_walk(image.pe.DIRECTORY_ENTRY_RESOURCE.entries, [])
-    old = json.loads((ROOT / 'reference/original/presentation/effect-inventory.json').read_text())
+    old = json.loads((ROOT / 'build/research/decompilation/presentation/effect-inventory.json').read_text())
     old_targets = [dict(address=a, **location(a)) for a in old['direct_targets_without_exported_entry']]
     report = dict(original_sha256=HASH, original_file_bytes=len(image.raw),
         code_virtual_bytes=len(image.code), code_raw_padding_bytes=int(snapshot['code_end'], 16) + 1 - image.end,
@@ -290,7 +290,7 @@ def render(report):
     text += (f"\nThese add to {report['code_virtual_bytes']:,} virtual CODE bytes; "
              f"{report['code_raw_padding_bytes']} raw padding bytes are separate. "
              "Unresolved bytes and metadata/instruction conflicts remain open findings.\n\n"
-             "See [REVIEW.md](REVIEW.md) for conclusions, [ledger.json](ledger.json) for the complete ledger, "
+             "See [the recovery guide](../../../../docs/decompilation.md) for conclusions, [ledger.json](ledger.json) for the complete ledger, "
              "[structural-inventory.json](structural-inventory.json) for classes/properties/signatures, "
              "and [byte-ledger.tsv](byte-ledger.tsv) for the byte partition. "
              "The ledger also inventories every PE section/file byte, import and resource.\n\n"

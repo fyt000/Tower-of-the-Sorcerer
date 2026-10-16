@@ -50,7 +50,7 @@ def build_probes(desktop, system):
     for name in ("base", "system201"):
         work = desktop / ("media-probe-" + name)
         work.mkdir(exist_ok=True)
-        inputs = [stage(ROOT / "reference/delphi2/probes/RuntimeProbe.dpr", work / "RuntimeProbe.dpr")]
+        inputs = [stage(ROOT / "tools/delphi2/probes/RuntimeProbe.dpr", work / "RuntimeProbe.dpr")]
         override = work / "override"
         override.mkdir(exist_ok=True)
         expected = {"SYSTEM.DCU"} if name == "system201" else set()
@@ -80,7 +80,7 @@ def build_probes(desktop, system):
     work.mkdir(exist_ok=True)
     record = build["recovery"]
     record["inputs"] = [stage(ROOT / name, work / Path(name).name) for name in
-                        ("reference/delphi2/probes/RecoveryProbe.dpr", "reference/delphi2/recovered/RecoveredNeighbor.pas")]
+                        ("tools/delphi2/probes/RecoveryProbe.dpr", "tools/delphi2/recovered/RecoveredNeighbor.pas")]
     command = [str(compiler), "-B", "-U..\\base\\lib", "-GD", "RecoveryProbe.dpr"]
     result = subprocess.run(command, cwd=work, capture_output=True, timeout=30)
     (work / "compile.log").write_bytes(result.stdout + result.stderr)
@@ -150,7 +150,7 @@ def main():
     if digest(original_path) != ORIGINAL_HASH:
         raise ValueError("Original EXE differs from pin")
     original = pefile.PE(str(original_path))
-    inventory_path = ROOT / "reference/original/whole-program/structural-inventory.json"
+    inventory_path = ROOT / "build/research/decompilation/whole-program/structural-inventory.json"
     inventory = json.loads(inventory_path.read_text())
     sizes = {c["name"]: c["instance_size"] for c in inventory["classes"]}
     report["variants"] = {}
@@ -198,12 +198,13 @@ def main():
         "IME layout explains the offset shift; it does not identify the precise Delphi release or validate a rebuilt VCL.",
         "Selected runtime shapes mask addresses and external transfers; callee equivalence is not established.",
         "No original game process, campaign or game screenshot comparison was run."]
-    target = ROOT / "reference/delphi2/media-review.json"
+    target = ROOT / "build/research/delphi2-reports/media-review.json"
     text = json.dumps(report, indent=2) + "\n"
     if args.check:
         if target.read_text(encoding="utf-8") != text:
             raise ValueError("Stale additional-media report")
     else:
+        target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(text, encoding="utf-8")
     for name, record in report["variants"].items():
         print(name, "shapes", sum(r["normalized_shape_match"] for r in record["runtime_shapes"]), "/", len(RUNTIME),

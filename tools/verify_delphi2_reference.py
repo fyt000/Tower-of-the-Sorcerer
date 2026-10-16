@@ -86,7 +86,7 @@ def normalized(pe, insns):
 
 
 def original_span(address):
-    path = ROOT / f"reference/original/whole-program/decompiled/{address:08x}.asm"
+    path = ROOT / f"build/research/decompilation/whole-program/decompiled/{address:08x}.asm"
     records = [(int(a, 16), bytes.fromhex(raw)) for a, raw in
                re.findall(r"^([0-9a-f]{8})  ([0-9a-f]+) ", path.read_text(), re.M)]
     # Handler/continuation ownership is separate in Ghidra; some runtime bytes
@@ -264,7 +264,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--toolchain", type=Path, default=ROOT / "build/research/delphi2")
     parser.add_argument("--original", type=Path, default=ROOT / "build/research/TSW.exe")
-    parser.add_argument("--output", type=Path, default=ROOT / "reference/delphi2/comparison-report.json")
+    parser.add_argument("--output", type=Path, default=ROOT / "build/research/delphi2-reports/comparison-report.json")
     parser.add_argument("--check", action="store_true", help="Compare regenerated report and runtime spans without overwriting")
     args = parser.parse_args()
     if digest(args.original) != ORIGINAL_HASH:
@@ -283,7 +283,7 @@ def main():
             if digest(directory / Path(source["source"]).name) != source["staged_sha256"]:
                 raise ValueError("Staged Pascal source changed since compilation")
     original = pefile.PE(str(args.original))
-    inventory = json.loads((ROOT / "reference/original/whole-program/structural-inventory.json").read_text())
+    inventory = json.loads((ROOT / "build/research/decompilation/whole-program/structural-inventory.json").read_text())
     sizes = {c["name"]: c["instance_size"] for c in inventory["classes"]}
     report = dict(schema_version=1, original_sha256=ORIGINAL_HASH,
                   archive_sha256=json.loads((toolchain / "media-manifest.json").read_text())["archive"]["sha256"],
@@ -298,7 +298,7 @@ def main():
     keys = {"DCC32.EXE", "SYSTEM.DCU", "CONTROLS.DCU", "FORMS.DCU", "STDCTRLS.DCU", "EXTCTRLS.DCU",
             "SYSTEM.PAS", "CONTROLS.PAS", "FORMS.PAS", "STDCTRLS.PAS", "EXTCTRLS.PAS"}
     report["toolchain_provenance"]["key_files"] = [r for r in media["files"] if Path(r["path"]).name.upper() in keys]
-    complete_code = (ROOT / "reference/original/whole-program/CODE.asm").read_text()
+    complete_code = (ROOT / "build/research/decompilation/whole-program/CODE.asm").read_text()
     listed = {int(address, 16) for address in re.findall(r"^([0-9a-f]{8})  [0-9a-f]+ ", complete_code, re.M)}
     report["focused_original_runtime_spans"] = []
     for name, address in RUNTIME.items():

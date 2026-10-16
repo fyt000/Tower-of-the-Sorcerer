@@ -14,3 +14,9 @@ explicitly includes publishing related works on Steam.
 **Tower of the Sorcerer for Windows 1.2**, freeware by Oz & Kenichi, published by Shigemasa Ozawa. Original sprites, sounds, music, maps, monster constants, and dialogue were extracted from the installation supplied by the user. The original `Readme.txt` names the copyright holders and includes original distribution conditions. Extracted media are retained for this local remake and are not relicensed under MIT.
 
 **tswKai**, by Z-H-Sun and contributors, [GitHub](https://github.com/Z-H-Sun/tswKai), MIT licensed. Its reverse-engineering research was used to locate tables and interpret original executable behavior. Original executable evidence and source links are recorded in the project documentation.
+
+**Interactive Delphi Reconstructor (IDR)**, copyright 2006–2018 crypto,
+[GitHub](https://github.com/crypto2011/IDR), MIT licensed. Research tools use its
+public Delphi recognition records and format references. Pinned inputs are in
+[tools/idr-inputs.json](tools/idr-inputs.json); the full license is retained in
+[tools/IDR-LICENSE.txt](tools/IDR-LICENSE.txt).

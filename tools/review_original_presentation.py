@@ -9,13 +9,13 @@ import json
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-PRESENTATION = ROOT / "reference/original/presentation"
+PRESENTATION = ROOT / "build/research/decompilation/presentation"
 WRITE = re.compile(r"(?:original_hero|original_maps|original_monsters|event_stack|event_cursor|dialogue_continue_stage).*?\s=(?!=)")
 
 
 def inventory():
     manifest = json.loads((PRESENTATION / "ui-manifest.json").read_text())
-    sources = {int(path.name[:8], 16): path for path in sorted((ROOT / "reference/original/decompiled").glob("*.c"))}
+    sources = {int(path.name[:8], 16): path for path in sorted((ROOT / "build/research/decompilation/decompiled").glob("*.c"))}
     recovered = {int(path.name[:8], 16): path for path in sorted((PRESENTATION / "decompiled").glob("*.c"))}
     sources.update(recovered)
     rows = {}
@@ -43,7 +43,7 @@ def inventory():
                              assembly=str(asm_path.relative_to(ROOT)) if asm_path.exists() else None,
                              decompiled="FAILED:" not in source, named_protected_writes=effects,
                              direct_edges=direct, unresolved_indirect_calls=indirect,
-                             review_status="triage-only; see REVIEW.md for branch and sequence review")
+                             review_status="triage-only; see docs/decompilation.md for reviewed scope")
     for address, row in rows.items():
         reached, todo = set(), [address]
         while todo:
@@ -95,7 +95,7 @@ def main():
             raise RuntimeError("UI effect inventory is stale; regenerate and review changes")
     else:
         path.write_text(rendered, encoding="utf-8")
-        lines = ["# Serialized UI event coverage", "", "Every binding below was recovered structurally from a Delphi form resource and resolved through its class method table. This is an entry-point inventory; review and sequence evidence are in [REVIEW.md](REVIEW.md).", "", "| Form / component | Event | Published method | Entry | Recovered source |", "|---|---|---|---|---|"]
+        lines = ["# Serialized UI event coverage", "", "Every binding below was recovered structurally from a Delphi form resource and resolved through its class method table. This is an entry-point inventory; reviewed scope is in [the recovery guide](../../../../docs/decompilation.md).", "", "| Form / component | Event | Published method | Entry | Recovered source |", "|---|---|---|---|---|"]
         for event in report["events"]:
             path_label = Path(event["source"]).name if event["source"] else "MISSING"
             relative = "decompiled/" + path_label

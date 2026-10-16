@@ -142,7 +142,7 @@ def walk(component):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--exe", type=Path, default=Path(os.environ.get("TOS_ORIGINAL_EXE", r"D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe")))
-    parser.add_argument("--output", type=Path, default=ROOT / "reference/original/presentation")
+    parser.add_argument("--output", type=Path, default=ROOT / "build/research/decompilation/presentation")
     args = parser.parse_args()
     import pefile
 
@@ -185,7 +185,7 @@ def main():
     manifest = dict(original_sha256=HASH, forms=forms, events=events,
                     limits="Published methods and serialized DFM events only. Dynamically assigned events, virtual dispatch, and unnamed helpers require call-site recovery.")
     (args.output / "ui-manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-    corpus = ROOT / "reference/original/decompiled"
+    corpus = ROOT / "build/research/decompilation/decompiled"
     missing = [address for address in exports if not list(corpus.glob(f"{int(address,16):08x}_*.c"))]
     (args.output / "published-methods.tsv").write_text("".join(f"{address}\t{name}\n" for address, name in sorted(exports.items())), encoding="utf-8")
     print(json.dumps(dict(forms=len(forms), components=sum(f["components"] for f in forms),

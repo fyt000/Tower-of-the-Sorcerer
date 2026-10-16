@@ -38,7 +38,7 @@ def build_probe(toolchain, work):
     record = dict(compiler=describe(compiler), media_manifest=describe(toolchain / "media-manifest.json"))
     work.mkdir(exist_ok=True)
     record["inputs"] = [stage(ROOT / name, work / Path(name).name) for name in
-                        ("reference/delphi2/probes/ImeRecoveryProbe.dpr", "reference/delphi2/recovered/RecoveredIme.pas")]
+                        ("tools/delphi2/probes/ImeRecoveryProbe.dpr", "tools/delphi2/recovered/RecoveredIme.pas")]
     command = [str(compiler), "-B", "-U..\\base\\lib", "-GD", "ImeRecoveryProbe.dpr"]
     result = subprocess.run(command, cwd=work, capture_output=True, timeout=30)
     (work / "compile.log").write_bytes(result.stdout + result.stderr)
@@ -168,7 +168,7 @@ def main():
     original = pefile.PE(str(original_path))
     candidate = pefile.PE(str(work / "ImeRecoveryProbe.dll"))
     entries = {s.name.decode("ascii"): candidate.OPTIONAL_HEADER.ImageBase + s.address for s in candidate.DIRECTORY_ENTRY_EXPORT.symbols}
-    inventory = json.loads((ROOT / "reference/original/whole-program/structural-inventory.json").read_text())
+    inventory = json.loads((ROOT / "build/research/decompilation/whole-program/structural-inventory.json").read_text())
     old, old_reloc = dispatcher_bytes(original, 0x40EE88)
     new, new_reloc = dispatcher_bytes(candidate, entries["RecoveredSetImeStatus"])
     old_helper = original.get_data(0x40EE6C - original.OPTIONAL_HEADER.ImageBase, 27)
@@ -200,12 +200,13 @@ def main():
         "Windows APIs are observer models; selected API failures return false with supplied output values.",
         "Missing individual function pointers with a loaded library and actual OS notifications/focus are not exercised.",
         "Only the two standalone helpers are reconstructed; VCL class bodies, loader and virtual dispatch still need integration."]
-    target = ROOT / "reference/delphi2/ime-review.json"
+    target = ROOT / "build/research/delphi2-reports/ime-review.json"
     text = json.dumps(report, indent=2) + "\n"
     if args.check:
         if target.read_text(encoding="utf-8") != text:
             raise ValueError("Stale IME report")
     else:
+        target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(text, encoding="utf-8")
     print("Enable helper:", old_helper == new_helper, "27 literal bytes")
     print("Dispatcher:", old == new, "253 bytes with six explicit local address relocations")

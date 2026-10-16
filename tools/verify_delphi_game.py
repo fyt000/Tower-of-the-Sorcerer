@@ -259,7 +259,7 @@ def compare_native_gates(original, output):
     through the actual English VCL/Windows in FormSmoke. No other call target
     is accepted or skipped in these original routine bodies.
     """
-    manifest = json.loads((ROOT / "reference/original/presentation/ui-manifest.json").read_text())
+    manifest = json.loads((ROOT / "build/research/decompilation/presentation/ui-manifest.json").read_text())
     form = next(f for f in manifest["forms"] if f["class_name"] == "TTSW10")
     fields = {f["name"]: int(f["offset"], 16) for f in form["fields"]}
     machine = emulator(original)

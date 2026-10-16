@@ -17,7 +17,7 @@ from capstone.x86_const import X86_OP_IMM, X86_OP_MEM, X86_OP_REG, X86_REG_FS, X
 from idr_knowledge_base import KnowledgeBase, find_matches, literal_runs
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / 'reference/original/whole-program'
+OUTPUT = ROOT / 'build/research/decompilation/whole-program'
 HASH = '41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779'
 HEX = lambda address: f'0x{address:08x}'
 

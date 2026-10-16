@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def recover_hints(manifest):
-    path = ROOT / "reference/original/whole-program/decompiled/00484f48.c"
+    path = ROOT / "build/research/decompilation/whole-program/decompiled/00484f48.c"
     source = path.read_text()
     start = source.index('  FUN_0040352c((int *)(param_1[0x7c] + 0x54),')
     stop = source.index('  FUN_00419c7c(', start)

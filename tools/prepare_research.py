@@ -18,22 +18,22 @@ from recovery_evidence import ROOT, ORIGINAL_HASH, digest
 DATA_FILES = (
     "data/original-map-bytes.bin", "data/original-dialogue.json",
     "data/original-enemies.json", "data/events.json", "data/interactions.json",
-    "data/campaign.json", "reference/original/presentation/ui-manifest.json",
+    "data/campaign.json", "build/research/decompilation/presentation/ui-manifest.json",
 )
 EXPORT_FILES = (
-    "reference/original/decompiled/00442c38_FUN_00442c38.c",
-    "reference/original/decompiled/00449e18_FUN_00449e18.c",
-    "reference/original/presentation/decompiled/0043416c_TAboutBox_formactivate.c",
-    "reference/original/whole-program/decompiled/00455cb8.c",
-    "reference/original/whole-program/decompiled/00484f48.c",
-    "reference/original/whole-program/decompiled/0047d4a4.c",
-    "reference/original/whole-program/decompiled/00454de8.c",
-    "reference/original/whole-program/decompiled/export-manifest.json",
-    "reference/original/whole-program/discovery-snapshot.json",
-    "reference/original/whole-program/analysis-snapshot.json",
-    "reference/original/whole-program/structural-inventory.json",
-    "reference/original/whole-program/ledger.json",
-    "reference/original/presentation/effect-inventory.json",
+    "build/research/decompilation/decompiled/00442c38_FUN_00442c38.c",
+    "build/research/decompilation/decompiled/00449e18_FUN_00449e18.c",
+    "build/research/decompilation/presentation/decompiled/0043416c_TAboutBox_formactivate.c",
+    "build/research/decompilation/whole-program/decompiled/00455cb8.c",
+    "build/research/decompilation/whole-program/decompiled/00484f48.c",
+    "build/research/decompilation/whole-program/decompiled/0047d4a4.c",
+    "build/research/decompilation/whole-program/decompiled/00454de8.c",
+    "build/research/decompilation/whole-program/decompiled/export-manifest.json",
+    "build/research/decompilation/whole-program/discovery-snapshot.json",
+    "build/research/decompilation/whole-program/analysis-snapshot.json",
+    "build/research/decompilation/whole-program/structural-inventory.json",
+    "build/research/decompilation/whole-program/ledger.json",
+    "build/research/decompilation/presentation/effect-inventory.json",
 )
 
 
@@ -87,9 +87,9 @@ def decompile(ghidra):
     if not launcher.is_file():
         raise ValueError("--ghidra must name a Ghidra installation with support/analyzeHeadless")
     original = ROOT / "build/research/TSW.exe"
-    gameplay = ROOT / "reference/original/decompiled"
-    presentation = ROOT / "reference/original/presentation"
-    whole = ROOT / "reference/original/whole-program"
+    gameplay = ROOT / "build/research/decompilation/decompiled"
+    presentation = ROOT / "build/research/decompilation/presentation"
+    whole = ROOT / "build/research/decompilation/whole-program"
     for folder in (gameplay, presentation / "decompiled", whole):
         folder.mkdir(parents=True, exist_ok=True)
     python("tools/fetch_idr_recognition.py")

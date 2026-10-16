@@ -82,7 +82,7 @@ class DelphiReferenceTests(unittest.TestCase):
         self.assertTrue(result["mismatches"])
 
     def test_abi_mismatch_is_retained_as_unaccepted_baseline(self):
-        report = json.loads((ROOT / "reference/delphi2/comparison-report.json").read_text())
+        report = json.loads((ROOT / "build/research/delphi2-reports/comparison-report.json").read_text())
         self.assertFalse(report["status"]["complete_runtime_baseline_accepted"])
         self.assertFalse(report["status"]["full_pascal_game_recovered"])
         for variant in report["variants"].values():
