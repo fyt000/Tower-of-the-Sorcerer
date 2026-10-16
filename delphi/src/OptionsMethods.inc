@@ -10,7 +10,7 @@ begin
   High1.Checked := True;
   Middle1.Checked := False;
   Low1.Checked := False;
-  GameOptions[3] := 1;
+  GameOptions[optionSpeed] := gameSpeedHigh;
 end;
 
 procedure TTSW10.speedmiddle; { $0047F4E0 }
@@ -21,7 +21,7 @@ begin
   High1.Checked := False;
   Middle1.Checked := True;
   Low1.Checked := False;
-  GameOptions[3] := 2;
+  GameOptions[optionSpeed] := gameSpeedMiddle;
 end;
 
 procedure TTSW10.speedlow; { $0047F544 }
@@ -32,7 +32,7 @@ begin
   High1.Checked := False;
   Middle1.Checked := False;
   Low1.Checked := True;
-  GameOptions[3] := 3;
+  GameOptions[optionSpeed] := gameSpeedLow;
 end;
 
 procedure TTSW10.timerin; { $0047F5A8 }
@@ -51,81 +51,81 @@ begin
   Small1.Checked := False;
   Normal1.Checked := False;
   Large1.Checked := False;
-  case GameOptions[0] of
+  case GameOptions[optionSmallFont] of
     8:
-      if GameOptions[1] = 10 then
+      if GameOptions[optionLargeFont] = 10 then
         tiny1.Checked := True;
     9:
-      if GameOptions[1] = 11 then
+      if GameOptions[optionLargeFont] = 11 then
         Small1.Checked := True;
     10:
-      if GameOptions[1] = 12 then
+      if GameOptions[optionLargeFont] = 12 then
         Normal1.Checked := True;
     12:
-      if GameOptions[1] = 14 then
+      if GameOptions[optionLargeFont] = 14 then
         Large1.Checked := True;
   end;
-  Memo1.Font.Size := GameOptions[0];
-  Memo2.Font.Size := GameOptions[0];
-  Memo3.Font.Size := GameOptions[0];
-  Memo4.Font.Size := GameOptions[0];
-  Memo9.Font.Size := GameOptions[0];
-  Memo10.Font.Size := GameOptions[0];
-  Memo8.Font.Size := GameOptions[0];
-  Memo5.Font.Size := GameOptions[0];
-  Memo6.Font.Size := GameOptions[0];
-  Memo7.Font.Size := GameOptions[0];
-  Edit13.Font.Size := GameOptions[0];
-  Edit14.Font.Size := GameOptions[0];
-  Edit15.Font.Size := GameOptions[0];
-  Edit16.Font.Size := GameOptions[0];
-  Edit17.Font.Size := GameOptions[0];
-  Edit18.Font.Size := GameOptions[0];
-  Edit19.Font.Size := GameOptions[0];
-  Edit20.Font.Size := GameOptions[0];
-  Edit21.Font.Size := GameOptions[0];
-  Edit22.Font.Size := GameOptions[0];
-  Edit23.Font.Size := GameOptions[0];
-  Edit24.Font.Size := GameOptions[0];
-  Edit25.Font.Size := GameOptions[0];
-  Edit26.Font.Size := GameOptions[0];
-  Edit27.Font.Size := GameOptions[0];
-  Edit28.Font.Size := GameOptions[0];
-  Edit29.Font.Size := GameOptions[0];
-  Edit30.Font.Size := GameOptions[0];
-  Edit31.Font.Size := GameOptions[0];
-  Edit32.Font.Size := GameOptions[0];
-  Edit33.Font.Size := GameOptions[0];
-  Memo11.Font.Size := GameOptions[1];
-  Edit8.Font.Size := GameOptions[1];
-  RichEdit1.Font.Size := GameOptions[1];
-  Button39.Font.Size := GameOptions[1];
-  Button40.Font.Size := GameOptions[1];
-  Button41.Font.Size := GameOptions[1];
-  Button42.Font.Size := GameOptions[1];
+  Memo1.Font.Size := GameOptions[optionSmallFont];
+  Memo2.Font.Size := GameOptions[optionSmallFont];
+  Memo3.Font.Size := GameOptions[optionSmallFont];
+  Memo4.Font.Size := GameOptions[optionSmallFont];
+  Memo9.Font.Size := GameOptions[optionSmallFont];
+  Memo10.Font.Size := GameOptions[optionSmallFont];
+  Memo8.Font.Size := GameOptions[optionSmallFont];
+  Memo5.Font.Size := GameOptions[optionSmallFont];
+  Memo6.Font.Size := GameOptions[optionSmallFont];
+  Memo7.Font.Size := GameOptions[optionSmallFont];
+  Edit13.Font.Size := GameOptions[optionSmallFont];
+  Edit14.Font.Size := GameOptions[optionSmallFont];
+  Edit15.Font.Size := GameOptions[optionSmallFont];
+  Edit16.Font.Size := GameOptions[optionSmallFont];
+  Edit17.Font.Size := GameOptions[optionSmallFont];
+  Edit18.Font.Size := GameOptions[optionSmallFont];
+  Edit19.Font.Size := GameOptions[optionSmallFont];
+  Edit20.Font.Size := GameOptions[optionSmallFont];
+  Edit21.Font.Size := GameOptions[optionSmallFont];
+  Edit22.Font.Size := GameOptions[optionSmallFont];
+  Edit23.Font.Size := GameOptions[optionSmallFont];
+  Edit24.Font.Size := GameOptions[optionSmallFont];
+  Edit25.Font.Size := GameOptions[optionSmallFont];
+  Edit26.Font.Size := GameOptions[optionSmallFont];
+  Edit27.Font.Size := GameOptions[optionSmallFont];
+  Edit28.Font.Size := GameOptions[optionSmallFont];
+  Edit29.Font.Size := GameOptions[optionSmallFont];
+  Edit30.Font.Size := GameOptions[optionSmallFont];
+  Edit31.Font.Size := GameOptions[optionSmallFont];
+  Edit32.Font.Size := GameOptions[optionSmallFont];
+  Edit33.Font.Size := GameOptions[optionSmallFont];
+  Memo11.Font.Size := GameOptions[optionLargeFont];
+  Edit8.Font.Size := GameOptions[optionLargeFont];
+  RichEdit1.Font.Size := GameOptions[optionLargeFont];
+  Button39.Font.Size := GameOptions[optionLargeFont];
+  Button40.Font.Size := GameOptions[optionLargeFont];
+  Button41.Font.Size := GameOptions[optionLargeFont];
+  Button42.Font.Size := GameOptions[optionLargeFont];
 
   High1.Checked := False;
   Middle1.Checked := False;
   Low1.Checked := False;
-  case GameOptions[3] of
-    1: High1.Checked := True;
-    2: Middle1.Checked := True;
-    3: Low1.Checked := True;
+  case GameOptions[optionSpeed] of
+    gameSpeedHigh: High1.Checked := True;
+    gameSpeedMiddle: Middle1.Checked := True;
+    gameSpeedLow: Low1.Checked := True;
   end;
   timerin;
-  case GameOptions[4] of
-    0:
+  case GameOptions[optionControls] of
+    controlMouse:
     begin
-      GameOptions[4] := 0;
+      GameOptions[optionControls] := controlMouse;
       MouseControl1.Checked := True;
       KeyboardControl1.Checked := False;
       itemdel;
       MainForm.KeyPreview := False;
       itemlive;
     end;
-    1:
+    controlKeyboard:
     begin
-      GameOptions[4] := 1;
+      GameOptions[optionControls] := controlKeyboard;
       MouseControl1.Checked := False;
       KeyboardControl1.Checked := True;
       itemdel;
@@ -133,7 +133,7 @@ begin
       itemlive;
     end;
   end;
-  case GameOptions[5] of
+  case GameOptions[optionIntroduction] of
     0: K5.Checked := False;
     1: K5.Checked := True;
   end;
@@ -165,13 +165,13 @@ begin
       wavon1.Checked := False;
     end;
   end;
-  case GameOptions[8] of
-    0:
+  case GameOptions[optionDisplaySize] of
+    display640x400:
     begin
       N800x5001.Checked := False;
       N640x4001.Checked := True;
     end;
-    1:
+    display800x500:
     begin
       N800x5001.Checked := True;
       N640x4001.Checked := False;
@@ -198,9 +198,9 @@ begin
   Small1.Checked := False;
   Normal1.Checked := False;
   tiny1.Checked := False;
-  GameOptions[0] := 12;
-  GameOptions[1] := 14;
-  GameOptions[2] := 0;
+  GameOptions[optionSmallFont] := 12;
+  GameOptions[optionLargeFont] := 14;
+  GameOptions[optionReserved2] := 0;
   optionl1;
 end;
 procedure TTSW10.Small1Click(Sender: TObject); { $0047F724 }
@@ -209,9 +209,9 @@ begin
   Small1.Checked := True;
   Normal1.Checked := False;
   tiny1.Checked := False;
-  GameOptions[0] := 9;
-  GameOptions[1] := 11;
-  GameOptions[2] := 0;
+  GameOptions[optionSmallFont] := 9;
+  GameOptions[optionLargeFont] := 11;
+  GameOptions[optionReserved2] := 0;
   optionl1;
 end;
 procedure TTSW10.Normal1Click(Sender: TObject); { $0047F77C }
@@ -220,9 +220,9 @@ begin
   Small1.Checked := False;
   Normal1.Checked := True;
   tiny1.Checked := False;
-  GameOptions[0] := 10;
-  GameOptions[1] := 12;
-  GameOptions[2] := 0;
+  GameOptions[optionSmallFont] := 10;
+  GameOptions[optionLargeFont] := 12;
+  GameOptions[optionReserved2] := 0;
   optionl1;
 end;
 procedure TTSW10.tiny1Click(Sender: TObject); { $00480E0C }
@@ -231,9 +231,9 @@ begin
   Small1.Checked := False;
   Normal1.Checked := False;
   tiny1.Checked := True;
-  GameOptions[0] := 8;
-  GameOptions[1] := 10;
-  GameOptions[2] := 0;
+  GameOptions[optionSmallFont] := 8;
+  GameOptions[optionLargeFont] := 10;
+  GameOptions[optionReserved2] := 0;
   optionl1;
 end;
 
@@ -244,7 +244,7 @@ begin
   BitBtn2.Visible := False;
   BitBtn3.Visible := False;
   BitBtn4.Visible := False;
-  GameOptions[4] := 1;
+  GameOptions[optionControls] := controlKeyboard;
   MouseControl1.Checked := False;
   KeyboardControl1.Checked := True;
   itemdel;
@@ -255,7 +255,7 @@ end;
 procedure TTSW10.MouseControl1Click(Sender: TObject); { $00480EE0 }
 begin
   itemdel;
-  GameOptions[4] := 0;
+  GameOptions[optionControls] := controlMouse;
   { The introduction keeps movement buttons hidden until gameplay starts. }
   if not Timer4.Enabled then
   begin
@@ -272,11 +272,11 @@ end;
 
 procedure TTSW10.N800x5001Click(Sender: TObject); { $00484CAC }
 begin
-  if (GameOptions[8] = 0) and (Screen.Width >= 800) then
+  if (GameOptions[optionDisplaySize] = display640x400) and (Screen.Width >= 800) then
   begin
     N800x5001.Checked := True;
     N640x4001.Checked := False;
-    GameOptions[8] := 1;
+    GameOptions[optionDisplaySize] := display800x500;
     ImageList1.Clear;
     ImageList2.Clear;
     ImageList3.Clear;
@@ -291,11 +291,11 @@ end;
 
 procedure TTSW10.N640x4001Click(Sender: TObject); { $00484D74 }
 begin
-  if GameOptions[8] = 1 then
+  if GameOptions[optionDisplaySize] = display800x500 then
   begin
     N800x5001.Checked := False;
     N640x4001.Checked := True;
-    GameOptions[8] := 0;
+    GameOptions[optionDisplaySize] := display640x400;
     ImageList1.Clear;
     ImageList2.Clear;
     ImageList3.Clear;
@@ -310,18 +310,18 @@ procedure TTSW10.NormalOption1Click(Sender: TObject); { $0047F5E8 }
 begin
   if MessageDlg('Initialize options. Is it true?', mtInformation, [mbYes, mbNo], 0) = mrYes then
   begin
-    GameOptions[0] := 10;
-    GameOptions[1] := 12;
-    GameOptions[2] := 0;
-    GameOptions[3] := 2;
-    GameOptions[4] := 0;
-    GameOptions[5] := 1;
+    GameOptions[optionSmallFont] := 10;
+    GameOptions[optionLargeFont] := 12;
+    GameOptions[optionReserved2] := 0;
+    GameOptions[optionSpeed] := gameSpeedMiddle;
+    GameOptions[optionControls] := controlMouse;
+    GameOptions[optionIntroduction] := 1;
     GameOptions[6] := 0;
     GameOptions[7] := 0;
-    GameOptions[9] := 0;
-    if GameOptions[8] = 1 then
+    GameOptions[optionReserved9] := 0;
+    if GameOptions[optionDisplaySize] = display800x500 then
     begin
-      GameOptions[8] := 0;
+      GameOptions[optionDisplaySize] := display640x400;
       ImageList1.Clear;
       ImageList2.Clear;
       ImageList3.Clear;
@@ -338,16 +338,16 @@ end;
 procedure TTSW10.buttonfocus; { $00442D50 }
 begin
   case FacingRequest of
-    1:
+    Ord(moveUp):
       if BitBtn1.Visible = True then
         BitBtn1.SetFocus;
-    2:
+    Ord(moveLeft):
       if BitBtn2.Visible = True then
         BitBtn2.SetFocus;
-    3:
+    Ord(moveRight):
       if BitBtn3.Visible = True then
         BitBtn3.SetFocus;
-    4:
+    Ord(moveDown):
       if BitBtn4.Visible = True then
         BitBtn4.SetFocus;
   end;

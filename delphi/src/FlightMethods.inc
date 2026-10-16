@@ -2,7 +2,7 @@ procedure TTSW10.monswork; { $0044B6F4 }
 begin
   MonsterText := ListBox2.Items[$5D];
   case MonsterIndex of
-    0..33: MonsterText := ListBox2.Items[MonsterIndex + $5E];
+    Ord(monsterGreenSlime)..33: MonsterText := ListBox2.Items[MonsterIndex + $5E];
   end;
 end;
 
@@ -13,7 +13,7 @@ begin
   Image31.Visible := False;
   DrawX := 0;
   DrawY := 0;
-  if MonsterIndex >= 0 then
+  if MonsterIndex >= Ord(monsterGreenSlime) then
   begin
     WorkBitmap1.Width := Image6.Width;
     WorkBitmap1.Height := Image6.Height;
@@ -27,10 +27,10 @@ begin
     monswork;
     Frame := 0;
     case MonsterIndex of
-      0..17: Frame := MonsterIndex * 2 + $3C;
-      18: Frame := $67;
-      19: Frame := $79;
-      20..32: Frame := MonsterIndex * 2 + $5C;
+      Ord(monsterGreenSlime)..Ord(monsterVampire): Frame := MonsterIndex * 2 + $3C;
+      Ord(monsterOctopus): Frame := $67;
+      Ord(monsterDragon): Frame := $79;
+      Ord(monsterGoldenKnight)..Ord(monsterGateKeeperA): Frame := MonsterIndex * 2 + $5C;
     end;
     ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, $A2);
     ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, Frame);
@@ -38,13 +38,13 @@ begin
     TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
     SourceRect := TargetRect;
     kasanegaki;
-    case GameOptions[8] of
-      0:
+    case GameOptions[optionDisplaySize] of
+      display640x400:
       begin
         Image31.Top := $E6;
         Image31.Left := Image3.Left + $2E;
       end;
-      1:
+      display800x500:
       begin
         Image31.Top := $120;
         Image31.Left := Image3.Left + $3A;
@@ -66,13 +66,13 @@ begin
     WorkBitmap3.Width := Image6.Width;
     WorkBitmap3.Height := Image6.Height;
     ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, $A2);
-    case GameOptions[8] of
-      0:
+    case GameOptions[optionDisplaySize] of
+      display640x400:
       begin
         Image31.Top := $E6;
         Image31.Left := Image3.Left + $2E;
       end;
-      1:
+      display800x500:
       begin
         Image31.Top := $120;
         Image31.Left := Image3.Left + $3A;
@@ -105,8 +105,8 @@ end;
 
 procedure TTSW10.img4work; { $00481E80 }
 begin
-  Hero.Word632 := 0;
-  Hero.Word664 := 0;
+  Hero.Word632 := Ord(flightNone);
+  Hero.Word664 := Ord(stairNone);
   DamageMode := 2;
   StrikeCount := -1;
   MonsterIndex := -1;
@@ -115,8 +115,8 @@ begin
   begin
     itemdel;
     TileClass := 0;
-    ScratchIndex := Hero.y * 11 + Hero.x;
-    NeighborIndex := ScratchIndex - 11;
+    ScratchIndex := Hero.y * BoardWidth + Hero.x;
+    NeighborIndex := ScratchIndex - BoardWidth;
     case Hero.y of
       1..10: mmes;
     end;
@@ -128,7 +128,7 @@ begin
     case Hero.x of
       0..9: mmes;
     end;
-    NeighborIndex := ScratchIndex + 11;
+    NeighborIndex := ScratchIndex + BoardWidth;
     case Hero.y of
       0..9: mmes;
     end;
@@ -163,7 +163,7 @@ procedure TTSW10.Button9Click(Sender: TObject); { $0044ED1C }
 begin
   if Hero.floor > 1 then
   begin
-    Hero.Word632 := 2;
+    Hero.Word632 := Ord(flightDown);
     if Hero.floor = $2D then
       Hero.floor := $2B
     else
@@ -184,7 +184,7 @@ procedure TTSW10.Button8Click(Sender: TObject); { $0044ED94 }
 begin
   if Hero.floor < Hero.highest_floor then
   begin
-    Hero.Word632 := 1;
+    Hero.Word632 := Ord(flightUp);
     if Hero.floor = $2B then
       Hero.floor := $2D
     else
@@ -192,7 +192,7 @@ begin
     mhyouji;
     disp;
     if (Hero.floor = $23) and (Maps[35, 93] + Maps[2, 122] = $1B) then
-      Maps[2, 122] := 6;
+      Maps[2, 122] := tileRoad;
     if not Button9.Enabled and (Hero.floor > 1) then
       Button9.Enabled := True;
     if Hero.highest_floor = Hero.floor then
@@ -208,39 +208,39 @@ begin
   Button8.Visible := False;
   Button9.Visible := False;
   Button10.Visible := False;
-  if (Hero.Word632 <> 0) and (Hero.floor <> $19) and (Maps[25, 73] = $17) then
-    Maps[25, 73] := 6;
-  if (Hero.Word632 <> 0) and (Hero.floor <> $31) and (Maps[49, 18] = $17) then
-    Maps[49, 18] := 6;
+  if (Hero.Word632 <> Ord(flightNone)) and (Hero.floor <> $19) and (Maps[25, 73] = tileFairy) then
+    Maps[25, 73] := tileRoad;
+  if (Hero.Word632 <> Ord(flightNone)) and (Hero.floor <> $31) and (Maps[49, 18] = tileFairy) then
+    Maps[49, 18] := tileRoad;
   Hero.Word48 := 0;
   case Hero.Word632 of
-    1:
-      if (Hero.floor = Hero.highest_floor) and (Hero.Word664 = 1) then
-        Hero.Word632 := 2;
-    2:
-      if (Hero.floor = Hero.highest_floor) and (Hero.Word664 <> 1) then
-        Hero.Word632 := 1;
+    Ord(flightUp):
+      if (Hero.floor = Hero.highest_floor) and (Hero.Word664 = Ord(stairUp)) then
+        Hero.Word632 := Ord(flightDown);
+    Ord(flightDown):
+      if (Hero.floor = Hero.highest_floor) and (Hero.Word664 <> Ord(stairUp)) then
+        Hero.Word632 := Ord(flightUp);
   end;
   case Hero.Word632 of
-    1..2:
+    Ord(flightUp)..Ord(flightDown):
     begin
-      Hero.x := Maps[Hero.floor, Hero.Word632 - 1] mod 11;
-      Hero.y := Maps[Hero.floor, Hero.Word632 - 1] div 11;
+      Hero.x := Maps[Hero.floor, Hero.Word632 - 1] mod BoardWidth;
+      Hero.y := Maps[Hero.floor, Hero.Word632 - 1] div BoardWidth;
     end;
   end;
-  if (Hero.Word632 <> 0) and (Hero.highest_floor = $1D) and (Hero.floor < $1D) then
+  if (Hero.Word632 <> Ord(flightNone)) and (Hero.highest_floor = $1D) and (Hero.floor < $1D) then
   begin
-    Maps[29, 40] := 6;
-    Maps[29, 29] := 6;
-    Maps[29, 19] := $15;
+    Maps[29, 40] := tileRoad;
+    Maps[29, 29] := tileRoad;
+    Maps[29, 19] := tileThief;
   end;
   { Preview rendering uses DrawIndex without changing the movement cursor. }
-  FlightCell := Hero.y * 11 + Hero.x;
-  DrawX := (Image6.Width * FlightCell) mod (Image6.Width * 11);
-  DrawY := ((Image6.Height * FlightCell) div (Image6.Height * 11)) * Image6.Height;
+  FlightCell := Hero.y * BoardWidth + Hero.x;
+  DrawX := (Image6.Width * FlightCell) mod (Image6.Width * BoardWidth);
+  DrawY := ((Image6.Height * FlightCell) div (Image6.Height * BoardWidth)) * Image6.Height;
   case Hero.Word632 of
-    1: kaidanupcheck;
-    2: kaidandowncheck;
+    Ord(flightUp): kaidanupcheck;
+    Ord(flightDown): kaidandowncheck;
   end;
   timer2on;
   { PushCommand(0, 0, 0): wait. }

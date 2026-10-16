@@ -71,7 +71,7 @@ begin
   DrawY := 0;
   DoorOpened := $A2;
   ImageList1.Draw(WorkBitmap1.Canvas, DrawX, DrawY, DoorOpened);
-  if Hero.sword <> 0 then
+  if Hero.sword <> Ord(equipmentNone) then
   begin
     ImageList1.Draw(WorkBitmap2.Canvas, DrawX, DrawY, Hero.sword + $31);
     ImageList3.Draw(WorkBitmap3.Canvas, DrawX, DrawY, Hero.sword + $31);
@@ -81,36 +81,36 @@ begin
   end;
   Image19.Picture.Bitmap := WorkBitmap1;
   case Hero.sword of
-    0:
+    Ord(equipmentNone):
     begin
       Memo9.Text := '      ';
       Image19.ShowHint := False;
     end;
-    1:
+    Ord(equipmentIron):
     begin
       Memo9.Text := 'Iron';
       Image19.Hint := 'Iron Sword';
       Image19.ShowHint := True;
     end;
-    2:
+    Ord(equipmentSilver):
     begin
       Memo9.Text := 'Silver';
       Image19.Hint := 'Silver Sword';
       Image19.ShowHint := True;
     end;
-    3:
+    Ord(equipmentKnight):
     begin
       Memo9.Text := 'Knight';
       Image19.Hint := 'Knight Sword';
       Image19.ShowHint := True;
     end;
-    4:
+    Ord(equipmentHoly):
     begin
       Memo9.Text := 'Holy';
       Image19.Hint := 'Holy Sword';
       Image19.ShowHint := True;
     end;
-    5:
+    Ord(equipmentSacred):
     begin
       Memo9.Text := 'Sacred';
       Image19.Hint := 'Sacred Sword';
@@ -119,7 +119,7 @@ begin
   end;
   DoorOpened := $A2;
   ImageList1.Draw(WorkBitmap1.Canvas, DrawX, DrawY, DoorOpened);
-  if Hero.shield <> 0 then
+  if Hero.shield <> Ord(equipmentNone) then
   begin
     ImageList1.Draw(WorkBitmap2.Canvas, DrawX, DrawY, Hero.shield + $36);
     ImageList3.Draw(WorkBitmap3.Canvas, DrawX, DrawY, Hero.shield + $36);
@@ -129,36 +129,36 @@ begin
   end;
   Image20.Picture.Bitmap := WorkBitmap1;
   case Hero.shield of
-    0:
+    Ord(equipmentNone):
     begin
       Memo10.Text := '      ';
       Image20.ShowHint := False;
     end;
-    1:
+    Ord(equipmentIron):
     begin
       Memo10.Text := 'Iron';
       Image20.Hint := 'Iron Shield';
       Image20.ShowHint := True;
     end;
-    2:
+    Ord(equipmentSilver):
     begin
       Memo10.Text := 'Silver';
       Image20.Hint := 'Silver Shield';
       Image20.ShowHint := True;
     end;
-    3:
+    Ord(equipmentKnight):
     begin
       Memo10.Text := 'Knight';
       Image20.Hint := 'Knight Shield';
       Image20.ShowHint := True;
     end;
-    4:
+    Ord(equipmentHoly):
     begin
       Memo10.Text := 'Holy';
       Image20.Hint := 'Holy Shield';
       Image20.ShowHint := True;
     end;
-    5:
+    Ord(equipmentSacred):
     begin
       Memo10.Text := 'Sacred';
       Image20.Hint := 'Sacred Shield';
@@ -366,8 +366,8 @@ end;
 
 procedure TTSW10.takowork1; { $004548A0 }
 begin
-  ScratchIndex := ((Hero.y * 11 + Hero.x) mod 11) * Image6.Width;
-  NeighborIndex := ((Hero.y * 11 + Hero.x) div 11) * Image6.Height;
+  ScratchIndex := ((Hero.y * BoardWidth + Hero.x) mod BoardWidth) * Image6.Width;
+  NeighborIndex := ((Hero.y * BoardWidth + Hero.x) div BoardWidth) * Image6.Height;
   ImageList1.Draw(MapBitmap1.Canvas, ScratchIndex - Image6.Width, NeighborIndex, 5);
   ImageList1.Draw(MapBitmap1.Canvas, ScratchIndex + Image6.Width, NeighborIndex, 5);
   ImageList1.Draw(MapBitmap1.Canvas, ScratchIndex - Image6.Width, NeighborIndex - Image6.Height, 5);
@@ -382,8 +382,8 @@ end;
 
 procedure TTSW10.takowork2; { $00454A58 }
 begin
-  ScratchIndex := ((Hero.y * 11 + Hero.x) mod 11) * Image6.Width;
-  NeighborIndex := ((Hero.y * 11 + Hero.x) div 11) * Image6.Height;
+  ScratchIndex := ((Hero.y * BoardWidth + Hero.x) mod BoardWidth) * Image6.Width;
+  NeighborIndex := ((Hero.y * BoardWidth + Hero.x) div BoardWidth) * Image6.Height;
   ImageList1.Draw(MapBitmap2.Canvas, ScratchIndex - Image6.Width, NeighborIndex, 5);
   ImageList1.Draw(MapBitmap2.Canvas, ScratchIndex + Image6.Width, NeighborIndex, 5);
   ImageList1.Draw(MapBitmap2.Canvas, ScratchIndex - Image6.Width, NeighborIndex - Image6.Height, 5);
@@ -404,26 +404,26 @@ begin
     if Hero.Word48 = 0 then
     begin
       if Hero.floor = 15 then
-        if Hero.y * 11 + Hero.x = $3C then
-          if Maps[15, 62] = 6 then
+        if Hero.y * BoardWidth + Hero.x = $3C then
+          if Maps[15, 62] = tileRoad then
             if Hero.Word608 <= 1 then
             begin
               takowork2;
               Hero.Word608 := Hero.Word608 + 1;
             end;
       if Hero.floor = 35 then
-        if Hero.y * 11 + Hero.x = $47 then
-          if Maps[35, 73] = 6 then
+        if Hero.y * BoardWidth + Hero.x = $47 then
+          if Maps[35, 73] = tileRoad then
             if Hero.Word612 <= 1 then
             begin
               takowork2;
               Hero.Word612 := Hero.Word612 + 1;
             end;
       case Hero.facing of
-        1: ScratchIndex := $FE;
-        2: ScratchIndex := $106;
-        3: ScratchIndex := $10E;
-        4: ScratchIndex := $116;
+        Ord(hfDown): ScratchIndex := $FE;
+        Ord(hfLeft): ScratchIndex := $106;
+        Ord(hfRight): ScratchIndex := $10E;
+        Ord(hfUp): ScratchIndex := $116;
       end;
       DoorOpened := 1;
       yusyahyouji;
@@ -436,26 +436,26 @@ begin
     if Hero.Word48 = 0 then
     begin
       if Hero.floor = 15 then
-        if Hero.y * 11 + Hero.x = $3C then
-          if Maps[15, 62] = 6 then
+        if Hero.y * BoardWidth + Hero.x = $3C then
+          if Maps[15, 62] = tileRoad then
             if Hero.Word608 <= 1 then
             begin
               takowork1;
               Hero.Word608 := Hero.Word608 + 1;
             end;
       if Hero.floor = 35 then
-        if Hero.y * 11 + Hero.x = $47 then
-          if Maps[35, 73] = 6 then
+        if Hero.y * BoardWidth + Hero.x = $47 then
+          if Maps[35, 73] = tileRoad then
             if Hero.Word612 <= 1 then
             begin
               takowork1;
               Hero.Word612 := Hero.Word612 + 1;
             end;
       case Hero.facing of
-        1: ScratchIndex := $FE;
-        2: ScratchIndex := $106;
-        3: ScratchIndex := $10E;
-        4: ScratchIndex := $116;
+        Ord(hfDown): ScratchIndex := $FE;
+        Ord(hfLeft): ScratchIndex := $106;
+        Ord(hfRight): ScratchIndex := $10E;
+        Ord(hfUp): ScratchIndex := $116;
       end;
       DoorOpened := 0;
       yusyahyouji;

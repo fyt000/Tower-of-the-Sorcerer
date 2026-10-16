@@ -79,6 +79,38 @@ Run `format_delphi.py` without `--check` to format. Rebuild after Pascal changes
 add `--audio-smoke` only for audio-related changes. Other `verify_delphi_*.py`
 tools cover graphics, Flight, UI, startup and runtime behavior.
 
+Recovered numeric domains are named in `GameState.pas`: map tiles, monster rows,
+inventory choices, equipment tiers, facing, movement requests, Flight/stair kinds,
+shop modes, speech IDs, text indices and option slots/values. Persisted fields and
+event operands retain their original integer types. Enum members are used through
+`Ord(...)` on those integer fields; sparse IDs and byte option values use untyped
+constants. Delphi 2 can widen byte comparisons involving `Ord(enum)`, and typed
+constants allocate data, so neither is a safe substitute for an untyped byte
+literal. Inventory choices are one-based, merchant mode is zero, and facing and
+movement requests encode up/down differently; these values must not be copied
+from the C++ enum declaration order.
+
+For a source-only cleanup, capture a fresh successful build **before editing**,
+then compare the rebuilt artifacts with that baseline:
+
+```powershell
+python tools/build_delphi_game.py
+python tools/compare_delphi_builds.py capture build/my-delphi-baseline
+# Edit, format and rebuild the Pascal sources.
+python tools/build_delphi_game.py --smoke
+python tools/compare_delphi_builds.py check build/my-delphi-baseline
+python tools/test_delphi_builds.py
+```
+
+The check covers every built EXE/DLL in full, including code, data, resource
+payloads, headers, section layouts and BSS sizes. Only corresponding PE resource
+directory `TimeDateStamp` fields may differ. It saves the result in
+`build/delphi-game/reports/constant-cleanup-comparison.json`. The routine tests
+also rebuild an isolated numeric-literal version of the named values and require
+the same full-image comparison to pass. Original generated map/reset stores,
+unverified offsets, aggregate puzzle totals and unrelated scene operands stay
+literal until their domains are established.
+
 Detailed results, byte differences and calendar call traces are generated under
 `build/delphi-game/reports/`. Comparison tools accept `--check` for stale reports.
 See also [mechanics](../docs/mechanics.md) and the [save layout](../docs/original-data.md#original-saves).

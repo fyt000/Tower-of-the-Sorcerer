@@ -68,101 +68,108 @@ end;
 procedure TTSW10.mmmes; { $00451C20 }
 begin
   TileClass := 0;
-  case Maps[Hero.floor, NeighborIndex + 2] of
-    8: TileClass := 1;
-    61..90, 93..96, 133..144, 147..158:
+  case Maps[Hero.floor, NeighborIndex + MapTileOffset] of
+    tileWall: TileClass := 1;
+    tileGreenSlime..tileRock + 1,
+    tileSorcerer..tileVampire + 1,
+    tileGoldenKnight..tileSlimeMan + 1,
+    tileVampireBat..tileGateKeeperA + 1:
     begin
       TileClass := 2;
-      case Maps[Hero.floor, NeighborIndex + 2] of
-        61..96: MonsterIndex := (Maps[Hero.floor, NeighborIndex + 2] - 61) div 2;
-        97..114: MonsterIndex := 18;
-        115..132: MonsterIndex := 19;
-        133..158: MonsterIndex := (Maps[Hero.floor, NeighborIndex + 2] - 133) div 2 + 20;
+      case Maps[Hero.floor, NeighborIndex + MapTileOffset] of
+        tileGreenSlime..tileVampire + 1:
+          MonsterIndex := (Maps[Hero.floor, NeighborIndex + MapTileOffset] - tileGreenSlime) div 2;
+        tileOctopusFirst..tileOctopusLast: MonsterIndex := Ord(monsterOctopus);
+        tileDragonFirst..132: MonsterIndex := Ord(monsterDragon);
+        tileGoldenKnight..tileGateKeeperA + 1:
+          MonsterIndex :=
+              (Maps[Hero.floor, NeighborIndex + MapTileOffset] - tileGoldenKnight) div 2
+                  + Ord(monsterGoldenKnight);
       end;
     end;
-    13: TileClass := 3;
+    tileLava: TileClass := 3;
   end;
 end;
 procedure TTSW10.mmes; { $0044C9F0; preserves prior message unless a case matches }
 begin
-  case Maps[Hero.floor, NeighborIndex + 2] - 1 of
-    10:
+  case Maps[Hero.floor, NeighborIndex + MapTileOffset] - 1 of
+    tileStairsUp - 1:
     begin
       TileClass := 19;
       if Hero.floor = Hero.highest_floor then
-        Hero.Word664 := 1;
+        Hero.Word664 := Ord(stairUp);
     end;
-    11:
+    tileStairsDown - 1:
     begin
       TileClass := 19;
       if Hero.floor = Hero.highest_floor then
-        Hero.Word664 := 2;
+        Hero.Word664 := Ord(stairDown);
     end;
-    12: TileClass := 52;
-    15: TileClass := 24;
-    17: TileClass := 24;
-    18, 19: TileClass := 13;
-    20, 21: TileClass := 15;
-    22, 23: TileClass := 14;
-    24, 25: TileClass := 12;
-    150, 151: TileClass := 110;
-    152, 153: TileClass := 111;
+    tileLava - 1: TileClass := 52;
+    tileAltar - 1: TileClass := 24;
+    tileAltarSide - 1: TileClass := 24;
+    tileMerchant - 1, tileMerchant2 - 1: TileClass := 13;
+    tileThief - 1, tileThief2 - 1: TileClass := 15;
+    tileFairy - 1, tileFairy2 - 1: TileClass := 14;
+    tileOldMan - 1, tileOldMan2 - 1: TileClass := 12;
+    tileMagicianA - 1, tileMagicianA + 1 - 1: TileClass := 110;
+    tileMagicianB - 1, tileMagicianB + 1 - 1: TileClass := 111;
   end;
 end;
 procedure TTSW10.kaidanupcheck; { $00442F80; the last matching adjacent stair sets facing }
 begin
-  ScratchIndex := Hero.y * 11 + Hero.x;
-  NeighborIndex := ScratchIndex - 11;
+  ScratchIndex := Hero.y * BoardWidth + Hero.x;
+  NeighborIndex := ScratchIndex - BoardWidth;
   case Hero.y of
     1..10:
-      if Maps[Hero.floor, NeighborIndex + 2] = 12 then
-        Hero.facing := 1;
+      if Maps[Hero.floor, NeighborIndex + MapTileOffset] = tileStairsDown then
+        Hero.facing := Ord(hfDown);
   end;
   NeighborIndex := ScratchIndex - 1;
   case Hero.x of
     1..10:
-      if Maps[Hero.floor, NeighborIndex + 2] = 12 then
-        Hero.facing := 3;
+      if Maps[Hero.floor, NeighborIndex + MapTileOffset] = tileStairsDown then
+        Hero.facing := Ord(hfRight);
   end;
   NeighborIndex := ScratchIndex + 1;
   case Hero.x of
     0..9:
-      if Maps[Hero.floor, NeighborIndex + 2] = 12 then
-        Hero.facing := 2;
+      if Maps[Hero.floor, NeighborIndex + MapTileOffset] = tileStairsDown then
+        Hero.facing := Ord(hfLeft);
   end;
-  NeighborIndex := ScratchIndex + 11;
+  NeighborIndex := ScratchIndex + BoardWidth;
   case Hero.y of
     0..9:
-      if Maps[Hero.floor, NeighborIndex + 2] = 12 then
-        Hero.facing := 4;
+      if Maps[Hero.floor, NeighborIndex + MapTileOffset] = tileStairsDown then
+        Hero.facing := Ord(hfUp);
   end;
 end;
 procedure TTSW10.kaidandowncheck; { $00443050 }
 begin
-  ScratchIndex := Hero.y * 11 + Hero.x;
-  NeighborIndex := ScratchIndex - 11;
+  ScratchIndex := Hero.y * BoardWidth + Hero.x;
+  NeighborIndex := ScratchIndex - BoardWidth;
   case Hero.y of
     1..10:
-      if Maps[Hero.floor, NeighborIndex + 2] = 11 then
-        Hero.facing := 1;
+      if Maps[Hero.floor, NeighborIndex + MapTileOffset] = tileStairsUp then
+        Hero.facing := Ord(hfDown);
   end;
   NeighborIndex := ScratchIndex - 1;
   case Hero.x of
     1..10:
-      if Maps[Hero.floor, NeighborIndex + 2] = 11 then
-        Hero.facing := 3;
+      if Maps[Hero.floor, NeighborIndex + MapTileOffset] = tileStairsUp then
+        Hero.facing := Ord(hfRight);
   end;
   NeighborIndex := ScratchIndex + 1;
   case Hero.x of
     0..9:
-      if Maps[Hero.floor, NeighborIndex + 2] = 11 then
-        Hero.facing := 2;
+      if Maps[Hero.floor, NeighborIndex + MapTileOffset] = tileStairsUp then
+        Hero.facing := Ord(hfLeft);
   end;
-  NeighborIndex := ScratchIndex + 11;
+  NeighborIndex := ScratchIndex + BoardWidth;
   case Hero.y of
     0..9:
-      if Maps[Hero.floor, NeighborIndex + 2] = 11 then
-        Hero.facing := 4;
+      if Maps[Hero.floor, NeighborIndex + MapTileOffset] = tileStairsUp then
+        Hero.facing := Ord(hfUp);
   end;
 end;
 procedure TTSW10.damecount; { $0045031C }
@@ -479,7 +486,7 @@ begin
   Inc(EventCursor);
   EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
   EventStack[EventCursor].A := Word(NeighborIndex);
-  EventStack[EventCursor].B := 6;
+  EventStack[EventCursor].B := tileRoad;
   { PushCommand(0, 0, 0): wait / paired animation operands. }
   Inc(EventCursor);
   EventStack[EventCursor].Opcode := Ord(evWait);
@@ -516,7 +523,7 @@ begin
               + Maps[Hero.floor, 60]
               + Maps[Hero.floor, 62]
           = 7) then
-        if (Maps[Hero.floor, 16] = 6) then
+        if (Maps[Hero.floor, 16] = tileRoad) then
           if (ContactIndex = 38) then
           begin
             { PushCommand(0, 0, 0): wait / paired animation operands. }
@@ -528,7 +535,7 @@ begin
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
             EventStack[EventCursor].A := 36;
-            EventStack[EventCursor].B := 43;
+            EventStack[EventCursor].B := tileWarpStaff;
             { PushCommand(0, 0, 0): wait / paired animation operands. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -558,7 +565,7 @@ begin
               + Maps[Hero.floor, 60]
               + Maps[Hero.floor, 62]
           = 7) then
-        if (Maps[Hero.floor, 40] = 6) then
+        if (Maps[Hero.floor, 40] = tileRoad) then
           if (ContactIndex = 14) then
           begin
             { PushCommand(0, 0, 0): wait / paired animation operands. }
@@ -570,7 +577,7 @@ begin
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
             EventStack[EventCursor].A := 36;
-            EventStack[EventCursor].B := 43;
+            EventStack[EventCursor].B := tileWarpStaff;
             { PushCommand(0, 0, 0): wait / paired animation operands. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -595,13 +602,13 @@ begin
     end;
     43: { Arm the sorcerer trap by changing contact cell 7 to special road. }
       if (ContactIndex = 7) then
-        if (Maps[Hero.floor, 10] = 93) then
+        if (Maps[Hero.floor, 10] = tileSorcerer) then
         begin
           { PushCommand(6, 7, 7): change tile and redraw. }
           Inc(EventCursor);
           EventStack[EventCursor].Opcode := Ord(evSetTile);
           EventStack[EventCursor].A := 7;
-          EventStack[EventCursor].B := 7;
+          EventStack[EventCursor].B := tileSpecialRoad;
         end;
   end;
 end;

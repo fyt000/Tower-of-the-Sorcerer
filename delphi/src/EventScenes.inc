@@ -27,7 +27,7 @@ begin
         { PushCommand(13, (3 * 11 + 7), 5): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (3 * 11 + 7);
+        EventStack[EventCursor].A := (3 * BoardWidth + 7);
         EventStack[EventCursor].B := 5;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -43,7 +43,7 @@ begin
         { PushCommand(13, (3 * 11 + 3), 5): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (3 * 11 + 3);
+        EventStack[EventCursor].A := (3 * BoardWidth + 3);
         EventStack[EventCursor].B := 5;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -94,8 +94,8 @@ begin
         { PushCommand(12, (3 * 11 + 7), (3 * 11 + 6)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 7);
-        EventStack[EventCursor].B := (3 * 11 + 6);
+        EventStack[EventCursor].A := (3 * BoardWidth + 7);
+        EventStack[EventCursor].B := (3 * BoardWidth + 6);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -124,8 +124,8 @@ begin
         { PushCommand(12, (3 * 11 + 8), (3 * 11 + 7)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 8);
-        EventStack[EventCursor].B := (3 * 11 + 7);
+        EventStack[EventCursor].A := (3 * BoardWidth + 8);
+        EventStack[EventCursor].B := (3 * BoardWidth + 7);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -154,8 +154,8 @@ begin
         { PushCommand(12, (3 * 11 + 9), (3 * 11 + 8)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 9);
-        EventStack[EventCursor].B := (3 * 11 + 8);
+        EventStack[EventCursor].A := (3 * BoardWidth + 9);
+        EventStack[EventCursor].B := (3 * BoardWidth + 8);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -184,8 +184,8 @@ begin
         { PushCommand(12, (3 * 11 + 10), (3 * 11 + 9)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 10);
-        EventStack[EventCursor].B := (3 * 11 + 9);
+        EventStack[EventCursor].A := (3 * BoardWidth + 10);
+        EventStack[EventCursor].B := (3 * BoardWidth + 9);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -214,8 +214,8 @@ begin
         { PushCommand(12, (2 * 11 + 10), (3 * 11 + 10)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (2 * 11 + 10);
-        EventStack[EventCursor].B := (3 * 11 + 10);
+        EventStack[EventCursor].A := (2 * BoardWidth + 10);
+        EventStack[EventCursor].B := (3 * BoardWidth + 10);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -244,8 +244,8 @@ begin
         { PushCommand(12, (3 * 11 + 3), (3 * 11 + 4)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 3);
-        EventStack[EventCursor].B := (3 * 11 + 4);
+        EventStack[EventCursor].A := (3 * BoardWidth + 3);
+        EventStack[EventCursor].B := (3 * BoardWidth + 4);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -274,8 +274,8 @@ begin
         { PushCommand(12, (3 * 11 + 2), (3 * 11 + 3)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 2);
-        EventStack[EventCursor].B := (3 * 11 + 3);
+        EventStack[EventCursor].A := (3 * BoardWidth + 2);
+        EventStack[EventCursor].B := (3 * BoardWidth + 3);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -304,8 +304,8 @@ begin
         { PushCommand(12, (3 * 11 + 1), (3 * 11 + 2)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 1);
-        EventStack[EventCursor].B := (3 * 11 + 2);
+        EventStack[EventCursor].A := (3 * BoardWidth + 1);
+        EventStack[EventCursor].B := (3 * BoardWidth + 2);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -334,8 +334,8 @@ begin
         { PushCommand(12, (3 * 11 + 0), (3 * 11 + 1)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 0);
-        EventStack[EventCursor].B := (3 * 11 + 1);
+        EventStack[EventCursor].A := (3 * BoardWidth + 0);
+        EventStack[EventCursor].B := (3 * BoardWidth + 1);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -364,8 +364,8 @@ begin
         { PushCommand(12, (2 * 11 + 0), (3 * 11 + 0)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (2 * 11 + 0);
-        EventStack[EventCursor].B := (3 * 11 + 0);
+        EventStack[EventCursor].A := (2 * BoardWidth + 0);
+        EventStack[EventCursor].B := (3 * BoardWidth + 0);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -394,8 +394,8 @@ begin
         { PushCommand(12, (3 * 11 + 6), (4 * 11 + 6)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 6);
-        EventStack[EventCursor].B := (4 * 11 + 6);
+        EventStack[EventCursor].A := (3 * BoardWidth + 6);
+        EventStack[EventCursor].B := (4 * BoardWidth + 6);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -424,8 +424,8 @@ begin
         { PushCommand(12, (3 * 11 + 7), (3 * 11 + 6)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 7);
-        EventStack[EventCursor].B := (3 * 11 + 6);
+        EventStack[EventCursor].A := (3 * BoardWidth + 7);
+        EventStack[EventCursor].B := (3 * BoardWidth + 6);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -454,8 +454,8 @@ begin
         { PushCommand(12, (3 * 11 + 8), (3 * 11 + 7)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 8);
-        EventStack[EventCursor].B := (3 * 11 + 7);
+        EventStack[EventCursor].A := (3 * BoardWidth + 8);
+        EventStack[EventCursor].B := (3 * BoardWidth + 7);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -484,8 +484,8 @@ begin
         { PushCommand(12, (3 * 11 + 9), (3 * 11 + 8)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 9);
-        EventStack[EventCursor].B := (3 * 11 + 8);
+        EventStack[EventCursor].A := (3 * BoardWidth + 9);
+        EventStack[EventCursor].B := (3 * BoardWidth + 8);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -514,8 +514,8 @@ begin
         { PushCommand(12, (2 * 11 + 9), (3 * 11 + 9)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (2 * 11 + 9);
-        EventStack[EventCursor].B := (3 * 11 + 9);
+        EventStack[EventCursor].A := (2 * BoardWidth + 9);
+        EventStack[EventCursor].B := (3 * BoardWidth + 9);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -544,8 +544,8 @@ begin
         { PushCommand(12, (3 * 11 + 4), (4 * 11 + 4)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 4);
-        EventStack[EventCursor].B := (4 * 11 + 4);
+        EventStack[EventCursor].A := (3 * BoardWidth + 4);
+        EventStack[EventCursor].B := (4 * BoardWidth + 4);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -574,8 +574,8 @@ begin
         { PushCommand(12, (3 * 11 + 3), (3 * 11 + 4)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 3);
-        EventStack[EventCursor].B := (3 * 11 + 4);
+        EventStack[EventCursor].A := (3 * BoardWidth + 3);
+        EventStack[EventCursor].B := (3 * BoardWidth + 4);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -604,8 +604,8 @@ begin
         { PushCommand(12, (3 * 11 + 2), (3 * 11 + 3)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 2);
-        EventStack[EventCursor].B := (3 * 11 + 3);
+        EventStack[EventCursor].A := (3 * BoardWidth + 2);
+        EventStack[EventCursor].B := (3 * BoardWidth + 3);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -634,8 +634,8 @@ begin
         { PushCommand(12, (3 * 11 + 1), (3 * 11 + 2)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 1);
-        EventStack[EventCursor].B := (3 * 11 + 2);
+        EventStack[EventCursor].A := (3 * BoardWidth + 1);
+        EventStack[EventCursor].B := (3 * BoardWidth + 2);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -664,8 +664,8 @@ begin
         { PushCommand(12, (2 * 11 + 1), (3 * 11 + 1)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (2 * 11 + 1);
-        EventStack[EventCursor].B := (3 * 11 + 1);
+        EventStack[EventCursor].A := (2 * BoardWidth + 1);
+        EventStack[EventCursor].B := (3 * BoardWidth + 1);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -694,8 +694,8 @@ begin
         { PushCommand(12, (4 * 11 + 6), (5 * 11 + 6)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (4 * 11 + 6);
-        EventStack[EventCursor].B := (5 * 11 + 6);
+        EventStack[EventCursor].A := (4 * BoardWidth + 6);
+        EventStack[EventCursor].B := (5 * BoardWidth + 6);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -724,8 +724,8 @@ begin
         { PushCommand(12, (3 * 11 + 6), (4 * 11 + 6)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 6);
-        EventStack[EventCursor].B := (4 * 11 + 6);
+        EventStack[EventCursor].A := (3 * BoardWidth + 6);
+        EventStack[EventCursor].B := (4 * BoardWidth + 6);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -754,8 +754,8 @@ begin
         { PushCommand(12, (3 * 11 + 7), (3 * 11 + 6)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 7);
-        EventStack[EventCursor].B := (3 * 11 + 6);
+        EventStack[EventCursor].A := (3 * BoardWidth + 7);
+        EventStack[EventCursor].B := (3 * BoardWidth + 6);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -784,8 +784,8 @@ begin
         { PushCommand(12, (3 * 11 + 8), (3 * 11 + 7)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 8);
-        EventStack[EventCursor].B := (3 * 11 + 7);
+        EventStack[EventCursor].A := (3 * BoardWidth + 8);
+        EventStack[EventCursor].B := (3 * BoardWidth + 7);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -814,8 +814,8 @@ begin
         { PushCommand(12, (2 * 11 + 8), (3 * 11 + 8)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (2 * 11 + 8);
-        EventStack[EventCursor].B := (3 * 11 + 8);
+        EventStack[EventCursor].A := (2 * BoardWidth + 8);
+        EventStack[EventCursor].B := (3 * BoardWidth + 8);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -844,8 +844,8 @@ begin
         { PushCommand(12, (4 * 11 + 4), (5 * 11 + 4)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (4 * 11 + 4);
-        EventStack[EventCursor].B := (5 * 11 + 4);
+        EventStack[EventCursor].A := (4 * BoardWidth + 4);
+        EventStack[EventCursor].B := (5 * BoardWidth + 4);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -874,8 +874,8 @@ begin
         { PushCommand(12, (3 * 11 + 4), (4 * 11 + 4)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 4);
-        EventStack[EventCursor].B := (4 * 11 + 4);
+        EventStack[EventCursor].A := (3 * BoardWidth + 4);
+        EventStack[EventCursor].B := (4 * BoardWidth + 4);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -904,8 +904,8 @@ begin
         { PushCommand(12, (3 * 11 + 3), (3 * 11 + 4)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 3);
-        EventStack[EventCursor].B := (3 * 11 + 4);
+        EventStack[EventCursor].A := (3 * BoardWidth + 3);
+        EventStack[EventCursor].B := (3 * BoardWidth + 4);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -934,8 +934,8 @@ begin
         { PushCommand(12, (3 * 11 + 2), (3 * 11 + 3)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 2);
-        EventStack[EventCursor].B := (3 * 11 + 3);
+        EventStack[EventCursor].A := (3 * BoardWidth + 2);
+        EventStack[EventCursor].B := (3 * BoardWidth + 3);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -964,8 +964,8 @@ begin
         { PushCommand(12, (2 * 11 + 2), (3 * 11 + 2)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (2 * 11 + 2);
-        EventStack[EventCursor].B := (3 * 11 + 2);
+        EventStack[EventCursor].A := (2 * BoardWidth + 2);
+        EventStack[EventCursor].B := (3 * BoardWidth + 2);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -994,8 +994,8 @@ begin
         { PushCommand(12, (3 * 11 + 6), (3 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 6);
-        EventStack[EventCursor].B := (3 * 11 + 5);
+        EventStack[EventCursor].A := (3 * BoardWidth + 6);
+        EventStack[EventCursor].B := (3 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1024,8 +1024,8 @@ begin
         { PushCommand(12, (3 * 11 + 7), (3 * 11 + 6)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 7);
-        EventStack[EventCursor].B := (3 * 11 + 6);
+        EventStack[EventCursor].A := (3 * BoardWidth + 7);
+        EventStack[EventCursor].B := (3 * BoardWidth + 6);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1054,8 +1054,8 @@ begin
         { PushCommand(12, (3 * 11 + 8), (3 * 11 + 7)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 8);
-        EventStack[EventCursor].B := (3 * 11 + 7);
+        EventStack[EventCursor].A := (3 * BoardWidth + 8);
+        EventStack[EventCursor].B := (3 * BoardWidth + 7);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1084,8 +1084,8 @@ begin
         { PushCommand(12, (3 * 11 + 9), (3 * 11 + 8)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 9);
-        EventStack[EventCursor].B := (3 * 11 + 8);
+        EventStack[EventCursor].A := (3 * BoardWidth + 9);
+        EventStack[EventCursor].B := (3 * BoardWidth + 8);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1114,8 +1114,8 @@ begin
         { PushCommand(12, (5 * 11 + 4), (5 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (5 * 11 + 4);
-        EventStack[EventCursor].B := (5 * 11 + 5);
+        EventStack[EventCursor].A := (5 * BoardWidth + 4);
+        EventStack[EventCursor].B := (5 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1144,8 +1144,8 @@ begin
         { PushCommand(12, (4 * 11 + 4), (5 * 11 + 4)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (4 * 11 + 4);
-        EventStack[EventCursor].B := (5 * 11 + 4);
+        EventStack[EventCursor].A := (4 * BoardWidth + 4);
+        EventStack[EventCursor].B := (5 * BoardWidth + 4);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1174,8 +1174,8 @@ begin
         { PushCommand(12, (3 * 11 + 4), (4 * 11 + 4)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 4);
-        EventStack[EventCursor].B := (4 * 11 + 4);
+        EventStack[EventCursor].A := (3 * BoardWidth + 4);
+        EventStack[EventCursor].B := (4 * BoardWidth + 4);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1204,8 +1204,8 @@ begin
         { PushCommand(12, (3 * 11 + 3), (3 * 11 + 4)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 3);
-        EventStack[EventCursor].B := (3 * 11 + 4);
+        EventStack[EventCursor].A := (3 * BoardWidth + 3);
+        EventStack[EventCursor].B := (3 * BoardWidth + 4);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1234,8 +1234,8 @@ begin
         { PushCommand(12, (3 * 11 + 2), (3 * 11 + 3)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 2);
-        EventStack[EventCursor].B := (3 * 11 + 3);
+        EventStack[EventCursor].A := (3 * BoardWidth + 2);
+        EventStack[EventCursor].B := (3 * BoardWidth + 3);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1264,12 +1264,12 @@ begin
         { PushCommand(12, (3 * 11 + 1), (3 * 11 + 2)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 1);
-        EventStack[EventCursor].B := (3 * 11 + 2);
+        EventStack[EventCursor].A := (3 * BoardWidth + 1);
+        EventStack[EventCursor].B := (3 * BoardWidth + 2);
         { PushCommand(13, (3 * 11 + 7), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (3 * 11 + 7);
+        EventStack[EventCursor].A := (3 * BoardWidth + 7);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -1285,7 +1285,7 @@ begin
         { PushCommand(13, (3 * 11 + 3), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (3 * 11 + 3);
+        EventStack[EventCursor].A := (3 * BoardWidth + 3);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -1301,7 +1301,7 @@ begin
         { PushCommand(13, (6 * 11 + 5), 5): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (6 * 11 + 5);
+        EventStack[EventCursor].A := (6 * BoardWidth + 5);
         EventStack[EventCursor].B := 5;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -1317,7 +1317,7 @@ begin
         { PushCommand(13, (2 * 11 + 5), 5): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (2 * 11 + 5);
+        EventStack[EventCursor].A := (2 * BoardWidth + 5);
         EventStack[EventCursor].B := 5;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -1338,8 +1338,8 @@ begin
         { PushCommand(12, (1 * 11 + 5), (0 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (1 * 11 + 5);
-        EventStack[EventCursor].B := (0 * 11 + 5);
+        EventStack[EventCursor].A := (1 * BoardWidth + 5);
+        EventStack[EventCursor].B := (0 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1348,8 +1348,8 @@ begin
         { PushCommand(12, (2 * 11 + 5), (1 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (2 * 11 + 5);
-        EventStack[EventCursor].B := (1 * 11 + 5);
+        EventStack[EventCursor].A := (2 * BoardWidth + 5);
+        EventStack[EventCursor].B := (1 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1358,8 +1358,8 @@ begin
         { PushCommand(12, (3 * 11 + 5), (2 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 5);
-        EventStack[EventCursor].B := (2 * 11 + 5);
+        EventStack[EventCursor].A := (3 * BoardWidth + 5);
+        EventStack[EventCursor].B := (2 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1368,8 +1368,8 @@ begin
         { PushCommand(6, (5 * 11 + 6), 6): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (5 * 11 + 6);
-        EventStack[EventCursor].B := 6;
+        EventStack[EventCursor].A := (5 * BoardWidth + 6);
+        EventStack[EventCursor].B := tileRoad;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1388,8 +1388,8 @@ begin
         { PushCommand(6, (5 * 11 + 4), 6): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (5 * 11 + 4);
-        EventStack[EventCursor].B := 6;
+        EventStack[EventCursor].A := (5 * BoardWidth + 4);
+        EventStack[EventCursor].B := tileRoad;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1408,7 +1408,7 @@ begin
         { PushCommand(10, 13, 0): story dialogue. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDialogue);
-        EventStack[EventCursor].A := 13;
+        EventStack[EventCursor].A := speechSkeletonLordChallenge;
         EventStack[EventCursor].B := 0;
         if (Hero.music_track <> 0) then
         begin
@@ -1434,8 +1434,8 @@ begin
         { PushCommand(6, (9 * 11 + 5), 6): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (9 * 11 + 5);
-        EventStack[EventCursor].B := 6;
+        EventStack[EventCursor].A := (9 * BoardWidth + 5);
+        EventStack[EventCursor].B := tileRoad;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1454,7 +1454,7 @@ begin
         { PushCommand(10, 17, 0): story dialogue. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDialogue);
-        EventStack[EventCursor].A := 17;
+        EventStack[EventCursor].A := speechThiefSecondDeparture;
         EventStack[EventCursor].B := 0;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
@@ -1464,8 +1464,8 @@ begin
         { PushCommand(12, (9 * 11 + 4), (9 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (9 * 11 + 4);
-        EventStack[EventCursor].B := (9 * 11 + 5);
+        EventStack[EventCursor].A := (9 * BoardWidth + 4);
+        EventStack[EventCursor].B := (9 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1474,8 +1474,8 @@ begin
         { PushCommand(12, (10 * 11 + 4), (9 * 11 + 4)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (10 * 11 + 4);
-        EventStack[EventCursor].B := (9 * 11 + 4);
+        EventStack[EventCursor].A := (10 * BoardWidth + 4);
+        EventStack[EventCursor].B := (9 * BoardWidth + 4);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1484,8 +1484,8 @@ begin
         { PushCommand(12, (10 * 11 + 3), (10 * 11 + 4)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (10 * 11 + 3);
-        EventStack[EventCursor].B := (10 * 11 + 4);
+        EventStack[EventCursor].A := (10 * BoardWidth + 3);
+        EventStack[EventCursor].B := (10 * BoardWidth + 4);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1494,8 +1494,8 @@ begin
         { PushCommand(12, (10 * 11 + 2), (10 * 11 + 3)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (10 * 11 + 2);
-        EventStack[EventCursor].B := (10 * 11 + 3);
+        EventStack[EventCursor].A := (10 * BoardWidth + 2);
+        EventStack[EventCursor].B := (10 * BoardWidth + 3);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1504,8 +1504,8 @@ begin
         { PushCommand(12, (9 * 11 + 2), (10 * 11 + 2)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (9 * 11 + 2);
-        EventStack[EventCursor].B := (10 * 11 + 2);
+        EventStack[EventCursor].A := (9 * BoardWidth + 2);
+        EventStack[EventCursor].B := (10 * BoardWidth + 2);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1514,8 +1514,8 @@ begin
         { PushCommand(12, (8 * 11 + 2), (9 * 11 + 2)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (8 * 11 + 2);
-        EventStack[EventCursor].B := (9 * 11 + 2);
+        EventStack[EventCursor].A := (8 * BoardWidth + 2);
+        EventStack[EventCursor].B := (9 * BoardWidth + 2);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1524,8 +1524,8 @@ begin
         { PushCommand(12, (7 * 11 + 2), (8 * 11 + 2)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (7 * 11 + 2);
-        EventStack[EventCursor].B := (8 * 11 + 2);
+        EventStack[EventCursor].A := (7 * BoardWidth + 2);
+        EventStack[EventCursor].B := (8 * BoardWidth + 2);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1534,8 +1534,8 @@ begin
         { PushCommand(12, (7 * 11 + 1), (7 * 11 + 2)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (7 * 11 + 1);
-        EventStack[EventCursor].B := (7 * 11 + 2);
+        EventStack[EventCursor].A := (7 * BoardWidth + 1);
+        EventStack[EventCursor].B := (7 * BoardWidth + 2);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1544,8 +1544,8 @@ begin
         { PushCommand(12, (7 * 11 + 0), (7 * 11 + 1)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (7 * 11 + 0);
-        EventStack[EventCursor].B := (7 * 11 + 1);
+        EventStack[EventCursor].A := (7 * BoardWidth + 0);
+        EventStack[EventCursor].B := (7 * BoardWidth + 1);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1554,8 +1554,8 @@ begin
         { PushCommand(12, (8 * 11 + 0), (7 * 11 + 0)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (8 * 11 + 0);
-        EventStack[EventCursor].B := (7 * 11 + 0);
+        EventStack[EventCursor].A := (8 * BoardWidth + 0);
+        EventStack[EventCursor].B := (7 * BoardWidth + 0);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1564,8 +1564,8 @@ begin
         { PushCommand(12, (9 * 11 + 0), (8 * 11 + 0)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (9 * 11 + 0);
-        EventStack[EventCursor].B := (8 * 11 + 0);
+        EventStack[EventCursor].A := (9 * BoardWidth + 0);
+        EventStack[EventCursor].B := (8 * BoardWidth + 0);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1574,8 +1574,8 @@ begin
         { PushCommand(6, (9 * 11 + 0), 21): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (9 * 11 + 0);
-        EventStack[EventCursor].B := 21;
+        EventStack[EventCursor].A := (9 * BoardWidth + 0);
+        EventStack[EventCursor].B := tileThief;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1593,7 +1593,7 @@ begin
       { PushCommand(13, (8 * 11 + 5), 5): door/wall animation frame. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-      EventStack[EventCursor].A := (8 * 11 + 5);
+      EventStack[EventCursor].A := (8 * BoardWidth + 5);
       EventStack[EventCursor].B := 5;
       doorstackin;
       { PushCommand(0, 0, 0): wait. }
@@ -1633,15 +1633,15 @@ begin
         EventStack[EventCursor].A := 5;
         EventStack[EventCursor].B := 0;
       end;
-      Maps[Hero.floor, 2 + 4 * 11 + 4] := 6;
-      Maps[Hero.floor, 2 + 4 * 11 + 5] := 6;
-      Maps[Hero.floor, 2 + 4 * 11 + 6] := 6;
-      Maps[Hero.floor, 2 + 5 * 11 + 4] := 6;
-      Maps[Hero.floor, 2 + 5 * 11 + 6] := 6;
-      Maps[Hero.floor, 2 + 6 * 11 + 4] := 6;
-      Maps[Hero.floor, 2 + 6 * 11 + 5] := 6;
-      Maps[Hero.floor, 2 + 6 * 11 + 6] := 6;
-      Maps[Hero.floor, 2 + 5 * 11 + 5] := 95;
+      Maps[Hero.floor, 2 + 4 * BoardWidth + 4] := tileRoad;
+      Maps[Hero.floor, 2 + 4 * BoardWidth + 5] := tileRoad;
+      Maps[Hero.floor, 2 + 4 * BoardWidth + 6] := tileRoad;
+      Maps[Hero.floor, 2 + 5 * BoardWidth + 4] := tileRoad;
+      Maps[Hero.floor, 2 + 5 * BoardWidth + 6] := tileRoad;
+      Maps[Hero.floor, 2 + 6 * BoardWidth + 4] := tileRoad;
+      Maps[Hero.floor, 2 + 6 * BoardWidth + 5] := tileRoad;
+      Maps[Hero.floor, 2 + 6 * BoardWidth + 6] := tileRoad;
+      Maps[Hero.floor, 2 + 5 * BoardWidth + 5] := tileVampire;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1650,7 +1650,7 @@ begin
       { PushCommand(10, 20, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 20;
+      EventStack[EventCursor].A := speechVampireChallenge;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -1986,7 +1986,7 @@ begin
       { PushCommand(13, (8 * 11 + 5), 5): door/wall animation frame. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-      EventStack[EventCursor].A := (8 * 11 + 5);
+      EventStack[EventCursor].A := (8 * BoardWidth + 5);
       EventStack[EventCursor].B := 5;
       doorstackin;
       { PushCommand(0, 0, 0): wait. }
@@ -2068,8 +2068,8 @@ begin
         { PushCommand(12, (5 * 11 + 5), (6 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (5 * 11 + 5);
-        EventStack[EventCursor].B := (6 * 11 + 5);
+        EventStack[EventCursor].A := (5 * BoardWidth + 5);
+        EventStack[EventCursor].B := (6 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -2098,8 +2098,8 @@ begin
         { PushCommand(12, (4 * 11 + 5), (5 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (4 * 11 + 5);
-        EventStack[EventCursor].B := (5 * 11 + 5);
+        EventStack[EventCursor].A := (4 * BoardWidth + 5);
+        EventStack[EventCursor].B := (5 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -2129,7 +2129,7 @@ begin
       { PushCommand(10, 57, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 57;
+      EventStack[EventCursor].A := speechZenoOffersAlliance;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -2159,7 +2159,7 @@ begin
       { PushCommand(10, 56, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 56;
+      EventStack[EventCursor].A := speechHeroQuestionsPrincessRumor;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -2189,7 +2189,7 @@ begin
       { PushCommand(10, 55, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 55;
+      EventStack[EventCursor].A := speechZenoRevealsPlan;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -2219,7 +2219,7 @@ begin
       { PushCommand(10, 54, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 54;
+      EventStack[EventCursor].A := speechHeroQuestionsLegend;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -2249,7 +2249,7 @@ begin
       { PushCommand(10, 53, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 53;
+      EventStack[EventCursor].A := speechZenoExplainsLegend;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -2279,7 +2279,7 @@ begin
       { PushCommand(10, 52, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 52;
+      EventStack[EventCursor].A := speechHeroQuestionsTest;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -2309,7 +2309,7 @@ begin
       { PushCommand(10, 51, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 51;
+      EventStack[EventCursor].A := speechZenoExplainsTest;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -2339,7 +2339,7 @@ begin
       { PushCommand(10, 50, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 50;
+      EventStack[EventCursor].A := speechHeroRecognizesZeno;
       EventStack[EventCursor].B := 0;
       if (Hero.music_track <> 0) then
       begin
@@ -2352,8 +2352,8 @@ begin
       { PushCommand(17, (4 * 11 + 5), 91): change map only. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := 91;
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := tileZeno;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -2602,7 +2602,7 @@ begin
       { PushCommand(10, 49, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 49;
+      EventStack[EventCursor].A := speechThiefRevealsDisguise;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -2632,7 +2632,7 @@ begin
       { PushCommand(10, 48, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 48;
+      EventStack[EventCursor].A := speechHeroFindsThief;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -3239,12 +3239,12 @@ begin
       { PushCommand(10, 23, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 23;
+      EventStack[EventCursor].A := speechRockChallenge;
       EventStack[EventCursor].B := 0;
       { PushCommand(13, (9 * 11 + 5), 5): door/wall animation frame. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-      EventStack[EventCursor].A := (9 * 11 + 5);
+      EventStack[EventCursor].A := (9 * BoardWidth + 5);
       EventStack[EventCursor].B := 5;
       doorstackin;
       { PushCommand(0, 0, 0): wait. }
@@ -3273,7 +3273,7 @@ begin
       { PushCommand(13, (6 * 11 + 5), 5): door/wall animation frame. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-      EventStack[EventCursor].A := (6 * 11 + 5);
+      EventStack[EventCursor].A := (6 * BoardWidth + 5);
       EventStack[EventCursor].B := 5;
       doorstackin;
       { PushCommand(0, 0, 0): wait. }
@@ -3289,7 +3289,7 @@ begin
       { PushCommand(13, (3 * 11 + 5), 5): door/wall animation frame. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-      EventStack[EventCursor].A := (3 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 5);
       EventStack[EventCursor].B := 5;
       doorstackin;
       { PushCommand(0, 0, 0): wait. }
@@ -3344,8 +3344,8 @@ begin
       { PushCommand(12, (8 * 11 + 5), (9 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (8 * 11 + 5);
-      EventStack[EventCursor].B := (9 * 11 + 5);
+      EventStack[EventCursor].A := (8 * BoardWidth + 5);
+      EventStack[EventCursor].B := (9 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3364,8 +3364,8 @@ begin
       { PushCommand(12, (7 * 11 + 5), (8 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (7 * 11 + 5);
-      EventStack[EventCursor].B := (8 * 11 + 5);
+      EventStack[EventCursor].A := (7 * BoardWidth + 5);
+      EventStack[EventCursor].B := (8 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3384,8 +3384,8 @@ begin
       { PushCommand(12, (6 * 11 + 5), (7 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (6 * 11 + 5);
-      EventStack[EventCursor].B := (7 * 11 + 5);
+      EventStack[EventCursor].A := (6 * BoardWidth + 5);
+      EventStack[EventCursor].B := (7 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3404,8 +3404,8 @@ begin
       { PushCommand(12, (5 * 11 + 5), (6 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := (6 * 11 + 5);
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := (6 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3424,7 +3424,7 @@ begin
       { PushCommand(10, 30, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 30;
+      EventStack[EventCursor].A := speechGreatMagicMasterChallenge;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -3464,8 +3464,8 @@ begin
       { PushCommand(12, (4 * 11 + 5), (5 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := (5 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := (5 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3484,8 +3484,8 @@ begin
       { PushCommand(12, (3 * 11 + 5), (4 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 5);
-      EventStack[EventCursor].B := (4 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 5);
+      EventStack[EventCursor].B := (4 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3504,8 +3504,8 @@ begin
       { PushCommand(12, (2 * 11 + 5), (3 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (2 * 11 + 5);
-      EventStack[EventCursor].B := (3 * 11 + 5);
+      EventStack[EventCursor].A := (2 * BoardWidth + 5);
+      EventStack[EventCursor].B := (3 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3524,8 +3524,8 @@ begin
       { PushCommand(12, (1 * 11 + 5), (2 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (1 * 11 + 5);
-      EventStack[EventCursor].B := (2 * 11 + 5);
+      EventStack[EventCursor].A := (1 * BoardWidth + 5);
+      EventStack[EventCursor].B := (2 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3544,8 +3544,8 @@ begin
       { PushCommand(12, (0 * 11 + 5), (1 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (0 * 11 + 5);
-      EventStack[EventCursor].B := (1 * 11 + 5);
+      EventStack[EventCursor].A := (0 * BoardWidth + 5);
+      EventStack[EventCursor].B := (1 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3564,8 +3564,8 @@ begin
       { PushCommand(12, (0 * 11 + 6), (0 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (0 * 11 + 6);
-      EventStack[EventCursor].B := (0 * 11 + 5);
+      EventStack[EventCursor].A := (0 * BoardWidth + 6);
+      EventStack[EventCursor].B := (0 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3584,8 +3584,8 @@ begin
       { PushCommand(12, (0 * 11 + 7), (0 * 11 + 6)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (0 * 11 + 7);
-      EventStack[EventCursor].B := (0 * 11 + 6);
+      EventStack[EventCursor].A := (0 * BoardWidth + 7);
+      EventStack[EventCursor].B := (0 * BoardWidth + 6);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3604,8 +3604,8 @@ begin
       { PushCommand(12, (0 * 11 + 8), (0 * 11 + 7)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (0 * 11 + 8);
-      EventStack[EventCursor].B := (0 * 11 + 7);
+      EventStack[EventCursor].A := (0 * BoardWidth + 8);
+      EventStack[EventCursor].B := (0 * BoardWidth + 7);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3624,8 +3624,8 @@ begin
       { PushCommand(12, (0 * 11 + 9), (0 * 11 + 8)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (0 * 11 + 9);
-      EventStack[EventCursor].B := (0 * 11 + 8);
+      EventStack[EventCursor].A := (0 * BoardWidth + 9);
+      EventStack[EventCursor].B := (0 * BoardWidth + 8);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3644,8 +3644,8 @@ begin
       { PushCommand(6, (0 * 11 + 9), 133): change tile and redraw. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evSetTile);
-      EventStack[EventCursor].A := (0 * 11 + 9);
-      EventStack[EventCursor].B := 133;
+      EventStack[EventCursor].A := (0 * BoardWidth + 9);
+      EventStack[EventCursor].B := tileGoldenKnight;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3709,7 +3709,7 @@ begin
     end;
     33: { Wrong approach at cell 107 raises a wall; otherwise seal the guard room. }
     begin
-      if (((Hero.y * 11) + Hero.x) = 107) then
+      if (((Hero.y * BoardWidth) + Hero.x) = 107) then
       begin
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
@@ -3729,7 +3729,7 @@ begin
         { PushCommand(13, (9 * 11 + 7), 8): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (9 * 11 + 7);
+        EventStack[EventCursor].A := (9 * BoardWidth + 7);
         EventStack[EventCursor].B := 8;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -3758,7 +3758,7 @@ begin
         { PushCommand(13, (7 * 11 + 9), 5): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (7 * 11 + 9);
+        EventStack[EventCursor].A := (7 * BoardWidth + 9);
         EventStack[EventCursor].B := 5;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -3774,7 +3774,7 @@ begin
         { PushCommand(13, (3 * 11 + 9), 5): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (3 * 11 + 9);
+        EventStack[EventCursor].A := (3 * BoardWidth + 9);
         EventStack[EventCursor].B := 5;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -3819,7 +3819,7 @@ begin
       { PushCommand(13, (4 * 11 + 1), 8): door/wall animation frame. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-      EventStack[EventCursor].A := (4 * 11 + 1);
+      EventStack[EventCursor].A := (4 * BoardWidth + 1);
       EventStack[EventCursor].B := 8;
       doorstackin;
       { PushCommand(0, 0, 0): wait. }
@@ -3846,57 +3846,57 @@ begin
     40: { Seal the Golden Knight arena and stage the thirteen-fight gauntlet. }
     begin
       Button1.Caption := ListBox2.Items[218];
-      if (Maps[Hero.floor, 2 + 3 * 11 + 4] = 6) then
+      if (Maps[Hero.floor, 2 + 3 * BoardWidth + 4] = tileRoad) then
       begin
-        Maps[Hero.floor, 2 + 3 * 11 + 4] := 141;
+        Maps[Hero.floor, 2 + 3 * BoardWidth + 4] := tileGhostSoldier;
       end;
-      if (Maps[Hero.floor, 2 + 3 * 11 + 3] = 6) then
+      if (Maps[Hero.floor, 2 + 3 * BoardWidth + 3] = tileRoad) then
       begin
-        Maps[Hero.floor, 2 + 3 * 11 + 3] := 141;
+        Maps[Hero.floor, 2 + 3 * BoardWidth + 3] := tileGhostSoldier;
       end;
-      if (Maps[Hero.floor, 2 + 3 * 11 + 2] = 6) then
+      if (Maps[Hero.floor, 2 + 3 * BoardWidth + MapTileOffset] = tileRoad) then
       begin
-        Maps[Hero.floor, 2 + 3 * 11 + 2] := 141;
+        Maps[Hero.floor, 2 + 3 * BoardWidth + MapTileOffset] := tileGhostSoldier;
       end;
-      if (Maps[Hero.floor, 2 + 3 * 11 + 6] = 6) then
+      if (Maps[Hero.floor, 2 + 3 * BoardWidth + 6] = tileRoad) then
       begin
-        Maps[Hero.floor, 2 + 3 * 11 + 6] := 139;
+        Maps[Hero.floor, 2 + 3 * BoardWidth + 6] := tileSoldier;
       end;
-      if (Maps[Hero.floor, 2 + 3 * 11 + 7] = 6) then
+      if (Maps[Hero.floor, 2 + 3 * BoardWidth + 7] = tileRoad) then
       begin
-        Maps[Hero.floor, 2 + 3 * 11 + 7] := 139;
+        Maps[Hero.floor, 2 + 3 * BoardWidth + 7] := tileSoldier;
       end;
-      if (Maps[Hero.floor, 2 + 3 * 11 + 8] = 6) then
+      if (Maps[Hero.floor, 2 + 3 * BoardWidth + 8] = tileRoad) then
       begin
-        Maps[Hero.floor, 2 + 3 * 11 + 8] := 139;
+        Maps[Hero.floor, 2 + 3 * BoardWidth + 8] := tileSoldier;
       end;
-      if (Maps[Hero.floor, 2 + 1 * 11 + 3] = 6) then
+      if (Maps[Hero.floor, 2 + 1 * BoardWidth + 3] = tileRoad) then
       begin
-        Maps[Hero.floor, 2 + 1 * 11 + 3] := 137;
+        Maps[Hero.floor, 2 + 1 * BoardWidth + 3] := tileSwordsman;
       end;
-      if (Maps[Hero.floor, 2 + 1 * 11 + 2] = 6) then
+      if (Maps[Hero.floor, 2 + 1 * BoardWidth + MapTileOffset] = tileRoad) then
       begin
-        Maps[Hero.floor, 2 + 1 * 11 + 2] := 137;
+        Maps[Hero.floor, 2 + 1 * BoardWidth + MapTileOffset] := tileSwordsman;
       end;
-      if (Maps[Hero.floor, 2 + 1 * 11 + 1] = 6) then
+      if (Maps[Hero.floor, 2 + 1 * BoardWidth + 1] = tileRoad) then
       begin
-        Maps[Hero.floor, 2 + 1 * 11 + 1] := 137;
+        Maps[Hero.floor, 2 + 1 * BoardWidth + 1] := tileSwordsman;
       end;
-      if (Maps[Hero.floor, 2 + 1 * 11 + 7] = 6) then
+      if (Maps[Hero.floor, 2 + 1 * BoardWidth + 7] = tileRoad) then
       begin
-        Maps[Hero.floor, 2 + 1 * 11 + 7] := 135;
+        Maps[Hero.floor, 2 + 1 * BoardWidth + 7] := tileKnight;
       end;
-      if (Maps[Hero.floor, 2 + 1 * 11 + 8] = 6) then
+      if (Maps[Hero.floor, 2 + 1 * BoardWidth + 8] = tileRoad) then
       begin
-        Maps[Hero.floor, 2 + 1 * 11 + 8] := 135;
+        Maps[Hero.floor, 2 + 1 * BoardWidth + 8] := tileKnight;
       end;
-      if (Maps[Hero.floor, 2 + 1 * 11 + 9] = 6) then
+      if (Maps[Hero.floor, 2 + 1 * BoardWidth + 9] = tileRoad) then
       begin
-        Maps[Hero.floor, 2 + 1 * 11 + 9] := 135;
+        Maps[Hero.floor, 2 + 1 * BoardWidth + 9] := tileKnight;
       end;
-      if (Maps[Hero.floor, 2 + 1 * 11 + 5] = 6) then
+      if (Maps[Hero.floor, 2 + 1 * BoardWidth + 5] = tileRoad) then
       begin
-        Maps[Hero.floor, 2 + 1 * 11 + 5] := 133;
+        Maps[Hero.floor, 2 + 1 * BoardWidth + 5] := tileGoldenKnight;
       end;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -3916,8 +3916,8 @@ begin
       { PushCommand(6, (1 * 11 + 5), 6): change tile and redraw. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evSetTile);
-      EventStack[EventCursor].A := (1 * 11 + 5);
-      EventStack[EventCursor].B := 6;
+      EventStack[EventCursor].A := (1 * BoardWidth + 5);
+      EventStack[EventCursor].B := tileRoad;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3936,8 +3936,8 @@ begin
       { PushCommand(12, (2 * 11 + 5), (1 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (2 * 11 + 5);
-      EventStack[EventCursor].B := (1 * 11 + 5);
+      EventStack[EventCursor].A := (2 * BoardWidth + 5);
+      EventStack[EventCursor].B := (1 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3956,8 +3956,8 @@ begin
       { PushCommand(12, (3 * 11 + 5), (2 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 5);
-      EventStack[EventCursor].B := (2 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 5);
+      EventStack[EventCursor].B := (2 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3976,8 +3976,8 @@ begin
       { PushCommand(12, (4 * 11 + 5), (3 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := (3 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := (3 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3996,8 +3996,8 @@ begin
       { PushCommand(12, (5 * 11 + 5), (4 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := (4 * 11 + 5);
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := (4 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4016,8 +4016,8 @@ begin
       { PushCommand(12, (6 * 11 + 5), (5 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (6 * 11 + 5);
-      EventStack[EventCursor].B := (5 * 11 + 5);
+      EventStack[EventCursor].A := (6 * BoardWidth + 5);
+      EventStack[EventCursor].B := (5 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4051,12 +4051,12 @@ begin
       { PushCommand(17, (6 * 11 + 5), 133): change map only. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-      EventStack[EventCursor].A := (6 * 11 + 5);
-      EventStack[EventCursor].B := 133;
+      EventStack[EventCursor].A := (6 * BoardWidth + 5);
+      EventStack[EventCursor].B := tileGoldenKnight;
       { PushCommand(10, 39, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 39;
+      EventStack[EventCursor].A := speechGreatMagicMasterDefeated;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -4066,8 +4066,8 @@ begin
       { PushCommand(6, (0 * 11 + 5), 11): change tile and redraw. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evSetTile);
-      EventStack[EventCursor].A := (0 * 11 + 5);
-      EventStack[EventCursor].B := 11;
+      EventStack[EventCursor].A := (0 * BoardWidth + 5);
+      EventStack[EventCursor].B := tileStairsUp;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4106,7 +4106,7 @@ begin
       { PushCommand(13, (7 * 11 + 5), 4): door/wall animation frame. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-      EventStack[EventCursor].A := (7 * 11 + 5);
+      EventStack[EventCursor].A := (7 * BoardWidth + 5);
       EventStack[EventCursor].B := 4;
       doorstackin;
       { PushCommand(0, 0, 0): wait. }
@@ -4147,8 +4147,8 @@ begin
       { PushCommand(12, (5 * 11 + 5), (6 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := (6 * 11 + 5);
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := (6 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4157,8 +4157,8 @@ begin
       { PushCommand(12, (4 * 11 + 5), (5 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := (5 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := (5 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4167,8 +4167,8 @@ begin
       { PushCommand(12, (3 * 11 + 5), (4 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 5);
-      EventStack[EventCursor].B := (4 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 5);
+      EventStack[EventCursor].B := (4 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4177,8 +4177,8 @@ begin
       { PushCommand(12, (2 * 11 + 5), (3 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (2 * 11 + 5);
-      EventStack[EventCursor].B := (3 * 11 + 5);
+      EventStack[EventCursor].A := (2 * BoardWidth + 5);
+      EventStack[EventCursor].B := (3 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4187,8 +4187,8 @@ begin
       { PushCommand(12, (1 * 11 + 5), (2 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (1 * 11 + 5);
-      EventStack[EventCursor].B := (2 * 11 + 5);
+      EventStack[EventCursor].A := (1 * BoardWidth + 5);
+      EventStack[EventCursor].B := (2 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4197,7 +4197,7 @@ begin
       { PushCommand(10, 38, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 38;
+      EventStack[EventCursor].A := speechGreatMagicMasterBattle;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -4217,8 +4217,8 @@ begin
       { PushCommand(12, (5 * 11 + 5), (6 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := (6 * 11 + 5);
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := (6 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4227,8 +4227,8 @@ begin
       { PushCommand(12, (4 * 11 + 5), (5 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := (5 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := (5 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4237,8 +4237,8 @@ begin
       { PushCommand(12, (3 * 11 + 5), (4 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 5);
-      EventStack[EventCursor].B := (4 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 5);
+      EventStack[EventCursor].B := (4 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4247,8 +4247,8 @@ begin
       { PushCommand(12, (3 * 11 + 6), (3 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 6);
-      EventStack[EventCursor].B := (3 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 6);
+      EventStack[EventCursor].B := (3 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4257,8 +4257,8 @@ begin
       { PushCommand(12, (2 * 11 + 6), (3 * 11 + 6)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (2 * 11 + 6);
-      EventStack[EventCursor].B := (3 * 11 + 6);
+      EventStack[EventCursor].A := (2 * BoardWidth + 6);
+      EventStack[EventCursor].B := (3 * BoardWidth + 6);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4267,8 +4267,8 @@ begin
       { PushCommand(12, (2 * 11 + 7), (2 * 11 + 6)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (2 * 11 + 7);
-      EventStack[EventCursor].B := (2 * 11 + 6);
+      EventStack[EventCursor].A := (2 * BoardWidth + 7);
+      EventStack[EventCursor].B := (2 * BoardWidth + 6);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4277,8 +4277,8 @@ begin
       { PushCommand(12, (1 * 11 + 7), (2 * 11 + 7)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (1 * 11 + 7);
-      EventStack[EventCursor].B := (2 * 11 + 7);
+      EventStack[EventCursor].A := (1 * BoardWidth + 7);
+      EventStack[EventCursor].B := (2 * BoardWidth + 7);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4287,8 +4287,8 @@ begin
       { PushCommand(12, (1 * 11 + 8), (1 * 11 + 7)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (1 * 11 + 8);
-      EventStack[EventCursor].B := (1 * 11 + 7);
+      EventStack[EventCursor].A := (1 * BoardWidth + 8);
+      EventStack[EventCursor].B := (1 * BoardWidth + 7);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4297,8 +4297,8 @@ begin
       { PushCommand(12, (1 * 11 + 9), (1 * 11 + 8)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (1 * 11 + 9);
-      EventStack[EventCursor].B := (1 * 11 + 8);
+      EventStack[EventCursor].A := (1 * BoardWidth + 9);
+      EventStack[EventCursor].B := (1 * BoardWidth + 8);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4317,8 +4317,8 @@ begin
       { PushCommand(12, (5 * 11 + 5), (6 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := (6 * 11 + 5);
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := (6 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4327,8 +4327,8 @@ begin
       { PushCommand(12, (4 * 11 + 5), (5 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := (5 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := (5 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4337,8 +4337,8 @@ begin
       { PushCommand(12, (3 * 11 + 5), (4 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 5);
-      EventStack[EventCursor].B := (4 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 5);
+      EventStack[EventCursor].B := (4 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4347,8 +4347,8 @@ begin
       { PushCommand(12, (3 * 11 + 6), (3 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 6);
-      EventStack[EventCursor].B := (3 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 6);
+      EventStack[EventCursor].B := (3 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4357,8 +4357,8 @@ begin
       { PushCommand(12, (2 * 11 + 6), (3 * 11 + 6)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (2 * 11 + 6);
-      EventStack[EventCursor].B := (3 * 11 + 6);
+      EventStack[EventCursor].A := (2 * BoardWidth + 6);
+      EventStack[EventCursor].B := (3 * BoardWidth + 6);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4367,8 +4367,8 @@ begin
       { PushCommand(12, (2 * 11 + 7), (2 * 11 + 6)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (2 * 11 + 7);
-      EventStack[EventCursor].B := (2 * 11 + 6);
+      EventStack[EventCursor].A := (2 * BoardWidth + 7);
+      EventStack[EventCursor].B := (2 * BoardWidth + 6);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4377,8 +4377,8 @@ begin
       { PushCommand(12, (1 * 11 + 7), (2 * 11 + 7)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (1 * 11 + 7);
-      EventStack[EventCursor].B := (2 * 11 + 7);
+      EventStack[EventCursor].A := (1 * BoardWidth + 7);
+      EventStack[EventCursor].B := (2 * BoardWidth + 7);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4387,8 +4387,8 @@ begin
       { PushCommand(12, (1 * 11 + 8), (1 * 11 + 7)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (1 * 11 + 8);
-      EventStack[EventCursor].B := (1 * 11 + 7);
+      EventStack[EventCursor].A := (1 * BoardWidth + 8);
+      EventStack[EventCursor].B := (1 * BoardWidth + 7);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4407,8 +4407,8 @@ begin
       { PushCommand(12, (5 * 11 + 5), (6 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := (6 * 11 + 5);
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := (6 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4417,8 +4417,8 @@ begin
       { PushCommand(12, (4 * 11 + 5), (5 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := (5 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := (5 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4427,8 +4427,8 @@ begin
       { PushCommand(12, (3 * 11 + 5), (4 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 5);
-      EventStack[EventCursor].B := (4 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 5);
+      EventStack[EventCursor].B := (4 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4437,8 +4437,8 @@ begin
       { PushCommand(12, (3 * 11 + 6), (3 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 6);
-      EventStack[EventCursor].B := (3 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 6);
+      EventStack[EventCursor].B := (3 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4447,8 +4447,8 @@ begin
       { PushCommand(12, (2 * 11 + 6), (3 * 11 + 6)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (2 * 11 + 6);
-      EventStack[EventCursor].B := (3 * 11 + 6);
+      EventStack[EventCursor].A := (2 * BoardWidth + 6);
+      EventStack[EventCursor].B := (3 * BoardWidth + 6);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4457,8 +4457,8 @@ begin
       { PushCommand(12, (2 * 11 + 7), (2 * 11 + 6)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (2 * 11 + 7);
-      EventStack[EventCursor].B := (2 * 11 + 6);
+      EventStack[EventCursor].A := (2 * BoardWidth + 7);
+      EventStack[EventCursor].B := (2 * BoardWidth + 6);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4467,8 +4467,8 @@ begin
       { PushCommand(12, (1 * 11 + 7), (2 * 11 + 7)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (1 * 11 + 7);
-      EventStack[EventCursor].B := (2 * 11 + 7);
+      EventStack[EventCursor].A := (1 * BoardWidth + 7);
+      EventStack[EventCursor].B := (2 * BoardWidth + 7);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4477,7 +4477,7 @@ begin
       { PushCommand(10, 37, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 37;
+      EventStack[EventCursor].A := speechGreatMagicMasterSummonsKnights;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -4497,8 +4497,8 @@ begin
       { PushCommand(12, (5 * 11 + 5), (6 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := (6 * 11 + 5);
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := (6 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4507,8 +4507,8 @@ begin
       { PushCommand(12, (4 * 11 + 5), (5 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := (5 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := (5 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4517,8 +4517,8 @@ begin
       { PushCommand(12, (3 * 11 + 5), (4 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 5);
-      EventStack[EventCursor].B := (4 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 5);
+      EventStack[EventCursor].B := (4 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4527,8 +4527,8 @@ begin
       { PushCommand(12, (3 * 11 + 4), (3 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 4);
-      EventStack[EventCursor].B := (3 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 4);
+      EventStack[EventCursor].B := (3 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4537,8 +4537,8 @@ begin
       { PushCommand(12, (2 * 11 + 4), (3 * 11 + 4)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (2 * 11 + 4);
-      EventStack[EventCursor].B := (3 * 11 + 4);
+      EventStack[EventCursor].A := (2 * BoardWidth + 4);
+      EventStack[EventCursor].B := (3 * BoardWidth + 4);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4547,8 +4547,8 @@ begin
       { PushCommand(12, (2 * 11 + 3), (2 * 11 + 4)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (2 * 11 + 3);
-      EventStack[EventCursor].B := (2 * 11 + 4);
+      EventStack[EventCursor].A := (2 * BoardWidth + 3);
+      EventStack[EventCursor].B := (2 * BoardWidth + 4);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4557,8 +4557,8 @@ begin
       { PushCommand(12, (1 * 11 + 3), (2 * 11 + 3)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (1 * 11 + 3);
-      EventStack[EventCursor].B := (2 * 11 + 3);
+      EventStack[EventCursor].A := (1 * BoardWidth + 3);
+      EventStack[EventCursor].B := (2 * BoardWidth + 3);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4567,8 +4567,8 @@ begin
       { PushCommand(12, (1 * 11 + 2), (1 * 11 + 3)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (1 * 11 + 2);
-      EventStack[EventCursor].B := (1 * 11 + 3);
+      EventStack[EventCursor].A := (1 * BoardWidth + 2);
+      EventStack[EventCursor].B := (1 * BoardWidth + 3);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4577,8 +4577,8 @@ begin
       { PushCommand(12, (1 * 11 + 1), (1 * 11 + 2)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (1 * 11 + 1);
-      EventStack[EventCursor].B := (1 * 11 + 2);
+      EventStack[EventCursor].A := (1 * BoardWidth + 1);
+      EventStack[EventCursor].B := (1 * BoardWidth + 2);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4597,8 +4597,8 @@ begin
       { PushCommand(12, (5 * 11 + 5), (6 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := (6 * 11 + 5);
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := (6 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4607,8 +4607,8 @@ begin
       { PushCommand(12, (4 * 11 + 5), (5 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := (5 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := (5 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4617,8 +4617,8 @@ begin
       { PushCommand(12, (3 * 11 + 5), (4 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 5);
-      EventStack[EventCursor].B := (4 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 5);
+      EventStack[EventCursor].B := (4 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4627,8 +4627,8 @@ begin
       { PushCommand(12, (3 * 11 + 4), (3 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 4);
-      EventStack[EventCursor].B := (3 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 4);
+      EventStack[EventCursor].B := (3 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4637,8 +4637,8 @@ begin
       { PushCommand(12, (2 * 11 + 4), (3 * 11 + 4)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (2 * 11 + 4);
-      EventStack[EventCursor].B := (3 * 11 + 4);
+      EventStack[EventCursor].A := (2 * BoardWidth + 4);
+      EventStack[EventCursor].B := (3 * BoardWidth + 4);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4647,8 +4647,8 @@ begin
       { PushCommand(12, (2 * 11 + 3), (2 * 11 + 4)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (2 * 11 + 3);
-      EventStack[EventCursor].B := (2 * 11 + 4);
+      EventStack[EventCursor].A := (2 * BoardWidth + 3);
+      EventStack[EventCursor].B := (2 * BoardWidth + 4);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4657,8 +4657,8 @@ begin
       { PushCommand(12, (1 * 11 + 3), (2 * 11 + 3)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (1 * 11 + 3);
-      EventStack[EventCursor].B := (2 * 11 + 3);
+      EventStack[EventCursor].A := (1 * BoardWidth + 3);
+      EventStack[EventCursor].B := (2 * BoardWidth + 3);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4667,8 +4667,8 @@ begin
       { PushCommand(12, (1 * 11 + 2), (1 * 11 + 3)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (1 * 11 + 2);
-      EventStack[EventCursor].B := (1 * 11 + 3);
+      EventStack[EventCursor].A := (1 * BoardWidth + 2);
+      EventStack[EventCursor].B := (1 * BoardWidth + 3);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4687,8 +4687,8 @@ begin
       { PushCommand(12, (5 * 11 + 5), (6 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := (6 * 11 + 5);
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := (6 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4697,8 +4697,8 @@ begin
       { PushCommand(12, (4 * 11 + 5), (5 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := (5 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := (5 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4707,8 +4707,8 @@ begin
       { PushCommand(12, (3 * 11 + 5), (4 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 5);
-      EventStack[EventCursor].B := (4 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 5);
+      EventStack[EventCursor].B := (4 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4717,8 +4717,8 @@ begin
       { PushCommand(12, (3 * 11 + 4), (3 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 4);
-      EventStack[EventCursor].B := (3 * 11 + 5);
+      EventStack[EventCursor].A := (3 * BoardWidth + 4);
+      EventStack[EventCursor].B := (3 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4727,8 +4727,8 @@ begin
       { PushCommand(12, (2 * 11 + 4), (3 * 11 + 4)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (2 * 11 + 4);
-      EventStack[EventCursor].B := (3 * 11 + 4);
+      EventStack[EventCursor].A := (2 * BoardWidth + 4);
+      EventStack[EventCursor].B := (3 * BoardWidth + 4);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4737,8 +4737,8 @@ begin
       { PushCommand(12, (2 * 11 + 3), (2 * 11 + 4)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (2 * 11 + 3);
-      EventStack[EventCursor].B := (2 * 11 + 4);
+      EventStack[EventCursor].A := (2 * BoardWidth + 3);
+      EventStack[EventCursor].B := (2 * BoardWidth + 4);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4747,8 +4747,8 @@ begin
       { PushCommand(12, (1 * 11 + 3), (2 * 11 + 3)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (1 * 11 + 3);
-      EventStack[EventCursor].B := (2 * 11 + 3);
+      EventStack[EventCursor].A := (1 * BoardWidth + 3);
+      EventStack[EventCursor].B := (2 * BoardWidth + 3);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4757,7 +4757,7 @@ begin
       { PushCommand(10, 36, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 36;
+      EventStack[EventCursor].A := speechGreatMagicMasterSummonsSwordsmen;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -4777,8 +4777,8 @@ begin
       { PushCommand(12, (5 * 11 + 5), (6 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := (6 * 11 + 5);
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := (6 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4787,8 +4787,8 @@ begin
       { PushCommand(12, (4 * 11 + 5), (5 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := (5 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := (5 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4797,8 +4797,8 @@ begin
       { PushCommand(12, (4 * 11 + 6), (4 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 6);
-      EventStack[EventCursor].B := (4 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 6);
+      EventStack[EventCursor].B := (4 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4807,8 +4807,8 @@ begin
       { PushCommand(12, (3 * 11 + 6), (4 * 11 + 6)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 6);
-      EventStack[EventCursor].B := (4 * 11 + 6);
+      EventStack[EventCursor].A := (3 * BoardWidth + 6);
+      EventStack[EventCursor].B := (4 * BoardWidth + 6);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4817,8 +4817,8 @@ begin
       { PushCommand(12, (3 * 11 + 7), (3 * 11 + 6)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 7);
-      EventStack[EventCursor].B := (3 * 11 + 6);
+      EventStack[EventCursor].A := (3 * BoardWidth + 7);
+      EventStack[EventCursor].B := (3 * BoardWidth + 6);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4827,8 +4827,8 @@ begin
       { PushCommand(12, (3 * 11 + 8), (3 * 11 + 7)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 8);
-      EventStack[EventCursor].B := (3 * 11 + 7);
+      EventStack[EventCursor].A := (3 * BoardWidth + 8);
+      EventStack[EventCursor].B := (3 * BoardWidth + 7);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4847,8 +4847,8 @@ begin
       { PushCommand(12, (5 * 11 + 5), (6 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := (6 * 11 + 5);
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := (6 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4857,8 +4857,8 @@ begin
       { PushCommand(12, (4 * 11 + 5), (5 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := (5 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := (5 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4867,8 +4867,8 @@ begin
       { PushCommand(12, (4 * 11 + 6), (4 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 6);
-      EventStack[EventCursor].B := (4 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 6);
+      EventStack[EventCursor].B := (4 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4877,8 +4877,8 @@ begin
       { PushCommand(12, (3 * 11 + 6), (4 * 11 + 6)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 6);
-      EventStack[EventCursor].B := (4 * 11 + 6);
+      EventStack[EventCursor].A := (3 * BoardWidth + 6);
+      EventStack[EventCursor].B := (4 * BoardWidth + 6);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4887,8 +4887,8 @@ begin
       { PushCommand(12, (3 * 11 + 7), (3 * 11 + 6)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 7);
-      EventStack[EventCursor].B := (3 * 11 + 6);
+      EventStack[EventCursor].A := (3 * BoardWidth + 7);
+      EventStack[EventCursor].B := (3 * BoardWidth + 6);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4907,8 +4907,8 @@ begin
       { PushCommand(12, (5 * 11 + 5), (6 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := (6 * 11 + 5);
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := (6 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4917,8 +4917,8 @@ begin
       { PushCommand(12, (4 * 11 + 5), (5 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := (5 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := (5 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4927,8 +4927,8 @@ begin
       { PushCommand(12, (4 * 11 + 6), (4 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 6);
-      EventStack[EventCursor].B := (4 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 6);
+      EventStack[EventCursor].B := (4 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4937,8 +4937,8 @@ begin
       { PushCommand(12, (3 * 11 + 6), (4 * 11 + 6)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 6);
-      EventStack[EventCursor].B := (4 * 11 + 6);
+      EventStack[EventCursor].A := (3 * BoardWidth + 6);
+      EventStack[EventCursor].B := (4 * BoardWidth + 6);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4947,7 +4947,7 @@ begin
       { PushCommand(10, 35, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 35;
+      EventStack[EventCursor].A := speechGreatMagicMasterSummonsSoldiers;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -4967,8 +4967,8 @@ begin
       { PushCommand(12, (5 * 11 + 5), (6 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := (6 * 11 + 5);
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := (6 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4977,8 +4977,8 @@ begin
       { PushCommand(12, (4 * 11 + 5), (5 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := (5 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := (5 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4987,8 +4987,8 @@ begin
       { PushCommand(12, (4 * 11 + 4), (4 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 4);
-      EventStack[EventCursor].B := (4 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 4);
+      EventStack[EventCursor].B := (4 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -4997,8 +4997,8 @@ begin
       { PushCommand(12, (3 * 11 + 4), (4 * 11 + 4)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 4);
-      EventStack[EventCursor].B := (4 * 11 + 4);
+      EventStack[EventCursor].A := (3 * BoardWidth + 4);
+      EventStack[EventCursor].B := (4 * BoardWidth + 4);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5007,8 +5007,8 @@ begin
       { PushCommand(12, (3 * 11 + 3), (3 * 11 + 4)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 3);
-      EventStack[EventCursor].B := (3 * 11 + 4);
+      EventStack[EventCursor].A := (3 * BoardWidth + 3);
+      EventStack[EventCursor].B := (3 * BoardWidth + 4);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5017,8 +5017,8 @@ begin
       { PushCommand(12, (3 * 11 + 2), (3 * 11 + 3)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 2);
-      EventStack[EventCursor].B := (3 * 11 + 3);
+      EventStack[EventCursor].A := (3 * BoardWidth + 2);
+      EventStack[EventCursor].B := (3 * BoardWidth + 3);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5037,8 +5037,8 @@ begin
       { PushCommand(12, (5 * 11 + 5), (6 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := (6 * 11 + 5);
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := (6 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5047,8 +5047,8 @@ begin
       { PushCommand(12, (4 * 11 + 5), (5 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := (5 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := (5 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5057,8 +5057,8 @@ begin
       { PushCommand(12, (4 * 11 + 4), (4 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 4);
-      EventStack[EventCursor].B := (4 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 4);
+      EventStack[EventCursor].B := (4 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5067,8 +5067,8 @@ begin
       { PushCommand(12, (3 * 11 + 4), (4 * 11 + 4)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 4);
-      EventStack[EventCursor].B := (4 * 11 + 4);
+      EventStack[EventCursor].A := (3 * BoardWidth + 4);
+      EventStack[EventCursor].B := (4 * BoardWidth + 4);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5077,8 +5077,8 @@ begin
       { PushCommand(12, (3 * 11 + 3), (3 * 11 + 4)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 3);
-      EventStack[EventCursor].B := (3 * 11 + 4);
+      EventStack[EventCursor].A := (3 * BoardWidth + 3);
+      EventStack[EventCursor].B := (3 * BoardWidth + 4);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5097,8 +5097,8 @@ begin
       { PushCommand(12, (5 * 11 + 5), (6 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := (6 * 11 + 5);
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := (6 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5107,8 +5107,8 @@ begin
       { PushCommand(12, (4 * 11 + 5), (5 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 5);
-      EventStack[EventCursor].B := (5 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 5);
+      EventStack[EventCursor].B := (5 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5117,8 +5117,8 @@ begin
       { PushCommand(12, (4 * 11 + 4), (4 * 11 + 5)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (4 * 11 + 4);
-      EventStack[EventCursor].B := (4 * 11 + 5);
+      EventStack[EventCursor].A := (4 * BoardWidth + 4);
+      EventStack[EventCursor].B := (4 * BoardWidth + 5);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5127,8 +5127,8 @@ begin
       { PushCommand(12, (3 * 11 + 4), (4 * 11 + 4)): monster movement. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-      EventStack[EventCursor].A := (3 * 11 + 4);
-      EventStack[EventCursor].B := (4 * 11 + 4);
+      EventStack[EventCursor].A := (3 * BoardWidth + 4);
+      EventStack[EventCursor].B := (4 * BoardWidth + 4);
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5137,12 +5137,12 @@ begin
       { PushCommand(10, 34, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 34;
+      EventStack[EventCursor].A := speechGreatMagicMasterFinalChallenge;
       EventStack[EventCursor].B := 0;
       { PushCommand(13, (7 * 11 + 5), 5): door/wall animation frame. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-      EventStack[EventCursor].A := (7 * 11 + 5);
+      EventStack[EventCursor].A := (7 * BoardWidth + 5);
       EventStack[EventCursor].B := 5;
       doorstackin;
       { PushCommand(0, 0, 0): wait. }
@@ -5168,7 +5168,7 @@ begin
     end;
     42: { Zeno arrives, summons four guards and executes the Golden Knight. }
     begin
-      Maps[35, 2 + 9 * 11 + 4] := 6;
+      Maps[35, 2 + 9 * BoardWidth + 4] := tileRoad;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5177,8 +5177,8 @@ begin
       { PushCommand(6, (5 * 11 + 5), 6): change tile and redraw. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evSetTile);
-      EventStack[EventCursor].A := (5 * 11 + 5);
-      EventStack[EventCursor].B := 6;
+      EventStack[EventCursor].A := (5 * BoardWidth + 5);
+      EventStack[EventCursor].B := tileRoad;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5227,7 +5227,7 @@ begin
       { PushCommand(10, 44, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 44;
+      EventStack[EventCursor].A := speechZenoPromisesFairFight;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -5262,23 +5262,23 @@ begin
       { PushCommand(6, (7 * 11 + 6), 6): change tile and redraw. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evSetTile);
-      EventStack[EventCursor].A := (7 * 11 + 6);
-      EventStack[EventCursor].B := 6;
+      EventStack[EventCursor].A := (7 * BoardWidth + 6);
+      EventStack[EventCursor].B := tileRoad;
       { PushCommand(6, (7 * 11 + 4), 6): change tile and redraw. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evSetTile);
-      EventStack[EventCursor].A := (7 * 11 + 4);
-      EventStack[EventCursor].B := 6;
+      EventStack[EventCursor].A := (7 * BoardWidth + 4);
+      EventStack[EventCursor].B := tileRoad;
       { PushCommand(6, (8 * 11 + 5), 6): change tile and redraw. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evSetTile);
-      EventStack[EventCursor].A := (8 * 11 + 5);
-      EventStack[EventCursor].B := 6;
+      EventStack[EventCursor].A := (8 * BoardWidth + 5);
+      EventStack[EventCursor].B := tileRoad;
       { PushCommand(6, (6 * 11 + 5), 6): change tile and redraw. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evSetTile);
-      EventStack[EventCursor].A := (6 * 11 + 5);
-      EventStack[EventCursor].B := 6;
+      EventStack[EventCursor].A := (6 * BoardWidth + 5);
+      EventStack[EventCursor].B := tileRoad;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5317,8 +5317,8 @@ begin
       { PushCommand(6, (7 * 11 + 5), 6): change tile and redraw. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evSetTile);
-      EventStack[EventCursor].A := (7 * 11 + 5);
-      EventStack[EventCursor].B := 6;
+      EventStack[EventCursor].A := (7 * BoardWidth + 5);
+      EventStack[EventCursor].B := tileRoad;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5342,7 +5342,7 @@ begin
       { PushCommand(0, Maps[Hero.floor, 2 + 7 * 11 + 5], 184): wait / paired animation operands. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
-      EventStack[EventCursor].A := Maps[Hero.floor, 2 + 7 * 11 + 5];
+      EventStack[EventCursor].A := Maps[Hero.floor, 2 + 7 * BoardWidth + 5];
       EventStack[EventCursor].B := 184;
       { PushCommand(9, 82, 183): masked overlay. }
       Inc(EventCursor);
@@ -5367,7 +5367,7 @@ begin
       { PushCommand(10, 43, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 43;
+      EventStack[EventCursor].A := speechGoldenKnightPleads;
       EventStack[EventCursor].B := 0;
       ScratchIndex := 71;
       NeighborIndex := 93;
@@ -5402,7 +5402,7 @@ begin
       { PushCommand(10, 42, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 42;
+      EventStack[EventCursor].A := speechZenoRebukesGoldenKnight;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -5432,7 +5432,7 @@ begin
       { PushCommand(10, 41, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 41;
+      EventStack[EventCursor].A := speechGoldenKnightReportsFailure;
       EventStack[EventCursor].B := 0;
       ScratchIndex := 60;
       zenolivework;
@@ -5470,7 +5470,7 @@ begin
     end;
     43: { The upper-passage sorcerer retreats and raises two walls. }
     begin
-      if (Maps[Hero.floor, 2 + 0 * 11 + 8] = 93) then
+      if (Maps[Hero.floor, 2 + 0 * BoardWidth + 8] = tileSorcerer) then
       begin
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
@@ -5480,7 +5480,7 @@ begin
         { PushCommand(13, (0 * 11 + 9), 8): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (0 * 11 + 9);
+        EventStack[EventCursor].A := (0 * BoardWidth + 9);
         EventStack[EventCursor].B := 8;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -5511,7 +5511,7 @@ begin
         { PushCommand(13, (0 * 11 + 6), 8): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (0 * 11 + 6);
+        EventStack[EventCursor].A := (0 * BoardWidth + 6);
         EventStack[EventCursor].B := 8;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -5552,8 +5552,8 @@ begin
         { PushCommand(12, (0 * 11 + 9), (0 * 11 + 10)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (0 * 11 + 9);
-        EventStack[EventCursor].B := (0 * 11 + 10);
+        EventStack[EventCursor].A := (0 * BoardWidth + 9);
+        EventStack[EventCursor].B := (0 * BoardWidth + 10);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5592,8 +5592,8 @@ begin
         { PushCommand(12, (0 * 11 + 8), (0 * 11 + 9)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (0 * 11 + 8);
-        EventStack[EventCursor].B := (0 * 11 + 9);
+        EventStack[EventCursor].A := (0 * BoardWidth + 8);
+        EventStack[EventCursor].B := (0 * BoardWidth + 9);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5634,8 +5634,8 @@ begin
       { PushCommand(6, (0 * 11 + 0), 93): change tile and redraw. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evSetTile);
-      EventStack[EventCursor].A := (0 * 11 + 0);
-      EventStack[EventCursor].B := 93;
+      EventStack[EventCursor].A := (0 * BoardWidth + 0);
+      EventStack[EventCursor].B := tileSorcerer;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -5696,7 +5696,7 @@ begin
       { PushCommand(10, 45, 0): story dialogue. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 45;
+      EventStack[EventCursor].A := speechZenoFinalChallenge;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0): wait. }
       Inc(EventCursor);
@@ -5721,7 +5721,7 @@ begin
       { PushCommand(13, (6 * 11 + 5), 5): door/wall animation frame. }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-      EventStack[EventCursor].A := (6 * 11 + 5);
+      EventStack[EventCursor].A := (6 * BoardWidth + 5);
       EventStack[EventCursor].B := 5;
       doorstackin;
       { PushCommand(0, 0, 0): wait. }
@@ -5768,14 +5768,14 @@ begin
   case Hero.floor of
     2: { Defeat both prison guards to open the six cell gates. }
     begin
-      if (((Maps[Hero.floor, 2 + 1 * 11 + 5] + Maps[Hero.floor, 2 + 1 * 11 + 7])
-              + Maps[Hero.floor, 2 + 4 * 11 + 4])
+      if (((Maps[Hero.floor, 2 + 1 * BoardWidth + 5] + Maps[Hero.floor, 2 + 1 * BoardWidth + 7])
+              + Maps[Hero.floor, 2 + 4 * BoardWidth + 4])
           = 17) then
       begin
         { PushCommand(13, (10 * 11 + 8), 6): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (10 * 11 + 8);
+        EventStack[EventCursor].A := (10 * BoardWidth + 8);
         EventStack[EventCursor].B := 6;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -5791,7 +5791,7 @@ begin
         { PushCommand(13, (10 * 11 + 4), 6): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (10 * 11 + 4);
+        EventStack[EventCursor].A := (10 * BoardWidth + 4);
         EventStack[EventCursor].B := 6;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -5807,7 +5807,7 @@ begin
         { PushCommand(13, (7 * 11 + 8), 6): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (7 * 11 + 8);
+        EventStack[EventCursor].A := (7 * BoardWidth + 8);
         EventStack[EventCursor].B := 6;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -5823,7 +5823,7 @@ begin
         { PushCommand(13, (7 * 11 + 4), 6): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (7 * 11 + 4);
+        EventStack[EventCursor].A := (7 * BoardWidth + 4);
         EventStack[EventCursor].B := 6;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -5839,7 +5839,7 @@ begin
         { PushCommand(13, (4 * 11 + 8), 6): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (4 * 11 + 8);
+        EventStack[EventCursor].A := (4 * BoardWidth + 8);
         EventStack[EventCursor].B := 6;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -5855,7 +5855,7 @@ begin
         { PushCommand(13, (4 * 11 + 4), 6): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (4 * 11 + 4);
+        EventStack[EventCursor].A := (4 * BoardWidth + 4);
         EventStack[EventCursor].B := 6;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -5882,14 +5882,14 @@ begin
     end;
     8: { Defeat the guard pair to open their gate. }
     begin
-      if (((Maps[Hero.floor, 2 + 4 * 11 + 8] + Maps[Hero.floor, 2 + 4 * 11 + 10])
-              + Maps[Hero.floor, 2 + 3 * 11 + 9])
+      if (((Maps[Hero.floor, 2 + 4 * BoardWidth + 8] + Maps[Hero.floor, 2 + 4 * BoardWidth + 10])
+              + Maps[Hero.floor, 2 + 3 * BoardWidth + 9])
           = 16) then
       begin
         { PushCommand(13, (3 * 11 + 9), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (3 * 11 + 9);
+        EventStack[EventCursor].A := (3 * BoardWidth + 9);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -5916,14 +5916,15 @@ begin
     end;
     10: { Skeleton guards unlock the boss; clearing the arena unlocks stairs and loot. }
     begin
-      if (((((((((Maps[Hero.floor, 2 + 3 * 11 + 4] + Maps[Hero.floor, 2 + 3 * 11 + 5])
-                                      + Maps[Hero.floor, 2 + 3 * 11 + 6])
-                                  + Maps[Hero.floor, 2 + 4 * 11 + 4])
-                              + Maps[Hero.floor, 2 + 4 * 11 + 6])
-                          + Maps[Hero.floor, 2 + 5 * 11 + 4])
-                      + Maps[Hero.floor, 2 + 5 * 11 + 5])
-                  + Maps[Hero.floor, 2 + 5 * 11 + 6])
-              + Maps[Hero.floor, 2 + 2 * 11 + 5])
+      if (((((((((Maps[Hero.floor, 2 + 3 * BoardWidth + 4]
+                                          + Maps[Hero.floor, 2 + 3 * BoardWidth + 5])
+                                      + Maps[Hero.floor, 2 + 3 * BoardWidth + 6])
+                                  + Maps[Hero.floor, 2 + 4 * BoardWidth + 4])
+                              + Maps[Hero.floor, 2 + 4 * BoardWidth + 6])
+                          + Maps[Hero.floor, 2 + 5 * BoardWidth + 4])
+                      + Maps[Hero.floor, 2 + 5 * BoardWidth + 5])
+                  + Maps[Hero.floor, 2 + 5 * BoardWidth + 6])
+              + Maps[Hero.floor, 2 + 2 * BoardWidth + 5])
           = 52) then
       begin
         if (Hero.music_track <> 0) then
@@ -5942,7 +5943,7 @@ begin
         { PushCommand(13, (2 * 11 + 5), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (2 * 11 + 5);
+        EventStack[EventCursor].A := (2 * BoardWidth + 5);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -5973,7 +5974,7 @@ begin
         { PushCommand(10, 14, 0): story dialogue. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDialogue);
-        EventStack[EventCursor].A := 14;
+        EventStack[EventCursor].A := speechSkeletonLordBattle;
         EventStack[EventCursor].B := 0;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
@@ -5986,9 +5987,9 @@ begin
         EventStack[EventCursor].A := 0;
         EventStack[EventCursor].B := 0;
       end;
-      if ((((Maps[Hero.floor, 2 + 0 * 11 + 5] + Maps[Hero.floor, 2 + 6 * 11 + 5])
-                  + Maps[Hero.floor, 2 + 3 * 11 + 7])
-              + Maps[Hero.floor, 2 + 3 * 11 + 3])
+      if ((((Maps[Hero.floor, 2 + 0 * BoardWidth + 5] + Maps[Hero.floor, 2 + 6 * BoardWidth + 5])
+                  + Maps[Hero.floor, 2 + 3 * BoardWidth + 7])
+              + Maps[Hero.floor, 2 + 3 * BoardWidth + 3])
           = 18) then
       begin
         { PushCommand(0, 0, 0): wait. }
@@ -5999,8 +6000,8 @@ begin
         { PushCommand(6, (8 * 11 + 5), 7): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (8 * 11 + 5);
-        EventStack[EventCursor].B := 7;
+        EventStack[EventCursor].A := (8 * BoardWidth + 5);
+        EventStack[EventCursor].B := tileSpecialRoad;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6009,8 +6010,8 @@ begin
         { PushCommand(6, (10 * 11 + 5), 11): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (10 * 11 + 5);
-        EventStack[EventCursor].B := 11;
+        EventStack[EventCursor].A := (10 * BoardWidth + 5);
+        EventStack[EventCursor].B := tileStairsUp;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6029,8 +6030,8 @@ begin
         { PushCommand(6, (3 * 11 + 10), 29): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 10);
-        EventStack[EventCursor].B := 29;
+        EventStack[EventCursor].A := (3 * BoardWidth + 10);
+        EventStack[EventCursor].B := tileYellowKey;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6049,8 +6050,8 @@ begin
         { PushCommand(6, (3 * 11 + 9), 29): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 9);
-        EventStack[EventCursor].B := 29;
+        EventStack[EventCursor].A := (3 * BoardWidth + 9);
+        EventStack[EventCursor].B := tileYellowKey;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6069,8 +6070,8 @@ begin
         { PushCommand(6, (3 * 11 + 8), 29): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 8);
-        EventStack[EventCursor].B := 29;
+        EventStack[EventCursor].A := (3 * BoardWidth + 8);
+        EventStack[EventCursor].B := tileYellowKey;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6089,8 +6090,8 @@ begin
         { PushCommand(6, (3 * 11 + 2), 33): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 2);
-        EventStack[EventCursor].B := 33;
+        EventStack[EventCursor].A := (3 * BoardWidth + 2);
+        EventStack[EventCursor].B := tileBluePotion;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6109,8 +6110,8 @@ begin
         { PushCommand(6, (3 * 11 + 1), 33): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 1);
-        EventStack[EventCursor].B := 33;
+        EventStack[EventCursor].A := (3 * BoardWidth + 1);
+        EventStack[EventCursor].B := tileBluePotion;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6129,8 +6130,8 @@ begin
         { PushCommand(6, (3 * 11 + 0), 33): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 0);
-        EventStack[EventCursor].B := 33;
+        EventStack[EventCursor].A := (3 * BoardWidth + 0);
+        EventStack[EventCursor].B := tileBluePotion;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6149,8 +6150,8 @@ begin
         { PushCommand(6, (2 * 11 + 10), 35): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (2 * 11 + 10);
-        EventStack[EventCursor].B := 35;
+        EventStack[EventCursor].A := (2 * BoardWidth + 10);
+        EventStack[EventCursor].B := tileBlueGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6169,8 +6170,8 @@ begin
         { PushCommand(6, (2 * 11 + 9), 35): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (2 * 11 + 9);
-        EventStack[EventCursor].B := 35;
+        EventStack[EventCursor].A := (2 * BoardWidth + 9);
+        EventStack[EventCursor].B := tileBlueGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6189,8 +6190,8 @@ begin
         { PushCommand(6, (2 * 11 + 8), 35): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (2 * 11 + 8);
-        EventStack[EventCursor].B := 35;
+        EventStack[EventCursor].A := (2 * BoardWidth + 8);
+        EventStack[EventCursor].B := tileBlueGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6209,8 +6210,8 @@ begin
         { PushCommand(6, (2 * 11 + 2), 34): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (2 * 11 + 2);
-        EventStack[EventCursor].B := 34;
+        EventStack[EventCursor].A := (2 * BoardWidth + 2);
+        EventStack[EventCursor].B := tileRedGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6229,8 +6230,8 @@ begin
         { PushCommand(6, (2 * 11 + 1), 34): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (2 * 11 + 1);
-        EventStack[EventCursor].B := 34;
+        EventStack[EventCursor].A := (2 * BoardWidth + 1);
+        EventStack[EventCursor].B := tileRedGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6249,8 +6250,8 @@ begin
         { PushCommand(6, (2 * 11 + 0), 34): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (2 * 11 + 0);
-        EventStack[EventCursor].B := 34;
+        EventStack[EventCursor].A := (2 * BoardWidth + 0);
+        EventStack[EventCursor].B := tileRedGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6269,8 +6270,8 @@ begin
         { PushCommand(6, (2 * 11 + 5), 23): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (2 * 11 + 5);
-        EventStack[EventCursor].B := 23;
+        EventStack[EventCursor].A := (2 * BoardWidth + 5);
+        EventStack[EventCursor].B := tileFairy;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6284,7 +6285,7 @@ begin
         { PushCommand(13, (6 * 11 + 5), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (6 * 11 + 5);
+        EventStack[EventCursor].A := (6 * BoardWidth + 5);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -6300,7 +6301,7 @@ begin
         { PushCommand(13, (3 * 11 + 7), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (3 * 11 + 7);
+        EventStack[EventCursor].A := (3 * BoardWidth + 7);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -6316,7 +6317,7 @@ begin
         { PushCommand(13, (3 * 11 + 3), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (3 * 11 + 3);
+        EventStack[EventCursor].A := (3 * BoardWidth + 3);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -6347,7 +6348,7 @@ begin
         { PushCommand(10, 15, 0): story dialogue. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDialogue);
-        EventStack[EventCursor].A := 15;
+        EventStack[EventCursor].A := speechSkeletonLordDefeated;
         EventStack[EventCursor].B := 0;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
@@ -6376,14 +6377,15 @@ begin
     end;
     11: { Defeat the guard pair to open their gate. }
     begin
-      if (((Maps[Hero.floor, 2 + 4 * 11 + 0] + Maps[Hero.floor, 2 + 4 * 11 + 2])
-              + Maps[Hero.floor, 2 + 3 * 11 + 1])
+      if (((Maps[Hero.floor, 2 + 4 * BoardWidth + 0]
+                  + Maps[Hero.floor, 2 + 4 * BoardWidth + MapTileOffset])
+              + Maps[Hero.floor, 2 + 3 * BoardWidth + 1])
           = 16) then
       begin
         { PushCommand(13, (3 * 11 + 1), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (3 * 11 + 1);
+        EventStack[EventCursor].A := (3 * BoardWidth + 1);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -6410,9 +6412,10 @@ begin
     end;
     14: { Defeat all three guards to reveal a red key. }
     begin
-      if ((((Maps[Hero.floor, 2 + 0 * 11 + 0] + Maps[Hero.floor, 2 + 0 * 11 + 2])
-                  + Maps[Hero.floor, 2 + 1 * 11 + 1])
-              + Maps[Hero.floor, 2 + 2 * 11 + 0])
+      if ((((Maps[Hero.floor, 2 + 0 * BoardWidth + 0]
+                      + Maps[Hero.floor, 2 + 0 * BoardWidth + MapTileOffset])
+                  + Maps[Hero.floor, 2 + 1 * BoardWidth + 1])
+              + Maps[Hero.floor, 2 + 2 * BoardWidth + 0])
           = 26) then
       begin
         { PushCommand(0, 0, 0): wait. }
@@ -6423,8 +6426,8 @@ begin
         { PushCommand(6, (2 * 11 + 0), 30): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (2 * 11 + 0);
-        EventStack[EventCursor].B := 30;
+        EventStack[EventCursor].A := (2 * BoardWidth + 0);
+        EventStack[EventCursor].B := tileRedKey;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6449,8 +6452,8 @@ begin
     end;
     15: { Defeat the octopus to reveal the mattock and reopen the chamber. }
     begin
-      if (((Maps[Hero.floor, 2 + 5 * 11 + 5] + Maps[Hero.floor, 2 + 2 * 11 + 5])
-              + Maps[Hero.floor, 2 + 8 * 11 + 5])
+      if (((Maps[Hero.floor, 2 + 5 * BoardWidth + 5] + Maps[Hero.floor, 2 + 2 * BoardWidth + 5])
+              + Maps[Hero.floor, 2 + 8 * BoardWidth + 5])
           = 14) then
       begin
         { PushCommand(0, 0, 0): wait. }
@@ -6461,8 +6464,8 @@ begin
         { PushCommand(6, (4 * 11 + 5), 41): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (4 * 11 + 5);
-        EventStack[EventCursor].B := 41;
+        EventStack[EventCursor].A := (4 * BoardWidth + 5);
+        EventStack[EventCursor].B := tileMattock;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6476,7 +6479,7 @@ begin
         { PushCommand(13, (8 * 11 + 5), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (8 * 11 + 5);
+        EventStack[EventCursor].A := (8 * BoardWidth + 5);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -6492,7 +6495,7 @@ begin
         { PushCommand(13, (2 * 11 + 5), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (2 * 11 + 5);
+        EventStack[EventCursor].A := (2 * BoardWidth + 5);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -6519,14 +6522,14 @@ begin
     end;
     17: { Each of the four guard pairs opens its own gate. }
     begin
-      if (((Maps[Hero.floor, 2 + 4 * 11 + 8] + Maps[Hero.floor, 2 + 4 * 11 + 10])
-              + Maps[Hero.floor, 2 + 3 * 11 + 9])
+      if (((Maps[Hero.floor, 2 + 4 * BoardWidth + 8] + Maps[Hero.floor, 2 + 4 * BoardWidth + 10])
+              + Maps[Hero.floor, 2 + 3 * BoardWidth + 9])
           = 16) then
       begin
         { PushCommand(13, (3 * 11 + 9), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (3 * 11 + 9);
+        EventStack[EventCursor].A := (3 * BoardWidth + 9);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -6550,14 +6553,14 @@ begin
         EventStack[EventCursor].A := 0;
         EventStack[EventCursor].B := 0;
       end;
-      if (((Maps[Hero.floor, 2 + 7 * 11 + 8] + Maps[Hero.floor, 2 + 7 * 11 + 10])
-              + Maps[Hero.floor, 2 + 6 * 11 + 9])
+      if (((Maps[Hero.floor, 2 + 7 * BoardWidth + 8] + Maps[Hero.floor, 2 + 7 * BoardWidth + 10])
+              + Maps[Hero.floor, 2 + 6 * BoardWidth + 9])
           = 16) then
       begin
         { PushCommand(13, (6 * 11 + 9), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (6 * 11 + 9);
+        EventStack[EventCursor].A := (6 * BoardWidth + 9);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -6581,14 +6584,15 @@ begin
         EventStack[EventCursor].A := 0;
         EventStack[EventCursor].B := 0;
       end;
-      if (((Maps[Hero.floor, 2 + 4 * 11 + 0] + Maps[Hero.floor, 2 + 4 * 11 + 2])
-              + Maps[Hero.floor, 2 + 3 * 11 + 1])
+      if (((Maps[Hero.floor, 2 + 4 * BoardWidth + 0]
+                  + Maps[Hero.floor, 2 + 4 * BoardWidth + MapTileOffset])
+              + Maps[Hero.floor, 2 + 3 * BoardWidth + 1])
           = 16) then
       begin
         { PushCommand(13, (3 * 11 + 1), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (3 * 11 + 1);
+        EventStack[EventCursor].A := (3 * BoardWidth + 1);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -6612,14 +6616,15 @@ begin
         EventStack[EventCursor].A := 0;
         EventStack[EventCursor].B := 0;
       end;
-      if (((Maps[Hero.floor, 2 + 7 * 11 + 0] + Maps[Hero.floor, 2 + 7 * 11 + 2])
-              + Maps[Hero.floor, 2 + 6 * 11 + 1])
+      if (((Maps[Hero.floor, 2 + 7 * BoardWidth + 0]
+                  + Maps[Hero.floor, 2 + 7 * BoardWidth + MapTileOffset])
+              + Maps[Hero.floor, 2 + 6 * BoardWidth + 1])
           = 16) then
       begin
         { PushCommand(13, (6 * 11 + 1), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (6 * 11 + 1);
+        EventStack[EventCursor].A := (6 * BoardWidth + 1);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -6646,16 +6651,17 @@ begin
     end;
     20: { Defeat the vampire to reveal the fairy, stairs and chamber loot. }
     begin
-      if (((((((((((Maps[Hero.floor, 2 + 4 * 11 + 4] + Maps[Hero.floor, 2 + 4 * 11 + 5])
-                                              + Maps[Hero.floor, 2 + 4 * 11 + 6])
-                                          + Maps[Hero.floor, 2 + 5 * 11 + 4])
-                                      + Maps[Hero.floor, 2 + 5 * 11 + 6])
-                                  + Maps[Hero.floor, 2 + 6 * 11 + 4])
-                              + Maps[Hero.floor, 2 + 6 * 11 + 5])
-                          + Maps[Hero.floor, 2 + 6 * 11 + 6])
-                      + Maps[Hero.floor, 2 + 5 * 11 + 5])
-                  + Maps[Hero.floor, 2 + 2 * 11 + 5])
-              + Maps[Hero.floor, 2 + 8 * 11 + 5])
+      if (((((((((((Maps[Hero.floor, 2 + 4 * BoardWidth + 4]
+                                                  + Maps[Hero.floor, 2 + 4 * BoardWidth + 5])
+                                              + Maps[Hero.floor, 2 + 4 * BoardWidth + 6])
+                                          + Maps[Hero.floor, 2 + 5 * BoardWidth + 4])
+                                      + Maps[Hero.floor, 2 + 5 * BoardWidth + 6])
+                                  + Maps[Hero.floor, 2 + 6 * BoardWidth + 4])
+                              + Maps[Hero.floor, 2 + 6 * BoardWidth + 5])
+                          + Maps[Hero.floor, 2 + 6 * BoardWidth + 6])
+                      + Maps[Hero.floor, 2 + 5 * BoardWidth + 5])
+                  + Maps[Hero.floor, 2 + 2 * BoardWidth + 5])
+              + Maps[Hero.floor, 2 + 8 * BoardWidth + 5])
           = 62) then
       begin
         { PushCommand(0, 0, 0): wait. }
@@ -6666,8 +6672,8 @@ begin
         { PushCommand(6, (0 * 11 + 5), 11): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (0 * 11 + 5);
-        EventStack[EventCursor].B := 11;
+        EventStack[EventCursor].A := (0 * BoardWidth + 5);
+        EventStack[EventCursor].B := tileStairsUp;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6686,8 +6692,8 @@ begin
         { PushCommand(6, (3 * 11 + 6), 29): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 6);
-        EventStack[EventCursor].B := 29;
+        EventStack[EventCursor].A := (3 * BoardWidth + 6);
+        EventStack[EventCursor].B := tileYellowKey;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6706,8 +6712,8 @@ begin
         { PushCommand(6, (3 * 11 + 5), 29): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 5);
-        EventStack[EventCursor].B := 29;
+        EventStack[EventCursor].A := (3 * BoardWidth + 5);
+        EventStack[EventCursor].B := tileYellowKey;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6726,8 +6732,8 @@ begin
         { PushCommand(6, (3 * 11 + 4), 29): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 4);
-        EventStack[EventCursor].B := 29;
+        EventStack[EventCursor].A := (3 * BoardWidth + 4);
+        EventStack[EventCursor].B := tileYellowKey;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6746,8 +6752,8 @@ begin
         { PushCommand(6, (7 * 11 + 6), 33): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (7 * 11 + 6);
-        EventStack[EventCursor].B := 33;
+        EventStack[EventCursor].A := (7 * BoardWidth + 6);
+        EventStack[EventCursor].B := tileBluePotion;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6766,8 +6772,8 @@ begin
         { PushCommand(6, (7 * 11 + 5), 33): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (7 * 11 + 5);
-        EventStack[EventCursor].B := 33;
+        EventStack[EventCursor].A := (7 * BoardWidth + 5);
+        EventStack[EventCursor].B := tileBluePotion;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6786,8 +6792,8 @@ begin
         { PushCommand(6, (7 * 11 + 4), 33): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (7 * 11 + 4);
-        EventStack[EventCursor].B := 33;
+        EventStack[EventCursor].A := (7 * BoardWidth + 4);
+        EventStack[EventCursor].B := tileBluePotion;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6806,8 +6812,8 @@ begin
         { PushCommand(6, (6 * 11 + 7), 35): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (6 * 11 + 7);
-        EventStack[EventCursor].B := 35;
+        EventStack[EventCursor].A := (6 * BoardWidth + 7);
+        EventStack[EventCursor].B := tileBlueGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6826,8 +6832,8 @@ begin
         { PushCommand(6, (5 * 11 + 7), 35): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (5 * 11 + 7);
-        EventStack[EventCursor].B := 35;
+        EventStack[EventCursor].A := (5 * BoardWidth + 7);
+        EventStack[EventCursor].B := tileBlueGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6846,8 +6852,8 @@ begin
         { PushCommand(6, (4 * 11 + 7), 35): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (4 * 11 + 7);
-        EventStack[EventCursor].B := 35;
+        EventStack[EventCursor].A := (4 * BoardWidth + 7);
+        EventStack[EventCursor].B := tileBlueGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6866,8 +6872,8 @@ begin
         { PushCommand(6, (6 * 11 + 3), 34): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (6 * 11 + 3);
-        EventStack[EventCursor].B := 34;
+        EventStack[EventCursor].A := (6 * BoardWidth + 3);
+        EventStack[EventCursor].B := tileRedGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6886,8 +6892,8 @@ begin
         { PushCommand(6, (5 * 11 + 3), 34): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (5 * 11 + 3);
-        EventStack[EventCursor].B := 34;
+        EventStack[EventCursor].A := (5 * BoardWidth + 3);
+        EventStack[EventCursor].B := tileRedGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6906,8 +6912,8 @@ begin
         { PushCommand(6, (4 * 11 + 3), 34): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (4 * 11 + 3);
-        EventStack[EventCursor].B := 34;
+        EventStack[EventCursor].A := (4 * BoardWidth + 3);
+        EventStack[EventCursor].B := tileRedGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6926,8 +6932,8 @@ begin
         { PushCommand(6, (4 * 11 + 5), 23): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (4 * 11 + 5);
-        EventStack[EventCursor].B := 23;
+        EventStack[EventCursor].A := (4 * BoardWidth + 5);
+        EventStack[EventCursor].B := tileFairy;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6959,12 +6965,12 @@ begin
         { PushCommand(10, 21, 0): story dialogue. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDialogue);
-        EventStack[EventCursor].A := 21;
+        EventStack[EventCursor].A := speechVampireDefeated;
         EventStack[EventCursor].B := 0;
         { PushCommand(13, (8 * 11 + 5), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (8 * 11 + 5);
+        EventStack[EventCursor].A := (8 * BoardWidth + 5);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -6980,7 +6986,7 @@ begin
         { PushCommand(13, (2 * 11 + 5), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (2 * 11 + 5);
+        EventStack[EventCursor].A := (2 * BoardWidth + 5);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -7007,17 +7013,18 @@ begin
     end;
     25: { Defeat the Great Magic Master to reveal the fairy and red keys. }
     begin
-      if ((Maps[Hero.floor, 2 + 5 * 11 + 5] + Maps[Hero.floor, 2 + 9 * 11 + 5]) = 10) then
+      if ((Maps[Hero.floor, 2 + 5 * BoardWidth + 5] + Maps[Hero.floor, 2 + 9 * BoardWidth + 5])
+          = 10) then
       begin
         if (Hero.Word464 = 1) then
         begin
           { The time-gate dialogue also prepares the route through 24F. }
-          Maps[24, 2 + 0 * 11 + 4] := 8;
-          Maps[24, 2 + 0 * 11 + 6] := 8;
-          Maps[24, 2 + 1 * 11 + 5] := 6;
-          Maps[24, 2 + 2 * 11 + 5] := 6;
-          Maps[24, 2 + 3 * 11 + 5] := 6;
-          Maps[24, 2 + 0 * 11 + 5] := 7;
+          Maps[24, 2 + 0 * BoardWidth + 4] := tileWall;
+          Maps[24, 2 + 0 * BoardWidth + 6] := tileWall;
+          Maps[24, 2 + 1 * BoardWidth + 5] := tileRoad;
+          Maps[24, 2 + 2 * BoardWidth + 5] := tileRoad;
+          Maps[24, 2 + 3 * BoardWidth + 5] := tileRoad;
+          Maps[24, 2 + 0 * BoardWidth + 5] := tileSpecialRoad;
         end;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
@@ -7027,8 +7034,8 @@ begin
         { PushCommand(6, (7 * 11 + 7), 30): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (7 * 11 + 7);
-        EventStack[EventCursor].B := 30;
+        EventStack[EventCursor].A := (7 * BoardWidth + 7);
+        EventStack[EventCursor].B := tileRedKey;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7047,8 +7054,8 @@ begin
         { PushCommand(6, (7 * 11 + 6), 30): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (7 * 11 + 6);
-        EventStack[EventCursor].B := 30;
+        EventStack[EventCursor].A := (7 * BoardWidth + 6);
+        EventStack[EventCursor].B := tileRedKey;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7067,8 +7074,8 @@ begin
         { PushCommand(6, (7 * 11 + 5), 30): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (7 * 11 + 5);
-        EventStack[EventCursor].B := 30;
+        EventStack[EventCursor].A := (7 * BoardWidth + 5);
+        EventStack[EventCursor].B := tileRedKey;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7087,8 +7094,8 @@ begin
         { PushCommand(6, (7 * 11 + 4), 30): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (7 * 11 + 4);
-        EventStack[EventCursor].B := 30;
+        EventStack[EventCursor].A := (7 * BoardWidth + 4);
+        EventStack[EventCursor].B := tileRedKey;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7107,8 +7114,8 @@ begin
         { PushCommand(6, (7 * 11 + 3), 30): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (7 * 11 + 3);
-        EventStack[EventCursor].B := 30;
+        EventStack[EventCursor].A := (7 * BoardWidth + 3);
+        EventStack[EventCursor].B := tileRedKey;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7127,8 +7134,8 @@ begin
         { PushCommand(6, (6 * 11 + 5), 23): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (6 * 11 + 5);
-        EventStack[EventCursor].B := 23;
+        EventStack[EventCursor].A := (6 * BoardWidth + 5);
+        EventStack[EventCursor].B := tileFairy;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7142,7 +7149,7 @@ begin
         { PushCommand(13, (9 * 11 + 5), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (9 * 11 + 5);
+        EventStack[EventCursor].A := (9 * BoardWidth + 5);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -7169,13 +7176,14 @@ begin
     end;
     30: { Clear the guard line to reveal stairs and reopen the chamber. }
     begin
-      if ((((((((Maps[Hero.floor, 2 + 4 * 11 + 2] + Maps[Hero.floor, 2 + 4 * 11 + 3])
-                                  + Maps[Hero.floor, 2 + 4 * 11 + 4])
-                              + Maps[Hero.floor, 2 + 4 * 11 + 6])
-                          + Maps[Hero.floor, 2 + 4 * 11 + 7])
-                      + Maps[Hero.floor, 2 + 4 * 11 + 8])
-                  + Maps[Hero.floor, 2 + 3 * 11 + 5])
-              + Maps[Hero.floor, 2 + 6 * 11 + 5])
+      if ((((((((Maps[Hero.floor, 2 + 4 * BoardWidth + MapTileOffset]
+                                      + Maps[Hero.floor, 2 + 4 * BoardWidth + 3])
+                                  + Maps[Hero.floor, 2 + 4 * BoardWidth + 4])
+                              + Maps[Hero.floor, 2 + 4 * BoardWidth + 6])
+                          + Maps[Hero.floor, 2 + 4 * BoardWidth + 7])
+                      + Maps[Hero.floor, 2 + 4 * BoardWidth + 8])
+                  + Maps[Hero.floor, 2 + 3 * BoardWidth + 5])
+              + Maps[Hero.floor, 2 + 6 * BoardWidth + 5])
           = 44) then
       begin
         { PushCommand(0, 0, 0): wait. }
@@ -7186,8 +7194,8 @@ begin
         { PushCommand(6, (0 * 11 + 5), 11): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (0 * 11 + 5);
-        EventStack[EventCursor].B := 11;
+        EventStack[EventCursor].A := (0 * BoardWidth + 5);
+        EventStack[EventCursor].B := tileStairsUp;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7201,7 +7209,7 @@ begin
         { PushCommand(13, (6 * 11 + 5), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (6 * 11 + 5);
+        EventStack[EventCursor].A := (6 * BoardWidth + 5);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -7217,7 +7225,7 @@ begin
         { PushCommand(13, (3 * 11 + 5), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (3 * 11 + 5);
+        EventStack[EventCursor].A := (3 * BoardWidth + 5);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -7244,14 +7252,15 @@ begin
     end;
     32: { Open the paired-guard gate; the Golden Knight defeat advances the thief story. }
     begin
-      if (((Maps[Hero.floor, 2 + 9 * 11 + 0] + Maps[Hero.floor, 2 + 9 * 11 + 2])
-              + Maps[Hero.floor, 2 + 8 * 11 + 1])
+      if (((Maps[Hero.floor, 2 + 9 * BoardWidth + 0]
+                  + Maps[Hero.floor, 2 + 9 * BoardWidth + MapTileOffset])
+              + Maps[Hero.floor, 2 + 8 * BoardWidth + 1])
           = 16) then
       begin
         { PushCommand(13, (8 * 11 + 1), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (8 * 11 + 1);
+        EventStack[EventCursor].A := (8 * BoardWidth + 1);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -7275,11 +7284,11 @@ begin
         EventStack[EventCursor].A := 0;
         EventStack[EventCursor].B := 0;
       end;
-      if (((Maps[Hero.floor, 2 + 5 * 11 + 5] + Hero.Word480) + Hero.Word484) = 7) then
+      if (((Maps[Hero.floor, 2 + 5 * BoardWidth + 5] + Hero.Word480) + Hero.Word484) = 7) then
       begin
         Button1.Caption := 'OK';
-        Maps[29, 2 + 1 * 11 + 6] := 6;
-        Maps[2, 2 + 10 * 11 + 10] := 21;
+        Maps[29, 2 + 1 * BoardWidth + 6] := tileRoad;
+        Maps[2, 2 + 10 * BoardWidth + 10] := tileThief;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7288,8 +7297,8 @@ begin
         { PushCommand(6, (0 * 11 + 9), 6): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (0 * 11 + 9);
-        EventStack[EventCursor].B := 6;
+        EventStack[EventCursor].A := (0 * BoardWidth + 9);
+        EventStack[EventCursor].B := tileRoad;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7318,8 +7327,8 @@ begin
         { PushCommand(12, (0 * 11 + 8), (0 * 11 + 9)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (0 * 11 + 8);
-        EventStack[EventCursor].B := (0 * 11 + 9);
+        EventStack[EventCursor].A := (0 * BoardWidth + 8);
+        EventStack[EventCursor].B := (0 * BoardWidth + 9);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7338,8 +7347,8 @@ begin
         { PushCommand(12, (0 * 11 + 7), (0 * 11 + 8)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (0 * 11 + 7);
-        EventStack[EventCursor].B := (0 * 11 + 8);
+        EventStack[EventCursor].A := (0 * BoardWidth + 7);
+        EventStack[EventCursor].B := (0 * BoardWidth + 8);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7358,8 +7367,8 @@ begin
         { PushCommand(12, (0 * 11 + 6), (0 * 11 + 7)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (0 * 11 + 6);
-        EventStack[EventCursor].B := (0 * 11 + 7);
+        EventStack[EventCursor].A := (0 * BoardWidth + 6);
+        EventStack[EventCursor].B := (0 * BoardWidth + 7);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7378,8 +7387,8 @@ begin
         { PushCommand(12, (0 * 11 + 5), (0 * 11 + 6)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (0 * 11 + 5);
-        EventStack[EventCursor].B := (0 * 11 + 6);
+        EventStack[EventCursor].A := (0 * BoardWidth + 5);
+        EventStack[EventCursor].B := (0 * BoardWidth + 6);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7398,8 +7407,8 @@ begin
         { PushCommand(12, (1 * 11 + 5), (0 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (1 * 11 + 5);
-        EventStack[EventCursor].B := (0 * 11 + 5);
+        EventStack[EventCursor].A := (1 * BoardWidth + 5);
+        EventStack[EventCursor].B := (0 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7418,8 +7427,8 @@ begin
         { PushCommand(12, (2 * 11 + 5), (1 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (2 * 11 + 5);
-        EventStack[EventCursor].B := (1 * 11 + 5);
+        EventStack[EventCursor].A := (2 * BoardWidth + 5);
+        EventStack[EventCursor].B := (1 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7438,8 +7447,8 @@ begin
         { PushCommand(12, (3 * 11 + 5), (2 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (3 * 11 + 5);
-        EventStack[EventCursor].B := (2 * 11 + 5);
+        EventStack[EventCursor].A := (3 * BoardWidth + 5);
+        EventStack[EventCursor].B := (2 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7458,8 +7467,8 @@ begin
         { PushCommand(12, (4 * 11 + 5), (3 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (4 * 11 + 5);
-        EventStack[EventCursor].B := (3 * 11 + 5);
+        EventStack[EventCursor].A := (4 * BoardWidth + 5);
+        EventStack[EventCursor].B := (3 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7478,8 +7487,8 @@ begin
         { PushCommand(12, (5 * 11 + 5), (4 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (5 * 11 + 5);
-        EventStack[EventCursor].B := (4 * 11 + 5);
+        EventStack[EventCursor].A := (5 * BoardWidth + 5);
+        EventStack[EventCursor].B := (4 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7498,8 +7507,8 @@ begin
         { PushCommand(12, (6 * 11 + 5), (5 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (6 * 11 + 5);
-        EventStack[EventCursor].B := (5 * 11 + 5);
+        EventStack[EventCursor].A := (6 * BoardWidth + 5);
+        EventStack[EventCursor].B := (5 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7518,8 +7527,8 @@ begin
         { PushCommand(12, (7 * 11 + 5), (6 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (7 * 11 + 5);
-        EventStack[EventCursor].B := (6 * 11 + 5);
+        EventStack[EventCursor].A := (7 * BoardWidth + 5);
+        EventStack[EventCursor].B := (6 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7538,8 +7547,8 @@ begin
         { PushCommand(12, (8 * 11 + 5), (7 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (8 * 11 + 5);
-        EventStack[EventCursor].B := (7 * 11 + 5);
+        EventStack[EventCursor].A := (8 * BoardWidth + 5);
+        EventStack[EventCursor].B := (7 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7558,8 +7567,8 @@ begin
         { PushCommand(12, (9 * 11 + 5), (8 * 11 + 5)): monster movement. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-        EventStack[EventCursor].A := (9 * 11 + 5);
-        EventStack[EventCursor].B := (8 * 11 + 5);
+        EventStack[EventCursor].A := (9 * BoardWidth + 5);
+        EventStack[EventCursor].B := (8 * BoardWidth + 5);
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7568,8 +7577,8 @@ begin
         { PushCommand(17, (9 * 11 + 5), 133): change map only. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-        EventStack[EventCursor].A := (9 * 11 + 5);
-        EventStack[EventCursor].B := 133;
+        EventStack[EventCursor].A := (9 * BoardWidth + 5);
+        EventStack[EventCursor].B := tileGoldenKnight;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7598,7 +7607,7 @@ begin
         { PushCommand(10, 31, 0): story dialogue. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDialogue);
-        EventStack[EventCursor].A := 31;
+        EventStack[EventCursor].A := speechGreatMagicMasterRetreat;
         EventStack[EventCursor].B := 0;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
@@ -7614,17 +7623,17 @@ begin
     end;
     33: { Defeat all four guards to reopen the chamber gates. }
     begin
-      if ((((((Maps[Hero.floor, 2 + 4 * 11 + 8] + Maps[Hero.floor, 2 + 4 * 11 + 10])
-                          + Maps[Hero.floor, 2 + 6 * 11 + 8])
-                      + Maps[Hero.floor, 2 + 6 * 11 + 10])
-                  + Maps[Hero.floor, 2 + 3 * 11 + 9])
-              + Maps[Hero.floor, 2 + 7 * 11 + 9])
+      if ((((((Maps[Hero.floor, 2 + 4 * BoardWidth + 8] + Maps[Hero.floor, 2 + 4 * BoardWidth + 10])
+                          + Maps[Hero.floor, 2 + 6 * BoardWidth + 8])
+                      + Maps[Hero.floor, 2 + 6 * BoardWidth + 10])
+                  + Maps[Hero.floor, 2 + 3 * BoardWidth + 9])
+              + Maps[Hero.floor, 2 + 7 * BoardWidth + 9])
           = 32) then
       begin
         { PushCommand(13, (7 * 11 + 9), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (7 * 11 + 9);
+        EventStack[EventCursor].A := (7 * BoardWidth + 9);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -7640,7 +7649,7 @@ begin
         { PushCommand(13, (3 * 11 + 9), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (3 * 11 + 9);
+        EventStack[EventCursor].A := (3 * BoardWidth + 9);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -7667,13 +7676,14 @@ begin
     end;
     34: { Defeat all eight guards to reveal the key cache once. }
     begin
-      if ((((((((Maps[Hero.floor, 2 + 3 * 11 + 4] + Maps[Hero.floor, 2 + 3 * 11 + 6])
-                                  + Maps[Hero.floor, 2 + 3 * 11 + 8])
-                              + Maps[Hero.floor, 2 + 3 * 11 + 10])
-                          + Maps[Hero.floor, 2 + 7 * 11 + 4])
-                      + Maps[Hero.floor, 2 + 7 * 11 + 6])
-                  + Maps[Hero.floor, 2 + 7 * 11 + 8])
-              + Maps[Hero.floor, 2 + 7 * 11 + 10])
+      if ((((((((Maps[Hero.floor, 2 + 3 * BoardWidth + 4]
+                                      + Maps[Hero.floor, 2 + 3 * BoardWidth + 6])
+                                  + Maps[Hero.floor, 2 + 3 * BoardWidth + 8])
+                              + Maps[Hero.floor, 2 + 3 * BoardWidth + 10])
+                          + Maps[Hero.floor, 2 + 7 * BoardWidth + 4])
+                      + Maps[Hero.floor, 2 + 7 * BoardWidth + 6])
+                  + Maps[Hero.floor, 2 + 7 * BoardWidth + 8])
+              + Maps[Hero.floor, 2 + 7 * BoardWidth + 10])
           = 48) then
         case Hero.Word592 of
           0:
@@ -7687,8 +7697,8 @@ begin
             { PushCommand(6, (6 * 11 + 2), 29): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (6 * 11 + 2);
-            EventStack[EventCursor].B := 29;
+            EventStack[EventCursor].A := (6 * BoardWidth + 2);
+            EventStack[EventCursor].B := tileYellowKey;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7707,8 +7717,8 @@ begin
             { PushCommand(6, (6 * 11 + 0), 29): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (6 * 11 + 0);
-            EventStack[EventCursor].B := 29;
+            EventStack[EventCursor].A := (6 * BoardWidth + 0);
+            EventStack[EventCursor].B := tileYellowKey;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7727,8 +7737,8 @@ begin
             { PushCommand(6, (4 * 11 + 2), 29): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (4 * 11 + 2);
-            EventStack[EventCursor].B := 29;
+            EventStack[EventCursor].A := (4 * BoardWidth + 2);
+            EventStack[EventCursor].B := tileYellowKey;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7747,8 +7757,8 @@ begin
             { PushCommand(6, (4 * 11 + 0), 29): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (4 * 11 + 0);
-            EventStack[EventCursor].B := 29;
+            EventStack[EventCursor].A := (4 * BoardWidth + 0);
+            EventStack[EventCursor].B := tileYellowKey;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7767,8 +7777,8 @@ begin
             { PushCommand(6, (5 * 11 + 1), 30): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (5 * 11 + 1);
-            EventStack[EventCursor].B := 30;
+            EventStack[EventCursor].A := (5 * BoardWidth + 1);
+            EventStack[EventCursor].B := tileRedKey;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7794,7 +7804,8 @@ begin
     end;
     35: { Defeat the dragon to reveal the snow crystal and potions once. }
     begin
-      if ((Maps[Hero.floor, 2 + 6 * 11 + 5] + Maps[Hero.floor, 2 + 2 * 11 + 5]) = 10) then
+      if ((Maps[Hero.floor, 2 + 6 * BoardWidth + 5] + Maps[Hero.floor, 2 + 2 * BoardWidth + 5])
+          = 10) then
         case Hero.Word596 of
           0:
           begin
@@ -7807,8 +7818,8 @@ begin
             { PushCommand(6, (4 * 11 + 6), 33): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (4 * 11 + 6);
-            EventStack[EventCursor].B := 33;
+            EventStack[EventCursor].A := (4 * BoardWidth + 6);
+            EventStack[EventCursor].B := tileBluePotion;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7827,8 +7838,8 @@ begin
             { PushCommand(6, (4 * 11 + 5), 33): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (4 * 11 + 5);
-            EventStack[EventCursor].B := 33;
+            EventStack[EventCursor].A := (4 * BoardWidth + 5);
+            EventStack[EventCursor].B := tileBluePotion;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7847,8 +7858,8 @@ begin
             { PushCommand(6, (4 * 11 + 4), 33): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (4 * 11 + 4);
-            EventStack[EventCursor].B := 33;
+            EventStack[EventCursor].A := (4 * BoardWidth + 4);
+            EventStack[EventCursor].B := tileBluePotion;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7867,8 +7878,8 @@ begin
             { PushCommand(6, (5 * 11 + 5), 47): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (5 * 11 + 5);
-            EventStack[EventCursor].B := 47;
+            EventStack[EventCursor].A := (5 * BoardWidth + 5);
+            EventStack[EventCursor].B := tileSnowCrystal;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7882,7 +7893,7 @@ begin
             { PushCommand(13, (2 * 11 + 5), 4): door/wall animation frame. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-            EventStack[EventCursor].A := (2 * 11 + 5);
+            EventStack[EventCursor].A := (2 * BoardWidth + 5);
             EventStack[EventCursor].B := 4;
             doorstackin;
             { PushCommand(0, 0, 0): wait. }
@@ -7910,14 +7921,17 @@ begin
     end;
     38: { Clearing the two guards reveals a secret wall. }
     begin
-      if ((Maps[Hero.floor, 2 + 9 * 11 + 0] + Maps[Hero.floor, 2 + 9 * 11 + 2]) = 12) then
+      if ((Maps[Hero.floor, 2 + 9 * BoardWidth + 0]
+              + Maps[Hero.floor, 2 + 9 * BoardWidth + MapTileOffset])
+          = 12) then
       begin
-        Maps[Hero.floor, 2 + 8 * 11 + 1] := 9;
+        Maps[Hero.floor, 2 + 8 * BoardWidth + 1] := tileSecretWall;
       end;
     end;
     40: { Defeat the Golden Knight to reveal the fairy and arena loot once. }
     begin
-      if ((Maps[Hero.floor, 2 + 1 * 11 + 5] + Maps[Hero.floor, 2 + 0 * 11 + 5]) = 17) then
+      if ((Maps[Hero.floor, 2 + 1 * BoardWidth + 5] + Maps[Hero.floor, 2 + 0 * BoardWidth + 5])
+          = 17) then
         case Hero.Word600 of
           0:
           begin
@@ -7930,8 +7944,8 @@ begin
             { PushCommand(6, (3 * 11 + 8), 29): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (3 * 11 + 8);
-            EventStack[EventCursor].B := 29;
+            EventStack[EventCursor].A := (3 * BoardWidth + 8);
+            EventStack[EventCursor].B := tileYellowKey;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7950,8 +7964,8 @@ begin
             { PushCommand(6, (3 * 11 + 7), 29): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (3 * 11 + 7);
-            EventStack[EventCursor].B := 29;
+            EventStack[EventCursor].A := (3 * BoardWidth + 7);
+            EventStack[EventCursor].B := tileYellowKey;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7970,8 +7984,8 @@ begin
             { PushCommand(6, (3 * 11 + 6), 29): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (3 * 11 + 6);
-            EventStack[EventCursor].B := 29;
+            EventStack[EventCursor].A := (3 * BoardWidth + 6);
+            EventStack[EventCursor].B := tileYellowKey;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -7990,8 +8004,8 @@ begin
             { PushCommand(6, (3 * 11 + 4), 33): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (3 * 11 + 4);
-            EventStack[EventCursor].B := 33;
+            EventStack[EventCursor].A := (3 * BoardWidth + 4);
+            EventStack[EventCursor].B := tileBluePotion;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8010,8 +8024,8 @@ begin
             { PushCommand(6, (3 * 11 + 3), 33): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (3 * 11 + 3);
-            EventStack[EventCursor].B := 33;
+            EventStack[EventCursor].A := (3 * BoardWidth + 3);
+            EventStack[EventCursor].B := tileBluePotion;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8030,8 +8044,8 @@ begin
             { PushCommand(6, (3 * 11 + 2), 33): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (3 * 11 + 2);
-            EventStack[EventCursor].B := 33;
+            EventStack[EventCursor].A := (3 * BoardWidth + 2);
+            EventStack[EventCursor].B := tileBluePotion;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8050,8 +8064,8 @@ begin
             { PushCommand(6, (1 * 11 + 9), 35): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (1 * 11 + 9);
-            EventStack[EventCursor].B := 35;
+            EventStack[EventCursor].A := (1 * BoardWidth + 9);
+            EventStack[EventCursor].B := tileBlueGem;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8070,8 +8084,8 @@ begin
             { PushCommand(6, (1 * 11 + 8), 35): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (1 * 11 + 8);
-            EventStack[EventCursor].B := 35;
+            EventStack[EventCursor].A := (1 * BoardWidth + 8);
+            EventStack[EventCursor].B := tileBlueGem;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8090,8 +8104,8 @@ begin
             { PushCommand(6, (1 * 11 + 7), 35): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (1 * 11 + 7);
-            EventStack[EventCursor].B := 35;
+            EventStack[EventCursor].A := (1 * BoardWidth + 7);
+            EventStack[EventCursor].B := tileBlueGem;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8110,8 +8124,8 @@ begin
             { PushCommand(6, (1 * 11 + 3), 34): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (1 * 11 + 3);
-            EventStack[EventCursor].B := 34;
+            EventStack[EventCursor].A := (1 * BoardWidth + 3);
+            EventStack[EventCursor].B := tileRedGem;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8130,8 +8144,8 @@ begin
             { PushCommand(6, (1 * 11 + 2), 34): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (1 * 11 + 2);
-            EventStack[EventCursor].B := 34;
+            EventStack[EventCursor].A := (1 * BoardWidth + 2);
+            EventStack[EventCursor].B := tileRedGem;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8150,8 +8164,8 @@ begin
             { PushCommand(6, (1 * 11 + 1), 34): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (1 * 11 + 1);
-            EventStack[EventCursor].B := 34;
+            EventStack[EventCursor].A := (1 * BoardWidth + 1);
+            EventStack[EventCursor].B := tileRedGem;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8170,8 +8184,8 @@ begin
             { PushCommand(6, (5 * 11 + 5), 23): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (5 * 11 + 5);
-            EventStack[EventCursor].B := 23;
+            EventStack[EventCursor].A := (5 * BoardWidth + 5);
+            EventStack[EventCursor].B := tileFairy;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8210,7 +8224,8 @@ begin
     end;
     41: { Defeat both magicians to reveal the descent wing and change the central walls. }
     begin
-      if ((Maps[Hero.floor, 2 + 1 * 11 + 1] + Maps[Hero.floor, 2 + 1 * 11 + 9]) = 12) then
+      if ((Maps[Hero.floor, 2 + 1 * BoardWidth + 1] + Maps[Hero.floor, 2 + 1 * BoardWidth + 9])
+          = 12) then
         case Hero.Word616 of
           0:
           begin
@@ -8223,8 +8238,8 @@ begin
             { PushCommand(6, (4 * 11 + 5), 45): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (4 * 11 + 5);
-            EventStack[EventCursor].B := 45;
+            EventStack[EventCursor].A := (4 * BoardWidth + 5);
+            EventStack[EventCursor].B := tileDescentWing;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8243,8 +8258,8 @@ begin
             { PushCommand(6, (6 * 11 + 6), 6): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (6 * 11 + 6);
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := (6 * BoardWidth + 6);
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8263,8 +8278,8 @@ begin
             { PushCommand(6, (6 * 11 + 4), 6): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (6 * 11 + 4);
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := (6 * BoardWidth + 4);
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8283,8 +8298,8 @@ begin
             { PushCommand(6, (5 * 11 + 6), 8): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (5 * 11 + 6);
-            EventStack[EventCursor].B := 8;
+            EventStack[EventCursor].A := (5 * BoardWidth + 6);
+            EventStack[EventCursor].B := tileWall;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8303,8 +8318,8 @@ begin
             { PushCommand(6, (5 * 11 + 5), 8): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (5 * 11 + 5);
-            EventStack[EventCursor].B := 8;
+            EventStack[EventCursor].A := (5 * BoardWidth + 5);
+            EventStack[EventCursor].B := tileWall;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8323,8 +8338,8 @@ begin
             { PushCommand(6, (5 * 11 + 4), 8): change tile and redraw. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
-            EventStack[EventCursor].A := (5 * 11 + 4);
-            EventStack[EventCursor].B := 8;
+            EventStack[EventCursor].A := (5 * BoardWidth + 4);
+            EventStack[EventCursor].B := tileWall;
             { PushCommand(0, 0, 0): wait. }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8350,14 +8365,14 @@ begin
     end;
     44: { Defeat the guard pair to open their gate. }
     begin
-      if (((Maps[Hero.floor, 2 + 8 * 11 + 4] + Maps[Hero.floor, 2 + 8 * 11 + 6])
-              + Maps[Hero.floor, 2 + 7 * 11 + 5])
+      if (((Maps[Hero.floor, 2 + 8 * BoardWidth + 4] + Maps[Hero.floor, 2 + 8 * BoardWidth + 6])
+              + Maps[Hero.floor, 2 + 7 * BoardWidth + 5])
           = 16) then
       begin
         { PushCommand(13, (7 * 11 + 5), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (7 * 11 + 5);
+        EventStack[EventCursor].A := (7 * BoardWidth + 5);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -8384,14 +8399,14 @@ begin
     end;
     45: { Each guard pair opens its neighboring gate. }
     begin
-      if (((Maps[Hero.floor, 2 + 8 * 11 + 4] + Maps[Hero.floor, 2 + 10 * 11 + 4])
-              + Maps[Hero.floor, 2 + 9 * 11 + 3])
+      if (((Maps[Hero.floor, 2 + 8 * BoardWidth + 4] + Maps[Hero.floor, 2 + 10 * BoardWidth + 4])
+              + Maps[Hero.floor, 2 + 9 * BoardWidth + 3])
           = 16) then
       begin
         { PushCommand(13, (9 * 11 + 3), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (9 * 11 + 3);
+        EventStack[EventCursor].A := (9 * BoardWidth + 3);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -8415,14 +8430,14 @@ begin
         EventStack[EventCursor].A := 0;
         EventStack[EventCursor].B := 0;
       end;
-      if (((Maps[Hero.floor, 2 + 8 * 11 + 7] + Maps[Hero.floor, 2 + 10 * 11 + 7])
-              + Maps[Hero.floor, 2 + 9 * 11 + 6])
+      if (((Maps[Hero.floor, 2 + 8 * BoardWidth + 7] + Maps[Hero.floor, 2 + 10 * BoardWidth + 7])
+              + Maps[Hero.floor, 2 + 9 * BoardWidth + 6])
           = 16) then
       begin
         { PushCommand(13, (9 * 11 + 6), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (9 * 11 + 6);
+        EventStack[EventCursor].A := (9 * BoardWidth + 6);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -8449,12 +8464,13 @@ begin
     end;
     48: { Defeat the corner sorcerer to open the lower gate. }
     begin
-      if ((Maps[Hero.floor, 2 + 0 * 11 + 0] + Maps[Hero.floor, 2 + 7 * 11 + 7]) = 10) then
+      if ((Maps[Hero.floor, 2 + 0 * BoardWidth + 0] + Maps[Hero.floor, 2 + 7 * BoardWidth + 7])
+          = 10) then
       begin
         { PushCommand(13, (7 * 11 + 7), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (7 * 11 + 7);
+        EventStack[EventCursor].A := (7 * BoardWidth + 7);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -8481,14 +8497,14 @@ begin
     end;
     49: { Open outer guard gates, apply the sealing puzzle, then award decoy-Zeno loot. }
     begin
-      if (((Maps[Hero.floor, 2 + 9 * 11 + 4] + Maps[Hero.floor, 2 + 9 * 11 + 6])
-              + Maps[Hero.floor, 2 + 8 * 11 + 5])
+      if (((Maps[Hero.floor, 2 + 9 * BoardWidth + 4] + Maps[Hero.floor, 2 + 9 * BoardWidth + 6])
+              + Maps[Hero.floor, 2 + 8 * BoardWidth + 5])
           = 16) then
       begin
         { PushCommand(13, (8 * 11 + 5), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (8 * 11 + 5);
+        EventStack[EventCursor].A := (8 * BoardWidth + 5);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -8512,15 +8528,15 @@ begin
         EventStack[EventCursor].A := 0;
         EventStack[EventCursor].B := 0;
       end;
-      if ((((Maps[Hero.floor, 2 + 7 * 11 + 4] + Maps[Hero.floor, 2 + 7 * 11 + 6])
-                  + Maps[Hero.floor, 2 + 6 * 11 + 5])
-              + Maps[Hero.floor, 2 + 5 * 11 + 5])
+      if ((((Maps[Hero.floor, 2 + 7 * BoardWidth + 4] + Maps[Hero.floor, 2 + 7 * BoardWidth + 6])
+                  + Maps[Hero.floor, 2 + 6 * BoardWidth + 5])
+              + Maps[Hero.floor, 2 + 5 * BoardWidth + 5])
           = 23) then
       begin
         { PushCommand(13, (6 * 11 + 5), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (6 * 11 + 5);
+        EventStack[EventCursor].A := (6 * BoardWidth + 5);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -8545,13 +8561,14 @@ begin
         EventStack[EventCursor].B := 0;
       end;
       { Four cardinal sorcerers gone with the corner sorcerers intact seals Zeno to one-tenth strength. }
-      if (((((Maps[Hero.floor, 2 + 1 * 11 + 5] + Maps[Hero.floor, 2 + 2 * 11 + 4])
-                      + Maps[Hero.floor, 2 + 2 * 11 + 6])
-                  + Maps[Hero.floor, 2 + 3 * 11 + 5])
+      if (((((Maps[Hero.floor, 2 + 1 * BoardWidth + 5] + Maps[Hero.floor, 2 + 2 * BoardWidth + 4])
+                      + Maps[Hero.floor, 2 + 2 * BoardWidth + 6])
+                  + Maps[Hero.floor, 2 + 3 * BoardWidth + 5])
               = 24)
-          and ((((Maps[Hero.floor, 2 + 1 * 11 + 4] + Maps[Hero.floor, 2 + 1 * 11 + 6])
-                      + Maps[Hero.floor, 2 + 3 * 11 + 4])
-                  + Maps[Hero.floor, 2 + 3 * 11 + 6])
+          and ((((Maps[Hero.floor, 2 + 1 * BoardWidth + 4]
+                          + Maps[Hero.floor, 2 + 1 * BoardWidth + 6])
+                      + Maps[Hero.floor, 2 + 3 * BoardWidth + 4])
+                  + Maps[Hero.floor, 2 + 3 * BoardWidth + 6])
               = 372)) then
       begin
         if (Hero.zeno_sealed = 0) then
@@ -8582,7 +8599,7 @@ begin
         { PushCommand(10, 46, 0): story dialogue. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDialogue);
-        EventStack[EventCursor].A := 46;
+        EventStack[EventCursor].A := speechZenoDefeated;
         EventStack[EventCursor].B := 0;
         if (Hero.music_track <> 0) then
         begin
@@ -8608,8 +8625,8 @@ begin
         EventStack[EventCursor].A := 0;
         EventStack[EventCursor].B := 0;
       end;
-      if (((Maps[Hero.floor, 2 + 2 * 11 + 5] + Maps[Hero.floor, 2 + 6 * 11 + 5])
-              + Maps[Hero.floor, 2 + 5 * 11 + 5])
+      if (((Maps[Hero.floor, 2 + 2 * BoardWidth + 5] + Maps[Hero.floor, 2 + 6 * BoardWidth + 5])
+              + Maps[Hero.floor, 2 + 5 * BoardWidth + 5])
           = 16) then
       begin
         { Boss loot replaces any pending sealing dialogue queued above. }
@@ -8622,8 +8639,8 @@ begin
         { PushCommand(6, (1 * 11 + 6), 46): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (1 * 11 + 6);
-        EventStack[EventCursor].B := 46;
+        EventStack[EventCursor].A := (1 * BoardWidth + 6);
+        EventStack[EventCursor].B := tileDragonSlayer;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8642,8 +8659,8 @@ begin
         { PushCommand(6, (1 * 11 + 4), 30): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (1 * 11 + 4);
-        EventStack[EventCursor].B := 30;
+        EventStack[EventCursor].A := (1 * BoardWidth + 4);
+        EventStack[EventCursor].B := tileRedKey;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8662,8 +8679,8 @@ begin
         { PushCommand(6, (3 * 11 + 9), 35): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 9);
-        EventStack[EventCursor].B := 35;
+        EventStack[EventCursor].A := (3 * BoardWidth + 9);
+        EventStack[EventCursor].B := tileBlueGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8682,8 +8699,8 @@ begin
         { PushCommand(6, (3 * 11 + 8), 35): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 8);
-        EventStack[EventCursor].B := 35;
+        EventStack[EventCursor].A := (3 * BoardWidth + 8);
+        EventStack[EventCursor].B := tileBlueGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8702,8 +8719,8 @@ begin
         { PushCommand(6, (3 * 11 + 7), 35): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 7);
-        EventStack[EventCursor].B := 35;
+        EventStack[EventCursor].A := (3 * BoardWidth + 7);
+        EventStack[EventCursor].B := tileBlueGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8722,8 +8739,8 @@ begin
         { PushCommand(6, (3 * 11 + 3), 34): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 3);
-        EventStack[EventCursor].B := 34;
+        EventStack[EventCursor].A := (3 * BoardWidth + 3);
+        EventStack[EventCursor].B := tileRedGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8742,8 +8759,8 @@ begin
         { PushCommand(6, (3 * 11 + 2), 34): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 2);
-        EventStack[EventCursor].B := 34;
+        EventStack[EventCursor].A := (3 * BoardWidth + 2);
+        EventStack[EventCursor].B := tileRedGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8762,8 +8779,8 @@ begin
         { PushCommand(6, (3 * 11 + 1), 34): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 1);
-        EventStack[EventCursor].B := 34;
+        EventStack[EventCursor].A := (3 * BoardWidth + 1);
+        EventStack[EventCursor].B := tileRedGem;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8782,8 +8799,8 @@ begin
         { PushCommand(6, (4 * 11 + 6), 33): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (4 * 11 + 6);
-        EventStack[EventCursor].B := 33;
+        EventStack[EventCursor].A := (4 * BoardWidth + 6);
+        EventStack[EventCursor].B := tileBluePotion;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8802,8 +8819,8 @@ begin
         { PushCommand(6, (4 * 11 + 5), 33): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (4 * 11 + 5);
-        EventStack[EventCursor].B := 33;
+        EventStack[EventCursor].A := (4 * BoardWidth + 5);
+        EventStack[EventCursor].B := tileBluePotion;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8822,8 +8839,8 @@ begin
         { PushCommand(6, (4 * 11 + 4), 33): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (4 * 11 + 4);
-        EventStack[EventCursor].B := 33;
+        EventStack[EventCursor].A := (4 * BoardWidth + 4);
+        EventStack[EventCursor].B := tileBluePotion;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8842,8 +8859,8 @@ begin
         { PushCommand(6, (1 * 11 + 5), 23): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (1 * 11 + 5);
-        EventStack[EventCursor].B := 23;
+        EventStack[EventCursor].A := (1 * BoardWidth + 5);
+        EventStack[EventCursor].B := tileFairy;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -8857,7 +8874,7 @@ begin
         { PushCommand(13, (6 * 11 + 5), 4): door/wall animation frame. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
-        EventStack[EventCursor].A := (6 * 11 + 5);
+        EventStack[EventCursor].A := (6 * BoardWidth + 5);
         EventStack[EventCursor].B := 4;
         doorstackin;
         { PushCommand(0, 0, 0): wait. }
@@ -8873,23 +8890,23 @@ begin
         { PushCommand(6, (3 * 11 + 6), 6): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 6);
-        EventStack[EventCursor].B := 6;
+        EventStack[EventCursor].A := (3 * BoardWidth + 6);
+        EventStack[EventCursor].B := tileRoad;
         { PushCommand(6, (3 * 11 + 4), 6): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (3 * 11 + 4);
-        EventStack[EventCursor].B := 6;
+        EventStack[EventCursor].A := (3 * BoardWidth + 4);
+        EventStack[EventCursor].B := tileRoad;
         { PushCommand(6, (1 * 11 + 6), 6): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (1 * 11 + 6);
-        EventStack[EventCursor].B := 6;
+        EventStack[EventCursor].A := (1 * BoardWidth + 6);
+        EventStack[EventCursor].B := tileRoad;
         { PushCommand(6, (1 * 11 + 4), 6): change tile and redraw. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evSetTile);
-        EventStack[EventCursor].A := (1 * 11 + 4);
-        EventStack[EventCursor].B := 6;
+        EventStack[EventCursor].A := (1 * BoardWidth + 4);
+        EventStack[EventCursor].B := tileRoad;
         { PushCommand(0, 0, 0): wait. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
@@ -9308,7 +9325,7 @@ begin
         { PushCommand(10, 62, 99): story dialogue. }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDialogue);
-        EventStack[EventCursor].A := 62;
+        EventStack[EventCursor].A := speechBacksideZenoDefeated;
         EventStack[EventCursor].B := 99;
         timer2on;
       end;

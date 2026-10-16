@@ -119,9 +119,9 @@ begin
       end;
     end;
     if SkipIntroduction then
-      GameOptions[5] := 0;
+      GameOptions[optionIntroduction] := 0;
     syokidata0;
-    K5.Checked := GameOptions[5] = 1;
+    K5.Checked := GameOptions[optionIntroduction] = 1;
     Timer4.Enabled := K5.Checked;
     optionl1;
     StrikeCount := 0;
@@ -181,10 +181,10 @@ begin
   DrawIndex := 1;
   AnimationFrame := True;
   PreviousCell := 0;
-  FlightCell := Hero.y * 11 + Hero.x;
+  FlightCell := Hero.y * BoardWidth + Hero.x;
   TileClass := 0;
-  FacingRequest := 1;
-  DialogueStage := 0;
+  FacingRequest := Ord(moveUp);
+  DialogueStage := stageNone;
   EventCursor := 0;
   if Timer4.Enabled = False then
     mhyouji;
@@ -209,8 +209,8 @@ begin
     Memo11.Visible := True;
   end;
   Edit8.Visible := True;
-  MapBitmap1.Height := Image6.Height * 11;
-  MapBitmap1.Width := Image6.Width * 11;
+  MapBitmap1.Height := Image6.Height * BoardWidth;
+  MapBitmap1.Width := Image6.Width * BoardWidth;
   MapBitmap2.Height := MapBitmap1.Height;
   MapBitmap2.Width := MapBitmap1.Width;
   WorkBitmap1.Height := Image6.Height * 5;
@@ -275,9 +275,9 @@ begin
   end;
   if (Hero.music_track <> 0) and not Timer4.Enabled then
     soundplay;
-  DrawX := ((Hero.y * 11 + Hero.x) * Image6.Width) mod (Image6.Width * 11);
+  DrawX := ((Hero.y * BoardWidth + Hero.x) * Image6.Width) mod (Image6.Width * BoardWidth);
   { Startup divides by tile height; the hero renderer recomputes final coordinates. }
-  DrawY := ((Hero.y * 11 + Hero.x) div (Image6.Height * 11)) * Image6.Height;
+  DrawY := ((Hero.y * BoardWidth + Hero.x) div (Image6.Height * BoardWidth)) * Image6.Height;
   if not Timer4.Enabled then
     yusyahyouji1;
   case Hero.zeno_sealed of

@@ -14,7 +14,7 @@ end;
 
 procedure TTSW10.savework; { $0047EADC }
 type
-  THeroSaveWords = array[0..170] of Longint;
+  THeroSaveWords = array[0..HeroWordCount - 1] of Longint;
 var
   I, Sum, Alternating: Longint;
 begin
@@ -57,7 +57,7 @@ end;
 
 procedure TTSW10.loadwork; { $0047E7D4 }
 type
-  THeroSaveWords = array[0..170] of Longint;
+  THeroSaveWords = array[0..HeroWordCount - 1] of Longint;
 var
   I, Sum, Alternating: Longint;
 begin
@@ -470,14 +470,14 @@ procedure TTSW10.OptionSave1Click(Sender: TObject); { $0047D324 }
 begin
   if MessageDlg('Save options. Is it true?', mtInformation, [mbYes, mbNo], 0) = mrYes then
   begin
-    GameOptions[0] := Memo1.Font.Size;
-    GameOptions[1] := Edit8.Font.Size;
-    GameOptions[2] := 0;
-    GameOptions[3] := 2;
+    GameOptions[optionSmallFont] := Memo1.Font.Size;
+    GameOptions[optionLargeFont] := Edit8.Font.Size;
+    GameOptions[optionReserved2] := 0;
+    GameOptions[optionSpeed] := gameSpeedMiddle;
     if High1.Checked = True then
-      GameOptions[3] := 1;
+      GameOptions[optionSpeed] := gameSpeedHigh;
     if Low1.Checked = True then
-      GameOptions[3] := 3;
+      GameOptions[optionSpeed] := gameSpeedLow;
     IOPath := Memo12.Lines[0] + '\option.dat';
     AssignFile(SettingsFile, IOPath);
     Rewrite(SettingsFile, 1);

@@ -2,12 +2,12 @@ procedure TTSW10.syokidata0; { $00484F48 }
 var
   Row, Column: Longint;
 begin
-  if (Screen.Width < 800) and (GameOptions[8] = 1) then
+  if (Screen.Width < 800) and (GameOptions[optionDisplaySize] = display800x500) then
   begin
-    GameOptions[8] := 0;
+    GameOptions[optionDisplaySize] := display640x400;
   end;
-  case GameOptions[8] of
-    0:
+  case GameOptions[optionDisplaySize] of
+    display640x400:
     begin
       if Screen.Width < 800 then
       begin
@@ -17,7 +17,7 @@ begin
       UiSpan := $90;
       UiStep := $18;
     end;
-    1:
+    display800x500:
     begin
       DataDirectory := '\data3';
       UiSpan := $B4;
@@ -25,8 +25,8 @@ begin
     end;
   end;
   MainForm.Top := 0;
-  case GameOptions[8] of
-    0:
+  case GameOptions[optionDisplaySize] of
+    display640x400:
     begin
       if Screen.Width <= $280 then
       begin
@@ -41,7 +41,7 @@ begin
         MainForm.Width := $288;
       end;
     end;
-    1:
+    display800x500:
     begin
       if Screen.Width <= $320 then
       begin
@@ -57,8 +57,8 @@ begin
       end;
     end;
   end;
-  case GameOptions[8] of
-    0:
+  case GameOptions[optionDisplaySize] of
+    display640x400:
     begin
       Image1.Height := 400;
       Image1.Width := $186;
@@ -69,7 +69,7 @@ begin
       Image6.Top := $C0;
       Image6.Left := (Image2.Left + ((Image1.Left) div 2)) - (((Image6.Width * 3)) div 2);
     end;
-    1:
+    display800x500:
     begin
       Image1.Height := 500;
       Image1.Width := $1E8;
@@ -145,8 +145,8 @@ begin
   Image18.Width := Image6.Width;
   Image18.Top := Image13.Top + Image13.Height;
   Image18.Left := Image4.Left;
-  case GameOptions[8] of
-    0:
+  case GameOptions[optionDisplaySize] of
+    display640x400:
     begin
       Image19.Height := Image6.Height;
       Image19.Width := Image6.Width;
@@ -161,7 +161,7 @@ begin
       Image32.Top := $90;
       Image32.Left := (Image3.Left + ((Image3.Width) div 2)) - ((Image32.Width) div 2);
     end;
-    1:
+    display800x500:
     begin
       Image19.Height := Image6.Height;
       Image19.Width := Image6.Width;
@@ -197,8 +197,8 @@ begin
   Image30.Height := Image6.Height;
   Image31.Height := Image6.Height;
   Image31.Width := Image6.Width;
-  case GameOptions[8] of
-    0:
+  case GameOptions[optionDisplaySize] of
+    display640x400:
     begin
       Image31.Top := $E6;
       Image31.Left := ((Image3.Width) div 2) - $10 + Image3.Left;
@@ -212,7 +212,7 @@ begin
       BitBtn1.Left := (Image3.Left + ((Image3.Width) div 2)) - ((BitBtn1.Width) div 2);
       Button2.Left := $108;
     end;
-    1:
+    display800x500:
     begin
       Image31.Top := $120;
       Image31.Left := ((Image3.Width) div 2) - $10 + Image3.Left;
@@ -358,8 +358,8 @@ begin
   Button35.Width := Image5.Width;
   Button35.Top := Button29.Top + Button29.Height;
   Button35.Left := Button15.Left;
-  case GameOptions[8] of
-    0:
+  case GameOptions[optionDisplaySize] of
+    display640x400:
     begin
       Button36.Height := $14;
       Button36.Width := $40;
@@ -370,7 +370,7 @@ begin
       Button39.Top := $50;
       Button39.Left := $D0;
     end;
-    1:
+    display800x500:
     begin
       Button36.Height := $19;
       Button36.Width := $50;
@@ -398,8 +398,8 @@ begin
   Edit8.Width := MainForm.Width;
   Edit8.Top := Image1.Top + Image1.Height;
   Edit8.Left := Image2.Left;
-  case GameOptions[8] of
-    0:
+  case GameOptions[optionDisplaySize] of
+    display640x400:
     begin
       Memo11.Height := Edit8.Height;
       Memo11.Width := $67;
@@ -434,7 +434,7 @@ begin
       Panel2.Height := $28;
       Panel2.Width := $B8;
     end;
-    1:
+    display800x500:
     begin
       Memo11.Height := Edit8.Height;
       Memo11.Width := $81;
@@ -574,15 +574,15 @@ begin
   Edit33.Width := Edit14.Width - Edit13.Width;
   Edit33.Top := Edit25.Top;
   Edit33.Left := Edit25.Left + Edit25.Width;
-  case GameOptions[8] of
-    0:
+  case GameOptions[optionDisplaySize] of
+    display640x400:
     begin
       RichEdit1.Height := 200;
       RichEdit1.Width := $17E;
       RichEdit1.Top := $2D;
       RichEdit1.Left := $81;
     end;
-    1:
+    display800x500:
     begin
       RichEdit1.Height := $FA;
       RichEdit1.Width := $1DE;
@@ -604,7 +604,7 @@ begin
     Image3.Picture.LoadFromFile(Memo12.Lines[1] + DataDirectory + '\rightr.bmp');
 
   MapBitmap1 := TBitmap.Create;
-  MapBitmap1.Height := Image6.Height * 11;
+  MapBitmap1.Height := Image6.Height * BoardWidth;
   MapBitmap1.Width := Image1.Width + Image2.Width + Image3.Width;
   MapBitmap1.LoadFromFile(Memo12.Lines[1] + DataDirectory + '\chtable.oz');
   MapBitmap2 := TBitmap.Create;
@@ -629,7 +629,7 @@ begin
         ImageList1.Add(MapBitmap2, nil);
       end;
 
-  MapBitmap1.Height := Image6.Height * 11;
+  MapBitmap1.Height := Image6.Height * BoardWidth;
   MapBitmap1.Width := Image6.Width * 15;
   MapBitmap1.LoadFromFile(Memo12.Lines[1] + DataDirectory + '\chtableb.oz');
   ImageList3.Width := Image6.Width;
@@ -680,8 +680,8 @@ begin
       ImageList2.Add(MapBitmap2, nil);
     end;
 
-  MapBitmap1.Height := Image6.Height * 11;
-  MapBitmap1.Width := Image6.Width * 11;
+  MapBitmap1.Height := Image6.Height * BoardWidth;
+  MapBitmap1.Width := Image6.Width * BoardWidth;
   MapBitmap2.Height := MapBitmap1.Height;
   MapBitmap2.Width := MapBitmap1.Width;
   WorkBitmap1 := TBitmap.Create;
@@ -706,26 +706,27 @@ procedure TTSW10.mhyouji; { $00442C38 }
 var
   I: Longint;
 begin
-  Hero.Word664 := 0;
+  Hero.Word664 := Ord(stairNone);
   for I := 1 to 121 do
   begin
     DrawIndex := I;
-    DrawX := (RenderOrder[DrawIndex - 1] * Image6.Width) mod (Image6.Width * 11);
+    DrawX := (RenderOrder[DrawIndex - 1] * Image6.Width) mod (Image6.Width * BoardWidth);
     DrawY :=
-        ((RenderOrder[DrawIndex - 1] * Image6.Height) div (Image6.Height * 11)) * Image6.Height;
+        ((RenderOrder[DrawIndex - 1] * Image6.Height) div (Image6.Height * BoardWidth))
+            * Image6.Height;
     ImageList1.Draw(
         MapBitmap1.Canvas,
         DrawX,
         DrawY,
-        Maps[Hero.floor, RenderOrder[DrawIndex - 1] + 2] - 1
+        Maps[Hero.floor, RenderOrder[DrawIndex - 1] + MapTileOffset] - 1
     );
-    GraphicTile := Maps[Hero.floor, RenderOrder[DrawIndex - 1] + 2];
+    GraphicTile := Maps[Hero.floor, RenderOrder[DrawIndex - 1] + MapTileOffset];
     imagework;
     ImageList1.Draw(
         MapBitmap2.Canvas,
         DrawX,
         DrawY,
-        Maps[Hero.floor, RenderOrder[DrawIndex - 1] + 2] - 1 + DoorOpened
+        Maps[Hero.floor, RenderOrder[DrawIndex - 1] + MapTileOffset] - 1 + DoorOpened
     );
   end;
 end;
@@ -748,7 +749,12 @@ begin
   WorkBitmap1.Canvas.CopyMode := $CC0020;
   WorkBitmap2.Canvas.CopyMode := $CC0020;
   WorkBitmap3.Canvas.CopyMode := $CC0020;
-  ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2] - 1);
+  ImageList1.Draw(
+      WorkBitmap1.Canvas,
+      0,
+      0,
+      Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset] - 1
+  );
   ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, ScratchIndex - $42);
   ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, ScratchIndex + 1 - $42);
   SourceRect := TargetRect;
@@ -776,7 +782,7 @@ procedure TTSW10.yusyahyouji1; { $004433A4 }
 begin
   { Each facing retains its original two-frame drawing block. }
   case Hero.facing of
-    1:
+    Ord(hfDown):
     begin
       NeighborIndex := Image6.Width * Hero.x;
       NeighborY := Image6.Height * Hero.y;
@@ -789,7 +795,7 @@ begin
       yusyahyouji;
       MapBitmap1.Canvas.Draw(NeighborIndex, NeighborY, WorkBitmap1);
     end;
-    2:
+    Ord(hfLeft):
     begin
       NeighborIndex := Image6.Width * Hero.x;
       NeighborY := Image6.Height * Hero.y;
@@ -802,7 +808,7 @@ begin
       yusyahyouji;
       MapBitmap1.Canvas.Draw(NeighborIndex, NeighborY, WorkBitmap1);
     end;
-    3:
+    Ord(hfRight):
     begin
       NeighborIndex := Image6.Width * Hero.x;
       NeighborY := Image6.Height * Hero.y;
@@ -815,7 +821,7 @@ begin
       yusyahyouji;
       MapBitmap1.Canvas.Draw(NeighborIndex, NeighborY, WorkBitmap1);
     end;
-    4:
+    Ord(hfUp):
     begin
       NeighborIndex := Image6.Width * Hero.x;
       NeighborY := Image6.Height * Hero.y;

@@ -33,7 +33,7 @@ begin
   Form.RichEdit1.Text := GameplayText(Form, Index);
   Form.RichEdit1.Left := UiSpan + 8;
   Form.RichEdit1.Top := UiStep + 8;
-  Form.RichEdit1.Width := Form.Image6.Width * 11 - 16;
+  Form.RichEdit1.Width := Form.Image6.Width * BoardWidth - 16;
   Form.RichEdit1.Height := Form.Image6.Height * 6;
   Form.RichEdit1.Visible := True;
   Form.Button1.Left := Form.RichEdit1.Left + Form.RichEdit1.Width - Form.Button1.Width;
@@ -78,25 +78,25 @@ begin
     RemainingHP := Monsters[MonsterIndex].HP * (Hero.cycle_factor_minus_one + 1);
 
     case MonsterIndex of
-      0..11: damecount;
-      12..13:
+      Ord(monsterGreenSlime)..Ord(monsterBigBat): damecount;
+      Ord(monsterZombie)..Ord(monsterZombieKnight):
         if Hero.cross = 0 then
           damecount
         else
           damecount2;
-      14..16: damecount;
-      17:
+      Ord(monsterRock)..Ord(monsterSorcerer): damecount;
+      Ord(monsterVampire):
         if Hero.cross = 0 then
           damecount
         else
           damecount2;
-      18: damecount;
-      19:
+      Ord(monsterOctopus): damecount;
+      Ord(monsterDragon):
         if Hero.dragon_slayer = 0 then
           damecount
         else
           damecount2;
-      20..32: damecount;
+      Ord(monsterGoldenKnight)..Ord(monsterGateKeeperA): damecount;
     end;
     if Hero.defense - Monsters[MonsterIndex].Attack * (Hero.cycle_factor_minus_one + 1) >= 0 then
       Damage := 0
@@ -115,11 +115,13 @@ procedure TTSW10.taisen; { $0044A480 }
 var
   I: Longint;
 begin
-  case Maps[Hero.floor, ContactIndex + 2] of
-    61..95: DoorOpened := (Maps[Hero.floor, ContactIndex + 2] + 1) div 2 - 30 + 197;
-    97..105: DoorOpened := 216;
-    115..123: DoorOpened := 217;
-    132..157: DoorOpened := (Maps[Hero.floor, ContactIndex + 2] + 1) div 2 - 46 + 197;
+  case Maps[Hero.floor, ContactIndex + MapTileOffset] of
+    tileGreenSlime..tileVampire:
+      DoorOpened := (Maps[Hero.floor, ContactIndex + MapTileOffset] + 1) div 2 - 30 + 197;
+    tileOctopusFirst..105: DoorOpened := 216;
+    tileDragonFirst..123: DoorOpened := 217;
+    132..tileGateKeeperA:
+      DoorOpened := (Maps[Hero.floor, ContactIndex + MapTileOffset] + 1) div 2 - 46 + 197;
   end;
   NeighborIndex := DoorOpened - 198;
   MonsterIndex := NeighborIndex;
@@ -179,25 +181,25 @@ begin
       EventStack[EventCursor].B := 0;
 
       case MonsterIndex of
-        0..11: ydameiji;
-        12..13:
+        Ord(monsterGreenSlime)..Ord(monsterBigBat): ydameiji;
+        Ord(monsterZombie)..Ord(monsterZombieKnight):
           if Hero.cross = 0 then
             ydameiji
           else
             ydameiji2;
-        14..16: ydameiji;
-        17:
+        Ord(monsterRock)..Ord(monsterSorcerer): ydameiji;
+        Ord(monsterVampire):
           if Hero.cross = 0 then
             ydameiji
           else
             ydameiji2;
-        18: ydameiji;
-        19:
+        Ord(monsterOctopus): ydameiji;
+        Ord(monsterDragon):
           if Hero.dragon_slayer = 0 then
             ydameiji
           else
             ydameiji2;
-        20..32: ydameiji;
+        Ord(monsterGoldenKnight)..Ord(monsterGateKeeperA): ydameiji;
       end;
       for I := 1 to StrikeCount do
       begin
@@ -212,13 +214,14 @@ begin
         EventStack[EventCursor].Opcode := Ord(evEnemyAttack);
         EventStack[EventCursor].A := ContactIndex;
         if ScratchIndex = 1 then
-          EventStack[EventCursor].B := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2]
+          EventStack[EventCursor].B :=
+              Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset]
         else
           EventStack[EventCursor].B := 184;
         { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], (Hero.facing - 1) * 8 + 257 - 66). }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
-        EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+        EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset];
         EventStack[EventCursor].B := (Hero.facing - 1) * 8 + 257 - 66;
         { PushCommand(9, ContactIndex, (Hero.facing - 1) * 8 + 258 - 66). }
         Inc(EventCursor);
@@ -247,7 +250,7 @@ begin
         { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], 184). }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
-        EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+        EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset];
         EventStack[EventCursor].B := 184;
         { PushCommand(9, ContactIndex, 183). }
         Inc(EventCursor);
@@ -295,8 +298,8 @@ begin
               + ' '
               + IntToStr(Monsters[MonsterIndex].Gold * (Hero.lucky_gold + 1))
               + ListBox2.Items[201];
-      case Maps[Hero.floor, ContactIndex + 2] of
-        97..103:
+      case Maps[Hero.floor, ContactIndex + MapTileOffset] of
+        tileOctopusFirst..103:
         begin
           if Hero.lucky_gold = 0 then
           begin
@@ -358,107 +361,107 @@ begin
       { PushCommand(17, Hero.y * 11 + Hero.x, 6). }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-      EventStack[EventCursor].A := Hero.y * 11 + Hero.x;
-      EventStack[EventCursor].B := 6;
+      EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x;
+      EventStack[EventCursor].B := tileRoad;
       case MonsterIndex of
-        18:
+        Ord(monsterOctopus):
         begin
-          if Maps[Hero.floor, ContactIndex + 2] = 104 then
+          if Maps[Hero.floor, ContactIndex + MapTileOffset] = tileOctopusMouth then
           begin
             { PushCommand(17, Hero.y * 11 + Hero.x - 21, 6). }
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 21;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x - 21;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x - 22, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 22;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x - 22;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x - 23, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 23;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x - 23;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x - 12, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 12;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x - 12;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x - 11, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 11;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x - 11;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x - 10, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 10;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x - 10;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x - 1, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 1;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x - 1;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x + 1, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x + 1;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x + 1;
+            EventStack[EventCursor].B := tileRoad;
           end;
         end;
-        19:
+        Ord(monsterDragon):
         begin
-          if Maps[Hero.floor, ContactIndex + 2] = 122 then
+          if Maps[Hero.floor, ContactIndex + MapTileOffset] = tileDragonHead then
           begin
             { PushCommand(17, Hero.y * 11 + Hero.x - 21, 6). }
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 21;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x - 21;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x - 22, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 22;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x - 22;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x - 23, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 23;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x - 23;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x - 12, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 12;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x - 12;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x - 11, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 11;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x - 11;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x - 10, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 10;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x - 10;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x - 1, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x - 1;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x - 1;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(17, Hero.y * 11 + Hero.x + 1, 6). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-            EventStack[EventCursor].A := Hero.y * 11 + Hero.x + 1;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x + 1;
+            EventStack[EventCursor].B := tileRoad;
           end;
         end;
       end;
@@ -485,7 +488,7 @@ begin
       { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], 184). }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
-      EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+      EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset];
       EventStack[EventCursor].B := 184;
       { PushCommand(9, ContactIndex, 183). }
       Inc(EventCursor);
@@ -493,14 +496,14 @@ begin
       EventStack[EventCursor].A := ContactIndex;
       EventStack[EventCursor].B := 183;
       case MonsterIndex of
-        18:
+        Ord(monsterOctopus):
         begin
-          if Maps[Hero.floor, ContactIndex + 2] = 104 then
+          if Maps[Hero.floor, ContactIndex + MapTileOffset] = tileOctopusMouth then
             EventStack[EventCursor].Opcode := Ord(evHeroAttackOverlay);
         end;
-        19:
+        Ord(monsterDragon):
         begin
-          if Maps[Hero.floor, ContactIndex + 2] = 122 then
+          if Maps[Hero.floor, ContactIndex + MapTileOffset] = tileDragonHead then
             EventStack[EventCursor].Opcode := Ord(evHeroAttackOverlay);
         end;
       end;
@@ -531,7 +534,8 @@ begin
           { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], (Hero.facing - 1) * 8 + 257 - 66). }
           Inc(EventCursor);
           EventStack[EventCursor].Opcode := Ord(evWait);
-          EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+          EventStack[EventCursor].A :=
+              Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset];
           EventStack[EventCursor].B := (Hero.facing - 1) * 8 + 257 - 66;
           { PushCommand(9, ContactIndex, (Hero.facing - 1) * 8 + 258 - 66). }
           Inc(EventCursor);
@@ -561,7 +565,8 @@ begin
           { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], 184). }
           Inc(EventCursor);
           EventStack[EventCursor].Opcode := Ord(evWait);
-          EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+          EventStack[EventCursor].A :=
+              Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset];
           EventStack[EventCursor].B := 184;
           { PushCommand(9, ContactIndex, 183). }
           Inc(EventCursor);
@@ -588,9 +593,11 @@ var
   I: Longint;
 begin
   ContactIndex := Smallint(EventStack[EventCursor + 1].B);
-  case Maps[Hero.floor, ContactIndex + 2] of
-    61..95: DoorOpened := (Maps[Hero.floor, ContactIndex + 2] + 1) div 2 - 30 + 197;
-    132..157: DoorOpened := (Maps[Hero.floor, ContactIndex + 2] + 1) div 2 - 46 + 197;
+  case Maps[Hero.floor, ContactIndex + MapTileOffset] of
+    tileGreenSlime..tileVampire:
+      DoorOpened := (Maps[Hero.floor, ContactIndex + MapTileOffset] + 1) div 2 - 30 + 197;
+    132..tileGateKeeperA:
+      DoorOpened := (Maps[Hero.floor, ContactIndex + MapTileOffset] + 1) div 2 - 46 + 197;
   end;
   NeighborIndex := DoorOpened - 198;
   MonsterIndex := NeighborIndex;
@@ -665,7 +672,7 @@ begin
         { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], 184). }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
-        EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+        EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset];
         EventStack[EventCursor].B := 184;
         { PushCommand(9, ContactIndex, 183). }
         Inc(EventCursor);
@@ -756,13 +763,13 @@ begin
       EventStack[EventCursor].Opcode := Ord(evEnemyAttack);
       EventStack[EventCursor].A := ContactIndex;
       if ScratchIndex = 1 then
-        EventStack[EventCursor].B := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2]
+        EventStack[EventCursor].B := Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset]
       else
         EventStack[EventCursor].B := 250;
       { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], (Hero.facing - 1) * 8 + 257 - 66). }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
-      EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+      EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset];
       EventStack[EventCursor].B := (Hero.facing - 1) * 8 + 257 - 66;
       { PushCommand(9, ContactIndex, (Hero.facing - 1) * 8 + 258 - 66). }
       Inc(EventCursor);
@@ -812,8 +819,8 @@ begin
     { PushCommand(17, Hero.y * 11 + Hero.x, 6). }
     Inc(EventCursor);
     EventStack[EventCursor].Opcode := Ord(evSetTileOnly);
-    EventStack[EventCursor].A := Hero.y * 11 + Hero.x;
-    EventStack[EventCursor].B := 6;
+    EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x;
+    EventStack[EventCursor].B := tileRoad;
     { PushCommand(0, 0, 0). }
     Inc(EventCursor);
     EventStack[EventCursor].Opcode := Ord(evWait);
@@ -841,7 +848,7 @@ begin
         { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], 184). }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
-        EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+        EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset];
         EventStack[EventCursor].B := 184;
         { PushCommand(9, ContactIndex, 183). }
         Inc(EventCursor);
@@ -871,7 +878,7 @@ begin
         { PushCommand(0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2], (Hero.facing - 1) * 8 + 257 - 66). }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evWait);
-        EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * 11 + Hero.x + 2];
+        EventStack[EventCursor].A := Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset];
         EventStack[EventCursor].B := (Hero.facing - 1) * 8 + 257 - 66;
         { PushCommand(9, ContactIndex, (Hero.facing - 1) * 8 + 258 - 66). }
         Inc(EventCursor);
@@ -920,20 +927,20 @@ begin
   EventStack[EventCursor].Opcode := Ord(evWait);
   EventStack[EventCursor].A := 6;
   case Hero.facing of
-    1: EventStack[EventCursor].B := 191;
-    2: EventStack[EventCursor].B := 199;
-    3: EventStack[EventCursor].B := 207;
-    4: EventStack[EventCursor].B := 215;
+    Ord(hfDown): EventStack[EventCursor].B := 191;
+    Ord(hfLeft): EventStack[EventCursor].B := 199;
+    Ord(hfRight): EventStack[EventCursor].B := 207;
+    Ord(hfUp): EventStack[EventCursor].B := 215;
   end;
   { PushCommand(9, ScratchIndex, facing damage frame). }
   Inc(EventCursor);
   EventStack[EventCursor].Opcode := Ord(evOverlay);
   EventStack[EventCursor].A := ScratchIndex;
   case Hero.facing of
-    1: EventStack[EventCursor].B := 192;
-    2: EventStack[EventCursor].B := 200;
-    3: EventStack[EventCursor].B := 208;
-    4: EventStack[EventCursor].B := 216;
+    Ord(hfDown): EventStack[EventCursor].B := 192;
+    Ord(hfLeft): EventStack[EventCursor].B := 200;
+    Ord(hfRight): EventStack[EventCursor].B := 208;
+    Ord(hfUp): EventStack[EventCursor].B := 216;
   end;
   { PushCommand(0, 0, 0). }
   Inc(EventCursor);
@@ -952,22 +959,22 @@ end;
 
 procedure TTSW10.syounin; { $00449014 }
 type
-  THeroWords = array[0..170] of Longint;
+  THeroWords = array[0..HeroWordCount - 1] of Longint;
 var
   HeroWords: THeroWords absolute Hero;
 begin
   Button1.Caption := 'OK';
   itemdel;
-  RichEdit1.Font.Size := GameOptions[1];
-  case GameOptions[8] of
-    0:
+  RichEdit1.Font.Size := GameOptions[optionLargeFont];
+  case GameOptions[optionDisplaySize] of
+    display640x400:
     begin
       RichEdit1.Height := 200;
       RichEdit1.Width := 382;
       RichEdit1.Top := 45;
       RichEdit1.Left := 129;
     end;
-    1:
+    display800x500:
     begin
       RichEdit1.Height := 250;
       RichEdit1.Width := 478;
@@ -981,8 +988,8 @@ begin
   Button7.Left := RichEdit1.Left + RichEdit1.Width - Button7.Width - Image6.Width div 2;
   Button2.Top := RichEdit1.Top + RichEdit1.Height - Button2.Height - Image6.Height div 2;
   Button2.Left := Button7.Left - Button2.Width - Image6.Width div 2;
-  ShopMode := 0;
-  DialogueStage := 0;
+  ShopMode := Ord(shopMerchant);
+  DialogueStage := stageNone;
   case Hero.floor of
     2:
     begin
@@ -1097,7 +1104,7 @@ begin
     0:
     begin
       case ScratchIndex of
-        0..11: RichEdit1.Text := ListBox2.Items[ScratchIndex + 246];
+        0..11: RichEdit1.Text := ListBox2.Items[ScratchIndex + textMerchantOfferBase];
       end;
       RichEdit1.Visible := True;
       Button2.Visible := True;
@@ -1140,14 +1147,14 @@ end;
 
 procedure TTSW10.roujin; { $00449708 }
 type
-  THeroWords = array[0..170] of Longint;
+  THeroWords = array[0..HeroWordCount - 1] of Longint;
 var
   HeroWords: THeroWords absolute Hero;
 begin
   Button1.Caption := 'OK';
-  RichEdit1.Font.Size := GameOptions[1];
+  RichEdit1.Font.Size := GameOptions[optionLargeFont];
   itemdel;
-  DialogueStage := 0;
+  DialogueStage := stageNone;
   DamageMode := 0;
   case Hero.floor of
     2:
@@ -1241,7 +1248,7 @@ begin
       { PushCommand(10, 61, 0). }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 61;
+      EventStack[EventCursor].A := speechOldManFloor23;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0). }
       Inc(EventCursor);
@@ -1410,14 +1417,14 @@ end;
 
 procedure TTSW10.Button1Click(Sender: TObject); { $0044DA10 }
 type
-  THeroWords = array[0..170] of Longint;
+  THeroWords = array[0..HeroWordCount - 1] of Longint;
 var
   HeroWords: THeroWords absolute Hero;
 begin
   if (DialogueStage > 10) and (DialogueStage < 68) then
     HeroWords[DialogueStage + 80] := 1;
   case DialogueStage of
-    0:
+    stageNone:
     begin
       if Hero.hero_orb = 2 then
         Hero.hero_orb := 1;
@@ -1437,17 +1444,17 @@ begin
       RichEdit1.Text := '';
       Timer2.Enabled := True;
     end;
-    11:
+    speechUnconscious + DialogueStageOffset:
     begin
       Button1.Visible := False;
       Timer2.Enabled := True;
     end;
-    12:
+    speechThiefCallsHero + DialogueStageOffset:
     begin
       Button1.Visible := False;
       Timer2.Enabled := True;
     end;
-    13:
+    speechThiefWakesHero + DialogueStageOffset:
     begin
       Button1.Visible := False;
       Timer2.Enabled := False;
@@ -1459,7 +1466,7 @@ begin
       RichEdit1.Text := '';
       itemlive;
     end;
-    14:
+    speechThiefOpensPrison + DialogueStageOffset:
     begin
       Button1.Visible := False;
       RichEdit1.Visible := False;
@@ -1497,7 +1504,7 @@ begin
       EventStack[EventCursor].A := 68;
       EventStack[EventCursor].B := 67;
     end;
-    15:
+    speechThiefFirstDeparture + DialogueStageOffset:
     begin
       Button1.Visible := False;
       RichEdit1.Visible := False;
@@ -1513,7 +1520,7 @@ begin
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evSetTile);
       EventStack[EventCursor].A := 99;
-      EventStack[EventCursor].B := 6;
+      EventStack[EventCursor].B := tileRoad;
       { PushCommand(0, 0, 0). }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -1545,17 +1552,18 @@ begin
       EventStack[EventCursor].A := 77;
       EventStack[EventCursor].B := 88;
     end;
-    16:
+    speechThiefReturnsToPrison + DialogueStageOffset:
     begin
       Button1.Visible := False;
       RichEdit1.Visible := False;
       RichEdit1.Text := '';
       Timer2.Enabled := False;
-      Maps[35, 105] := 21;
-      Maps[35, 93] := 6;
+      Maps[35, 105] := tileThief;
+      Maps[35, 93] := tileRoad;
       itemlive;
     end;
-    17..19:
+    speechThiefPromisesToFollow + DialogueStageOffset
+        ..speechMerchantRescueReward + DialogueStageOffset:
     begin
       Button1.Visible := False;
       RichEdit1.Visible := False;
@@ -1563,28 +1571,36 @@ begin
       Timer2.Enabled := False;
       itemlive;
     end;
-    20:
+    speechZenoCaptureChallenge + DialogueStageOffset:
     begin
       Button1.Visible := False;
       RichEdit1.Visible := False;
       RichEdit1.Text := '';
       openning2;
     end;
-    21:
+    speechHeroCaptured + DialogueStageOffset:
     begin
       Button1.Visible := False;
       RichEdit1.Visible := False;
       RichEdit1.Text := '';
       Timer2.Enabled := True;
     end;
-    23..25, 27..31, 33, 35..49, 51..56, 58..67:
+    speechSkeletonLordChallenge + DialogueStageOffset
+        ..speechSkeletonLordDefeated + DialogueStageOffset,
+    speechThiefSecondDeparture + DialogueStageOffset..speechVampireDefeated + DialogueStageOffset,
+    speechRockChallenge + DialogueStageOffset,
+    speechTimeGateInvitation + DialogueStageOffset
+        ..speechGreatMagicMasterDefeated + DialogueStageOffset,
+    speechGoldenKnightReportsFailure + DialogueStageOffset
+        ..speechZenoDefeated + DialogueStageOffset,
+    speechHeroFindsThief + DialogueStageOffset..speechZenoOffersAlliance + DialogueStageOffset:
     begin
       Button1.Visible := False;
       RichEdit1.Visible := False;
       RichEdit1.Text := '';
       Timer2.Enabled := True;
     end;
-    71, 274:
+    speechOldManFloor23 + DialogueStageOffset, speechThiefTimeGate + DialogueStageOffset:
     begin
       Button1.Visible := False;
       RichEdit1.Visible := False;
@@ -1592,7 +1608,11 @@ begin
       Timer2.Enabled := False;
       itemlive;
     end;
-    26, 32, 34, 50, 57:
+    speechFairyFloor10 + DialogueStageOffset,
+    speechFairyFloor20 + DialogueStageOffset,
+    speechFairyFloor25 + DialogueStageOffset,
+    speechFairyFloor40 + DialogueStageOffset,
+    speechFairyFloor49 + DialogueStageOffset:
     begin
       Button1.Visible := False;
       RichEdit1.Visible := False;
@@ -1603,7 +1623,7 @@ begin
       else
         Timer2.Enabled := True;
     end;
-    72:
+    speechBacksideZenoDefeated + DialogueStageOffset:
     begin
       Button1.Visible := False;
       RichEdit1.Visible := False;
@@ -1622,7 +1642,7 @@ end;
 
 procedure TTSW10.Button2Click(Sender: TObject); { $0044E1CC }
 type
-  THeroWords = array[0..170] of Longint;
+  THeroWords = array[0..HeroWordCount - 1] of Longint;
 var
   HeroWords: THeroWords absolute Hero;
 begin
@@ -1631,11 +1651,11 @@ begin
   if Button7.Enabled = False then
     Button7.Enabled := True;
   RichEdit1.Text := '';
-  if ShopMode = 0 then
+  if ShopMode = Ord(shopMerchant) then
     RichEdit1.Visible := False;
   disp;
   case ShopMode of
-    0:
+    Ord(shopMerchant):
     begin
       if Hero.floor <> 28 then
       begin
@@ -1645,12 +1665,12 @@ begin
           RichEdit1.Visible := True;
           Button1.Visible := True;
           Button1.SetFocus;
-          DialogueStage := 0;
+          DialogueStage := stageNone;
         end
         else
         begin
           Dec(Hero.gold, GameplayShopCost);
-          DialogueStage := 0;
+          DialogueStage := stageNone;
           case MerchantTradeWord of
             42..45: HeroWords[MerchantTradeWord] := 1;
             47: HeroWords[MerchantTradeWord] := 1;
@@ -1713,13 +1733,13 @@ begin
           RichEdit1.Visible := True;
           Button1.Visible := True;
           Button1.SetFocus;
-          DialogueStage := 0;
+          DialogueStage := stageNone;
         end
         else
         begin
           Dec(Hero.yellow_keys);
           Inc(Hero.gold, 100);
-          DialogueStage := 0;
+          DialogueStage := stageNone;
           RichEdit1.Text := ListBox2.Items[259];
           RichEdit1.Visible := True;
           Button1.Visible := True;
@@ -1748,7 +1768,7 @@ begin
         end;
       end;
     end;
-    1:
+    Ord(shopAltar):
     begin
       { Altar choices form four full-width rows inside the dialogue panel. }
       Button39.Height := Image6.Height;
@@ -1854,7 +1874,7 @@ begin
   else
   begin
     RichEdit1.Text := ListBox2.Items[211];
-    DialogueStage := 0;
+    DialogueStage := stageNone;
     Button1.Top := RichEdit1.Top + RichEdit1.Height - Button1.Height - 16;
     Button1.Left := RichEdit1.Left + RichEdit1.Width - Button1.Width - 16;
     RichEdit1.Visible := True;
@@ -1906,7 +1926,7 @@ begin
   else
   begin
     RichEdit1.Text := ListBox2.Items[211];
-    DialogueStage := 0;
+    DialogueStage := stageNone;
     Button1.Top := RichEdit1.Top + RichEdit1.Height - Button1.Height - 16;
     Button1.Left := RichEdit1.Left + RichEdit1.Width - Button1.Width - 16;
     RichEdit1.Visible := True;
@@ -1958,7 +1978,7 @@ begin
   else
   begin
     RichEdit1.Text := ListBox2.Items[211];
-    DialogueStage := 0;
+    DialogueStage := stageNone;
     Button1.Top := RichEdit1.Top + RichEdit1.Height - Button1.Height - 16;
     Button1.Left := RichEdit1.Left + RichEdit1.Width - Button1.Width - 16;
     RichEdit1.Visible := True;
@@ -2099,16 +2119,16 @@ begin
   end
   else
   begin
-    RichEdit1.Font.Size := GameOptions[1];
-    case GameOptions[8] of
-      0:
+    RichEdit1.Font.Size := GameOptions[optionLargeFont];
+    case GameOptions[optionDisplaySize] of
+      display640x400:
       begin
         RichEdit1.Height := 200;
         RichEdit1.Width := 382;
         RichEdit1.Top := 45;
         RichEdit1.Left := 129;
       end;
-      1:
+      display800x500:
       begin
         RichEdit1.Height := 250;
         RichEdit1.Width := 478;
@@ -2119,20 +2139,23 @@ begin
     Button1.Top := RichEdit1.Top + RichEdit1.Height - Button1.Height - 16;
     Button1.Left := RichEdit1.Left + RichEdit1.Width - Button1.Width - 16;
     if DialogueStage < 10 then
-      RichEdit1.Text := ListBox2.Items[GameplayHintIndex + 62]
+      RichEdit1.Text := ListBox2.Items[GameplayHintIndex + textWisdomHintBase]
     else
     begin
       { Ranking speeches keep the text prepared by yousei. }
-      if (DialogueSpeech <> 16)
-          and (DialogueSpeech <> 22)
-          and (DialogueSpeech <> 24)
-          and (DialogueSpeech <> 40)
-          and (DialogueSpeech <> 47) then
+      if (DialogueSpeech <> speechFairyFloor10)
+          and (DialogueSpeech <> speechFairyFloor20)
+          and (DialogueSpeech <> speechFairyFloor25)
+          and (DialogueSpeech <> speechFairyFloor40)
+          and (DialogueSpeech <> speechFairyFloor49) then
         RichEdit1.Text := ListBox2.Items[DialogueSpeech - 1];
       case DialogueSpeech of
-        5: RichEdit1.Text := RichEdit1.Text + ListBox2.Items[DialogueSpeech + 53 - 1];
-        17: RichEdit1.Text := RichEdit1.Text + ListBox2.Items[DialogueSpeech + 42 - 1];
-        55: RichEdit1.Text := RichEdit1.Text + ListBox2.Items[DialogueSpeech + 5 - 1];
+        speechThiefFirstDeparture:
+          RichEdit1.Text := RichEdit1.Text + ListBox2.Items[DialogueSpeech + 53 - 1];
+        speechThiefSecondDeparture:
+          RichEdit1.Text := RichEdit1.Text + ListBox2.Items[DialogueSpeech + 42 - 1];
+        speechZenoRevealsPlan:
+          RichEdit1.Text := RichEdit1.Text + ListBox2.Items[DialogueSpeech + 5 - 1];
       end;
     end;
     if (Hero.Word668 <> 1) and (DialogueSpeech = 93) and (DialogueStage >= 10) then
@@ -2438,7 +2461,7 @@ procedure TTSW10.Button35Click(Sender: TObject);
 begin
   RichEdit1.Visible := False;
   RichEdit1.Text := '';
-  DialogueStage := 0;
+  DialogueStage := stageNone;
   Hero.Word668 := 0;
   { Close every clue button, then restore item controls. }
   Button11.Visible := False;
@@ -2487,10 +2510,10 @@ begin
     begin
       Tile := 0;
       case MonsterIndex of
-        0..17: Tile := MonsterIndex * 2 + 60;
-        18: Tile := 103;
-        19: Tile := 121;
-        20..32: Tile := MonsterIndex * 2 + 92;
+        Ord(monsterGreenSlime)..Ord(monsterVampire): Tile := MonsterIndex * 2 + 60;
+        Ord(monsterOctopus): Tile := 103;
+        Ord(monsterDragon): Tile := 121;
+        Ord(monsterGoldenKnight)..Ord(monsterGateKeeperA): Tile := MonsterIndex * 2 + 92;
       end;
       ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, Tile);
       case OrbRow of
@@ -2678,9 +2701,9 @@ procedure TTSW10.img6work; { $00480F60 }
 var
   I: Longint;
 begin
-  RichEdit1.Font.Size := GameOptions[1];
-  case GameOptions[8] of
-    0:
+  RichEdit1.Font.Size := GameOptions[optionLargeFont];
+  case GameOptions[optionDisplaySize] of
+    display640x400:
     begin
       RichEdit1.Height := 56;
       RichEdit1.Width := 358;
@@ -2689,7 +2712,7 @@ begin
       Image23.Top := 24;
       Image23.Left := 144;
     end;
-    1:
+    display800x500:
     begin
       RichEdit1.Height := 70;
       RichEdit1.Width := 448;
@@ -2699,16 +2722,16 @@ begin
       Image23.Left := 180;
     end;
   end;
-  Image23.Height := Image6.Height * 11;
-  Image23.Width := Image6.Width * 11;
+  Image23.Height := Image6.Height * BoardWidth;
+  Image23.Width := Image6.Width * BoardWidth;
   if Hero.hero_orb = 1 then
   begin
     Timer1.Enabled := False;
     itemdel;
     { Align the original fixed rows, portraits and damage column. }
-    case GameOptions[8] of
-      0: Edit13.Left := RichEdit1.Left + 40;
-      1: Edit13.Left := RichEdit1.Left + 50;
+    case GameOptions[optionDisplaySize] of
+      display640x400: Edit13.Left := RichEdit1.Left + 40;
+      display800x500: Edit13.Left := RichEdit1.Left + 50;
     end;
     Edit14.Left := Edit13.Left;
     Edit15.Left := Edit13.Left;
@@ -2775,24 +2798,25 @@ begin
     begin
       DrawIndex := I;
       case Maps[Hero.floor, DrawIndex + 1] of
-        61..95:
+        tileGreenSlime..tileVampire:
         begin
-          NeighborIndex := (Maps[Hero.floor, DrawIndex + 1] - 61) div 2;
+          NeighborIndex := (Maps[Hero.floor, DrawIndex + 1] - tileGreenSlime) div 2;
           yousya;
         end;
-        104:
+        tileOctopusMouth:
         begin
-          NeighborIndex := 18;
+          NeighborIndex := Ord(monsterOctopus);
           yousya;
         end;
-        122:
+        tileDragonHead:
         begin
-          NeighborIndex := 19;
+          NeighborIndex := Ord(monsterDragon);
           yousya;
         end;
-        133..157:
+        tileGoldenKnight..tileGateKeeperA:
         begin
-          NeighborIndex := (Maps[Hero.floor, DrawIndex + 1] - 133) div 2 + 20;
+          NeighborIndex :=
+              (Maps[Hero.floor, DrawIndex + 1] - tileGoldenKnight) div 2 + Ord(monsterGoldenKnight);
           yousya;
         end;
       end;
@@ -2877,15 +2901,15 @@ begin
   Edit31.Text := '';
   Edit32.Text := '';
   Edit33.Text := '';
-  case GameOptions[8] of
-    0:
+  case GameOptions[optionDisplaySize] of
+    display640x400:
     begin
       RichEdit1.Height := 200;
       RichEdit1.Width := 382;
       RichEdit1.Top := 45;
       RichEdit1.Left := 129;
     end;
-    1:
+    display800x500:
     begin
       RichEdit1.Height := 250;
       RichEdit1.Width := 478;
@@ -2898,7 +2922,7 @@ begin
   itemlive;
   keydisplay;
   Timer1.Enabled := True;
-  RichEdit1.Font.Size := GameOptions[1];
+  RichEdit1.Font.Size := GameOptions[optionLargeFont];
 end;
 
 procedure TTSW10.mazyutu1; { $0044C5C4 }
@@ -2912,10 +2936,11 @@ begin
           case Hero.y of
             1..9:
             begin
-              case Hero.x + Hero.y * 11 + Damage of
+              case Hero.x + Hero.y * BoardWidth + Damage of
                 0..121:
                 begin
-                  if Maps[Hero.floor, Hero.x + Hero.y * 11 + Damage + 2] = 6 then
+                  if Maps[Hero.floor, Hero.x + Hero.y * BoardWidth + Damage + MapTileOffset]
+                      = tileRoad then
                   begin
                     { PushCommand(0, 0, 0). }
                     Inc(EventCursor);
@@ -2925,8 +2950,8 @@ begin
                     { PushCommand(12, Hero.y * 11 + Hero.x + Damage div 2, Hero.y * 11 + Hero.x + Damage). }
                     Inc(EventCursor);
                     EventStack[EventCursor].Opcode := Ord(evMoveMonster);
-                    EventStack[EventCursor].A := Hero.y * 11 + Hero.x + Damage div 2;
-                    EventStack[EventCursor].B := Hero.y * 11 + Hero.x + Damage;
+                    EventStack[EventCursor].A := Hero.y * BoardWidth + Hero.x + Damage div 2;
+                    EventStack[EventCursor].B := Hero.y * BoardWidth + Hero.x + Damage;
                     { PushCommand(0, 0, 0). }
                     Inc(EventCursor);
                     EventStack[EventCursor].Opcode := Ord(evWait);
@@ -2974,20 +2999,20 @@ begin
         EventStack[EventCursor].Opcode := Ord(evWait);
         EventStack[EventCursor].A := 6;
         case Hero.facing of
-          1: EventStack[EventCursor].B := 191;
-          2: EventStack[EventCursor].B := 199;
-          3: EventStack[EventCursor].B := 207;
-          4: EventStack[EventCursor].B := 215;
+          Ord(hfDown): EventStack[EventCursor].B := 191;
+          Ord(hfLeft): EventStack[EventCursor].B := 199;
+          Ord(hfRight): EventStack[EventCursor].B := 207;
+          Ord(hfUp): EventStack[EventCursor].B := 215;
         end;
         { PushCommand(9, ScratchIndex, facing damage frame). }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evOverlay);
         EventStack[EventCursor].A := ScratchIndex;
         case Hero.facing of
-          1: EventStack[EventCursor].B := 192;
-          2: EventStack[EventCursor].B := 200;
-          3: EventStack[EventCursor].B := 208;
-          4: EventStack[EventCursor].B := 216;
+          Ord(hfDown): EventStack[EventCursor].B := 192;
+          Ord(hfLeft): EventStack[EventCursor].B := 200;
+          Ord(hfRight): EventStack[EventCursor].B := 208;
+          Ord(hfUp): EventStack[EventCursor].B := 216;
         end;
         { PushCommand(0, 0, 0). }
         Inc(EventCursor);
@@ -3036,20 +3061,20 @@ begin
         EventStack[EventCursor].Opcode := Ord(evWait);
         EventStack[EventCursor].A := 6;
         case Hero.facing of
-          1: EventStack[EventCursor].B := 191;
-          2: EventStack[EventCursor].B := 199;
-          3: EventStack[EventCursor].B := 207;
-          4: EventStack[EventCursor].B := 215;
+          Ord(hfDown): EventStack[EventCursor].B := 191;
+          Ord(hfLeft): EventStack[EventCursor].B := 199;
+          Ord(hfRight): EventStack[EventCursor].B := 207;
+          Ord(hfUp): EventStack[EventCursor].B := 215;
         end;
         { PushCommand(9, ScratchIndex, facing damage frame). }
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evOverlay);
         EventStack[EventCursor].A := ScratchIndex;
         case Hero.facing of
-          1: EventStack[EventCursor].B := 192;
-          2: EventStack[EventCursor].B := 200;
-          3: EventStack[EventCursor].B := 208;
-          4: EventStack[EventCursor].B := 216;
+          Ord(hfDown): EventStack[EventCursor].B := 192;
+          Ord(hfLeft): EventStack[EventCursor].B := 200;
+          Ord(hfRight): EventStack[EventCursor].B := 208;
+          Ord(hfUp): EventStack[EventCursor].B := 216;
         end;
         { PushCommand(0, 0, 0). }
         Inc(EventCursor);
@@ -3074,25 +3099,25 @@ begin
   if NeighborIndex mod (Image6.Width div 4) = 0 then
   begin
     case Hero.facing of
-      1:
+      Ord(hfDown):
       begin
         ScratchIndex := 184;
         DoorOpened := 0;
         yusyai1;
       end;
-      2:
+      Ord(hfLeft):
       begin
         ScratchIndex := 192;
         DoorOpened := 0;
         yusyai2;
       end;
-      3:
+      Ord(hfRight):
       begin
         ScratchIndex := 200;
         DoorOpened := 0;
         yusyai3;
       end;
-      4:
+      Ord(hfUp):
       begin
         ScratchIndex := 208;
         DoorOpened := 0;
@@ -3104,25 +3129,25 @@ begin
   else
   begin
     case Hero.facing of
-      1:
+      Ord(hfDown):
       begin
         ScratchIndex := 186;
         DoorOpened := 1;
         yusyai1;
       end;
-      2:
+      Ord(hfLeft):
       begin
         ScratchIndex := 194;
         DoorOpened := 1;
         yusyai2;
       end;
-      3:
+      Ord(hfRight):
       begin
         ScratchIndex := 202;
         DoorOpened := 1;
         yusyai3;
       end;
-      4:
+      Ord(hfUp):
       begin
         ScratchIndex := 210;
         DoorOpened := 1;
@@ -3134,25 +3159,25 @@ begin
   if NeighborIndex = Image6.Width then
   begin
     case Hero.facing of
-      1:
+      Ord(hfDown):
       begin
         ScratchIndex := 186;
         DoorOpened := 1;
         yusyai1;
       end;
-      2:
+      Ord(hfLeft):
       begin
         ScratchIndex := 194;
         DoorOpened := 1;
         yusyai2;
       end;
-      3:
+      Ord(hfRight):
       begin
         ScratchIndex := 202;
         DoorOpened := 1;
         yusyai3;
       end;
-      4:
+      Ord(hfUp):
       begin
         ScratchIndex := 210;
         DoorOpened := 1;
@@ -3176,12 +3201,17 @@ begin
   WorkBitmap3.Canvas.CopyMode := cmSrcCopy;
   ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, ScratchIndex);
   ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, ScratchIndex + 1);
-  ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2] - 1);
+  ImageList1.Draw(
+      WorkBitmap1.Canvas,
+      0,
+      0,
+      Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset] - 1
+  );
   ImageList1.Draw(
       WorkBitmap1.Canvas,
       0,
       Image6.Height,
-      Maps[Hero.floor, Hero.y * 11 + Hero.x + 2 + 11] - 1
+      Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + 2 + 11] - 1
   );
   WorkBitmap2.Canvas.CopyMode := cmSrcPaint;
   TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
@@ -3211,9 +3241,14 @@ begin
   WorkBitmap3.Canvas.CopyMode := cmSrcCopy;
   ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, ScratchIndex);
   ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, ScratchIndex + 1);
+  ImageList1.Draw(
+      WorkBitmap1.Canvas,
+      Image6.Width,
+      0,
+      Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset] - 1
+  );
   ImageList1
-      .Draw(WorkBitmap1.Canvas, Image6.Width, 0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2] - 1);
-  ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2 - 1] - 1);
+      .Draw(WorkBitmap1.Canvas, 0, 0, Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + 2 - 1] - 1);
   TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
   SourceRect :=
       Rect(Image6.Width - NeighborIndex, 0, Image6.Width * 2 - NeighborIndex, Image6.Height);
@@ -3233,12 +3268,17 @@ begin
   WorkBitmap3.Canvas.CopyMode := cmSrcCopy;
   ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, ScratchIndex);
   ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, ScratchIndex + 1);
-  ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2] - 1);
+  ImageList1.Draw(
+      WorkBitmap1.Canvas,
+      0,
+      0,
+      Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset] - 1
+  );
   ImageList1.Draw(
       WorkBitmap1.Canvas,
       Image6.Width,
       0,
-      Maps[Hero.floor, Hero.y * 11 + Hero.x + 2 + 1] - 1
+      Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + 2 + 1] - 1
   );
   TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
   SourceRect := Rect(NeighborIndex, 0, Image6.Width + NeighborIndex, Image6.Height);
@@ -3258,9 +3298,14 @@ begin
   WorkBitmap3.Canvas.CopyMode := cmSrcCopy;
   ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, ScratchIndex);
   ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, ScratchIndex + 1);
+  ImageList1.Draw(
+      WorkBitmap1.Canvas,
+      0,
+      Image6.Height,
+      Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + MapTileOffset] - 1
+  );
   ImageList1
-      .Draw(WorkBitmap1.Canvas, 0, Image6.Height, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2] - 1);
-  ImageList1.Draw(WorkBitmap1.Canvas, 0, 0, Maps[Hero.floor, Hero.y * 11 + Hero.x + 2 - 11] - 1);
+      .Draw(WorkBitmap1.Canvas, 0, 0, Maps[Hero.floor, Hero.y * BoardWidth + Hero.x + 2 - 11] - 1);
   WorkBitmap3.Canvas.CopyMode := cmNotSrcCopy;
   TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
   WorkBitmap3.Canvas.CopyRect(TargetRect, WorkBitmap3.Canvas, TargetRect);
@@ -3278,12 +3323,14 @@ procedure TTSW10.idou; { $0044C04C }
 var
   Steps, I: Longint;
 begin
-  HeroCell := Hero.y * 11 + Hero.x;
-  DrawX := (Hero.y * 11 + Hero.x) * Image6.Width mod (Image6.Width * 11);
-  DrawY := ((Hero.y * 11 + Hero.x) * Image6.Height div (Image6.Height * 11)) * Image6.Height;
+  HeroCell := Hero.y * BoardWidth + Hero.x;
+  DrawX := (Hero.y * BoardWidth + Hero.x) * Image6.Width mod (Image6.Width * BoardWidth);
+  DrawY :=
+      ((Hero.y * BoardWidth + Hero.x) * Image6.Height div (Image6.Height * BoardWidth))
+          * Image6.Height;
   case Hero.facing of
-    2: Dec(DrawX, Image6.Width);
-    4: Dec(DrawY, Image6.Height);
+    Ord(hfLeft): Dec(DrawX, Image6.Width);
+    Ord(hfUp): Dec(DrawY, Image6.Height);
   end;
   Steps := Image6.Width;
   if High1.Checked = True then
@@ -3301,17 +3348,17 @@ begin
     yusyaidou;
     MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
   end;
-  Hero.x := ContactIndex mod 11;
-  Hero.y := ContactIndex div 11;
-  DrawX := Image6.Width * ContactIndex mod (Image6.Width * 11);
-  DrawY := (Image6.Height * ContactIndex div (Image6.Height * 11)) * Image6.Height;
+  Hero.x := ContactIndex mod BoardWidth;
+  Hero.y := ContactIndex div BoardWidth;
+  DrawX := Image6.Width * ContactIndex mod (Image6.Width * BoardWidth);
+  DrawY := (Image6.Height * ContactIndex div (Image6.Height * BoardWidth)) * Image6.Height;
   yusyahyouji1;
   NeighborY := 0;
   Damage := 0;
   TileClass := 0;
-  ScratchIndex := Hero.y * 11 + Hero.x;
+  ScratchIndex := Hero.y * BoardWidth + Hero.x;
   { Classify each neighbor before applying magician or pincer damage. }
-  NeighborIndex := ScratchIndex - 11;
+  NeighborIndex := ScratchIndex - BoardWidth;
   case Hero.y of
     1..10:
     begin
@@ -3364,16 +3411,16 @@ begin
     case Hero.x of
       1..9:
       begin
-        if Maps[Hero.floor, ScratchIndex - 1 + 2] = 93 then
-          if Maps[Hero.floor, ScratchIndex + 1 + 2] = 93 then
+        if Maps[Hero.floor, ScratchIndex - 1 + MapTileOffset] = tileSorcerer then
+          if Maps[Hero.floor, ScratchIndex + 1 + MapTileOffset] = tileSorcerer then
             madoushi1;
       end;
     end;
     case Hero.y of
       1..9:
       begin
-        if Maps[Hero.floor, ScratchIndex - 11 + 2] = 93 then
-          if Maps[Hero.floor, ScratchIndex + 11 + 2] = 93 then
+        if Maps[Hero.floor, ScratchIndex - BoardWidth + MapTileOffset] = tileSorcerer then
+          if Maps[Hero.floor, ScratchIndex + BoardWidth + MapTileOffset] = tileSorcerer then
             madoushi1;
       end;
     end;
@@ -3381,8 +3428,8 @@ begin
   if NeighborY = 0 then
   begin
     TileClass := 0;
-    ScratchIndex := Hero.y * 11 + Hero.x;
-    NeighborIndex := ScratchIndex - 11;
+    ScratchIndex := Hero.y * BoardWidth + Hero.x;
+    NeighborIndex := ScratchIndex - BoardWidth;
     case Hero.y of
       1..10: mmes;
     end;
@@ -3410,8 +3457,8 @@ begin
   MapBitmap2.Free;
   MapBitmap1 := TBitmap.Create;
   MapBitmap2 := TBitmap.Create;
-  MapBitmap1.Height := Image6.Height * 11;
-  MapBitmap1.Width := Image6.Width * 11;
+  MapBitmap1.Height := Image6.Height * BoardWidth;
+  MapBitmap1.Width := Image6.Width * BoardWidth;
   MapBitmap2.Height := MapBitmap1.Height;
   MapBitmap2.Width := MapBitmap1.Width;
   Timer1.Enabled := False;
@@ -3463,12 +3510,12 @@ procedure TTSW10.handan; { $00444490 }
 var
   I: Longint;
 begin
-  case Ord(Maps[Hero.floor, ContactIndex + 2]) of
-    1..3:
+  case Ord(Maps[Hero.floor, ContactIndex + MapTileOffset]) of
+    tileYellowDoor..tileRedDoor:
     begin
       DoorOpened := 0;
-      case Maps[Hero.floor, ContactIndex + 2] of
-        1:
+      case Maps[Hero.floor, ContactIndex + MapTileOffset] of
+        tileYellowDoor:
         begin
           TileClass := 16;
           if Hero.yellow_keys > 0 then
@@ -3478,7 +3525,7 @@ begin
             TileClass := 4;
           end;
         end;
-        2:
+        tileBlueDoor:
         begin
           TileClass := 17;
           if Hero.blue_keys > 0 then
@@ -3488,7 +3535,7 @@ begin
             TileClass := 5;
           end;
         end;
-        3:
+        tileRedDoor:
         begin
           TileClass := 18;
           if Hero.red_keys > 0 then
@@ -3516,7 +3563,7 @@ begin
         Inc(EventCursor);
         EventStack[EventCursor].Opcode := Ord(evDoorFrame);
         EventStack[EventCursor].A := ContactIndex;
-        EventStack[EventCursor].B := Maps[Hero.floor, ContactIndex + 2];
+        EventStack[EventCursor].B := Maps[Hero.floor, ContactIndex + MapTileOffset];
         doorstackin;
         { PushCommand(0, 0, 0). }
         Inc(EventCursor);
@@ -3540,9 +3587,9 @@ begin
         timer2on;
       end;
     end;
-    6: idou;
-    7: mevent;
-    9:
+    tileRoad: idou;
+    tileSpecialRoad: mevent;
+    tileSecretWall:
     begin
       timer2on;
       TileClass := 1;
@@ -3579,7 +3626,7 @@ begin
       EventStack[EventCursor].A := 1;
       EventStack[EventCursor].B := 0;
     end;
-    10:
+    tileHiddenObject:
     begin
       case Hero.floor of
         12:
@@ -3595,7 +3642,7 @@ begin
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
             EventStack[EventCursor].A := 10;
-            EventStack[EventCursor].B := 19;
+            EventStack[EventCursor].B := tileMerchant;
             { PushCommand(0, 0, 0). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3632,7 +3679,7 @@ begin
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
             EventStack[EventCursor].A := 120;
-            EventStack[EventCursor].B := 25;
+            EventStack[EventCursor].B := tileOldMan;
             { PushCommand(0, 0, 0). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3669,7 +3716,7 @@ begin
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
             EventStack[EventCursor].A := 27;
-            EventStack[EventCursor].B := 39;
+            EventStack[EventCursor].B := tileCross;
             { PushCommand(0, 0, 0). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3695,7 +3742,7 @@ begin
         end;
         41:
         begin
-          if Maps[41, 14] = 6 then
+          if Maps[41, 14] = tileRoad then
           begin
             { PushCommand(0, 0, 0). }
             Inc(EventCursor);
@@ -3706,7 +3753,7 @@ begin
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
             EventStack[EventCursor].A := 20;
-            EventStack[EventCursor].B := 151;
+            EventStack[EventCursor].B := tileMagicianA;
             { PushCommand(0, 0, 0). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3732,7 +3779,7 @@ begin
         end;
       end;
     end;
-    11..12:
+    tileStairsUp..tileStairsDown:
     begin
       { PushCommand(0, 0, 0). }
       Inc(EventCursor);
@@ -3749,20 +3796,20 @@ begin
         Timer1.Enabled := False;
         MediaPlayer5.Close;
       end;
-      case Maps[Hero.floor, ContactIndex + 2] of
-        11:
+      case Maps[Hero.floor, ContactIndex + MapTileOffset] of
+        tileStairsUp:
         begin
           MonsterIndex := -1;
           monshyouji;
           TileClass := 1;
           MessageText := ListBox2.Items[243];
           disp;
-          if (Hero.floor = 20) and (Maps[20, 51] = 23) then
-            Maps[20, 51] := 6;
-          if (Hero.floor = 25) and (Maps[25, 73] = 23) then
-            Maps[25, 73] := 6;
-          if (Hero.floor = 40) and (Maps[40, 62] = 23) then
-            Maps[40, 62] := 6;
+          if (Hero.floor = 20) and (Maps[20, 51] = tileFairy) then
+            Maps[20, 51] := tileRoad;
+          if (Hero.floor = 25) and (Maps[25, 73] = tileFairy) then
+            Maps[25, 73] := tileRoad;
+          if (Hero.floor = 40) and (Maps[40, 62] = tileFairy) then
+            Maps[40, 62] := tileRoad;
           if Hero.floor = 43 then
             Hero.floor := 45
           else
@@ -3772,10 +3819,10 @@ begin
             Hero.highest_floor := Hero.floor;
             if Hero.Word140 = 35 then
               if Maps[35, 93] + Maps[2, 122] = 27 then
-                Maps[2, 122] := 6;
+                Maps[2, 122] := tileRoad;
           end;
-          Hero.x := Maps[Hero.floor, 0] mod 11;
-          Hero.y := Maps[Hero.floor, 0] div 11;
+          Hero.x := Maps[Hero.floor, 0] mod BoardWidth;
+          Hero.y := Maps[Hero.floor, 0] div BoardWidth;
           kaidanupcheck;
           if (Hero.floor = 32) and (Hero.floor32_arrival_seen = 0) then
           begin
@@ -3798,29 +3845,29 @@ begin
           EventStack[EventCursor].A := 7;
           EventStack[EventCursor].B := 0;
         end;
-        12:
+        tileStairsDown:
         begin
           MonsterIndex := -1;
           monshyouji;
           TileClass := 1;
           MessageText := ListBox2.Items[243];
           disp;
-          if (Hero.floor = 25) and (Maps[25, 73] = 23) then
-            Maps[25, 73] := 6;
-          if (Hero.floor = 49) and (Maps[49, 18] = 23) then
-            Maps[49, 18] := 6;
+          if (Hero.floor = 25) and (Maps[25, 73] = tileFairy) then
+            Maps[25, 73] := tileRoad;
+          if (Hero.floor = 49) and (Maps[49, 18] = tileFairy) then
+            Maps[49, 18] := tileRoad;
           if Hero.floor = 45 then
             Hero.floor := 43
           else
             Dec(Hero.floor);
           if (Hero.highest_floor = 29) and (Hero.floor = 28) then
           begin
-            Maps[29, 40] := 6;
-            Maps[29, 29] := 6;
-            Maps[29, 19] := 21;
+            Maps[29, 40] := tileRoad;
+            Maps[29, 29] := tileRoad;
+            Maps[29, 19] := tileThief;
           end;
-          Hero.x := Maps[Hero.floor, 1] mod 11;
-          Hero.y := Maps[Hero.floor, 1] div 11;
+          Hero.x := Maps[Hero.floor, 1] mod BoardWidth;
+          Hero.y := Maps[Hero.floor, 1] div BoardWidth;
           kaidandowncheck;
           { PushCommand(0, 0, 0). }
           Inc(EventCursor);
@@ -3840,24 +3887,24 @@ begin
       itemlive;
       timer2on;
     end;
-    16:
+    tileAltar:
     begin
-      RichEdit1.Font.Size := GameOptions[1];
-      ShopMode := 1;
+      RichEdit1.Font.Size := GameOptions[optionLargeFont];
+      ShopMode := Ord(shopAltar);
       itemdel;
       GameplayShopCost := ((Hero.Word44 + 1) * (Hero.Word44 + 1) - (Hero.Word44 + 1) + 2) * 10;
       RichEdit1.Text :=
           ListBox2.Items[202] + ' ' + IntToStr(GameplayShopCost) + ' ' + ListBox2.Items[203];
-      DialogueStage := 2;
-      case GameOptions[8] of
-        0:
+      DialogueStage := stageAltar;
+      case GameOptions[optionDisplaySize] of
+        display640x400:
         begin
           RichEdit1.Height := 200;
           RichEdit1.Width := 382;
           RichEdit1.Top := 45;
           RichEdit1.Left := 129;
         end;
-        1:
+        display800x500:
         begin
           RichEdit1.Height := 250;
           RichEdit1.Width := 478;
@@ -3874,11 +3921,11 @@ begin
       Button7.Visible := True;
       Button2.SetFocus;
     end;
-    19..20: syounin;
-    21..22: touzoku;
-    23..24: yousei;
-    25..26: roujin;
-    27..28:
+    tileMerchant..tileMerchant2: syounin;
+    tileThief..tileThief2: touzoku;
+    tileFairy..tileFairy2: yousei;
+    tileOldMan..tileOldMan2: roujin;
+    tileTimeGate..tileTimeGate2:
     begin
       if Hero.music_track <> 0 then
         if Hero.music_track <> 13 then
@@ -3887,16 +3934,16 @@ begin
           Hero.music_track := 13;
           soundplay;
         end;
-      if Maps[25, 62] = 6 then
+      if Maps[25, 62] = tileRoad then
       begin
-        Maps[24, 6] := 8;
-        Maps[24, 8] := 8;
-        Maps[24, 18] := 6;
-        Maps[24, 29] := 6;
-        Maps[24, 40] := 6;
-        Maps[24, 7] := 7;
+        Maps[24, 6] := tileWall;
+        Maps[24, 8] := tileWall;
+        Maps[24, 18] := tileRoad;
+        Maps[24, 29] := tileRoad;
+        Maps[24, 40] := tileRoad;
+        Maps[24, 7] := tileSpecialRoad;
       end;
-      Maps[50, 51] := 21;
+      Maps[50, 51] := tileThief;
       { PushCommand(0, 0, 0). }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3906,7 +3953,7 @@ begin
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evSetTile);
       EventStack[EventCursor].A := 60;
-      EventStack[EventCursor].B := 27;
+      EventStack[EventCursor].B := tileTimeGate;
       { PushCommand(0, 0, 0). }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evWait);
@@ -3915,7 +3962,7 @@ begin
       { PushCommand(10, 26, 0). }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 26;
+      EventStack[EventCursor].A := speechHeroFindsDoll;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0). }
       Inc(EventCursor);
@@ -3925,7 +3972,7 @@ begin
       { PushCommand(10, 25, 0). }
       Inc(EventCursor);
       EventStack[EventCursor].Opcode := Ord(evDialogue);
-      EventStack[EventCursor].A := 25;
+      EventStack[EventCursor].A := speechTimeGateInvitation;
       EventStack[EventCursor].B := 0;
       { PushCommand(0, 0, 0). }
       Inc(EventCursor);
@@ -3940,22 +3987,22 @@ begin
       timer2on;
       Button1.Caption := 'OK';
     end;
-    29..31:
+    tileYellowKey..tileBlueKey:
     begin
-      case Maps[Hero.floor, ContactIndex + 2] of
-        29:
+      case Maps[Hero.floor, ContactIndex + MapTileOffset] of
+        tileYellowKey:
         begin
           Inc(Hero.yellow_keys);
           TileClass := 1;
           MessageText := ListBox2.Items[128];
         end;
-        30:
+        tileRedKey:
         begin
           Inc(Hero.red_keys);
           TileClass := 1;
           MessageText := ListBox2.Items[130];
         end;
-        31:
+        tileBlueKey:
         begin
           Inc(Hero.blue_keys);
           TileClass := 1;
@@ -3983,13 +4030,13 @@ begin
       EventStack[EventCursor].Opcode := Ord(evSound);
       EventStack[EventCursor].A := 2;
       EventStack[EventCursor].B := 0;
-      Maps[Hero.floor, ContactIndex + 2] := 6;
+      Maps[Hero.floor, ContactIndex + MapTileOffset] := tileRoad;
       idou;
     end;
-    32..50:
+    tileRedPotion..tileLuckyGold:
     begin
-      case Maps[Hero.floor, ContactIndex + 2] of
-        32:
+      case Maps[Hero.floor, ContactIndex + MapTileOffset] of
+        tileRedPotion:
         begin
           Hero.hp := Hero.hp + (Hero.floor + 9) div 10 * 50 * (Hero.cycle_factor_minus_one + 1);
           TileClass := 1;
@@ -3999,7 +4046,7 @@ begin
                   + IntToStr((Hero.floor + 9) div 10 * 50 * (Hero.cycle_factor_minus_one + 1))
                   + ListBox2.Items[166];
         end;
-        33:
+        tileBluePotion:
         begin
           Hero.hp := Hero.hp + (Hero.floor + 9) div 10 * 200 * (Hero.cycle_factor_minus_one + 1);
           TileClass := 1;
@@ -4009,7 +4056,7 @@ begin
                   + IntToStr((Hero.floor + 9) div 10 * 200 * (Hero.cycle_factor_minus_one + 1))
                   + ListBox2.Items[166];
         end;
-        34:
+        tileRedGem:
         begin
           Hero.attack := Hero.attack + (Hero.floor + 9) div 10 * (Hero.cycle_factor_minus_one + 1);
           TileClass := 1;
@@ -4026,7 +4073,7 @@ begin
                     + IntToStr((Hero.floor + 9) div 10 * (Hero.cycle_factor_minus_one + 1))
                     + ListBox2.Items[166];
         end;
-        35:
+        tileBlueGem:
         begin
           Hero.defense :=
               Hero.defense + (Hero.floor + 9) div 10 * (Hero.cycle_factor_minus_one + 1);
@@ -4044,72 +4091,72 @@ begin
                     + IntToStr((Hero.floor + 9) div 10 * (Hero.cycle_factor_minus_one + 1))
                     + ListBox2.Items[166];
         end;
-        37:
+        tileWisdomOrb:
         begin
           Hero.wisdom_orb := 1;
           TileClass := 22;
         end;
-        38:
+        tileFlightOrb:
         begin
           Hero.flight_orb := 1;
           TileClass := 21;
         end;
-        39:
+        tileCross:
         begin
           Hero.cross := 1;
           TileClass := 40;
         end;
-        40:
+        tileElixir:
         begin
           Hero.elixir := 1;
           TileClass := 41;
         end;
-        41:
+        tileMattock:
         begin
           Hero.mattock := 1;
           TileClass := 42;
         end;
-        42:
+        tileBomb:
         begin
           Hero.bomb := 1;
           TileClass := 43;
         end;
-        43:
+        tileWarpStaff:
         begin
           Hero.warp_staff := 3;
           TileClass := 44;
         end;
-        44:
+        tileAscentWing:
         begin
           Hero.ascent_wing := 1;
           TileClass := 45;
         end;
-        45:
+        tileDescentWing:
         begin
           Hero.descent_wing := 1;
           TileClass := 46;
         end;
-        46:
+        tileDragonSlayer:
         begin
           Hero.dragon_slayer := 1;
           TileClass := 47;
         end;
-        47:
+        tileSnowCrystal:
         begin
           Hero.snow_crystal := 1;
           TileClass := 48;
         end;
-        48:
+        tileMagicKey:
         begin
           Hero.magic_key := 1;
           TileClass := 49;
         end;
-        49:
+        tileSuperMattock:
         begin
           Hero.super_mattock := 1;
           TileClass := 50;
         end;
-        50:
+        tileLuckyGold:
         begin
           Hero.lucky_gold := 1;
           TileClass := 51;
@@ -4136,16 +4183,16 @@ begin
       EventStack[EventCursor].A := 2;
       EventStack[EventCursor].B := 0;
       timer2on;
-      Maps[Hero.floor, ContactIndex + 2] := 6;
+      Maps[Hero.floor, ContactIndex + MapTileOffset] := tileRoad;
       idou;
     end;
-    51..60:
+    tileIronSword..tileSacredShield:
     begin
-      case Maps[Hero.floor, ContactIndex + 2] of
-        51:
+      case Maps[Hero.floor, ContactIndex + MapTileOffset] of
+        tileIronSword:
         begin
           Hero.attack := Hero.attack + (Hero.cycle_factor_minus_one + 1) * 10;
-          Hero.sword := 1;
+          Hero.sword := Ord(equipmentIron);
           Hero.Word128 := 1;
           TileClass := 1;
           MessageText :=
@@ -4154,10 +4201,10 @@ begin
                   + IntToStr((Hero.cycle_factor_minus_one + 1) * 10)
                   + ListBox2.Items[166];
         end;
-        52:
+        tileSilverSword:
         begin
           Hero.attack := Hero.attack + (Hero.cycle_factor_minus_one + 1) * 20;
-          Hero.sword := 2;
+          Hero.sword := Ord(equipmentSilver);
           Hero.Word132 := 1;
           TileClass := 1;
           MessageText :=
@@ -4166,10 +4213,10 @@ begin
                   + IntToStr((Hero.cycle_factor_minus_one + 1) * 20)
                   + ListBox2.Items[166];
         end;
-        53:
+        tileKnightSword:
         begin
           Hero.attack := Hero.attack + (Hero.cycle_factor_minus_one + 1) * 40;
-          Hero.sword := 3;
+          Hero.sword := Ord(equipmentKnight);
           Hero.Word136 := 1;
           TileClass := 1;
           MessageText :=
@@ -4178,10 +4225,10 @@ begin
                   + IntToStr((Hero.cycle_factor_minus_one + 1) * 40)
                   + ListBox2.Items[166];
         end;
-        54:
+        tileHolySword:
         begin
           Hero.attack := Hero.attack + (Hero.cycle_factor_minus_one + 1) * 50;
-          Hero.sword := 4;
+          Hero.sword := Ord(equipmentHoly);
           Hero.Word140 := 1;
           TileClass := 1;
           MessageText :=
@@ -4190,10 +4237,10 @@ begin
                   + IntToStr((Hero.cycle_factor_minus_one + 1) * 50)
                   + ListBox2.Items[166];
         end;
-        55:
+        tileSacredSword:
         begin
           Hero.attack := Hero.attack + (Hero.cycle_factor_minus_one + 1) * 100;
-          Hero.sword := 5;
+          Hero.sword := Ord(equipmentSacred);
           Hero.Word144 := 1;
           TileClass := 1;
           MessageText :=
@@ -4202,10 +4249,10 @@ begin
                   + IntToStr((Hero.cycle_factor_minus_one + 1) * 100)
                   + ListBox2.Items[166];
         end;
-        56:
+        tileIronShield:
         begin
           Hero.defense := Hero.defense + (Hero.cycle_factor_minus_one + 1) * 10;
-          Hero.shield := 1;
+          Hero.shield := Ord(equipmentIron);
           Hero.Word148 := 1;
           TileClass := 1;
           MessageText :=
@@ -4214,10 +4261,10 @@ begin
                   + IntToStr((Hero.cycle_factor_minus_one + 1) * 10)
                   + ListBox2.Items[166];
         end;
-        57:
+        tileSilverShield:
         begin
           Hero.defense := Hero.defense + (Hero.cycle_factor_minus_one + 1) * 20;
-          Hero.shield := 2;
+          Hero.shield := Ord(equipmentSilver);
           Hero.Word152 := 1;
           TileClass := 1;
           MessageText :=
@@ -4226,10 +4273,10 @@ begin
                   + IntToStr((Hero.cycle_factor_minus_one + 1) * 20)
                   + ListBox2.Items[166];
         end;
-        58:
+        tileKnightShield:
         begin
           Hero.defense := Hero.defense + (Hero.cycle_factor_minus_one + 1) * 40;
-          Hero.shield := 3;
+          Hero.shield := Ord(equipmentKnight);
           Hero.Word156 := 1;
           TileClass := 1;
           MessageText :=
@@ -4238,10 +4285,10 @@ begin
                   + IntToStr((Hero.cycle_factor_minus_one + 1) * 40)
                   + ListBox2.Items[166];
         end;
-        59:
+        tileHolyShield:
         begin
           Hero.defense := Hero.defense + (Hero.cycle_factor_minus_one + 1) * 50;
-          Hero.shield := 4;
+          Hero.shield := Ord(equipmentHoly);
           Hero.Word160 := 1;
           TileClass := 1;
           MessageText :=
@@ -4250,10 +4297,10 @@ begin
                   + IntToStr((Hero.cycle_factor_minus_one + 1) * 50)
                   + ListBox2.Items[166];
         end;
-        60:
+        tileSacredShield:
         begin
           Hero.defense := Hero.defense + (Hero.cycle_factor_minus_one + 1) * 100;
-          Hero.shield := 5;
+          Hero.shield := Ord(equipmentSacred);
           Hero.sacred_shield := 1;
           TileClass := 1;
           MessageText :=
@@ -4284,11 +4331,11 @@ begin
       EventStack[EventCursor].Opcode := Ord(evSound);
       EventStack[EventCursor].A := 2;
       EventStack[EventCursor].B := 0;
-      Maps[Hero.floor, ContactIndex + 2] := 6;
+      Maps[Hero.floor, ContactIndex + MapTileOffset] := tileRoad;
       idou;
     end;
-    61..90: taisen;
-    91..92:
+    tileGreenSlime..tileRock + 1: taisen;
+    tileZeno..tileZeno + 1:
     begin
       case Hero.floor of
         49: taisen;
@@ -5822,9 +5869,9 @@ begin
         end;
       end;
     end;
-    93..114: taisen;
-    122: taisen;
-    133..157: taisen;
+    tileSorcerer..tileOctopusLast: taisen;
+    tileDragonHead: taisen;
+    tileGoldenKnight..tileGateKeeperA: taisen;
   end;
 end;
 
@@ -5833,7 +5880,7 @@ begin
   if Hero.elixir = 1 then
   begin
     itemdel;
-    GameplayItemChoice := 5;
+    GameplayItemChoice := Ord(itemElixir);
     Button37.Height := Image6.Height div 2;
     Button37.Width := Image6.Width * 2;
     Button37.Left := Image8.Left - Image6.Width div 2;
@@ -5852,7 +5899,7 @@ begin
   if Hero.mattock = 1 then
   begin
     itemdel;
-    GameplayItemChoice := 6;
+    GameplayItemChoice := Ord(itemMattock);
     Button37.Height := Image6.Height div 2;
     Button37.Width := Image6.Width * 2;
     Button37.Left := Image9.Left - Image6.Width div 2;
@@ -5871,7 +5918,7 @@ begin
   if Hero.bomb = 1 then
   begin
     itemdel;
-    GameplayItemChoice := 7;
+    GameplayItemChoice := Ord(itemBomb);
     Button37.Height := Image6.Height div 2;
     Button37.Width := Image6.Width * 2;
     Button37.Left := Image10.Left - Image6.Width div 2;
@@ -5890,7 +5937,7 @@ begin
   if Hero.warp_staff >= 1 then
   begin
     itemdel;
-    GameplayItemChoice := 8;
+    GameplayItemChoice := Ord(itemWarpStaff);
     Button37.Height := Image6.Height div 2;
     Button37.Width := Image6.Width * 2;
     Button37.Left := Image11.Left - Image6.Width div 2;
@@ -5909,7 +5956,7 @@ begin
   if Hero.ascent_wing = 1 then
   begin
     itemdel;
-    GameplayItemChoice := 9;
+    GameplayItemChoice := Ord(itemAscentWing);
     Button37.Height := Image6.Height div 2;
     Button37.Width := Image6.Width * 2;
     Button37.Left := Image12.Left - Image6.Width div 2;
@@ -5928,7 +5975,7 @@ begin
   if Hero.descent_wing = 1 then
   begin
     itemdel;
-    GameplayItemChoice := 10;
+    GameplayItemChoice := Ord(itemDescentWing);
     Button37.Height := Image6.Height div 2;
     Button37.Width := Image6.Width * 2;
     Button37.Left := Image13.Left - Image6.Width div 2;
@@ -5947,7 +5994,7 @@ begin
   if Hero.snow_crystal = 1 then
   begin
     itemdel;
-    GameplayItemChoice := 12;
+    GameplayItemChoice := Ord(itemSnowCrystal);
     Button37.Height := Image6.Height div 2;
     Button37.Width := Image6.Width * 2;
     Button37.Left := Image15.Left - Image6.Width div 2;
@@ -5966,7 +6013,7 @@ begin
   if Hero.magic_key = 1 then
   begin
     itemdel;
-    GameplayItemChoice := 13;
+    GameplayItemChoice := Ord(itemMagicKey);
     Button37.Height := Image6.Height div 2;
     Button37.Width := Image6.Width * 2;
     Button37.Left := Image16.Left - Image6.Width div 2;
@@ -5985,7 +6032,7 @@ begin
   if Hero.super_mattock = 1 then
   begin
     itemdel;
-    GameplayItemChoice := 14;
+    GameplayItemChoice := Ord(itemSuperMattock);
     Button37.Height := Image6.Height div 2;
     Button37.Width := Image6.Width * 2;
     Button37.Left := Image17.Left - Image6.Width div 2;
@@ -6007,7 +6054,7 @@ begin
   Button37.Visible := False;
   Button38.Visible := False;
   case GameplayItemChoice of
-    5:
+    Ord(itemElixir):
     begin
       TileClass := 1;
       timer2on;
@@ -6048,7 +6095,7 @@ begin
       Hero.elixir := 0;
       EventPaused := 0;
     end;
-    6:
+    Ord(itemMattock):
     begin
       timer2on;
       { PushCommand(2, 60, 0). }
@@ -6063,8 +6110,8 @@ begin
       EventStack[EventCursor].B := 0;
       TileClass := 0;
       { Inspect south, east, west, north in the original order. }
-      ScratchIndex := Hero.y * 11 + Hero.x;
-      NeighborIndex := ScratchIndex + 11;
+      ScratchIndex := Hero.y * BoardWidth + Hero.x;
+      NeighborIndex := ScratchIndex + BoardWidth;
       ContactIndex := NeighborIndex;
       case Hero.y of
         0..9:
@@ -6076,7 +6123,7 @@ begin
           end;
         end;
       end;
-      ScratchIndex := Hero.y * 11 + Hero.x;
+      ScratchIndex := Hero.y * BoardWidth + Hero.x;
       NeighborIndex := ScratchIndex + 1;
       ContactIndex := NeighborIndex;
       case Hero.x of
@@ -6089,7 +6136,7 @@ begin
           end;
         end;
       end;
-      ScratchIndex := Hero.y * 11 + Hero.x;
+      ScratchIndex := Hero.y * BoardWidth + Hero.x;
       NeighborIndex := ScratchIndex - 1;
       ContactIndex := NeighborIndex;
       case Hero.x of
@@ -6102,8 +6149,8 @@ begin
           end;
         end;
       end;
-      ScratchIndex := Hero.y * 11 + Hero.x;
-      NeighborIndex := ScratchIndex - 11;
+      ScratchIndex := Hero.y * BoardWidth + Hero.x;
+      NeighborIndex := ScratchIndex - BoardWidth;
       ContactIndex := NeighborIndex;
       case Hero.y of
         1..10:
@@ -6117,7 +6164,7 @@ begin
       end;
       Hero.mattock := 0;
     end;
-    7:
+    Ord(itemBomb):
     begin
       timer2on;
       { PushCommand(0, 0, 0). }
@@ -6143,8 +6190,8 @@ begin
       GameplayShopCost := 0;
       TileClass := 0;
       { Inspect south, east, west, north in the original order. }
-      ScratchIndex := Hero.y * 11 + Hero.x;
-      NeighborIndex := ScratchIndex + 11;
+      ScratchIndex := Hero.y * BoardWidth + Hero.x;
+      NeighborIndex := ScratchIndex + BoardWidth;
       ContactIndex := NeighborIndex;
       case Hero.y of
         0..9:
@@ -6183,7 +6230,7 @@ begin
           end;
         end;
       end;
-      NeighborIndex := ScratchIndex - 11;
+      NeighborIndex := ScratchIndex - BoardWidth;
       ContactIndex := NeighborIndex;
       case Hero.y of
         1..10:
@@ -6206,31 +6253,36 @@ begin
               + IntToStr(GameplayShopCost)
               + ListBox2.Items[201];
     end;
-    8:
+    Ord(itemWarpStaff):
     begin
       Dec(Hero.warp_staff);
       TileClass := 62;
-      FlightCell := Hero.y * 11 + Hero.x;
+      FlightCell := Hero.y * BoardWidth + Hero.x;
       ContactIndex := 120 - FlightCell;
-      if Maps[Hero.floor, ContactIndex + 2] <> 6 then
+      if Maps[Hero.floor, ContactIndex + MapTileOffset] <> tileRoad then
         TileClass := 68
       else
       begin
-        DrawX := (FlightCell * Image6.Width) mod (Image6.Width * 11);
-        DrawY := (FlightCell * Image6.Height) div (Image6.Height * 11) * Image6.Height;
-        ImageList1.Draw(MapBitmap1.Canvas, DrawX, DrawY, Maps[Hero.floor, FlightCell + 2] - 1);
-        GraphicTile := Maps[Hero.floor, FlightCell + 2];
+        DrawX := (FlightCell * Image6.Width) mod (Image6.Width * BoardWidth);
+        DrawY := (FlightCell * Image6.Height) div (Image6.Height * BoardWidth) * Image6.Height;
+        ImageList1.Draw(
+            MapBitmap1.Canvas,
+            DrawX,
+            DrawY,
+            Maps[Hero.floor, FlightCell + MapTileOffset] - 1
+        );
+        GraphicTile := Maps[Hero.floor, FlightCell + MapTileOffset];
         imagework;
         ImageList1.Draw(
             MapBitmap2.Canvas,
             DrawX,
             DrawY,
-            Maps[Hero.floor, FlightCell + 2] - 1 + DoorOpened
+            Maps[Hero.floor, FlightCell + MapTileOffset] - 1 + DoorOpened
         );
-        Hero.x := ContactIndex mod 11;
-        Hero.y := ContactIndex div 11;
-        DrawX := (ContactIndex * Image6.Width) mod (Image6.Width * 11);
-        DrawY := (ContactIndex * Image6.Height) div (Image6.Height * 11) * Image6.Height;
+        Hero.x := ContactIndex mod BoardWidth;
+        Hero.y := ContactIndex div BoardWidth;
+        DrawX := (ContactIndex * Image6.Width) mod (Image6.Width * BoardWidth);
+        DrawY := (ContactIndex * Image6.Height) div (Image6.Height * BoardWidth) * Image6.Height;
         yusyahyouji1;
         MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
         timer2on;
@@ -6243,9 +6295,10 @@ begin
       itemlive;
       disp;
     end;
-    9:
+    Ord(itemAscentWing):
     begin
-      if (Hero.floor <> 50) and (Maps[Hero.floor + 1, Hero.y * 11 + Hero.x + 2] = 6) then
+      if (Hero.floor <> 50)
+          and (Maps[Hero.floor + 1, Hero.y * BoardWidth + Hero.x + MapTileOffset] = tileRoad) then
       begin
         Hero.ascent_wing := 0;
         TileClass := 63;
@@ -6287,7 +6340,7 @@ begin
         itemlive;
       end;
     end;
-    10:
+    Ord(itemDescentWing):
     begin
       case Hero.floor of
         0:
@@ -6298,7 +6351,7 @@ begin
         end;
       else
         begin
-          if Maps[Hero.floor - 1, Hero.y * 11 + Hero.x + 2] = 6 then
+          if Maps[Hero.floor - 1, Hero.y * BoardWidth + Hero.x + MapTileOffset] = tileRoad then
           begin
             Hero.descent_wing := 0;
             TileClass := 64;
@@ -6338,7 +6391,7 @@ begin
         end;
       end;
     end;
-    12:
+    Ord(itemSnowCrystal):
     begin
       timer2on;
       { PushCommand(8, 0, 0). }
@@ -6348,8 +6401,8 @@ begin
       EventStack[EventCursor].B := 0;
       NeighborY := 0;
       { Inspect south, east, west, north in the original order. }
-      ScratchIndex := Hero.y * 11 + Hero.x;
-      NeighborIndex := ScratchIndex + 11;
+      ScratchIndex := Hero.y * BoardWidth + Hero.x;
+      NeighborIndex := ScratchIndex + BoardWidth;
       ContactIndex := NeighborIndex;
       case Hero.y of
         0..9:
@@ -6363,7 +6416,7 @@ begin
           end;
         end;
       end;
-      ScratchIndex := Hero.y * 11 + Hero.x;
+      ScratchIndex := Hero.y * BoardWidth + Hero.x;
       NeighborIndex := ScratchIndex + 1;
       ContactIndex := NeighborIndex;
       case Hero.x of
@@ -6378,7 +6431,7 @@ begin
           end;
         end;
       end;
-      ScratchIndex := Hero.y * 11 + Hero.x;
+      ScratchIndex := Hero.y * BoardWidth + Hero.x;
       NeighborIndex := ScratchIndex - 1;
       ContactIndex := NeighborIndex;
       case Hero.x of
@@ -6393,8 +6446,8 @@ begin
           end;
         end;
       end;
-      ScratchIndex := Hero.y * 11 + Hero.x;
-      NeighborIndex := ScratchIndex - 11;
+      ScratchIndex := Hero.y * BoardWidth + Hero.x;
+      NeighborIndex := ScratchIndex - BoardWidth;
       ContactIndex := NeighborIndex;
       case Hero.y of
         1..10:
@@ -6421,7 +6474,7 @@ begin
       EventStack[EventCursor].A := TileClass;
       EventStack[EventCursor].B := 0;
     end;
-    13:
+    Ord(itemMagicKey):
     begin
       Hero.magic_key := 0;
       TileClass := 66;
@@ -6439,7 +6492,7 @@ begin
       for X := 120 downto 0 do
       begin
         DrawIndex := X;
-        if Maps[Hero.floor, DrawIndex + 2] = 1 then
+        if Maps[Hero.floor, DrawIndex + MapTileOffset] = tileYellowDoor then
         begin
           { PushCommand(13, DrawIndex, 1). }
           Inc(EventCursor);
@@ -6460,7 +6513,7 @@ begin
         end;
       end;
     end;
-    14:
+    Ord(itemSuperMattock):
     begin
       Hero.super_mattock := 0;
       TileClass := 67;
@@ -6478,8 +6531,8 @@ begin
       for X := 10 downto 0 do
         for Y := 10 downto 0 do
         begin
-          DrawIndex := Y * 11 + X;
-          if Maps[Hero.floor, DrawIndex + 2] = 8 then
+          DrawIndex := Y * BoardWidth + X;
+          if Maps[Hero.floor, DrawIndex + MapTileOffset] = tileWall then
           begin
             { PushCommand(0, 0, 0). }
             Inc(EventCursor);
@@ -6490,7 +6543,7 @@ begin
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evSetTile);
             EventStack[EventCursor].A := DrawIndex;
-            EventStack[EventCursor].B := 6;
+            EventStack[EventCursor].B := tileRoad;
             { PushCommand(0, 0, 0). }
             Inc(EventCursor);
             EventStack[EventCursor].Opcode := Ord(evWait);
@@ -6558,7 +6611,7 @@ end;
 
 procedure TTSW10.itemichiwork2; { $0046171C }
 type
-  THeroWords = array[0..170] of Longint;
+  THeroWords = array[0..HeroWordCount - 1] of Longint;
 var
   HeroWords: THeroWords absolute Hero;
 begin
@@ -6575,7 +6628,7 @@ end;
 
 procedure TTSW10.itemichiwork(Direction: Longint); { $004610C4 }
 type
-  THeroWords = array[0..170] of Longint;
+  THeroWords = array[0..HeroWordCount - 1] of Longint;
 var
   HeroWords: THeroWords absolute Hero;
 begin
@@ -6767,32 +6820,32 @@ begin
   Y := Hero.y;
   FacingRequest := Direction;
   case Direction of
-    1:
+    Ord(moveUp):
     begin
       Dec(Y);
-      Hero.facing := 4;
+      Hero.facing := Ord(hfUp);
     end;
-    2:
+    Ord(moveLeft):
     begin
       Dec(X);
-      Hero.facing := 2;
+      Hero.facing := Ord(hfLeft);
     end;
-    3:
+    Ord(moveRight):
     begin
       Inc(X);
-      Hero.facing := 3;
+      Hero.facing := Ord(hfRight);
     end;
-    4:
+    Ord(moveDown):
     begin
       Inc(Y);
-      Hero.facing := 1;
+      Hero.facing := Ord(hfDown);
     end;
   end;
   if (X < 0) or (X > 10) or (Y < 0) or (Y > 10) then
     Exit;
-  HeroCell := Hero.y * 11 + Hero.x;
+  HeroCell := Hero.y * BoardWidth + Hero.x;
   PreviousCell := HeroCell;
-  ContactIndex := Y * 11 + X;
+  ContactIndex := Y * BoardWidth + X;
   Form.handan;
 end;
 
@@ -6801,9 +6854,9 @@ begin
   if EventCursor <= 0 then
   begin
     EventCursor := 0;
-    FacingRequest := 1;
-    Hero.facing := 4;
-    FlightCell := Hero.y * 11 + Hero.x;
+    FacingRequest := Ord(moveUp);
+    Hero.facing := Ord(hfUp);
+    FlightCell := Hero.y * BoardWidth + Hero.x;
     ContactIndex := FlightCell - 11;
     if Hero.y <> 0 then
       handan;
@@ -6814,9 +6867,9 @@ begin
   if EventCursor <= 0 then
   begin
     EventCursor := 0;
-    FacingRequest := 2;
-    Hero.facing := 2;
-    FlightCell := Hero.y * 11 + Hero.x;
+    FacingRequest := Ord(moveLeft);
+    Hero.facing := Ord(hfLeft);
+    FlightCell := Hero.y * BoardWidth + Hero.x;
     ContactIndex := FlightCell - 1;
     if Hero.x <> 0 then
       handan;
@@ -6827,9 +6880,9 @@ begin
   if EventCursor <= 0 then
   begin
     EventCursor := 0;
-    FacingRequest := 3;
-    Hero.facing := 3;
-    FlightCell := Hero.y * 11 + Hero.x;
+    FacingRequest := Ord(moveRight);
+    Hero.facing := Ord(hfRight);
+    FlightCell := Hero.y * BoardWidth + Hero.x;
     ContactIndex := FlightCell + 1;
     if Hero.x <> 10 then
       handan;
@@ -6840,9 +6893,9 @@ begin
   if EventCursor <= 0 then
   begin
     EventCursor := 0;
-    FacingRequest := 4;
-    Hero.facing := 1;
-    FlightCell := Hero.y * 11 + Hero.x;
+    FacingRequest := Ord(moveDown);
+    Hero.facing := Ord(hfDown);
+    FlightCell := Hero.y * BoardWidth + Hero.x;
     ContactIndex := FlightCell + 11;
     if Hero.y <> 10 then
       handan;
@@ -6851,7 +6904,7 @@ end;
 
 procedure TTSW10.formkeydown(Sender: TObject; var Key: Word; Shift: TShiftState);
 type
-  THeroWords = array[0..170] of Longint;
+  THeroWords = array[0..HeroWordCount - 1] of Longint;
 var
   I: Longint;
   HeroWords: THeroWords absolute Hero;
@@ -6864,9 +6917,9 @@ begin
       begin
         if Image22.Visible = False then
         begin
-          FacingRequest := 1;
-          FlightCell := Hero.y * 11 + Hero.x;
-          Hero.facing := 4;
+          FacingRequest := Ord(moveUp);
+          FlightCell := Hero.y * BoardWidth + Hero.x;
+          Hero.facing := Ord(hfUp);
           ContactIndex := FlightCell - 11;
           if Hero.y <> 0 then
             handan;
@@ -6899,9 +6952,9 @@ begin
       begin
         if Image22.Visible = False then
         begin
-          FacingRequest := 2;
-          FlightCell := Hero.y * 11 + Hero.x;
-          Hero.facing := 2;
+          FacingRequest := Ord(moveLeft);
+          FlightCell := Hero.y * BoardWidth + Hero.x;
+          Hero.facing := Ord(hfLeft);
           ContactIndex := FlightCell - 1;
           if Hero.x <> 0 then
             handan;
@@ -6925,9 +6978,9 @@ begin
       begin
         if Image22.Visible = False then
         begin
-          FacingRequest := 3;
-          FlightCell := Hero.y * 11 + Hero.x;
-          Hero.facing := 3;
+          FacingRequest := Ord(moveRight);
+          FlightCell := Hero.y * BoardWidth + Hero.x;
+          Hero.facing := Ord(hfRight);
           ContactIndex := FlightCell + 1;
           if Hero.x <> 10 then
             handan;
@@ -6951,9 +7004,9 @@ begin
       begin
         if Image22.Visible = False then
         begin
-          FacingRequest := 4;
-          FlightCell := Hero.y * 11 + Hero.x;
-          Hero.facing := 1;
+          FacingRequest := Ord(moveDown);
+          FlightCell := Hero.y * BoardWidth + Hero.x;
+          Hero.facing := Ord(hfDown);
           ContactIndex := FlightCell + 11;
           if Hero.y <> 10 then
             handan;
@@ -7014,9 +7067,9 @@ procedure TTSW10.monidou; { $00480384; cardinal tile slide }
 var
   I: Longint;
 begin
-  DrawX := Smallint(EventStack[EventCursor].A) * Image6.Width mod (Image6.Width * 11);
+  DrawX := Smallint(EventStack[EventCursor].A) * Image6.Width mod (Image6.Width * BoardWidth);
   DrawY :=
-      (Smallint(EventStack[EventCursor].A) * Image6.Height div (Image6.Height * 11))
+      (Smallint(EventStack[EventCursor].A) * Image6.Height div (Image6.Height * BoardWidth))
           * Image6.Height;
 
   { Alternate the monster frames while updating the two map-animation buffers. }
@@ -7025,9 +7078,9 @@ begin
     StrikeCount := I;
     NeighborIndex := StrikeCount;
     if NeighborIndex mod (Image6.Width div 4) = 0 then
-      ScratchIndex := Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] - 1
+      ScratchIndex := Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + MapTileOffset] - 1
     else
-      ScratchIndex := Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] - 1 + 1;
+      ScratchIndex := Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + MapTileOffset] - 1 + 1;
     TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
     case Smallint(EventStack[EventCursor].B) - Smallint(EventStack[EventCursor].A) of
       11:
@@ -7038,9 +7091,9 @@ begin
         else
           DoorOpened := 1;
         monidouwork;
-        DrawX := Smallint(EventStack[EventCursor].A) * Image6.Width mod (Image6.Width * 11);
+        DrawX := Smallint(EventStack[EventCursor].A) * Image6.Width mod (Image6.Width * BoardWidth);
         DrawY :=
-            (Smallint(EventStack[EventCursor].A) * Image6.Height div (Image6.Height * 11))
+            (Smallint(EventStack[EventCursor].A) * Image6.Height div (Image6.Height * BoardWidth))
                 * Image6.Height;
       end;
       -1:
@@ -7051,9 +7104,9 @@ begin
         else
           DoorOpened := 1;
         monidouwork;
-        DrawX := Smallint(EventStack[EventCursor].B) * Image6.Width mod (Image6.Width * 11);
+        DrawX := Smallint(EventStack[EventCursor].B) * Image6.Width mod (Image6.Width * BoardWidth);
         DrawY :=
-            (Smallint(EventStack[EventCursor].B) * Image6.Height div (Image6.Height * 11))
+            (Smallint(EventStack[EventCursor].B) * Image6.Height div (Image6.Height * BoardWidth))
                 * Image6.Height;
       end;
       1:
@@ -7064,9 +7117,9 @@ begin
         else
           DoorOpened := 1;
         monidouwork;
-        DrawX := Smallint(EventStack[EventCursor].A) * Image6.Width mod (Image6.Width * 11);
+        DrawX := Smallint(EventStack[EventCursor].A) * Image6.Width mod (Image6.Width * BoardWidth);
         DrawY :=
-            (Smallint(EventStack[EventCursor].A) * Image6.Height div (Image6.Height * 11))
+            (Smallint(EventStack[EventCursor].A) * Image6.Height div (Image6.Height * BoardWidth))
                 * Image6.Height;
       end;
       -11:
@@ -7077,9 +7130,9 @@ begin
         else
           DoorOpened := 1;
         monidouwork;
-        DrawX := Smallint(EventStack[EventCursor].B) * Image6.Width mod (Image6.Width * 11);
+        DrawX := Smallint(EventStack[EventCursor].B) * Image6.Width mod (Image6.Width * BoardWidth);
         DrawY :=
-            (Smallint(EventStack[EventCursor].B) * Image6.Height div (Image6.Height * 11))
+            (Smallint(EventStack[EventCursor].B) * Image6.Height div (Image6.Height * BoardWidth))
                 * Image6.Height;
       end;
     end;
@@ -7091,7 +7144,7 @@ begin
     MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
   end;
   NeighborIndex := Image6.Width;
-  ScratchIndex := Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] - 1 + 1;
+  ScratchIndex := Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + MapTileOffset] - 1 + 1;
   TargetRect := Rect(0, 0, Image6.Width, Image6.Height);
   case Smallint(EventStack[EventCursor].B) - Smallint(EventStack[EventCursor].A) of
     11:
@@ -7099,9 +7152,9 @@ begin
       Damage := 1;
       DoorOpened := 1;
       monidouwork;
-      DrawX := Smallint(EventStack[EventCursor].A) * Image6.Width mod (Image6.Width * 11);
+      DrawX := Smallint(EventStack[EventCursor].A) * Image6.Width mod (Image6.Width * BoardWidth);
       DrawY :=
-          (Smallint(EventStack[EventCursor].A) * Image6.Height div (Image6.Height * 11))
+          (Smallint(EventStack[EventCursor].A) * Image6.Height div (Image6.Height * BoardWidth))
               * Image6.Height;
     end;
     -1:
@@ -7109,9 +7162,9 @@ begin
       Damage := 2;
       DoorOpened := 1;
       monidouwork;
-      DrawX := Smallint(EventStack[EventCursor].B) * Image6.Width mod (Image6.Width * 11);
+      DrawX := Smallint(EventStack[EventCursor].B) * Image6.Width mod (Image6.Width * BoardWidth);
       DrawY :=
-          (Smallint(EventStack[EventCursor].B) * Image6.Height div (Image6.Height * 11))
+          (Smallint(EventStack[EventCursor].B) * Image6.Height div (Image6.Height * BoardWidth))
               * Image6.Height;
     end;
     1:
@@ -7119,9 +7172,9 @@ begin
       Damage := 3;
       DoorOpened := 1;
       monidouwork;
-      DrawX := Smallint(EventStack[EventCursor].A) * Image6.Width mod (Image6.Width * 11);
+      DrawX := Smallint(EventStack[EventCursor].A) * Image6.Width mod (Image6.Width * BoardWidth);
       DrawY :=
-          (Smallint(EventStack[EventCursor].A) * Image6.Height div (Image6.Height * 11))
+          (Smallint(EventStack[EventCursor].A) * Image6.Height div (Image6.Height * BoardWidth))
               * Image6.Height;
     end;
     -11:
@@ -7129,17 +7182,17 @@ begin
       Damage := 4;
       DoorOpened := 1;
       monidouwork;
-      DrawX := Smallint(EventStack[EventCursor].B) * Image6.Width mod (Image6.Width * 11);
+      DrawX := Smallint(EventStack[EventCursor].B) * Image6.Width mod (Image6.Width * BoardWidth);
       DrawY :=
-          (Smallint(EventStack[EventCursor].B) * Image6.Height div (Image6.Height * 11))
+          (Smallint(EventStack[EventCursor].B) * Image6.Height div (Image6.Height * BoardWidth))
               * Image6.Height;
     end;
   end;
 
   MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap1);
-  Maps[Hero.floor, Smallint(EventStack[EventCursor].B) + 2] :=
-      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2];
-  Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+  Maps[Hero.floor, Smallint(EventStack[EventCursor].B) + MapTileOffset] :=
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + MapTileOffset];
+  Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + MapTileOffset] := 6;
 end;
 
 procedure TTSW10.monidouwork; { $00480A90 }
@@ -7214,7 +7267,7 @@ begin
       ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
       if ScratchIndex = 16 then
         timerin;
-      if GameOptions[8] = 1 then
+      if GameOptions[optionDisplaySize] = display800x500 then
         ScratchIndex := ScratchIndex * 5 div 4;
       WorkBitmap2.Height := Image6.Height;
       WorkBitmap2.Width := Image6.Width;
@@ -7222,8 +7275,8 @@ begin
       WorkBitmap3.Width := WorkBitmap2.Width;
       ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 5);
       ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, Smallint(EventStack[EventCursor].B) - 1);
-      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
-      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      DrawX := (Smallint(EventStack[EventCursor].A) mod BoardWidth) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div BoardWidth) * Image6.Height;
       TargetRect := Rect(ScratchIndex, 0, Image6.Width div 2, Image6.Height);
       SourceRect := Rect(0, 0, Image6.Width div 2 - ScratchIndex, Image6.Height);
       WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
@@ -7233,7 +7286,7 @@ begin
       MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
-      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + MapTileOffset] := 6;
     end;
     4:
     begin
@@ -7251,12 +7304,12 @@ begin
       ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
       if ScratchIndex = 16 then
         timerin;
-      if GameOptions[8] = 1 then
+      if GameOptions[optionDisplaySize] = display800x500 then
         ScratchIndex := ScratchIndex * 5 div 4;
       ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 5);
       ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 3);
-      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
-      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      DrawX := (Smallint(EventStack[EventCursor].A) mod BoardWidth) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div BoardWidth) * Image6.Height;
       TargetRect := Rect(ScratchIndex, ScratchIndex, Image6.Width div 2, Image6.Height div 2);
       SourceRect :=
           Rect(0, 0, Image6.Width div 2 - ScratchIndex, Image6.Height div 2 - ScratchIndex);
@@ -7299,7 +7352,7 @@ begin
       MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
-      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + MapTileOffset] := 6;
     end;
     5:
     begin
@@ -7317,12 +7370,12 @@ begin
       ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
       if ScratchIndex = 16 then
         timerin;
-      if GameOptions[8] = 1 then
+      if GameOptions[optionDisplaySize] = display800x500 then
         ScratchIndex := ScratchIndex * 5 div 4;
       ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 5);
       ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 3);
-      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
-      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      DrawX := (Smallint(EventStack[EventCursor].A) mod BoardWidth) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div BoardWidth) * Image6.Height;
       TargetRect :=
           Rect(
               Image6.Width div 2 - ScratchIndex,
@@ -7368,7 +7421,7 @@ begin
       MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
-      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 4;
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + MapTileOffset] := 4;
     end;
     6:
     begin
@@ -7386,7 +7439,7 @@ begin
       ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
       if ScratchIndex = 16 then
         timerin;
-      if GameOptions[8] = 1 then
+      if GameOptions[optionDisplaySize] = display800x500 then
         ScratchIndex := ScratchIndex * 5 div 4;
       ImageList3.Draw(WorkBitmap3.Canvas, 0, 0, 4);
       ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 4);
@@ -7394,12 +7447,12 @@ begin
       TargetRect := Rect(0, ScratchIndex * 2, Image6.Width, Image6.Height);
       SourceRect := Rect(0, 0, Image6.Width, Image6.Height - ScratchIndex * 2);
       kasanegaki;
-      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
-      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      DrawX := (Smallint(EventStack[EventCursor].A) mod BoardWidth) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div BoardWidth) * Image6.Height;
       MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap1);
       MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap1);
       MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
-      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + MapTileOffset] := 6;
     end;
     7:
     begin
@@ -7417,19 +7470,19 @@ begin
       ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
       if ScratchIndex = 16 then
         timerin;
-      if GameOptions[8] = 1 then
+      if GameOptions[optionDisplaySize] = display800x500 then
         ScratchIndex := ScratchIndex * 5 div 4;
       ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 5);
       ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 7);
-      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
-      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      DrawX := (Smallint(EventStack[EventCursor].A) mod BoardWidth) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div BoardWidth) * Image6.Height;
       TargetRect := Rect(0, 0, Image6.Width, Image6.Height - ScratchIndex * 2);
       SourceRect := Rect(0, ScratchIndex * 2, Image6.Width, Image6.Height);
       WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
       MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
-      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + MapTileOffset] := 6;
     end;
     8:
     begin
@@ -7447,19 +7500,19 @@ begin
       ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
       if ScratchIndex = 16 then
         timerin;
-      if GameOptions[8] = 1 then
+      if GameOptions[optionDisplaySize] = display800x500 then
         ScratchIndex := ScratchIndex * 5 div 4;
       ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 5);
       ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 7);
-      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
-      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      DrawX := (Smallint(EventStack[EventCursor].A) mod BoardWidth) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div BoardWidth) * Image6.Height;
       TargetRect := Rect(0, 0, Image6.Width, ScratchIndex * 2);
       SourceRect := Rect(0, (Image6.Width div 2 - ScratchIndex) * 2, Image6.Width, Image6.Height);
       WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
       MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
-      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 8;
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + MapTileOffset] := 8;
     end;
     9:
     begin
@@ -7477,19 +7530,19 @@ begin
       ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
       if ScratchIndex = 16 then
         timerin;
-      if GameOptions[8] = 1 then
+      if GameOptions[optionDisplaySize] = display800x500 then
         ScratchIndex := ScratchIndex * 5 div 4;
       ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 12);
       ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 5);
-      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
-      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      DrawX := (Smallint(EventStack[EventCursor].A) mod BoardWidth) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div BoardWidth) * Image6.Height;
       TargetRect := Rect(0, 0, ScratchIndex * 2, Image6.Height);
       SourceRect := Rect((Image6.Width div 2 - ScratchIndex) * 2, 0, Image6.Width, Image6.Height);
       WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
       MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
-      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + MapTileOffset] := 6;
     end;
     10:
     begin
@@ -7507,19 +7560,19 @@ begin
       ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
       if ScratchIndex = 16 then
         timerin;
-      if GameOptions[8] = 1 then
+      if GameOptions[optionDisplaySize] = display800x500 then
         ScratchIndex := ScratchIndex * 5 div 4;
       ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 12);
       ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 5);
-      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
-      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      DrawX := (Smallint(EventStack[EventCursor].A) mod BoardWidth) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div BoardWidth) * Image6.Height;
       TargetRect := Rect(0, 0, ScratchIndex * 2, Image6.Height);
       SourceRect := Rect(0, 0, ScratchIndex * 2, Image6.Height);
       WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
       MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
-      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + MapTileOffset] := 6;
     end;
     11:
     begin
@@ -7537,19 +7590,19 @@ begin
       ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
       if ScratchIndex = 16 then
         timerin;
-      if GameOptions[8] = 1 then
+      if GameOptions[optionDisplaySize] = display800x500 then
         ScratchIndex := ScratchIndex * 5 div 4;
       ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 12);
       ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 5);
-      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
-      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      DrawX := (Smallint(EventStack[EventCursor].A) mod BoardWidth) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div BoardWidth) * Image6.Height;
       TargetRect := Rect(0, 0, Image6.Width, ScratchIndex * 2);
       SourceRect := Rect(0, 0, Image6.Width, ScratchIndex * 2);
       WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
       MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
-      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + MapTileOffset] := 6;
     end;
     12:
     begin
@@ -7567,19 +7620,19 @@ begin
       ScratchIndex := Smallint(EventStack[EventCursor - 1].B);
       if ScratchIndex = 16 then
         timerin;
-      if GameOptions[8] = 1 then
+      if GameOptions[optionDisplaySize] = display800x500 then
         ScratchIndex := ScratchIndex * 5 div 4;
       ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, 12);
       ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, 5);
-      DrawX := (Smallint(EventStack[EventCursor].A) mod 11) * Image6.Width;
-      DrawY := (Smallint(EventStack[EventCursor].A) div 11) * Image6.Height;
+      DrawX := (Smallint(EventStack[EventCursor].A) mod BoardWidth) * Image6.Width;
+      DrawY := (Smallint(EventStack[EventCursor].A) div BoardWidth) * Image6.Height;
       TargetRect := Rect(0, (Image6.Height div 2 - ScratchIndex) * 2, Image6.Width, Image6.Height);
       SourceRect := Rect(0, (Image6.Height div 2 - ScratchIndex) * 2, Image6.Width, Image6.Height);
       WorkBitmap3.Canvas.CopyRect(SourceRect, WorkBitmap2.Canvas, TargetRect);
       MapBitmap1.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MapBitmap2.Canvas.Draw(DrawX, DrawY, WorkBitmap3);
       MainForm.Canvas.Draw(UiSpan, UiStep, MapBitmap1);
-      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + 2] := 6;
+      Maps[Hero.floor, Smallint(EventStack[EventCursor].A) + MapTileOffset] := 6;
     end;
   end;
 end;
@@ -7676,9 +7729,9 @@ begin
           Image6.Height * 2
       );
   kasanegaki;
-  case GameOptions[8] of
-    0: NeighborIndex := ScratchIndex div 2 + 231 - 66;
-    1: NeighborIndex := ScratchIndex * 4 div 5 div 2 + 231 - 66;
+  case GameOptions[optionDisplaySize] of
+    display640x400: NeighborIndex := ScratchIndex div 2 + 231 - 66;
+    display800x500: NeighborIndex := ScratchIndex * 4 div 5 div 2 + 231 - 66;
   end;
   ImageList1.Draw(WorkBitmap3.Canvas, 0, 0, NeighborIndex);
   ImageList1.Draw(WorkBitmap2.Canvas, 0, 0, DoorOpened + 94);

@@ -11,6 +11,7 @@ import unittest
 import pefile
 
 from compare_delphi_routines import compare_span, report_for, ROOT, CORE_METHODS
+from compare_delphi_builds import compare_images
 from delphi_routine_layout import trace_layout
 from review_delphi_calendar import review
 
@@ -221,7 +222,7 @@ class RoutineComparisonTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "calendar resource missing or changed"):
             review(original, pefile.PE(data=bytes(data)))
 
-    def test_opcode_enum_emits_identical_production_code_to_numeric_literals(self):
+    def test_named_values_emit_identical_production_bytes_to_numeric_literals(self):
         # This is an isolated compiler experiment, not a production generator.
         source = ROOT / "build/delphi-game"
         dest = ROOT / "build/delphi-enum-equivalence"
@@ -229,14 +230,29 @@ class RoutineComparisonTests(unittest.TestCase):
         shutil.copyfile(source / "Tower.dpr", dest / "Tower.dpr")
         shutil.copyfile(source / "GameResources.res", dest / "GameResources.res")
         text = (source / "src/GameState.pas").read_text(encoding="cp1252")
-        declaration = text.split("TEventOpcode = (", 1)[1].split(");", 1)[0]
-        names = re.findall(r"\bev[A-Za-z]+\b", re.sub(r"\{[^}]*\}", "", declaration))
-        self.assertEqual(len(names), 23)
-        values = dict(zip(names, range(23)))
+        declarations = re.sub(r"\{[^}]*\}", "", text)
+        ordinals = {}
+        for declaration in re.findall(r"\bT\w+ = \((.*?)\);", declarations, re.S):
+            names = re.findall(r"\b[A-Za-z]\w*\b", declaration)
+            ordinals.update(zip(names, range(len(names))))
+        self.assertEqual(sum(name.startswith("ev") for name in ordinals), 23)
+        self.assertEqual(ordinals["hfUp"], 4)
+        self.assertEqual(ordinals["moveUp"], 1)
+        self.assertEqual(ordinals["itemHeroOrb"], 1)
+        self.assertEqual(ordinals["shopMerchant"], 0)
+        values = {}
+        constants = declarations.split("const", 1)[1].split("type", 1)[0]
+        for name, expression in re.findall(r"\b(\w+) = ([^;]+);", constants):
+            expression = expression.replace("SizeOf(Longint)", "4")
+            values[name] = eval(expression, {"__builtins__": {}}, values)
+        self.assertGreater(len(values), 200)
+        identifiers = re.compile(r"\b(" + "|".join(values) + r")\b")
         for path in (dest / "src").rglob("*"):
-            if path.suffix in (".pas", ".inc"):
+            if path.suffix in (".pas", ".inc") and path.name != "GameState.pas":
                 text = path.read_text(encoding="cp1252")
-                text = re.sub(r"Ord\((ev[A-Za-z]+)\)", lambda m: str(values[m[1]]), text)
+                text = re.sub(r"Ord\((\w+)\)",
+                              lambda m: str(ordinals[m[1]]) if m[1] in ordinals else m[0], text)
+                text = identifiers.sub(lambda m: str(values[m[1]]), text)
                 path.write_text(text, encoding="cp1252")
         compiler = ROOT / "build/research/delphi2/base/bin/DCC32.EXE"
         lib = os.path.relpath(compiler.parent.parent / "lib", dest)
@@ -244,12 +260,8 @@ class RoutineComparisonTests(unittest.TestCase):
                                  "-Isrc;src\\generated", "-E.", "-N.", "Tower.dpr"],
                                 cwd=dest, capture_output=True, timeout=30)
         self.assertEqual(result.returncode, 0, result.stdout.decode("cp1252"))
-        enum = pefile.PE(str(source / "game/Tower.exe"))
-        numeric = pefile.PE(str(dest / "Tower.exe"))
-        for name in (b"CODE", b"DATA", b".reloc"):
-            left = next(s.get_data() for s in enum.sections if s.Name.rstrip(b"\0") == name)
-            right = next(s.get_data() for s in numeric.sections if s.Name.rstrip(b"\0") == name)
-            self.assertEqual(left, right, name.decode() + " changed for enum constants")
+        comparison = compare_images((source / "game/Tower.exe").read_bytes(), (dest / "Tower.exe").read_bytes())
+        self.assertTrue(comparison["passed"], comparison)
 
 
 if __name__ == "__main__":
