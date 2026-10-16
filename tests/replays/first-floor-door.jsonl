@@ -1,0 +1,8 @@
+{"type":"new_game"}
+{"type":"move","direction":"up"}
+{"type":"move","direction":"up"}
+{"type":"move","direction":"left"}
+{"type":"move","direction":"right"}
+{"type":"move","direction":"up"}
+{"type":"move","direction":"up"}
+{"type":"use_item","item":"bomb"}

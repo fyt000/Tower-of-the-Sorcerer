@@ -1,0 +1,24 @@
+/build/
+/artifacts/
+/data/atlas-index.png
+**/__pycache__/
+*.save.json
+*.log
+*.tmp
+*.temp
+
+# Local extraction/decompilation caches. Keep the tools and authored reviews.
+/data/
+/reference/original/decompiled/
+/reference/original/presentation/decompiled/
+/reference/original/presentation/*.json
+/reference/original/presentation/published-methods.tsv
+/reference/original/presentation/EVENTS.md
+/reference/original/ui-extraction-manifest.json
+/reference/original/whole-program/*
+!/reference/original/whole-program/REVIEW.md
+!/reference/original/whole-program/IDR-LICENSE.txt
+/reference/delphi2/*.json
+/reference/delphi2/runtime-spans/
+/cpp/locales/source/
+/cpp/locales/dialogue-comparison.tsv

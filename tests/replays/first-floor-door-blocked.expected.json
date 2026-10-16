@@ -1,0 +1,5 @@
+{
+  "hero": {"floor": 1, "x": 5, "y": 9, "hp": 1000, "gold": 0, "yellow_keys": 0},
+  "map": {"93": 1, "103": 29},
+  "dead": false
+}

@@ -1,0 +1,12 @@
+{
+  "name": "tower-of-the-sorcerer",
+  "version-string": "0.9.0",
+  "builtin-baseline": "b5d1a94fb7f88fd835e360fd23a45a09ceedbf48",
+  "dependencies": [
+    "raylib",
+    "stb",
+    "catch2",
+    "glaze",
+    "miniaudio"
+  ]
+}

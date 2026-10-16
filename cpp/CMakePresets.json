@@ -1,0 +1,89 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "windows",
+      "displayName": "Visual Studio 2026 + vcpkg (x64)",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/../build/cpp/vs",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "TSW_GUI": "ON",
+        "VCPKG_INSTALLED_DIR": "${sourceDir}/../build/dependencies/vcpkg_installed"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "core",
+      "displayName": "Portable headless core",
+      "binaryDir": "${sourceDir}/../build/cpp/core",
+      "cacheVariables": {
+        "TSW_GUI": "OFF",
+        "VCPKG_INSTALLED_DIR": "${sourceDir}/../build/dependencies/vcpkg_installed"
+      }
+    },
+    {
+      "name": "asan",
+      "inherits": "windows",
+      "displayName": "Visual Studio AddressSanitizer",
+      "binaryDir": "${sourceDir}/../build/cpp/asan",
+      "cacheVariables": {
+        "TSW_SANITIZERS": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "configurePreset": "windows",
+      "configuration": "Debug"
+    },
+    {
+      "name": "release",
+      "configurePreset": "windows",
+      "configuration": "Release"
+    },
+    {
+      "name": "asan",
+      "configurePreset": "asan",
+      "configuration": "Release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "debug",
+      "configurePreset": "windows",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "release",
+      "configurePreset": "windows",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "asan",
+      "configurePreset": "asan",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}

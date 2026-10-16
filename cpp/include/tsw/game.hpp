@@ -1,0 +1,451 @@
+#pragma once
+#include "tsw/achievements.hpp"
+#include "tsw/dialogue_ids.hpp"
+#include "tsw/game_types.hpp"
+#include "tsw/items.hpp"
+#include "tsw/rankings.hpp"
+#include "tsw/status_message.hpp"
+#include <array>
+#include <cstdint>
+#include <filesystem>
+#include <iosfwd>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <vector>
+
+namespace tsw {
+inline constexpr int BoardWidth = 11;
+inline constexpr int MonsterCount = 33, MaxMapTile = 165;
+inline constexpr int EquipmentTierCount = 5;
+inline constexpr int CellCount = BoardWidth * BoardWidth;
+inline constexpr int FloorCount = 51;
+inline constexpr int BacksideFactor = 44;
+inline constexpr std::size_t OriginalHeroWordCount = 171; // Delphi's 684-byte persisted state record.
+enum class SaveKind { Slot, Checkpoint }; // Original checksummed slots and raw save0 snapshots.
+
+constexpr int cell(int x, int y) {
+    return y * BoardWidth + x;
+}
+
+// Values are the original atlas/map IDs. They are kept stable for source comparison.
+enum Tile : std::uint8_t {
+    Void = 0,
+    YellowDoor = 1,
+    BlueDoor = 2,
+    RedDoor = 3,
+    SealedGate = 4,
+    PrisonGate = 5,
+    Road = 6,
+    SpecialRoad = 7,
+    Wall = 8,
+    SecretWall = 9,
+    HiddenObject = 10,
+    StairsUp = 11,
+    StairsDown = 12,
+    Lava = 13,
+    StarVoid = 14,
+    SolidDecoration = 15,
+    Altar = 16,
+    AltarTop = 17,
+    AltarSide = 18,
+    Merchant = 19,
+    Merchant2 = 20,
+    Thief = 21,
+    Thief2 = 22,
+    Fairy = 23,
+    Fairy2 = 24,
+    OldMan = 25,
+    OldMan2 = 26,
+    TimeGate = 27,
+    TimeGate2 = 28,
+    YellowKey = 29,
+    RedKey = 30,
+    BlueKey = 31,
+    RedPotion = 32,
+    BluePotion = 33,
+    RedGem = 34,
+    BlueGem = 35,
+    HeroOrb = 36,
+    WisdomOrb = 37,
+    FlightOrb = 38,
+    Cross = 39,
+    Elixir = 40,
+    Mattock = 41,
+    Bomb = 42,
+    WarpStaff = 43,
+    AscentWing = 44,
+    DescentWing = 45,
+    DragonSlayer = 46,
+    SnowCrystal = 47,
+    MagicKey = 48,
+    SuperMattock = 49,
+    LuckyGold = 50,
+    IronSword = 51,
+    SilverSword = 52,
+    KnightSword = 53,
+    HolySword = 54,
+    SacredSword = 55,
+    IronShield = 56,
+    SilverShield = 57,
+    KnightShield = 58,
+    HolyShield = 59,
+    SacredShield = 60,
+    GreenSlime = 61,
+    RedSlime = 63,
+    BigSlime = 65,
+    Bat = 67,
+    Priest = 69,
+    SuperionPriest = 71,
+    GateKeeperC = 73,
+    GateKeeperB = 75,
+    SkeletonC = 77,
+    SkeletonB = 79,
+    SkeletonA = 81,
+    BigBat = 83,
+    Zombie = 85,
+    ZombieKnight = 87,
+    Rock = 89,
+    Zeno = 91,
+    Sorcerer = 93,
+    Vampire = 95,
+    OctopusFirst = 97,
+    OctopusMouth = 104,
+    OctopusLast = 114,
+    DragonFirst = 115,
+    DragonHead = 122,
+    GoldenKnight = 133,
+    Knight = 135,
+    Swordsman = 137,
+    Soldier = 139,
+    GhostSoldier = 141,
+    SlimeMan = 143,
+    GreatMagicMaster = 145,
+    VampireBat = 147,
+    SlimeLord = 149,
+    MagicianA = 151,
+    MagicianA2 = 152,
+    MagicianB = 153,
+    MagicianB2 = 154,
+    DarkKnight = 155,
+    GateKeeperA = 157,
+    StairCover = 159
+};
+
+inline constexpr int HeroHitMask = 183, HeroHitColor = 184;
+inline constexpr int DownDamageColor = 191, FacingSpriteStride = 8;
+inline constexpr int DissolveFirstMask = 166, DissolveLastMask = 182;
+inline constexpr int ZombieRow = 12, ZombieKnightRow = 13, ZenoRow = 15;
+inline constexpr int VampireRow = 17, OctopusRow = 18, DragonRow = 19;
+inline constexpr int SacredShieldFlag = 9;
+enum class TileClass : int { Other, Wall, BombTarget, Lava };
+enum class Direction : int { Down = 1, Left = 2, Right = 3, Up = 4 };
+
+// Three 16-bit words, as in the Delphi command stack. Operand interpretation depends on op.
+enum class Op : std::uint16_t {
+    Wait,
+    Sound,
+    Message,
+    Defeat,
+    EnemyStrike,
+    HeroStrike,
+    SetTile,
+    Reward,
+    UpdateInventory,
+    Overlay,
+    Dialogue,
+    Callback,
+    MoveTile,
+    DoorFrame,
+    LargeMonsterStrike,
+    FloorMusic,
+    HpDelta,
+    WriteTile,
+    MovementFrame,
+    PincerDamage,
+    SetHeroValue,
+    StairFrame,
+    DeathScene
+};
+enum class Callback : int {
+    Capture = 1,
+    SummonZeno,
+    SummonGuards,
+    Transformation,
+    CheckGuards,
+    NextCycle,
+    Title,
+    RestoreBoard,
+    BattleEnd,
+    ForcedBattle,
+    Teleport,
+    RasterScene,
+    HideHero,
+    HidePanels,
+    CacheScene
+};
+enum class DoorMotion : int {
+    Yellow = 1,
+    Blue,
+    Red,
+    OpenGate,
+    CloseGate,
+    Prison,
+    LowerWall,
+    RaiseWall,
+    RoadFromRight,
+    RoadFromLeft,
+    RoadFromTop,
+    RoadFromBottom
+};
+enum class SoundCue : int {
+    Open = 1,
+    Get,
+    Strike,
+    Zeno,
+    MusicStart,
+    MusicStop,
+    Floor3,
+    Floor20,
+    Stairs,
+    Stairs2
+};
+
+struct Command {
+    Op op{};
+    std::uint16_t a{}, b{};
+    friend bool operator==(const Command&, const Command&) = default;
+};
+
+static_assert(sizeof(Command) == 3 * sizeof(std::uint16_t));
+
+struct Monster {
+    std::int32_t hp{}, attack{}, defense{}, gold{};
+    friend bool operator==(const Monster&, const Monster&) = default;
+};
+
+struct EnemyInfo {
+    int monster_index = -1, tile{};
+    Monster stats; // Encounter-time values, including the current cycle's scaling.
+    std::int64_t damage{};
+};
+
+struct Floor {
+    std::uint8_t up_landing{}, down_landing{};
+    std::array<std::uint8_t, CellCount> tiles{};
+    friend bool operator==(const Floor&, const Floor&) = default;
+};
+
+struct Hero {
+    std::int32_t hp = 1000, attack = 100, defense = 100, gold = 0;
+    int floor = 1, highest_floor = 1, x = 5, y = 10;
+    int yellow_keys{}, red_keys{}, blue_keys{}, altar_purchases{}, fairy_visits{};
+    EquipmentTier sword = EquipmentTier::Sacred, shield = EquipmentTier::Sacred;
+    std::array<int, ItemCount> items{};
+    std::array<int, 10> equipment_found{0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+    std::array<int, 68> dialogue_seen{};
+    std::array<HintState, 24> wisdom_hints{};
+    bool floor34_reward_created{}, floor35_reward_created{}, floor40_reward_created{},
+        floor41_reward_created{};
+    bool floor32_arrival_seen{}, zeno_sealed{};
+    std::array<HintState, 3> old_man_heard{}; // Original hint slots 66, 67 and 71.
+    HintState merchant2_heard{};
+    std::array<int, 12> merchant_used{};
+    int cycle_factor_minus_one{}, later_cycle{};
+    Direction facing = Direction::Up;
+    MusicTrack music_track = MusicTrack::Floors1To10;
+    FlightDirection flight_direction{};
+    StairKind highest_floor_stair_kind{};
+    int fairy_score{}, fairy_rank{};
+    FairyCategory fairy_category{};
+
+    int& speech_seen(SpeechId id) { return dialogue_seen.at(std::to_underlying(continuation_for(id))); }
+
+    int speech_seen(SpeechId id) const { return dialogue_seen.at(std::to_underlying(continuation_for(id))); }
+
+    friend bool operator==(const Hero&, const Hero&) = default;
+};
+
+struct Dialogue {
+    std::string text;
+    ContinuationStage continuation{};
+    bool shop{};
+    std::array<std::string, 3> choices{};
+    friend bool operator==(const Dialogue&, const Dialogue&) = default;
+};
+
+struct EndingSummary {
+    Hero hero;
+    RunHistory history;
+    friend bool operator==(const EndingSummary&, const EndingSummary&) = default;
+};
+
+struct Visual {
+    struct Layer {
+        int mask{}, color{}, underlying = -1;
+    };
+
+    std::array<Layer, CellCount> layers{};
+    int overlay_cell = -1, mask{}, color{}, underlying = Road;
+    int door_cell = -1, door_mode{}, door_frame{}, door_tile{};
+    RasterMode raster_mode = RasterMode::Inactive;
+    int raster_frame{};
+    bool hide_hero{}, battle{}, dead{}, enemy_first{};
+    int enemy_hp{}, monster_index = -1;
+    EnemyInfo battle_enemy;
+    std::optional<EnemyInfo> last_defeated;
+    std::array<bool, CellCount> stair_cover{};
+    int stair_source_floor = -1;
+    int stair_hero_x{}, stair_hero_y{};
+    Direction stair_hero_facing = Direction::Up;
+    bool stair_revealing{};
+    Floor stair_source{};
+};
+
+struct Forecast {
+    bool penetrates{};
+    std::int64_t damage{};
+    std::int64_t hero_strike_count{};
+    int hero_damage_per_strike{}, enemy_damage_per_strike{};
+};
+
+class Game {
+  public:
+    Hero hero;
+    RunHistory run_history;
+    std::optional<EndingSummary> ending_summary;
+    std::array<Floor, FloorCount> floors{};
+    std::array<Monster, MonsterCount> monsters{};
+    RankingTables rankings = default_rankings();
+    std::vector<Command> commands; // Insertion order; back() executes first.
+    std::optional<Dialogue> dialogue;
+    Visual visual;
+    std::string status;
+    std::vector<SoundCue> sounds;
+    bool checkpoint_requested{};
+    Game();
+    void new_game();
+    bool move(Direction);
+    bool use(Item, int destination_floor = -1);
+    bool continue_dialogue();
+    bool choose(int choice);
+    bool run_one(Command* executed = nullptr); // One command, never a recursive timer call.
+    void finish_commands(bool continue_speech = false);
+    bool busy() const;
+
+    const std::optional<StatusMessage>& status_message() const { return displayed_status_; }
+
+    int shop_cost() const { return dialogue && dialogue->shop ? shop_cost_ : -1; }
+
+    int& inventory(Item item) { return hero.items.at(std::to_underlying(item)); }
+
+    int inventory(Item item) const { return hero.items.at(std::to_underlying(item)); }
+
+    std::uint8_t& tile(int floor, int index) { return floors.at(floor).tiles.at(index); }
+
+    std::uint8_t tile(int floor, int index) const { return floors.at(floor).tiles.at(index); }
+
+    std::uint8_t& tile_at(int floor, int x, int y) { return tile(floor, cell(x, y)); }
+
+    std::uint8_t tile_at(int floor, int x, int y) const { return tile(floor, cell(x, y)); }
+
+    Forecast forecast(int tile_id, bool enemy_first = false) const;
+    // 0x44FF0C: the original Orb display omits Cross and Slayer bonuses.
+    Forecast orb_forecast(int tile_id) const;
+    static int monster_for_tile(int tile_id);
+    static TileClass classify_tile(int tile_id);
+    int animation_offset(int tile_id) const;
+    static std::string_view item_name(Item);
+    static std::string_view monster_name(int index);
+    // Zero-based recovered text-table index; Op::Dialogue uses one-based IDs.
+    static std::string_view original_dialogue(DialogueId id);
+    void push(Op op, int a = 0, int b = 0);
+
+    void push(Op op, Callback a, int b = 0) { push(op, std::to_underlying(a), b); }
+
+    void push(Op op, SoundCue a, int b = 0) { push(op, std::to_underlying(a), b); }
+
+    void push(Op op, int a, DoorMotion b) { push(op, a, std::to_underlying(b)); }
+
+    void queue_speech(SpeechId id, int b = 0) { push(Op::Dialogue, std::to_underlying(id), b); }
+
+    void queue_hero_value(HeroField field, int value) {
+        push(Op::SetHeroValue, std::to_underlying(field), value);
+    }
+
+    void queue_raster(RasterMode mode, int frame = 0) {
+        push(Op::Wait, std::to_underlying(mode));
+        push(Op::Callback, Callback::RasterScene, frame);
+    }
+
+    void waits(int count) {
+        for (int i = 0; i < count; ++i)
+            push(Op::Wait);
+    }
+
+    void expand_door();
+    void check_guards(); // 0x4664E4, including original numeric-sum predicates.
+    void check_floor();  // 0x46CB1C, recovered two-level switch.
+    void check_door();   // 0x47BEAC, called even when key contact is refused.
+    void special_road(); // 0x46397C.
+    void contact();      // 0x444490.
+    void battle(bool enemy_first = false);
+    void capture();
+    void next_cycle();
+    void save(const std::filesystem::path&, SaveKind = SaveKind::Slot) const;
+    void load(const std::filesystem::path&, SaveKind = SaveKind::Slot);
+    void save(std::ostream&, SaveKind = SaveKind::Slot) const;
+    void load(std::istream&, SaveKind = SaveKind::Slot);
+    bool flight_preview(int destination_floor, FlightDirection direction = FlightDirection::Up);
+    bool can_open_flight() const;
+    bool open_flight();
+    // Original selector callback; player inputs must enter through open_flight first.
+    bool confirm_flight(int destination_floor);
+    // Exposed state inputs for original-machine differential probes.
+    int contact_index{}, scratch_index{}, neighbor_index{}, message_code{}, door_opened{};
+
+  private:
+    friend struct GameState;
+    // Preserve unmapped Delphi fields and the manual writer's live checksum words.
+    mutable std::optional<std::array<std::uint32_t, OriginalHeroWordCount>> original_save_record_;
+
+    struct Fight {
+        int target{}, monster_index{}, hero_strike_count{}, enemy_strike_count{}, turn{}, underlying{};
+        bool fatal{}, enemy_first{};
+        std::size_t base_commands{};
+    };
+
+    std::optional<Fight> fight_;
+    ShopKind shop_kind_{};
+    int shop_cost_{}, shop_hint_{}, shop_id_{}, shop_npc_cell_{};
+    bool stopped_{};
+    StatusMessage prepared_status_;
+    std::optional<StatusMessage> displayed_status_;
+    void walk_to_contact();
+    void stair(bool up);
+    void face_away_from_stair(bool climbed);
+    void hazard(int magician_cell, int retreat_cell);
+    void damage_pose(int cell_index, int underlying = -1);
+    void summon(int cell_index, int color);
+    void summon_guards();
+    void summon_four_guards(int north, int south, int west, int east);
+    void transform_vampire();
+    void show_dialogue(SpeechId id);
+    void speak_old_man();
+    void speak_merchant();
+    void speak_thief();
+    void speak_fairy();
+    void continue_original(ContinuationStage stage);
+    void bomb_dissolve(int cell_index);
+    void battle_step();
+    void battle_finished(const Fight&);
+    int attack_multiplier(int enemy, bool enemy_first) const;
+    void initialize_cycle();
+    void update_status(int code);
+    void publish_status();
+    void classify_neighbor();
+    void change_music_for_floor();
+    void ending();
+    void queue_death();
+};
+} // namespace tsw

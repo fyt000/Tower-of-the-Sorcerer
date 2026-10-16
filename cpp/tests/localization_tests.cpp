@@ -1,0 +1,229 @@
+#include "tsw/game.hpp"
+#include "tsw/localization.hpp"
+#include "tsw/settings.hpp"
+#include <algorithm>
+#include <catch2/catch_test_macros.hpp>
+#include <fstream>
+
+using namespace tsw;
+
+TEST_CASE("Every C++ language has complete dialogue and stable identifiers", "[localization]") {
+    for (const auto language : Languages) {
+        REQUIRE(parse_language(language_id(language)) == language);
+        REQUIRE_FALSE(language_label(language).empty());
+        REQUIRE_FALSE(localized_opening(language).empty());
+        for (auto id = DialogueId::First; id < DialogueId::Count; id = id + 1) {
+            const auto original = Game::original_dialogue(id);
+            REQUIRE(localized_dialogue(Language::English, id) == original);
+            if (!original.empty())
+                REQUIRE_FALSE(localized_dialogue(language, id).empty());
+        }
+    }
+    REQUIRE_THROWS(parse_language("unknown"));
+    REQUIRE_THROWS(language_id(static_cast<Language>(99)));
+    REQUIRE_THROWS(localized_dialogue(Language::Japanese, DialogueId::Count));
+    for (const auto language : Languages)
+        for (int i = 0; i < MonsterCount; ++i)
+            REQUIRE(localized_text(language, Game::monster_name(i)) ==
+                    localized_dialogue(language, DialogueId::MonsterNameBase + i));
+}
+
+TEST_CASE("Japanese tail is aligned semantically after the English split", "[localization]") {
+    REQUIRE(localized_dialogue(Language::Japanese, static_cast<DialogueId>(263)).find("時空の門") !=
+            std::string_view::npos);
+    REQUIRE(localized_dialogue(Language::Japanese, static_cast<DialogueId>(265)) ==
+            "このデータはロードできません。");
+    REQUIRE(localized_dialogue(Language::Japanese, static_cast<DialogueId>(266)).find("８８００") !=
+            std::string_view::npos);
+    REQUIRE(localized_dialogue(Language::Japanese, static_cast<DialogueId>(267)).find("４４００") !=
+            std::string_view::npos);
+    REQUIRE(localized_dialogue(Language::EnglishFromJapanese, static_cast<DialogueId>(56))
+                .find("absorb your power") != std::string_view::npos);
+    REQUIRE(localized_dialogue(Language::ChineseFromEnglish, static_cast<DialogueId>(56)).find("合作") !=
+            std::string_view::npos);
+    REQUIRE(
+        localized_dialogue(Language::ChineseFromJapanese, static_cast<DialogueId>(56)).find("吸收你的力量") !=
+        std::string_view::npos);
+    REQUIRE(localized_opening(Language::Japanese).find("全能") != std::string_view::npos);
+    REQUIRE(localized_opening(Language::EnglishFromJapanese).find("omnipotent") != std::string_view::npos);
+    REQUIRE(localized_opening(Language::ChineseFromJapanese).find("全能") != std::string_view::npos);
+    REQUIRE(localized_opening(Language::ChineseFromEnglish).find("全知") != std::string_view::npos);
+}
+
+TEST_CASE("Rendering translates joined speeches and generated statuses in one pass", "[localization]") {
+    const auto speech = std::string(Game::original_dialogue(static_cast<DialogueId>(4))) +
+                        std::string(Game::original_dialogue(static_cast<DialogueId>(57)));
+    REQUIRE(localized_text(Language::Japanese, speech) ==
+            std::string(localized_dialogue(Language::Japanese, static_cast<DialogueId>(4))) +
+                std::string(localized_dialogue(Language::Japanese, static_cast<DialogueId>(57))));
+    REQUIRE(localized_text(Language::ChineseFromEnglish, "Found Super Mattock.") == "获得了鹤嘴锄。");
+    REQUIRE(localized_text(Language::ChineseFromEnglish, "Defeated Zombie Knight. Received 20 gold.") ==
+            "打倒了丧尸武士。获得了20 金币。");
+    REQUIRE(localized_text(Language::English, speech) == speech);
+    REQUIRE(localized_text(Language::Japanese, "unrecognized message") == "unrecognized message");
+    REQUIRE(localized_text(Language::ChineseFromJapanese, "Warp Staff") == "瞬移之翼");
+    REQUIRE(localized_text(Language::Japanese, "Warp Staff") == "空間転移の秘宝");
+    REQUIRE(localized_text(Language::EnglishFromJapanese, "Superion Priest") == "High Priest");
+}
+
+TEST_CASE("Fairy speeches use readable language-specific spacing and punctuation", "[localization][npcs]") {
+    struct Speeches {
+        Language language;
+        std::string_view ranked, unranked, low_score;
+    };
+
+    // Literal rendered prose catches joins between fragments, including the
+    // English-from-Japanese rank suffix that begins with a period instead of a word.
+    constexpr std::array cases{
+        Speeches{
+            Language::English,
+            "Congratulations! You win the 3 place with the points which you got. I'm going to register "
+            "your score. Judging by your vital power, offensive power, defensive power, and number of "
+            "keys, you have 134 points. Congratulations! Your score is GREAT! I give you the special "
+            "rank of BRAVE MAN. You may as well play as good as you have from this point on.",
+            "Judging by your vital power, offensive power, defensive power, and number of keys, you "
+            "have 201 points. Do you wish to go on? I give you the special rank of FIGHTER GOD. "
+            "It was nice fight so far.",
+            "Judging by your vital power, offensive power, defensive power, and number of keys, you "
+            "have 0 points. If you have that many points, you might want to reconsider going higher... =)"},
+        Speeches{
+            Language::EnglishFromJapanese,
+            "Congratulations! Your score placed 3. I'll record it in the rankings. Judging your ability "
+            "by your HP, defense, attack, and keys so far, your score is 134 points. Congratulations! "
+            "A perfect score! I award you the title Brave. Keep it up as you go on.",
+            "Judging your ability by your HP, defense, attack, and keys so far, your score is 201 points. "
+            "You've done well. I award you the title God of Battle. Well done making it this far.",
+            "Judging your ability by your HP, defense, attack, and keys so far, your score is 0 points. "
+            "At this score, pressing onward will be very difficult."},
+        Speeches{Language::Japanese,
+                 "おめでとう！得点が第3位の成績でした。スコアに登録しておきます。"
+                 "「この階までのあなたの生命力、防御力、攻撃力、鍵の個数からあなたの実力を評価すると・・・"
+                 "134点です。おめでとう！満点です。あなたには『勇者』の称号を差し上げましょう。"
+                 "これから先もこの調子でね。」",
+                 "「この階までのあなたの生命力、防御力、攻撃力、鍵の個数からあなたの実力を評価すると・・・"
+                 "201点です。よくがんばりましたね。あなたには『闘神』の称号を差し上げましょう。"
+                 "ここまでおつかれさまでした。」",
+                 "「この階までのあなたの生命力、防御力、攻撃力、鍵の個数からあなたの実力を評価すると・・・"
+                 "0点です。うーん、この点数だとこれから先へ進むのは、かなり無理があるでしょう。」"},
+        Speeches{Language::ChineseFromJapanese,
+                 "恭喜！你的得分排在第3名。已登记到排行榜。"
+                 "「根据到这一层为止的生命、防御、攻击和钥匙数量，评估你的实力，得分为……"
+                 "134分。恭喜！满分！授予你『勇者』的称号。之后也要保持这个势头。」",
+                 "「根据到这一层为止的生命、防御、攻击和钥匙数量，评估你的实力，得分为……"
+                 "201分。你很努力了。授予你『斗神』的称号。能走到这里，辛苦你了。」",
+                 "「根据到这一层为止的生命、防御、攻击和钥匙数量，评估你的实力，得分为……"
+                 "0分。嗯，这个分数的话，继续前进会相当勉强。」"},
+        Speeches{Language::ChineseFromEnglish,
+                 "恭喜！凭借这个得分，你获得了第3名。我会登记你的得分。"
+                 "根据你的生命、攻击、防御和钥匙数量，你的得分为134分。恭喜！你的得分很棒！"
+                 "我授予你特别称号：勇者。接下来也要像之前一样好好发挥。",
+                 "根据你的生命、攻击、防御和钥匙数量，你的得分为201分。你想继续前进吗？"
+                 "我授予你特别称号：斗神。到目前为止，你战斗得不错。",
+                 "根据你的生命、攻击、防御和钥匙数量，你的得分为0分。"
+                 "这个分数的话，或许该重新考虑是否继续往上走…… =)"}};
+    for (const auto& speeches : cases) {
+        CAPTURE(language_id(speeches.language));
+        REQUIRE(localized_fairy_dialogue(speeches.language, 134, 3, 3) == speeches.ranked);
+        REQUIRE(localized_fairy_dialogue(speeches.language, 201, 0, 4) == speeches.unranked);
+        REQUIRE(localized_fairy_dialogue(speeches.language, 0, 0, 1) == speeches.low_score);
+    }
+}
+
+TEST_CASE("Unicode wrapping preserves codepoints, paragraphs and words", "[localization]") {
+    const auto measure = [](std::string_view s) {
+        return float(std::count_if(s.begin(), s.end(), [](unsigned char c) { return (c & 0xc0) != 0x80; }));
+    };
+    REQUIRE(wrap_localized_text("日本語の文章", 3, measure) == "日本語\nの文章\n");
+    REQUIRE(wrap_localized_text("魔法之塔\n\n新的旅途", 4, measure) == "魔法之塔\n\n新的旅途\n");
+    REQUIRE(wrap_localized_text("one two three", 7, measure) == "one two\nthree\n");
+    REQUIRE(wrap_localized_text("abcdefgh", 3, measure) == "abc\ndef\ngh\n");
+    const auto points = localization_codepoints();
+    REQUIRE(std::find(points.begin(), points.end(), int(U'塔')) != points.end());
+    REQUIRE(std::find(points.begin(), points.end(), int(U'译')) != points.end());
+}
+
+TEST_CASE("Language preferences round trip and old settings default to English", "[localization][settings]") {
+    const auto path = std::filesystem::path(TSW_TEST_TEMP) / "localization-settings.json";
+    for (const auto language : Languages) {
+        Settings settings;
+        settings.language = language_id(language);
+        save_settings(path, settings);
+        REQUIRE(load_settings(path).language == language_id(language));
+    }
+    {
+        std::ofstream out(path);
+        out << R"({"game_speed":2,"recording":true})";
+    }
+    REQUIRE(load_settings(path).language == "en");
+    {
+        std::ofstream out(path);
+        out << R"({"language":"bad-id"})";
+    }
+    REQUIRE_THROWS(load_settings(path));
+    std::filesystem::remove(path);
+}
+
+TEST_CASE("Gameplay status keeps catalog identity and formats in every language", "[localization][status]") {
+    struct Sample {
+        Language language;
+        std::string_view potion, sword, bomb, snow;
+    };
+
+    const Sample samples[]{
+        {Language::English, "Got a red elixir. Your vital power was 50 points up!",
+         "Got an Iron Sword! Your offensive power was 10 points up!",
+         "You used The destructible Ball! Enemies on all sides died!Recieved 3 Gold.",
+         "You've used the snow crystal!The lava cooled and turned to stone."},
+        {Language::Japanese, "赤い回復薬を手に入れた。生命力が50ポイントアップ！",
+         "鉄の剣を手に入れた。攻撃力が10ポイントアップ！",
+         "破壊の玉を使った！四方の敵が倒れた！ＧＯＬＤを3枚手に入れた！",
+         "雪の結晶を使った！溶岩が固まって道ができた！"},
+        {Language::EnglishFromJapanese, "You found a red potion. HP increases by 50 points!",
+         "You found an Iron Sword. Attack increases by 10 points!",
+         "You used the Orb of Destruction! Enemies on all four sides fell! You received 3 gold!",
+         "You used the Snow Crystal! The lava solidified into a path!"},
+        {Language::ChineseFromJapanese, "拿到了红血瓶，生命提升50点！", "拿到了铁剑，攻击力提升10点！",
+         "使用了破坏爆弹！四周的敌人被消灭了！获得了3金币！", "使用了雪花结晶！熔岩凝固，变成了道路！"},
+        {Language::ChineseFromEnglish, "获得了红血瓶，生命提升50点！", "获得了铁剑！攻击力提升10点！",
+         "你使用了破坏爆弹！四周的敌人都死了！获得了3金币。", "你使用了雪花结晶！熔岩冷却，变成了石头。"},
+    };
+    for (const auto& sample : samples) {
+        CAPTURE(language_id(sample.language));
+        REQUIRE(localized_status_message(sample.language, {DialogueId::RedPotionFound, 50}) == sample.potion);
+        REQUIRE(localized_status_message(sample.language, {DialogueId::IronSwordFound, 10}) == sample.sword);
+        REQUIRE(localized_status_message(sample.language, {DialogueId::BombUsed, 3}) == sample.bomb);
+        REQUIRE(localized_status_message(sample.language, {DialogueId::SnowCrystalUsed}) == sample.snow);
+        Game g;
+        g.hero.x = g.hero.y = 5;
+        g.floors[1].tiles.fill(Road);
+        for (const auto& [tile, id] :
+             std::array<std::pair<Tile, DialogueId>, 3>{{{YellowKey, DialogueId::YellowKeyFound},
+                                                         {RedKey, DialogueId::RedKeyFound},
+                                                         {BlueKey, DialogueId::BlueKeyFound}}}) {
+            g.tile_at(1, 5, 4) = tile;
+            REQUIRE(g.move(Direction::Up));
+            g.finish_commands();
+            REQUIRE(localized_status(sample.language, g) == localized_dialogue(sample.language, id));
+            REQUIRE(g.move(Direction::Down));
+        }
+        g.tile_at(1, 5, 4) = RedPotion;
+        REQUIRE(g.move(Direction::Up));
+        g.finish_commands();
+        REQUIRE(localized_status(sample.language, g) == sample.potion);
+        // Changing display language must not alter canonical replay or MCP text.
+        REQUIRE(g.status == "Got a red elixir. Your vital power was 50 points up!");
+        g.status = "Quick save written.";
+        REQUIRE(localized_status(sample.language, g) ==
+                localized_text(sample.language, "Quick save written."));
+        g.status = "External error text";
+        REQUIRE(localized_status(sample.language, g) == "External error text");
+    }
+    REQUIRE(localized_status_message(Language::English, {DialogueId::RedGemFound, 1}) ==
+            "Got a red crystal. Your offensive power was 1 point up!");
+    REQUIRE(localized_status_message(Language::English, {DialogueId::RedGemFound, 2}) ==
+            "Got a red crystal. Your offensive power was 2 points up!");
+    REQUIRE(
+        localized_status_message(Language::Japanese, {DialogueId::BattleWon, 20, ZombieKnightRow}) ==
+        std::string(localized_dialogue(Language::Japanese, DialogueId::MonsterNameBase + ZombieKnightRow)) +
+            "をたおした！ＧＯＬＤを20枚手に入れた！");
+}

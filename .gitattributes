@@ -1,0 +1,20 @@
+# Keep source diffs consistent across build hosts.
+*.cpp text eol=lf
+*.hpp text eol=lf
+*.pas text eol=lf
+*.dpr text eol=lf
+*.inc text eol=lf
+*.cmake text eol=lf
+CMakeLists.txt text eol=lf
+.gitignore text eol=lf
+.clang-format text eol=lf
+*.json text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+*.png binary
+*.wav binary
+*.mid binary
+
+# Generated declaration/check includes retain their final separator line.
+/delphi/src/generated/** -text !eol whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol

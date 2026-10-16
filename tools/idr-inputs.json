@@ -1,0 +1,84 @@
+{
+  "recognition_provenance": {
+    "repository": "https://github.com/crypto2011/IDR",
+    "commit": "03f38fc0b2e5b972c644e0c80a24872c447aa5b7",
+    "files": {
+      "KnowledgeBase.cpp": {
+        "url": "https://raw.githubusercontent.com/crypto2011/IDR/03f38fc0b2e5b972c644e0c80a24872c447aa5b7/KnowledgeBase.cpp",
+        "sha256": "c67612e6f02ffa18088df1a0d59dc4ecbdd8613438f4b292039909d7419ab3d1",
+        "bytes": 72232
+      },
+      "KnowledgeBase.h": {
+        "url": "https://raw.githubusercontent.com/crypto2011/IDR/03f38fc0b2e5b972c644e0c80a24872c447aa5b7/KnowledgeBase.h",
+        "sha256": "d378076f240a1071d6d6f0dd1915f47272861b26b78a53b74efa1f5f9c629a50",
+        "bytes": 13954
+      },
+      "Main.cpp": {
+        "url": "https://raw.githubusercontent.com/crypto2011/IDR/03f38fc0b2e5b972c644e0c80a24872c447aa5b7/Main.cpp",
+        "sha256": "bdc02f666ccb2c76fa6099f031d36db8147f57f9dc88cd2801371b1b24afec7b",
+        "bytes": 516093
+      },
+      "Misc.cpp": {
+        "url": "https://raw.githubusercontent.com/crypto2011/IDR/03f38fc0b2e5b972c644e0c80a24872c447aa5b7/Misc.cpp",
+        "sha256": "1230fbd82f55fbd3422729031677a215cc4922d0036c0306b83f74dbf522a676",
+        "bytes": 148276
+      },
+      "Analyze1.cpp": {
+        "url": "https://raw.githubusercontent.com/crypto2011/IDR/03f38fc0b2e5b972c644e0c80a24872c447aa5b7/Analyze1.cpp",
+        "sha256": "53f0ce1e335dadb562348f049888079b2c1a8dd7335582419b48634e4b8f44eb",
+        "bytes": 34834
+      },
+      "Analyze2.cpp": {
+        "url": "https://raw.githubusercontent.com/crypto2011/IDR/03f38fc0b2e5b972c644e0c80a24872c447aa5b7/Analyze2.cpp",
+        "sha256": "3a8364b64502856c7d69dbb3a94a6ac77db9b6ac524f055eefc27bb34a8333e8",
+        "bytes": 146660
+      },
+      "README.md": {
+        "url": "https://raw.githubusercontent.com/crypto2011/IDR/03f38fc0b2e5b972c644e0c80a24872c447aa5b7/README.md",
+        "sha256": "7eaa6c1f90f96089c614f3d63e3ef73c7b0d3d1c3937d0c56a3593b41dfeea88",
+        "bytes": 1877
+      },
+      "LICENSE": {
+        "url": "https://raw.githubusercontent.com/crypto2011/IDR/03f38fc0b2e5b972c644e0c80a24872c447aa5b7/LICENSE",
+        "sha256": "3871189f85318d3acc81972bb5a69930000fbc15a41ea08fa16de55edd288bd6",
+        "bytes": 1068
+      },
+      "syskb2.bin": {
+        "url": "https://raw.githubusercontent.com/crypto2011/IDR/03f38fc0b2e5b972c644e0c80a24872c447aa5b7/syskb2.bin",
+        "sha256": "3f46097779581d508bc9fb6aa7ef16829b01680e06ef2864f05c41e5f0eaf958",
+        "bytes": 113787
+      },
+      "syskb3.bin": {
+        "url": "https://raw.githubusercontent.com/crypto2011/IDR/03f38fc0b2e5b972c644e0c80a24872c447aa5b7/syskb3.bin",
+        "sha256": "5c598d7b774369ebefc70a63a54b7e3ff48e6dfa38d156f2da514ac481510388",
+        "bytes": 153844
+      },
+      "syskb4.bin": {
+        "url": "https://raw.githubusercontent.com/crypto2011/IDR/03f38fc0b2e5b972c644e0c80a24872c447aa5b7/syskb4.bin",
+        "sha256": "460ff4c82f1f1038088dbb27b1be081f019fae09ee0775e029196157bcdff84d",
+        "bytes": 200049
+      },
+      "syskb5.bin": {
+        "url": "https://raw.githubusercontent.com/crypto2011/IDR/03f38fc0b2e5b972c644e0c80a24872c447aa5b7/syskb5.bin",
+        "sha256": "7c0f6e19f734876aa65de18a56032c2cb7416c8e7b5d41a2acdf0a2892171e28",
+        "bytes": 207076
+      },
+      "syskb6.bin": {
+        "url": "https://raw.githubusercontent.com/crypto2011/IDR/03f38fc0b2e5b972c644e0c80a24872c447aa5b7/syskb6.bin",
+        "sha256": "af475452d91ce49b63d9c5538d389a13db3129a52d60843bda367ecac2f3f80d",
+        "bytes": 222588
+      },
+      "syskb7.bin": {
+        "url": "https://raw.githubusercontent.com/crypto2011/IDR/03f38fc0b2e5b972c644e0c80a24872c447aa5b7/syskb7.bin",
+        "sha256": "9ca430f838464bcc5eff3d50fd63d6786a941e130ee4db16df3de234fe316213",
+        "bytes": 218183
+      },
+      "kb2.7z": {
+        "url": "https://raw.githubusercontent.com/crypto2011/IDR/03f38fc0b2e5b972c644e0c80a24872c447aa5b7/kb2.7z",
+        "sha256": "3c9221f197704d2208e950e626d30b3ae39e770078868292d073f8b56799cf5b",
+        "bytes": 1317716
+      }
+    }
+  },
+  "knowledge_base_sha256": "dc1f8f590f6d5146ae0c8c96eb28c2694382389b8d84657e8f58cbe7c49768c1"
+}

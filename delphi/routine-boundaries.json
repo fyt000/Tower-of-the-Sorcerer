@@ -1,0 +1,1616 @@
+{
+  "schema_version": 2,
+  "original_sha256": "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779",
+  "reviewed_routines": [
+    {
+      "method": "TAboutBox.OKButtonClick",
+      "entry": "0x434084",
+      "code_bytes": 16,
+      "literal_pool_bytes": 0,
+      "successor": "0x434094"
+    },
+    {
+      "method": "TAboutBox.image1onclick",
+      "entry": "0x434094",
+      "code_bytes": 31,
+      "literal_pool_bytes": 0,
+      "successor": "0x4340b4"
+    },
+    {
+      "method": "TAboutBox.image2onclick",
+      "entry": "0x4340b4",
+      "code_bytes": 44,
+      "literal_pool_bytes": 0,
+      "successor": "0x4340e0"
+    },
+    {
+      "method": "TAboutBox.Timer1Timer",
+      "entry": "0x4340e0",
+      "code_bytes": 77,
+      "literal_pool_bytes": 0,
+      "successor": "0x434130"
+    },
+    {
+      "method": "TAboutBox.programicononclick",
+      "entry": "0x434130",
+      "code_bytes": 44,
+      "literal_pool_bytes": 0,
+      "successor": "0x43415c"
+    },
+    {
+      "method": "TAboutBox.AboutBoxonclose",
+      "entry": "0x43415c",
+      "code_bytes": 16,
+      "literal_pool_bytes": 0,
+      "successor": "0x43416c"
+    },
+    {
+      "method": "TAboutBox.formactivate",
+      "entry": "0x43416c",
+      "code_bytes": 1078,
+      "literal_pool_bytes": 0,
+      "successor": "0x4345a4"
+    },
+    {
+      "method": "TAboutBox.copyrightonclick",
+      "entry": "0x4345a4",
+      "code_bytes": 40,
+      "literal_pool_bytes": 60,
+      "successor": "0x434608"
+    },
+    {
+      "method": "TForm2.formactivate",
+      "entry": "0x434bc4",
+      "code_bytes": 8088,
+      "literal_pool_bytes": 148,
+      "successor": "0x436bf0"
+    },
+    {
+      "method": "TForm2.Button6Click",
+      "entry": "0x436bf0",
+      "code_bytes": 34,
+      "literal_pool_bytes": 0,
+      "successor": "0x436c14"
+    },
+    {
+      "method": "TForm2.hyouji",
+      "entry": "0x436c14",
+      "code_bytes": 2435,
+      "literal_pool_bytes": 65,
+      "successor": "0x4375d8"
+    },
+    {
+      "method": "TForm2.optionload",
+      "entry": "0x4375d8",
+      "code_bytes": 2365,
+      "literal_pool_bytes": 23,
+      "successor": "0x437f2c"
+    },
+    {
+      "method": "TForm2.scoreload",
+      "entry": "0x437f2c",
+      "code_bytes": 7163,
+      "literal_pool_bytes": 441,
+      "successor": "0x439ce0"
+    },
+    {
+      "method": "TForm2.scoresave",
+      "entry": "0x439ce0",
+      "code_bytes": 1560,
+      "literal_pool_bytes": 260,
+      "successor": "0x43a3fc"
+    },
+    {
+      "method": "TForm2.loadwork",
+      "entry": "0x43a3fc",
+      "code_bytes": 241,
+      "literal_pool_bytes": 23,
+      "successor": "0x43a504"
+    },
+    {
+      "method": "TForm2.form2onclose",
+      "entry": "0x43a504",
+      "code_bytes": 34,
+      "literal_pool_bytes": 0,
+      "successor": "0x43a528"
+    },
+    {
+      "method": "TForm2.BitBtn1Click",
+      "entry": "0x43a528",
+      "code_bytes": 37,
+      "literal_pool_bytes": 0,
+      "successor": "0x43a550"
+    },
+    {
+      "method": "TForm2.BitBtn2Click",
+      "entry": "0x43a550",
+      "code_bytes": 37,
+      "literal_pool_bytes": 0,
+      "successor": "0x43a578"
+    },
+    {
+      "method": "TForm2.BitBtn3Click",
+      "entry": "0x43a578",
+      "code_bytes": 37,
+      "literal_pool_bytes": 0,
+      "successor": "0x43a5a0"
+    },
+    {
+      "method": "TForm2.BitBtn4Click",
+      "entry": "0x43a5a0",
+      "code_bytes": 37,
+      "literal_pool_bytes": 0,
+      "successor": "0x43a5c8"
+    },
+    {
+      "method": "TForm2.BitBtn5Click",
+      "entry": "0x43a5c8",
+      "code_bytes": 37,
+      "literal_pool_bytes": 0,
+      "successor": "0x43a5f0"
+    },
+    {
+      "method": "TForm2.Button1Click",
+      "entry": "0x43a5f0",
+      "code_bytes": 5592,
+      "literal_pool_bytes": 1280,
+      "successor": "0x43c0c8"
+    },
+    {
+      "method": "TForm4.DriveComboBox1Change",
+      "entry": "0x440298",
+      "code_bytes": 24,
+      "literal_pool_bytes": 0,
+      "successor": "0x4402b0"
+    },
+    {
+      "method": "TForm4.DirectoryListBox1Change",
+      "entry": "0x4402b0",
+      "code_bytes": 54,
+      "literal_pool_bytes": 0,
+      "successor": "0x4402e8"
+    },
+    {
+      "method": "TForm4.Button1Click",
+      "entry": "0x4402e8",
+      "code_bytes": 1395,
+      "literal_pool_bytes": 281,
+      "successor": "0x440974"
+    },
+    {
+      "method": "TForm4.Button2Click",
+      "entry": "0x440974",
+      "code_bytes": 16,
+      "literal_pool_bytes": 0,
+      "successor": "0x440984"
+    },
+    {
+      "method": "TForm4.Button3Click",
+      "entry": "0x440984",
+      "code_bytes": 181,
+      "literal_pool_bytes": 79,
+      "successor": "0x440a88"
+    },
+    {
+      "method": "TForm4.form4onclose",
+      "entry": "0x440a88",
+      "code_bytes": 16,
+      "literal_pool_bytes": 0,
+      "successor": "0x440a98"
+    },
+    {
+      "method": "TForm4.form4activate",
+      "entry": "0x440a98",
+      "code_bytes": 1170,
+      "literal_pool_bytes": 0,
+      "successor": "0x440f2c"
+    },
+    {
+      "method": "TTSW10.formactivate",
+      "entry": "0x44280c",
+      "code_bytes": 938,
+      "literal_pool_bytes": 130,
+      "successor": "0x442c38"
+    },
+    {
+      "method": "TTSW10.mhyouji",
+      "entry": "0x442c38",
+      "code_bytes": 279,
+      "literal_pool_bytes": 0,
+      "successor": "0x442d50"
+    },
+    {
+      "method": "TTSW10.buttonfocus",
+      "entry": "0x442d50",
+      "code_bytes": 117,
+      "literal_pool_bytes": 0,
+      "successor": "0x442dc8"
+    },
+    {
+      "method": "TTSW10.kaidanwork",
+      "entry": "0x442dc8",
+      "code_bytes": 437,
+      "literal_pool_bytes": 0,
+      "successor": "0x442f80"
+    },
+    {
+      "method": "TTSW10.kaidanupcheck",
+      "entry": "0x442f80",
+      "code_bytes": 208,
+      "literal_pool_bytes": 0,
+      "successor": "0x443050"
+    },
+    {
+      "method": "TTSW10.kaidandowncheck",
+      "entry": "0x443050",
+      "code_bytes": 208,
+      "literal_pool_bytes": 0,
+      "successor": "0x443120"
+    },
+    {
+      "method": "TTSW10.Timer1Timer",
+      "entry": "0x443120",
+      "code_bytes": 642,
+      "literal_pool_bytes": 0,
+      "successor": "0x4433a4"
+    },
+    {
+      "method": "TTSW10.yusyahyouji1",
+      "entry": "0x4433a4",
+      "code_bytes": 673,
+      "literal_pool_bytes": 0,
+      "successor": "0x443648"
+    },
+    {
+      "method": "TTSW10.yusyahyouji",
+      "entry": "0x443648",
+      "code_bytes": 447,
+      "literal_pool_bytes": 0,
+      "successor": "0x443808"
+    },
+    {
+      "method": "TTSW10.yusyaidou",
+      "entry": "0x443808",
+      "code_bytes": 556,
+      "literal_pool_bytes": 0,
+      "successor": "0x443a34"
+    },
+    {
+      "method": "TTSW10.yusyai3",
+      "entry": "0x443a34",
+      "code_bytes": 465,
+      "literal_pool_bytes": 0,
+      "successor": "0x443c08"
+    },
+    {
+      "method": "TTSW10.yusyai2",
+      "entry": "0x443c08",
+      "code_bytes": 480,
+      "literal_pool_bytes": 0,
+      "successor": "0x443de8"
+    },
+    {
+      "method": "TTSW10.yusyai1",
+      "entry": "0x443de8",
+      "code_bytes": 768,
+      "literal_pool_bytes": 0,
+      "successor": "0x4440e8"
+    },
+    {
+      "method": "TTSW10.yusyai4",
+      "entry": "0x4440e8",
+      "code_bytes": 692,
+      "literal_pool_bytes": 0,
+      "successor": "0x44439c"
+    },
+    {
+      "method": "TTSW10.kasanegaki",
+      "entry": "0x44439c",
+      "code_bytes": 242,
+      "literal_pool_bytes": 0,
+      "successor": "0x444490"
+    },
+    {
+      "method": "TTSW10.handan",
+      "entry": "0x444490",
+      "code_bytes": 19285,
+      "literal_pool_bytes": 47,
+      "successor": "0x449014"
+    },
+    {
+      "method": "TTSW10.syounin",
+      "entry": "0x449014",
+      "code_bytes": 1766,
+      "literal_pool_bytes": 14,
+      "successor": "0x449708"
+    },
+    {
+      "method": "TTSW10.roujin",
+      "entry": "0x449708",
+      "code_bytes": 1794,
+      "literal_pool_bytes": 14,
+      "successor": "0x449e18"
+    },
+    {
+      "method": "TTSW10.zyouout",
+      "entry": "0x449e18",
+      "code_bytes": 1581,
+      "literal_pool_bytes": 59,
+      "successor": "0x44a480"
+    },
+    {
+      "method": "TTSW10.taisen",
+      "entry": "0x44a480",
+      "code_bytes": 4699,
+      "literal_pool_bytes": 25,
+      "successor": "0x44b6f4"
+    },
+    {
+      "method": "TTSW10.monswork",
+      "entry": "0x44b6f4",
+      "code_bytes": 149,
+      "literal_pool_bytes": 0,
+      "successor": "0x44b78c"
+    },
+    {
+      "method": "TTSW10.monshyouji",
+      "entry": "0x44b78c",
+      "code_bytes": 1151,
+      "literal_pool_bytes": 0,
+      "successor": "0x44bc0c"
+    },
+    {
+      "method": "TTSW10.timer2on",
+      "entry": "0x44bc0c",
+      "code_bytes": 38,
+      "literal_pool_bytes": 0,
+      "successor": "0x44bc34"
+    },
+    {
+      "method": "TTSW10.toroad2",
+      "entry": "0x44bc34",
+      "code_bytes": 675,
+      "literal_pool_bytes": 0,
+      "successor": "0x44bed8"
+    },
+    {
+      "method": "TTSW10.keydisplay",
+      "entry": "0x44bed8",
+      "code_bytes": 370,
+      "literal_pool_bytes": 0,
+      "successor": "0x44c04c"
+    },
+    {
+      "method": "TTSW10.idou",
+      "entry": "0x44c04c",
+      "code_bytes": 1045,
+      "literal_pool_bytes": 0,
+      "successor": "0x44c464"
+    },
+    {
+      "method": "TTSW10.madoushi1",
+      "entry": "0x44c464",
+      "code_bytes": 350,
+      "literal_pool_bytes": 0,
+      "successor": "0x44c5c4"
+    },
+    {
+      "method": "TTSW10.mazyutu1",
+      "entry": "0x44c5c4",
+      "code_bytes": 1066,
+      "literal_pool_bytes": 0,
+      "successor": "0x44c9f0"
+    },
+    {
+      "method": "TTSW10.mmes",
+      "entry": "0x44c9f0",
+      "code_bytes": 321,
+      "literal_pool_bytes": 0,
+      "successor": "0x44cb34"
+    },
+    {
+      "method": "TTSW10.disp",
+      "entry": "0x44cb34",
+      "code_bytes": 395,
+      "literal_pool_bytes": 25,
+      "successor": "0x44ccd8"
+    },
+    {
+      "method": "TTSW10.itemdisp",
+      "entry": "0x44ccd8",
+      "code_bytes": 3062,
+      "literal_pool_bytes": 322,
+      "successor": "0x44da10"
+    },
+    {
+      "method": "TTSW10.Button1Click",
+      "entry": "0x44da10",
+      "code_bytes": 1978,
+      "literal_pool_bytes": 0,
+      "successor": "0x44e1cc"
+    },
+    {
+      "method": "TTSW10.Button2Click",
+      "entry": "0x44e1cc",
+      "code_bytes": 2230,
+      "literal_pool_bytes": 14,
+      "successor": "0x44ea90"
+    },
+    {
+      "method": "TTSW10.Button7Click",
+      "entry": "0x44ea90",
+      "code_bytes": 90,
+      "literal_pool_bytes": 0,
+      "successor": "0x44eaec"
+    },
+    {
+      "method": "TTSW10.Image4Click",
+      "entry": "0x44eaec",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x44eaf4"
+    },
+    {
+      "method": "TTSW10.Button10Click",
+      "entry": "0x44eaf4",
+      "code_bytes": 550,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ed1c"
+    },
+    {
+      "method": "TTSW10.Button9Click",
+      "entry": "0x44ed1c",
+      "code_bytes": 117,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ed94"
+    },
+    {
+      "method": "TTSW10.Button8Click",
+      "entry": "0x44ed94",
+      "code_bytes": 176,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ee44"
+    },
+    {
+      "method": "TTSW10.Image5Click",
+      "entry": "0x44ee44",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ee4c"
+    },
+    {
+      "method": "TTSW10.Button11Click",
+      "entry": "0x44ee4c",
+      "code_bytes": 24,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ee64"
+    },
+    {
+      "method": "TTSW10.Button12Click",
+      "entry": "0x44ee64",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ee80"
+    },
+    {
+      "method": "TTSW10.Button13Click",
+      "entry": "0x44ee80",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ee9c"
+    },
+    {
+      "method": "TTSW10.Button14Click",
+      "entry": "0x44ee9c",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44eeb8"
+    },
+    {
+      "method": "TTSW10.Button15Click",
+      "entry": "0x44eeb8",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44eed4"
+    },
+    {
+      "method": "TTSW10.Button16Click",
+      "entry": "0x44eed4",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44eef0"
+    },
+    {
+      "method": "TTSW10.Button17Click",
+      "entry": "0x44eef0",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ef0c"
+    },
+    {
+      "method": "TTSW10.Button18Click",
+      "entry": "0x44ef0c",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ef28"
+    },
+    {
+      "method": "TTSW10.Button19Click",
+      "entry": "0x44ef28",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ef44"
+    },
+    {
+      "method": "TTSW10.Button20Click",
+      "entry": "0x44ef44",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ef60"
+    },
+    {
+      "method": "TTSW10.Button21Click",
+      "entry": "0x44ef60",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ef7c"
+    },
+    {
+      "method": "TTSW10.Button22Click",
+      "entry": "0x44ef7c",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44ef98"
+    },
+    {
+      "method": "TTSW10.Button23Click",
+      "entry": "0x44ef98",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44efb4"
+    },
+    {
+      "method": "TTSW10.Button24Click",
+      "entry": "0x44efb4",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44efd0"
+    },
+    {
+      "method": "TTSW10.Button25Click",
+      "entry": "0x44efd0",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44efec"
+    },
+    {
+      "method": "TTSW10.Button26Click",
+      "entry": "0x44efec",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f008"
+    },
+    {
+      "method": "TTSW10.Button27Click",
+      "entry": "0x44f008",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f024"
+    },
+    {
+      "method": "TTSW10.Button28Click",
+      "entry": "0x44f024",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f040"
+    },
+    {
+      "method": "TTSW10.Button29Click",
+      "entry": "0x44f040",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f05c"
+    },
+    {
+      "method": "TTSW10.Button30Click",
+      "entry": "0x44f05c",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f078"
+    },
+    {
+      "method": "TTSW10.Button31Click",
+      "entry": "0x44f078",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f094"
+    },
+    {
+      "method": "TTSW10.Button32Click",
+      "entry": "0x44f094",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f0b0"
+    },
+    {
+      "method": "TTSW10.Button33Click",
+      "entry": "0x44f0b0",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f0cc"
+    },
+    {
+      "method": "TTSW10.Button34Click",
+      "entry": "0x44f0cc",
+      "code_bytes": 26,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f0e8"
+    },
+    {
+      "method": "TTSW10.Button35Click",
+      "entry": "0x44f0e8",
+      "code_bytes": 377,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f264"
+    },
+    {
+      "method": "TTSW10.Image6Click",
+      "entry": "0x44f264",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x44f26c"
+    },
+    {
+      "method": "TTSW10.yousya",
+      "entry": "0x44f26c",
+      "code_bytes": 3219,
+      "literal_pool_bytes": 13,
+      "successor": "0x44ff0c"
+    },
+    {
+      "method": "TTSW10.obudameiji",
+      "entry": "0x44ff0c",
+      "code_bytes": 332,
+      "literal_pool_bytes": 12,
+      "successor": "0x450064"
+    },
+    {
+      "method": "TTSW10.dameiji",
+      "entry": "0x450064",
+      "code_bytes": 535,
+      "literal_pool_bytes": 13,
+      "successor": "0x450288"
+    },
+    {
+      "method": "TTSW10.ydameiji",
+      "entry": "0x450288",
+      "code_bytes": 72,
+      "literal_pool_bytes": 0,
+      "successor": "0x4502d0"
+    },
+    {
+      "method": "TTSW10.ydameiji2",
+      "entry": "0x4502d0",
+      "code_bytes": 74,
+      "literal_pool_bytes": 0,
+      "successor": "0x45031c"
+    },
+    {
+      "method": "TTSW10.damecount",
+      "entry": "0x45031c",
+      "code_bytes": 66,
+      "literal_pool_bytes": 0,
+      "successor": "0x450360"
+    },
+    {
+      "method": "TTSW10.damecount2",
+      "entry": "0x450360",
+      "code_bytes": 72,
+      "literal_pool_bytes": 0,
+      "successor": "0x4503a8"
+    },
+    {
+      "method": "TTSW10.ydamecount",
+      "entry": "0x4503a8",
+      "code_bytes": 66,
+      "literal_pool_bytes": 0,
+      "successor": "0x4503ec"
+    },
+    {
+      "method": "TTSW10.Button36Click",
+      "entry": "0x4503ec",
+      "code_bytes": 876,
+      "literal_pool_bytes": 0,
+      "successor": "0x450758"
+    },
+    {
+      "method": "TTSW10.itemdel",
+      "entry": "0x450758",
+      "code_bytes": 286,
+      "literal_pool_bytes": 0,
+      "successor": "0x450878"
+    },
+    {
+      "method": "TTSW10.Image8Click",
+      "entry": "0x450878",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x450880"
+    },
+    {
+      "method": "TTSW10.itemlive",
+      "entry": "0x450880",
+      "code_bytes": 758,
+      "literal_pool_bytes": 0,
+      "successor": "0x450b78"
+    },
+    {
+      "method": "TTSW10.Button37Click",
+      "entry": "0x450b78",
+      "code_bytes": 38,
+      "literal_pool_bytes": 0,
+      "successor": "0x450ba0"
+    },
+    {
+      "method": "TTSW10.Button38Click",
+      "entry": "0x450ba0",
+      "code_bytes": 4043,
+      "literal_pool_bytes": 13,
+      "successor": "0x451b78"
+    },
+    {
+      "method": "TTSW10.Image9Click",
+      "entry": "0x451b78",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451b80"
+    },
+    {
+      "method": "TTSW10.Image10Click",
+      "entry": "0x451b80",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451b88"
+    },
+    {
+      "method": "TTSW10.Image12Click",
+      "entry": "0x451b88",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451b90"
+    },
+    {
+      "method": "TTSW10.Image13Click",
+      "entry": "0x451b90",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451b98"
+    },
+    {
+      "method": "TTSW10.matokwork",
+      "entry": "0x451b98",
+      "code_bytes": 133,
+      "literal_pool_bytes": 0,
+      "successor": "0x451c20"
+    },
+    {
+      "method": "TTSW10.mmmes",
+      "entry": "0x451c20",
+      "code_bytes": 282,
+      "literal_pool_bytes": 0,
+      "successor": "0x451d3c"
+    },
+    {
+      "method": "TTSW10.yukiwork",
+      "entry": "0x451d3c",
+      "code_bytes": 190,
+      "literal_pool_bytes": 0,
+      "successor": "0x451dfc"
+    },
+    {
+      "method": "TTSW10.Image15Click",
+      "entry": "0x451dfc",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451e04"
+    },
+    {
+      "method": "TTSW10.Image16Click",
+      "entry": "0x451e04",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451e0c"
+    },
+    {
+      "method": "TTSW10.Image17Click",
+      "entry": "0x451e0c",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451e14"
+    },
+    {
+      "method": "TTSW10.Image11Click",
+      "entry": "0x451e14",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x451e1c"
+    },
+    {
+      "method": "TTSW10.Button39Click",
+      "entry": "0x451e1c",
+      "code_bytes": 650,
+      "literal_pool_bytes": 14,
+      "successor": "0x4520b4"
+    },
+    {
+      "method": "TTSW10.Button40Click",
+      "entry": "0x4520b4",
+      "code_bytes": 670,
+      "literal_pool_bytes": 14,
+      "successor": "0x452360"
+    },
+    {
+      "method": "TTSW10.Button41Click",
+      "entry": "0x452360",
+      "code_bytes": 672,
+      "literal_pool_bytes": 12,
+      "successor": "0x45260c"
+    },
+    {
+      "method": "TTSW10.Button42Click",
+      "entry": "0x45260c",
+      "code_bytes": 77,
+      "literal_pool_bytes": 0,
+      "successor": "0x45265c"
+    },
+    {
+      "method": "TTSW10.timer2timer",
+      "entry": "0x45265c",
+      "code_bytes": 99,
+      "literal_pool_bytes": 0,
+      "successor": "0x4526c0"
+    },
+    {
+      "method": "TTSW10.stackwork",
+      "entry": "0x4526c0",
+      "code_bytes": 8530,
+      "literal_pool_bytes": 142,
+      "successor": "0x4548a0"
+    },
+    {
+      "method": "TTSW10.takowork1",
+      "entry": "0x4548a0",
+      "code_bytes": 437,
+      "literal_pool_bytes": 0,
+      "successor": "0x454a58"
+    },
+    {
+      "method": "TTSW10.takowork2",
+      "entry": "0x454a58",
+      "code_bytes": 437,
+      "literal_pool_bytes": 0,
+      "successor": "0x454c10"
+    },
+    {
+      "method": "TTSW10.imagework",
+      "entry": "0x454c10",
+      "code_bytes": 399,
+      "literal_pool_bytes": 0,
+      "successor": "0x454da0"
+    },
+    {
+      "method": "TTSW10.gameover",
+      "entry": "0x454da0",
+      "code_bytes": 71,
+      "literal_pool_bytes": 0,
+      "successor": "0x454de8"
+    },
+    {
+      "method": "TTSW10.syokidata2",
+      "entry": "0x454de8",
+      "code_bytes": 3547,
+      "literal_pool_bytes": 245,
+      "successor": "0x455cb8"
+    },
+    {
+      "method": "TTSW10.syokidata",
+      "entry": "0x455cb8",
+      "code_bytes": 44832,
+      "literal_pool_bytes": 0,
+      "successor": "0x460bd8"
+    },
+    {
+      "method": "TTSW10.formkeydown",
+      "entry": "0x460bd8",
+      "code_bytes": 1259,
+      "literal_pool_bytes": 0,
+      "successor": "0x4610c4"
+    },
+    {
+      "method": "TTSW10.itemichiwork",
+      "entry": "0x4610c4",
+      "code_bytes": 1622,
+      "literal_pool_bytes": 0,
+      "successor": "0x46171c"
+    },
+    {
+      "method": "TTSW10.itemichiwork2",
+      "entry": "0x46171c",
+      "code_bytes": 66,
+      "literal_pool_bytes": 0,
+      "successor": "0x461760"
+    },
+    {
+      "method": "TTSW10.timer3ontimer",
+      "entry": "0x461760",
+      "code_bytes": 410,
+      "literal_pool_bytes": 0,
+      "successor": "0x4618fc"
+    },
+    {
+      "method": "TTSW10.button8onmousedown",
+      "entry": "0x4618fc",
+      "code_bytes": 72,
+      "literal_pool_bytes": 0,
+      "successor": "0x461944"
+    },
+    {
+      "method": "TTSW10.button8onmouseup",
+      "entry": "0x461944",
+      "code_bytes": 62,
+      "literal_pool_bytes": 0,
+      "successor": "0x461984"
+    },
+    {
+      "method": "TTSW10.button9onmousedown",
+      "entry": "0x461984",
+      "code_bytes": 72,
+      "literal_pool_bytes": 0,
+      "successor": "0x4619cc"
+    },
+    {
+      "method": "TTSW10.button9onmouseup",
+      "entry": "0x4619cc",
+      "code_bytes": 62,
+      "literal_pool_bytes": 0,
+      "successor": "0x461a0c"
+    },
+    {
+      "method": "TTSW10.zenolivework",
+      "entry": "0x461a0c",
+      "code_bytes": 1255,
+      "literal_pool_bytes": 0,
+      "successor": "0x461ef4"
+    },
+    {
+      "method": "TTSW10.madoushilivework",
+      "entry": "0x461ef4",
+      "code_bytes": 1642,
+      "literal_pool_bytes": 0,
+      "successor": "0x462560"
+    },
+    {
+      "method": "TTSW10.madoushi2",
+      "entry": "0x462560",
+      "code_bytes": 4742,
+      "literal_pool_bytes": 0,
+      "successor": "0x4637e8"
+    },
+    {
+      "method": "TTSW10.GameStart1Click",
+      "entry": "0x4637e8",
+      "code_bytes": 94,
+      "literal_pool_bytes": 46,
+      "successor": "0x463874"
+    },
+    {
+      "method": "TTSW10.GameQuit1Click",
+      "entry": "0x463874",
+      "code_bytes": 124,
+      "literal_pool_bytes": 44,
+      "successor": "0x46391c"
+    },
+    {
+      "method": "TTSW10.Exit1Click",
+      "entry": "0x46391c",
+      "code_bytes": 94,
+      "literal_pool_bytes": 0,
+      "successor": "0x46397c"
+    },
+    {
+      "method": "TTSW10.mevent",
+      "entry": "0x46397c",
+      "code_bytes": 1739,
+      "literal_pool_bytes": 0,
+      "successor": "0x464048"
+    },
+    {
+      "method": "TTSW10.openning2",
+      "entry": "0x464048",
+      "code_bytes": 4973,
+      "literal_pool_bytes": 0,
+      "successor": "0x4653b8"
+    },
+    {
+      "method": "TTSW10.openning31",
+      "entry": "0x4653b8",
+      "code_bytes": 1240,
+      "literal_pool_bytes": 112,
+      "successor": "0x465900"
+    },
+    {
+      "method": "TTSW10.touzoku",
+      "entry": "0x465900",
+      "code_bytes": 1987,
+      "literal_pool_bytes": 13,
+      "successor": "0x4660d0"
+    },
+    {
+      "method": "TTSW10.doorstackin",
+      "entry": "0x4660d0",
+      "code_bytes": 1043,
+      "literal_pool_bytes": 0,
+      "successor": "0x4664e4"
+    },
+    {
+      "method": "TTSW10.moncheck",
+      "entry": "0x4664e4",
+      "code_bytes": 26154,
+      "literal_pool_bytes": 14,
+      "successor": "0x46cb1c"
+    },
+    {
+      "method": "TTSW10.ichicheck",
+      "entry": "0x46cb1c",
+      "code_bytes": 42422,
+      "literal_pool_bytes": 14,
+      "successor": "0x4770e0"
+    },
+    {
+      "method": "TTSW10.dooropen",
+      "entry": "0x4770e0",
+      "code_bytes": 7723,
+      "literal_pool_bytes": 0,
+      "successor": "0x478f0c"
+    },
+    {
+      "method": "TTSW10.yousei",
+      "entry": "0x478f0c",
+      "code_bytes": 11826,
+      "literal_pool_bytes": 366,
+      "successor": "0x47beac"
+    },
+    {
+      "method": "TTSW10.doorcheck",
+      "entry": "0x47beac",
+      "code_bytes": 863,
+      "literal_pool_bytes": 0,
+      "successor": "0x47c20c"
+    },
+    {
+      "method": "TTSW10.wavon1Click",
+      "entry": "0x47c20c",
+      "code_bytes": 75,
+      "literal_pool_bytes": 0,
+      "successor": "0x47c258"
+    },
+    {
+      "method": "TTSW10.BGMON1Click",
+      "entry": "0x47c258",
+      "code_bytes": 100,
+      "literal_pool_bytes": 0,
+      "successor": "0x47c2bc"
+    },
+    {
+      "method": "TTSW10.soundplay",
+      "entry": "0x47c2bc",
+      "code_bytes": 1117,
+      "literal_pool_bytes": 479,
+      "successor": "0x47c8f8"
+    },
+    {
+      "method": "TTSW10.soundcheck",
+      "entry": "0x47c8f8",
+      "code_bytes": 126,
+      "literal_pool_bytes": 0,
+      "successor": "0x47c978"
+    },
+    {
+      "method": "TTSW10.banpaiawork",
+      "entry": "0x47c978",
+      "code_bytes": 2399,
+      "literal_pool_bytes": 0,
+      "successor": "0x47d2d8"
+    },
+    {
+      "method": "TTSW10.Help2Click",
+      "entry": "0x47d2d8",
+      "code_bytes": 40,
+      "literal_pool_bytes": 24,
+      "successor": "0x47d318"
+    },
+    {
+      "method": "TTSW10.About1Click",
+      "entry": "0x47d318",
+      "code_bytes": 11,
+      "literal_pool_bytes": 0,
+      "successor": "0x47d324"
+    },
+    {
+      "method": "TTSW10.OptionSave1Click",
+      "entry": "0x47d324",
+      "code_bytes": 307,
+      "literal_pool_bytes": 77,
+      "successor": "0x47d4a4"
+    },
+    {
+      "method": "TTSW10.optionl1",
+      "entry": "0x47d4a4",
+      "code_bytes": 1328,
+      "literal_pool_bytes": 0,
+      "successor": "0x47d9d4"
+    },
+    {
+      "method": "TTSW10.Load11Click",
+      "entry": "0x47d9d4",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47db94"
+    },
+    {
+      "method": "TTSW10.Load21Click",
+      "entry": "0x47db94",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47dd54"
+    },
+    {
+      "method": "TTSW10.Load31Click",
+      "entry": "0x47dd54",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47df14"
+    },
+    {
+      "method": "TTSW10.Load41Click",
+      "entry": "0x47df14",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47e0d4"
+    },
+    {
+      "method": "TTSW10.Load51Click",
+      "entry": "0x47e0d4",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47e294"
+    },
+    {
+      "method": "TTSW10.Load61Click",
+      "entry": "0x47e294",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47e454"
+    },
+    {
+      "method": "TTSW10.Load71Click",
+      "entry": "0x47e454",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47e614"
+    },
+    {
+      "method": "TTSW10.Load81Click",
+      "entry": "0x47e614",
+      "code_bytes": 407,
+      "literal_pool_bytes": 41,
+      "successor": "0x47e7d4"
+    },
+    {
+      "method": "TTSW10.loadwork",
+      "entry": "0x47e7d4",
+      "code_bytes": 717,
+      "literal_pool_bytes": 59,
+      "successor": "0x47eadc"
+    },
+    {
+      "method": "TTSW10.savework",
+      "entry": "0x47eadc",
+      "code_bytes": 449,
+      "literal_pool_bytes": 39,
+      "successor": "0x47ecc4"
+    },
+    {
+      "method": "TTSW10.Save11Click",
+      "entry": "0x47ecc4",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47edb8"
+    },
+    {
+      "method": "TTSW10.Save21Click",
+      "entry": "0x47edb8",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47eeac"
+    },
+    {
+      "method": "TTSW10.Save31Click",
+      "entry": "0x47eeac",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47efa0"
+    },
+    {
+      "method": "TTSW10.Save41Click",
+      "entry": "0x47efa0",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47f094"
+    },
+    {
+      "method": "TTSW10.Save51Click",
+      "entry": "0x47f094",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47f188"
+    },
+    {
+      "method": "TTSW10.Save61Click",
+      "entry": "0x47f188",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47f27c"
+    },
+    {
+      "method": "TTSW10.Save71Click",
+      "entry": "0x47f27c",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47f370"
+    },
+    {
+      "method": "TTSW10.Save81Click",
+      "entry": "0x47f370",
+      "code_bytes": 224,
+      "literal_pool_bytes": 20,
+      "successor": "0x47f464"
+    },
+    {
+      "method": "TTSW10.High1Click",
+      "entry": "0x47f464",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f46c"
+    },
+    {
+      "method": "TTSW10.Middle1Click",
+      "entry": "0x47f46c",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f474"
+    },
+    {
+      "method": "TTSW10.Low1Click",
+      "entry": "0x47f474",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f47c"
+    },
+    {
+      "method": "TTSW10.speedhigh",
+      "entry": "0x47f47c",
+      "code_bytes": 99,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f4e0"
+    },
+    {
+      "method": "TTSW10.speedmiddle",
+      "entry": "0x47f4e0",
+      "code_bytes": 99,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f544"
+    },
+    {
+      "method": "TTSW10.speedlow",
+      "entry": "0x47f544",
+      "code_bytes": 99,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f5a8"
+    },
+    {
+      "method": "TTSW10.timerin",
+      "entry": "0x47f5a8",
+      "code_bytes": 62,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f5e8"
+    },
+    {
+      "method": "TTSW10.NormalOption1Click",
+      "entry": "0x47f5e8",
+      "code_bytes": 184,
+      "literal_pool_bytes": 44,
+      "successor": "0x47f6cc"
+    },
+    {
+      "method": "TTSW10.Large1Click",
+      "entry": "0x47f6cc",
+      "code_bytes": 85,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f724"
+    },
+    {
+      "method": "TTSW10.Small1Click",
+      "entry": "0x47f724",
+      "code_bytes": 85,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f77c"
+    },
+    {
+      "method": "TTSW10.Normal1Click",
+      "entry": "0x47f77c",
+      "code_bytes": 85,
+      "literal_pool_bytes": 0,
+      "successor": "0x47f7d4"
+    },
+    {
+      "method": "TTSW10.taisen2",
+      "entry": "0x47f7d4",
+      "code_bytes": 2718,
+      "literal_pool_bytes": 26,
+      "successor": "0x48028c"
+    },
+    {
+      "method": "TTSW10.dameiji2",
+      "entry": "0x48028c",
+      "code_bytes": 110,
+      "literal_pool_bytes": 0,
+      "successor": "0x4802fc"
+    },
+    {
+      "method": "TTSW10.damei3",
+      "entry": "0x4802fc",
+      "code_bytes": 66,
+      "literal_pool_bytes": 0,
+      "successor": "0x480340"
+    },
+    {
+      "method": "TTSW10.ydamei3",
+      "entry": "0x480340",
+      "code_bytes": 66,
+      "literal_pool_bytes": 0,
+      "successor": "0x480384"
+    },
+    {
+      "method": "TTSW10.monidou",
+      "entry": "0x480384",
+      "code_bytes": 1804,
+      "literal_pool_bytes": 0,
+      "successor": "0x480a90"
+    },
+    {
+      "method": "TTSW10.monidouwork",
+      "entry": "0x480a90",
+      "code_bytes": 889,
+      "literal_pool_bytes": 0,
+      "successor": "0x480e0c"
+    },
+    {
+      "method": "TTSW10.tiny1Click",
+      "entry": "0x480e0c",
+      "code_bytes": 85,
+      "literal_pool_bytes": 0,
+      "successor": "0x480e64"
+    },
+    {
+      "method": "TTSW10.KeyboardControl1Click",
+      "entry": "0x480e64",
+      "code_bytes": 123,
+      "literal_pool_bytes": 0,
+      "successor": "0x480ee0"
+    },
+    {
+      "method": "TTSW10.MouseControl1Click",
+      "entry": "0x480ee0",
+      "code_bytes": 128,
+      "literal_pool_bytes": 0,
+      "successor": "0x480f60"
+    },
+    {
+      "method": "TTSW10.img6work",
+      "entry": "0x480f60",
+      "code_bytes": 2604,
+      "literal_pool_bytes": 0,
+      "successor": "0x48198c"
+    },
+    {
+      "method": "TTSW10.img5work",
+      "entry": "0x48198c",
+      "code_bytes": 1266,
+      "literal_pool_bytes": 0,
+      "successor": "0x481e80"
+    },
+    {
+      "method": "TTSW10.img4work",
+      "entry": "0x481e80",
+      "code_bytes": 412,
+      "literal_pool_bytes": 0,
+      "successor": "0x48201c"
+    },
+    {
+      "method": "TTSW10.img8work",
+      "entry": "0x48201c",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x482128"
+    },
+    {
+      "method": "TTSW10.img9work",
+      "entry": "0x482128",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x482234"
+    },
+    {
+      "method": "TTSW10.img10work",
+      "entry": "0x482234",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x482340"
+    },
+    {
+      "method": "TTSW10.img11work",
+      "entry": "0x482340",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x48244c"
+    },
+    {
+      "method": "TTSW10.img12work",
+      "entry": "0x48244c",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x482558"
+    },
+    {
+      "method": "TTSW10.img13work",
+      "entry": "0x482558",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x482664"
+    },
+    {
+      "method": "TTSW10.img15work",
+      "entry": "0x482664",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x482770"
+    },
+    {
+      "method": "TTSW10.img16work",
+      "entry": "0x482770",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x48287c"
+    },
+    {
+      "method": "TTSW10.img17work",
+      "entry": "0x48287c",
+      "code_bytes": 268,
+      "literal_pool_bytes": 0,
+      "successor": "0x482988"
+    },
+    {
+      "method": "TTSW10.HighScore1Click",
+      "entry": "0x482988",
+      "code_bytes": 228,
+      "literal_pool_bytes": 20,
+      "successor": "0x482a80"
+    },
+    {
+      "method": "TTSW10.mediaplayer5onnotify",
+      "entry": "0x482a80",
+      "code_bytes": 21,
+      "literal_pool_bytes": 0,
+      "successor": "0x482a98"
+    },
+    {
+      "method": "TTSW10.timer4ontimer",
+      "entry": "0x482a98",
+      "code_bytes": 948,
+      "literal_pool_bytes": 20,
+      "successor": "0x482e60"
+    },
+    {
+      "method": "TTSW10.openning9",
+      "entry": "0x482e60",
+      "code_bytes": 6381,
+      "literal_pool_bytes": 723,
+      "successor": "0x484a20"
+    },
+    {
+      "method": "TTSW10.K5Click",
+      "entry": "0x484a20",
+      "code_bytes": 46,
+      "literal_pool_bytes": 0,
+      "successor": "0x484a50"
+    },
+    {
+      "method": "TTSW10.K6Click",
+      "entry": "0x484a50",
+      "code_bytes": 193,
+      "literal_pool_bytes": 0,
+      "successor": "0x484b14"
+    },
+    {
+      "method": "TTSW10.TSW10close",
+      "entry": "0x484b14",
+      "code_bytes": 71,
+      "literal_pool_bytes": 0,
+      "successor": "0x484b5c"
+    },
+    {
+      "method": "TTSW10.BitBtn1Click",
+      "entry": "0x484b5c",
+      "code_bytes": 83,
+      "literal_pool_bytes": 0,
+      "successor": "0x484bb0"
+    },
+    {
+      "method": "TTSW10.BitBtn2Click",
+      "entry": "0x484bb0",
+      "code_bytes": 81,
+      "literal_pool_bytes": 0,
+      "successor": "0x484c04"
+    },
+    {
+      "method": "TTSW10.BitBtn3Click",
+      "entry": "0x484c04",
+      "code_bytes": 82,
+      "literal_pool_bytes": 0,
+      "successor": "0x484c58"
+    },
+    {
+      "method": "TTSW10.BitBtn4Click",
+      "entry": "0x484c58",
+      "code_bytes": 84,
+      "literal_pool_bytes": 0,
+      "successor": "0x484cac"
+    },
+    {
+      "method": "TTSW10.N800x5001Click",
+      "entry": "0x484cac",
+      "code_bytes": 154,
+      "literal_pool_bytes": 46,
+      "successor": "0x484d74"
+    },
+    {
+      "method": "TTSW10.N640x4001Click",
+      "entry": "0x484d74",
+      "code_bytes": 108,
+      "literal_pool_bytes": 0,
+      "successor": "0x484de0"
+    },
+    {
+      "method": "TTSW10.image34click",
+      "entry": "0x484de0",
+      "code_bytes": 6,
+      "literal_pool_bytes": 0,
+      "successor": "0x484de8"
+    },
+    {
+      "method": "TTSW10.append",
+      "entry": "0x484de8",
+      "code_bytes": 350,
+      "literal_pool_bytes": 0,
+      "successor": "0x484f48"
+    },
+    {
+      "method": "TTSW10.syokidata0",
+      "entry": "0x484f48",
+      "code_bytes": 14600,
+      "literal_pool_bytes": 1280,
+      "successor": "0x488d50"
+    }
+  ]
+}
