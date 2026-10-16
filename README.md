@@ -3,6 +3,9 @@
 C++ remake and Delphi source recovery for the English **Tower of the Sorcerer
 for Windows 1.2** by Oz & Kenichi.
 
+This project is largely AI-generated. AI agents perform most implementation and
+recovery work. I provide technical direction and look for unslop opportunities.
+
 [Download the original English game from Vector](https://www.vector.co.jp/soft/win95/game/se093259.html).
 
 | Project | Focus | Start here |

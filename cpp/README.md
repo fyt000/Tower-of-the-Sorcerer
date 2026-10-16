@@ -6,8 +6,8 @@ Use a Visual Studio developer shell with the C++ workload, Windows SDK, CMake,
 clang-format, Python and vcpkg. From the repository root:
 
 ```powershell
-$env:VCPKG_ROOT = 'D:/projects/vcpkg'
-$env:TOS_ORIGINAL_EXE = 'D:/Program Files (x86)/Tower of the Sorcerer/TSW.exe'
+$env:VCPKG_ROOT = 'C:/path/to/vcpkg'
+$env:TOS_ORIGINAL_EXE = 'C:/path/to/original/TSW.exe'
 python -m pip install pefile pillow
 Set-Location cpp
 cmake --preset windows
@@ -87,7 +87,7 @@ See [mechanics](../docs/mechanics.md), [fidelity](FIDELITY.md),
 Packaging requires fresh research comparisons and renderer/window reports:
 
 ```powershell
-python cpp/tools/package.py --original-dir "D:/Program Files (x86)/Tower of the Sorcerer"
+python cpp/tools/package.py --original-dir "C:/path/to/original"
 ```
 
 Output: `build/packages/`. [Dependency notices](THIRD_PARTY.md).

@@ -43,11 +43,11 @@ Local `source/` evidence is ignored. Extract the Japanese LHA with 7-Zip and
 InstallShield payload with [idecomp](https://github.com/lephilousophe/idecomp):
 
 ```powershell
-& 'C:/Program Files/7-Zip/7z.exe' x D:/Downloads/mtw16a.exe -obuild/localization/installer -y
+& 'C:/Program Files/7-Zip/7z.exe' x PATH/mtw16a.exe -obuild/localization/installer -y
 # From build/localization; -O bypasses idecomp's CP932 filename-length assertion:
 python -O PATH/idecomp.py -e cp932 installer/_SETUP.1 '*.exe' '*.txt' '*.cnt' '*.hlp' '*open2.bmp'
 # From the repository root:
-python cpp/tools/extract_japanese.py build/localization/Group1/Mtw.exe --html5 D:/Downloads/tswh5.zip --opening-bmp build/localization/Group10/Open2.bmp
+python cpp/tools/extract_japanese.py build/localization/Group1/Mtw.exe --html5 PATH/tswh5.zip --opening-bmp build/localization/Group10/Open2.bmp
 ```
 
 The extractor validates the EXE hash and dialogue/form structure. Source JSON

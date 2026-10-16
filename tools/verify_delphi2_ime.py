@@ -19,7 +19,7 @@ import unicorn
 from unicorn.x86_const import UC_X86_REG_EAX, UC_X86_REG_ESP
 
 from build_delphi2_reference import stage
-from review_delphi2_media import describe, validate_media
+from delphi2_toolchain import describe, validate_media
 from verify_delphi2_reference import ROOT, ORIGINAL_HASH, digest, emulator, execute
 
 DIFF_ZIP_HASH = "9d998eaa662e6f22b28f12eeb73934d5e42279a77243cf0856b3f6ab9c0ae968"

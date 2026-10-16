@@ -11,7 +11,7 @@ original routine extents, including exceptions, switch tables and literals.
 | 156 | Reviewed English/Japanese VCL differences |
 | `madoushi2` | Floor-49 stale summon-record fix |
 
-The supplied compiler is English Delphi 2. Original Delphi 2.0J Desktop adds an
+The current baseline uses English Delphi 2. Original Delphi 2.0J Desktop adds an
 IME field and two virtual methods; later fields shift four bytes and virtual
 slots also differ. Exact compiler patch and a matching Japanese build remain
 unverified. Original forms, icons and calendar tables are preserved; Japanese
@@ -24,23 +24,21 @@ delivery remain unverified. [Research setup](../docs/decompilation.md).
 
 ## Compiler setup
 
-Supply `Borland Delphi Client Server Suite 2.0.7z`, 7-Zip and the
+Supply local Delphi 2 media containing `DATA.Z` and the
 [original research cache](../docs/decompilation.md#prepare-data-and-decompilation).
 From the repository root, adjusting paths:
 
 ```powershell
-& 'C:/Program Files/7-Zip/7z.exe' x 'D:/Downloads/Borland Delphi Client Server Suite 2.0.7z' '-obuild/research/delphi2-media' -y
 git clone https://github.com/lephilousophe/idecomp.git build/research/idecomp
 git -C build/research/idecomp checkout bd2b77624b96bb2a4f347518d087126759296a03
-python tools/prepare_delphi2_reference.py --media 'build/research/delphi2-media/Borland Delphi Client Server Suite 2.0' --extractor build/research/idecomp --archive 'D:/Downloads/Borland Delphi Client Server Suite 2.0.7z'
+python tools/prepare_delphi2_reference.py --media PATH/TO/MEDIA --extractor build/research/idecomp
 ```
 
 Optional [compiler/IME probes](../tools/delphi2/) reproduce selected byte and
 API-trace comparisons with `build_delphi2_reference.py`,
 `verify_delphi2_reference.py` and `verify_delphi2_ime.py` in `tools/`.
 Absolute-address recovery DLLs are for emulation only. Reports live in
-`build/research/delphi2-reports/`; additional media review uses
-`tools/review_delphi2_media.py`. These probes do not establish a matching VCL.
+`build/research/delphi2-reports/`. These probes do not establish a matching VCL.
 IME verification also requires the DEKO declaration archive/pages named in its script.
 
 ## Build and run
@@ -48,7 +46,7 @@ IME verification also requires the DEKO declaration archive/pages named in its s
 ```powershell
 python tools/reconstruct_delphi_project.py
 python tools/build_delphi_game.py --smoke
-./tools/run_delphi_game.ps1 -Assets 'D:/Program Files (x86)/Tower of the Sorcerer'
+./tools/run_delphi_game.ps1 -Assets 'C:/path/to/original'
 ```
 
 Launcher options: `-SkipIntro`, `-Assets PATH`, `-SaveDirectory PATH`. Saves default

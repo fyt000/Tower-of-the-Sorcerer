@@ -4,13 +4,15 @@ import argparse
 import hashlib
 import io
 import json
-import os
+import sys
 import struct
 
 import pefile
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / 'tools'))
+from recovery_evidence import original_exe
 ORIGINAL_HASH = '41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779'
 RESOURCE_NAME = 'TTSW10'
 # Reviewed Picture.Data BMP starts for Image21 and Image33 in this hash-pinned form.
@@ -19,8 +21,7 @@ PICTURES = {'ending-story': ('Image21', 3098), 'ending-card': ('Image33', 260264
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--exe', type=Path, default=Path(os.environ.get(
-        'TOS_ORIGINAL_EXE', r'D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe')))
+    parser.add_argument('--exe', type=Path, default=original_exe())
     parser.add_argument('--output', type=Path, default=ROOT / 'build/assets')
     parser.add_argument('--binary-output', type=Path, help='Write original BMP resources for embedding, without PNG conversion')
     args = parser.parse_args()

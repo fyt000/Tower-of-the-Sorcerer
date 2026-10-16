@@ -18,9 +18,9 @@ import time
 import pefile
 
 from build_delphi2_reference import stage
-from recovery_evidence import ROOT, ORIGINAL_HASH, digest
+from recovery_evidence import ROOT, ORIGINAL_HASH, digest, original_assets
 from reconstruct_delphi_project import generated, output_path
-from review_delphi2_media import validate_media
+from delphi2_toolchain import validate_media
 from verify_delphi_entry import compare_entry
 
 WORK = ROOT / "build/delphi-game"
@@ -203,7 +203,7 @@ def main():
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--audio-smoke", action="store_true",
                         help="Run audio checks when audio code/assets/configuration changed")
-    parser.add_argument("--assets", type=Path, default=Path(r"D:\Program Files (x86)\Tower of the Sorcerer"))
+    parser.add_argument("--assets", type=Path, default=original_assets())
     args = parser.parse_args()
     for name, content in generated().items():
         if output_path(name).read_text(encoding="utf-8") != content:

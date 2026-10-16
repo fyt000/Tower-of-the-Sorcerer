@@ -17,6 +17,8 @@ import pefile
 from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_EDX, UC_X86_REG_ECX,
                                UC_X86_REG_ESP, UC_X86_REG_EFLAGS)
 
+from recovery_evidence import original_assets
+
 from verify_delphi_flight import FlightRunner
 from verify_delphi_graphics import (ROOT, WORK, ORIGINAL_HASH, digest, symbols, data_symbols,
                                    first_difference, walk, PixelOracle, pixel_check)
@@ -332,7 +334,7 @@ def compare_native_ui(original, build):
     rows = [json.loads(s) for s in record["native_output"].splitlines() if s.startswith("{")]
     if not rows[-1].get("ui_smoke_passed"):
         raise ValueError("Incomplete native UI smoke")
-    assets = Path(r"D:\Program Files (x86)\Tower of the Sorcerer")
+    assets = original_assets()
     runner = UIRunner(original, original=True, assets=assets)
     checks, pixels = [], []
     for scale in (0, 1):

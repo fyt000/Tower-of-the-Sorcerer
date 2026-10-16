@@ -8,7 +8,6 @@ from pathlib import Path
 import argparse
 import hashlib
 import json
-import os
 import random
 import struct
 import subprocess
@@ -22,6 +21,7 @@ from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ECX, UC_X86_REG_EDX,
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tools'))
+from recovery_evidence import original_exe
 HASH = '41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779'
 HERO, MAP, MONSTERS = 0x4b8688, 0x4b8934, 0x489910
 MAP_BYTES, HERO_BYTES, SAVE_BYTES = 6273, 684, 6957
@@ -205,8 +205,7 @@ def main():
     (ROOT / 'build/cpp/reports').mkdir(parents=True, exist_ok=True)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--probe', type=Path, default=ROOT/'build/cpp/vs/Release/tsw_probe.exe')
-    parser.add_argument('--original-exe', type=Path, default=Path(os.environ.get(
-        'TOS_ORIGINAL_EXE', r'D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe')))
+    parser.add_argument('--original-exe', type=Path, default=original_exe())
     parser.add_argument('--fixtures', type=Path, default=ROOT/'build/cpp/vs/save-checks')
     parser.add_argument('--report', type=Path, default=ROOT/'build/cpp/reports/save-report.json')
     args = parser.parse_args()

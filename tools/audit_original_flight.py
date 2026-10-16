@@ -8,19 +8,18 @@ this repository. TOS_ORIGINAL_EXE can override the installation path.
 
 import hashlib
 import json
-import os
 import struct
 from pathlib import Path
 
 import unicorn
 from unicorn.x86_const import UC_X86_REG_EAX, UC_X86_REG_EIP, UC_X86_REG_ESP
 
+from recovery_evidence import original_exe
+
 from original_event_probe import ROOT, md, pe, probe
 
 
-EXE = Path(os.environ.get(
-    "TOS_ORIGINAL_EXE", r"D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe"
-))
+EXE = original_exe()
 
 
 def control(name, address, floor, highest, direction=0, changes=()):

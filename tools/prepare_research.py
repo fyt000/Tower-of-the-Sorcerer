@@ -13,7 +13,7 @@ import subprocess
 import sys
 import tempfile
 
-from recovery_evidence import ROOT, ORIGINAL_HASH, digest
+from recovery_evidence import ROOT, ORIGINAL_HASH, digest, original_assets
 
 DATA_FILES = (
     "data/original-map-bytes.bin", "data/original-dialogue.json",
@@ -129,8 +129,7 @@ def decompile(ghidra):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", type=Path, default=Path(os.environ.get(
-        "TOS_ORIGINAL_EXE", r"D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe")).parent)
+    parser.add_argument("--source", type=Path, default=original_assets())
     parser.add_argument("--check", action="store_true", help="Check prerequisites without generating files")
     parser.add_argument("--decompile", action="store_true", help="Also prepare/check Ghidra exports and inventories")
     parser.add_argument("--ghidra", type=Path, default=ROOT / "build/research/ghidra_11.0.3_PUBLIC")

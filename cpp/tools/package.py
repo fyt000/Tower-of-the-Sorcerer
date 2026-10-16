@@ -3,7 +3,6 @@ from pathlib import Path
 import argparse
 import hashlib
 import json
-import os
 import re
 import shutil
 import subprocess
@@ -13,6 +12,8 @@ from comparison_boundary import check_skipped_calls
 
 CPP = Path(__file__).resolve().parents[1]
 ROOT = CPP.parent
+sys.path.insert(0, str(ROOT / 'tools'))
+from recovery_evidence import original_assets
 VERSION = '0.9'
 NAME = f'tower-of-the-sorcerer-{VERSION}-windows-x64'
 
@@ -21,8 +22,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--build-dir', type=Path, default=ROOT / 'build/cpp/vs')
     parser.add_argument('--configuration', default='Release', choices=['Debug', 'Release'])
-    parser.add_argument('--original-dir', type=Path, default=Path(os.environ.get(
-        'TOS_ORIGINAL_EXE', r'D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe')).parent)
+    parser.add_argument('--original-dir', type=Path, default=original_assets())
     parser.add_argument('--output', type=Path, default=ROOT / 'build/packages' / NAME)
     args = parser.parse_args()
     subprocess.run([sys.executable, str(ROOT / 'tools/prepare_research.py'),

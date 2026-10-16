@@ -3,11 +3,12 @@ from pathlib import Path
 import hashlib, json, sys
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tools'))
+from recovery_evidence import original_exe
 from extract_original import extract_maps, extract_dialogue, MONSTER_OFFSET, MONSTERS
 import struct
 
 def main():
-    source = Path(sys.argv[1] if len(sys.argv)>1 else r'D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe')
+    source = Path(sys.argv[1]) if len(sys.argv) > 1 else original_exe()
     exe = source.read_bytes()
     digest = hashlib.sha256(exe).hexdigest()
     assert digest == '41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779'

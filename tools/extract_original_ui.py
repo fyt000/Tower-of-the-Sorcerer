@@ -7,10 +7,9 @@ from pathlib import Path
 import argparse
 import hashlib
 import json
-import os
 import struct
 
-from recovery_evidence import ROOT, ORIGINAL_HASH as HASH
+from recovery_evidence import ROOT, ORIGINAL_HASH as HASH, original_exe
 
 
 class FormReader:
@@ -141,7 +140,7 @@ def walk(component):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--exe", type=Path, default=Path(os.environ.get("TOS_ORIGINAL_EXE", r"D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe")))
+    parser.add_argument("--exe", type=Path, default=original_exe())
     parser.add_argument("--output", type=Path, default=ROOT / "build/research/decompilation/presentation")
     args = parser.parse_args()
     import pefile

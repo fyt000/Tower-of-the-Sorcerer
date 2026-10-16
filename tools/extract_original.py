@@ -16,8 +16,10 @@ from pathlib import Path
 
 from PIL import Image, ImageOps
 
+from recovery_evidence import original_assets
+
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SOURCE = Path(r"D:\Program Files (x86)\Tower of the Sorcerer")
+DEFAULT_SOURCE = original_assets()
 MAP_CODE_START = 0x550B8
 MAP_CODE_END = 0x5FFD8
 MONSTER_OFFSET = 0x88D10

@@ -285,11 +285,11 @@ def main():
     original = pefile.PE(str(args.original))
     inventory = json.loads((ROOT / "build/research/decompilation/whole-program/structural-inventory.json").read_text())
     sizes = {c["name"]: c["instance_size"] for c in inventory["classes"]}
+    media = json.loads((toolchain / "media-manifest.json").read_text())
     report = dict(schema_version=1, original_sha256=ORIGINAL_HASH,
-                  archive_sha256=json.loads((toolchain / "media-manifest.json").read_text())["archive"]["sha256"],
+                  archive_sha256=media.get("archive", {}).get("sha256"),
                   compiler_sha256=build["compiler_sha256"],
                   variants={}, original_framework_cases=framework_cases(original, {**RUNTIME, "TButton.Click": 0x42A370}))
-    media = json.loads((toolchain / "media-manifest.json").read_text())
     report["toolchain_provenance"] = dict(payload_sha256=media["payload_sha256"],
                                          extractor=media["extractor"],
                                          total_media_files=media["total_count"], extracted_files=media["extracted_count"],

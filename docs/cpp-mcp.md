@@ -7,7 +7,7 @@ Example client configuration, using your checkout's absolute executable path:
 {
   "mcpServers": {
     "tower-cpp": {
-      "command": "D:/projects/tos-rust/build/cpp/vs/Release/tsw_cli.exe",
+      "command": "C:/path/to/checkout/build/cpp/vs/Release/tsw_cli.exe",
       "args": ["mcp"]
     }
   }

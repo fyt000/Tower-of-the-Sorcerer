@@ -6,7 +6,6 @@ Requires pefile, capstone, and unicorn, as used by original_event_probe.py.
 """
 import hashlib
 import json
-import os
 import pathlib
 import struct
 
@@ -15,8 +14,10 @@ import pefile
 import unicorn
 from unicorn.x86_const import UC_X86_REG_EAX, UC_X86_REG_EDX, UC_X86_REG_EIP, UC_X86_REG_ESP
 
+from recovery_evidence import original_exe
+
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-EXE = pathlib.Path(os.environ.get("TOS_ORIGINAL_EXE", r"D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe"))
+EXE = original_exe()
 EXPECTED_SHA256 = "41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779"
 IMAGE = pefile.PE(str(EXE)).get_memory_mapped_image()
 MD = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)

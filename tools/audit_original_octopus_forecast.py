@@ -7,7 +7,6 @@ arguments passed to the original integer-to-string routine are recorded.
 import argparse
 import hashlib
 import json
-import os
 import pathlib
 import struct
 
@@ -20,9 +19,10 @@ from unicorn.x86_const import (
     UC_X86_REG_EIP, UC_X86_REG_ESP,
 )
 
+from recovery_evidence import original_exe
+
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-EXE = pathlib.Path(os.environ.get(
-    "TOS_ORIGINAL_EXE", r"D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe"))
+EXE = original_exe()
 IMAGE = pefile.PE(str(EXE)).get_memory_mapped_image()
 MD = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)
 END = 0x6FFFF0

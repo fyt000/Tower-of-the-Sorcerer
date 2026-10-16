@@ -1,4 +1,4 @@
-"""Extract the user's Delphi 2 research baseline without running its installer.
+"""Extract a local Delphi 2 research baseline without running its installer.
 
 Requires an already unpacked media directory and a checkout of
 https://github.com/lephilousophe/idecomp at the pinned revision below.

@@ -13,6 +13,8 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from recovery_evidence import original_assets
+
 ROOT = Path(__file__).resolve().parents[1]
 CONTROL = re.compile(r"\\([a-zA-Z]+)(-?\d+)? ?|\\'([0-9a-fA-F]{2})|\\([^a-zA-Z])")
 DESTINATIONS = {
@@ -102,7 +104,7 @@ def extract(source: Path, rtf: Path) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", type=Path, default=Path(r"D:\Program Files (x86)\Tower of the Sorcerer"))
+    parser.add_argument("--source", type=Path, default=original_assets())
     options = parser.add_mutually_exclusive_group(required=True)
     options.add_argument("--hlp-rtf", type=Path, help="Complete helpdeco -r output")
     options.add_argument("--helpdeco", type=Path, help="Path to a working helpdeco executable")

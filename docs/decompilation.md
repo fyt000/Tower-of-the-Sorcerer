@@ -25,6 +25,10 @@ recovers events, then assembles a new campaign. Existing editable campaigns and
 interactions are preserved; `extract_original.py --regenerate-campaign` explicitly
 rebuilds a campaign. Preserve manually adjusted exports before regeneration.
 
+Tools default to `build/research/TSW.exe`; override with `TOS_ORIGINAL_EXE`.
+Asset paths use `TOS_ASSETS`, otherwise the executable's directory. Extraction
+and build commands also accept explicit source/asset paths.
+
 | Local output | Content |
 |---|---|
 | `build/research/TSW.exe` | Verified original copy |

@@ -16,6 +16,8 @@ import subprocess
 import zipfile
 
 from PIL import Image, ImageChops
+from recovery_evidence import original_assets
+
 from original_event_probe import ROOT, RAW, pe, probe
 
 EXE_HASH = '41cb9844d9bdcf2641a34d4b152d6fbbb0455077abe0e9d7bfed77761a4d2779'
@@ -123,7 +125,7 @@ def main():
     thief = probe(0x465900, 50, 5, 5, changes=[(50, 5, 4, 21)], include_presentation=True)
     assert thief['queue'] == [[10, 264, 0], [0, 0, 0]]
 
-    original_dir = Path(os.environ.get('TOS_ORIGINAL_EXE', r'D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe')).parent
+    original_dir = original_assets()
     original_masks = Image.open(original_dir / 'Data3/Chtableb.oz').convert('RGBA')
     with zipfile.ZipFile(UPSTREAM / 'tsw.patch.zip') as archive:
         patched_masks = Image.open(io.BytesIO(archive.read('Data3/Chtableb.oz'))).convert('RGBA')

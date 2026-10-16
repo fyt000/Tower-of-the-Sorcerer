@@ -8,7 +8,6 @@ unrelated field-hazard callbacks are bypassed and explicitly reported.
 import argparse
 import hashlib
 import json
-import os
 import pathlib
 import struct
 
@@ -20,9 +19,10 @@ from unicorn.x86_const import (
     UC_X86_REG_EDX, UC_X86_REG_EIP, UC_X86_REG_ESP,
 )
 
+from recovery_evidence import original_exe
+
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-EXE = pathlib.Path(os.environ.get(
-    "TOS_ORIGINAL_EXE", r"D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe"))
+EXE = original_exe()
 PE = pefile.PE(str(EXE))
 IMAGE = PE.get_memory_mapped_image()
 MD = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)

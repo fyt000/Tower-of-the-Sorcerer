@@ -4,12 +4,14 @@ Requires pefile, capstone, and unicorn. Set TOS_ORIGINAL_EXE to override
 where the installed executable is read. Calls are skipped unless explicitly
 whitelisted through follow_calls; followed and skipped targets are reported.
 """
-import json, struct, pathlib, sys, os
+import json, struct, pathlib, sys
 import capstone, pefile, unicorn
 from unicorn.x86_const import *
 
+from recovery_evidence import original_exe
+
 ROOT=pathlib.Path(__file__).resolve().parents[1]
-pe=pefile.PE(os.environ.get('TOS_ORIGINAL_EXE',r'D:\Program Files (x86)\Tower of the Sorcerer\TSW.exe'))
+pe=pefile.PE(str(original_exe()))
 md=capstone.Cs(capstone.CS_ARCH_X86,capstone.CS_MODE_32)
 MAP=0x4b8934
 RAW=(ROOT/'data/original-map-bytes.bin').read_bytes()

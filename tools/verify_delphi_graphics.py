@@ -20,6 +20,8 @@ from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_EDX, UC_X86_REG_ECX,
                                UC_X86_REG_ESP, UC_X86_REG_EIP, UC_X86_REG_EFLAGS)
 from PIL import Image, ImageChops
 
+from recovery_evidence import original_assets
+
 from verify_delphi2_reference import ROOT, ORIGINAL_HASH, digest, emulator, symbols, class_vmt
 from build_delphi_game import WORK
 
@@ -84,7 +86,7 @@ class GraphicsRunner:
         self.self = 0x600000
         self.bitmap_vmt, self.lines_vmt = 0x601000, 0x602000
         self.lines, self.font = 0x603000, 0x604000
-        self.assets = assets or Path(r"D:\Program Files (x86)\Tower of the Sorcerer")
+        self.assets = assets or original_assets()
         manifest = json.loads((ROOT / "build/research/decompilation/presentation/ui-manifest.json").read_text())
         self.form = next(f for f in manifest["forms"] if f["class_name"] == "TTSW10")
         self.components = {f["name"]: 0x610000 + i * 0x400 for i, f in enumerate(self.form["fields"])}
@@ -627,7 +629,7 @@ def compare_native_pixels(original, build, assets):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--assets", type=Path, default=Path(r"D:\Program Files (x86)\Tower of the Sorcerer"))
+    parser.add_argument("--assets", type=Path, default=original_assets())
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     original_path = ROOT / "build/research/TSW.exe"
