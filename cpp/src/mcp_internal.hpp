@@ -27,7 +27,7 @@ struct Session {
         steps = recorder.history().size() - 1;
     }
 
-    void act(const PlayerInput&);
+    InputOutcome act(const PlayerInput&);
     void record(const PlayerInput&, const InputOutcome&);
 };
 

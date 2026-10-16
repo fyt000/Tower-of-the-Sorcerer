@@ -4,6 +4,7 @@
 #include "tsw/game_types.hpp"
 #include "tsw/items.hpp"
 #include "tsw/rankings.hpp"
+#include "tsw/status_message.hpp"
 #include <array>
 #include <cstdint>
 #include <filesystem>
@@ -123,7 +124,9 @@ enum Tile : std::uint8_t {
     VampireBat = 147,
     SlimeLord = 149,
     MagicianA = 151,
+    MagicianA2 = 152,
     MagicianB = 153,
+    MagicianB2 = 154,
     DarkKnight = 155,
     GateKeeperA = 157,
     StairCover = 159
@@ -330,6 +333,8 @@ class Game {
     void finish_commands(bool continue_speech = false);
     bool busy() const;
 
+    const std::optional<StatusMessage>& status_message() const { return displayed_status_; }
+
     int shop_cost() const { return dialogue && dialogue->shop ? shop_cost_ : -1; }
 
     int& inventory(Item item) { return hero.items.at(std::to_underlying(item)); }
@@ -414,6 +419,8 @@ class Game {
     ShopKind shop_kind_{};
     int shop_cost_{}, shop_hint_{}, shop_id_{}, shop_npc_cell_{};
     bool stopped_{};
+    StatusMessage prepared_status_;
+    std::optional<StatusMessage> displayed_status_;
     void walk_to_contact();
     void stair(bool up);
     void face_away_from_stair(bool climbed);
@@ -435,6 +442,8 @@ class Game {
     int attack_multiplier(int enemy, bool enemy_first) const;
     void initialize_cycle();
     void update_status(int code);
+    void publish_status();
+    void classify_neighbor();
     void change_music_for_floor();
     void ending();
     void queue_death();

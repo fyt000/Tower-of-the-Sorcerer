@@ -564,5 +564,28 @@
     "Finish with at least 5 red keys.": "通关时持有至少5把红钥匙。"
   },
   "ending_story": "漫长的战斗宣告结束，虚荣之塔轰然崩塌。\n\n诸神回归天际，\n战士重返大地。\n\n现在渐渐成为过去，\n这段旅程也即将化作往事。\n\n你稍稍回首，\n便迈出脚步，踏上新的旅途。",
-  "opening_story": "时机已至……\n我将运用全能之力，击碎神剑，\n获得伟大的智慧……"
+  "opening_story": "时机已至……\n我将运用全能之力，击碎神剑，\n获得伟大的智慧……",
+  "status": {
+    "IronSwordFound": "拿到了铁剑，攻击力提升{0}点！",
+    "SilverSwordFound": "拿到了银剑，攻击力提升{0}点！",
+    "KnightSwordFound": "拿到了骑士剑，攻击力提升{0}点！",
+    "HolySwordFound": "拿到了圣剑，攻击力提升{0}点！",
+    "SacredSwordFound": "拿到了神圣剑，攻击力提升{0}点！",
+    "IronShieldFound": "拿到了铁盾，防御力提升{0}点！",
+    "SilverShieldFound": "拿到了银盾，防御力提升{0}点！",
+    "KnightShieldFound": "拿到了骑士盾，防御力提升{0}点！",
+    "HolyShieldFound": "拿到了圣盾，防御力提升{0}点！",
+    "SacredShieldFound": "拿到了神圣盾，防御力提升{0}点！",
+    "RedPotionFound": "拿到了红血瓶，生命提升{0}点！",
+    "BluePotionFound": "拿到了蓝血瓶，生命提升{0}点！",
+    "RedGemFound": "拿到了红宝石，攻击力提升{0}点！",
+    "BlueGemFound": "拿到了蓝宝石，防御力提升{0}点！",
+    "AltarHitPoints": "生命：{0}点！",
+    "AltarAttack": "攻击：{0}点！",
+    "AltarDefense": "防御：{0}点！",
+    "ElixirUsed": "使用了圣水！生命提升{0}点！",
+    "BombUsed": "使用了破坏爆弹！四周的敌人被消灭了！获得了{0}金币！",
+    "SnowCrystalUsed": "使用了雪花结晶！熔岩凝固，变成了道路！",
+    "BattleWon": "{2}被打倒了！获得了{0}金币！"
+  }
 }

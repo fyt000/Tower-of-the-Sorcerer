@@ -73,15 +73,24 @@ bool Game::choose(int choice) {
             return false;
         const int scale = hero.cycle_factor_minus_one + 1, area = (hero.floor + 10) / 10;
         switch (static_cast<AltarUpgrade>(choice)) {
-        case AltarUpgrade::HitPoints:
-            hero.hp += 100 * (hero.altar_purchases + 1) * scale;
+        case AltarUpgrade::HitPoints: {
+            const int gain = 100 * (hero.altar_purchases + 1) * scale;
+            prepared_status_ = {DialogueId::AltarHitPoints, gain};
+            hero.hp += gain;
             break;
-        case AltarUpgrade::Attack:
-            hero.attack += 2 * area * scale;
+        }
+        case AltarUpgrade::Attack: {
+            const int gain = 2 * area * scale;
+            prepared_status_ = {DialogueId::AltarAttack, gain};
+            hero.attack += gain;
             break;
-        case AltarUpgrade::Defense:
-            hero.defense += 4 * area * scale;
+        }
+        case AltarUpgrade::Defense: {
+            const int gain = 4 * area * scale;
+            prepared_status_ = {DialogueId::AltarDefense, gain};
+            hero.defense += gain;
             break;
+        }
         }
         hero.gold -= shop_cost_;
         ++hero.altar_purchases;
@@ -140,7 +149,7 @@ bool Game::choose(int choice) {
     shop_kind_ = ShopKind::None;
     if (altar) {
         push(Op::Wait);
-        push(Op::Message, 1);
+        push(Op::Message, msg::Prepared);
     } else {
         push(Op::Message);
         push(Op::UpdateInventory);
@@ -319,10 +328,12 @@ void Game::speak_thief() {
             push(Op::Wait);
             queue_speech(SpeechId::ThiefFirstDeparture);
         } else if (hero.x == 2 || hero.x == 3) {
+            prepared_status_ = {DialogueId::SecretPassage};
+            message_code = msg::Prepared;
             push(Op::Wait);
             queue_speech(SpeechId::ThiefOpensPrison);
             push(Op::Wait);
-            push(Op::Message, 1);
+            push(Op::Message, msg::Prepared);
             push(Op::Wait);
             push(Op::DoorFrame, 67, DoorMotion::LowerWall);
             expand_door();

@@ -1,6 +1,7 @@
 #include "tsw/localization.hpp"
 #include "fairy_dialogue.hpp"
 #include "localization_data.hpp"
+#include "tsw/game.hpp"
 #include <algorithm>
 #include <cctype>
 #include <format>
@@ -65,6 +66,29 @@ std::string_view localized_ending(Language language) {
     return localization_data::Endings.at(index(language));
 }
 
+std::string localized_status_message(Language language, const StatusMessage& message) {
+    const auto column = index(language);
+    for (const auto& entry : localization_data::StatusTemplates)
+        if (message.formatted && entry.id == message.text) {
+            const auto plural = message.amount == 1 ? "" : "s";
+            const auto monster =
+                message.monster_index < 0 ? std::string_view{}
+                : language == Language::English
+                    ? Game::monster_name(message.monster_index)
+                    : localized_dialogue(language, DialogueId::MonsterNameBase + message.monster_index);
+            return std::vformat(entry.text[column], std::make_format_args(message.amount, plural, monster));
+        }
+    return std::string(localized_dialogue(language, message.text));
+}
+
+std::string localized_status(Language language, const Game& game) {
+    if (const auto& message = game.status_message();
+        message && game.status == localized_status_message(Language::English, *message))
+        return localized_status_message(language, *message);
+    // Application messages and external errors can replace the canonical gameplay status.
+    return localized_text(language, game.status);
+}
+
 std::string localized_text(Language language, std::string_view source) {
     const auto column = index(language);
     if (language == Language::English)
@@ -119,6 +143,9 @@ std::vector<int> localization_codepoints() {
         for (const auto text : entries)
             add(text);
     for (const auto& entry : localization_data::Text)
+        for (const auto text : entry.text)
+            add(text);
+    for (const auto& entry : localization_data::StatusTemplates)
         for (const auto text : entry.text)
             add(text);
     for (const auto text : localization_data::Labels)

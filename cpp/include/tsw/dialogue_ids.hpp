@@ -67,6 +67,7 @@ enum class SpeechId : int {
     ThiefTimeGate = 264,
 };
 enum class DialogueId : int {
+    First = 0,
     ThiefFirstEquipmentAdvice = 57,  // Final paragraph of speech 5.
     ThiefSecondEquipmentAdvice = 58, // Final paragraph of speech 17.
     ZenoPlan = 59,                   // Final paragraph of speech 55.
@@ -78,8 +79,35 @@ enum class DialogueId : int {
     OldManElixir = 89,
     NoMoreAdvice = 90,
     MerchantRescueThanks = 91,
+    MonsterNameBase = 94,    // Add a monster row index.
     MerchantOfferBase = 246, // Add the merchant table row (0..11).
     StatusOffset = 127,      // Add an Op::Message code.
+    YellowKeyFound = 128,
+    BlueKeyFound = 129,
+    RedKeyFound = 130,
+    SecretPassage = 137,
+    IronSwordFound = 152,
+    SilverSwordFound = 153,
+    KnightSwordFound = 154,
+    HolySwordFound = 155,
+    SacredSwordFound = 156,
+    IronShieldFound = 157,
+    SilverShieldFound = 158,
+    KnightShieldFound = 159,
+    HolyShieldFound = 160,
+    SacredShieldFound = 161,
+    EquipmentPickupBase = IronSwordFound, // Add the sword/shield acquisition index (0..9).
+    RedPotionFound = 162,
+    BluePotionFound = 163,
+    RedGemFound = 164,
+    BlueGemFound = 165,
+    AltarHitPoints = 181,
+    AltarAttack = 182,
+    AltarDefense = 183,
+    ElixirUsed = 186,
+    BombUsed = 188,
+    SnowCrystalUsed = 192,
+    BattleWon = 199,
 
     // Fairy evaluation fragments from yousei (0x478F0C). The title is distinct from
     // the numeric leaderboard rank, which appears only when the score places.
@@ -102,6 +130,7 @@ enum class DialogueId : int {
     FairyFarewell = 236,     // Fourth and subsequent visits.
     FairyRankPrefix = 244,
     FairyRankSuffix = 245,
+    Count = 268,
 };
 enum class ContinuationStage : int {
     None = 0,
@@ -130,6 +159,10 @@ constexpr DialogueId dialogue_for(SpeechId id) {
 
 constexpr DialogueId operator+(DialogueId base, int offset) {
     return static_cast<DialogueId>(std::to_underlying(base) + offset);
+}
+
+constexpr bool valid_dialogue(DialogueId id) {
+    return id >= DialogueId::First && id < DialogueId::Count;
 }
 
 constexpr bool is_fairy_speech(SpeechId id) {

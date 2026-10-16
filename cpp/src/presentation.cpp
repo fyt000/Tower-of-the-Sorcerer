@@ -1441,16 +1441,19 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
     DrawLine(0, MenuHeight + ContentHeight, CanvasWidth, MenuHeight + ContentHeight, Border);
     std::string status =
         ui.flight >= 0 ? std::format("Previewing floor {}. Up / Down to choose; Enter to travel.", ui.flight)
-                       : game.status;
-    if (ui.ending_wait)
+                       : localized_status(ui.language, game);
+    bool translate_status = ui.flight >= 0;
+    if (ui.ending_wait) {
         status = "The End. Press Enter / Space to continue to the backside tower.";
+        translate_status = true;
+    }
     if (ui.replay_active) {
         const std::string state =
             ui.replay_paused
                 ? (ui.replay_step == ui.replay_count && !ui.replay_in_progress ? "Finished" : "Paused")
                 : "Playing";
         status = ui.replay_error.empty() ? localized_text(ui.language, state) + "  /  " + ui.replay_name +
-                                               "  /  " + localized_text(ui.language, game.status)
+                                               "  /  " + localized_status(ui.language, game)
                                          : ui.replay_error;
     }
     if (!ui.replay_active && !ui.modal() && !game.dialogue && ui.flight < 0) {
@@ -1458,8 +1461,10 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
         for (int i = 0; i < ItemCount; ++i)
             if (game.inventory(static_cast<Item>(i)) > 0) {
                 if (CheckCollisionPointRec(
-                        mouse, {16.f + owned % 3 * 42, MenuHeight + 238.f + owned / 3 * 40, 42, 40}))
+                        mouse, {16.f + owned % 3 * 42, MenuHeight + 238.f + owned / 3 * 40, 42, 40})) {
                     status = std::string(Game::item_name(static_cast<Item>(i))) + "  -  click to inspect";
+                    translate_status = true;
+                }
                 ++owned;
             }
     }
@@ -1467,16 +1472,18 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
         CheckCollisionPointRec(mouse, MapArea) && mouse.x < BoardX + BoardPixels &&
         mouse.y < BoardY + BoardPixels) {
         const int index = cell(int((mouse.x - BoardX) / TileSize), int((mouse.y - BoardY) / TileSize));
-        if (const auto info = orb_tile_info(game, game.hero.floor, index, ui.hero_orb_actual_damage))
+        if (const auto info = orb_tile_info(game, game.hero.floor, index, ui.hero_orb_actual_damage)) {
             status = std::format("{} | HP {} | ATK {} | DEF {} | Gold {} | HP cost {}",
                                  Game::monster_name(info->monster_index), info->hp, info->attack,
                                  info->defense, info->gold,
                                  info->forecast.penetrates ? std::to_string(info->forecast.damage) : "∞");
+            translate_status = true;
+        }
     }
     art_->text.fit(
         status,
         {7, MenuHeight + ContentHeight + 3, ui.ending_wait ? 643.f : CanvasWidth - 14.f, StatusHeight - 6},
-        17, Ink, {.translate = !ui.replay_active});
+        17, Ink, {.translate = translate_status && !ui.replay_active});
     if (ui.ending_wait && !ui.replay_active &&
         art_->text.button({658, MenuHeight + ContentHeight + 3, 135, StatusHeight - 6}, "Continue", mouse,
                           !ui.modal()))

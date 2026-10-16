@@ -1,6 +1,7 @@
 #include "tsw/game.hpp"
 #include "fairy_dialogue.hpp"
 #include "original_constants.hpp"
+#include "tsw/localization.hpp"
 #include <algorithm>
 #include <stdexcept>
 
@@ -53,7 +54,10 @@ void Game::new_game() {
     shop_kind_ = ShopKind::None;
     checkpoint_requested = false;
     contact_index = cell(hero.x, hero.y);
-    scratch_index = neighbor_index = message_code = door_opened = 0;
+    scratch_index = neighbor_index = door_opened = 0;
+    message_code = msg::Empty;
+    prepared_status_ = {};
+    displayed_status_.reset();
     status = "Find the princess at the top of the tower.";
 }
 
@@ -148,9 +152,20 @@ void Game::expand_door() {
 }
 
 void Game::update_status(int code) {
-    message_code = code;
-    if (code > 1 && std::to_underlying(DialogueId::StatusOffset + code) < std::ssize(original::Dialogue))
-        status = original_dialogue(DialogueId::StatusOffset + code);
+    // Opcode zero refreshes the current classification; one publishes prepared text.
+    if (code != msg::Refresh)
+        message_code = code;
+    publish_status();
+}
+
+void Game::publish_status() {
+    if (message_code < msg::Empty || !valid_dialogue(DialogueId::StatusOffset + message_code))
+        return;
+    displayed_status_ =
+        message_code == msg::Prepared
+            ? prepared_status_
+            : StatusMessage{.text = DialogueId::StatusOffset + message_code, .formatted = false};
+    status = localized_status_message(Language::English, *displayed_status_);
 }
 
 void Game::show_dialogue(SpeechId id) {

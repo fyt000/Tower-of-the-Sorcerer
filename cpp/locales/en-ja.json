@@ -564,5 +564,28 @@
     "Finish with at least 5 red keys.": "Finish with at least 5 red keys."
   },
   "ending_story": "The long battle is over; the tower of vanity crumbles.\n\nThe gods return to the heavens,\nand the warrior returns to the earth.\n\nThe present slips into the past,\nand this journey, too, is becoming a memory.\n\nYou pause to look back,\nthen take your first step toward a new journey.",
-  "opening_story": "The time has come...\nWith my omnipotent power,\nI shall shatter the divine sword\nand obtain great wisdom..."
+  "opening_story": "The time has come...\nWith my omnipotent power,\nI shall shatter the divine sword\nand obtain great wisdom...",
+  "status": {
+    "IronSwordFound": "You found an Iron Sword. Attack increases by {0} points!",
+    "SilverSwordFound": "You found a Silver Sword. Attack increases by {0} points!",
+    "KnightSwordFound": "You found a Knight's Sword. Attack increases by {0} points!",
+    "HolySwordFound": "You found the Holy Sword. Attack increases by {0} points!",
+    "SacredSwordFound": "You found the Divine Sword. Attack increases by {0} points!",
+    "IronShieldFound": "You found an Iron Shield. Defense increases by {0} points!",
+    "SilverShieldFound": "You found a Silver Shield. Defense increases by {0} points!",
+    "KnightShieldFound": "You found a Knight's Shield. Defense increases by {0} points!",
+    "HolyShieldFound": "You found the Holy Shield. Defense increases by {0} points!",
+    "SacredShieldFound": "You found the Divine Shield. Defense increases by {0} points!",
+    "RedPotionFound": "You found a red potion. HP increases by {0} points!",
+    "BluePotionFound": "You found a blue potion. HP increases by {0} points!",
+    "RedGemFound": "You found a red crystal. Attack increases by {0} points!",
+    "BlueGemFound": "You found a blue crystal. Defense increases by {0} points!",
+    "AltarHitPoints": "HP: {0} points!",
+    "AltarAttack": "Attack: {0} points!",
+    "AltarDefense": "Defense: {0} points!",
+    "ElixirUsed": "You used an Elixir! HP increases by {0} points!",
+    "BombUsed": "You used the Orb of Destruction! Enemies on all four sides fell! You received {0} gold!",
+    "SnowCrystalUsed": "You used the Snow Crystal! The lava solidified into a path!",
+    "BattleWon": "{2} was defeated! You received {0} gold!"
+  }
 }

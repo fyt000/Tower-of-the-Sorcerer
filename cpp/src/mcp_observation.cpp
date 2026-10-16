@@ -238,13 +238,15 @@ std::string dump(const Json& value) {
     return output;
 }
 
-void Session::act(const PlayerInput& input) {
-    record(input, execute_input(game, flight, input));
+InputOutcome Session::act(const PlayerInput& input) {
+    auto outcome = execute_input(game, flight, input);
+    record(input, outcome);
     if (input.kind == InputKind::NewGame) {
         const auto previous = recorder.history().size();
         recorder.rankings(game.rankings);
         steps += recorder.history().size() - previous;
     }
+    return outcome;
 }
 
 void Session::record(const PlayerInput& input, const InputOutcome& outcome) {
@@ -589,10 +591,11 @@ Json navigate(Session& session, bool developer, int x, int y, bool interact) {
         return result;
     }
     auto step = [&](Direction direction) {
-        session.act(PlayerInput::move(direction));
+        const auto outcome = session.act(PlayerInput::move(direction));
         result["inputs"] = result["inputs"].as<int>() + 1;
         for (const auto& message : session.last_action["messages"].get_array())
             result["messages"].get_array().push_back(message);
+        return !outcome.speech.empty();
     };
     const auto& directions = path["directions"].get_array();
     for (std::size_t i = 0; i < directions.size(); ++i) {
@@ -611,7 +614,7 @@ Json navigate(Session& session, bool developer, int x, int y, bool interact) {
             result["reached"] = true;
             return result;
         }
-        step(direction);
+        bool speech = step(direction);
         if (!session.last_action["ok"].get<bool>()) {
             result["reason"] = "refused";
             return result;
@@ -621,7 +624,7 @@ Json navigate(Session& session, bool developer, int x, int y, bool interact) {
             session.game.hero.y == h.y && !session.game.busy() &&
             (tile == YellowDoor || tile == BlueDoor || tile == RedDoor || tile == SecretWall) &&
             session.game.tile_at(floor, nx, ny) == Road)
-            step(direction);
+            speech |= step(direction);
         if (session.game.hero.floor != floor) {
             result["reached"] = final && tile != Road && tile != SpecialRoad;
             result["reason"] =
@@ -633,11 +636,10 @@ Json navigate(Session& session, bool developer, int x, int y, bool interact) {
             result["reason"] = session.game.hero.hp <= 0 ? "dead" : "interaction_open";
             return result;
         }
-        if (!final &&
-            (tile == SpecialRoad || session.game.hero.x != nx || session.game.hero.y != ny ||
-             session.game.hero.hp != h.hp || session.game.hero.attack != h.attack ||
-             session.game.hero.defense != h.defense || session.game.hero.gold != h.gold ||
-             session.game.hero.items != h.items || !session.last_action["messages"].get_array().empty())) {
+        if (!final && (tile == SpecialRoad || session.game.hero.x != nx || session.game.hero.y != ny ||
+                       session.game.hero.hp != h.hp || session.game.hero.attack != h.attack ||
+                       session.game.hero.defense != h.defense || session.game.hero.gold != h.gold ||
+                       session.game.hero.items != h.items || speech)) {
             result["reason"] = "interrupted";
             return result;
         }

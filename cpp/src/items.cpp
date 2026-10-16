@@ -184,16 +184,20 @@ bool Game::use(Item item, int destination) {
             flight_preview(floor, step > 0 ? FlightDirection::Up : FlightDirection::Down);
         }
         return confirm_flight(destination);
-    case Item::Elixir:
-        hero.hp += hero.attack * 10 + hero.defense * 5;
+    case Item::Elixir: {
+        const int gain = hero.attack * 10 + hero.defense * 5;
+        prepared_status_ = {DialogueId::ElixirUsed, gain};
+        message_code = msg::Prepared;
+        hero.hp += gain;
         inventory(item) = 0;
         push(Op::Wait);
-        push(Op::Message, 1);
+        push(Op::Message, msg::Prepared);
         push(Op::Wait);
         push(Op::UpdateInventory);
         push(Op::Wait);
         push(Op::Sound, SoundCue::Get);
         return true;
+    }
     case Item::Mattock:
         inventory(item) = 0;
         push(Op::Message, 60);
@@ -208,7 +212,8 @@ bool Game::use(Item item, int destination) {
                 push(Op::Sound, SoundCue::Open);
             }
         return true;
-    case Item::Bomb:
+    case Item::Bomb: {
+        const int previous_gold = hero.gold;
         push(Op::Wait);
         push(Op::Callback, Callback::CheckGuards);
         push(Op::Message);
@@ -222,7 +227,10 @@ bool Game::use(Item item, int destination) {
                 bomb_dissolve(index);
             }
         inventory(item) = 0;
+        prepared_status_ = {DialogueId::BombUsed, hero.gold - previous_gold};
+        message_code = msg::Prepared;
         return true;
+    }
     case Item::WarpStaff:
         --inventory(item);
         contact_index = CellCount - 1 - position;
@@ -268,7 +276,10 @@ bool Game::use(Item item, int destination) {
                 push(Op::Wait);
                 push(Op::Sound, SoundCue::Open);
             }
-        push(Op::Message, found ? 1 : 65);
+        if (found)
+            prepared_status_ = {DialogueId::SnowCrystalUsed};
+        message_code = found ? msg::Prepared : msg::SnowFailed;
+        push(Op::Message, message_code);
         return true;
     }
     case Item::MagicKey:

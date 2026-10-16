@@ -7,6 +7,7 @@ namespace tsw {
 void Game::contact() {
     const int target = tile(hero.floor, contact_index);
     const int scale = hero.cycle_factor_minus_one + 1;
+    const int pickup_scale = ((hero.floor + 9) / 10) * scale;
     switch (target) {
     case YellowDoor:
     case BlueDoor:
@@ -36,8 +37,10 @@ void Game::contact() {
         special_road();
         return;
     case SecretWall:
+        prepared_status_ = {DialogueId::SecretPassage};
+        message_code = msg::Prepared;
         push(Op::Wait);
-        push(Op::Message, 1);
+        push(Op::Message, msg::Prepared);
         push(Op::Wait);
         push(Op::DoorFrame, contact_index, DoorMotion::LowerWall);
         expand_door();
@@ -119,24 +122,35 @@ void Game::contact() {
         return;
     case YellowKey:
         ++hero.yellow_keys;
+        prepared_status_ = {DialogueId::YellowKeyFound};
         break;
     case RedKey:
         ++hero.red_keys;
+        prepared_status_ = {DialogueId::RedKeyFound};
         break;
     case BlueKey:
         ++hero.blue_keys;
+        prepared_status_ = {DialogueId::BlueKeyFound};
         break;
-    case RedPotion:
-        hero.hp += 50 * ((hero.floor + 9) / 10) * scale;
+    case RedPotion: {
+        const int gain = 50 * pickup_scale;
+        hero.hp += gain;
+        prepared_status_ = {DialogueId::RedPotionFound, gain};
         break;
-    case BluePotion:
-        hero.hp += 200 * ((hero.floor + 9) / 10) * scale;
+    }
+    case BluePotion: {
+        const int gain = 200 * pickup_scale;
+        hero.hp += gain;
+        prepared_status_ = {DialogueId::BluePotionFound, gain};
         break;
+    }
     case RedGem:
-        hero.attack += ((hero.floor + 9) / 10) * scale;
+        hero.attack += pickup_scale;
+        prepared_status_ = {DialogueId::RedGemFound, pickup_scale};
         break;
     case BlueGem:
-        hero.defense += ((hero.floor + 9) / 10) * scale;
+        hero.defense += pickup_scale;
+        prepared_status_ = {DialogueId::BlueGemFound, pickup_scale};
         break;
     case HeroOrb:
         // The recovered 32..50 pickup branch clears tile 36 without granting an item.
@@ -147,18 +161,19 @@ void Game::contact() {
             inventory(item) = item == Item::WarpStaff ? 3 : 1;
             if (item == Item::DragonSlayer)
                 run_history.dragon_slayer_acquired = true;
-            status = std::format("Found {}.", item_name(item));
         } else if (target >= IronSword && target <= SacredShield) {
             constexpr std::array<int, 5> Gain{10, 20, 40, 50, 100};
             const int equipment = target - IronSword, tier = equipment % 5;
+            const int gain = Gain[tier] * scale;
             if (equipment < 5) {
-                hero.attack += Gain[tier] * scale;
+                hero.attack += gain;
                 hero.sword = static_cast<EquipmentTier>(tier + 1);
             } else {
-                hero.defense += Gain[tier] * scale;
+                hero.defense += gain;
                 hero.shield = static_cast<EquipmentTier>(tier + 1);
             }
             hero.equipment_found[equipment] = 1;
+            prepared_status_ = {DialogueId::EquipmentPickupBase + equipment, gain};
         } else if (target == Zeno || target == Zeno + 1) {
             if (hero.floor == 50 && !hero.cycle_factor_minus_one)
                 ending();
@@ -175,7 +190,7 @@ void Game::contact() {
         } else
             return;
     }
-    message_code = 1;
+    message_code = msg::Prepared;
     if (target >= WisdomOrb && target <= LuckyGold)
         message_code = target == WisdomOrb ? 22 : target == FlightOrb ? 21 : target + 1;
     push(Op::Message, message_code);
@@ -186,37 +201,89 @@ void Game::contact() {
     walk_to_contact();
 }
 
+// mmes, 0x44C9F0: unrecognized neighbors preserve the prior classification.
+void Game::classify_neighbor() {
+    const int t = tile(hero.floor, neighbor_index);
+    switch (t) {
+    case StairsUp:
+    case StairsDown:
+        message_code = msg::Stairs;
+        if (hero.floor == hero.highest_floor)
+            hero.highest_floor_stair_kind = t == StairsUp ? StairKind::Up : StairKind::Down;
+        break;
+    case Lava:
+        message_code = msg::Lava;
+        break;
+    case Altar:
+    case AltarSide:
+        message_code = msg::Altar;
+        break;
+    case Merchant:
+    case Merchant2:
+        message_code = msg::Merchant;
+        break;
+    case Thief:
+    case Thief2:
+        message_code = msg::Thief;
+        break;
+    case Fairy:
+    case Fairy2:
+        message_code = msg::Fairy;
+        break;
+    case OldMan:
+    case OldMan2:
+        message_code = msg::OldMan;
+        break;
+    case MagicianA:
+    case MagicianA2:
+        message_code = msg::MagicianA;
+        break;
+    case MagicianB:
+    case MagicianB2:
+        message_code = msg::MagicianB;
+        break;
+    }
+}
+
 // idou, 0x44C04C: movement commits before the deferred magic damage.
 void Game::walk_to_contact() {
     hero.x = contact_index % BoardWidth;
     hero.y = contact_index / BoardWidth;
     scratch_index = contact_index;
+    message_code = msg::Empty;
+    bool hazard_pending = false;
     for (const auto [dx, dy] : std::array<std::array<int, 2>, 4>{{{0, -1}, {-1, 0}, {1, 0}, {0, 1}}}) {
         const int x = hero.x + dx, y = hero.y + dy;
         if (x < 0 || x >= BoardWidth || y < 0 || y >= BoardWidth)
             continue;
         neighbor_index = cell(x, y);
-        const int t = tile(hero.floor, neighbor_index);
-        if (hero.floor == hero.highest_floor && (t == StairsUp || t == StairsDown))
-            hero.highest_floor_stair_kind = t == StairsUp ? StairKind::Up : StairKind::Down;
-        if (t == MagicianA || t == MagicianA + 1 || t == MagicianB || t == MagicianB + 1)
+        classify_neighbor();
+        if (message_code == msg::MagicianA || message_code == msg::MagicianB) {
             hazard(neighbor_index, cell(hero.x + dx * 2, hero.y + dy * 2));
+            // mazyutu1 suppresses the immediate refresh even when the shield blocks damage.
+            hazard_pending = true;
+            message_code = msg::Empty;
+        }
     }
-    if (hero.equipment_found[SacredShieldFlag])
-        return;
-    const bool horizontal = hero.x > 0 && hero.x < 10 && tile(hero.floor, scratch_index - 1) == Sorcerer &&
+    const bool horizontal = !hero.equipment_found[SacredShieldFlag] && hero.x > 0 && hero.x < 10 &&
+                            tile(hero.floor, scratch_index - 1) == Sorcerer &&
                             tile(hero.floor, scratch_index + 1) == Sorcerer;
-    const bool vertical = hero.y > 0 && hero.y < 10 && tile(hero.floor, scratch_index - 11) == Sorcerer &&
+    const bool vertical = !hero.equipment_found[SacredShieldFlag] && hero.y > 0 && hero.y < 10 &&
+                          tile(hero.floor, scratch_index - 11) == Sorcerer &&
                           tile(hero.floor, scratch_index + 11) == Sorcerer;
     for (int pair = 0; pair < int(horizontal) + int(vertical); ++pair) {
+        hazard_pending = true;
+        message_code = msg::Empty;
         push(Op::Wait);
         push(Op::PincerDamage);
         push(Op::Wait);
-        push(Op::Message, 112);
+        push(Op::Message, msg::Pincer);
         damage_pose(scratch_index);
         push(Op::Wait);
         push(Op::Sound, SoundCue::Open);
     }
+    if (!hazard_pending)
+        publish_status();
 }
 
 void Game::hazard(int magician_cell, int retreat_cell) {
@@ -235,7 +302,8 @@ void Game::hazard(int magician_cell, int retreat_cell) {
         push(Op::Wait);
         push(Op::HpDelta, -(magician_a ? 200 : 100) * (hero.cycle_factor_minus_one + 1));
         push(Op::Wait);
-        push(Op::Message, (magician_a ? 110 : 111) + (hero.cycle_factor_minus_one ? 28 : 0));
+        push(Op::Message, (magician_a ? msg::MagicianA : msg::MagicianB) +
+                              (hero.cycle_factor_minus_one ? msg::BacksideMagicOffset : 0));
         damage_pose(scratch_index);
         push(Op::Wait);
         push(Op::Sound, SoundCue::Open);

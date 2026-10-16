@@ -14,6 +14,8 @@ GameState GameState::capture(const Game& g) {
             .dialogue = g.dialogue,
             .visual = g.visual,
             .status = g.status,
+            .prepared_status = g.prepared_status_,
+            .displayed_status = g.displayed_status_,
             .sounds = g.sounds,
             .checkpoint_requested = g.checkpoint_requested,
             .contact_index = g.contact_index,
@@ -91,6 +93,15 @@ Game GameState::restore() const {
     g.dialogue = dialogue;
     g.visual = visual;
     g.status = status;
+    const auto valid_status = [](const StatusMessage& message) {
+        return valid_dialogue(message.text) && message.monster_index >= -1 &&
+               message.monster_index < MonsterCount &&
+               (message.monster_index < 0 || message.text == DialogueId::BattleWon);
+    };
+    if (!valid_status(prepared_status) || (displayed_status && !valid_status(*displayed_status)))
+        throw std::runtime_error("Invalid runtime status message");
+    g.prepared_status_ = prepared_status;
+    g.displayed_status_ = displayed_status;
     g.sounds = sounds;
     g.checkpoint_requested = checkpoint_requested;
     g.contact_index = contact_index;

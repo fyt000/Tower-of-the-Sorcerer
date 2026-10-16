@@ -12,20 +12,20 @@ TEST_CASE("Every C++ language has complete dialogue and stable identifiers", "[l
         REQUIRE(parse_language(language_id(language)) == language);
         REQUIRE_FALSE(language_label(language).empty());
         REQUIRE_FALSE(localized_opening(language).empty());
-        for (int i = 0; i < 268; ++i) {
-            const auto original = Game::original_dialogue(static_cast<DialogueId>(i));
-            REQUIRE(localized_dialogue(Language::English, static_cast<DialogueId>(i)) == original);
+        for (auto id = DialogueId::First; id < DialogueId::Count; id = id + 1) {
+            const auto original = Game::original_dialogue(id);
+            REQUIRE(localized_dialogue(Language::English, id) == original);
             if (!original.empty())
-                REQUIRE_FALSE(localized_dialogue(language, static_cast<DialogueId>(i)).empty());
+                REQUIRE_FALSE(localized_dialogue(language, id).empty());
         }
     }
     REQUIRE_THROWS(parse_language("unknown"));
     REQUIRE_THROWS(language_id(static_cast<Language>(99)));
-    REQUIRE_THROWS(localized_dialogue(Language::Japanese, static_cast<DialogueId>(268)));
+    REQUIRE_THROWS(localized_dialogue(Language::Japanese, DialogueId::Count));
     for (const auto language : Languages)
-        for (int i = 0; i < 33; ++i)
+        for (int i = 0; i < MonsterCount; ++i)
             REQUIRE(localized_text(language, Game::monster_name(i)) ==
-                    localized_dialogue(language, static_cast<DialogueId>(94 + i)));
+                    localized_dialogue(language, DialogueId::MonsterNameBase + i));
 }
 
 TEST_CASE("Japanese tail is aligned semantically after the English split", "[localization]") {
@@ -161,4 +161,69 @@ TEST_CASE("Language preferences round trip and old settings default to English",
     }
     REQUIRE_THROWS(load_settings(path));
     std::filesystem::remove(path);
+}
+
+TEST_CASE("Gameplay status keeps catalog identity and formats in every language", "[localization][status]") {
+    struct Sample {
+        Language language;
+        std::string_view potion, sword, bomb, snow;
+    };
+
+    const Sample samples[]{
+        {Language::English, "Got a red elixir. Your vital power was 50 points up!",
+         "Got an Iron Sword! Your offensive power was 10 points up!",
+         "You used The destructible Ball! Enemies on all sides died!Recieved 3 Gold.",
+         "You've used the snow crystal!The lava cooled and turned to stone."},
+        {Language::Japanese, "赤い回復薬を手に入れた。生命力が50ポイントアップ！",
+         "鉄の剣を手に入れた。攻撃力が10ポイントアップ！",
+         "破壊の玉を使った！四方の敵が倒れた！ＧＯＬＤを3枚手に入れた！",
+         "雪の結晶を使った！溶岩が固まって道ができた！"},
+        {Language::EnglishFromJapanese, "You found a red potion. HP increases by 50 points!",
+         "You found an Iron Sword. Attack increases by 10 points!",
+         "You used the Orb of Destruction! Enemies on all four sides fell! You received 3 gold!",
+         "You used the Snow Crystal! The lava solidified into a path!"},
+        {Language::ChineseFromJapanese, "拿到了红血瓶，生命提升50点！", "拿到了铁剑，攻击力提升10点！",
+         "使用了破坏爆弹！四周的敌人被消灭了！获得了3金币！", "使用了雪花结晶！熔岩凝固，变成了道路！"},
+        {Language::ChineseFromEnglish, "获得了红血瓶，生命提升50点！", "获得了铁剑！攻击力提升10点！",
+         "你使用了破坏爆弹！四周的敌人都死了！获得了3金币。", "你使用了雪花结晶！熔岩冷却，变成了石头。"},
+    };
+    for (const auto& sample : samples) {
+        CAPTURE(language_id(sample.language));
+        REQUIRE(localized_status_message(sample.language, {DialogueId::RedPotionFound, 50}) == sample.potion);
+        REQUIRE(localized_status_message(sample.language, {DialogueId::IronSwordFound, 10}) == sample.sword);
+        REQUIRE(localized_status_message(sample.language, {DialogueId::BombUsed, 3}) == sample.bomb);
+        REQUIRE(localized_status_message(sample.language, {DialogueId::SnowCrystalUsed}) == sample.snow);
+        Game g;
+        g.hero.x = g.hero.y = 5;
+        g.floors[1].tiles.fill(Road);
+        for (const auto& [tile, id] :
+             std::array<std::pair<Tile, DialogueId>, 3>{{{YellowKey, DialogueId::YellowKeyFound},
+                                                         {RedKey, DialogueId::RedKeyFound},
+                                                         {BlueKey, DialogueId::BlueKeyFound}}}) {
+            g.tile_at(1, 5, 4) = tile;
+            REQUIRE(g.move(Direction::Up));
+            g.finish_commands();
+            REQUIRE(localized_status(sample.language, g) == localized_dialogue(sample.language, id));
+            REQUIRE(g.move(Direction::Down));
+        }
+        g.tile_at(1, 5, 4) = RedPotion;
+        REQUIRE(g.move(Direction::Up));
+        g.finish_commands();
+        REQUIRE(localized_status(sample.language, g) == sample.potion);
+        // Changing display language must not alter canonical replay or MCP text.
+        REQUIRE(g.status == "Got a red elixir. Your vital power was 50 points up!");
+        g.status = "Quick save written.";
+        REQUIRE(localized_status(sample.language, g) ==
+                localized_text(sample.language, "Quick save written."));
+        g.status = "External error text";
+        REQUIRE(localized_status(sample.language, g) == "External error text");
+    }
+    REQUIRE(localized_status_message(Language::English, {DialogueId::RedGemFound, 1}) ==
+            "Got a red crystal. Your offensive power was 1 point up!");
+    REQUIRE(localized_status_message(Language::English, {DialogueId::RedGemFound, 2}) ==
+            "Got a red crystal. Your offensive power was 2 points up!");
+    REQUIRE(
+        localized_status_message(Language::Japanese, {DialogueId::BattleWon, 20, ZombieKnightRow}) ==
+        std::string(localized_dialogue(Language::Japanese, DialogueId::MonsterNameBase + ZombieKnightRow)) +
+            "をたおした！ＧＯＬＤを20枚手に入れた！");
 }

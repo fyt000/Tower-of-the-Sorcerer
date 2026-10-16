@@ -1,4 +1,6 @@
 #include "tsw/game.hpp"
+#include "tsw/game_state.hpp"
+#include "tsw/localization.hpp"
 #include "tsw/save_slots.hpp"
 #include <algorithm>
 #include <catch2/catch_test_macros.hpp>
@@ -777,4 +779,182 @@ TEST_CASE("Queued conversations include their equipment clues and Zeno explanati
         g.finish_commands(true);
         REQUIRE(!g.busy());
     }
+}
+
+TEST_CASE("Pickup status matches the recovered final display", "[status][items]") {
+    // Expected strings were observed from the compiled recovery after event playback.
+    const std::pair<Tile, std::string_view> cases[]{
+        {YellowKey, "You've found a key."},
+        {RedKey, "You've found a red key."},
+        {BlueKey, "You've found a blue key."},
+        {RedPotion, "Got a red elixir. Your vital power was 50 points up!"},
+        {BluePotion, "Got a blue elixir. Your vital power was 200 points up!"},
+        {RedGem, "Got a red crystal. Your offensive power was 1 point up!"},
+        {BlueGem, "Got a blue crystal. Your defensive power was 1 point up!"},
+        {WisdomOrb, "You've found the orb of wisdom."},
+        {FlightOrb, "You've found the orb of flying."},
+        {Cross, "Got a cross! Your offensive power against Vampires and Zombies has doubled."},
+        {Elixir, "You recieved The Magic Elixir."},
+        {Mattock, "You recieved The Magic Mattock."},
+        {Bomb, "You recieved The destructible Ball!"},
+        {WarpStaff, "You recieved The Warp Staff!"},
+        {AscentWing, "You recieved wings to fly up!"},
+        {DescentWing, "You recieved wings to fly down!"},
+        {DragonSlayer, "You recieved The Dragon Slayer! Your attack power against the Dragon has doubled!"},
+        {SnowCrystal, "Got the snow crystal!"},
+        {MagicKey, "Got the magic key!"},
+        {SuperMattock, "Got The Super Magic Mattock!"},
+        {LuckyGold, "Got the Lucky Gold! You now get twice the normal amount of gold."},
+        {IronSword, "Got an Iron Sword! Your offensive power was 10 points up!"},
+        {SilverSword, "Got a Silver Sword! Your offensive power was 20 points up!"},
+        {KnightSword, "Got a Sword of Knight! Your offensive power was 40 points up!"},
+        {HolySword, "Got a Holy Sword! Your offensive power was 50 points up!"},
+        {SacredSword, "Got a Sacred Sword! Your offensive power was 100 points up!"},
+        {IronShield, "Got an Iron Shield! Your defensive power was 10 points up!"},
+        {SilverShield, "Got a Silver Shield! Your defensive power was 20 points up!"},
+        {KnightShield, "Got a Shield of Knight! Your defensive power was 40 points up!"},
+        {HolyShield, "Got a Holy Shield! Your defensive power was 50 points up!"},
+        {SacredShield, "Got a Sacred Shield! Your defensive power was 100 points up!"},
+    };
+    for (const auto& [target, expected] : cases) {
+        CAPTURE(target);
+        auto g = room();
+        g.tile_at(1, 4, 5) = YellowDoor;
+        REQUIRE(g.move(Direction::Left));
+        g.finish_commands();
+        REQUIRE(g.status == "You don't have the key.");
+        g.tile_at(1, 5, 4) = target;
+        REQUIRE(g.move(Direction::Up));
+        // Movement refreshes first; the queued acquisition must publish afterward.
+        REQUIRE(g.status.empty());
+        g.finish_commands();
+        REQUIRE(g.status == expected);
+    }
+}
+
+TEST_CASE("Pickup messages report scaled gains and singular gems", "[status][items]") {
+    auto g = room(12);
+    g.hero.cycle_factor_minus_one = BacksideFactor - 1;
+    g.tile_at(12, 5, 4) = RedPotion;
+    REQUIRE(g.move(Direction::Up));
+    g.finish_commands();
+    REQUIRE(g.status == "Got a red elixir. Your vital power was 4400 points up!");
+    g.tile_at(12, 4, 4) = BlueGem;
+    REQUIRE(g.move(Direction::Left));
+    g.finish_commands();
+    REQUIRE(g.status == "Got a blue crystal. Your defensive power was 88 points up!");
+}
+
+TEST_CASE("Consumable results publish at their original command boundary", "[status][items]") {
+    auto g = room();
+    const auto previous = g.status;
+    g.inventory(Item::Elixir) = 1;
+    REQUIRE(g.use(Item::Elixir));
+    REQUIRE(g.status == previous);
+    g.finish_commands();
+    REQUIRE(g.status == "You used the Magic Elixir. Your vital power is now 1500 points up!");
+    g.inventory(Item::Bomb) = g.inventory(Item::LuckyGold) = 1;
+    g.tile_at(1, 5, 4) = GreenSlime;
+    g.tile_at(1, 6, 5) = RedSlime;
+    REQUIRE(g.use(Item::Bomb));
+    g.finish_commands();
+    REQUIRE(g.status == "You used The destructible Ball! Enemies on all sides died!Recieved 3 Gold.");
+    REQUIRE(g.hero.gold == 3);
+    g.inventory(Item::Bomb) = 1;
+    REQUIRE(g.use(Item::Bomb));
+    g.finish_commands();
+    REQUIRE(g.status == "You used The destructible Ball! Enemies on all sides died!Recieved 0 Gold.");
+    g.inventory(Item::SnowCrystal) = 1;
+    g.tile_at(1, 5, 4) = Lava;
+    REQUIRE(g.use(Item::SnowCrystal));
+    REQUIRE(g.status.find("Recieved 0 Gold.") != std::string::npos);
+    REQUIRE(g.run_one()); // Snow Crystal publishes before its queued road animation.
+    REQUIRE(g.status == "You've used the snow crystal!The lava cooled and turned to stone.");
+    g.finish_commands();
+    REQUIRE(g.use(Item::SnowCrystal));
+    g.finish_commands();
+    REQUIRE(g.status == Game::original_dialogue(DialogueId::SnowCrystalUsed));
+}
+
+TEST_CASE("Nearby status follows ordered classification and clears on plain road", "[status][movement]") {
+    const std::pair<Tile, msg::Code> cases[]{
+        {StairsUp, msg::Stairs}, {StairsDown, msg::Stairs}, {Lava, msg::Lava},          {Altar, msg::Altar},
+        {AltarSide, msg::Altar}, {Merchant, msg::Merchant}, {Merchant2, msg::Merchant}, {Thief, msg::Thief},
+        {Thief2, msg::Thief},    {Fairy, msg::Fairy},       {Fairy2, msg::Fairy},       {OldMan, msg::OldMan},
+        {OldMan2, msg::OldMan}};
+    for (const auto& [target, code] : cases) {
+        CAPTURE(target);
+        auto g = room();
+        g.tile_at(1, 5, 3) = target;
+        REQUIRE(g.move(Direction::Up));
+        REQUIRE(g.status == Game::original_dialogue(DialogueId::StatusOffset + code));
+        REQUIRE(g.commands.empty());
+        REQUIRE(g.move(Direction::Down));
+        REQUIRE(g.status.empty());
+    }
+    auto g = room();
+    g.tile_at(1, 5, 3) = StairsUp;
+    g.tile_at(1, 4, 4) = Merchant;
+    g.tile_at(1, 6, 4) = Altar;
+    // The last recognized neighbor wins; an ordinary southern tile does not erase it.
+    REQUIRE(g.move(Direction::Up));
+    REQUIRE(g.status == "You see an altar.");
+    REQUIRE(g.hero.highest_floor_stair_kind == StairKind::Up);
+    REQUIRE_FALSE(g.can_open_flight());
+}
+
+TEST_CASE("Hazards suppress immediate nearby status even with Sacred Shield", "[status][hazards]") {
+    for (const Tile magician : std::array{MagicianA, MagicianA2, MagicianB, MagicianB2})
+        for (const bool shield : {false, true}) {
+            CAPTURE(magician, shield);
+            auto g = room();
+            g.hero.equipment_found[SacredShieldFlag] = shield;
+            g.tile_at(1, 5, 3) = magician;
+            g.tile_at(1, 6, 4) = Altar;
+            const auto previous = g.status;
+            REQUIRE(g.move(Direction::Up));
+            REQUIRE(g.status == previous);
+            g.finish_commands();
+            if (shield)
+                REQUIRE(g.status == previous);
+            else
+                REQUIRE(g.status ==
+                        Game::original_dialogue(DialogueId::StatusOffset +
+                                                (magician < MagicianB ? msg::MagicianA : msg::MagicianB)));
+        }
+    auto g = room();
+    g.hero.equipment_found[SacredShieldFlag] = 0;
+    g.tile_at(1, 4, 4) = g.tile_at(1, 6, 4) = Sorcerer;
+    const auto previous = g.status;
+    REQUIRE(g.move(Direction::Up));
+    REQUIRE(g.status == previous);
+    g.finish_commands();
+    REQUIRE(g.status == Game::original_dialogue(DialogueId::StatusOffset + msg::Pincer));
+}
+
+TEST_CASE("Zero status operand republishes classification and migration retains prepared text",
+          "[status][runtime]") {
+    auto g = room();
+    g.tile_at(1, 5, 4) = RedGem;
+    REQUIRE(g.move(Direction::Up));
+    auto pending = GameState::capture(g).restore();
+    REQUIRE(pending.status.empty());
+    g.finish_commands();
+    pending.finish_commands();
+    REQUIRE(g.status == "Got a red crystal. Your offensive power was 1 point up!");
+    REQUIRE(pending.status == g.status);
+    REQUIRE(localized_status(Language::Japanese, pending) == localized_status(Language::Japanese, g));
+    pending.status = "stale display";
+    pending.push(Op::Message);
+    pending.finish_commands();
+    REQUIRE(pending.status == g.status);
+    pending.push(Op::Message, msg::MissingKey);
+    pending.finish_commands();
+    pending.status = "stale display";
+    pending.push(Op::Message);
+    pending.finish_commands();
+    REQUIRE(pending.status == "You don't have the key.");
+    auto invalid = GameState::capture(pending);
+    invalid.prepared_status.text = DialogueId::Count;
+    REQUIRE_THROWS(invalid.restore());
 }

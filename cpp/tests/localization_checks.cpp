@@ -56,6 +56,25 @@ int verify_localization(Presentation& renderer, const std::filesystem::path& out
         capture("fairy-title");
         ui.dialogue_scroll = 0;
         game.new_game();
+        game.hero.x = game.hero.y = 5;
+        game.floors[1].tiles.fill(Road);
+        game.tile_at(1, 5, 4) = RedPotion;
+        game.move(Direction::Up);
+        game.finish_commands();
+        capture("pickup-status");
+        ui.replay_active = ui.replay_paused = true;
+        ui.replay_name = "status-fixture";
+        capture("replay-status");
+        ui.replay_active = ui.replay_paused = false;
+        game.inventory(Item::Bomb) = 1;
+        game.tile_at(1, 5, 3) = GreenSlime;
+        game.use(Item::Bomb);
+        game.finish_commands();
+        capture("consumable-status");
+        game.tile_at(1, 4, 5) = StairsUp;
+        game.move(Direction::Down);
+        capture("nearby-status");
+        game.new_game();
         for (int i = 0; i < 15; ++i)
             game.hero.items[i] = 1;
         ui.inventory = true;

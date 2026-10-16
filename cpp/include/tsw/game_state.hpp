@@ -16,6 +16,8 @@ struct GameState {
     std::optional<Dialogue> dialogue;
     Visual visual;
     std::string status;
+    StatusMessage prepared_status;
+    std::optional<StatusMessage> displayed_status;
     std::vector<SoundCue> sounds;
     bool checkpoint_requested{};
     int contact_index{}, scratch_index{}, neighbor_index{}, message_code{}, door_opened{};

@@ -190,6 +190,7 @@ void Game::battle_finished(const Fight& fight) {
     push(Op::Wait);
     push(Op::Callback, Callback::BattleEnd);
     const int earned = reward * (inventory(Item::LuckyGold) + 1);
-    status = std::format("Defeated {}. Received {} gold.", monster_name(fight.monster_index), earned);
+    prepared_status_ = {DialogueId::BattleWon, earned, fight.monster_index};
+    message_code = msg::Prepared;
 }
 } // namespace tsw

@@ -564,5 +564,28 @@
     "Finish with at least 5 red keys.": "Finish with at least 5 red keys."
   },
   "ending_story": "",
-  "opening_story": "Now is the time to act.\nUsing omniscient power,\nI shall break the sacred sword\nand get great wisdom."
+  "opening_story": "Now is the time to act.\nUsing omniscient power,\nI shall break the sacred sword\nand get great wisdom.",
+  "status": {
+    "IronSwordFound": "Got an Iron Sword! Your offensive power was {0} points up!",
+    "SilverSwordFound": "Got a Silver Sword! Your offensive power was {0} points up!",
+    "KnightSwordFound": "Got a Sword of Knight! Your offensive power was {0} points up!",
+    "HolySwordFound": "Got a Holy Sword! Your offensive power was {0} points up!",
+    "SacredSwordFound": "Got a Sacred Sword! Your offensive power was {0} points up!",
+    "IronShieldFound": "Got an Iron Shield! Your defensive power was {0} points up!",
+    "SilverShieldFound": "Got a Silver Shield! Your defensive power was {0} points up!",
+    "KnightShieldFound": "Got a Shield of Knight! Your defensive power was {0} points up!",
+    "HolyShieldFound": "Got a Holy Shield! Your defensive power was {0} points up!",
+    "SacredShieldFound": "Got a Sacred Shield! Your defensive power was {0} points up!",
+    "RedPotionFound": "Got a red elixir. Your vital power was {0} points up!",
+    "BluePotionFound": "Got a blue elixir. Your vital power was {0} points up!",
+    "RedGemFound": "Got a red crystal. Your offensive power was {0} point{1} up!",
+    "BlueGemFound": "Got a blue crystal. Your defensive power was {0} point{1} up!",
+    "AltarHitPoints": "Vital power: {0} points up!",
+    "AltarAttack": "Offensive power: {0} points up!",
+    "AltarDefense": "Defensive power: {0} points up!",
+    "ElixirUsed": "You used the Magic Elixir. Your vital power is now {0} points up!",
+    "BombUsed": "You used The destructible Ball! Enemies on all sides died!Recieved {0} Gold.",
+    "SnowCrystalUsed": "You've used the snow crystal!The lava cooled and turned to stone.",
+    "BattleWon": "Defeated {2}. Received {0} gold."
+  }
 }

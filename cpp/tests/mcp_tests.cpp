@@ -1117,3 +1117,25 @@ TEST_CASE("MCP batches stop after damage and floor changes", "[mcp][batch]") {
     REQUIRE(changed["batch"]["executed_steps"].as<int>() == 1);
     REQUIRE(changed["hero"]["floor"].as<int>() == 2);
 }
+
+TEST_CASE("MCP navigation retains nearby hints without interrupting road travel",
+          "[mcp][navigation][status]") {
+    auto game = room();
+    game.floors[1].tiles.fill(Wall);
+    for (int y = 1; y <= 5; ++y)
+        game.tile_at(1, 5, y) = Road;
+    game.tile_at(1, 6, 4) = Altar;
+    game.tile_at(1, 4, 3) = Merchant;
+    game.tile_at(1, 6, 2) = Thief;
+    Client client(false, game);
+    const auto result = client.tool("navigate", Json{{"x", 5}, {"y", 1}});
+    REQUIRE(result["navigation"]["reached"].get<bool>());
+    REQUIRE(result["navigation"]["inputs"].as<int>() == 4);
+    REQUIRE(result["hero"]["y"].as<int>() == 1);
+    const auto& messages = result["navigation"]["messages"].get_array();
+    REQUIRE(messages.size() == 4);
+    REQUIRE(messages[0].get<std::string>() == "You see an altar.");
+    REQUIRE(messages[1].get<std::string>() == "You see a merchant.");
+    REQUIRE(messages[2].get<std::string>() == "You see a thief.");
+    REQUIRE(messages[3].get<std::string>().empty());
+}
