@@ -15,6 +15,8 @@ struct Settings {
     bool mouse_walking{};
     bool realtime_hero_orb{};
     std::optional<bool> touch_controls; // Unset follows the current input device.
+    bool blink_mode{};
+    bool item_collection{};
 };
 
 Settings load_settings(const std::filesystem::path&);

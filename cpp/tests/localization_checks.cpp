@@ -30,6 +30,9 @@ int verify_localization(Presentation& renderer, const std::filesystem::path& out
         capture("home");
         ui.menu = Menu::Options;
         capture("settings");
+        ui.item_collection = true;
+        capture("settings-collection");
+        ui.item_collection = false;
         ui.settings_tab = SettingsTab::Controls;
         capture("settings-controls");
         ui.settings_tab = SettingsTab::Replay;
@@ -82,6 +85,9 @@ int verify_localization(Presentation& renderer, const std::filesystem::path& out
         game.tile_at(1, 4, 5) = StairsUp;
         game.move(Direction::Down);
         capture("nearby-status");
+        ui.item_collection = true;
+        capture("collection-controls");
+        ui.item_collection = false;
         game.new_game();
         for (int i = 0; i < 15; ++i)
             game.hero.items[i] = 1;

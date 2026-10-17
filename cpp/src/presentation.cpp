@@ -149,9 +149,9 @@ std::array<Rectangle, 6> touch_buttons(const CanvasViewport& view) {
 }
 
 std::optional<int> mouse_destination(const Game& game, const DesktopUi& ui, Vector2 mouse) {
-    if (!ui.mouse_walking || ui.modal() || ui.replay_active || ui.flight >= 0 || ui.ending_wait ||
-        game.busy() || mouse.x < BoardX || mouse.y < BoardY || mouse.x >= BoardX + BoardPixels ||
-        mouse.y >= BoardY + BoardPixels)
+    if ((!ui.mouse_walking && !ui.blink_mode) || ui.modal() || ui.replay_active || ui.flight >= 0 ||
+        ui.ending_wait || game.busy() || mouse.x < BoardX || mouse.y < BoardY ||
+        mouse.x >= BoardX + BoardPixels || mouse.y >= BoardY + BoardPixels)
         return {};
     return cell(int((mouse.x - BoardX) / TileSize), int((mouse.y - BoardY) / TileSize));
 }
@@ -542,6 +542,42 @@ struct Presentation::Art {
         DrawTexturePro(transparent(value, value, true), {0, 0, TileSize, TileSize}, target, {0, 0}, 0, tint);
     }
 
+    bool collection_button(Rectangle rect, bool except_potions, Vector2 mouse, bool enabled) {
+        const bool hover = enabled && CheckCollisionPointRec(mouse, rect);
+        const Color tint = enabled ? WHITE : Color{112, 112, 112, 255};
+        const Color light{183, 182, 187, 255}, shadow{38, 35, 43, 255};
+        DrawRectangleRec(rect, hover ? Color{115, 112, 121, 255} : Color{87, 85, 93, 255});
+        DrawRectangleRec({rect.x, rect.y, rect.width, 1}, light);
+        DrawRectangleRec({rect.x, rect.y, 1, rect.height}, light);
+        DrawRectangleRec({rect.x, rect.y + rect.height - 1, rect.width, 1}, shadow);
+        DrawRectangleRec({rect.x + rect.width - 1, rect.y, 1, rect.height}, shadow);
+        // Use the original atlas at whole-pixel coordinates, like the inventory itself.
+        icon(YellowKey, {rect.x + 2, rect.y + 2, 23, 23}, tint);
+        icon(RedGem, {rect.x + 23, rect.y + 3, 15, 19}, tint);
+        icon(RedPotion, {rect.x + 22, rect.y + 21, 17, 18}, tint);
+        constexpr std::array<std::string_view, 7> arrow{"  #  ", "  #  ", "#####", " ### ",
+                                                        "  #  ", "#   #", "#####"};
+        for (int y = 0; y < int(arrow.size()); ++y)
+            for (int x = 0; x < int(arrow[y].size()); ++x)
+                if (arrow[y][x] == '#')
+                    DrawRectangle(int(rect.x) + 6 + x * 2, int(rect.y) + 23 + y * 2, 2, 2,
+                                  enabled ? Ink : Muted);
+        if (except_potions) {
+            // A stepped slash stays crisp on the same pixel grid as the flask.
+            for (int i = 0; i < 12; ++i)
+                DrawRectangle(int(rect.x) + 24 + i, int(rect.y) + 35 - i, 4, 4, shadow);
+            for (int i = 0; i < 12; ++i)
+                DrawRectangle(int(rect.x) + 25 + i, int(rect.y) + 36 - i, 2, 2, enabled ? Ink : Muted);
+        }
+        if (hover) {
+            DrawRectangleLinesEx({rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2}, 1, Gold);
+#ifndef __ANDROID__
+            SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+#endif
+        }
+        return enabled && clicked(rect, mouse);
+    }
+
     void scene(const std::string& name, Rectangle target) const {
         const auto found = scenes.find(name);
         if (found == scenes.end())
@@ -607,11 +643,19 @@ void Presentation::reset() {
     previous_raster_ = RasterMode::Inactive;
     walking_remaining_ = 0;
     animation_seconds_ = 0;
+    collected_.clear();
+    collection_age_ = 0;
 }
 
 void Presentation::moved(const Hero& before, const Hero& after) {
     if (before.floor == after.floor && (before.x != after.x || before.y != after.y))
         walking_remaining_ = WalkAnimationSeconds;
+}
+
+void Presentation::collected(int floor, const std::vector<CollectedItem>& items) {
+    collection_floor_ = floor;
+    collected_ = items;
+    collection_age_ = 0;
 }
 
 void Presentation::advance(float seconds) {
@@ -773,6 +817,27 @@ void Presentation::draw_board(const Game& game, int floor, bool animated) {
     }
     if (active && v.raster_mode == RasterMode::VampireTransformation)
         draw_transformation(game, animation);
+    if (active && floor == collection_floor_ && !v.hide_hero && !v.dead &&
+        v.raster_mode == RasterMode::Inactive) {
+        for (std::size_t i = 0; i < collected_.size(); ++i) {
+            const float delay = .16f * float(i) / float(collected_.size());
+            const float progress = std::clamp((collection_age_ - delay) / .46f, 0.f, 1.f);
+            if (progress >= 1)
+                continue;
+            const auto& item = collected_[i];
+            const float ease = 1 - (1 - progress) * (1 - progress);
+            const float x =
+                float(item.position % BoardWidth) + (game.hero.x - float(item.position % BoardWidth)) * ease;
+            const float y =
+                float(item.position / BoardWidth) + (game.hero.y - float(item.position / BoardWidth)) * ease;
+            const float size = TileSize * (1 - .45f * progress);
+            const float arc = std::sin(progress * PI) * 24;
+            art_->icon(item.tile,
+                       {BoardX + x * TileSize + (TileSize - size) / 2,
+                        BoardY + y * TileSize + (TileSize - size) / 2 - arc, size, size},
+                       Fade(WHITE, 1 - .3f * progress));
+        }
+    }
 }
 
 void Presentation::draw_realtime_orb(const Game& game, const DesktopUi& ui) {
@@ -1007,6 +1072,30 @@ UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mous
     if (h.fairy_visits)
         art_->text.fit(std::format("Fairy rank {}", h.fairy_rank), {RightX + 12, MenuHeight + 453, 128, 20},
                        13, Panel);
+    if (ui.item_collection) {
+        const bool can_collect = !game.busy() && !ui.modal() && !ui.replay_active && !ui.ending_wait &&
+                                 game.visual.raster_mode == RasterMode::Inactive && !collecting();
+        constexpr Rectangle all{28, 480, 40, 40}, except{88, 480, 40, 40};
+        DrawRectangle(22, 476, 112, 48, Panel);
+        DrawRectangleLinesEx({22, 476, 112, 48}, 1, Border);
+        if (art_->collection_button(all, false, mouse, can_collect))
+            action = {Action::CollectAll};
+        if (art_->collection_button(except, true, mouse, can_collect))
+            action = {Action::CollectExceptPotions};
+        if (can_collect && CheckCollisionPointRec(mouse, all))
+            art_->text.tooltip(
+                all,
+                localized_text(ui.language, "Zuck all") + "\n" +
+                    localized_text(ui.language,
+                                   "Collect safely reachable items on this floor. Doors, monsters, hidden "
+                                   "events and hazards block collection. The hero stays in place."));
+        if (can_collect && CheckCollisionPointRec(mouse, except))
+            art_->text.tooltip(
+                except, localized_text(ui.language, "Zuck all except potion") + "\n" +
+                            localized_text(ui.language,
+                                           "Collect safely reachable items, leaving red and blue potions "
+                                           "untouched. Skipped potions also block collection beyond them."));
+    }
     return action;
 }
 
@@ -1165,7 +1254,8 @@ void Presentation::draw_enemies(const Game& game, DesktopUi& ui, Vector2 mouse) 
 }
 
 void Presentation::draw_qol_status(const DesktopUi& ui, Rectangle rect, Vector2 mouse) {
-    const int count = int(ui.mouse_walking) + int(ui.hero_orb_actual_damage) + int(ui.realtime_hero_orb);
+    const int count = int(ui.mouse_walking) + int(ui.blink_mode) + int(ui.hero_orb_actual_damage) +
+                      int(ui.realtime_hero_orb) + int(ui.item_collection);
     DrawRectangleRec(rect, Bar);
     DrawRectangleLinesEx(rect, 1, count ? Gold : Border);
     art_->text.fit(count ? std::format("QOL: {} enabled", count) : "QOL: none", rect, 16,
@@ -1175,10 +1265,14 @@ void Presentation::draw_qol_status(const DesktopUi& ui, Rectangle rect, Vector2 
             localized_text(art_->text.language, count ? "Enabled QOLs:" : "Enabled QOLs: none");
         if (ui.mouse_walking)
             text += "\n" + localized_text(art_->text.language, "Mouse walking");
+        if (ui.blink_mode)
+            text += "\n" + localized_text(art_->text.language, "Blink mode (experienced players only)");
         if (ui.hero_orb_actual_damage)
             text += "\n" + localized_text(art_->text.language, "Hero Orb actual damage");
         if (ui.realtime_hero_orb)
             text += "\n" + localized_text(art_->text.language, "Realtime Hero Orb");
+        if (ui.item_collection)
+            text += "\n" + localized_text(art_->text.language, "Item collection");
         text += "\n" + localized_text(art_->text.language, "Change QOLs in Settings. Default: off.");
         art_->text.tooltip(rect, text);
     }
@@ -1305,6 +1399,13 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
                                   ui.realtime_hero_orb ? "Realtime Hero Orb: on" : "Realtime Hero Orb: off",
                                   mouse))
                 return {Action::RealtimeHeroOrb};
+            const Rectangle collection{left, 438, 328, 48};
+            if (art_->text.button(collection,
+                                  ui.item_collection ? "Item collection: on" : "Item collection: off", mouse))
+                return {Action::ItemCollection};
+            if (CheckCollisionPointRec(mouse, collection))
+                art_->text.tooltip(collection,
+                                   "Show the two collection buttons beneath the inventory. Default: off.");
             if (CheckCollisionPointRec(mouse, qol))
                 art_->text.tooltip(qol, ui.hero_orb_actual_damage
                                             ? "Hero Orb actual damage: on\nShows combat damage with Cross "
@@ -1322,14 +1423,23 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
                                   ui.touch_enabled() ? "Touch controls: on" : "Touch controls: off", mouse))
                 return {Action::TouchControls};
             art_->text.draw("Show the directional pad. Default: automatic.", int(left), 252, 17, Muted);
-            const Rectangle walking{left, 298, 664, 48};
+            const Rectangle walking{left, 276, 664, 48};
             if (art_->text.button(walking, ui.mouse_walking ? "Mouse walking: on" : "Mouse walking: off",
                                   mouse))
                 return {Action::MouseWalking};
-            art_->text.draw("Click or tap the map to walk.", int(left), 358, 17, Muted);
+            art_->text.draw("Click or tap the map to walk.", int(left), 334, 17, Muted);
             if (CheckCollisionPointRec(mouse, walking))
                 art_->text.tooltip(walking, "Click floor to walk or an event to interact. Hidden events stop "
                                             "the walk. Default: off.");
+            const Rectangle blink{left, 372, 664, 48};
+            if (art_->text.button(blink, ui.blink_mode ? "Blink mode: on" : "Blink mode: off", mouse))
+                return {Action::BlinkMode};
+            art_->text.draw("Experienced players only. Default: off.", int(left), 430, 17, Muted);
+            if (CheckCollisionPointRec(mouse, blink))
+                art_->text.tooltip(
+                    blink, "Blink across event-free floor, or beside the clicked event to interact once. "
+                           "Otherwise walk normally. Does not cross doors, monsters or hidden tunnels. "
+                           "Overrides mouse walking.");
         } else if (ui.settings_tab == SettingsTab::Replay) {
             art_->text.draw("Recording", int(left), 158, 19, Gold);
             if (art_->text.button({left, 192, 664, 48},
@@ -1693,6 +1803,11 @@ void Presentation::paint_touch_controls(const CanvasViewport& view) const {
 }
 
 UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, float real_seconds) {
+    if (collecting()) {
+        collection_age_ += std::max(0.f, real_seconds);
+        if (collection_age_ >= .62f || collection_floor_ != game.hero.floor || ui.home || ui.replay_active)
+            collected_.clear();
+    }
     const auto context = touch_context(game, ui);
     touch_context_ = TouchContext::Hidden;
     const auto view = window_viewport();

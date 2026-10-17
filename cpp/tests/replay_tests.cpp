@@ -521,10 +521,12 @@ TEST_CASE("Desktop settings persist opt in audio and both speeds with bounds che
     REQUIRE_FALSE(load_settings(path).recording);
     REQUIRE_FALSE(load_settings(path).hero_orb_actual_damage);
     REQUIRE_FALSE(load_settings(path).mouse_walking);
+    REQUIRE_FALSE(load_settings(path).blink_mode);
+    REQUIRE_FALSE(load_settings(path).item_collection);
     REQUIRE_FALSE(load_settings(path).realtime_hero_orb);
     REQUIRE_FALSE(load_settings(path).touch_controls.has_value());
     REQUIRE(load_settings(path).replay_speed_index == 2);
-    save_settings(path, {2, 6, true, true, true, "en", true, true});
+    save_settings(path, {2, 6, true, true, true, "en", true, true, std::nullopt, true, true});
     const auto settings = load_settings(path);
     REQUIRE(settings.game_speed_index == 2);
     REQUIRE(settings.replay_speed_index == 6);
@@ -532,6 +534,8 @@ TEST_CASE("Desktop settings persist opt in audio and both speeds with bounds che
     REQUIRE(settings.muted);
     REQUIRE(settings.hero_orb_actual_damage);
     REQUIRE(settings.mouse_walking);
+    REQUIRE(settings.blink_mode);
+    REQUIRE(settings.item_collection);
     REQUIRE(settings.realtime_hero_orb);
     for (const bool enabled : {false, true}) {
         auto touch = settings;
@@ -554,12 +558,15 @@ TEST_CASE("Desktop settings persist opt in audio and both speeds with bounds che
     }
     REQUIRE_FALSE(load_settings(path).hero_orb_actual_damage);
     REQUIRE_FALSE(load_settings(path).mouse_walking);
+    REQUIRE_FALSE(load_settings(path).blink_mode);
+    REQUIRE_FALSE(load_settings(path).item_collection);
     REQUIRE_FALSE(load_settings(path).realtime_hero_orb);
     REQUIRE_FALSE(load_settings(path).touch_controls.has_value());
     REQUIRE_THROWS(save_settings(path, {3, 0, false, false}));
     for (const auto* source : {R"({"game_speed":-1})", R"({"replay_speed":7})", R"({"recording":"true"})",
                                R"({"hero_orb_actual_damage":"true"})", R"({"mouse_walking":"true"})",
-                               R"({"realtime_hero_orb":"true"})", "not json"}) {
+                               R"({"realtime_hero_orb":"true"})", R"({"blink_mode":"true"})",
+                               R"({"item_collection":"true"})", "not json"}) {
         std::ofstream output(path);
         output << source;
         output.close();

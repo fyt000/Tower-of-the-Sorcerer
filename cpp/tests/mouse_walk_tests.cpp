@@ -1,6 +1,8 @@
+#include "tsw/blink.hpp"
 #include "tsw/mouse_walk.hpp"
 #include "tsw/replay.hpp"
 #include <catch2/catch_test_macros.hpp>
+#include <sstream>
 
 using namespace tsw;
 
@@ -323,4 +325,148 @@ TEST_CASE("Mouse movement records and replays ordinary native inputs", "[mouse][
     Game replayed;
     player.seek(replayed, flight, player.size());
     REQUIRE(gameplay_json(replayed) == gameplay_json(game));
+}
+
+TEST_CASE("Blink crosses a connected clear route in one call without crossing events", "[blink][movement]") {
+    auto game = corridor();
+    game.floors[1].tiles.fill(Road);
+    game.tile_at(1, 2, 5) = YellowDoor;
+    game.hero.yellow_keys = 1;
+    const auto before = gameplay_json(game);
+    const auto path = blink_path(game, cell(3, 5));
+    REQUIRE(path.size() == 4);
+    REQUIRE(gameplay_json(game) == before);
+    REQUIRE(blink_to(game, cell(3, 5), [&](Direction direction) { REQUIRE(game.move(direction)); }));
+    REQUIRE(game.hero.x == 3);
+    REQUIRE(game.hero.y == 5);
+    REQUIRE(game.hero.yellow_keys == 1);
+    REQUIRE(game.tile_at(1, 2, 5) == YellowDoor);
+    REQUIRE_FALSE(game.busy());
+}
+
+TEST_CASE("Blink cannot cross a door monster pickup or hidden event", "[blink][movement]") {
+    for (const int obstacle :
+         {int(YellowDoor), int(BlueDoor), int(RedDoor), int(GreenSlime), int(RedPotion), int(YellowKey),
+          int(Wall), int(SecretWall), int(HiddenObject), int(SpecialRoad), int(StairsUp), int(Altar)}) {
+        INFO("Obstacle: " << obstacle);
+        auto game = corridor();
+        game.tile_at(1, 4, 5) = static_cast<std::uint8_t>(obstacle);
+        REQUIRE(blink_path(game, cell(9, 5)).empty());
+        int inputs = 0;
+        REQUIRE_FALSE(blink_to(game, cell(9, 5), [&](Direction) { ++inputs; }));
+        REQUIRE(inputs == 0);
+        REQUIRE(game.hero.x == 1);
+    }
+}
+
+TEST_CASE("Blink makes just one normal contact on a selected door or tunnel", "[blink][movement]") {
+    for (const int target : {int(YellowDoor), int(SecretWall)}) {
+        for (const int keys : {0, 1}) {
+            auto game = corridor();
+            game.hero.yellow_keys = keys;
+            game.tile_at(1, 5, 5) = static_cast<std::uint8_t>(target);
+            REQUIRE(blink_to(game, cell(5, 5), [&](Direction direction) { REQUIRE(game.move(direction)); }));
+            REQUIRE(game.hero.x == 4);
+            game.finish_commands();
+            REQUIRE(game.hero.x == 4);
+            REQUIRE(game.hero.yellow_keys == (target == YellowDoor ? 0 : keys));
+            REQUIRE(game.tile_at(1, 5, 5) == (target == SecretWall || keys ? Road : YellowDoor));
+        }
+    }
+}
+
+TEST_CASE("Blink selected events retain native combat dialogue pickup and stair behavior",
+          "[blink][movement]") {
+    for (const int target : {int(RedPotion), int(GreenSlime), int(Altar), int(StairsUp)}) {
+        auto game = corridor();
+        game.tile_at(1, 5, 5) = static_cast<std::uint8_t>(target);
+        auto expected = game;
+        for (int i = 0; i < 4; ++i)
+            REQUIRE(expected.move(Direction::Right));
+        REQUIRE(blink_to(game, cell(5, 5), [&](Direction direction) { REQUIRE(game.move(direction)); }));
+        REQUIRE(gameplay_json(game) == gameplay_json(expected));
+        game.finish_commands();
+        expected.finish_commands();
+        REQUIRE(gameplay_json(game) == gameplay_json(expected));
+    }
+}
+
+TEST_CASE("Blink avoids magic pincer damage and moving magicians without probing live state",
+          "[blink][hazards]") {
+    for (const int floor : {1, 47}) {
+        auto game = corridor(floor);
+        game.hero.equipment_found[SacredShieldFlag] = floor == 47;
+        game.tile_at(floor, 4, 4) = MagicianA;
+        game.tile_at(floor, 4, 3) = Road;
+        const auto before = gameplay_json(game);
+        REQUIRE(blink_path(game, cell(9, 5)).empty());
+        REQUIRE(gameplay_json(game) == before);
+        REQUIRE(game.commands.empty());
+        REQUIRE(game.sounds.empty());
+    }
+    auto game = corridor();
+    game.hero.equipment_found[SacredShieldFlag] = 0;
+    game.tile_at(1, 4, 4) = game.tile_at(1, 4, 6) = Sorcerer;
+    REQUIRE(blink_path(game, cell(9, 5)).empty());
+    game.floors[1].tiles.fill(Road);
+    game.tile_at(1, 4, 4) = MagicianA;
+    const auto hp = game.hero.hp;
+    REQUIRE(blink_to(game, cell(9, 5), [&](Direction direction) { REQUIRE(game.move(direction)); }));
+    REQUIRE(game.hero.x == 9);
+    REQUIRE(game.hero.hp == hp);
+    REQUIRE_FALSE(game.busy());
+}
+
+TEST_CASE("Blink validates its start edges nearby clicks and busy state", "[blink][movement]") {
+    auto game = corridor();
+    for (const int destination : {-1, CellCount, cell(1, 5), cell(2, 5), cell(0, 0)})
+        REQUIRE(blink_path(game, destination).empty());
+    game.tile_at(1, 1, 5) = StairsUp;
+    REQUIRE_FALSE(blink_path(game, cell(9, 5)).empty());
+    game.hero.equipment_found[SacredShieldFlag] = 0;
+    game.tile_at(1, 1, 4) = MagicianA;
+    REQUIRE(blink_path(game, cell(9, 5)).empty());
+    game.tile_at(1, 1, 4) = Wall;
+    game.push(Op::Wait);
+    REQUIRE(blink_path(game, cell(9, 5)).empty());
+    game.finish_commands();
+    game.hero.x = 10;
+    game.hero.y = 0;
+    game.floors[1].tiles.fill(Road);
+    REQUIRE(blink_path(game, cell(0, 1)).size() == BoardWidth);
+}
+
+TEST_CASE("Blink picks TSWH5's first safe adjacent approach to a selected event", "[blink][movement]") {
+    auto game = corridor();
+    game.floors[1].tiles.fill(Road);
+    game.hero.x = 8;
+    game.tile_at(1, 5, 5) = Altar;
+    const auto path = blink_path(game, cell(5, 5));
+    REQUIRE(path.back() == cell(5, 5));
+    REQUIRE(path[path.size() - 2] == cell(4, 5));
+    REQUIRE(blink_to(game, cell(5, 5), [&](Direction direction) { REQUIRE(game.move(direction)); }));
+    REQUIRE(game.hero.x == 4);
+    REQUIRE(game.dialogue.has_value());
+}
+
+TEST_CASE("Blink records native moves and replays the identical save", "[blink][replay]") {
+    Game game;
+    Recorder recorder(true);
+    recorder.new_game(game.rankings);
+    int flight = -1;
+    REQUIRE(blink_to(game, cell(6, 9), [&](Direction direction) {
+        const auto input = PlayerInput::move(direction);
+        REQUIRE(apply_input(game, flight, input));
+        recorder.append(input);
+    }));
+    REQUIRE(game.hero.x == 6);
+    REQUIRE(game.hero.y == 9);
+    ReplayPlayer player({recorder.history().begin(), recorder.history().end()});
+    Game replayed;
+    player.seek(replayed, flight, player.size());
+    REQUIRE(gameplay_json(replayed) == gameplay_json(game));
+    std::ostringstream actual, expected;
+    game.save(actual);
+    replayed.save(expected);
+    REQUIRE(actual.str() == expected.str());
 }

@@ -2,6 +2,7 @@
 #include "assets.hpp"
 #include "raylib.h"
 #include "raylib_resources.hpp"
+#include "tsw/collect.hpp"
 #include "tsw/game.hpp"
 #include "tsw/hero_orb.hpp"
 #include "tsw/mouse_walk.hpp"
@@ -44,6 +45,8 @@ struct DesktopUi {
     bool inventory{}, enemies{}, help{}, muted{}, ending_wait{}, hero_orb_actual_damage{};
     bool recording_enabled{}, recording_active{};
     bool mouse_walking{};
+    bool blink_mode{};
+    bool item_collection{};
     bool realtime_hero_orb{};
     std::optional<bool> touch_controls;
 
@@ -126,7 +129,11 @@ enum class Action {
     RealtimeHeroOrb,
     TouchControls,
     Move,
-    ScrollDialogue
+    ScrollDialogue,
+    BlinkMode,
+    CollectAll,
+    CollectExceptPotions,
+    ItemCollection
 };
 
 struct UiAction {
@@ -196,6 +203,10 @@ class Presentation {
     Presentation& operator=(const Presentation&) = delete;
     Vector2 mouse_position() const;
     void moved(const Hero& before, const Hero& after);
+    void collected(int floor, const std::vector<CollectedItem>&);
+
+    bool collecting() const { return !collected_.empty(); }
+
     void advance(float seconds);  // Scaled animation and command time.
     void command(const Command&); // Original rendering callbacks, after run_one().
     void reset();
@@ -216,6 +227,9 @@ class Presentation {
     bool hide_panels_{}, cache_requested_{}, cache_valid_{};
     float walking_remaining_{};
     float animation_seconds_{};
+    std::vector<CollectedItem> collected_;
+    int collection_floor_{};
+    float collection_age_{};
     TouchRepeat touch_;
     [[maybe_unused]] int pointer_serial_{};
     TouchContext touch_context_ = TouchContext::Hidden;

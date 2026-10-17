@@ -46,7 +46,7 @@ Run beside the original `Data3/`, `Data2/`, `Midi/` and `Wav/` folders, or pass
 | Control | Action |
 |---|---|
 | Arrows / WASD | Walk; hold to repeat |
-| Map click | Walk/contact a destination when Mouse walking is enabled |
+| Map click | Blink or walk/contact a destination when the corresponding control is enabled |
 | Enter / Space | Continue dialogue or ending |
 | Item click / I | Inspect/use items / open inventory |
 | Flight: Up/Down, Enter, Esc | Preview, travel, cancel |
@@ -61,11 +61,27 @@ releasing a held direction before walking again. Above 1x, repeated sound effect
 are consolidated, crossfaded and shortened; music and effect pitch retain their
 normal playback rate.
 
-Settings has Game, Controls, Replay and Language tabs. Controls groups Mouse walking
-and Touch controls; Replay groups recording and playback speed. Game includes
-music, animation speed, Realtime Hero Orb and bonus-aware **Hero Orb actual damage**.
+Settings has Game, Controls, Replay and Language tabs. Controls groups Mouse walking,
+Blink mode and Touch controls; Replay groups recording and playback speed. Game includes
+music, animation speed, Item collection, Realtime Hero Orb and bonus-aware **Hero Orb actual damage**.
 Mouse walking and both Orb options default off. Mouse
 routes stop at unexpected events/hazards; other inputs cancel the route.
+**Blink mode is for experienced players only** and defaults off. It takes precedence
+over Mouse walking and enables map clicks by itself. Like TSWH5, it instantly crosses
+connected event-free floor, or blinks beside the selected event and makes one normal
+contact. It never crosses intervening doors, monsters, pickups, hidden tunnels or
+hazards; when a safe blink is unavailable it falls back to ordinary mouse walking.
+Adjacent clicks use ordinary contact. See the [source comparison](../docs/blink-mode.md).
+Enable **Item collection** under **Settings → Game → Quality of life** to show the
+two collection buttons and their background beneath the inventory. It defaults off.
+The buttons use the original key, gem and potion sprites with a pixel collection arrow.
+They provide **Zuck all** and **Zuck all except potion**.
+The crossed-out potion badge identifies the second action; hover for names and explanations.
+Each activation collects safely reachable pickups on the current floor and makes their
+icons fly to the hero, who stays in place. The second button preserves both red and
+blue potions; skipped potions remain barriers. Collection never opens doors, fights,
+reveals hidden passages, crosses hazards or changes floors. It is available without
+enabling Mouse walking or Blink mode. See [collection and replay notes](../docs/collection-qol.md).
 See [languages](locales/README.md) for catalog IDs and `--language` overrides.
 
 ## Saves and replay
@@ -81,6 +97,7 @@ unverified history-dependent awards without blocking loading.
 
 Choose **Play replay** or pass `--replay FILE`. Enable **Record new games** or
 `--record` before starting. [Replay controls, CLI and format](../docs/replay-verification.md).
+Blink and collection record ordinary native movements, so replays show walking.
 
 ## Development
 

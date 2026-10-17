@@ -1,4 +1,5 @@
 #include "desktop_session.hpp"
+#include "tsw/blink.hpp"
 #include <algorithm>
 #include <format>
 #include <fstream>
@@ -40,6 +41,8 @@ DesktopSession::DesktopSession(const Assets& assets, const std::filesystem::path
     ui.muted = settings.muted;
     ui.hero_orb_actual_damage = settings.hero_orb_actual_damage;
     ui.mouse_walking = settings.mouse_walking;
+    ui.blink_mode = settings.blink_mode;
+    ui.item_collection = settings.item_collection;
     ui.realtime_hero_orb = settings.realtime_hero_orb;
     ui.touch_controls = settings.touch_controls;
     ui.language = parse_language(settings.language);
@@ -60,7 +63,8 @@ void DesktopSession::dispatch(UiAction action) {
         game.status = error.what();
         ui.notice = error.what();
     }
-    if (!ui.mouse_walking || ui.modal() || ui.replay_active || ui.flight >= 0 || ui.ending_wait)
+    if ((!ui.mouse_walking && !ui.blink_mode) || ui.modal() || ui.replay_active || ui.flight >= 0 ||
+        ui.ending_wait)
         mouse_walk_.cancel();
     renderer.moved(before, game.hero);
     recording_status();
@@ -129,7 +133,9 @@ void DesktopSession::preferences() {
                                                       .language = std::string(language_id(ui.language)),
                                                       .mouse_walking = ui.mouse_walking,
                                                       .realtime_hero_orb = ui.realtime_hero_orb,
-                                                      .touch_controls = ui.touch_controls});
+                                                      .touch_controls = ui.touch_controls,
+                                                      .blink_mode = ui.blink_mode,
+                                                      .item_collection = ui.item_collection});
 }
 
 void DesktopSession::open_home(bool startup) {
@@ -321,7 +327,8 @@ void DesktopSession::advance_replay(float seconds) {
 }
 
 void DesktopSession::advance_commands(float seconds) {
-    if (!ui.mouse_walking || ui.modal() || ui.replay_active || ui.flight >= 0 || ui.ending_wait)
+    if ((!ui.mouse_walking && !ui.blink_mode) || ui.modal() || ui.replay_active || ui.flight >= 0 ||
+        ui.ending_wait)
         mouse_walk_.cancel();
     if (ui.home || ui.replay_picker || ui.rankings || ui.save_picker != SavePicker::None ||
         ui.menu != Menu::None || ui.help) {
@@ -399,8 +406,29 @@ void DesktopSession::apply(UiAction action) {
             ui.dialogue_scroll = std::max(0.f, ui.dialogue_scroll + action.value);
         break;
     case Action::WalkTo:
-        if (ui.mouse_walking && !ui.modal() && !ui.replay_active && ui.flight < 0 && !ui.ending_wait)
-            mouse_walk_.start(game, action.value);
+        if ((ui.mouse_walking || ui.blink_mode) && !ui.modal() && !ui.replay_active && ui.flight < 0 &&
+            !ui.ending_wait) {
+            mouse_walk_.cancel();
+            if (!ui.blink_mode ||
+                !blink_to(game, action.value, [this](Direction direction) { move_step(direction); }))
+                mouse_walk_.start(game, action.value);
+        }
+        break;
+    case Action::CollectAll:
+    case Action::CollectExceptPotions:
+        if (!ui.item_collection || game.busy() || ui.modal() || ui.replay_active || ui.flight >= 0 ||
+            ui.ending_wait || game.visual.raster_mode != RasterMode::Inactive || renderer.collecting())
+            break;
+        {
+            const auto collected =
+                collect_items(game, action.kind == Action::CollectExceptPotions,
+                              [this](Direction direction) { play(PlayerInput::move(direction)); });
+            renderer.collected(game.hero.floor, collected);
+            game.status = collected.empty() ? "No safely reachable items to collect."
+                          : action.kind == Action::CollectExceptPotions
+                              ? "Collected reachable items. Potions were left untouched."
+                              : "Collected all safely reachable items.";
+        }
         break;
     case Action::MainMenu:
         open_home();
@@ -625,6 +653,14 @@ void DesktopSession::apply(UiAction action) {
         break;
     case Action::MouseWalking:
         ui.mouse_walking = !ui.mouse_walking;
+        preferences();
+        break;
+    case Action::BlinkMode:
+        ui.blink_mode = !ui.blink_mode;
+        preferences();
+        break;
+    case Action::ItemCollection:
+        ui.item_collection = !ui.item_collection;
         preferences();
         break;
     case Action::RealtimeHeroOrb:

@@ -272,6 +272,12 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         ui.mouse_walking = true;
         require(mouse_destination(game, ui, hover) == cell(8, 5),
                 "A map click selects the tile under the logical mouse coordinates");
+        ui.mouse_walking = false;
+        ui.blink_mode = true;
+        require(mouse_destination(game, ui, hover) == cell(8, 5),
+                "Blink enables map clicks independently of mouse walking");
+        ui.blink_mode = false;
+        ui.mouse_walking = true;
         const CanvasViewport viewport{1600, 1116, 1600, 1116, {0, 0, 1600, 1116}};
         require(mouse_destination(game, ui, viewport.canvas_point({hover.x * 2, hover.y * 2})) == cell(8, 5),
                 "Resized-window mouse coordinates select the same map tile");
@@ -347,6 +353,88 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         renderer.draw(game, ui, {230, 12});
         snapshot("mouse-qol-tooltip");
         ui.mouse_walking = false;
+        ui.menu = Menu::Options;
+        ui.settings_tab = SettingsTab::Controls;
+        renderer.draw(game, ui, {-1, -1});
+        snapshot("blink-settings-off");
+        require(press_at({300, 396}).kind == Action::BlinkMode,
+                "The Controls tab dispatches the Blink mode toggle");
+        ui.blink_mode = true;
+        renderer.draw(game, ui, {-1, -1});
+        snapshot("blink-settings-on");
+        ui.blink_mode = false;
+        ui.close_overlays();
+    }
+    {
+        renderer.reset();
+        Game game;
+        game.floors[1].tiles.fill(Road);
+        game.hero.x = game.hero.y = 5;
+        game.tile_at(1, 2, 2) = RedGem;
+        game.tile_at(1, 8, 2) = BluePotion;
+        game.tile_at(1, 8, 8) = IronSword;
+        const auto press_at = [&](Vector2 mouse) {
+            auto* window = glfwGetCurrentContext();
+            const auto callback = glfwSetMouseButtonCallback(window, nullptr);
+            glfwSetMouseButtonCallback(window, callback);
+            callback(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
+            const auto action = renderer.draw(game, ui, mouse);
+            callback(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_RELEASE, 0);
+            return action;
+        };
+        constexpr Rectangle toolbar{22, 476, 112, 48};
+        Image original_panel = assets.image("data3-left");
+        const auto unobstructed = fingerprint(original_panel, {22, 448, 112, 48});
+        UnloadImage(original_panel);
+        draw(game);
+        require(!ui.item_collection && fingerprint(renderer, toolbar) == unobstructed,
+                "Collection defaults off with both buttons and their background completely absent");
+        snapshot("collection-disabled");
+        require(press_at({48, 500}).kind == Action::None && press_at({108, 500}).kind == Action::None,
+                "Hidden collection buttons cannot be activated");
+        ui.menu = Menu::Options;
+        ui.settings_tab = SettingsTab::Game;
+        require(press_at({232, 462}).kind == Action::ItemCollection,
+                "The Game tab dispatches the Item collection QOL toggle");
+        ui.close_overlays();
+        ui.item_collection = true;
+        require(press_at({48, 500}).kind == Action::CollectAll,
+                "Zuck all dispatches from the inventory toolbar");
+        require(press_at({108, 500}).kind == Action::CollectExceptPotions,
+                "Zuck all except potion dispatches from its separate button");
+        ui.replay_active = true;
+        require(press_at({48, 500}).kind == Action::None, "Collection cannot mutate an active replay");
+        ui.replay_active = false;
+        game.push(Op::Wait);
+        require(press_at({48, 500}).kind == Action::None,
+                "Collection controls are disabled while native events are pending");
+        game.finish_commands();
+        const int x = game.hero.x, y = game.hero.y;
+        const auto items = collect_items(game, false);
+        draw(game);
+        const auto finished = fingerprint(renderer, BoardArea);
+        renderer.collected(game.hero.floor, items);
+        draw(game);
+        snapshot("collection-start");
+        require(renderer.collecting() && game.hero.x == x && game.hero.y == y,
+                "Flying pickups keep the hero in place");
+        renderer.draw(game, ui, {-1, -1}, .23f);
+        snapshot("collection-flying");
+        require(fingerprint(renderer, BoardArea) != finished,
+                "Collected item icons fly over the cleared map");
+        require(press_at({48, 500}).kind == Action::None,
+                "Repeated collection is disabled until the flight animation finishes");
+        renderer.draw(game, ui, {-1, -1}, .5f);
+        require(!renderer.collecting() && fingerprint(renderer, BoardArea) == finished,
+                "Item flights finish cleanly without leaving sprites on the board");
+        snapshot("collection-finished");
+        renderer.collected(game.hero.floor, items);
+        renderer.reset();
+        require(!renderer.collecting(), "Loads and new games clear pending collection effects");
+        ui.item_collection = false;
+        draw(game);
+        require(fingerprint(renderer, toolbar) == unobstructed,
+                "Turning collection back off restores the original panel background");
     }
     {
         renderer.reset();

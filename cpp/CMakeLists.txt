@@ -26,7 +26,7 @@ include(CTest)
 if((ANDROID OR EMSCRIPTEN) AND (BUILD_TESTING OR TSW_TOOLS OR TSW_PLANNER))
     message(FATAL_ERROR "Cross builds require BUILD_TESTING, TSW_TOOLS and TSW_PLANNER to be OFF")
 endif()
-add_library(tsw_core src/game.cpp src/combat.cpp src/items.cpp src/contact.cpp src/mouse_walk.cpp src/hero_orb.cpp
+add_library(tsw_core src/game.cpp src/combat.cpp src/items.cpp src/contact.cpp src/mouse_walk.cpp src/blink.cpp src/collect.cpp src/hero_orb.cpp
     src/floor_checks.cpp src/scenes.cpp src/npcs.cpp src/save.cpp src/original_save.cpp src/save_slots.cpp
     src/game_state.cpp src/rankings.cpp src/localization.cpp src/achievements.cpp)
 target_include_directories(tsw_core PUBLIC include PRIVATE src)
@@ -101,7 +101,7 @@ if(BUILD_TESTING)
             endforeach()
         endif()
     endif()
-    add_executable(tsw_tests tests/core_tests.cpp tests/mouse_walk_tests.cpp tests/hero_orb_tests.cpp tests/tile_variant_tests.cpp tests/replay_tests.cpp tests/mcp_tests.cpp
+    add_executable(tsw_tests tests/core_tests.cpp tests/mouse_walk_tests.cpp tests/collect_tests.cpp tests/hero_orb_tests.cpp tests/tile_variant_tests.cpp tests/replay_tests.cpp tests/mcp_tests.cpp
         tests/ranking_tests.cpp tests/ranking_game_tests.cpp tests/ranking_replay_tests.cpp tests/localization_tests.cpp tests/achievement_tests.cpp)
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/test-temp")
     target_compile_definitions(tsw_tests PRIVATE TSW_TEST_TEMP="${CMAKE_CURRENT_BINARY_DIR}/test-temp")
