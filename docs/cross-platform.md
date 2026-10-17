@@ -43,7 +43,7 @@ and `build/android/artifacts/`. Debug APKs are signed for local testing.
 ## Publish on Cloudflare Pages
 
 Build locally first, then upload the **contents** of `build/cpp/web/site/` as a
-Pages Direct Upload project. The web build uses the q1 compressed GeneralUser GS
+Pages Direct Upload project. Every build uses the q1 compressed GeneralUser GS
 soundfont and shows download progress while its assets load. The web `.data`
 file is below Cloudflare Pages' 25 MiB per-file limit.
 

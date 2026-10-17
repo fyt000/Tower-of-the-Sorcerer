@@ -21,7 +21,7 @@ if(WIN32)
         "${EMBEDDED_ROOT}/ending-story.bmp" "${EMBEDDED_ROOT}/ending-card.bmp")
     configure_file(cmake/media.rc.in "${EMBEDDED_ROOT}/media.rc" @ONLY)
     set_source_files_properties("${EMBEDDED_ROOT}/media.rc" PROPERTIES OBJECT_DEPENDS
-        "${EMBEDDED_ROOT}/ending-story.bmp;${EMBEDDED_ROOT}/ending-card.bmp;${SOUNDFONT_ROOT}/music.sf2")
+        "${EMBEDDED_ROOT}/ending-story.bmp;${EMBEDDED_ROOT}/ending-card.bmp;${SOUNDFONT_FILE}")
     get_filename_component(original_directory "${TSW_ORIGINAL_EXE}" DIRECTORY)
 endif()
 
@@ -36,7 +36,7 @@ function(tsw_embed_media target)
     else()
         target_compile_definitions(${target} PRIVATE TSW_ORIGINAL_ASSETS="")
         add_custom_command(TARGET ${target} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SOUNDFONT_ROOT}/music.sf2" $<TARGET_FILE_DIR:${target}>/music.sf2)
+            "${SOUNDFONT_FILE}" $<TARGET_FILE_DIR:${target}>/music.sfo)
     endif()
     target_compile_definitions(${target} PRIVATE TSW_ASSETS="${TSW_BUILD_ROOT}/assets")
 endfunction()

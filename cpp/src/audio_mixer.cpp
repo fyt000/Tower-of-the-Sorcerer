@@ -1,11 +1,12 @@
 #include "audio_mixer.hpp"
 #include "audio_queue.hpp"
+#include "stb_vorbis.c"
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
-#ifdef __EMSCRIPTEN__
-#include "stb_vorbis.c"
-#endif
+#undef L
+#undef C
+#undef R
 #define TSF_IMPLEMENTATION
 #include "tsf.h"
 #define TML_IMPLEMENTATION

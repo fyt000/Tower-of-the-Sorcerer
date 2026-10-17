@@ -15,7 +15,7 @@ IMAGES += [f"data2-end{n:02}.png" for n in [*range(5, 21), 26]]
 IMAGES += ["data-exe-ending-story.png", "data-exe-ending-card.png"]
 
 
-def stage(source: Path, soundfont: Path, output: Path, soundfont_license: Path | None = None) -> None:
+def stage(source: Path, soundfont: Path, output: Path) -> None:
     source, output = source.resolve(), output.resolve()
     if source == output or source in output.parents or output in source.parents:
         raise ValueError("Source and output must be separate, non-nested directories")
@@ -27,12 +27,12 @@ def stage(source: Path, soundfont: Path, output: Path, soundfont_license: Path |
         files.update({f"{folder}/{p.name}": p for p in entries})
     # Optional freely redistributable fonts supplied by the builder, with their notices.
     files.update({p.relative_to(source).as_posix(): p for p in (source / "fonts").glob("*") if p.is_file()})
-    if soundfont.suffix.lower() not in (".sf2", ".sfo"):
-        raise ValueError(f"Unsupported soundfont format: {soundfont}")
-    files[f"music{soundfont.suffix.lower()}"] = soundfont
+    if soundfont.suffix.lower() != ".sfo":
+        raise ValueError(f"Expected an .sfo soundfont: {soundfont}")
+    files["music.sfo"] = soundfont
     cpp = Path(__file__).resolve().parents[1]
     files.update({f"licenses/{p.name}": p for p in (cpp / "licenses").glob("*.txt")})
-    files["licenses/GeneralUser-GS.txt"] = soundfont_license or soundfont.parent / "LICENSE.txt"
+    files["licenses/GeneralUser-GS.txt"] = soundfont.parent / "LICENSE.txt"
     files["licenses/game-attribution.md"] = cpp.parent / "THIRD_PARTY.md"
     files["licenses/project.txt"] = cpp.parent / "LICENSE"
     missing = [str(p) for p in files.values() if not p.is_file()]
@@ -62,7 +62,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--soundfont", type=Path, required=True)
-    parser.add_argument("--soundfont-license", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    stage(args.source, args.soundfont, args.output, args.soundfont_license)
+    stage(args.source, args.soundfont, args.output)

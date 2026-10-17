@@ -194,6 +194,9 @@ if(TSW_GUI)
     else()
         set(TSW_STB_INCLUDE_DIR "${raylib_SOURCE_DIR}/src/external")
     endif()
+    if(NOT EXISTS "${TSW_STB_INCLUDE_DIR}/stb_vorbis.c")
+        message(FATAL_ERROR "stb_vorbis.c is required for the compressed soundfont")
+    endif()
     add_library(tsw_media src/assets.cpp src/embedded_media.cpp)
     target_include_directories(tsw_media PUBLIC src)
     target_include_directories(tsw_media SYSTEM PRIVATE "${TSW_STB_INCLUDE_DIR}")
@@ -205,7 +208,8 @@ if(TSW_GUI)
         endif()
     endif()
     add_library(tsw_audio src/audio.cpp src/audio_mixer.cpp)
-    target_include_directories(tsw_audio SYSTEM PRIVATE ${tinysoundfont_SOURCE_DIR} ${TSW_MINIAUDIO_INCLUDE_DIR})
+    target_include_directories(tsw_audio SYSTEM PRIVATE ${tinysoundfont_SOURCE_DIR} ${TSW_MINIAUDIO_INCLUDE_DIR}
+        ${TSW_STB_INCLUDE_DIR})
     target_link_libraries(tsw_audio PUBLIC tsw_core tsw_media)
     add_library(tsw_desktop src/presentation.cpp src/desktop_session.cpp)
     target_link_libraries(tsw_desktop PUBLIC tsw_audio tsw_replay)
@@ -241,7 +245,7 @@ if(TSW_GUI)
     endif()
     add_custom_command(TARGET tsw_game POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${TSW_MINIAUDIO_LICENSE} $<TARGET_FILE_DIR:tsw_game>/miniaudio-LICENSE.txt
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SOUNDFONT_ROOT}/LICENSE.txt $<TARGET_FILE_DIR:tsw_game>/GeneralUser-GS-LICENSE.txt
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SOUNDFONT_LICENSE} $<TARGET_FILE_DIR:tsw_game>/GeneralUser-GS-LICENSE.txt
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${tinysoundfont_SOURCE_DIR}/LICENSE $<TARGET_FILE_DIR:tsw_game>/TinySoundFont-LICENSE.txt
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${RAYLIB_LICENSE} $<TARGET_FILE_DIR:tsw_game>/raylib-LICENSE.txt)
     if(MINGW)

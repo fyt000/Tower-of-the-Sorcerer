@@ -46,16 +46,10 @@ android {
     }
 }
 
-// Configure once here to fetch the pinned soundfont even on a clean checkout.
 tasks.register('prepareGameAssets', Exec) {
     workingDir repoDir
     commandLine python, 'cpp/tools/portable_assets.py', '--source', sourceAssets,
-        '--soundfont', new File(repoDir, 'build/dependencies/generaluser/music.sf2').path,
+        '--soundfont', new File(repoDir, 'cpp/soundfont/music.sfo').path,
         '--output', stagedAssets.path
-    doFirst {
-        exec {
-            commandLine 'cmake', '-P', new File(repoDir, 'cpp/cmake/PrepareSoundfont.cmake').path
-        }
-    }
 }
 tasks.named('preBuild').configure { dependsOn 'prepareGameAssets' }

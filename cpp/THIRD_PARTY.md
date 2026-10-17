@@ -17,24 +17,25 @@ MIT. See [project attribution](../THIRD_PARTY.md) and [catalog sources](locales/
 | Glaze | 7.2.2 | `licenses/glaze.txt` |
 | GeneralUser GS | 2.0.3; `684543d5e5efaef08d02be50dcda8d552478fa60` | `GeneralUser-GS-LICENSE.txt` |
 
-GeneralUser GS is by **S. Christian Collins**; its complete soundfont is embedded
-with its license. CMake verifies download hashes; inputs stay in
-`build/dependencies/`. Packaging copies static dependency notices from vcpkg's
-`share/*/copyright` and hashes packaged files.
+GeneralUser GS is by **S. Christian Collins**. All builds use the same
+Vorbis-compressed q1 `.sfo` derivative in [soundfont/](soundfont/) with its
+license. CMake verifies the soundfont and license checksums. Packaging copies
+static dependency notices from vcpkg's `share/*/copyright` and hashes packaged
+files.
 
 Segoe UI, Yu Gothic/MS Gothic and Microsoft YaHei are read from installed Windows
 fonts, or CJK uses `TSW_CJK_FONT`. Font files are not redistributed.
 
-Android packages the original GeneralUser GS bank. WebAssembly packages a
-Vorbis-compressed q1 `.sfo` derivative of that bank (SHA-256
-`0509a47616c426f6bb160c9f3740dea4174448749c6771644c1e6c562c05d8af`),
-made with TinySoundFont SFOTool and FFmpeg. Both package the extracted runtime
-media as data files. Their dependency notices are staged from [licenses/](licenses/)
-alongside the soundfont and game attribution. Optional builder-supplied fonts
-must include their redistribution notices. Android can also read system fonts.
+The soundfont has SHA-256
+`0509a47616c426f6bb160c9f3740dea4174448749c6771644c1e6c562c05d8af`.
+Windows embeds it in the executable; Android and WebAssembly package it with
+the extracted runtime media. Their dependency notices are staged from
+[licenses/](licenses/) alongside the soundfont and game attribution. Optional
+builder-supplied fonts must include their redistribution notices. Android can
+also read system fonts.
 
-The web derivative was generated from the pinned GeneralUser GS download with
+The derivative was generated from the pinned GeneralUser GS 2.0.3 source
+(`684543d5e5efaef08d02be50dcda8d552478fa60`) with
 SFOTool from the pinned TinySoundFont source and FFmpeg 8.0.1 (`libvorbis`,
 quality 1): extract the SF2 sample stream to WAV, encode that WAV to Ogg Vorbis,
-then use SFOTool to replace the SF2 sample stream with the Ogg file. The original
-SF2 stays the source for desktop and Android.
+then use SFOTool to replace the SF2 sample stream with the Ogg file.

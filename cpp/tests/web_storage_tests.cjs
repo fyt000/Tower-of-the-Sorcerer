@@ -108,6 +108,6 @@ test('exports preserve bytes, reject traversal and omit unfinished transaction f
     f.write('/Savedat/quick.save.pending');
     assert.deepEqual([...f.storage.read('quick.save')], [0, 128, 255]);
     assert.deepEqual(Array.from(f.storage.files()), ['quick.save']);
-    for (const name of ['../assets/music.sf2', 'folder/file', 'folder\\file', '.', '..', ''])
+    for (const name of ['../assets/music.sfo', 'folder/file', 'folder\\file', '.', '..', ''])
         assert.throws(() => f.storage.read(name), /Invalid save filename/);
 });
