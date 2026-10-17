@@ -28,6 +28,15 @@ cmake --build build/cpp/core --config Release
 ctest --test-dir build/cpp/core -C Release -LE audio --output-on-failure
 ```
 
+## Android and browser builds
+
+[Android APK and WebAssembly build guide](../docs/cross-platform.md) covers SDK
+setup, asset extraction and commands. Both ports build only the game and its
+runtime libraries. The browser build uses Emscripten with vcpkg, keeps saves in
+IndexedDB, and offers exact save-file downloads. Android packages an ARM64 APK
+(or x86-64 for an emulator), with saves in app-private storage and tap-to-walk
+enabled for a fresh installation.
+
 ## Run and controls
 
 Run beside the original `Data3/`, `Data2/`, `Midi/` and `Wav/` folders, or pass

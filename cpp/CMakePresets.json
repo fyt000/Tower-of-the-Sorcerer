@@ -41,6 +41,23 @@
       "cacheVariables": {
         "TSW_SANITIZERS": "ON"
       }
+    },
+    {
+      "name": "web",
+      "displayName": "WebAssembly game (Emscripten + vcpkg)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/../build/cpp/web",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "wasm32-emscripten",
+        "VCPKG_INSTALLED_DIR": "${sourceDir}/../build/dependencies/vcpkg_web",
+        "CMAKE_BUILD_TYPE": "Release",
+        "TSW_GUI": "ON",
+        "TSW_TOOLS": "OFF",
+        "TSW_PLANNER": "OFF",
+        "BUILD_TESTING": "OFF",
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+      }
     }
   ],
   "buildPresets": [
@@ -58,6 +75,13 @@
       "name": "asan",
       "configurePreset": "asan",
       "configuration": "Release"
+    },
+    {
+      "name": "web",
+      "configurePreset": "web",
+      "targets": [
+        "tsw_game"
+      ]
     }
   ],
   "testPresets": [

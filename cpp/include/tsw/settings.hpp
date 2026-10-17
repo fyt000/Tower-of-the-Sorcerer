@@ -2,6 +2,7 @@
 #include "tsw/localization.hpp"
 #include <array>
 #include <filesystem>
+#include <optional>
 
 namespace tsw {
 inline constexpr std::array<float, 3> GameSpeeds{1, 3, 10};
@@ -13,6 +14,7 @@ struct Settings {
     std::string language = "en";
     bool mouse_walking{};
     bool realtime_hero_orb{};
+    std::optional<bool> touch_controls; // Unset follows the current input device.
 };
 
 Settings load_settings(const std::filesystem::path&);

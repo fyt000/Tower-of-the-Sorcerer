@@ -27,6 +27,7 @@ struct CanvasViewport {
 };
 
 CanvasViewport window_viewport();
+bool touch_device();
 
 enum class Menu { None, Game, Options };
 enum class SavePicker { None, Save, Load };
@@ -41,6 +42,10 @@ struct DesktopUi {
     bool recording_enabled{}, recording_active{};
     bool mouse_walking{};
     bool realtime_hero_orb{};
+    std::optional<bool> touch_controls;
+
+    bool touch_enabled() const { return touch_controls.value_or(touch_device()); }
+
     bool home{}, game_started = true, replay_picker{}, replay_active{}, replay_paused{}, replay_in_progress{};
     bool quick_available{}, fairy_available{};
     int home_selection = 1, replay_speed_index = 2, replay_selected{}, replay_first_row{};
@@ -113,7 +118,10 @@ enum class Action {
     ReplaySpeed,
     WalkTo,
     MouseWalking,
-    RealtimeHeroOrb
+    RealtimeHeroOrb,
+    TouchControls,
+    Move,
+    ScrollDialogue
 };
 
 struct UiAction {
@@ -135,6 +143,20 @@ struct WalkRepeat {
     void stepped() { remaining = WalkRepeatSeconds; }
 };
 
+enum class TouchButton { Up, Left, Confirm, Right, Down };
+enum class TouchContext { Hidden, Walk, Dialogue, Shop, Flight };
+
+// Capture begins on a fresh press. Context changes require lifting the finger.
+struct TouchRepeat {
+    TouchContext context = TouchContext::Hidden;
+    std::optional<TouchButton> active;
+    WalkRepeat repeat;
+    bool blocked{};
+
+    std::optional<TouchButton> update(TouchContext current, std::optional<TouchButton> hovered, bool down,
+                                      bool pressed, float seconds);
+};
+
 // Owns raylib resources. Gameplay and save files never depend on this class.
 class Presentation {
   public:
@@ -147,7 +169,7 @@ class Presentation {
     void advance(float seconds);  // The same scaled clock as walking input and commands.
     void command(const Command&); // Original rendering callbacks, after run_one().
     void reset();
-    UiAction draw(const Game&, DesktopUi&, Vector2 mouse);
+    UiAction draw(const Game&, DesktopUi&, Vector2 mouse, float seconds = 0);
     void present() const;
     bool screenshot(const std::filesystem::path&) const;
     Image capture_canvas() const;        // Logical pixels, independent of desktop DPI.
@@ -164,6 +186,9 @@ class Presentation {
     bool hide_panels_{}, cache_requested_{}, cache_valid_{};
     float walking_remaining_{};
     float animation_seconds_{};
+    TouchRepeat touch_;
+    int pointer_serial_{};
+    UiAction draw_touch_controls(const Game&, TouchContext, std::optional<TouchButton>);
     void draw_board(const Game&, int floor, bool animated);
     void draw_realtime_orb(const Game&, const DesktopUi&);
     void draw_door(const Game&, int x, int y);

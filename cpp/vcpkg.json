@@ -5,7 +5,10 @@
   "dependencies": [
     "raylib",
     "stb",
-    "catch2",
+    {
+      "name": "catch2",
+      "platform": "!android & !emscripten"
+    },
     "glaze",
     "miniaudio"
   ]

@@ -4,11 +4,29 @@
 #include <iostream>
 #include <string>
 #include <tuple>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+#ifdef __ANDROID__
+#include <android_native_app_glue.h>
+extern "C" android_app* GetAndroidApp();
+#endif
 
 using namespace tsw;
 
 namespace {
 UiAction keyboard(const Game& game, DesktopUi& ui) {
+#ifdef __ANDROID__
+    if (IsKeyPressed(KEY_BACK)) {
+        if (ui.modal())
+            ui.close_overlays();
+        else if (ui.flight >= 0)
+            return {Action::CancelFlight};
+        else
+            return {Action::MainMenu};
+        return {};
+    }
+#endif
     if (ui.rankings) {
         if (IsKeyPressed(KEY_ESCAPE)) {
             ui.close_overlays();
@@ -199,17 +217,69 @@ UiAction keyboard(const Game& game, DesktopUi& ui) {
     }
     return {};
 }
+
+struct GameLoop {
+    std::unique_ptr<Assets> assets;
+    std::unique_ptr<DesktopSession> session;
+    WalkRepeat walking;
+
+    void frame() {
+        auto& game = session->game;
+        auto& ui = session->ui;
+        auto& renderer = session->renderer;
+        if (IsFileDropped()) {
+            const auto files = LoadDroppedFiles();
+            if (files.count) {
+                ui.replay_path = files.paths[0];
+                session->dispatch({Action::PlayReplay});
+            }
+            UnloadDroppedFiles(files);
+        }
+        session->dispatch(keyboard(game, ui));
+        const float game_elapsed = session->scaled_seconds(std::min(GetFrameTime(), .1f));
+        renderer.advance(game_elapsed);
+        if (!ui.replay_active && !game.dialogue && ui.flight < 0 && !ui.modal() && !game.busy()) {
+            walking.advance(game_elapsed);
+            for (const auto [key, alternative, direction] :
+                 std::array<std::tuple<int, int, Direction>, 4>{{{KEY_UP, KEY_W, Direction::Up},
+                                                                 {KEY_DOWN, KEY_S, Direction::Down},
+                                                                 {KEY_LEFT, KEY_A, Direction::Left},
+                                                                 {KEY_RIGHT, KEY_D, Direction::Right}}})
+                if (walking.ready(IsKeyPressed(key) || IsKeyPressed(alternative),
+                                  IsKeyDown(key) || IsKeyDown(alternative))) {
+                    session->move(direction);
+                    walking.stepped();
+                    break;
+                }
+        }
+        session->advance_commands(game_elapsed);
+        session->dispatch(renderer.draw(game, ui, renderer.mouse_position(), game_elapsed));
+        renderer.present();
+    }
+};
 } // namespace
 
 int main(int argc, char** argv) try {
+#ifdef __ANDROID__
+    const std::filesystem::path application = GetAndroidApp()->activity->internalDataPath;
+    std::filesystem::current_path(application / "game");
+    const auto executable = application / "game";
+#else
     const std::filesystem::path executable = GetApplicationDirectory();
+#endif
     auto executable_file = executable / std::filesystem::path(argv[0]).filename();
 #ifdef _WIN32
     if (!std::filesystem::exists(executable_file))
         executable_file += ".exe";
 #endif
     std::filesystem::path requested_assets, load_file, replay_file, screenshot;
+#ifdef __EMSCRIPTEN__
+    std::filesystem::path save_directory = "/Savedat";
+#elif defined(__ANDROID__)
+    auto save_directory = application / "Savedat";
+#else
     auto save_directory = executable / "Savedat";
+#endif
     std::optional<bool> record;
     std::optional<Language> language;
     SaveKind load_kind = SaveKind::Slot;
@@ -253,22 +323,37 @@ int main(int argc, char** argv) try {
         throw std::runtime_error("--checkpoint requires --load FILE");
     if (!load_file.empty() && !replay_file.empty())
         throw std::runtime_error("Choose --load or --replay");
-    Assets assets(Assets::select(executable, requested_assets, TSW_ORIGINAL_ASSETS, TSW_ASSETS),
-                  executable_file);
-    std::cout << "Assets: " << assets.root()
-              << (assets.original_layout() ? " (original layout)\n" : " (PNG layout)\n");
+    auto loop = std::make_unique<GameLoop>();
+    loop->assets = std::make_unique<Assets>(
+        Assets::select(executable, requested_assets, TSW_ORIGINAL_ASSETS, TSW_ASSETS), executable_file);
+    std::cout << "Assets: " << loop->assets->root()
+              << (loop->assets->original_layout() ? " (original layout)\n" : " (PNG layout)\n");
     std::cout << "Saves: " << save_directory << '\n';
     const bool hidden = !screenshot.empty();
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI | FLAG_VSYNC_HINT |
-                   (hidden ? FLAG_WINDOW_HIDDEN : 0));
+    unsigned flags = FLAG_WINDOW_HIGHDPI | FLAG_VSYNC_HINT | (hidden ? FLAG_WINDOW_HIDDEN : 0);
+#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
+    flags |= FLAG_WINDOW_RESIZABLE;
+#endif
+    SetConfigFlags(flags);
     SetTraceLogLevel(LOG_WARNING);
     InitWindow(CanvasWidth, CanvasHeight, "Tower of the Sorcerer");
+#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
     SetWindowMinSize(640, 447);
+#endif
     SetExitKey(KEY_NULL);
+#ifdef __EMSCRIPTEN__
+    SetTargetFPS(0);
+#else
     SetTargetFPS(hidden ? 0 : 60);
+#endif
     int result = 0;
     {
-        DesktopSession session(assets, save_directory, {}, record);
+        loop->session = std::make_unique<DesktopSession>(*loop->assets, save_directory, Game{}, record);
+        auto& session = *loop->session;
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__)
+        if (!std::filesystem::exists(save_directory / "settings.json"))
+            session.ui.mouse_walking = true;
+#endif
         if (language)
             session.ui.language = *language;
         if (!load_file.empty())
@@ -277,44 +362,28 @@ int main(int argc, char** argv) try {
             session.replay(replay_file);
         else
             session.open_home(true);
-        auto& game = session.game;
-        auto& ui = session.ui;
-        auto& renderer = session.renderer;
-        WalkRepeat walking;
-        while (!WindowShouldClose()) {
-            if (IsFileDropped()) {
-                const auto files = LoadDroppedFiles();
-                if (files.count) {
-                    ui.replay_path = files.paths[0];
-                    session.dispatch({Action::PlayReplay});
+#ifdef __EMSCRIPTEN__
+        emscripten_set_main_loop_arg(
+            [](void* state) {
+                try {
+                    static_cast<GameLoop*>(state)->frame();
+                } catch (const std::exception& error) {
+                    std::cerr << error.what() << '\n';
+                    EM_ASM({ Module['setStatus']('Game error: ' + UTF8ToString($0)); }, error.what());
+                    emscripten_cancel_main_loop();
                 }
-                UnloadDroppedFiles(files);
-            }
-            session.dispatch(keyboard(game, ui));
-            const float game_elapsed = session.scaled_seconds(std::min(GetFrameTime(), .1f));
-            renderer.advance(game_elapsed);
-            if (!ui.replay_active && !game.dialogue && ui.flight < 0 && !ui.modal() && !game.busy()) {
-                walking.advance(game_elapsed);
-                for (const auto [key, alternative, direction] :
-                     std::array<std::tuple<int, int, Direction>, 4>{{{KEY_UP, KEY_W, Direction::Up},
-                                                                     {KEY_DOWN, KEY_S, Direction::Down},
-                                                                     {KEY_LEFT, KEY_A, Direction::Left},
-                                                                     {KEY_RIGHT, KEY_D, Direction::Right}}})
-                    if (walking.ready(IsKeyPressed(key) || IsKeyPressed(alternative),
-                                      IsKeyDown(key) || IsKeyDown(alternative))) {
-                        session.move(direction);
-                        walking.stepped();
-                        break;
-                    }
-            }
-            session.advance_commands(game_elapsed);
-            session.dispatch(renderer.draw(game, ui, renderer.mouse_position()));
-            renderer.present();
+            },
+            loop.release(), 0, true);
+#else
+        while (!WindowShouldClose()) {
+            loop->frame();
             if (!screenshot.empty()) {
-                result = renderer.screenshot(screenshot) ? 0 : 1;
+                result = session.renderer.screenshot(screenshot) ? 0 : 1;
                 break;
             }
         }
+#endif
+        loop.reset(); // Renderer resources must be released before closing the graphics context.
     }
     CloseWindow();
     return result;

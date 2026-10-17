@@ -86,6 +86,81 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
     };
 
     {
+        TouchRepeat pad;
+        const auto left = TouchButton::Left, confirm = TouchButton::Confirm;
+        pad.update(TouchContext::Walk, {}, false, false, 0);
+        require(pad.update(TouchContext::Walk, left, true, true, 0) == left,
+                "A fresh direction touch emits one step immediately");
+        require(!pad.update(TouchContext::Walk, left, true, false, WalkRepeatSeconds / 2),
+                "A held direction waits for the keyboard repeat interval");
+        require(pad.update(TouchContext::Walk, left, true, false, WalkRepeatSeconds) == left,
+                "A held direction repeats on the same clock as keyboard walking");
+        require(!pad.update(TouchContext::Dialogue, left, true, false, 1) &&
+                    !pad.update(TouchContext::Walk, left, true, false, 1),
+                "A touch cannot carry across dialogue or return to movement without release");
+        pad.update(TouchContext::Walk, {}, false, false, 0);
+        require(!pad.update(TouchContext::Walk, left, true, false, 1),
+                "Dragging onto the pad from elsewhere does not acquire a touch");
+        pad.update(TouchContext::Dialogue, {}, false, false, 0);
+        require(pad.update(TouchContext::Dialogue, confirm, true, true, 0) == confirm &&
+                    !pad.update(TouchContext::Dialogue, confirm, true, false, 10),
+                "Confirm is emitted on a fresh press and never auto repeats");
+        pad.update(TouchContext::Walk, {}, false, false, 0);
+        pad.update(TouchContext::Walk, left, true, true, 0);
+        require(!pad.update(TouchContext::Walk, confirm, true, false, 1),
+                "Sliding from an arrow to Confirm never confirms an action");
+        pad.update(TouchContext::Hidden, left, true, false, 1);
+        require(!pad.update(TouchContext::Walk, left, true, false, 1),
+                "Menus disable a held direction until the pointer is released");
+        pad.update(TouchContext::Walk, {}, false, false, 0);
+        pad.update(TouchContext::Walk, left, true, true, 0);
+        require(!pad.update(TouchContext::Walk, {}, false, false, 1),
+                "Pointer cancellation releases a held direction");
+        Game game;
+        ui.touch_controls = true;
+        draw(game);
+        snapshot("touch-controls");
+        auto* window = glfwGetCurrentContext();
+        const auto callback = glfwSetMouseButtonCallback(window, nullptr);
+        glfwSetMouseButtonCallback(window, callback);
+        const auto press = [&](Vector2 point) {
+            callback(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
+            const auto action = renderer.draw(game, ui, point);
+            callback(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_RELEASE, 0);
+            draw(game);
+            return action;
+        };
+        const auto step = press({673, 447});
+        require(step.kind == Action::Move && step.value == int(Direction::Left),
+                "The visible Left button dispatches a directional step instead of map walking");
+        ui.flight = 2;
+        draw(game);
+        require(press({721, 399}).kind == Action::FlightUp && press({721, 447}).kind == Action::Travel &&
+                    press({721, 360}).kind == Action::CancelFlight,
+                "Touch Flight provides floor selection, travel and a visible Cancel button");
+        snapshot("touch-flight");
+        ui.flight = -1;
+        game.dialogue = Dialogue{"Touch dialogue."};
+        draw(game);
+        require(press({721, 447}).kind == Action::Continue &&
+                    press({721, 399}).kind == Action::ScrollDialogue,
+                "Dialogue maps the pad to confirmation and scrolling instead of walking");
+        snapshot("touch-dialogue");
+        game.dialogue->shop = true;
+        game.dialogue->choices[0] = "Buy";
+        draw(game);
+        require(press({721, 447}).kind == Action::Choose,
+                "Shop confirmation uses the same explicit choice as Enter");
+        game.dialogue.reset();
+        ui.menu = Menu::Options;
+        draw(game);
+        require(press({673, 447}).kind == Action::None,
+                "A menu consumes touches where the hidden pad would otherwise appear");
+        ui.close_overlays();
+        ui.touch_controls.reset();
+    }
+
+    {
         // Independent sprite expectations from 0x443120 (idle) and 0x443808 (walk).
         Image atlas = assets.image("original-atlas");
         constexpr std::array<int, 4> IdleTiles{189, 197, 205, 213}, WalkingTiles{185, 193, 201, 209};

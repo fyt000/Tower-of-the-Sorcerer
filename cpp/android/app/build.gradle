@@ -1,0 +1,61 @@
+plugins { id 'com.android.application' }
+
+def repoDir = file('../../..')
+def vcpkgRoot = providers.gradleProperty('vcpkgRoot').orElse(providers.environmentVariable('VCPKG_ROOT')).getOrElse('')
+if (vcpkgRoot.isBlank()) throw new GradleException('Set VCPKG_ROOT or -PvcpkgRoot=/path/to/vcpkg')
+def stagedAssets = new File(repoDir, 'build/android/packaged/assets')
+def sourceAssets = providers.gradleProperty('assetsDir').getOrElse(new File(repoDir, 'build/assets').path)
+def python = providers.gradleProperty('python').getOrElse('python')
+def gameAbi = providers.gradleProperty('androidAbi').getOrElse('arm64-v8a')
+def triplet = ['arm64-v8a': 'arm64-android', 'x86_64': 'x64-android'][gameAbi]
+if (triplet == null) throw new GradleException('androidAbi must be arm64-v8a or x86_64')
+
+android {
+    namespace 'org.tosrewritten.game'
+    compileSdk 35
+    ndkVersion '30.0.14904198'
+    defaultConfig {
+        applicationId 'org.tosrewritten.game'
+        minSdk 28
+        targetSdk 35
+        versionCode 1
+        versionName '0.9.0'
+        ndk { abiFilters gameAbi }
+        externalNativeBuild {
+            cmake {
+                targets 'tsw_game'
+                arguments '-DTSW_GUI=ON', '-DTSW_TOOLS=OFF', '-DTSW_PLANNER=OFF', '-DBUILD_TESTING=OFF',
+                    "-DCMAKE_TOOLCHAIN_FILE=${vcpkgRoot}/scripts/buildsystems/vcpkg.cmake",
+                    "-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${android.sdkDirectory}/ndk/${android.ndkVersion}/build/cmake/android.toolchain.cmake",
+                    "-DVCPKG_TARGET_TRIPLET=${triplet}",
+                    "-DVCPKG_INSTALLED_DIR=${repoDir}/build/dependencies/vcpkg_android"
+            }
+        }
+    }
+    buildTypes {
+        debug { jniDebuggable true }
+        release { minifyEnabled false }
+    }
+    externalNativeBuild {
+        cmake { path '../../CMakeLists.txt'; version '4.1.2' }
+    }
+    sourceSets { main { assets.srcDirs = [stagedAssets.parentFile] } }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// Configure once here to fetch the pinned soundfont even on a clean checkout.
+tasks.register('prepareGameAssets', Exec) {
+    workingDir repoDir
+    commandLine python, 'cpp/tools/portable_assets.py', '--source', sourceAssets,
+        '--soundfont', new File(repoDir, 'build/dependencies/generaluser/music.sf2').path,
+        '--output', stagedAssets.path
+    doFirst {
+        exec {
+            commandLine 'cmake', '-P', new File(repoDir, 'cpp/cmake/PrepareSoundfont.cmake').path
+        }
+    }
+}
+tasks.named('preBuild').configure { dependsOn 'prepareGameAssets' }

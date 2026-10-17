@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tower of the Sorcerer</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #1d1b23; color: #f6f1e6; }
+    body { margin: 0 auto; max-width: 1100px; padding: 12px; }
+    h1 { font-size: 1.3rem; margin: 0 0 8px; color: #f7d18a; }
+    canvas { display: block; width: 100%; height: auto; background: black; touch-action: none; outline: none; }
+    #game:fullscreen { width: 100vw; height: 100dvh; display: flex; align-items: center; justify-content: center; background: black; }
+    #game:fullscreen canvas { width: min(100vw, calc(100dvh * 800 / 558)); height: auto; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; }
+    button, select { font: inherit; padding: 8px 12px; border: 1px solid #a89176; border-radius: 5px; background: #39363f; color: inherit; }
+    button:disabled { opacity: .45; }
+    p { font-size: .9rem; line-height: 1.5; margin: 6px 0; }
+    #storage.error, #status.error { color: #ffb3a7; }
+    .touch-device body { max-width: none; padding: 0; }
+    .touch-device h1 { display: none; }
+    .touch-device .toolbar, .touch-device p { margin: 8px 12px; }
+    .touch-device #status:empty { display: none; }
+    @media (orientation: landscape) {
+      .touch-device #game { height: 100svh; display: flex; align-items: center; justify-content: center; background: black; }
+      .touch-device canvas { width: min(100vw, calc(100svh * 800 / 558)); height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Tower of the Sorcerer</h1>
+  <p id="status" role="status">Loading game…</p>
+  <div id="game"><canvas id="canvas" width="800" height="558" tabindex="0" aria-label="Tower of the Sorcerer game"></canvas></div>
+  <div class="toolbar">
+    <label for="save-file">Saved file</label><select id="save-file" disabled></select>
+    <button id="export" disabled>Export file</button>
+    <button id="retry" disabled>Retry storage</button>
+    <button id="fullscreen">Fullscreen</button>
+  </div>
+  <p id="storage" role="status">Preparing save storage…</p>
+  <p>Use the Game menu to save and load. Arrows / WASD move; Enter continues dialogue.
+    Tap or click the map to walk. Mobile uses a directional pad; hold an arrow to repeat.
+    Rotate to landscape for larger controls. Touch controls can be changed in Options.</p>
+  <p>Saves, rankings, settings and replay companions stay in this browser for this site address.
+    Export files to keep a copy outside the browser. Export matching .achievements.json and
+    .replay.jsonl companions too when preserving history. Clearing site data removes browser saves.</p>
+  <script>
+    var canvas = document.getElementById('canvas');
+    var select = document.getElementById('save-file');
+    var exportButton = document.getElementById('export');
+    var ready = false;
+    function refreshFiles() {
+      if (!ready) return;
+      var previous = select.value;
+      var files = Module['tswStorage'].files();
+      select.replaceChildren.apply(select, files.map(function (name) {
+        var option = document.createElement('option'); option.value = option.textContent = name; return option;
+      }));
+      if (files.indexOf(previous) >= 0) select.value = previous;
+      select.disabled = exportButton.disabled = !files.length;
+    }
+    var Module = {
+      canvas: canvas,
+      setStatus: function (text) { document.getElementById('status').textContent = text; },
+      onRuntimeInitialized: function () {
+        ready = true;
+        document.getElementById('retry').disabled = false;
+        Module.setStatus(''); refreshFiles(); canvas.focus();
+      },
+      onAbort: function (reason) {
+        document.getElementById('status').className = 'error';
+        Module.setStatus('Unable to start the game: ' + reason);
+      }
+    };
+    window.addEventListener('tsw-storage', function (event) {
+      var status = document.getElementById('storage');
+      status.textContent = event.detail.message; status.className = event.detail.error ? 'error' : '';
+      refreshFiles();
+    });
+    canvas.addEventListener('pointerdown', function () { canvas.focus(); });
+    canvas.addEventListener('contextmenu', function (event) { event.preventDefault(); });
+    document.getElementById('retry').onclick = function () { Module['tswStorage'].flush(); refreshFiles(); };
+    exportButton.onclick = function () {
+      try {
+        var url = URL.createObjectURL(new Blob([Module['tswStorage'].read(select.value)], { type: 'application/octet-stream' }));
+        var anchor = document.createElement('a'); anchor.href = url; anchor.download = select.value;
+        document.body.appendChild(anchor); anchor.click(); anchor.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      } catch (error) { Module.setStatus('Export failed: ' + error.message); }
+    };
+    document.getElementById('fullscreen').onclick = function () {
+      var game = document.getElementById('game');
+      if (game.requestFullscreen) game.requestFullscreen().catch(function (error) { Module.setStatus(error.message); });
+    };
+  </script>
+  {{{ SCRIPT }}}
+</body>
+</html>

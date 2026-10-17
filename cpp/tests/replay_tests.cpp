@@ -522,6 +522,7 @@ TEST_CASE("Desktop settings persist opt in audio and both speeds with bounds che
     REQUIRE_FALSE(load_settings(path).hero_orb_actual_damage);
     REQUIRE_FALSE(load_settings(path).mouse_walking);
     REQUIRE_FALSE(load_settings(path).realtime_hero_orb);
+    REQUIRE_FALSE(load_settings(path).touch_controls.has_value());
     REQUIRE(load_settings(path).replay_speed_index == 2);
     save_settings(path, {2, 6, true, true, true, "en", true, true});
     const auto settings = load_settings(path);
@@ -532,6 +533,13 @@ TEST_CASE("Desktop settings persist opt in audio and both speeds with bounds che
     REQUIRE(settings.hero_orb_actual_damage);
     REQUIRE(settings.mouse_walking);
     REQUIRE(settings.realtime_hero_orb);
+    for (const bool enabled : {false, true}) {
+        auto touch = settings;
+        touch.touch_controls = enabled;
+        save_settings(path, touch);
+        REQUIRE(load_settings(path).touch_controls == enabled);
+    }
+    save_settings(path, settings);
     {
         std::ifstream input(path);
         const std::string wire{std::istreambuf_iterator<char>(input), {}};
@@ -547,6 +555,7 @@ TEST_CASE("Desktop settings persist opt in audio and both speeds with bounds che
     REQUIRE_FALSE(load_settings(path).hero_orb_actual_damage);
     REQUIRE_FALSE(load_settings(path).mouse_walking);
     REQUIRE_FALSE(load_settings(path).realtime_hero_orb);
+    REQUIRE_FALSE(load_settings(path).touch_controls.has_value());
     REQUIRE_THROWS(save_settings(path, {3, 0, false, false}));
     for (const auto* source : {R"({"game_speed":-1})", R"({"replay_speed":7})", R"({"recording":"true"})",
                                R"({"hero_orb_actual_damage":"true"})", R"({"mouse_walking":"true"})",

@@ -41,6 +41,7 @@ DesktopSession::DesktopSession(const Assets& assets, const std::filesystem::path
     ui.hero_orb_actual_damage = settings.hero_orb_actual_damage;
     ui.mouse_walking = settings.mouse_walking;
     ui.realtime_hero_orb = settings.realtime_hero_orb;
+    ui.touch_controls = settings.touch_controls;
     ui.language = parse_language(settings.language);
     recorder_.enable(record.value_or(settings.recording));
     recorder_.new_game(game.rankings);
@@ -124,7 +125,8 @@ void DesktopSession::preferences() {
                                                       .hero_orb_actual_damage = ui.hero_orb_actual_damage,
                                                       .language = std::string(language_id(ui.language)),
                                                       .mouse_walking = ui.mouse_walking,
-                                                      .realtime_hero_orb = ui.realtime_hero_orb});
+                                                      .realtime_hero_orb = ui.realtime_hero_orb,
+                                                      .touch_controls = ui.touch_controls});
 }
 
 void DesktopSession::open_home(bool startup) {
@@ -386,6 +388,13 @@ void DesktopSession::apply(UiAction action) {
             break;
         }
     switch (action.kind) {
+    case Action::Move:
+        move(static_cast<Direction>(action.value));
+        break;
+    case Action::ScrollDialogue:
+        if (game.dialogue)
+            ui.dialogue_scroll = std::max(0.f, ui.dialogue_scroll + action.value);
+        break;
     case Action::WalkTo:
         if (ui.mouse_walking && !ui.modal() && !ui.replay_active && ui.flight < 0 && !ui.ending_wait)
             mouse_walk_.start(game, action.value);
@@ -613,6 +622,10 @@ void DesktopSession::apply(UiAction action) {
         break;
     case Action::RealtimeHeroOrb:
         ui.realtime_hero_orb = !ui.realtime_hero_orb;
+        preferences();
+        break;
+    case Action::TouchControls:
+        ui.touch_controls = !ui.touch_enabled();
         preferences();
         break;
     case Action::None:

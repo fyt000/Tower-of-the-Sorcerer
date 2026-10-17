@@ -24,3 +24,8 @@ with its license. CMake verifies download hashes; inputs stay in
 
 Segoe UI, Yu Gothic/MS Gothic and Microsoft YaHei are read from installed Windows
 fonts, or CJK uses `TSW_CJK_FONT`. Font files are not redistributed.
+
+Android and WebAssembly package the extracted runtime media and GeneralUser GS
+as data files. Their dependency notices are staged from [licenses/](licenses/)
+alongside the soundfont and game attribution. Optional builder-supplied fonts
+must include their redistribution notices. Android can also read system fonts.

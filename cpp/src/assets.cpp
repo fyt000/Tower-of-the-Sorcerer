@@ -136,6 +136,8 @@ std::vector<unsigned char> Assets::wave(std::string_view name) const {
 }
 
 std::vector<unsigned char> Assets::soundfont() const {
+    if (std::filesystem::is_regular_file(root_ / "music.sf2"))
+        return read(root_ / "music.sf2");
     const auto external = executable_.parent_path() / "music.sf2";
     if (std::filesystem::is_regular_file(external))
         return read(external);

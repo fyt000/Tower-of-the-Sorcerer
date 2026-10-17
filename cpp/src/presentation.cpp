@@ -1,12 +1,21 @@
 #include "presentation.hpp"
 #include "fairy_dialogue.hpp"
 #include "rlgl.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+#ifdef __ANDROID__
+#include <EGL/egl.h>
+#endif
+#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#endif
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <format>
+#include <fstream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -14,11 +23,72 @@
 #include <unordered_map>
 
 namespace tsw {
+bool touch_device() {
+#ifdef __ANDROID__
+    return true;
+#elif defined(__EMSCRIPTEN__)
+    return EM_ASM_INT({ return !!Module['tswTouchDevice']; });
+#else
+    return false;
+#endif
+}
+
+std::optional<TouchButton> TouchRepeat::update(TouchContext current, std::optional<TouchButton> hovered,
+                                               bool down, bool pressed, float seconds) {
+    if (context != current) {
+        active.reset();
+        blocked = down;
+        context = current;
+    }
+    if (!down) {
+        active.reset();
+        blocked = false;
+        return {};
+    }
+    if (context == TouchContext::Hidden || blocked)
+        return {};
+    if (pressed && hovered) {
+        active = hovered;
+        repeat.remaining = 0;
+    }
+    if (!active)
+        return {};
+    if (!hovered) {
+        active.reset();
+        blocked = true;
+        return {};
+    }
+    const bool changed = active != hovered;
+    active = hovered;
+    if (*active == TouchButton::Confirm)
+        return pressed ? active : std::nullopt; // Confirm never repeats or fires on a slide.
+    repeat.advance(seconds);
+    if (repeat.ready(pressed || changed, true)) {
+        repeat.stepped();
+        return active;
+    }
+    return {};
+}
+
 CanvasViewport window_viewport() {
     CanvasViewport view;
+#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
     auto* window = glfwGetCurrentContext();
     glfwGetWindowSize(window, &view.window_width, &view.window_height);
     glfwGetFramebufferSize(window, &view.framebuffer_width, &view.framebuffer_height);
+#elif defined(__ANDROID__)
+    // raylib reports its requested virtual size on Android; the EGL surface owns the real pixels.
+    EGLint width = GetRenderWidth(), height = GetRenderHeight();
+    eglQuerySurface(eglGetCurrentDisplay(), eglGetCurrentSurface(EGL_DRAW), EGL_WIDTH, &width);
+    eglQuerySurface(eglGetCurrentDisplay(), eglGetCurrentSurface(EGL_DRAW), EGL_HEIGHT, &height);
+    view.window_width = view.framebuffer_width = width;
+    view.window_height = view.framebuffer_height = height;
+#else
+    view.window_width = GetScreenWidth();
+    view.window_height = GetScreenHeight();
+    view.framebuffer_width = GetRenderWidth();
+    view.framebuffer_height = GetRenderHeight();
+#endif
     view.window_width = std::max(1, view.window_width);
     view.window_height = std::max(1, view.window_height);
     const float scale =
@@ -45,6 +115,18 @@ constexpr Color Panel{57, 54, 63, 255}, Border{168, 145, 118, 255}, Bar{57, 56, 
 constexpr Rectangle Content{0, MenuHeight, CanvasWidth, ContentHeight};
 constexpr Rectangle MapArea{BoardX, BoardY, BoardPixels, BoardPixels};
 constexpr Rectangle EndingArea{80, MenuHeight + 50, 640, 400};
+constexpr std::array<Rectangle, 5> TouchButtons{
+    {{698, 376, 46, 46}, {650, 424, 46, 46}, {698, 424, 46, 46}, {746, 424, 46, 46}, {698, 472, 46, 46}}};
+
+TouchContext touch_context(const Game& game, const DesktopUi& ui) {
+    if (!ui.touch_enabled() || ui.modal() || ui.replay_active || ui.ending_wait ||
+        (game.visual.raster_mode >= RasterMode::OpeningDissolve &&
+         game.visual.raster_mode <= RasterMode::Title))
+        return TouchContext::Hidden;
+    if (game.dialogue)
+        return game.dialogue->shop ? TouchContext::Shop : TouchContext::Dialogue;
+    return ui.flight >= 0 ? TouchContext::Flight : TouchContext::Walk;
+}
 
 Rectangle sprite(int tile) {
     return {float((tile - 1) % 11 * TileSize), float((tile - 1) / 11 * TileSize), TileSize, TileSize};
@@ -71,11 +153,9 @@ struct Typography {
         void load(const std::filesystem::path& path) {
             if (!std::filesystem::exists(path))
                 return;
-            int count{};
-            if (std::unique_ptr<unsigned char, decltype(&UnloadFileData)> data(
-                    LoadFileData(path.string().c_str(), &count), UnloadFileData);
-                data) {
-                bytes.assign(data.get(), data.get() + count);
+            std::ifstream input(path, std::ios::binary);
+            if (input) {
+                bytes.assign(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
                 // raylib initializes stb_truetype at byte zero. Windows CJK fonts
                 // are collections; move the first face's directory to byte zero,
                 // retaining its absolute table offsets and the original table data.
@@ -120,6 +200,20 @@ struct Typography {
     Vector2 scale{1, 1};
 
     Typography() {
+        body.load("assets/fonts/body.ttf");
+        numbers.load("assets/fonts/body.ttf");
+        japanese.load("assets/fonts/cjk.ttf");
+        chinese.load("assets/fonts/cjk.ttf");
+#ifdef __ANDROID__
+        if (body.bytes.empty())
+            body.load("/system/fonts/Roboto-Regular.ttf");
+        if (numbers.bytes.empty())
+            numbers.load("/system/fonts/Roboto-Bold.ttf");
+        if (japanese.bytes.empty())
+            japanese.load("/system/fonts/NotoSansCJK-Regular.ttc");
+        if (chinese.bytes.empty())
+            chinese.load("/system/fonts/NotoSansCJK-Regular.ttc");
+#endif
         // Use installed Windows fonts when available; no fonts or Windows APIs are bundled.
         if (const char* windows = std::getenv("WINDIR")) {
             const auto directory = std::filesystem::path(windows) / "Fonts";
@@ -147,11 +241,20 @@ struct Typography {
             if (!face.bytes.empty())
                 return face.at(size, scale.y);
         }
-        return (bold ? numbers : body).at(size, scale.y);
+        // Some Android images provide Roboto-Regular without a separate bold face.
+        // Keep both weights in the loaded family when either face is unavailable.
+        const auto& preferred = bold ? numbers : body;
+        const auto& fallback = bold ? body : numbers;
+        return (preferred.bytes.empty() ? fallback : preferred).at(size, scale.y);
     }
 
     float font_size(Font face, int size) const {
         return face.texture.id == GetFontDefault().texture.id ? float(size) : face.baseSize / scale.y;
+    }
+
+    float spacing(Font face, int size) const {
+        // The built-in bitmap face needs a gap between glyphs at each scaled size.
+        return face.texture.id == GetFontDefault().texture.id ? std::max(1.f, size / 10.f) : 0.f;
     }
 
     Vector2 position(float x, float y) const {
@@ -166,7 +269,8 @@ struct Typography {
 
     int width(const std::string& value, int size, bool bold = false) const {
         const auto face = font(size, bold, value);
-        return int(std::ceil(MeasureTextEx(face, value.c_str(), font_size(face, size), 0).x));
+        return int(
+            std::ceil(MeasureTextEx(face, value.c_str(), font_size(face, size), spacing(face, size)).x));
     }
 
     void draw(const std::string& value, int x, int y, int size, Color color = Ink,
@@ -176,7 +280,8 @@ struct Typography {
         std::istringstream lines(text);
         std::string line;
         while (std::getline(lines, line)) {
-            DrawTextEx(face, line.c_str(), position(float(x), float(y)), font_size(face, size), 0, color);
+            DrawTextEx(face, line.c_str(), position(float(x), float(y)), font_size(face, size),
+                       spacing(face, size), color);
             y += std::max(22, size + 2);
         }
     }
@@ -200,7 +305,7 @@ struct Typography {
             position(rect.x + (options.alignment == TextAlignment::Right ? rect.width - measured - 3
                                                                          : (rect.width - measured) / 2),
                      rect.y + (rect.height - size) / 2),
-            font_size(face, size), 0, color);
+            font_size(face, size), spacing(face, size), color);
         EndScissorMode();
     }
 
@@ -225,9 +330,9 @@ struct Typography {
         const float y = rect.y + (rect.height - size) / 2;
         clip(rect);
         for (const auto [dx, dy] : std::array<std::array<int, 2>, 4>{{{-1, 0}, {1, 0}, {0, -1}, {0, 1}}})
-            DrawTextEx(face, value.c_str(), position(x + dx, y + dy), font_size(face, size), 0,
-                       Color{16, 15, 22, 255});
-        DrawTextEx(face, value.c_str(), position(x, y), font_size(face, size), 0, color);
+            DrawTextEx(face, value.c_str(), position(x + dx, y + dy), font_size(face, size),
+                       spacing(face, size), Color{16, 15, 22, 255});
+        DrawTextEx(face, value.c_str(), position(x, y), font_size(face, size), spacing(face, size), color);
         EndScissorMode();
     }
 
@@ -263,10 +368,23 @@ struct Typography {
     }
 };
 
-constexpr const char* DissolveShader = R"(#version 330
+constexpr const char* DissolveShader =
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__)
+    R"(#version 100
+precision mediump float;
+varying vec2 fragTexCoord;
+varying vec4 fragColor;
+#define texture texture2D
+#define finalColor gl_FragColor
+)"
+#else
+    R"(#version 330
 in vec2 fragTexCoord;
 in vec4 fragColor;
 out vec4 finalColor;
+)"
+#endif
+    R"(
 uniform sampler2D texture0;
 uniform sampler2D maskAtlas;
 uniform vec2 maskOrigin;
@@ -389,6 +507,7 @@ void Presentation::resize_canvas(const CanvasViewport& view) {
 Presentation::~Presentation() = default;
 
 void Presentation::reset() {
+    touch_ = {};
     hide_panels_ = cache_requested_ = cache_valid_ = false;
     previous_raster_ = RasterMode::Inactive;
     walking_remaining_ = 0;
@@ -752,6 +871,14 @@ UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mous
     }
     if (ui.flight >= 0) {
         DrawRectangle(RightX + 12, MenuHeight + 278, 128, 162, Color{102, 102, 102, 255});
+        if (ui.touch_enabled()) {
+            DrawRectangle(RightX + 7, 306, 144, 214, Panel);
+            art_->text.fit("ORB OF FLIGHT", {RightX + 9, 306, 140, 20}, 15, Gold);
+            art_->text.fit(std::format("Floor {}", ui.flight), {RightX + 9, 327, 140, 20}, 18);
+            if (art_->text.button({RightX + 9, 348, 140, 24}, "Cancel", mouse))
+                action = {Action::CancelFlight};
+            return action;
+        }
         art_->text.fit("ORB OF FLIGHT", {RightX + 12, MenuHeight + 282, 128, 22}, 15, Gold);
         art_->text.fit(std::format("Floor {}", ui.flight), {RightX + 12, MenuHeight + 311, 128, 24}, 19);
         if (art_->text.button({RightX + 12, MenuHeight + 340, 60, 25}, "Up", mouse))
@@ -767,6 +894,23 @@ UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mous
     const EnemyInfo* enemy = game.visual.battle          ? &game.visual.battle_enemy
                              : game.visual.last_defeated ? &*game.visual.last_defeated
                                                          : nullptr;
+    if (ui.touch_enabled()) {
+        DrawRectangle(RightX + 7, MenuHeight + 278, 144, 214, Panel);
+        if (enemy) {
+            art_->text.fit(std::string(Game::monster_name(enemy->monster_index)), {RightX + 9, 308, 140, 20},
+                           16, Gold);
+            const auto& stats = enemy->stats;
+            art_->text.fit(std::format("HP {} / Cost {}",
+                                       game.visual.battle ? game.visual.enemy_hp : stats.hp, enemy->damage),
+                           {RightX + 9, 329, 140, 19}, 15);
+            art_->text.fit(std::format("ATK {} / DEF {}", stats.attack, stats.defense),
+                           {RightX + 9, 349, 140, 19}, 14);
+        } else {
+            art_->text.fit("Defeated enemies", {RightX + 9, 313, 140, 24}, 16, Muted);
+            art_->text.fit("appear here", {RightX + 9, 339, 140, 24}, 16, Muted);
+        }
+        return action;
+    }
     if (enemy) {
         const auto& monster = enemy->stats;
         art_->icon(enemy->tile, {RightX + 14, MenuHeight + 284, 40, 40});
@@ -1055,6 +1199,9 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
                                "values. Uses the Hero Orb damage setting. Default: off.");
         if (art_->text.button({rect.x + 18, rect.y + 456, 400, 24}, "Done [Esc]", mouse))
             ui.menu = Menu::None;
+        if (art_->text.button({rect.x + 440, rect.y + 418, 242, 34},
+                              ui.touch_enabled() ? "Touch controls: on" : "Touch controls: off", mouse))
+            return {Action::TouchControls};
         if (CheckCollisionPointRec(mouse, qol))
             art_->text.tooltip(
                 qol, ui.hero_orb_actual_damage
@@ -1330,10 +1477,77 @@ UiAction Presentation::draw_ending_summary(const EndingSummary& summary, Desktop
     return next ? UiAction{Action::ContinueEnding} : UiAction{};
 }
 
-UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
+UiAction Presentation::draw_touch_controls(const Game& game, TouchContext context,
+                                           std::optional<TouchButton> input) {
+    if (context == TouchContext::Hidden)
+        return {};
+    const auto enabled = [&](TouchButton button) {
+        if (context == TouchContext::Walk)
+            return button != TouchButton::Confirm && !game.busy();
+        return button != TouchButton::Left && button != TouchButton::Right;
+    };
+    for (int i = 0; i < int(TouchButtons.size()); ++i) {
+        const auto button = static_cast<TouchButton>(i);
+        const auto rect = TouchButtons[i];
+        const bool usable = enabled(button);
+        const bool held = usable && touch_.active == button && !touch_.blocked;
+        DrawRectangleRec(rect, held ? Color{113, 87, 55, 255} : Panel);
+        DrawRectangleLinesEx(rect, 1, usable ? Border : Color{99, 93, 94, 255});
+        const auto color = usable ? Ink : Color{120, 115, 117, 255};
+        const Vector2 center{rect.x + rect.width / 2, rect.y + rect.height / 2};
+        if (button == TouchButton::Confirm) {
+            art_->text.fit("OK", rect, 17, color);
+        } else {
+            const auto direction = button == TouchButton::Up     ? Vector2{0, -1}
+                                   : button == TouchButton::Down ? Vector2{0, 1}
+                                   : button == TouchButton::Left ? Vector2{-1, 0}
+                                                                 : Vector2{1, 0};
+            const Vector2 tip{center.x + 10 * direction.x, center.y + 10 * direction.y};
+            DrawLineEx({center.x - 9 * direction.x, center.y - 9 * direction.y}, tip, 3, color);
+            for (int side : {-1, 1})
+                DrawLineEx(tip,
+                           {center.x + 2 * direction.x - side * 8 * direction.y,
+                            center.y + 2 * direction.y + side * 8 * direction.x},
+                           3, color);
+        }
+    }
+    if (!input || !enabled(*input))
+        return {};
+    if (*input == TouchButton::Confirm)
+        return {context == TouchContext::Flight ? Action::Travel
+                : context == TouchContext::Shop ? Action::Choose
+                                                : Action::Continue};
+    if (context == TouchContext::Flight)
+        return {*input == TouchButton::Up ? Action::FlightUp : Action::FlightDown};
+    if (context == TouchContext::Dialogue || context == TouchContext::Shop)
+        return {Action::ScrollDialogue, *input == TouchButton::Up ? -44 : 44};
+    constexpr std::array<Direction, 5> directions{Direction::Up, Direction::Left, Direction::Down,
+                                                  Direction::Right, Direction::Down};
+    return {Action::Move, int(directions[int(*input)])};
+}
+
+UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, float seconds) {
+    const auto context = touch_context(game, ui);
+    std::optional<TouchButton> hovered;
+    for (int i = 0; i < int(TouchButtons.size()); ++i)
+        if (CheckCollisionPointRec(mouse, TouchButtons[i]))
+            hovered = static_cast<TouchButton>(i);
+    bool down = IsMouseButtonDown(MOUSE_BUTTON_LEFT), pressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+#ifdef __EMSCRIPTEN__
+    // Pointer capture in the shell also cancels holds on blur, page hiding and touch cancellation.
+    down = EM_ASM_INT({ return !!Module['tswPointerDown']; });
+    const int serial = EM_ASM_INT({ return Module['tswPointerSerial'] | 0; });
+    pressed = serial != pointer_serial_;
+    pointer_serial_ = serial;
+#elif defined(__ANDROID__)
+    down = down && IsWindowFocused();
+#endif
+    const auto touch_input = touch_.update(context, hovered, down, pressed, seconds);
     // Closing a panel must consume its click instead of selecting the floor underneath.
     const auto destination = mouse_destination(game, ui, mouse);
+#ifndef __ANDROID__
     SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+#endif
     art_->text.language = ui.language;
     resize_canvas(window_viewport());
     const auto mode = game.visual.raster_mode;
@@ -1490,12 +1704,19 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
         action = {Action::ContinueEnding};
     if (!ui.replay_active)
         draw_qol_status(ui, {220, 3, 132, 22}, mouse);
+    if (!hide_panels_ && context == touch_context(game, ui)) {
+        const auto control = draw_touch_controls(game, context, touch_input);
+        if (control.kind != Action::None && action.kind == Action::None)
+            action = control;
+    }
     if (destination && mouse_destination(game, ui, mouse)) {
         if (!mouse_path(game, *destination).empty()) {
             const Rectangle target{float(BoardX + *destination % BoardWidth * TileSize),
                                    float(BoardY + *destination / BoardWidth * TileSize), TileSize, TileSize};
             DrawRectangleLinesEx(target, 1.f, Gold);
+#ifndef __ANDROID__
             SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+#endif
         }
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             action = {Action::WalkTo, *destination};
@@ -1505,7 +1726,12 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse) {
 }
 
 Vector2 Presentation::mouse_position() const {
+#ifdef __ANDROID__
+    // Android's backend already removes letterboxing and returns the requested virtual size.
+    return GetMousePosition();
+#else
     return window_viewport().canvas_point(GetMousePosition());
+#endif
 }
 
 void Presentation::present() const {
