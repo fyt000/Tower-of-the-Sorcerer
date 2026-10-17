@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
+#ifdef __EMSCRIPTEN__
+#include "stb_vorbis.c"
+#endif
 #define TSF_IMPLEMENTATION
 #include "tsf.h"
 #define TML_IMPLEMENTATION

@@ -119,7 +119,10 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         Game game;
         ui.touch_controls = true;
         draw(game);
-        snapshot("touch-controls");
+        renderer.present();
+        detail::UniqueImage controls(renderer.capture_window());
+        require(ExportImage(controls.get(), (output / "touch-controls.png").string().c_str()),
+                "Export screen-space touch controls");
         auto* window = glfwGetCurrentContext();
         const auto callback = glfwSetMouseButtonCallback(window, nullptr);
         glfwSetMouseButtonCallback(window, callback);
@@ -130,31 +133,70 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
             draw(game);
             return action;
         };
-        const auto step = press({673, 447});
+        const auto control_point = [&](TouchButton button) {
+            const auto view = window_viewport();
+            const auto rect = touch_buttons(view)[int(button)];
+            return view.canvas_point({rect.x + rect.width / 2, rect.y + rect.height / 2});
+        };
+        const auto step = press(control_point(TouchButton::Left));
         require(step.kind == Action::Move && step.value == int(Direction::Left),
                 "The visible Left button dispatches a directional step instead of map walking");
         ui.flight = 2;
         draw(game);
-        require(press({721, 399}).kind == Action::FlightUp && press({721, 447}).kind == Action::Travel &&
-                    press({721, 360}).kind == Action::CancelFlight,
+        require(press(control_point(TouchButton::Up)).kind == Action::FlightUp &&
+                    press(control_point(TouchButton::Confirm)).kind == Action::Travel &&
+                    press(control_point(TouchButton::Cancel)).kind == Action::CancelFlight,
                 "Touch Flight provides floor selection, travel and a visible Cancel button");
         snapshot("touch-flight");
         ui.flight = -1;
         game.dialogue = Dialogue{"Touch dialogue."};
         draw(game);
-        require(press({721, 447}).kind == Action::Continue &&
-                    press({721, 399}).kind == Action::ScrollDialogue,
-                "Dialogue maps the pad to confirmation and scrolling instead of walking");
+        const auto release = [&](Vector2 point) {
+            callback(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_RELEASE, 0);
+            const auto action = renderer.draw(game, ui, point);
+            renderer.present();
+            return action;
+        };
+        const auto begin = [&](Vector2 point) {
+            callback(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
+            const auto action = renderer.draw(game, ui, point);
+            renderer.present();
+            return action;
+        };
+        require(begin({300, 210}).kind == Action::None && release({300, 210}).kind == Action::Continue,
+                "A tap on conversation text continues on release without an extra OK button");
+        require(press(control_point(TouchButton::Confirm)).kind == Action::None,
+                "The former pad confirmation cannot skip dialogue");
+        game.dialogue->text.clear();
+        for (int line = 0; line < 30; ++line)
+            game.dialogue->text += "A long conversation to scroll.\n";
+        draw(game);
+        begin({300, 290});
+        renderer.draw(game, ui, {300, 180});
+        require(ui.dialogue_scroll > 0 && release({300, 180}).kind == Action::None,
+                "Dragging long conversation text scrolls without advancing it");
+        begin({300, 210});
+        game.dialogue->text = "A new conversation.";
+        require(release({300, 210}).kind == Action::None,
+                "A touch cannot carry over to a different conversation");
         snapshot("touch-dialogue");
         game.dialogue->shop = true;
         game.dialogue->choices[0] = "Buy";
         draw(game);
-        require(press({721, 447}).kind == Action::Choose,
-                "Shop confirmation uses the same explicit choice as Enter");
+        require(begin({300, 210}).kind == Action::None && release({300, 210}).kind == Action::None &&
+                    press(control_point(TouchButton::Confirm)).kind == Action::None,
+                "Shop text and the former OK pad never select a purchase");
+        for (int line = 0; line < 30; ++line)
+            game.dialogue->text += "A long shop offer to scroll.\n";
+        begin({300, 290});
+        renderer.draw(game, ui, {300, 180});
+        require(ui.dialogue_scroll > 0 && release({300, 180}).kind == Action::None,
+                "Long shop prose can scroll without selecting an offer");
+        require(press({260, 403}).kind == Action::Choose, "Purchases still require an explicit shop choice");
         game.dialogue.reset();
         ui.menu = Menu::Options;
         draw(game);
-        require(press({673, 447}).kind == Action::None,
+        require(press(control_point(TouchButton::Left)).kind == Action::None,
                 "A menu consumes touches where the hidden pad would otherwise appear");
         ui.close_overlays();
         ui.touch_controls.reset();

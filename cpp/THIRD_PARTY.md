@@ -25,7 +25,16 @@ with its license. CMake verifies download hashes; inputs stay in
 Segoe UI, Yu Gothic/MS Gothic and Microsoft YaHei are read from installed Windows
 fonts, or CJK uses `TSW_CJK_FONT`. Font files are not redistributed.
 
-Android and WebAssembly package the extracted runtime media and GeneralUser GS
-as data files. Their dependency notices are staged from [licenses/](licenses/)
+Android packages the original GeneralUser GS bank. WebAssembly packages a
+Vorbis-compressed q1 `.sfo` derivative of that bank (SHA-256
+`0509a47616c426f6bb160c9f3740dea4174448749c6771644c1e6c562c05d8af`),
+made with TinySoundFont SFOTool and FFmpeg. Both package the extracted runtime
+media as data files. Their dependency notices are staged from [licenses/](licenses/)
 alongside the soundfont and game attribution. Optional builder-supplied fonts
 must include their redistribution notices. Android can also read system fonts.
+
+The web derivative was generated from the pinned GeneralUser GS download with
+SFOTool from the pinned TinySoundFont source and FFmpeg 8.0.1 (`libvorbis`,
+quality 1): extract the SF2 sample stream to WAV, encode that WAV to Ogg Vorbis,
+then use SFOTool to replace the SF2 sample stream with the Ogg file. The original
+SF2 stays the source for desktop and Android.

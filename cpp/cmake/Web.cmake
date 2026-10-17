@@ -4,10 +4,12 @@ set(web_assets "${CMAKE_CURRENT_BINARY_DIR}/web-assets")
 add_custom_target(tsw_web_assets
     BYPRODUCTS "${web_assets}/asset-version.txt"
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/portable_assets.py"
-        --source "${TSW_PORTABLE_ASSETS}" --soundfont "${SOUNDFONT_ROOT}/music.sf2"
+        --source "${TSW_PORTABLE_ASSETS}" --soundfont "${CMAKE_CURRENT_SOURCE_DIR}/web/GeneralUser-q1.sfo"
+        --soundfont-license "${SOUNDFONT_ROOT}/LICENSE.txt"
         --output "${web_assets}"
     VERBATIM)
 add_dependencies(tsw_game tsw_web_assets)
+target_include_directories(tsw_audio SYSTEM PRIVATE "${TSW_STB_INCLUDE_DIR}")
 set_target_properties(tsw_game PROPERTIES
     SUFFIX ".html" OUTPUT_NAME "index"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/site"

@@ -5,49 +5,167 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Tower of the Sorcerer</title>
   <style>
-    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #1d1b23; color: #f6f1e6; }
-    body { margin: 0 auto; max-width: 1100px; padding: 12px; }
-    h1 { font-size: 1.3rem; margin: 0 0 8px; color: #f7d18a; }
-    canvas { display: block; width: 100%; height: auto; background: black; touch-action: none; outline: none; }
-    #game:fullscreen { width: 100vw; height: 100dvh; display: flex; align-items: center; justify-content: center; background: black; }
-    #game:fullscreen canvas { width: min(100vw, calc(100dvh * 800 / 558)); height: auto; }
-    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; }
-    button, select { font: inherit; padding: 8px 12px; border: 1px solid #a89176; border-radius: 5px; background: #39363f; color: inherit; }
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #100f13; color: #f6f1e6; }
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; }
+    #game { position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr); width: 100%; height: 100svh; height: 100dvh; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); background: #100f13; }
+    .player-bar { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-bottom: 1px solid #39343d; }
+    h1 { flex: 1; min-width: 0; margin: 0; font-size: .95rem; color: #f7d18a; }
+    .player-actions { display: flex; gap: 8px; }
+    .player-actions button { display: flex; align-items: center; justify-content: center; gap: 7px; }
+    .player-actions svg { flex-shrink: 0; width: 20px; height: 20px; }
+    #stage { position: relative; display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; overflow: hidden; background: black; }
+    canvas { display: block; width: var(--canvas-width, 800px); height: var(--canvas-height, 558px); max-width: 100%; max-height: 100%; background: black; touch-action: none; outline: none; }
+    #loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; box-sizing: border-box; background: radial-gradient(circle at center, #37303b, #19171e 70%); text-align: center; }
+    #loading[hidden] { display: none; }
+    .spinner { width: 52px; height: 52px; border: 4px solid #65515a; border-top-color: #f7d18a; border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading-message { margin: 0; font-size: 1rem; color: #f6f1e6; }
+    #download-progress { width: min(320px, 80%); height: 10px; accent-color: #f7d18a; }
+    #loading.error .spinner, #loading.error #download-progress { display: none; }
+    #loading.error #loading-message { color: #ffb3a7; }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+    #status { position: absolute; z-index: 2; inset-inline: 16px; bottom: max(16px, env(safe-area-inset-bottom)); width: fit-content; max-width: calc(100% - 32px); margin: 0 auto; padding: 10px 14px; border: 1px solid #a89176; border-radius: 8px; background: #252129; pointer-events: none; }
+    #status:empty, #export-status:empty { display: none; }
+    #game:fullscreen { width: 100%; height: 100%; }
+    button, select { font: inherit; min-height: 48px; padding: 8px 12px; border: 1px solid #756657; border-radius: 8px; background: #302b34; color: inherit; }
+    button { cursor: pointer; }
+    button:hover { background: #443a44; }
+    button:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid #f7d18a; outline-offset: 3px; }
     button:disabled { opacity: .45; }
-    p { font-size: .9rem; line-height: 1.5; margin: 6px 0; }
-    #storage.error, #status.error { color: #ffb3a7; }
-    .touch-device body { max-width: none; padding: 0; }
-    .touch-device h1 { display: none; }
-    .touch-device .toolbar, .touch-device p { margin: 8px 12px; }
-    .touch-device #status:empty { display: none; }
-    @media (orientation: landscape) {
-      .touch-device #game { height: 100svh; display: flex; align-items: center; justify-content: center; background: black; }
-      .touch-device canvas { width: min(100vw, calc(100svh * 800 / 558)); height: auto; }
+    [hidden] { display: none !important; }
+    p { font-size: .9rem; line-height: 1.55; margin: 8px 0; }
+    #storage.error, #status.error, #export-status { color: #ffb3a7; }
+    #help-button.warning { border-color: #ffb3a7; color: #ffb3a7; }
+    #save-warning { font-weight: bold; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    dialog { width: min(520px, calc(100% - 24px)); max-height: calc(100% - 24px); padding: 0; border: 1px solid #756657; border-radius: 14px; background: #211d26; color: inherit; overscroll-behavior: contain; }
+    dialog::backdrop { background: #000b; }
+    .dialog-heading { position: sticky; top: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; border-bottom: 1px solid #49404b; background: #211d26; }
+    h2 { margin: 0; font-size: 1.15rem; color: #f7d18a; }
+    .dialog-content { padding: 4px 20px 20px; }
+    h3 { margin: 20px 0 8px; font-size: 1rem; color: #f7d18a; }
+    .save-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    label { display: block; margin-top: 12px; font-size: .9rem; }
+    select { display: block; width: 100%; margin-top: 6px; }
+    #storage { color: #c9bfb4; }
+    details { margin-top: 16px; font-size: .85rem; color: #c9bfb4; }
+    summary { width: fit-content; padding: 10px 0; cursor: pointer; }
+    details p { font-size: inherit; }
+    @media (max-width: 540px) {
+      .player-bar { padding: 4px 8px; }
+      h1 { font-size: .8rem; }
+      .player-actions { gap: 4px; }
+      .player-actions button { padding: 6px 8px; font-size: .8rem; }
+      .player-actions svg { display: none; }
+    }
+    @media (max-height: 600px) and (min-aspect-ratio: 2/1) {
+      #game { grid-template-rows: minmax(0, 1fr); }
+      .player-bar { position: absolute; z-index: 3; top: calc(env(safe-area-inset-top) + 8px); left: calc(env(safe-area-inset-left) + 8px); padding: 0; border: 0; }
+      h1 { display: none; }
+      .player-actions button { position: relative; width: 48px; height: 48px; padding: 0; }
+      .menu-label { display: none; }
+      #save-warning { position: absolute; top: 0; right: 4px; }
+      .player-actions svg { display: block; }
     }
   </style>
 </head>
 <body>
-  <h1>Tower of the Sorcerer</h1>
-  <p id="status" role="status">Loading game…</p>
-  <div id="game"><canvas id="canvas" width="800" height="558" tabindex="0" aria-label="Tower of the Sorcerer game"></canvas></div>
-  <div class="toolbar">
-    <label for="save-file">Saved file</label><select id="save-file" disabled></select>
-    <button id="export" disabled>Export file</button>
-    <button id="retry" disabled>Retry storage</button>
-    <button id="fullscreen">Fullscreen</button>
-  </div>
-  <p id="storage" role="status">Preparing save storage…</p>
-  <p>Use the Game menu to save and load. Arrows / WASD move; Enter continues dialogue.
-    Tap or click the map to walk. Mobile uses a directional pad; hold an arrow to repeat.
-    Rotate to landscape for larger controls. Touch controls can be changed in Options.</p>
-  <p>Saves, rankings, settings and replay companions stay in this browser for this site address.
-    Export files to keep a copy outside the browser. Export matching .achievements.json and
-    .replay.jsonl companions too when preserving history. Clearing site data removes browser saves.</p>
+  <main id="game">
+    <header class="player-bar">
+      <nav class="player-actions" aria-label="Player tools">
+        <button id="help-button" aria-label="Menu" aria-haspopup="dialog" aria-controls="help-panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <span class="menu-label">Menu</span><span id="save-warning" hidden aria-hidden="true">!</span>
+        </button>
+      </nav>
+      <h1>Tower of the Sorcerer</h1>
+    </header>
+    <div id="stage">
+      <canvas id="canvas" width="800" height="558" tabindex="0" aria-label="Tower of the Sorcerer game"></canvas>
+      <div id="loading" aria-busy="true">
+        <div class="spinner" aria-hidden="true"></div>
+        <p id="loading-message" role="status">Loading game…</p>
+        <progress id="download-progress" max="100" value="0" hidden aria-label="Game asset download"></progress>
+      </div>
+    </div>
+    <p id="status" role="status"></p>
+    <span id="save-notice" class="sr-only" role="status"></span>
+    <dialog id="help-panel" aria-labelledby="help-title">
+      <div class="dialog-heading">
+        <h2 id="help-title">Menu</h2>
+        <button id="close-help" autofocus aria-label="Close help and return to game">Done</button>
+      </div>
+      <div class="dialog-content">
+        <div class="save-tools">
+          <button id="fullscreen" aria-pressed="false" hidden><span id="fullscreen-label">Full screen</span></button>
+        </div>
+        <h3>How to play</h3>
+        <p>Tap the map to walk, or use the directional pad. Hold an arrow to keep moving;
+          tap a conversation to continue, or drag its text to scroll.
+          Change touch controls in Options. The pad stays on the right.</p>
+        <p>Turn your phone sideways for a larger game. Full screen is available in supported browsers.</p>
+        <details>
+          <summary>Keyboard controls</summary>
+          <p>Arrows / WASD to move. Enter / Space to continue dialogue. I for inventory.
+            Esc for the game menu. F5 to quick save; F9 to quick restore.</p>
+        </details>
+        <h3>Your saves</h3>
+        <p>Use the in-game Game menu to save and load. Saves stay in this browser.
+          Export a copy to keep them safe before clearing site data or switching browsers.</p>
+        <p id="storage" role="status">Preparing save storage…</p>
+        <label for="save-file">File to export</label>
+        <select id="save-file" disabled><option>No saved files yet</option></select>
+        <div class="save-tools">
+          <button id="export" disabled>Export file</button>
+          <button id="retry" disabled hidden>Retry storage</button>
+        </div>
+        <p id="export-status" role="status"></p>
+        <details>
+          <summary>Backups &amp; replay files</summary>
+          <p>Export the matching .achievements.json and .replay.jsonl files with a save
+            to preserve achievement and replay history. Files ending in .bak are previous copies.
+            Settings and rankings also belong to this browser and site address.</p>
+        </details>
+      </div>
+    </dialog>
+  </main>
   <script>
     var canvas = document.getElementById('canvas');
     var select = document.getElementById('save-file');
     var exportButton = document.getElementById('export');
+    var loading = document.getElementById('loading');
+    var loadingMessage = document.getElementById('loading-message');
+    var downloadProgress = document.getElementById('download-progress');
+    var game = document.getElementById('game');
+    var stage = document.getElementById('stage');
+    var helpPanel = document.getElementById('help-panel');
+    var helpButton = document.getElementById('help-button');
+    var fullscreenButton = document.getElementById('fullscreen');
     var ready = false;
+    var gameReady = false;
+    function fitCanvas() {
+      // GLFW resets inline width/height during startup; custom properties survive it.
+      canvas.style.setProperty('--canvas-width', stage.clientWidth + 'px');
+      canvas.style.setProperty('--canvas-height', stage.clientHeight + 'px');
+      if (window.Module) {
+        Module.tswGameLeftInset = getComputedStyle(helpButton.parentElement.parentElement).position === 'absolute'
+          ? helpButton.getBoundingClientRect().right - stage.getBoundingClientRect().left + 8 : 0;
+      }
+    }
+    new ResizeObserver(fitCanvas).observe(stage);
+    fitCanvas();
+    function openHelp() { helpPanel.showModal(); refreshFiles(); }
+    helpButton.onclick = openHelp;
+    document.getElementById('close-help').onclick = function () { helpPanel.close(); };
+    helpPanel.addEventListener('close', function () { if (gameReady) canvas.focus({ preventScroll: true }); });
+    // GLFW listens on window: keep dialog keys and button activation out of the game.
+    ['keydown', 'keypress', 'keyup'].forEach(function (type) {
+      window.addEventListener(type, function (event) {
+        if (event.target !== canvas || event.key === 'Tab') event.stopImmediatePropagation();
+      }, true);
+    });
+    canvas.addEventListener('blur', function () { window.dispatchEvent(new Event('blur')); });
     function refreshFiles() {
       if (!ready) return;
       var previous = select.value;
@@ -55,42 +173,88 @@
       select.replaceChildren.apply(select, files.map(function (name) {
         var option = document.createElement('option'); option.value = option.textContent = name; return option;
       }));
+      if (!files.length) select.add(new Option('No saved files yet', ''));
       if (files.indexOf(previous) >= 0) select.value = previous;
       select.disabled = exportButton.disabled = !files.length;
     }
     var Module = {
       canvas: canvas,
-      setStatus: function (text) { document.getElementById('status').textContent = text; },
+      setStatus: function (text) {
+        if (gameReady) { document.getElementById('status').textContent = text; return; }
+        if (loading.classList.contains('error')) return;
+        var download = /^Downloading data\.\.\. \((\d+)\/(\d+)\)$/.exec(text);
+        if (download) {
+          var percent = Math.min(100, Math.floor(100 * Number(download[1]) / Number(download[2])));
+          loadingMessage.textContent = 'Downloading game assets… ' + percent + '%';
+          downloadProgress.value = percent;
+          downloadProgress.hidden = false;
+        } else if (text === 'Downloading data...') {
+          loadingMessage.textContent = 'Downloading game assets…';
+          downloadProgress.hidden = true;
+        } else {
+          loadingMessage.textContent = 'Starting game…';
+          downloadProgress.hidden = true;
+        }
+      },
+      tswGameReady: function () {
+        gameReady = true;
+        loading.setAttribute('aria-busy', 'false');
+        loading.hidden = true;
+        document.getElementById('status').textContent = '';
+        if (!helpPanel.open) canvas.focus({ preventScroll: true });
+      },
+      tswGameError: function (message) {
+        gameReady = false;
+        loading.hidden = false;
+        loading.className = 'error';
+        loading.setAttribute('aria-busy', 'false');
+        loadingMessage.textContent = message;
+      },
       onRuntimeInitialized: function () {
         ready = true;
         document.getElementById('retry').disabled = false;
-        Module.setStatus(''); refreshFiles(); canvas.focus();
+        refreshFiles();
       },
       onAbort: function (reason) {
-        document.getElementById('status').className = 'error';
-        Module.setStatus('Unable to start the game: ' + reason);
+        Module.tswGameError('Unable to start the game: ' + reason);
       }
     };
+    window.addEventListener('unhandledrejection', function (event) {
+      if (!gameReady) Module.tswGameError('Unable to load game assets: ' + event.reason);
+    });
     window.addEventListener('tsw-storage', function (event) {
       var status = document.getElementById('storage');
       status.textContent = event.detail.message; status.className = event.detail.error ? 'error' : '';
+      document.getElementById('retry').hidden = !event.detail.error;
+      document.getElementById('save-warning').hidden = !event.detail.error;
+      document.getElementById('save-notice').textContent = event.detail.error ? event.detail.message : '';
+      helpButton.classList.toggle('warning', !!event.detail.error);
+      helpButton.setAttribute('aria-label', event.detail.error ? 'Menu: saves need attention' : 'Menu');
+      helpButton.title = event.detail.error ? event.detail.message : '';
       refreshFiles();
     });
     canvas.addEventListener('pointerdown', function () { canvas.focus(); });
     canvas.addEventListener('contextmenu', function (event) { event.preventDefault(); });
     document.getElementById('retry').onclick = function () { Module['tswStorage'].flush(); refreshFiles(); };
     exportButton.onclick = function () {
+      var exportStatus = document.getElementById('export-status');
+      exportStatus.textContent = '';
       try {
         var url = URL.createObjectURL(new Blob([Module['tswStorage'].read(select.value)], { type: 'application/octet-stream' }));
         var anchor = document.createElement('a'); anchor.href = url; anchor.download = select.value;
         document.body.appendChild(anchor); anchor.click(); anchor.remove();
         setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-      } catch (error) { Module.setStatus('Export failed: ' + error.message); }
+      } catch (error) { exportStatus.textContent = 'Export failed: ' + error.message; }
     };
-    document.getElementById('fullscreen').onclick = function () {
-      var game = document.getElementById('game');
-      if (game.requestFullscreen) game.requestFullscreen().catch(function (error) { Module.setStatus(error.message); });
+    fullscreenButton.hidden = !document.fullscreenEnabled || !game.requestFullscreen;
+    fullscreenButton.onclick = function () {
+      var action = document.fullscreenElement ? document.exitFullscreen() : game.requestFullscreen();
+      action.catch(function () { Module.setStatus('Full screen is unavailable. You can keep playing here.'); });
     };
+    document.addEventListener('fullscreenchange', function () {
+      document.getElementById('fullscreen-label').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen';
+      fullscreenButton.setAttribute('aria-pressed', String(!!document.fullscreenElement));
+    });
   </script>
   {{{ SCRIPT }}}
 </body>

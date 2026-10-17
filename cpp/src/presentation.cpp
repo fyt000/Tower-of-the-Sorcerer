@@ -6,6 +6,9 @@
 #endif
 #ifdef __ANDROID__
 #include <EGL/egl.h>
+#include <android/configuration.h>
+#include <android_native_app_glue.h>
+extern "C" android_app* GetAndroidApp();
 #endif
 #if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
 #define GLFW_INCLUDE_NONE
@@ -23,6 +26,24 @@
 #include <unordered_map>
 
 namespace tsw {
+#ifdef __ANDROID__
+namespace {
+int32_t (*android_input_handler)(android_app*, AInputEvent*){};
+bool android_pointer_cancelled{};
+
+int32_t track_android_pointer(android_app* app, AInputEvent* event) {
+    if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
+        const auto action = AMotionEvent_getAction(event) & AMOTION_EVENT_ACTION_MASK;
+        if (action == AMOTION_EVENT_ACTION_DOWN)
+            android_pointer_cancelled = false;
+        else if (action == AMOTION_EVENT_ACTION_CANCEL)
+            android_pointer_cancelled = true;
+    }
+    return android_input_handler ? android_input_handler(app, event) : 0;
+}
+} // namespace
+#endif
+
 bool touch_device() {
 #ifdef __ANDROID__
     return true;
@@ -83,6 +104,9 @@ CanvasViewport window_viewport() {
     eglQuerySurface(eglGetCurrentDisplay(), eglGetCurrentSurface(EGL_DRAW), EGL_HEIGHT, &height);
     view.window_width = view.framebuffer_width = width;
     view.window_height = view.framebuffer_height = height;
+    const int density = AConfiguration_getDensity(GetAndroidApp()->config);
+    if (density > 0 && density < ACONFIGURATION_DENSITY_ANY)
+        view.touch_scale = density / 160.f;
 #else
     view.window_width = GetScreenWidth();
     view.window_height = GetScreenHeight();
@@ -91,11 +115,38 @@ CanvasViewport window_viewport() {
 #endif
     view.window_width = std::max(1, view.window_width);
     view.window_height = std::max(1, view.window_height);
-    const float scale =
-        std::min(view.window_width / float(CanvasWidth), view.window_height / float(CanvasHeight));
-    view.area = {(view.window_width - CanvasWidth * scale) / 2,
+    float scale = std::min(view.window_width / float(CanvasWidth), view.window_height / float(CanvasHeight));
+    float left = 0, right = float(view.window_width);
+    if (touch_device() && view.window_width > view.window_height) {
+        // Keep both the map and the right HUD clear of the thumb controls.
+        right -= (3 * 48 + 2 * 4 + 16 + 8) * view.touch_scale;
+#ifdef __EMSCRIPTEN__
+        left = EM_ASM_DOUBLE({ return Module['tswGameLeftInset'] || 0; });
+#endif
+        scale = std::min(scale, std::max(.1f, (right - left) / CanvasWidth));
+    }
+    view.area = {std::clamp((view.window_width - CanvasWidth * scale) / 2, left,
+                            std::max(left, right - CanvasWidth * scale)),
                  (view.window_height - CanvasHeight * scale) / 2, CanvasWidth * scale, CanvasHeight * scale};
+#ifdef __EMSCRIPTEN__
+    // Expose the actual letterboxing to the browser host, including compact phone layouts.
+    EM_ASM(
+        { Module['tswCanvasViewport'] = ({x : $0, y : $1, width : $2, height : $3}); }, view.area.x,
+        view.area.y, view.area.width, view.area.height);
+#endif
     return view;
+}
+
+std::array<Rectangle, 6> touch_buttons(const CanvasViewport& view) {
+    const float unit = view.touch_scale, size = 48 * unit, step = 52 * unit;
+    const float x = view.window_width - 16 * unit - (2 * step + size);
+    const float y = view.window_height - 16 * unit - (2 * step + size);
+    return {{{x + step, y, size, size},
+             {x, y + step, size, size},
+             {x + step, y + step, size, size},
+             {x + 2 * step, y + step, size, size},
+             {x + step, y + 2 * step, size, size},
+             {x + 2 * step, y, size, size}}};
 }
 
 std::optional<int> mouse_destination(const Game& game, const DesktopUi& ui, Vector2 mouse) {
@@ -115,8 +166,12 @@ constexpr Color Panel{57, 54, 63, 255}, Border{168, 145, 118, 255}, Bar{57, 56, 
 constexpr Rectangle Content{0, MenuHeight, CanvasWidth, ContentHeight};
 constexpr Rectangle MapArea{BoardX, BoardY, BoardPixels, BoardPixels};
 constexpr Rectangle EndingArea{80, MenuHeight + 50, 640, 400};
-constexpr std::array<Rectangle, 5> TouchButtons{
-    {{698, 376, 46, 46}, {650, 424, 46, 46}, {698, 424, 46, 46}, {746, 424, 46, 46}, {698, 472, 46, 46}}};
+
+bool touch_button_enabled(TouchButton button, TouchContext context, bool busy) {
+    if (context == TouchContext::Walk)
+        return button != TouchButton::Confirm && button != TouchButton::Cancel && !busy;
+    return context == TouchContext::Flight && button != TouchButton::Left && button != TouchButton::Right;
+}
 
 TouchContext touch_context(const Game& game, const DesktopUi& ui) {
     if (!ui.touch_enabled() || ui.modal() || ui.replay_active || ui.ending_wait ||
@@ -469,6 +524,15 @@ struct Presentation::Art {
 };
 
 Presentation::Presentation(const Assets& assets) : art_(std::make_unique<Art>(assets)) {
+#ifdef __ANDROID__
+    // raylib exposes cancellation as a release; retain the distinction for conversation taps.
+    auto* app = GetAndroidApp();
+    if (app->onInputEvent != track_android_pointer) {
+        android_input_handler = app->onInputEvent;
+        app->onInputEvent = track_android_pointer;
+        android_pointer_cancelled = false;
+    }
+#endif
     resize_canvas(window_viewport());
     scene_cache_.reset(LoadRenderTexture(CanvasWidth, ContentHeight));
     SetTextureFilter(scene_cache_.get().texture, TEXTURE_FILTER_POINT);
@@ -508,6 +572,8 @@ Presentation::~Presentation() = default;
 
 void Presentation::reset() {
     touch_ = {};
+    touch_context_ = TouchContext::Hidden;
+    dialogue_dragging_ = false;
     hide_panels_ = cache_requested_ = cache_valid_ = false;
     previous_raster_ = RasterMode::Inactive;
     walking_remaining_ = 0;
@@ -894,23 +960,6 @@ UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mous
     const EnemyInfo* enemy = game.visual.battle          ? &game.visual.battle_enemy
                              : game.visual.last_defeated ? &*game.visual.last_defeated
                                                          : nullptr;
-    if (ui.touch_enabled()) {
-        DrawRectangle(RightX + 7, MenuHeight + 278, 144, 214, Panel);
-        if (enemy) {
-            art_->text.fit(std::string(Game::monster_name(enemy->monster_index)), {RightX + 9, 308, 140, 20},
-                           16, Gold);
-            const auto& stats = enemy->stats;
-            art_->text.fit(std::format("HP {} / Cost {}",
-                                       game.visual.battle ? game.visual.enemy_hp : stats.hp, enemy->damage),
-                           {RightX + 9, 329, 140, 19}, 15);
-            art_->text.fit(std::format("ATK {} / DEF {}", stats.attack, stats.defense),
-                           {RightX + 9, 349, 140, 19}, 14);
-        } else {
-            art_->text.fit("Defeated enemies", {RightX + 9, 313, 140, 24}, 16, Muted);
-            art_->text.fit("appear here", {RightX + 9, 339, 140, 24}, 16, Muted);
-        }
-        return action;
-    }
     if (enemy) {
         const auto& monster = enemy->stats;
         art_->icon(enemy->tile, {RightX + 14, MenuHeight + 284, 40, 40});
@@ -948,14 +997,43 @@ UiAction Presentation::draw_dialogue(const Game& game, DesktopUi& ui, Vector2 mo
                                                           game.hero.fairy_rank, game.hero.fairy_visits)
                                : dialogue.text;
     const auto text = art_->text.wrap(content, 376, 18, !fairy);
-    const int lines = int(std::ranges::count(text, '\n'));
+    const int lines = 1 + int(std::ranges::count(text, '\n'));
     constexpr int TextHeight = 188;
-    ui.dialogue_scroll = std::clamp(ui.dialogue_scroll, 0.f, std::max(0.f, float(lines * 22 - TextHeight)));
+    const float max_scroll = std::max(0.f, float(lines * 22 - TextHeight));
+    bool tapped = false;
+    if (!dialogue.shop || mouse.y < rect.y + 274 || dialogue_dragging_) {
+        if (dialogue_dragging_ && dialogue_text_ != dialogue.text)
+            dialogue_dragging_ = false;
+        if (pointer_pressed_ && CheckCollisionPointRec(mouse, rect)) {
+            dialogue_dragging_ = true;
+            dialogue_moved_ = false;
+            dialogue_start_ = dialogue_last_ = mouse;
+            dialogue_text_ = dialogue.text;
+        }
+        if (dialogue_dragging_) {
+            const auto view = window_viewport();
+            const float threshold = 10 * view.touch_scale * CanvasWidth / view.area.width;
+            dialogue_moved_ = dialogue_moved_ || std::abs(mouse.x - dialogue_start_.x) > threshold ||
+                              std::abs(mouse.y - dialogue_start_.y) > threshold;
+            if (pointer_down_) {
+                if (dialogue_moved_)
+                    ui.dialogue_scroll -= mouse.y - dialogue_last_.y;
+                dialogue_last_ = mouse;
+            } else {
+                tapped = !dialogue.shop && !pointer_cancelled_ && !dialogue_moved_ &&
+                         CheckCollisionPointRec(mouse, rect);
+                dialogue_dragging_ = false;
+            }
+        }
+    } else
+        dialogue_dragging_ = false;
+    ui.dialogue_scroll = std::clamp(ui.dialogue_scroll, 0.f, max_scroll);
     art_->text.clip({rect.x + 20, rect.y + 62, 376, TextHeight});
     art_->text.draw(text, int(rect.x + 20), int(rect.y + 62 - ui.dialogue_scroll), 18, Ink, false);
     EndScissorMode();
-    if (lines * 22 > TextHeight)
-        art_->text.draw("Mouse wheel to scroll", int(rect.x + 20), int(rect.y + 252), 12, Muted);
+    if (max_scroll > 0)
+        art_->text.draw(ui.touch_enabled() ? "Drag to scroll" : "Mouse wheel to scroll", int(rect.x + 20),
+                        int(rect.y + 252), 12, Muted);
     if (dialogue.shop) {
         for (int i = 0; i < 3; ++i)
             if (!dialogue.choices[i].empty() &&
@@ -963,8 +1041,18 @@ UiAction Presentation::draw_dialogue(const Game& game, DesktopUi& ui, Vector2 mo
                 return {Action::Choose, i};
         if (art_->text.button({rect.x + 284, rect.y + 308, 112, 19}, "Cancel [Esc]", mouse))
             return {Action::Choose, -1};
-    } else if (art_->text.button({rect.x + 20, rect.y + 282, 376, 30}, "Continue  [Enter / Space]", mouse))
-        return {Action::Continue};
+    } else {
+        if (ui.touch_enabled())
+            art_->text.fit("Tap the conversation to continue", {rect.x + 20, rect.y + 282, 376, 30}, 16,
+                           Gold);
+        else if (art_->text.button({rect.x + 20, rect.y + 282, 376, 30}, "Continue  [Enter / Space]",
+                                   mouse)) {
+            dialogue_dragging_ = false;
+            return {Action::Continue};
+        }
+        if (tapped)
+            return {Action::Continue};
+    }
     return {};
 }
 
@@ -1498,58 +1586,80 @@ UiAction Presentation::draw_ending_summary(const EndingSummary& summary, Desktop
 
 UiAction Presentation::draw_touch_controls(const Game& game, TouchContext context,
                                            std::optional<TouchButton> input) {
-    if (context == TouchContext::Hidden)
+    touch_context_ = context;
+    touch_busy_ = game.busy();
+    if (!input || !touch_button_enabled(*input, context, touch_busy_))
         return {};
-    const auto enabled = [&](TouchButton button) {
-        if (context == TouchContext::Walk)
-            return button != TouchButton::Confirm && !game.busy();
-        return button != TouchButton::Left && button != TouchButton::Right;
-    };
-    for (int i = 0; i < int(TouchButtons.size()); ++i) {
-        const auto button = static_cast<TouchButton>(i);
-        const auto rect = TouchButtons[i];
-        const bool usable = enabled(button);
-        const bool held = usable && touch_.active == button && !touch_.blocked;
-        DrawRectangleRec(rect, held ? Color{113, 87, 55, 255} : Panel);
-        DrawRectangleLinesEx(rect, 1, usable ? Border : Color{99, 93, 94, 255});
-        const auto color = usable ? Ink : Color{120, 115, 117, 255};
-        const Vector2 center{rect.x + rect.width / 2, rect.y + rect.height / 2};
-        if (button == TouchButton::Confirm) {
-            art_->text.fit("OK", rect, 17, color);
-        } else {
-            const auto direction = button == TouchButton::Up     ? Vector2{0, -1}
-                                   : button == TouchButton::Down ? Vector2{0, 1}
-                                   : button == TouchButton::Left ? Vector2{-1, 0}
-                                                                 : Vector2{1, 0};
-            const Vector2 tip{center.x + 10 * direction.x, center.y + 10 * direction.y};
-            DrawLineEx({center.x - 9 * direction.x, center.y - 9 * direction.y}, tip, 3, color);
-            for (int side : {-1, 1})
-                DrawLineEx(tip,
-                           {center.x + 2 * direction.x - side * 8 * direction.y,
-                            center.y + 2 * direction.y + side * 8 * direction.x},
-                           3, color);
-        }
-    }
-    if (!input || !enabled(*input))
-        return {};
+    if (*input == TouchButton::Cancel)
+        return {Action::CancelFlight};
     if (*input == TouchButton::Confirm)
-        return {context == TouchContext::Flight ? Action::Travel
-                : context == TouchContext::Shop ? Action::Choose
-                                                : Action::Continue};
+        return {Action::Travel};
     if (context == TouchContext::Flight)
         return {*input == TouchButton::Up ? Action::FlightUp : Action::FlightDown};
-    if (context == TouchContext::Dialogue || context == TouchContext::Shop)
-        return {Action::ScrollDialogue, *input == TouchButton::Up ? -44 : 44};
     constexpr std::array<Direction, 5> directions{Direction::Up, Direction::Left, Direction::Down,
                                                   Direction::Right, Direction::Down};
     return {Action::Move, int(directions[int(*input)])};
 }
 
+void Presentation::paint_touch_controls(const CanvasViewport& view) const {
+    if (touch_context_ != TouchContext::Walk && touch_context_ != TouchContext::Flight)
+        return;
+    const auto buttons = touch_buttons(view);
+    const float unit = view.touch_scale;
+    for (int i = 0; i < int(buttons.size()); ++i) {
+        const auto button = static_cast<TouchButton>(i);
+        const auto rect = buttons[i];
+        if (touch_context_ == TouchContext::Walk &&
+            (button == TouchButton::Confirm || button == TouchButton::Cancel))
+            continue;
+        if (touch_context_ == TouchContext::Flight &&
+            (button == TouchButton::Left || button == TouchButton::Right))
+            continue;
+        const bool usable = touch_button_enabled(button, touch_context_, touch_busy_);
+        const bool held = usable && touch_.active == button && !touch_.blocked;
+        DrawRectangleRec(rect, held ? Color{113, 87, 55, 255} : Panel);
+        DrawRectangleLinesEx(rect, unit, usable ? Border : Color{99, 93, 94, 255});
+        const auto color = usable ? Ink : Color{120, 115, 117, 255};
+        const Vector2 center{rect.x + rect.width / 2, rect.y + rect.height / 2};
+        if (button == TouchButton::Confirm || button == TouchButton::Cancel) {
+            if (button == TouchButton::Confirm) {
+                DrawLineEx({center.x - 11 * unit, center.y}, {center.x - 3 * unit, center.y + 8 * unit},
+                           3 * unit, color);
+                DrawLineEx({center.x - 3 * unit, center.y + 8 * unit},
+                           {center.x + 11 * unit, center.y - 9 * unit}, 3 * unit, color);
+            } else {
+                DrawLineEx({center.x - 9 * unit, center.y - 9 * unit},
+                           {center.x + 9 * unit, center.y + 9 * unit}, 3 * unit, color);
+                DrawLineEx({center.x + 9 * unit, center.y - 9 * unit},
+                           {center.x - 9 * unit, center.y + 9 * unit}, 3 * unit, color);
+            }
+        } else {
+            const auto direction = button == TouchButton::Up     ? Vector2{0, -1}
+                                   : button == TouchButton::Down ? Vector2{0, 1}
+                                   : button == TouchButton::Left ? Vector2{-1, 0}
+                                                                 : Vector2{1, 0};
+            const Vector2 tip{center.x + 10 * unit * direction.x, center.y + 10 * unit * direction.y};
+            DrawLineEx({center.x - 9 * unit * direction.x, center.y - 9 * unit * direction.y}, tip, 3 * unit,
+                       color);
+            for (int side : {-1, 1})
+                DrawLineEx(tip,
+                           {center.x + unit * (2 * direction.x - side * 8 * direction.y),
+                            center.y + unit * (2 * direction.y + side * 8 * direction.x)},
+                           3 * unit, color);
+        }
+    }
+}
+
 UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, float seconds) {
     const auto context = touch_context(game, ui);
+    touch_context_ = TouchContext::Hidden;
+    const auto view = window_viewport();
+    const auto buttons = touch_buttons(view);
+    const Vector2 screen_mouse{view.area.x + mouse.x * view.area.width / CanvasWidth,
+                               view.area.y + mouse.y * view.area.height / CanvasHeight};
     std::optional<TouchButton> hovered;
-    for (int i = 0; i < int(TouchButtons.size()); ++i)
-        if (CheckCollisionPointRec(mouse, TouchButtons[i]))
+    for (int i = 0; i < int(buttons.size()); ++i)
+        if (CheckCollisionPointRec(screen_mouse, buttons[i]))
             hovered = static_cast<TouchButton>(i);
     bool down = IsMouseButtonDown(MOUSE_BUTTON_LEFT), pressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 #ifdef __EMSCRIPTEN__
@@ -1558,9 +1668,15 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, floa
     const int serial = EM_ASM_INT({ return Module['tswPointerSerial'] | 0; });
     pressed = serial != pointer_serial_;
     pointer_serial_ = serial;
+    pointer_cancelled_ = EM_ASM_INT({ return !!Module['tswPointerCancelled']; });
 #elif defined(__ANDROID__)
     down = down && IsWindowFocused();
+    pointer_cancelled_ = !IsWindowFocused() || android_pointer_cancelled;
 #endif
+    pointer_down_ = down;
+    pointer_pressed_ = pressed;
+    if (!game.dialogue || ui.menu != Menu::None || ui.help || ui.replay_active)
+        dialogue_dragging_ = false;
     const auto touch_input = touch_.update(context, hovered, down, pressed, seconds);
     // Closing a panel must consume its click instead of selecting the floor underneath.
     const auto destination = mouse_destination(game, ui, mouse);
@@ -1568,7 +1684,7 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, floa
     SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 #endif
     art_->text.language = ui.language;
-    resize_canvas(window_viewport());
+    resize_canvas(view);
     const auto mode = game.visual.raster_mode;
     if (!ui.home) {
         if ((mode == RasterMode::OpeningDissolve || mode == RasterMode::EndingDissolve) &&
@@ -1750,12 +1866,7 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, floa
 }
 
 Vector2 Presentation::mouse_position() const {
-#ifdef __ANDROID__
-    // Android's backend already removes letterboxing and returns the requested virtual size.
-    return GetMousePosition();
-#else
     return window_viewport().canvas_point(GetMousePosition());
-#endif
 }
 
 void Presentation::present() const {
@@ -1773,6 +1884,7 @@ void Presentation::present() const {
     DrawTexturePro(canvas_.get().texture,
                    {0, 0, float(canvas_.get().texture.width), -float(canvas_.get().texture.height)},
                    view.area, {0, 0}, 0, WHITE);
+    paint_touch_controls(view);
     EndDrawing();
 }
 

@@ -226,6 +226,12 @@ struct GameLoop {
     WalkRepeat walking;
 
     void frame() {
+#ifdef __EMSCRIPTEN__
+        const int width = EM_ASM_INT({ return Module['canvas'].clientWidth; });
+        const int height = EM_ASM_INT({ return Module['canvas'].clientHeight; });
+        if (width > 0 && height > 0 && (width != GetScreenWidth() || height != GetScreenHeight()))
+            SetWindowSize(width, height);
+#endif
         auto& game = session->game;
         auto& ui = session->ui;
         auto& renderer = session->renderer;
@@ -338,7 +344,12 @@ int main(int argc, char** argv) try {
 #endif
     SetConfigFlags(flags);
     SetTraceLogLevel(LOG_WARNING);
+#ifdef __ANDROID__
+    // Use native pixels so Android density and thumb targets refer to the same surface.
+    InitWindow(0, 0, "Tower of the Sorcerer");
+#else
     InitWindow(CanvasWidth, CanvasHeight, "Tower of the Sorcerer");
+#endif
 #if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
     SetWindowMinSize(640, 447);
 #endif
@@ -369,9 +380,14 @@ int main(int argc, char** argv) try {
             [](void* state) {
                 try {
                     static_cast<GameLoop*>(state)->frame();
+                    static bool first_frame = true;
+                    if (first_frame) {
+                        first_frame = false;
+                        EM_ASM({ Module['tswGameReady'](); });
+                    }
                 } catch (const std::exception& error) {
                     std::cerr << error.what() << '\n';
-                    EM_ASM({ Module['setStatus']('Game error: ' + UTF8ToString($0)); }, error.what());
+                    EM_ASM({ Module['tswGameError']('Game error: ' + UTF8ToString($0)); }, error.what());
                     emscripten_cancel_main_loop();
                 }
             },
@@ -392,5 +408,8 @@ int main(int argc, char** argv) try {
 } catch (const std::exception& error) {
 
     std::cerr << error.what() << '\n';
+#ifdef __EMSCRIPTEN__
+    EM_ASM({ Module['tswGameError']('Unable to start the game: ' + UTF8ToString($0)); }, error.what());
+#endif
     return 1;
 }

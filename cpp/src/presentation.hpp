@@ -7,6 +7,7 @@
 #include "tsw/mouse_walk.hpp"
 #include "tsw/save_slots.hpp"
 #include "tsw/settings.hpp"
+#include <array>
 #include <filesystem>
 #include <memory>
 
@@ -19,6 +20,7 @@ inline constexpr int BoardX = 180, BoardY = MenuHeight + 30;
 struct CanvasViewport {
     int window_width{}, window_height{}, framebuffer_width{}, framebuffer_height{};
     Rectangle area{};
+    float touch_scale = 1; // Window units per CSS pixel (web) or density-independent pixel (Android).
 
     Vector2 canvas_point(Vector2 point) const {
         return {(point.x - area.x) * CanvasWidth / area.width,
@@ -144,8 +146,11 @@ struct WalkRepeat {
     void stepped() { remaining = WalkRepeatSeconds; }
 };
 
-enum class TouchButton { Up, Left, Confirm, Right, Down };
+enum class TouchButton { Up, Left, Confirm, Right, Down, Cancel };
 enum class TouchContext { Hidden, Walk, Dialogue, Shop, Flight };
+
+// Screen-space controls stay finger-sized independently of the game artwork.
+std::array<Rectangle, 6> touch_buttons(const CanvasViewport&);
 
 // Capture begins on a fresh press. Context changes require lifting the finger.
 struct TouchRepeat {
@@ -188,8 +193,14 @@ class Presentation {
     float walking_remaining_{};
     float animation_seconds_{};
     TouchRepeat touch_;
-    int pointer_serial_{};
+    [[maybe_unused]] int pointer_serial_{};
+    TouchContext touch_context_ = TouchContext::Hidden;
+    bool touch_busy_{}, pointer_down_{}, pointer_pressed_{}, pointer_cancelled_{};
+    bool dialogue_dragging_{}, dialogue_moved_{};
+    Vector2 dialogue_start_{}, dialogue_last_{};
+    std::string dialogue_text_;
     UiAction draw_touch_controls(const Game&, TouchContext, std::optional<TouchButton>);
+    void paint_touch_controls(const CanvasViewport&) const;
     void draw_board(const Game&, int floor, bool animated);
     void draw_realtime_orb(const Game&, const DesktopUi&);
     void draw_door(const Game&, int x, int y);
