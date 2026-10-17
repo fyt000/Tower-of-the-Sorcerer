@@ -250,7 +250,7 @@ struct Typography {
         }
     };
 
-    Typeface body, numbers, japanese, chinese;
+    Typeface body, numbers, japanese, chinese, labels;
     Language language = Language::English;
     Vector2 scale{1, 1};
 
@@ -259,6 +259,7 @@ struct Typography {
         numbers.load("assets/fonts/body.ttf");
         japanese.load("assets/fonts/cjk.ttf");
         chinese.load("assets/fonts/cjk.ttf");
+        labels.load("assets/fonts/labels.otf");
 #ifdef __ANDROID__
         if (body.bytes.empty())
             body.load("/system/fonts/Roboto-Regular.ttf");
@@ -285,9 +286,38 @@ struct Typography {
             chinese.load(path);
         }
         japanese.codepoints = chinese.codepoints = localization_codepoints();
+        for (const auto item : Languages) {
+            int count{};
+            auto* points = LoadCodepoints(std::string(language_label(item)).c_str(), &count);
+            for (int i = 0; i < count; ++i)
+                if (std::ranges::find(labels.codepoints, points[i]) == labels.codepoints.end())
+                    labels.codepoints.push_back(points[i]);
+            UnloadCodepoints(points);
+        }
+    }
+
+    void select_language(Language selected) {
+        language = selected;
+#ifdef __EMSCRIPTEN__
+        const int ready = EM_ASM_INT(
+            { return Module['tswFonts']['ensure'](UTF8ToString($0)); }, language_id(selected).data());
+        // Keep every scene readable while a language font is in flight or awaiting retry.
+        if (ready != 1) {
+            language = Language::English;
+            return;
+        }
+        if (selected == Language::Japanese && japanese.bytes.empty())
+            japanese.load("/fonts/ja.otf");
+        else if ((selected == Language::ChineseFromJapanese || selected == Language::ChineseFromEnglish) &&
+                 chinese.bytes.empty())
+            chinese.load("/fonts/zh.otf");
+#endif
     }
 
     Font font(int size, bool bold = false, std::string_view value = {}) const {
+        if (!labels.bytes.empty() &&
+            std::ranges::any_of(Languages, [&](Language item) { return value == language_label(item); }))
+            return labels.at(size, scale.y);
         const bool unicode = std::ranges::any_of(value, [](unsigned char c) { return c >= 128; });
         if (unicode) {
             const bool chinese_label = value == language_label(Language::ChineseFromJapanese) ||
@@ -874,13 +904,6 @@ float command_interval(const Game& game) {
 
 UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mouse) {
     const auto& h = game.hero;
-    if (ui.language != Language::English) {
-        for (int i = 0; i < 4; ++i) {
-            const Rectangle label{12, float(MenuHeight + 101 + i * 29), 38, 22};
-            DrawRectangleRec(label, Panel);
-            art_->text.fit(std::array<const char*, 4>{"HP", "ATK", "DEF", "Gold"}[i], label, 13);
-        }
-    }
     art_->text.fit(std::format("Tower {}", ui.flight >= 0 ? ui.flight : h.floor),
                    {18, MenuHeight + 59, 124, 24}, 22, Ink, {.bold = true});
     for (int i = 0; i < 4; ++i)
@@ -918,7 +941,7 @@ UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mous
     for (int i = 0; i < 2; ++i) {
         const int equipment =
             std::clamp(std::to_underlying(i == 0 ? h.sword : h.shield), 0, EquipmentTierCount);
-        if (ui.language != Language::English) {
+        if (art_->text.language != Language::English) {
             const Rectangle label{RightX + 12, float(MenuHeight + 59 + i * 60), 82, 22};
             DrawRectangleRec(label, Panel);
             art_->text.fit(i == 0 ? "Weapon" : "Shield", label, 17, Gold);
@@ -993,7 +1016,7 @@ UiAction Presentation::draw_dialogue(const Game& game, DesktopUi& ui, Vector2 mo
     constexpr Rectangle rect{BoardX + 12, BoardY + 58, 416, 330};
     art_->text.modal(rect, dialogue.shop ? "An offer" : "Conversation");
     const bool fairy = is_fairy_continuation(dialogue.continuation);
-    const auto content = fairy ? localized_fairy_dialogue(ui.language, game.hero.fairy_score,
+    const auto content = fairy ? localized_fairy_dialogue(art_->text.language, game.hero.fairy_score,
                                                           game.hero.fairy_rank, game.hero.fairy_visits)
                                : dialogue.text;
     const auto text = art_->text.wrap(content, 376, 18, !fairy);
@@ -1149,14 +1172,15 @@ void Presentation::draw_qol_status(const DesktopUi& ui, Rectangle rect, Vector2 
     art_->text.fit(count ? std::format("QOL: {} enabled", count) : "QOL: none", rect, 16,
                    count ? Gold : Muted);
     if (CheckCollisionPointRec(mouse, rect)) {
-        std::string text = localized_text(ui.language, count ? "Enabled QOLs:" : "Enabled QOLs: none");
+        std::string text =
+            localized_text(art_->text.language, count ? "Enabled QOLs:" : "Enabled QOLs: none");
         if (ui.mouse_walking)
-            text += "\n" + localized_text(ui.language, "Mouse walking");
+            text += "\n" + localized_text(art_->text.language, "Mouse walking");
         if (ui.hero_orb_actual_damage)
-            text += "\n" + localized_text(ui.language, "Hero Orb actual damage");
+            text += "\n" + localized_text(art_->text.language, "Hero Orb actual damage");
         if (ui.realtime_hero_orb)
-            text += "\n" + localized_text(ui.language, "Realtime Hero Orb");
-        text += "\n" + localized_text(ui.language, "Change QOLs in Settings. Default: off.");
+            text += "\n" + localized_text(art_->text.language, "Realtime Hero Orb");
+        text += "\n" + localized_text(art_->text.language, "Change QOLs in Settings. Default: off.");
         art_->text.tooltip(rect, text);
     }
 }
@@ -1250,68 +1274,87 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
     } else if (ui.menu == Menu::Options) {
         constexpr Rectangle rect{50, 34, 700, 484};
         art_->text.modal(rect, "Settings");
-        art_->text.draw("Language", int(rect.x + 440), int(rect.y + 60), 19, Gold);
-        for (int i = 0; i < std::ssize(Languages); ++i) {
-            const Rectangle choice{rect.x + 440, rect.y + 94 + i * 62, 242, 48};
-            if (art_->text.button(choice, std::string(language_label(Languages[i])), mouse))
-                return {Action::Language, i};
-            if (ui.language == Languages[i])
-                DrawRectangleLinesEx(choice, 2, Gold);
+        constexpr std::array<const char*, 4> tabs{"Game", "Controls", "Replay", "Language"};
+        for (int i = 0; i < std::ssize(tabs); ++i) {
+            const Rectangle tab{rect.x + 18 + i * 168, rect.y + 56, 160, 48};
+            if (art_->text.button(tab, tabs[i], mouse))
+                ui.settings_tab = static_cast<SettingsTab>(i);
+            if (int(ui.settings_tab) == i)
+                DrawRectangleLinesEx(tab, 2, Gold);
         }
-        if (art_->text.button({rect.x + 18, rect.y + 60, 400, 34},
-                              ui.muted ? "Enable music and effects [M]" : "Mute music and effects [M]",
-                              mouse))
-            return {Action::Mute};
-        art_->text.draw("Walking and animation speed", int(rect.x + 18), int(rect.y + 112), 17, Muted);
-        for (int i = 0; i < 3; ++i)
-            if (art_->text.button({rect.x + 18 + i * 135, rect.y + 138, 130, 30},
-                                  std::format("{}x{}", GameSpeeds[i], ui.game_speed_index == i ? " *" : ""),
+        const float left = rect.x + 18;
+        if (ui.settings_tab == SettingsTab::Game) {
+            art_->text.draw("Sound", int(left), 158, 19, Gold);
+            if (art_->text.button({left, 184, 664, 48},
+                                  ui.muted ? "Enable music and effects [M]" : "Mute music and effects [M]",
                                   mouse))
-                return {Action::Speed, i};
-        art_->text.draw("Replay and animation speed", int(rect.x + 18), int(rect.y + 188), 17, Muted);
-        for (int i = 0; i < std::ssize(ReplaySpeeds); ++i)
-            if (art_->text.button(
-                    {rect.x + 18 + i * 57, rect.y + 214, 54, 30},
-                    std::format("{}x{}", ReplaySpeeds[i], ui.replay_speed_index == i ? " *" : ""), mouse))
-                return {Action::ReplaySpeed, i};
-        if (art_->text.button({rect.x + 18, rect.y + 264, 400, 34},
-                              ui.recording_enabled ? "Record new games: on" : "Record new games: off", mouse))
-            return {Action::Recording};
-        art_->text.draw("New games, recorded loads and replay takeover.", int(rect.x + 18), int(rect.y + 308),
-                        15, Muted);
-        art_->text.draw("Quality of life", int(rect.x + 18), int(rect.y + 332), 17, Gold);
-        const Rectangle qol{rect.x + 18, rect.y + 354, 400, 28};
-        if (art_->text.button(
-                qol, ui.hero_orb_actual_damage ? "Hero Orb actual damage: on" : "Hero Orb actual damage: off",
-                mouse))
-            return {Action::HeroOrbActualDamage};
-        const Rectangle walking{rect.x + 18, rect.y + 386, 400, 28};
-        if (art_->text.button(walking, ui.mouse_walking ? "Mouse walking: on" : "Mouse walking: off", mouse))
-            return {Action::MouseWalking};
-        if (CheckCollisionPointRec(mouse, walking))
-            art_->text.tooltip(walking, "Click floor to walk or an event to interact. Hidden events stop the "
-                                        "walk. Default: off.");
-        const Rectangle realtime{rect.x + 18, rect.y + 418, 400, 28};
-        if (art_->text.button(
-                realtime, ui.realtime_hero_orb ? "Realtime Hero Orb: on" : "Realtime Hero Orb: off", mouse))
-            return {Action::RealtimeHeroOrb};
-        if (CheckCollisionPointRec(mouse, realtime))
-            art_->text.tooltip(realtime,
-                               "Requires Hero Orb. Top: HP cost. Left: ATK. Right: DEF. Bottom: gold. "
-                               "∞ means defense cannot be penetrated. Hover a monster for exact "
-                               "values. Uses the Hero Orb damage setting. Default: off.");
-        if (art_->text.button({rect.x + 18, rect.y + 456, 400, 24}, "Done [Esc]", mouse))
+                return {Action::Mute};
+            art_->text.draw("Walking and animation speed", int(left), 252, 17, Muted);
+            for (int i = 0; i < std::ssize(GameSpeeds); ++i)
+                if (art_->text.button(
+                        {left + i * 224, 278, 216, 48},
+                        std::format("{}x{}", GameSpeeds[i], ui.game_speed_index == i ? " *" : ""), mouse))
+                    return {Action::Speed, i};
+            art_->text.draw("Quality of life", int(left), 348, 19, Gold);
+            const Rectangle qol{left, 378, 328, 48}, realtime{left + 336, 378, 328, 48};
+            if (art_->text.button(qol,
+                                  ui.hero_orb_actual_damage ? "Hero Orb actual damage: on"
+                                                            : "Hero Orb actual damage: off",
+                                  mouse))
+                return {Action::HeroOrbActualDamage};
+            if (art_->text.button(realtime,
+                                  ui.realtime_hero_orb ? "Realtime Hero Orb: on" : "Realtime Hero Orb: off",
+                                  mouse))
+                return {Action::RealtimeHeroOrb};
+            if (CheckCollisionPointRec(mouse, qol))
+                art_->text.tooltip(qol, ui.hero_orb_actual_damage
+                                            ? "Hero Orb actual damage: on\nShows combat damage with Cross "
+                                              "and Dragon Slayer bonuses. Battle rules are unchanged."
+                                            : "Hero Orb actual damage: off\nEnable this to show combat "
+                                              "damage with Cross and Dragon Slayer bonuses. Default: off.");
+            if (CheckCollisionPointRec(mouse, realtime))
+                art_->text.tooltip(realtime,
+                                   "Requires Hero Orb. Top: HP cost. Left: ATK. Right: DEF. Bottom: gold. "
+                                   "∞ means defense cannot be penetrated. Hover a monster for exact "
+                                   "values. Uses the Hero Orb damage setting. Default: off.");
+        } else if (ui.settings_tab == SettingsTab::Controls) {
+            art_->text.draw("Controls", int(left), 158, 19, Gold);
+            if (art_->text.button({left, 192, 664, 48},
+                                  ui.touch_enabled() ? "Touch controls: on" : "Touch controls: off", mouse))
+                return {Action::TouchControls};
+            art_->text.draw("Show the directional pad. Default: automatic.", int(left), 252, 17, Muted);
+            const Rectangle walking{left, 298, 664, 48};
+            if (art_->text.button(walking, ui.mouse_walking ? "Mouse walking: on" : "Mouse walking: off",
+                                  mouse))
+                return {Action::MouseWalking};
+            art_->text.draw("Click or tap the map to walk.", int(left), 358, 17, Muted);
+            if (CheckCollisionPointRec(mouse, walking))
+                art_->text.tooltip(walking, "Click floor to walk or an event to interact. Hidden events stop "
+                                            "the walk. Default: off.");
+        } else if (ui.settings_tab == SettingsTab::Replay) {
+            art_->text.draw("Recording", int(left), 158, 19, Gold);
+            if (art_->text.button({left, 192, 664, 48},
+                                  ui.recording_enabled ? "Record new games: on" : "Record new games: off",
+                                  mouse))
+                return {Action::Recording};
+            art_->text.draw("New games, recorded loads and replay takeover.", int(left), 252, 17, Muted);
+            art_->text.draw("Replay and animation speed", int(left), 304, 17, Muted);
+            for (int i = 0; i < std::ssize(ReplaySpeeds); ++i)
+                if (art_->text.button(
+                        {left + i * 96, 336, 88, 48},
+                        std::format("{}x{}", ReplaySpeeds[i], ui.replay_speed_index == i ? " *" : ""), mouse))
+                    return {Action::ReplaySpeed, i};
+        } else {
+            for (int i = 0; i < std::ssize(Languages); ++i) {
+                const Rectangle choice{rect.x + 140, rect.y + 124 + i * 56, 420, 48};
+                if (art_->text.button(choice, std::string(language_label(Languages[i])), mouse))
+                    return {Action::Language, i};
+                if (ui.language == Languages[i])
+                    DrawRectangleLinesEx(choice, 2, Gold);
+            }
+        }
+        if (art_->text.button({rect.x + 490, rect.y + 426, 192, 48}, "Done [Esc]", mouse))
             ui.menu = Menu::None;
-        if (art_->text.button({rect.x + 440, rect.y + 418, 242, 34},
-                              ui.touch_enabled() ? "Touch controls: on" : "Touch controls: off", mouse))
-            return {Action::TouchControls};
-        if (CheckCollisionPointRec(mouse, qol))
-            art_->text.tooltip(
-                qol, ui.hero_orb_actual_damage
-                         ? "Hero Orb actual damage: on\nShows combat damage with Cross "
-                           "and Dragon Slayer bonuses. Battle rules are unchanged."
-                         : "Hero Orb actual damage: off\nEnable this to show combat damage with Cross "
-                           "and Dragon Slayer bonuses. Default: off.");
     }
     return {};
 }
@@ -1565,7 +1608,7 @@ UiAction Presentation::draw_ending_summary(const EndingSummary& summary, Desktop
             if (entry.overlay == DragonSlayer || entry.overlay == Bomb)
                 DrawLineEx({x + 42, y + 65}, {x + 62, y + 45}, 2, Color{240, 124, 116, 255});
         }
-        const auto name = localized_text(ui.language, entry.name);
+        const auto name = localized_text(art_->text.language, entry.name);
         int size = 18;
         while (size > 12 && art_->text.width(name, size) > 276)
             --size;
@@ -1683,7 +1726,7 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, floa
 #ifndef __ANDROID__
     SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 #endif
-    art_->text.language = ui.language;
+    art_->text.select_language(ui.language);
     resize_canvas(view);
     const auto mode = game.visual.raster_mode;
     if (!ui.home) {
@@ -1795,7 +1838,7 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, floa
     DrawLine(0, MenuHeight + ContentHeight, CanvasWidth, MenuHeight + ContentHeight, Border);
     std::string status =
         ui.flight >= 0 ? std::format("Previewing floor {}. Up / Down to choose; Enter to travel.", ui.flight)
-                       : localized_status(ui.language, game);
+                       : localized_status(art_->text.language, game);
     bool translate_status = ui.flight >= 0;
     if (ui.ending_wait) {
         status = "The End. Press Enter / Space to continue to the backside tower.";
@@ -1806,9 +1849,10 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, floa
             ui.replay_paused
                 ? (ui.replay_step == ui.replay_count && !ui.replay_in_progress ? "Finished" : "Paused")
                 : "Playing";
-        status = ui.replay_error.empty() ? localized_text(ui.language, state) + "  /  " + ui.replay_name +
-                                               "  /  " + localized_status(ui.language, game)
-                                         : ui.replay_error;
+        status = ui.replay_error.empty()
+                     ? localized_text(art_->text.language, state) + "  /  " + ui.replay_name + "  /  " +
+                           localized_status(art_->text.language, game)
+                     : ui.replay_error;
     }
     if (!ui.replay_active && !ui.modal() && !game.dialogue && ui.flight < 0) {
         int owned = 0;

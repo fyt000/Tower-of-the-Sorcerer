@@ -15,8 +15,10 @@ Artwork/credits stay original. Localization affects presentation; state, saves,
 replays, CLI and MCP retain canonical English. Chinese names follow TSWH5;
 its gameplay and prose are not translation sources.
 
-CJK fonts use installed Yu Gothic/MS Gothic or Microsoft YaHei. Override with
-`TSW_CJK_FONT` pointing to a local TTF/OTF/TTC; fonts are not redistributed.
+Desktop CJK fonts use installed Yu Gothic/MS Gothic or Microsoft YaHei. Override
+with `TSW_CJK_FONT` pointing to a local TTF/OTF/TTC. Android also reads system fonts.
+The [web build](../../docs/cross-platform.md#browser-fonts-and-settings) supplies
+redistributable Noto Sans CJK subsets and loads the selected language on demand.
 
 ## Editing and alignment
 

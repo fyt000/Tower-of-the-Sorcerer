@@ -27,6 +27,7 @@
     @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
     #status { position: absolute; z-index: 2; inset-inline: 16px; bottom: max(16px, env(safe-area-inset-bottom)); width: fit-content; max-width: calc(100% - 32px); margin: 0 auto; padding: 10px 14px; border: 1px solid #a89176; border-radius: 8px; background: #252129; pointer-events: none; }
     #status:empty, #export-status:empty { display: none; }
+    #font-notice { position: absolute; z-index: 2; inset-inline: 16px; bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 12px; width: fit-content; max-width: calc(100% - 32px); margin: auto; padding: 10px 14px; border: 1px solid #a89176; border-radius: 8px; background: #252129; font-size: .9rem; }
     #game:fullscreen { width: 100%; height: 100%; }
     button, select { font: inherit; min-height: 48px; padding: 8px 12px; border: 1px solid #756657; border-radius: 8px; background: #302b34; color: inherit; }
     button { cursor: pointer; }
@@ -90,6 +91,10 @@
       </div>
     </div>
     <p id="status" role="status"></p>
+    <div id="font-notice" hidden>
+      <span id="font-message" role="status"></span>
+      <button id="retry-font" hidden>Retry</button>
+    </div>
     <span id="save-notice" class="sr-only" role="status"></span>
     <dialog id="help-panel" aria-labelledby="help-title">
       <div class="dialog-heading">
@@ -103,7 +108,7 @@
         <h3>How to play</h3>
         <p>Tap the map to walk, or use the directional pad. Hold an arrow to keep moving;
           tap a conversation to continue, or drag its text to scroll.
-          Change touch controls in Options. The pad stays on the right.</p>
+          Change touch controls in Settings → Controls. The pad stays on the right.</p>
         <p>Turn your phone sideways for a larger game. Full screen is available in supported browsers.</p>
         <details>
           <summary>Keyboard controls</summary>
@@ -233,6 +238,18 @@
       helpButton.title = event.detail.error ? event.detail.message : '';
       refreshFiles();
     });
+    window.addEventListener('tsw-font', function (event) {
+      var detail = event.detail;
+      var failed = detail.state === 'error';
+      document.getElementById('font-notice').hidden = detail.state === 'ready';
+      document.getElementById('font-message').textContent = failed
+        ? 'Language font could not load. Using English until you retry.'
+        : 'Loading ' + (detail.family === 'ja' ? 'Japanese' : 'Chinese') + ' font… Using English for now.';
+      document.getElementById('retry-font').hidden = !failed;
+    });
+    document.getElementById('retry-font').onclick = function () {
+      Module['tswFonts'].retry(); canvas.focus({ preventScroll: true });
+    };
     canvas.addEventListener('pointerdown', function () { canvas.focus(); });
     canvas.addEventListener('contextmenu', function (event) { event.preventDefault(); });
     document.getElementById('retry').onclick = function () { Module['tswStorage'].flush(); refreshFiles(); };

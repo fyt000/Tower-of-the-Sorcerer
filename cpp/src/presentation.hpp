@@ -32,6 +32,7 @@ CanvasViewport window_viewport();
 bool touch_device();
 
 enum class Menu { None, Game, Options, About };
+enum class SettingsTab { Game, Controls, Replay, Language };
 enum class SavePicker { None, Save, Load };
 
 struct DesktopUi {
@@ -60,6 +61,7 @@ struct DesktopUi {
     std::string ranking_name;
     bool replay_path_focus = true;
     Menu menu = Menu::None;
+    SettingsTab settings_tab = SettingsTab::Game;
     float dialogue_scroll{};
 
     bool modal() const {

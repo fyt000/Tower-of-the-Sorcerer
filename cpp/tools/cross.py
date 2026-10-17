@@ -130,7 +130,7 @@ def check_web(args):
     if not (dependencies / "node_modules/playwright").is_dir():
         raise ValueError("Install the browser test runtime: python cpp/tools/cross.py check-web --install")
     env["NODE_PATH"] = str(dependencies / "node_modules") + os.pathsep + env.get("NODE_PATH", "")
-    run(["node", "--test", "cpp/tests/web_storage_tests.cjs"], env=env)
+    run(["node", "--test", "cpp/tests/web_storage_tests.cjs", "cpp/tests/web_fonts_tests.cjs"], env=env)
     run(["node", "cpp/tools/check_web.cjs"], env=env)
 
 

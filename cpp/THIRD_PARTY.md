@@ -15,6 +15,7 @@ MIT. See [project attribution](../THIRD_PARTY.md) and [catalog sources](locales/
 | TinySoundFont / TinyMidiLoader | `853a0a171759f1ddba0de1442133a75912bbeffa` | `TinySoundFont-LICENSE.txt` |
 | Catch2 (tests) | 3.13.0, vcpkg revision 1 | `licenses/catch2.txt` |
 | Glaze | 7.2.2 | `licenses/glaze.txt` |
+| Noto Sans CJK (web subsets) | `f8d157532fbfaeda587e826d4cd5b21a49186f7c` | `fonts/LICENSE.txt` (SIL OFL 1.1) |
 | GeneralUser GS | 2.0.3; `684543d5e5efaef08d02be50dcda8d552478fa60` | `GeneralUser-GS-LICENSE.txt` |
 
 GeneralUser GS is by **S. Christian Collins**. All builds use the same
@@ -24,7 +25,11 @@ static dependency notices from vcpkg's `share/*/copyright` and hashes packaged
 files.
 
 Segoe UI, Yu Gothic/MS Gothic and Microsoft YaHei are read from installed Windows
-fonts, or CJK uses `TSW_CJK_FONT`. Font files are not redistributed.
+fonts, or CJK uses `TSW_CJK_FONT`. These system fonts are not redistributed.
+The web build subsets Noto Sans CJK JP/SC Regular using fontTools 4.66.1
+(build-time only). Sources and license are checksum-pinned in
+[web_fonts.py](tools/web_fonts.py). The subset fonts retain copyright and license
+metadata; the site also includes the upstream license in `fonts/LICENSE.txt`.
 
 The soundfont has SHA-256
 `0509a47616c426f6bb160c9f3740dea4174448749c6771644c1e6c562c05d8af`.

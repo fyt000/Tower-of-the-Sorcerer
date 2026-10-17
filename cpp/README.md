@@ -55,8 +55,10 @@ Run beside the original `Data3/`, `Data2/`, `Midi/` and `Wav/` folders, or pass
 | F2 / M / R | New game / mute / rankings |
 | Esc | Close overlay or open main menu |
 
-Settings include language, speed, recording, Mouse walking, Realtime Hero Orb
-and bonus-aware **Hero Orb actual damage**. The last three default off. Mouse
+Settings has Game, Controls, Replay and Language tabs. Controls groups Mouse walking
+and Touch controls; Replay groups recording and playback speed. Game includes
+music, animation speed, Realtime Hero Orb and bonus-aware **Hero Orb actual damage**.
+Mouse walking and both Orb options default off. Mouse
 routes stop at unexpected events/hazards; other inputs cancel the route.
 See [languages](locales/README.md) for catalog IDs and `--language` overrides.
 

@@ -568,7 +568,13 @@
     "Altar devotee": "Altar devotee",
     "Make at least 21 altar purchases.": "Make at least 21 altar purchases.",
     "Red key collector": "Red key collector",
-    "Finish with at least 5 red keys.": "Finish with at least 5 red keys."
+    "Finish with at least 5 red keys.": "Finish with at least 5 red keys.",
+    "Controls": "Controls",
+    "Replay": "Replay",
+    "Sound": "Sound",
+    "Recording": "Recording",
+    "Show the directional pad. Default: automatic.": "Show the directional pad. Default: automatic.",
+    "Click or tap the map to walk.": "Click or tap the map to walk."
   },
   "ending_story": "",
   "opening_story": "Now is the time to act.\nUsing omniscient power,\nI shall break the sacred sword\nand get great wisdom.",

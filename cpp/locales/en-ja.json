@@ -568,7 +568,13 @@
     "Altar devotee": "Altar devotee",
     "Make at least 21 altar purchases.": "Make at least 21 altar purchases.",
     "Red key collector": "Red key collector",
-    "Finish with at least 5 red keys.": "Finish with at least 5 red keys."
+    "Finish with at least 5 red keys.": "Finish with at least 5 red keys.",
+    "Controls": "Controls",
+    "Replay": "Replay",
+    "Sound": "Sound",
+    "Recording": "Recording",
+    "Show the directional pad. Default: automatic.": "Show the directional pad. Default: automatic.",
+    "Click or tap the map to walk.": "Click or tap the map to walk."
   },
   "ending_story": "The long battle is over; the tower of vanity crumbles.\n\nThe gods return to the heavens,\nand the warrior returns to the earth.\n\nThe present slips into the past,\nand this journey, too, is becoming a memory.\n\nYou pause to look back,\nthen take your first step toward a new journey.",
   "opening_story": "The time has come...\nWith my omnipotent power,\nI shall shatter the divine sword\nand obtain great wisdom...",

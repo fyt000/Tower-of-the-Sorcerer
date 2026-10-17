@@ -568,7 +568,13 @@
     "Altar devotee": "祭壇の信奉者",
     "Make at least 21 altar purchases.": "祭壇で21回以上寄進する。",
     "Red key collector": "赤の鍵コレクター",
-    "Finish with at least 5 red keys.": "赤の鍵を5本以上持ってクリアする。"
+    "Finish with at least 5 red keys.": "赤の鍵を5本以上持ってクリアする。",
+    "Controls": "操作",
+    "Replay": "リプレイ",
+    "Sound": "サウンド",
+    "Recording": "記録",
+    "Show the directional pad. Default: automatic.": "方向パッドを表示。初期設定：自動。",
+    "Click or tap the map to walk.": "マップをクリック・タップして移動。"
   },
   "ending_story": "ながい戦いは終わりを告げ、虚栄の塔は崩れさる。\n\n神々は天へと帰り、\n戦士は大地へと戻った。\n\n現在は過去へと移り変わり、\nこの旅も過去のものになろうとしている。\n\nあなたは、少しだけ振り返ると、\n新たな旅へ向けて足を踏み出すのであった。",
   "opening_story": "時は来たれり・・・\n我、全能の力を用いて、神剣を砕き、\n偉大なる知恵を手に入れん・・・",

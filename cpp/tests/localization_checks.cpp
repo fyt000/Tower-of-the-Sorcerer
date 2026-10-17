@@ -30,6 +30,12 @@ int verify_localization(Presentation& renderer, const std::filesystem::path& out
         capture("home");
         ui.menu = Menu::Options;
         capture("settings");
+        ui.settings_tab = SettingsTab::Controls;
+        capture("settings-controls");
+        ui.settings_tab = SettingsTab::Replay;
+        capture("settings-replay");
+        ui.settings_tab = SettingsTab::Language;
+        capture("settings-language");
         ui.menu = Menu::About;
         capture("about");
         ui.home = false;

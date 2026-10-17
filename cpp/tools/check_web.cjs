@@ -86,8 +86,9 @@ async function mobileSmoke(browser, url, output) {
     }
     async function toggle() {
         await tap(100, 14); // Options
-        await tap(611, 469); // Touch controls
-        await tap(268, 502); // Done
+        await tap(316, 114); // Controls tab
+        await tap(400, 216); // Touch controls
+        await tap(636, 484); // Done
     }
     async function fixture(kind) {
         await page.evaluate(kind => {
@@ -248,6 +249,85 @@ async function mobileSmoke(browser, url, output) {
     }
 }
 
+async function languageSmoke(browser, url, output) {
+    const context = await browser.newContext({ viewport: { width: 1000, height: 800 } });
+    const page = await context.newPage();
+    const requests = [], errors = [];
+    let failChinese = true;
+    page.on('pageerror', error => errors.push(String(error)));
+    await page.route('**/fonts/*.otf', async route => {
+        requests.push(route.request().url());
+        await new Promise(resolve => setTimeout(resolve, 450));
+        if (failChinese && /\/zh-/.test(route.request().url())) {
+            failChinese = false;
+            await route.abort();
+        } else await route.continue();
+    });
+    async function ready() {
+        await page.waitForFunction(() => window.Module?.FS && document.getElementById('loading').hidden);
+        await page.locator('#canvas').focus();
+    }
+    async function click(x, y) {
+        const box = await page.locator('#canvas').boundingBox();
+        const view = await page.evaluate(() => Module.tswCanvasViewport);
+        await page.mouse.click(box.x + view.x + x * view.width / 800, box.y + view.y + y * view.height / 558, { delay: 80 });
+        await page.waitForTimeout(90);
+    }
+    async function fontReady(family) {
+        await page.waitForFunction(family => Module.FS.analyzePath('/fonts/' + family + '.otf').exists, family);
+        await page.waitForFunction(() => document.getElementById('font-notice').hidden);
+        await page.waitForTimeout(120); // Let the renderer create its atlas from the downloaded bytes.
+    }
+    try {
+        await page.goto(url);
+        await ready();
+        assert.equal(requests.length, 0, 'English startup must not request a full CJK font');
+        assert.equal(await page.evaluate(() => Module.FS.analyzePath('/assets/fonts/labels.otf').exists), true);
+        assert.equal(await page.evaluate(() => Module.FS.analyzePath('/assets/fonts/cjk.ttf').exists), false);
+        await page.keyboard.press('Enter', { delay: 100 });
+        await click(100, 14);
+        await page.screenshot({ path: path.join(output, 'settings-game.png') });
+        await click(316, 114);
+        await page.screenshot({ path: path.join(output, 'settings-controls.png') });
+        await click(484, 114);
+        await click(400, 216);
+        assert.equal(await page.evaluate(() => JSON.parse(new TextDecoder().decode(
+            Module.tswStorage.read('settings.json'))).recording), true, 'Recording belongs to Replay');
+        await page.screenshot({ path: path.join(output, 'settings-replay.png') });
+        await click(652, 114);
+        await page.screenshot({ path: path.join(output, 'settings-language.png') });
+        assert.equal(requests.length, 0, 'Native language labels must render without a full font download');
+        await click(400, 350); // Chinese from Japanese.
+        await page.locator('#retry-font').waitFor({ state: 'visible' });
+        await page.screenshot({ path: path.join(output, 'font-retry.png') });
+        assert.match(await page.locator('#font-message').textContent(), /Using English/);
+        await page.locator('#retry-font').click();
+        await fontReady('zh');
+        await page.screenshot({ path: path.join(output, 'settings-chinese.png') });
+        await click(400, 406); // The other Chinese catalog shares the same font.
+        assert.equal(requests.length, 2, 'Chinese catalogs must share one successful download');
+        await click(400, 238); // Japanese.
+        await page.locator('#font-notice').waitFor({ state: 'visible' });
+        await fontReady('ja');
+        await page.screenshot({ path: path.join(output, 'settings-japanese.png') });
+        await click(400, 182); // English.
+        await click(400, 238); // Cached Japanese.
+        assert.equal(requests.length, 3, 'Returning to a downloaded language must reuse its font');
+        await page.waitForFunction(() => document.getElementById('storage').textContent === 'Saved in this browser');
+        await page.reload();
+        await ready();
+        await fontReady('ja');
+        assert.equal(await page.evaluate(() => JSON.parse(new TextDecoder().decode(
+            Module.tswStorage.read('settings.json'))).language), 'ja');
+        await page.screenshot({ path: path.join(output, 'startup-japanese.png') });
+        assert.deepEqual(errors, []);
+        console.log('PASS: settings tabs, native language labels, lazy CJK download, failure/retry, font reuse and saved-language startup');
+    } finally {
+        await page.screenshot({ path: path.join(output, 'language-latest.png') }).catch(() => {});
+        await context.close();
+    }
+}
+
 async function main() {
     const site = process.argv[2] || 'build/cpp/web/site';
     let server;
@@ -365,6 +445,7 @@ async function main() {
         assert.deepEqual(errors, [], 'Game must not report uncaught browser errors');
         console.log('PASS: game startup, native save, IndexedDB reload, companion history, original-format export, load and backup');
         await mobileSmoke(browser, url, output);
+        await languageSmoke(browser, url, output);
     } finally {
         console.log('Final page status:', await page.locator('body').innerText().catch(() => 'Page unavailable'));
         await page.screenshot({ path: path.join(output, 'latest.png') }).catch(() => {});

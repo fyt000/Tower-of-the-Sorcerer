@@ -568,7 +568,13 @@
     "Altar devotee": "祭坛信徒",
     "Make at least 21 altar purchases.": "在祭坛购买至少21次。",
     "Red key collector": "红钥匙收藏家",
-    "Finish with at least 5 red keys.": "通关时持有至少5把红钥匙。"
+    "Finish with at least 5 red keys.": "通关时持有至少5把红钥匙。",
+    "Controls": "操作",
+    "Replay": "回放",
+    "Sound": "声音",
+    "Recording": "录制",
+    "Show the directional pad. Default: automatic.": "显示方向键。默认：自动。",
+    "Click or tap the map to walk.": "点击或轻触地图即可行走。"
   },
   "ending_story": "漫长的战斗宣告结束，虚荣之塔轰然崩塌。\n\n诸神回归天际，\n战士重返大地。\n\n现在渐渐成为过去，\n这段旅程也即将化作往事。\n\n你稍稍回首，\n便迈出脚步，踏上新的旅途。",
   "opening_story": "时机已至……\n我将运用全能之力，击碎神剑，\n获得伟大的智慧……",

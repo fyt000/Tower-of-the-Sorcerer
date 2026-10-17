@@ -115,7 +115,9 @@ if(BUILD_TESTING)
     if(TSW_NODE_EXECUTABLE)
         add_test(NAME web_storage COMMAND "${TSW_NODE_EXECUTABLE}" --test
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/web_storage_tests.cjs")
-        set_tests_properties(web_storage PROPERTIES LABELS "web" TIMEOUT 30)
+        add_test(NAME web_fonts COMMAND "${TSW_NODE_EXECUTABLE}" --test
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/web_fonts_tests.cjs")
+        set_tests_properties(web_storage web_fonts PROPERTIES LABELS "web" TIMEOUT 30)
     endif()
     find_package(Python3 COMPONENTS Interpreter QUIET)
     if(Python3_Interpreter_FOUND)

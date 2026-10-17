@@ -15,7 +15,7 @@ IMAGES += [f"data2-end{n:02}.png" for n in [*range(5, 21), 26]]
 IMAGES += ["data-exe-ending-story.png", "data-exe-ending-card.png"]
 
 
-def stage(source: Path, soundfont: Path, output: Path) -> None:
+def stage(source: Path, soundfont: Path, output: Path, exclude_cjk_font: bool = False) -> None:
     source, output = source.resolve(), output.resolve()
     if source == output or source in output.parents or output in source.parents:
         raise ValueError("Source and output must be separate, non-nested directories")
@@ -27,6 +27,8 @@ def stage(source: Path, soundfont: Path, output: Path) -> None:
         files.update({f"{folder}/{p.name}": p for p in entries})
     # Optional freely redistributable fonts supplied by the builder, with their notices.
     files.update({p.relative_to(source).as_posix(): p for p in (source / "fonts").glob("*") if p.is_file()})
+    if exclude_cjk_font:
+        files.pop("fonts/cjk.ttf", None)
     if soundfont.suffix.lower() != ".sfo":
         raise ValueError(f"Expected an .sfo soundfont: {soundfont}")
     files["music.sfo"] = soundfont
@@ -63,5 +65,6 @@ if __name__ == "__main__":
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--soundfont", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--exclude-cjk-font", action="store_true", help="web uses separate lazy font subsets")
     args = parser.parse_args()
-    stage(args.source, args.soundfont, args.output)
+    stage(args.source, args.soundfont, args.output, args.exclude_cjk_font)
