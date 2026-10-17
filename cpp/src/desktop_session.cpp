@@ -114,6 +114,9 @@ void DesktopSession::recording_status() {
         ui.replay_count = replay_->size();
         ui.replay_in_progress = replay_action_;
     }
+    audio.speed(ui.home            ? 1.f
+                : ui.replay_active ? ReplaySpeeds[ui.replay_speed_index]
+                                   : GameSpeeds[ui.game_speed_index]);
     audio.suspend(ui.replay_active && !ui.home && (ui.replay_paused || ui.modal()));
 }
 
@@ -302,7 +305,7 @@ void DesktopSession::advance_replay(float seconds) {
         const bool shop = game.dialogue && game.dialogue->shop;
         // The empty-queue run also clears transient layers/door frames before a paused boundary.
         if ((shop || (blocked && !game.dialogue && !ui.ending_wait)) &&
-            (shop ? replay_speech_ >= SpeechSeconds : replay_age_ >= WalkRepeatSeconds)) {
+            (shop ? replay_speech_ >= SpeechSeconds : replay_age_ >= ReplayStepSeconds)) {
             replay_action_ = false;
             accumulator_ = 0;
             if (replay_single_step_ || replay_->finished()) {

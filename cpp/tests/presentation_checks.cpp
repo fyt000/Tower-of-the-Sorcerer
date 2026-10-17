@@ -91,10 +91,13 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         pad.update(TouchContext::Walk, {}, false, false, 0);
         require(pad.update(TouchContext::Walk, left, true, true, 0) == left,
                 "A fresh direction touch emits one step immediately");
-        require(!pad.update(TouchContext::Walk, left, true, false, WalkRepeatSeconds / 2),
-                "A held direction waits for the keyboard repeat interval");
-        require(pad.update(TouchContext::Walk, left, true, false, WalkRepeatSeconds) == left,
-                "A held direction repeats on the same clock as keyboard walking");
+        require(!pad.update(TouchContext::Walk, left, true, false, .15f),
+                "A short direction touch remains one step");
+        require(pad.update(TouchContext::Walk, left, true, false, .101f) == left,
+                "A held direction waits 250 ms before its first repeat");
+        require(!pad.update(TouchContext::Walk, left, true, false, WalkRepeatSeconds / 2) &&
+                    pad.update(TouchContext::Walk, left, true, false, WalkRepeatSeconds) == left,
+                "Subsequent touch repeats use the keyboard's 120 ms real-time interval");
         require(!pad.update(TouchContext::Dialogue, left, true, false, 1) &&
                     !pad.update(TouchContext::Walk, left, true, false, 1),
                 "A touch cannot carry across dialogue or return to movement without release");
@@ -234,18 +237,29 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         std::array<int, 3> counts{};
         for (int speed = 0; speed < 3; ++speed) {
             WalkRepeat walking;
+            require(walking.update(true, true, 0), "A fresh arrow press moves immediately");
+            require(!walking.update(false, true, .15f),
+                    "A 150 ms arrow tap cannot accidentally take a second step");
+            require(walking.update(false, true, .101f), "Holding an arrow for 250 ms begins repetition");
+            require(!walking.update(false, true, .1f) && walking.update(false, true, .021f),
+                    "Subsequent arrow repeats wait 120 ms");
+            walking.update(false, false, 0);
+            require(!walking.update(false, true, 1), "A held key without a fresh press cannot begin walking");
             for (int frame = 0; frame < 120; ++frame) {
-                walking.advance(GameSpeeds[speed] / 60.f);
-                if (walking.ready(false, true)) {
+                renderer.advance(GameSpeeds[speed] / 60.f);
+                if (walking.update(frame == 0, true, 1.f / 60))
                     ++counts[speed];
-                    walking.stepped();
-                }
             }
-            require(!walking.ready(false, false) && walking.ready(true, true),
-                    "Walking speed " + std::to_string(speed) + " waits for input and accepts a fresh tap");
+            require(!walking.update(false, false, 0) && walking.update(true, true, 0),
+                    "Releasing and tapping again accepts a fresh step immediately");
+            require(!walking.update(false, true, 1, false) && !walking.update(false, true, 1) &&
+                        !walking.update(true, true, 0),
+                    "Menus, dialogue and lost focus block held directions until release");
+            require(!walking.update(false, false, 0) && walking.update(true, true, 0),
+                    "Releasing a blocked direction restores normal input");
         }
-        require(counts[1] >= 2 * counts[0] && counts[2] >= 5 * counts[0],
-                "3x and 10x game speed accelerate held walking through the same scaled clock");
+        require(counts[0] > 10 && counts[0] == counts[1] && counts[0] == counts[2],
+                "1x, 3x and 10x animation speeds retain identical real-time keyboard repeat timing");
     }
     {
         renderer.reset();

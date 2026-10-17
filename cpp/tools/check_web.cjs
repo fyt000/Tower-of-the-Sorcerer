@@ -99,7 +99,8 @@ async function mobileSmoke(browser, url, output) {
             const set = (offset, value) => view.setInt32(hero + offset, value, true);
             set(0, 1000); set(8, 100); set(12, 100); set(16, 1);
             set(24, 5); set(28, kind === 'shop' ? 5 : 10);
-            if (kind === 'shop') bytes[123 + 2 + 4 * 11 + 5] = 16; // Altar
+            if (kind === 'controls') bytes.fill(6, 123 + 2 + 10 * 11, 123 + 2 + 11 * 11); // Clear corridor.
+            else if (kind === 'shop') bytes[123 + 2 + 4 * 11 + 5] = 16; // Altar
             else {
                 set(72, 1); // Orb of Wisdom
                 for (const offset of [272, 276, 220, 224, 228, 236, 280, 288, 292, 296, 300, 244,
@@ -241,8 +242,32 @@ async function mobileSmoke(browser, url, output) {
         await tap(532, 433); // Close a remaining offer, if any.
         await position();
         assert.ok(await gold() < 100, 'The explicit shop choice must still purchase');
+        for (const [index, speed] of [1, 3, 10].entries()) {
+            await tap(100, 14); // Options
+            await tap(148, 114); // Game tab
+            await tap(176 + index * 224, 302);
+            await tap(636, 484); // Done
+            await fixture('controls');
+            assert.deepEqual(await position(), [5, 10]);
+            await page.keyboard.press('ArrowLeft', { delay: 160 });
+            assert.deepEqual(await position(), [4, 10], speed + 'x: a short arrow press takes exactly one step');
+            await padStart('Left');
+            await page.waitForTimeout(160);
+            await end();
+            assert.deepEqual(await position(), [3, 10], speed + 'x: a short pad press takes exactly one step');
+            await page.keyboard.press('ArrowRight', { delay: 320 });
+            assert.deepEqual(await position(), [5, 10], speed + 'x: a deliberate hold begins repeating after 250 ms');
+            await page.keyboard.down('ArrowLeft');
+            await page.waitForTimeout(60);
+            await page.keyboard.press('i', { delay: 80 }); // Inventory blocks the direction already held.
+            await page.waitForTimeout(300);
+            await page.keyboard.press('Escape', { delay: 80 });
+            await page.waitForTimeout(300);
+            await page.keyboard.up('ArrowLeft');
+            assert.deepEqual(await position(), [4, 10], speed + 'x: closing a menu cannot resume a held direction');
+        }
         assert.deepEqual(errors, []);
-        console.log('PASS: mobile movement, dialogue tap/drag/cancel, explicit shop choices, Menu isolation, saved override and viewport fit');
+        console.log('PASS: mobile movement, 1x/3x/10x keyboard and pad timing, held-key menu isolation, dialogue tap/drag/cancel, explicit shop choices, saved override and viewport fit');
     } finally {
         await page.screenshot({ path: path.join(output, 'mobile-latest.png') }).catch(() => {});
         await context.close();

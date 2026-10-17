@@ -55,6 +55,10 @@ void Audio::suspend(bool suspended) {
     impl_->mixer.suspend(suspended);
 }
 
+void Audio::speed(float multiplier) {
+    impl_->mixer.speed(multiplier);
+}
+
 void Audio::restart(Game& game) {
     impl_->mixer.restart(game);
 }

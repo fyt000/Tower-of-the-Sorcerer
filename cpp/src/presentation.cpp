@@ -63,6 +63,7 @@ std::optional<TouchButton> TouchRepeat::update(TouchContext current, std::option
     }
     if (!down) {
         active.reset();
+        repeat = {};
         blocked = false;
         return {};
     }
@@ -70,7 +71,7 @@ std::optional<TouchButton> TouchRepeat::update(TouchContext current, std::option
         return {};
     if (pressed && hovered) {
         active = hovered;
-        repeat.remaining = 0;
+        repeat = {};
     }
     if (!active)
         return {};
@@ -83,9 +84,7 @@ std::optional<TouchButton> TouchRepeat::update(TouchContext current, std::option
     active = hovered;
     if (*active == TouchButton::Confirm)
         return pressed ? active : std::nullopt; // Confirm never repeats or fires on a slide.
-    repeat.advance(seconds);
-    if (repeat.ready(pressed || changed, true)) {
-        repeat.stepped();
+    if (repeat.update(pressed || changed, true, seconds)) {
         return active;
     }
     return {};
@@ -1289,7 +1288,7 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
                                   ui.muted ? "Enable music and effects [M]" : "Mute music and effects [M]",
                                   mouse))
                 return {Action::Mute};
-            art_->text.draw("Walking and animation speed", int(left), 252, 17, Muted);
+            art_->text.draw("Animation and automatic walking speed", int(left), 252, 17, Muted);
             for (int i = 0; i < std::ssize(GameSpeeds); ++i)
                 if (art_->text.button(
                         {left + i * 224, 278, 216, 48},
@@ -1693,7 +1692,7 @@ void Presentation::paint_touch_controls(const CanvasViewport& view) const {
     }
 }
 
-UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, float seconds) {
+UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, float real_seconds) {
     const auto context = touch_context(game, ui);
     touch_context_ = TouchContext::Hidden;
     const auto view = window_viewport();
@@ -1720,7 +1719,7 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, floa
     pointer_pressed_ = pressed;
     if (!game.dialogue || ui.menu != Menu::None || ui.help || ui.replay_active)
         dialogue_dragging_ = false;
-    const auto touch_input = touch_.update(context, hovered, down, pressed, seconds);
+    const auto touch_input = touch_.update(context, hovered, down, pressed, real_seconds);
     // Closing a panel must consume its click instead of selecting the floor underneath.
     const auto destination = mouse_destination(game, ui, mouse);
 #ifndef __ANDROID__

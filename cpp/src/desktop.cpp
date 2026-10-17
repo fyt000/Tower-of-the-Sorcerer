@@ -223,7 +223,7 @@ UiAction keyboard(const Game& game, DesktopUi& ui) {
 struct GameLoop {
     std::unique_ptr<Assets> assets;
     std::unique_ptr<DesktopSession> session;
-    WalkRepeat walking;
+    std::array<WalkRepeat, 4> walking;
 
     void frame() {
 #ifdef __EMSCRIPTEN__
@@ -243,25 +243,41 @@ struct GameLoop {
             }
             UnloadDroppedFiles(files);
         }
+        const auto walking_enabled = [&] {
+            return IsWindowFocused() && !ui.replay_active && !game.dialogue && ui.flight < 0 && !ui.modal() &&
+                   !ui.ending_wait;
+        };
+        const bool was_walking = walking_enabled();
         session->dispatch(keyboard(game, ui));
-        const float game_elapsed = session->scaled_seconds(std::min(GetFrameTime(), .1f));
+        const float real_elapsed = std::min(GetFrameTime(), .1f);
+        const float game_elapsed = session->scaled_seconds(real_elapsed);
         renderer.advance(game_elapsed);
-        if (!ui.replay_active && !game.dialogue && ui.flight < 0 && !ui.modal() && !game.busy()) {
-            walking.advance(game_elapsed);
-            for (const auto [key, alternative, direction] :
-                 std::array<std::tuple<int, int, Direction>, 4>{{{KEY_UP, KEY_W, Direction::Up},
-                                                                 {KEY_DOWN, KEY_S, Direction::Down},
-                                                                 {KEY_LEFT, KEY_A, Direction::Left},
-                                                                 {KEY_RIGHT, KEY_D, Direction::Right}}})
-                if (walking.ready(IsKeyPressed(key) || IsKeyPressed(alternative),
-                                  IsKeyDown(key) || IsKeyDown(alternative))) {
-                    session->move(direction);
-                    walking.stepped();
-                    break;
-                }
+        constexpr std::array<std::tuple<int, int, Direction>, 4> directions{
+            {{KEY_UP, KEY_W, Direction::Up},
+             {KEY_DOWN, KEY_S, Direction::Down},
+             {KEY_LEFT, KEY_A, Direction::Left},
+             {KEY_RIGHT, KEY_D, Direction::Right}}};
+        std::optional<Direction> step;
+        bool fresh_step = false;
+        for (std::size_t i = 0; i < directions.size(); ++i) {
+            const auto [key, alternative, direction] = directions[i];
+            const bool pressed = IsKeyPressed(key) || IsKeyPressed(alternative);
+            if (walking[i].update(pressed, IsKeyDown(key) || IsKeyDown(alternative), real_elapsed,
+                                  was_walking && walking_enabled()) &&
+                (!step || (pressed && !fresh_step))) {
+                step = direction;
+                fresh_step = pressed;
+            }
         }
+        if (step && !game.busy())
+            session->move(*step);
         session->advance_commands(game_elapsed);
-        session->dispatch(renderer.draw(game, ui, renderer.mouse_position(), game_elapsed));
+        session->dispatch(renderer.draw(game, ui, renderer.mouse_position(), real_elapsed));
+        if (!walking_enabled())
+            for (std::size_t i = 0; i < directions.size(); ++i) {
+                const auto [key, alternative, direction] = directions[i];
+                walking[i].update(false, IsKeyDown(key) || IsKeyDown(alternative), 0, false);
+            }
         renderer.present();
     }
 };

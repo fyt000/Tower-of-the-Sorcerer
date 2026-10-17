@@ -3,6 +3,7 @@
 ## Deliberate differences and remaining work
 
 - raylib and synthesized MIDI replace VCL/MCI; fonts, overlays, timing and timbre differ.
+- Manual direction repeat uses real time. Above 1x, effects consolidate duplicates and fade tails sooner.
 - Forecasts use 64-bit damage; original signed 32-bit overflow can change extreme-value combat admission.
 - Bounds checks and bounded combat queues contain unsafe original behavior. The 49F stale summon record is omitted.
 - Mouse walking, Realtime Hero Orb and bonus-aware Orb forecasts are optional and default off.

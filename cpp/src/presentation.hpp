@@ -134,18 +134,40 @@ struct UiAction {
     int value{};
 };
 
-inline constexpr float WalkRepeatSeconds = MouseWalk::StepSeconds, WalkAnimationSeconds = .12f;
+inline constexpr float WalkInitialDelaySeconds = .25f, WalkRepeatSeconds = .12f, WalkAnimationSeconds = .12f;
+inline constexpr float ReplayStepSeconds = MouseWalk::StepSeconds;
 
 std::optional<int> mouse_destination(const Game&, const DesktopUi&, Vector2 mouse);
 
 struct WalkRepeat {
     float remaining{};
+    bool active{}, blocked{};
 
-    void advance(float seconds) { remaining -= seconds; }
-
-    bool ready(bool pressed, bool held) const { return pressed || (held && remaining <= 0); }
-
-    void stepped() { remaining = WalkRepeatSeconds; }
+    // Real time only. Disabled input requires release before another press can move.
+    bool update(bool pressed, bool held, float seconds, bool enabled = true) {
+        if (!held) {
+            *this = {};
+            return false;
+        }
+        if (!enabled) {
+            *this = {.blocked = true};
+            return false;
+        }
+        if (blocked)
+            return false;
+        if (pressed) {
+            active = true;
+            remaining = WalkInitialDelaySeconds;
+            return true;
+        }
+        if (!active)
+            return false;
+        remaining -= seconds;
+        if (remaining > 0)
+            return false;
+        remaining = WalkRepeatSeconds;
+        return true;
+    }
 };
 
 enum class TouchButton { Up, Left, Confirm, Right, Down, Cancel };
@@ -174,10 +196,10 @@ class Presentation {
     Presentation& operator=(const Presentation&) = delete;
     Vector2 mouse_position() const;
     void moved(const Hero& before, const Hero& after);
-    void advance(float seconds);  // The same scaled clock as walking input and commands.
+    void advance(float seconds);  // Scaled animation and command time.
     void command(const Command&); // Original rendering callbacks, after run_one().
     void reset();
-    UiAction draw(const Game&, DesktopUi&, Vector2 mouse, float seconds = 0);
+    UiAction draw(const Game&, DesktopUi&, Vector2 mouse, float real_seconds = 0);
     void present() const;
     bool screenshot(const std::filesystem::path&) const;
     Image capture_canvas() const;        // Logical pixels, independent of desktop DPI.

@@ -294,6 +294,123 @@ TEST_CASE("WAV bursts overlap with sixteen voices and a bounded cue queue", "[ef
     }
 }
 
+TEST_CASE("Accelerated bursts retain one cue per effect and preserve the attack samples", "[effects]") {
+    for (float speed : {2.f, 3.f, 10.f}) {
+        CAPTURE(speed);
+        AudioMixer mixer(media()), single(media());
+        mixer.speed(speed);
+        single.speed(speed);
+        Game game, reference;
+        game.hero.music_track = reference.hero.music_track = MusicTrack::Disabled;
+        for (auto effect : Effects) {
+            CAPTURE(int(effect));
+            game.sounds.assign(1024, effect);
+            reference.sounds = {effect};
+            mixer.update(game);
+            single.update(reference);
+            const auto actual = render(mixer, 512);
+            REQUIRE(energy(actual) > 0);
+            require_same(actual, render(single, 512));
+            render(mixer, AudioSampleRate * 10);
+            render(single, AudioSampleRate * 10);
+        }
+    }
+}
+
+TEST_CASE("Accelerated sound keeps distinct cues and the original effect pitch", "[effects]") {
+    AudioMixer mixer(media()), pickup(media()), door(media());
+    mixer.speed(10);
+    Game game, get, open;
+    game.hero.music_track = get.hero.music_track = open.hero.music_track = MusicTrack::Disabled;
+    game.sounds = {SoundCue::Get, SoundCue::Open, SoundCue::Get, SoundCue::Open};
+    get.sounds = {SoundCue::Get};
+    open.sounds = {SoundCue::Open};
+    mixer.update(game);
+    pickup.update(get);
+    door.update(open);
+    auto expected = render(pickup, AudioSampleRate * 8 / 100);
+    const auto other = render(door, AudioSampleRate * 8 / 100);
+    for (std::size_t i = 0; i < expected.size(); ++i)
+        expected[i] = std::clamp(expected[i] + other[i], -1.f, 1.f);
+    require_same(render(mixer, AudioSampleRate * 8 / 100), expected);
+}
+
+TEST_CASE("Accelerated strikes are skipped within 70 ms and resume without a backlog", "[effects]") {
+    AudioMixer mixer(media()), reference(media());
+    mixer.speed(10);
+    reference.speed(10);
+    Game game, expected;
+    game.hero.music_track = expected.hero.music_track = MusicTrack::Disabled;
+    game.sounds = expected.sounds = {SoundCue::Strike};
+    mixer.update(game);
+    reference.update(expected);
+    for (int i = 0; i < 7; ++i) {
+        require_same(render(mixer, AudioSampleRate / 100), render(reference, AudioSampleRate / 100));
+        if (i < 6) {
+            game.sounds = {SoundCue::Strike};
+            mixer.update(game);
+        }
+    }
+    // At 70 ms, a fresh strike must actually start; it fades the old strike in 10 ms.
+    game.sounds = {SoundCue::Strike};
+    mixer.update(game);
+    render(mixer, AudioSampleRate / 100);
+    AudioMixer fresh(media());
+    game.sounds = {SoundCue::Strike};
+    fresh.update(game);
+    render(fresh, AudioSampleRate / 100);
+    require_same(render(mixer, 512), render(fresh, 512));
+    render(mixer, AudioSampleRate);
+    REQUIRE(energy(render(mixer, 512)) == 0);
+}
+
+TEST_CASE("Accelerated retriggers crossfade away older copies of the same effect", "[effects]") {
+    AudioMixer mixer(media());
+    mixer.speed(3);
+    Game game;
+    game.hero.music_track = MusicTrack::Disabled;
+    for (int i = 0; i < 12; ++i) {
+        game.sounds = {SoundCue::Stairs};
+        mixer.update(game);
+        render(mixer, AudioSampleRate / 100);
+        AudioMixer fresh(media());
+        game.sounds = {SoundCue::Stairs};
+        fresh.update(game);
+        render(fresh, AudioSampleRate / 100);
+        // Once the short crossfade ends, only the newest attack remains.
+        require_same(render(mixer, 512), render(fresh, 512));
+    }
+}
+
+TEST_CASE("Accelerated long effects fade out sooner without changing their attack", "[effects]") {
+    for (float speed : {3.f, 10.f}) {
+        CAPTURE(speed);
+        AudioMixer mixer(media()), original(media());
+        mixer.speed(speed);
+        Game game, reference;
+        game.hero.music_track = reference.hero.music_track = MusicTrack::Disabled;
+        game.sounds = reference.sounds = {SoundCue::Stairs};
+        mixer.update(game);
+        original.update(reference);
+        require_same(render(mixer, AudioSampleRate * 8 / 100), render(original, AudioSampleRate * 8 / 100));
+        render(mixer, AudioSampleRate / 2);
+        render(original, AudioSampleRate / 2);
+        REQUIRE(energy(render(mixer, AudioSampleRate / 10)) == 0);
+        REQUIRE(energy(render(original, AudioSampleRate / 10)) > 0);
+    }
+}
+
+TEST_CASE("Changing animation speed leaves music timing and samples unchanged", "[playback]") {
+    AudioMixer mixer(media()), original(media());
+    Game game, reference;
+    mixer.restart(game);
+    original.restart(reference);
+    for (float speed : {1.f, 3.f, 10.f, .5f, 1.f}) {
+        mixer.speed(speed);
+        require_same(render(mixer, AudioSampleRate * 3), render(original, AudioSampleRate * 3));
+    }
+}
+
 TEST_CASE("Scenes select title and ending music without changing saved music", "[playback]") {
     Game game;
     for (int mode : {9, 0, 1}) {

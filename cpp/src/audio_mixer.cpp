@@ -2,6 +2,7 @@
 #include "audio_queue.hpp"
 #include "stb_vorbis.c"
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 #include <vector>
 #undef L
@@ -18,9 +19,12 @@ namespace tsw {
 namespace {
 constexpr int SampleRate = AudioSampleRate, MidiChannels = 16, SynthVoices = 256;
 constexpr std::size_t EffectVoiceCount = 16;
+constexpr int EffectFadeFrames = SampleRate / 100, MinimumEffectFrames = SampleRate / 10;
+constexpr int StrikeSpacingFrames = SampleRate * 70 / 1000;
 constexpr std::uint64_t TrackMask = 0xff, PlayingBit = 1 << 8, MutedBit = 1 << 9;
 constexpr std::uint64_t SuspendedBit = 1 << 10;
-constexpr int RestartShift = 11;
+constexpr int SpeedShift = 11, RestartShift = 17;
+constexpr std::uint64_t SpeedMask = 0x3f;
 static_assert(std::atomic<std::uint64_t>::is_always_lock_free);
 static_assert(std::atomic<std::uint32_t>::is_always_lock_free);
 constexpr std::array<const char*, 22> Tracks{
@@ -148,14 +152,15 @@ struct Synth {
 
 struct Effect {
     struct Voice {
-        std::size_t cursor{};
+        std::size_t cursor{}, limit{}; // Stereo frames, played at the original sample rate.
         std::uint64_t started{};
-        bool playing{};
+        int release{};
+        bool playing{}, shortened{};
     };
 
     std::vector<float> samples;
     std::array<Voice, EffectVoiceCount> voices{};
-    std::uint64_t sequence{};
+    std::uint64_t sequence{}, last_start{};
 
     void load(const std::vector<unsigned char>& bytes) {
         auto config = ma_decoder_config_init(ma_format_f32, 2, SampleRate);
@@ -168,23 +173,54 @@ struct Effect {
         samples.assign(owned.get(), owned.get() + frames * 2);
     }
 
-    void play() {
-        auto voice = std::ranges::find_if(voices, [](const auto& v) { return !v.playing; });
-        if (voice == voices.end())
-            voice = std::min_element(voices.begin(), voices.end(),
+    void play(float speed, std::uint64_t clock, bool strike) {
+        const bool accelerated = speed > 1;
+        // Skip dense strikes immediately; never defer them into a delayed backlog.
+        if (accelerated && strike && sequence && clock - last_start < StrikeSpacingFrames)
+            return;
+        auto end = voices.begin() + (accelerated ? 2 : EffectVoiceCount);
+        if (accelerated)
+            for (auto& voice : voices)
+                if (voice.playing && !voice.release)
+                    voice.release = EffectFadeFrames;
+        auto voice = std::find_if(voices.begin(), end, [](const auto& v) { return !v.playing; });
+        if (voice == end)
+            voice = std::min_element(voices.begin(), end,
                                      [](const auto& a, const auto& b) { return a.started < b.started; });
-        *voice = {0, ++sequence, true};
+        *voice = {.limit = samples.size() / 2, .started = ++sequence, .playing = true};
+        last_start = clock;
     }
 
-    void mix(float* output, int frames) {
+    void mix(float* output, int frames, float speed) {
+        const bool accelerated = speed > 1;
+        const auto shortened =
+            std::min(samples.size() / 2, std::max(std::size_t(MinimumEffectFrames),
+                                                  std::size_t(float(samples.size() / 2) / speed)));
         for (auto& voice : voices) {
             if (!voice.playing)
                 continue;
-            const auto count = std::min(std::size_t(frames) * 2, samples.size() - voice.cursor);
-            for (std::size_t i = 0; i < count; ++i)
-                output[i] += samples[voice.cursor + i];
+            if (accelerated) {
+                // A speed increase also fades voices already beyond their new end time.
+                voice.limit = std::min(voice.limit, std::max(shortened, voice.cursor + EffectFadeFrames));
+                voice.shortened = true;
+                if (&voice >= &voices[2] && !voice.release)
+                    voice.release = EffectFadeFrames;
+            }
+            const auto count = std::min(std::size_t(frames), voice.limit - voice.cursor);
+            for (std::size_t i = 0; i < count; ++i) {
+                const auto remaining = voice.limit - (voice.cursor + i);
+                float gain = voice.shortened ? std::min(1.f, float(remaining) / EffectFadeFrames) : 1.f;
+                if (voice.release) {
+                    gain = std::min(gain, float(voice.release) / EffectFadeFrames);
+                    voice.playing = --voice.release > 0;
+                }
+                output[i * 2] += samples[(voice.cursor + i) * 2] * gain;
+                output[i * 2 + 1] += samples[(voice.cursor + i) * 2 + 1] * gain;
+                if (!voice.playing)
+                    break;
+            }
             voice.cursor += count;
-            voice.playing = voice.cursor < samples.size();
+            voice.playing = voice.playing && voice.cursor < voice.limit;
         }
     }
 };
@@ -198,9 +234,11 @@ struct AudioMixer::Impl {
     // Only the game thread writes requested state. The callback owns all playback cursors.
     int requested_track = -1;
     bool requested_playing{}, requested_muted{}, requested_suspended{};
+    int requested_speed_quarters = 4;
     std::uint64_t restart_count{};
     std::atomic<std::uint64_t> request{};
     std::uint64_t previous_request{};
+    std::uint64_t effect_clock{};
 
     explicit Impl(const Assets& assets) : synth(assets.soundfont()) {
         for (int i = 5; i < std::ssize(Tracks); ++i)
@@ -215,7 +253,8 @@ struct AudioMixer::Impl {
         const auto value = (restart_count << RestartShift) |
                            std::uint64_t(valid_track(requested_track) ? requested_track : 0) |
                            (requested_playing ? PlayingBit : 0) | (requested_muted ? MutedBit : 0) |
-                           (requested_suspended ? SuspendedBit : 0);
+                           (requested_suspended ? SuspendedBit : 0) |
+                           (std::uint64_t(requested_speed_quarters) << SpeedShift);
         request.store(value, std::memory_order_release);
     }
 
@@ -231,7 +270,8 @@ struct AudioMixer::Impl {
             std::fill_n(output, frames * 2, 0.f);
             return;
         }
-        cues.consume([&](int cue) { effects[cue].play(); });
+        const float speed = std::max(1.f, float((control >> SpeedShift) & SpeedMask) / 4);
+        cues.consume([&](int cue) { effects[cue].play(speed, effect_clock, cue == int(SoundCue::Strike)); });
         if (control & PlayingBit) {
             synth.render(output, frames);
             for (int i = 0; i < frames * 2; ++i)
@@ -239,7 +279,8 @@ struct AudioMixer::Impl {
         } else
             std::fill_n(output, frames * 2, 0.f);
         for (auto& effect : effects)
-            effect.mix(output, frames);
+            effect.mix(output, frames, speed);
+        effect_clock += frames;
         for (int i = 0; i < frames * 2; ++i)
             output[i] = control & MutedBit ? 0.f : std::clamp(output[i], -1.f, 1.f);
     }
@@ -260,6 +301,12 @@ void AudioMixer::mute(bool muted) {
 
 void AudioMixer::suspend(bool suspended) {
     impl_->requested_suspended = suspended;
+    impl_->publish();
+}
+
+void AudioMixer::speed(float multiplier) {
+    impl_->requested_speed_quarters =
+        std::isfinite(multiplier) ? int(std::round(std::clamp(multiplier, .25f, 10.f) * 4)) : 4;
     impl_->publish();
 }
 
@@ -292,12 +339,16 @@ void AudioMixer::update(Game& game) {
         ++impl_->restart_count;
         impl_->requested_playing = valid_track(track);
     }
+    std::array<bool, EffectFiles.size()> emitted{};
     for (auto sound : game.sounds) {
         const int cue = int(sound);
         if (sound == SoundCue::MusicStop || sound == SoundCue::MusicStart)
             impl_->requested_playing = sound == SoundCue::MusicStart;
-        else if (cue > 0 && cue < std::ssize(EffectFiles) && EffectFiles[cue])
+        else if (cue > 0 && cue < std::ssize(EffectFiles) && EffectFiles[cue] &&
+                 (impl_->requested_speed_quarters <= 4 || !emitted[cue])) {
             impl_->cues.push(cue); // Drop excess cues when the fixed queue is full.
+            emitted[cue] = true;
+        }
     }
     impl_->publish();
     game.sounds.clear();

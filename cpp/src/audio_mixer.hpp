@@ -17,6 +17,7 @@ class AudioMixer {
     void restart(Game& game);
     void mute(bool muted);
     void suspend(bool suspended); // Freeze music and effects for visual replay pause.
+    void speed(float multiplier); // Above 1x, reduce repeated effects and fade long tails sooner.
     // Stereo floats. Called by one consumer; no allocation, I/O or mutex.
     void render(float* output, int frames);
     static int track_for_scene(const Game& game);
