@@ -29,7 +29,7 @@ struct CanvasViewport {
 CanvasViewport window_viewport();
 bool touch_device();
 
-enum class Menu { None, Game, Options };
+enum class Menu { None, Game, Options, About };
 enum class SavePicker { None, Save, Load };
 
 struct DesktopUi {
@@ -104,6 +104,7 @@ enum class Action {
     MainMenu,
     ResumeGame,
     OpenSettings,
+    OpenAbout,
     OpenRankings,
     RankingCategory,
     SubmitRanking,

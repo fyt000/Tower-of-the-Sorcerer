@@ -100,6 +100,13 @@ int verify_smoke(DesktopSession& session, const std::string& name, const std::fi
         require(ui.home && !ui.game_started && game.commands.size() == 1, "Startup menu must pause gameplay");
         renderer.draw(game, ui, {-1, -1});
         require(renderer.screenshot(output / "home.png"), "Opening artwork and menu must render");
+        session.dispatch({Action::OpenAbout});
+        require(ui.home && ui.menu == Menu::About && ui.modal(), "About must open over the startup menu");
+        session.advance_commands(1);
+        require(game.commands.size() == 1, "About must pause gameplay");
+        renderer.draw(game, ui, {-1, -1});
+        require(renderer.screenshot(output / "about-home.png"), "Startup About credits must render");
+        ui.close_overlays();
         session.dispatch({Action::OpenSettings});
         require(ui.home && ui.menu == Menu::Options, "Settings must open over the startup menu");
         require(!ui.hero_orb_actual_damage, "Hero Orb actual damage QOL must default off");
@@ -124,6 +131,11 @@ int verify_smoke(DesktopSession& session, const std::string& name, const std::fi
         session.dispatch({Action::NewGame});
         require(!ui.home && ui.game_started && ui.recording_active && !game.busy(),
                 "New game must leave the menu and honor recording");
+        session.dispatch({Action::OpenAbout});
+        require(!ui.home && ui.menu == Menu::About, "About must open during gameplay");
+        renderer.draw(game, ui, {-1, -1});
+        require(renderer.screenshot(output / "about-game.png"), "Gameplay About credits must render");
+        ui.close_overlays();
         const Game before_orb = game;
         game.hero.attack = 100;
         game.hero.defense = 20;

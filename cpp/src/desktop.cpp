@@ -117,7 +117,8 @@ UiAction keyboard(const Game& game, DesktopUi& ui) {
     if (IsKeyPressed(KEY_M))
         return {Action::Mute};
     if (ui.menu != Menu::None || ui.help) {
-        if (IsKeyPressed(KEY_ESCAPE))
+        if (IsKeyPressed(KEY_ESCAPE) ||
+            (ui.menu == Menu::About && (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE))))
             ui.close_overlays();
         return {};
     }
@@ -128,9 +129,10 @@ UiAction keyboard(const Game& game, DesktopUi& ui) {
             return {Action::OpenLoadSlots};
         const int step = IsKeyPressed(KEY_UP) ? -1 : IsKeyPressed(KEY_DOWN) ? 1 : 0;
         if (step)
-            ui.home_selection = std::clamp(ui.home_selection + step, ui.game_started ? 0 : 1, 4);
-        constexpr std::array<Action, 5> actions{Action::ResumeGame, Action::NewGame, Action::OpenLoadSlots,
-                                                Action::OpenReplays, Action::OpenSettings};
+            ui.home_selection = std::clamp(ui.home_selection + step, ui.game_started ? 0 : 1, 5);
+        constexpr std::array<Action, 6> actions{Action::ResumeGame,    Action::NewGame,
+                                                Action::OpenLoadSlots, Action::OpenReplays,
+                                                Action::OpenSettings,  Action::OpenAbout};
         return IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) ? UiAction{actions[ui.home_selection]}
                                                                   : UiAction{};
     }

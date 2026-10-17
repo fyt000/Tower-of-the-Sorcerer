@@ -1123,7 +1123,22 @@ void Presentation::draw_help(DesktopUi& ui, Vector2 mouse) {
 }
 
 UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse) {
-    if (ui.menu == Menu::Game) {
+    if (ui.menu == Menu::About) {
+        constexpr Rectangle rect{190, 136, 420, 288};
+        art_->text.modal(rect, "About");
+        art_->text.fit("Tower of the Sorcerer", {rect.x + 20, rect.y + 58, 380, 32}, 24, Ink, {.bold = true});
+        art_->text.fit("Magic Tower for Windows", {rect.x + 20, rect.y + 91, 380, 24}, 17, Muted);
+        DrawLine(int(rect.x + 22), int(rect.y + 128), int(rect.x + rect.width - 22), int(rect.y + 128),
+                 Border);
+        art_->text.fit("Windows game (1998-2000)", {rect.x + 20, rect.y + 138, 380, 22}, 16, Muted);
+        art_->text.fit("Oz & Kenichi", {rect.x + 20, rect.y + 161, 380, 29}, 22, Gold,
+                       {.bold = true, .translate = false});
+        art_->text.fit("Copyright (1996)", {rect.x + 20, rect.y + 194, 380, 22}, 16, Muted);
+        art_->text.fit("N.W", {rect.x + 20, rect.y + 217, 380, 25}, 20, Gold,
+                       {.bold = true, .translate = false});
+        if (art_->text.button({rect.x + 126, rect.y + 253, 168, 26}, "OK [Enter / Esc]", mouse))
+            ui.menu = Menu::None;
+    } else if (ui.menu == Menu::Game) {
         constexpr Rectangle rect{6, MenuHeight, 214, 339};
         DrawRectangleRec(rect, Panel);
         DrawRectangleLinesEx(rect, 1, Border);
@@ -1317,10 +1332,14 @@ UiAction Presentation::draw_save_slots(const Game& game, DesktopUi& ui, Vector2 
 
 UiAction Presentation::draw_home(const DesktopUi& ui, Vector2 mouse) {
     art_->scene("data3-open0", {0, 0, CanvasWidth, CanvasHeight});
-    const std::array<std::string, 5> labels{ui.replay_active ? "Continue replay" : "Continue game",
-                                            "New game", "Load game", "Play replay", "Settings"};
-    constexpr std::array<Action, 5> actions{Action::ResumeGame, Action::NewGame, Action::OpenLoadSlots,
-                                            Action::OpenReplays, Action::OpenSettings};
+    const std::array<std::string, 6> labels{ui.replay_active ? "Continue replay" : "Continue game",
+                                            "New game",
+                                            "Load game",
+                                            "Play replay",
+                                            "Settings",
+                                            "About"};
+    constexpr std::array<Action, 6> actions{Action::ResumeGame,  Action::NewGame,      Action::OpenLoadSlots,
+                                            Action::OpenReplays, Action::OpenSettings, Action::OpenAbout};
     const int first = ui.game_started ? 0 : 1;
     constexpr int top = 48;
     for (int i = first; i < std::ssize(labels); ++i) {
@@ -1597,7 +1616,7 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, floa
         draw_board(game, ui.flight >= 0 ? ui.flight : game.hero.floor, ui.flight < 0);
     draw_realtime_orb(game, ui);
     UiAction action;
-    const auto game_mouse = ui.replay_active ? Vector2{-1, -1} : mouse;
+    const auto game_mouse = ui.replay_active || ui.menu == Menu::About ? Vector2{-1, -1} : mouse;
     if (!hide_panels_)
         action = draw_panels(game, ui, game_mouse);
     if (mode == RasterMode::Title || (mode >= RasterMode::OpeningDissolve && mode <= RasterMode::ClosingCard))
@@ -1641,6 +1660,11 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, floa
         if (art_->text.button({154, 3, 58, 22}, "Help", mouse)) {
             ui.close_overlays();
             ui.help = true;
+        }
+        if (art_->text.button({218, 3, 62, 22}, "About", mouse)) {
+            const bool opened = ui.menu == Menu::About;
+            ui.close_overlays();
+            ui.menu = opened ? Menu::None : Menu::About;
         }
         const auto label =
             std::format("{}{}x  /  {}{}", game.hero.cycle_factor_minus_one ? "Backside  /  " : "",

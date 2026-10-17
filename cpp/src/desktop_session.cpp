@@ -418,6 +418,10 @@ void DesktopSession::apply(UiAction action) {
         ui.close_overlays();
         ui.menu = Menu::Options;
         break;
+    case Action::OpenAbout:
+        ui.close_overlays();
+        ui.menu = Menu::About;
+        break;
     case Action::NewGame:
         game.new_game();
         refresh_rankings();
