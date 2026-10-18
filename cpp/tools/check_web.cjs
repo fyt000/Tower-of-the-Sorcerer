@@ -23,22 +23,34 @@ async function checkPlayerLayout(page, name) {
         };
         return { width: innerWidth, height: innerHeight, scrollWidth: document.documentElement.scrollWidth,
             scrollHeight: document.documentElement.scrollHeight, canvas: bounds('canvas'),
-            help: bounds('help-button'), game: Module.tswCanvasViewport };
+            help: bounds('help-button'), fullscreen: bounds('fullscreen'), game: Module.tswCanvasViewport };
     });
     assert.ok(layout.scrollWidth <= layout.width && layout.scrollHeight <= layout.height,
         name + ': the player must fit the viewport without page scrolling');
-    for (const id of ['canvas', 'help']) {
+    for (const id of ['canvas', 'help', 'fullscreen']) {
         const box = layout[id];
         assert.ok(box.left >= 0 && box.top >= 0 && box.right <= layout.width + 1 && box.bottom <= layout.height + 1,
             name + ': ' + id + ' must remain on screen');
     }
     assert.ok(Math.abs(layout.game.width / layout.game.height - 800 / 558) < .01,
         name + ': canvas scaling must preserve the game aspect ratio');
-    assert.ok(layout.help.width >= 44 && layout.help.height >= 44,
-        name + ': player tools must have touch-sized targets');
-    assert.ok(layout.help.right <= layout.canvas.left + layout.game.x ||
-        layout.help.bottom <= layout.canvas.top + layout.game.y,
-        name + ': player tools must not cover the game');
+    const toolsAvailable = !await page.locator('#help-panel').evaluate(panel => panel.open);
+    for (const id of ['help', 'fullscreen']) {
+        const box = layout[id];
+        assert.ok(box.width >= 44 && box.height >= 44,
+            name + ': ' + id + ' must have a touch-sized target');
+        assert.ok(box.right <= layout.canvas.left + layout.game.x ||
+            box.bottom <= layout.canvas.top + layout.game.y,
+            name + ': ' + id + ' must not cover the game');
+        if (toolsAvailable) {
+            assert.equal(await page.evaluate(({ x, y, id }) => document.elementFromPoint(x, y)?.closest('button')?.id === id,
+                { x: box.left + box.width / 2, y: box.top + box.height / 2,
+                    id: id === 'help' ? 'help-button' : id }), true,
+                name + ': ' + id + ' must be reachable');
+        }
+    }
+    assert.equal(await page.locator('#fullscreen').evaluate(button => getComputedStyle(button).backgroundColor),
+        'rgba(0, 0, 0, 0)', name + ': fullscreen control must have a transparent background at rest');
     if (await page.evaluate(() => Module.tswTouchDevice) && layout.canvas.width > layout.canvas.height) {
         assert.ok(layout.game.x + layout.game.width <= layout.canvas.width - 176 + 1,
             name + ': the right-hand pad must leave the entire game and HUD visible');
@@ -93,6 +105,7 @@ async function fullscreenSmoke(browser, url, output) {
         ['desktop-hidpi', { width: 1000, height: 800 }, 1.25, false],
         ['phone-small', { width: 320, height: 568 }, 1, true],
         ['phone-portrait', { width: 393, height: 851 }, 3, true],
+        ['phone-landscape-compact', { width: 667, height: 375 }, 2, true],
         ['phone-landscape', { width: 915, height: 412 }, 2, true]
     ]) {
         const context = await browser.newContext({ viewport, deviceScaleFactor: density, isMobile: mobile, hasTouch: mobile });
@@ -115,14 +128,14 @@ async function fullscreenSmoke(browser, url, output) {
             await page.keyboard.press('q', { delay: 100 });
             await checkPlayerLayout(page, name);
             await checkSmallText(page, name);
-            await page.locator('#help-button').click();
             await page.locator('#fullscreen').click();
             await page.waitForFunction(() => document.fullscreenElement?.id === 'game' &&
                 document.getElementById('fullscreen').getAttribute('aria-pressed') === 'true');
-            assert.equal(await page.locator('#help-panel').isVisible(), true);
-            assert.deepEqual(await page.evaluate(() => orientationCalls), mobile ? [['portrait', 'game']] : [],
-                'Only touch devices should request portrait, after fullscreen entry');
-            await page.locator('#close-help').click();
+            assert.equal(await page.locator('#help-panel').isVisible(), false, 'Fullscreen needs no menu visit');
+            assert.equal(await page.locator('#fullscreen').getAttribute('aria-label'), 'Exit full screen');
+            assert.deepEqual(await page.evaluate(() => orientationCalls), mobile ? [['landscape', 'game']] : [],
+                'Only touch devices should request landscape, after fullscreen entry');
+            await page.mouse.move(viewport.width / 2, viewport.height / 2);
             await checkPlayerLayout(page, name + ' fullscreen');
             await checkSmallText(page, name + ' fullscreen');
             await page.screenshot({ path: path.join(output, name + '-fullscreen.png') });
@@ -156,36 +169,74 @@ async function fullscreenSmoke(browser, url, output) {
             const download = page.waitForEvent('download');
             await page.locator('#export').click();
             assert.ok((await download).suggestedFilename(), 'Export must be clickable in fullscreen');
+            await page.locator('#close-help').click();
             await page.locator('#fullscreen').click();
             await page.waitForFunction(() => !document.fullscreenElement &&
                 document.getElementById('fullscreen').getAttribute('aria-pressed') === 'false');
-            assert.deepEqual(await page.evaluate(() => orientationCalls), mobile ? [['portrait', 'game'], ['unlock']] : []);
-            await page.locator('#close-help').click();
+            assert.deepEqual(await page.evaluate(() => orientationCalls), mobile ? [['landscape', 'game'], ['unlock']] : []);
+            assert.equal(await page.locator('#fullscreen').getAttribute('aria-label'), 'Enter full screen');
+            await page.mouse.move(viewport.width / 2, viewport.height / 2);
             await checkPlayerLayout(page, name + ' restored');
             await checkSmallText(page, name + ' restored');
             if (mobile) {
-                for (const unavailable of ['rejected', 'missing']) {
+                for (const unavailable of ['rejected', 'throws', 'missing']) {
                     await page.evaluate(mode => Object.defineProperty(screen.orientation, 'lock', { value:
-                        mode === 'missing' ? undefined : async () => { throw new Error('Orientation lock unavailable'); }
+                        mode === 'missing' ? undefined : mode === 'throws'
+                            ? () => { throw new Error('Orientation lock unavailable'); }
+                            : async () => { throw new Error('Orientation lock unavailable'); }
                     }), unavailable);
-                    await page.locator('#help-button').click();
                     await page.locator('#fullscreen').click();
                     await page.waitForFunction(() => document.fullscreenElement?.id === 'game' &&
                         document.getElementById('fullscreen').getAttribute('aria-pressed') === 'true');
-                    await page.locator('#close-help').click();
+                    if (viewport.height > viewport.width) {
+                        await page.waitForFunction(() => document.getElementById('status').textContent.includes('sideways'));
+                        if (unavailable === 'rejected') {
+                            const client = await context.newCDPSession(page);
+                            await client.send('Emulation.setDeviceMetricsOverride', { width: viewport.height,
+                                height: viewport.width, deviceScaleFactor: density, mobile: true,
+                                screenOrientation: { type: 'landscapePrimary', angle: 90 } });
+                            await page.waitForFunction(() => document.getElementById('status').textContent === '');
+                            await client.send('Emulation.setDeviceMetricsOverride', { ...viewport,
+                                deviceScaleFactor: density, mobile: true,
+                                screenOrientation: { type: 'portraitPrimary', angle: 0 } });
+                        }
+                    } else {
+                        assert.equal(await page.locator('#status').textContent(), '', 'Landscape needs no rotation hint');
+                    }
                     await page.locator('#help-button').click();
                     // Browser-initiated exit must release a pending/rejected lock too.
                     await page.evaluate(() => document.exitFullscreen());
                     await page.waitForFunction(() => !document.fullscreenElement &&
                         document.getElementById('fullscreen').getAttribute('aria-pressed') === 'false');
                     await page.locator('#close-help').click();
+                    assert.equal(await page.locator('#status').textContent(), '', 'Rotation hint clears on exit');
                 }
                 assert.deepEqual(await page.evaluate(() => orientationCalls.at(-1)), ['unlock']);
+            } else {
+                for (const failure of ['rejected', 'throws']) {
+                    await page.evaluate(mode => {
+                        const deny = options => {
+                            window.fullscreenOptions = options;
+                            throw new Error('Fullscreen denied');
+                        };
+                        document.getElementById('game').requestFullscreen = mode === 'throws' ? deny : async options => deny(options);
+                    }, failure);
+                    await page.locator('#fullscreen').click();
+                    await page.waitForFunction(() => document.getElementById('status').textContent.includes('unavailable'));
+                    assert.deepEqual(await page.evaluate(() => fullscreenOptions), { navigationUI: 'hide' });
+                    assert.equal(await page.locator('#fullscreen').getAttribute('aria-pressed'), 'false');
+                }
+                await page.addInitScript(() => Object.defineProperty(document, 'fullscreenEnabled', { value: false }));
+                await page.reload();
+                await page.waitForFunction(() => document.getElementById('loading').hidden, null, { timeout: 60000 });
+                assert.equal(await page.locator('#fullscreen').isVisible(), false, 'Unsupported fullscreen must hide the control');
+                await page.locator('#help-button').click();
+                assert.equal(await page.locator('#help-panel').isVisible(), true, 'Menu remains available without fullscreen');
             }
             assert.deepEqual(errors, []);
         } finally { await context.close(); }
     }
-    console.log('PASS: mobile/desktop fullscreen menu and export, portrait request/unlock/fallback, native resolution, small text and all four box edges at 1x/1.25x/2x/3x density');
+    console.log('PASS: unobstructed transparent fullscreen control, mobile landscape request/unlock/fallback, fullscreen menu and export, native resolution, small text and all four box edges at 1x/1.25x/2x/3x density');
 }
 
 async function mobileSmoke(browser, url, output) {
@@ -629,17 +680,16 @@ async function main() {
             detail: { message: Module.tswStorageMessage, error: false }
         })));
         assert.equal(await page.locator('#save-warning').isVisible(), false);
-        await page.locator('#help-button').click();
         await page.locator('#fullscreen').click();
         await page.waitForFunction(() => document.fullscreenElement?.id === 'game');
-        assert.equal(await page.locator('#help-panel').isVisible(), true, 'Menu stays accessible when entering fullscreen');
-        await page.locator('#close-help').click();
+        await page.mouse.move(500, 500);
         await checkPlayerLayout(page, 'Fullscreen');
         await page.locator('#help-button').click();
         assert.equal(await page.locator('#help-panel').isVisible(), true, 'Help must work inside fullscreen');
+        await page.locator('#close-help').click();
         await page.locator('#fullscreen').click();
         await page.waitForFunction(() => !document.fullscreenElement);
-        await page.locator('#close-help').click();
+        await page.mouse.move(500, 500);
         await checkPlayerLayout(page, 'Exited fullscreen');
         // Load through the actual game UI after hydration, then save again to exercise backups.
         await page.locator('#canvas').focus();

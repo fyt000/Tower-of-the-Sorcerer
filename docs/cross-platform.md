@@ -36,15 +36,18 @@ from a phone on your network. Each subcommand has `--help`, including SDK paths,
 custom assets, unsigned release APKs and the Windows JDK socket workaround.
 
 The web player fits the browser viewport without page scrolling. **Menu** at the
-upper left opens help, save status, exports and **Full screen**. On wide landscape
-screens it becomes a single hamburger button in the left margin. Narrower screens
+upper left opens help, save status and exports. The transparent full screen icon
+beside Menu enters or exits fullscreen directly. On landscape phones, these controls
+sit in the left margin, clear of the game and right-hand D-pad. Narrower screens
 use a compact top bar. Fullscreen keeps Menu and exports accessible where the
 browser supports it. Android renders at native display resolution for consistent
 text and touch target sizing.
 
-On touch devices, fullscreen requests portrait orientation after entering fullscreen
+On touch devices, fullscreen requests landscape orientation after entering fullscreen
 and releases the lock on exit. Browsers that reject or lack orientation locking keep
-the current orientation. The web canvas renders at device pixel density, with its
+the current orientation and show a reminder to turn the phone sideways if needed.
+The full screen icon is hidden when the browser does not support fullscreen.
+The web canvas renders at device pixel density, with its
 game texture aligned to physical pixels so small text and box outlines remain visible.
 
 Outputs: `build/cpp/web/site/`, `build/cpp/web/tower-of-the-sorcerer-web.zip`,
