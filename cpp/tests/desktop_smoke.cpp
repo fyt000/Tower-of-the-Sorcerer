@@ -110,6 +110,13 @@ int verify_smoke(DesktopSession& session, const std::string& name, const std::fi
         session.dispatch({Action::OpenSettings});
         require(ui.home && ui.menu == Menu::Options, "Settings must open over the startup menu");
         require(!ui.hero_orb_actual_damage, "Hero Orb actual damage QOL must default off");
+        require(ui.item_use_mode == ItemUseMode::Confirm, "Item use must default to confirmation");
+        for (const auto mode : {ItemUseMode::Describe, ItemUseMode::OneClick, ItemUseMode::Confirm}) {
+            session.dispatch({Action::CycleItemUse});
+            require(ui.item_use_mode == mode &&
+                        load_settings(output / "saves/settings.json").item_use_mode == mode,
+                    "The item use control must cycle all modes and persist each choice");
+        }
         session.dispatch({Action::Speed, 55});
         session.dispatch({Action::ReplaySpeed, 4});
         if (!ui.recording_enabled)
@@ -175,7 +182,7 @@ int verify_smoke(DesktopSession& session, const std::string& name, const std::fi
         for (int panel = 0; panel < 3; ++panel) {
             ui.flight = panel == 0 ? game.hero.floor : -1;
             ui.enemies = panel == 1;
-            ui.selected_item = panel == 2 ? int(Item::Bomb) : -1;
+            ui.selected_item = panel == 2 ? int(Item::Cross) : -1;
             const auto hero_before = game.hero;
             session.dispatch({Action::SaveSlot, 1});
             require(!ui.notice.empty() && file_contents(output / "saves/save1.dat") == saved,

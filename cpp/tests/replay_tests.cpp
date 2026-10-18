@@ -717,6 +717,30 @@ TEST_CASE("Animation slider speed persists fractions and migrates legacy presets
     }
 }
 
+TEST_CASE("Item use preference defaults to confirmation and persists each mode", "[settings]") {
+    ReplayDirectory directory;
+    const auto path = directory.path / "settings.json";
+    REQUIRE(load_settings(path).item_use_mode == ItemUseMode::Confirm);
+    std::ofstream(path) << R"({"game_speed":2,"recording":true})";
+    REQUIRE(load_settings(path).item_use_mode == ItemUseMode::Confirm);
+    for (const auto mode : ItemUseModes) {
+        Settings settings;
+        settings.item_use_mode = mode;
+        save_settings(path, settings);
+        REQUIRE(load_settings(path).item_use_mode == mode);
+    }
+    for (const int invalid : {-1, 3}) {
+        Settings settings;
+        settings.item_use_mode = static_cast<ItemUseMode>(invalid);
+        REQUIRE_THROWS(save_settings(path, settings));
+    }
+    for (const auto* source : {R"({"item_use_mode":"unknown"})", R"({"item_use_mode":3})",
+                               R"({"item_use_mode":-1})", R"({"item_use_mode":true})"}) {
+        std::ofstream(path) << source;
+        REQUIRE_THROWS(load_settings(path));
+    }
+}
+
 TEST_CASE("Recording is opt in and never begins midway through an unrecorded game", "[replay][saves]") {
     ReplayDirectory directory;
     Game game;

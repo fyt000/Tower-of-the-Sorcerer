@@ -1,6 +1,7 @@
 # Quality of life
 
-**Settings → QOL**. All options default off and persist between launches.
+**Settings → QOL**. Toggles default off; **Item use** defaults to **Confirm**.
+Preferences persist between launches.
 
 | Option | Effect |
 |---|---|
@@ -11,6 +12,14 @@
 | Realtime Hero Orb | Monster stats and HP cost on the map; requires Hero Orb. Uses the damage setting above. |
 | Skip attack animation | First strike, then instant resolution; same damage and rewards. |
 | Skip staircase animation | Immediate arrival without the spiral wipe. |
+| Item use | Cycles **Confirm**, **Description + confirm**, and **One-click** for the nine usable items other than Orbs. |
+
+**Confirm** asks before using an item, without explaining its effects, following the
+original Delphi interaction. **Description + confirm** adds the item explanation and
+hover descriptions. **One-click** activates an item as soon as it is clicked or tapped,
+including consuming it or spending a charge under the usual game rules. Both
+confirmation modes support mouse, touch and Enter/Esc. Orbs open their views directly;
+passive items keep their description panels in every mode.
 
 ## Reachability
 

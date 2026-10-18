@@ -33,6 +33,11 @@ int verify_localization(Presentation& renderer, const std::filesystem::path& out
         capture("settings");
         ui.settings_tab = SettingsTab::Qol;
         capture("settings-qol");
+        ui.item_use_mode = ItemUseMode::Describe;
+        capture("settings-item-description");
+        ui.item_use_mode = ItemUseMode::OneClick;
+        capture("settings-item-one-click");
+        ui.item_use_mode = ItemUseMode::Confirm;
         ui.item_collection = true;
         capture("settings-collection");
         ui.skip_attack_animation = ui.skip_staircase_animation = true;
@@ -113,6 +118,9 @@ int verify_localization(Presentation& renderer, const std::filesystem::path& out
         ui.enemies = false;
         ui.selected_item = int(Item::WarpStaff);
         capture("item");
+        ui.item_use_mode = ItemUseMode::Describe;
+        capture("item-description");
+        ui.item_use_mode = ItemUseMode::Confirm;
         ui.selected_item = -1;
         ui.realtime_hero_orb = true;
         capture("realtime-orb");

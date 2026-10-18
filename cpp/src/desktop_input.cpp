@@ -204,8 +204,13 @@ UiAction keyboard_input(const Game& game, DesktopUi& ui) {
         else
             return {Action::MainMenu};
     } else if (ui.selected_item >= 0) {
-        if (IsKeyPressed(KEY_ENTER))
-            return {Action::UseItem, ui.selected_item};
+        if (IsKeyPressed(KEY_ENTER)) {
+            const auto item = static_cast<Item>(ui.selected_item);
+            if (item_definition(item).passive)
+                ui.close_overlays();
+            else if (!game.busy() && game.inventory(item) > 0)
+                return {Action::UseItem, ui.selected_item};
+        }
     } else if (IsKeyPressed(KEY_I) && !game.busy() && ui.flight < 0) {
         const bool opened = ui.inventory;
         ui.close_overlays();

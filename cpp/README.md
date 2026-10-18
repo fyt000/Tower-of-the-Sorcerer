@@ -48,7 +48,7 @@ Run beside the original `Data3/`, `Data2/`, `Midi/` and `Wav/` folders, or pass
 | Arrows / WASD | Walk; hold to repeat |
 | Map click | Blink or walk/contact a destination when the corresponding control is enabled |
 | Enter / Space | Continue dialogue or ending |
-| Item click / I | Inspect/use items / open inventory |
+| Item click / I | Open an Orb view or item details / open inventory |
 | Flight: Up/Down, Enter, Esc | Preview, travel, cancel |
 | K / L | Manual save/load; select slot with 1–8 or arrows |
 | Q / Shift+Q | Quick save / quick restore |
@@ -65,6 +65,16 @@ manual movement; automatic walking and replay use scaled animation time.
 Menus and dialogue require releasing a held direction before walking again. Held
 movement resumes as soon as a door or other event finishes, without losing a due
 step or accumulating extra steps.
+
+From either the sidebar or inventory, Hero Orb opens the enemy list, Wisdom Orb
+opens recorded clues, and Flight Orb opens the floor selector directly; choose a
+destination before travelling. **Settings → QOL → Item use** cycles through three
+modes for the other nine usable items: **Confirm** (default), **Description + confirm**,
+and **One-click**. Confirm asks before use; Description + confirm also explains the
+item and enables hover descriptions; One-click uses it immediately. Confirmation
+works with mouse or touch: **Use** or Enter confirms, **Cancel** or Esc closes the
+panel. Passive items keep their description panels in every mode.
+
 Above 1x, repeated sound effects
 are consolidated, crossfaded and shortened; music and effect pitch retain their
 normal playback rate.

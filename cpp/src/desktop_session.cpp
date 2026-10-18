@@ -47,6 +47,7 @@ DesktopSession::DesktopSession(const Assets& assets, const std::filesystem::path
     ui.skip_staircase_animation = settings.skip_staircase_animation;
     ui.realtime_hero_orb = settings.realtime_hero_orb;
     ui.touch_controls = settings.touch_controls;
+    ui.item_use_mode = settings.item_use_mode;
     ui.language = parse_language(settings.language);
     recorder_.enable(record.value_or(settings.recording));
     recorder_.new_game(game.rankings);
@@ -138,7 +139,8 @@ void DesktopSession::preferences() {
                                                       .item_collection = ui.item_collection,
                                                       .skip_attack_animation = ui.skip_attack_animation,
                                                       .skip_staircase_animation = ui.skip_staircase_animation,
-                                                      .animation_speed = ui.animation_speed});
+                                                      .animation_speed = ui.animation_speed,
+                                                      .item_use_mode = ui.item_use_mode});
 }
 
 void DesktopSession::open_home(bool startup) {
@@ -684,6 +686,10 @@ void DesktopSession::apply(UiAction action) {
         break;
     case Action::TouchControls:
         ui.touch_controls = !ui.touch_enabled();
+        preferences();
+        break;
+    case Action::CycleItemUse:
+        ui.item_use_mode = ItemUseModes[(std::to_underlying(ui.item_use_mode) + 1) % ItemUseModes.size()];
         preferences();
         break;
     case Action::None:

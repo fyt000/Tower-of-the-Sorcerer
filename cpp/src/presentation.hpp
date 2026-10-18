@@ -53,6 +53,7 @@ struct DesktopUi {
     bool skip_attack_animation{};
     bool skip_staircase_animation{};
     bool realtime_hero_orb{};
+    ItemUseMode item_use_mode = ItemUseMode::Confirm;
     std::optional<bool> touch_controls;
 
     bool touch_enabled() const { return touch_controls.value_or(touch_device()); }
@@ -141,7 +142,8 @@ enum class Action {
     ItemCollection,
     SkipAttackAnimation,
     SkipStaircaseAnimation,
-    LoadAutosave
+    LoadAutosave,
+    CycleItemUse
 };
 
 struct UiAction {

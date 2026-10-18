@@ -12,6 +12,8 @@ namespace tsw {
 namespace {
 void validate(const Settings& settings) {
     parse_language(settings.language);
+    if (settings.item_use_mode < ItemUseMode::Confirm || settings.item_use_mode > ItemUseMode::OneClick)
+        throw std::runtime_error("Saved item use mode is out of range");
     if (settings.game_speed_index < 0 || settings.game_speed_index >= std::ssize(GameSpeeds) ||
         settings.replay_speed_index < 0 || settings.replay_speed_index >= std::ssize(ReplaySpeeds))
         throw std::runtime_error("Saved speed setting is out of range");

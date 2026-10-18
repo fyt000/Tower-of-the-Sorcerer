@@ -135,9 +135,26 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         require(ui.help, "H opens Help");
         require(key(KEY_Q) == Action::None, "Help consumes game shortcuts");
         ui.close_overlays();
-        ui.selected_item = int(Item::HeroOrb);
+        ui.selected_item = int(Item::Cross);
         require(key(KEY_Q) == Action::None && key(KEY_L, KEY_LEFT_SHIFT) == Action::None,
                 "Save and restore shortcuts respect item panel file controls");
+        require(key(KEY_ENTER) == Action::None && ui.selected_item < 0,
+                "Enter closes passive item details without using an item");
+        for (const auto item : {Item::Elixir, Item::Mattock, Item::Bomb, Item::WarpStaff, Item::AscentWing,
+                                Item::DescentWing, Item::SnowCrystal, Item::MagicKey, Item::SuperMattock}) {
+            ui.selected_item = int(item);
+            game.inventory(item) = 1;
+            require(key(KEY_ENTER) == Action::UseItem && ui.selected_item == int(item),
+                    "Enter confirms each actionable item from its description panel");
+            game.push(Op::Wait);
+            require(key(KEY_ENTER) == Action::None,
+                    "Keyboard confirmation cannot use an item while gameplay is busy");
+            game.finish_commands();
+            game.inventory(item) = 0;
+            require(key(KEY_ENTER) == Action::None, "Keyboard confirmation cannot use an unavailable item");
+            require(key(KEY_ESCAPE) == Action::None && ui.selected_item < 0,
+                    "Escape cancels item confirmation");
+        }
         ui.close_overlays();
         ui.replay_active = true;
         require(key(KEY_Q) == Action::None && key(KEY_L, KEY_LEFT_SHIFT) == Action::None,
@@ -298,6 +315,14 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
                     press({232, 336}).kind == Action::SkipStaircaseAnimation &&
                     press({568, 336}).kind == Action::MouseWalking,
                 "Settings exposes separate clickable attack and staircase animation skips");
+        require(ui.item_use_mode == ItemUseMode::Confirm,
+                "Item use defaults to confirmation without descriptions");
+        for (const auto mode : ItemUseModes) {
+            ui.item_use_mode = mode;
+            require(press({568, 396}).kind == Action::CycleItemUse,
+                    "The QOL item use control remains clickable in all three modes");
+        }
+        ui.item_use_mode = ItemUseMode::Confirm;
         ui.close_overlays();
         ui.touch_controls.reset();
     }
@@ -532,7 +557,7 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         ui.flight = 2;
         require(!mouse_destination(game, ui, hover), "Flight preview cannot move the hero by clicking");
         ui.flight = -1;
-        ui.selected_item = int(Item::Bomb);
+        ui.selected_item = int(Item::Cross);
         require(!mouse_destination(game, ui, hover), "Item inspection disables map clicks");
         ui.close_overlays();
         ui.menu = Menu::Options;
@@ -1268,12 +1293,104 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         draw(game);
         snapshot("inventory-overlay");
         ui.inventory = false;
-        for (int i = 0; i < 15; ++i) {
-            ui.selected_item = i;
-            draw(game);
+        const auto press_item = [&](Vector2 mouse) {
+            auto* window = glfwGetCurrentContext();
+            const auto callback = glfwSetMouseButtonCallback(window, nullptr);
+            glfwSetMouseButtonCallback(window, callback);
+            callback(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
+            const auto action = renderer.draw(game, ui, mouse);
+            callback(window, GLFW_MOUSE_BUTTON_LEFT, GLFW_RELEASE, 0);
+            renderer.present();
+            return action;
+        };
+        for (int i = 0; i < ItemCount; ++i) {
+            const auto item = static_cast<Item>(i);
+            const bool orb = item == Item::HeroOrb || item == Item::WisdomOrb || item == Item::FlightOrb;
+            const Vector2 sidebar{37.f + i % 3 * 42, MenuHeight + 258.f + i / 3 * 40};
+            for (const auto mode : ItemUseModes) {
+                ui.item_use_mode = mode;
+                const bool direct = orb || (mode == ItemUseMode::OneClick && !item_definition(item).passive);
+                for (const bool touch : {false, true}) {
+                    ui.touch_controls = touch;
+                    for (const bool inventory : {false, true}) {
+                        ui.close_overlays();
+                        ui.inventory = inventory;
+                        const int owned_before = game.inventory(item);
+                        const auto action = press_item(
+                            inventory ? Vector2{BoardX + 30.f + i / 8 * 204, BoardY + 82.f + i % 8 * 39}
+                                      : sidebar);
+                        require(!ui.inventory, "Selecting an owned item closes inventory");
+                        if (direct)
+                            require(
+                                action.kind == Action::UseItem && action.value == i && ui.selected_item < 0 &&
+                                    !ui.modal(),
+                                "Orbs and one-click items dispatch directly with mouse or touch controls");
+                        else {
+                            require(
+                                action.kind == Action::None && ui.selected_item == i &&
+                                    game.inventory(item) == owned_before,
+                                "Other items open details without use or consumption with mouse or touch");
+                            if (!item_definition(item).passive) {
+                                require(press_item(sidebar).kind == Action::None && ui.selected_item == i,
+                                        "Tapping an item icon again cannot bypass confirmation");
+                                const auto confirm = press_item({BoardX + 56, BoardY + 315});
+                                require(confirm.kind == Action::UseItem && confirm.value == i,
+                                        "The Use button confirms every actionable item with mouse or touch");
+                                require(press_item({BoardX + 270, BoardY + 315}).kind == Action::None &&
+                                            ui.selected_item < 0 && game.inventory(item) == owned_before,
+                                        "Cancel closes confirmation without using or consuming the item");
+                            }
+                        }
+                    }
+                }
+            }
+            ui.item_use_mode = ItemUseMode::Confirm;
+            ui.touch_controls = false;
+            ui.close_overlays();
+            if (!orb)
+                ui.selected_item = i;
+            renderer.draw(game, ui, sidebar);
             snapshot("item-" + std::to_string(i));
         }
         ui.close_overlays();
+        game.push(Op::Wait);
+        require(press_item({37, MenuHeight + 258}).kind == Action::None && ui.selected_item < 0,
+                "Busy gameplay blocks immediate item use from the sidebar");
+        ui.inventory = true;
+        require(press_item({BoardX + 30, BoardY + 82}).kind == Action::None && ui.inventory,
+                "Busy gameplay blocks immediate item use from inventory");
+        ui.close_overlays();
+        ui.selected_item = int(Item::Bomb);
+        require(press_item({BoardX + 56, BoardY + 315}).kind == Action::None &&
+                    ui.selected_item == int(Item::Bomb),
+                "Busy gameplay disables the item confirmation button");
+        game.finish_commands();
+        game.inventory(Item::Bomb) = 0;
+        require(press_item({BoardX + 56, BoardY + 315}).kind == Action::None,
+                "Unavailable items cannot be confirmed");
+        game.inventory(Item::Bomb) = 1;
+        ui.touch_controls = true;
+        draw(game);
+        snapshot("touch-item-confirmation");
+        const auto confirmation = fingerprint(renderer, {BoardX + 38, BoardY + 210, 364, 80});
+        ui.item_use_mode = ItemUseMode::Describe;
+        draw(game);
+        require(fingerprint(renderer, {BoardX + 38, BoardY + 210, 364, 80}) != confirmation,
+                "Description mode adds the item explanation to the confirmation panel");
+        snapshot("touch-item-description");
+        ui.item_use_mode = ItemUseMode::Confirm;
+        ui.touch_controls = false;
+        ui.close_overlays();
+        game.inventory(Item::HeroOrb) = 0;
+        ui.inventory = true;
+        require(press_item({BoardX + 30, BoardY + 82}).kind == Action::None && ui.inventory,
+                "Missing items cannot be used from inventory");
+        game.inventory(Item::HeroOrb) = 1;
+        ui.close_overlays();
+        ui.replay_active = true;
+        require(press_item({37, MenuHeight + 258}).kind == Action::None && ui.selected_item < 0,
+                "Replay playback blocks immediate item use");
+        ui.replay_active = false;
         game.hero.hp = 2147483647;
         game.hero.attack = game.hero.defense = game.hero.gold = 10000000;
         draw(game);

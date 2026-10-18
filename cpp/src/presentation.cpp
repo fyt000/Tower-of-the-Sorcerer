@@ -165,6 +165,18 @@ std::optional<int> mouse_destination(const Game& game, const DesktopUi& ui, Vect
 
 namespace {
 constexpr int SideWidth = 156, FrameWidth = 488, RightX = SideWidth + FrameWidth;
+
+constexpr bool is_orb(Item item) {
+    return item == Item::HeroOrb || item == Item::WisdomOrb || item == Item::FlightOrb;
+}
+
+bool use_item_directly(Item item, const DesktopUi& ui) {
+    return is_orb(item) || (ui.item_use_mode == ItemUseMode::OneClick && !item_definition(item).passive);
+}
+
+constexpr std::array<const char*, 3> ItemUseLabels{"Item use: Confirm", "Item use: Description + confirm",
+                                                   "Item use: One-click"};
+
 constexpr int DoorFrames = 16, TransformationFrames = 32, FirstHeroWalkingColor = 185;
 constexpr int HeroSecondStepOffset = 2, HeroIdleOffset = 4;
 constexpr Color Ink{246, 241, 230, 255}, Gold{247, 209, 138, 255}, Muted{199, 195, 197, 255};
@@ -1091,8 +1103,12 @@ UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mous
             art_->text.fit(label, {rect.x + 18, rect.y + 24, 23, 15}, 12, Gold,
                            {.alignment = TextAlignment::Right});
         }
-        if (hover && !game.busy() && clicked(rect, mouse))
-            ui.selected_item = i;
+        if (hover && !game.busy() && clicked(rect, mouse)) {
+            if (use_item_directly(item, ui))
+                action = {Action::UseItem, i};
+            else
+                ui.selected_item = i;
+        }
         ++owned;
     }
     constexpr std::array<const char*, 6> EquipmentNames{"None", "Iron", "Silver", "Knight", "Holy", "Sacred"};
@@ -1264,6 +1280,7 @@ UiAction Presentation::draw_dialogue(const Game& game, DesktopUi& ui, Vector2 mo
 UiAction Presentation::draw_inventory(const Game& game, DesktopUi& ui, Vector2 mouse) {
     constexpr Rectangle rect{BoardX + 4, BoardY + 9, 432, 420};
     art_->text.modal(rect, "Inventory");
+    std::optional<std::pair<Rectangle, Item>> hovered_item;
     for (int i = 0; i < ItemCount; ++i) {
         const auto item = static_cast<Item>(i);
         const int count = game.inventory(item);
@@ -1273,16 +1290,23 @@ UiAction Presentation::draw_inventory(const Game& game, DesktopUi& ui, Vector2 m
         art_->icon(HeroOrb + i, {row.x + 2, row.y + 2, 31, 31}, count ? WHITE : Color{170, 170, 170, 130});
         art_->text.fit(std::string(Game::item_name(item)), {row.x + 37, row.y + 2, 158, 20}, 17,
                        count ? Ink : Muted);
-        art_->text.draw(count ? item_definition(item).passive ? "Passive" : "Use / inspect" : "Not found",
+        art_->text.draw(count ? item_definition(item).passive ? "Passive" : "Use" : "Not found",
                         int(row.x + 37), int(row.y + 21), 13, count ? Gold : Muted);
-        if (count && clicked(row, mouse)) {
+        if (hover)
+            hovered_item = {{row, item}};
+        if (count && !game.busy() && clicked(row, mouse)) {
             ui.inventory = false;
+            if (use_item_directly(item, ui))
+                return {Action::UseItem, i};
             ui.selected_item = i;
             break;
         }
     }
     if (art_->text.button({rect.x + 12, rect.y + 378, 408, 28}, "Close  [I / Esc]", mouse))
         ui.inventory = false;
+    if (ui.inventory && hovered_item && ui.item_use_mode == ItemUseMode::Describe)
+        art_->text.tooltip(hovered_item->first,
+                           localized_text(ui.language, item_definition(hovered_item->second).description));
     return {};
 }
 
@@ -1350,7 +1374,7 @@ void Presentation::draw_enemies(const Game& game, DesktopUi& ui, Vector2 mouse) 
 void Presentation::draw_qol_status(const DesktopUi& ui, Rectangle rect, Vector2 mouse) {
     const int count = int(ui.mouse_walking) + int(ui.blink_mode) + int(ui.hero_orb_actual_damage) +
                       int(ui.realtime_hero_orb) + int(ui.item_collection) + int(ui.skip_attack_animation) +
-                      int(ui.skip_staircase_animation);
+                      int(ui.skip_staircase_animation) + int(ui.item_use_mode != ItemUseMode::Confirm);
     DrawRectangleRec(rect, Bar);
     art_->text.outline(rect, 1, count ? Gold : Border);
     art_->text.fit(count ? std::format("QOL: {} enabled", count) : "QOL: none", rect, 16,
@@ -1372,31 +1396,39 @@ void Presentation::draw_qol_status(const DesktopUi& ui, Rectangle rect, Vector2 
             text += "\n" + localized_text(art_->text.language, "Skip attack animation");
         if (ui.skip_staircase_animation)
             text += "\n" + localized_text(art_->text.language, "Skip staircase animation");
-        text += "\n" + localized_text(art_->text.language, "Change QOLs in Settings. Default: off.");
+        if (ui.item_use_mode != ItemUseMode::Confirm)
+            text += "\n" +
+                    localized_text(art_->text.language, ItemUseLabels[std::to_underlying(ui.item_use_mode)]);
+        text += "\n" + localized_text(art_->text.language,
+                                      "Change QOLs in Settings. Defaults: off; item use: Confirm.");
         art_->text.tooltip(rect, text);
     }
 }
 
 UiAction Presentation::draw_item(const Game& game, DesktopUi& ui, Vector2 mouse) {
     const auto item = static_cast<Item>(ui.selected_item);
-    constexpr Rectangle rect{BoardX + 18, BoardY + 98, 404, 250};
+    const bool touch = ui.touch_enabled();
+    const float button_height = touch ? 44.f : 29.f;
+    const Rectangle rect{BoardX + 18, BoardY + 98, 404, touch ? 272.f : 250.f};
     art_->text.modal(rect, std::string(Game::item_name(item)));
     art_->icon(HeroOrb + ui.selected_item, {rect.x + 20, rect.y + 60, 40, 40});
     art_->text.draw(item_definition(item).passive ? "Passive item"
                                                   : std::format("Owned: {}", game.inventory(item)),
                     int(rect.x + 76), int(rect.y + 68), 18, Gold);
-    const auto description = art_->text.wrap(std::string(item_definition(item).description), 364, 17);
+    const bool describe = item_definition(item).passive || ui.item_use_mode == ItemUseMode::Describe;
+    const auto description = art_->text.wrap(
+        describe ? std::string(item_definition(item).description) : "Use this item?", 364, 17);
     SetTextLineSpacing(22);
     art_->text.draw(description, int(rect.x + 20), int(rect.y + 112), 17, Ink, false);
     if (item_definition(item).passive) {
-        if (art_->text.button({rect.x + 20, rect.y + 203, 364, 29}, "Close  [Enter / Esc]", mouse))
+        if (art_->text.button({rect.x + 20, rect.y + 203, 364, button_height}, "Close  [Enter / Esc]", mouse))
             ui.selected_item = -1;
     } else {
-        if (art_->text.button({rect.x + 20, rect.y + 203, 176, 29},
-                              item == Item::HeroOrb ? "View enemies [Enter]" : "Use  [Enter]", mouse,
-                              !game.busy() && game.inventory(item) > 0))
+        if (art_->text.button({rect.x + 20, rect.y + 203, 176, button_height}, touch ? "Use" : "Use  [Enter]",
+                              mouse, !game.busy() && game.inventory(item) > 0))
             return {Action::UseItem, ui.selected_item};
-        if (art_->text.button({rect.x + 208, rect.y + 203, 176, 29}, "Cancel  [Esc]", mouse))
+        if (art_->text.button({rect.x + 208, rect.y + 203, 176, button_height},
+                              touch ? "Cancel" : "Cancel  [Esc]", mouse))
             ui.selected_item = -1;
     }
     return {};
@@ -1554,10 +1586,16 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
             if (art_->text.button(walking, ui.mouse_walking ? "Mouse walking: on" : "Mouse walking: off",
                                   mouse))
                 return {Action::MouseWalking};
-            const Rectangle blink{left, 372, 664, 48};
+            const Rectangle blink{left, 372, 328, 48}, item_use{left + 336, 372, 328, 48};
             if (art_->text.button(blink, ui.blink_mode ? "Blink mode: on" : "Blink mode: off", mouse))
                 return {Action::BlinkMode};
-            art_->text.draw("Experienced players only. Default: off.", int(left), 430, 17, Muted);
+            if (art_->text.button(item_use, ItemUseLabels[std::to_underlying(ui.item_use_mode)], mouse))
+                return {Action::CycleItemUse};
+            art_->text.draw("Blink: experienced players only. Default item use: Confirm.", int(left), 430, 17,
+                            Muted);
+            if (CheckCollisionPointRec(mouse, item_use))
+                art_->text.tooltip(item_use, "Confirm asks before use. Description + confirm explains the "
+                                             "item. One-click use activates immediately.");
             if (CheckCollisionPointRec(mouse, attack))
                 art_->text.tooltip(
                     attack,
@@ -2146,8 +2184,14 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, floa
             if (game.inventory(static_cast<Item>(i)) > 0) {
                 if (CheckCollisionPointRec(
                         mouse, {16.f + owned % 3 * 42, MenuHeight + 238.f + owned / 3 * 40, 42, 40})) {
-                    status = std::string(Game::item_name(static_cast<Item>(i))) + "  -  click to inspect";
+                    const auto item = static_cast<Item>(i);
+                    status = std::string(Game::item_name(item)) +
+                             (use_item_directly(item, ui) ? "  -  click to use" : "  -  click to inspect");
                     translate_status = true;
+                    if (ui.item_use_mode == ItemUseMode::Describe)
+                        art_->text.tooltip(
+                            {16.f + owned % 3 * 42, MenuHeight + 238.f + owned / 3 * 40, 42, 40},
+                            localized_text(ui.language, item_definition(item).description));
                 }
                 ++owned;
             }

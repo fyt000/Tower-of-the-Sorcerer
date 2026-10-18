@@ -337,8 +337,7 @@ async function mobileSmoke(browser, url, output) {
         await page.setViewportSize({ width: 915, height: 412 });
         await checkPlayerLayout(page, 'Mobile rotated back to landscape');
         await fixture('wisdom');
-        await tap(37, 286); // Inspect the Orb of Wisdom in the unchanged inventory.
-        await tap(300, 374); // Use it to open a genuinely long conversation.
+        await tap(37, 286); // The Orb of Wisdom directly opens a long conversation.
         await page.waitForTimeout(180);
         const firstText = await dialogueSnapshot();
         const heading = await dialogueSnapshot(true);
@@ -462,6 +461,13 @@ async function languageSmoke(browser, url, output) {
             Module.tswStorage.read('settings.json'))).animation_speed), 5.5);
         await click(266, 114);
         await page.screenshot({ path: path.join(output, 'settings-qol.png') });
+        for (const [mode, value] of [['Description + confirm', 1], ['One-click', 2], ['Confirm', 0]]) {
+            await click(568, 396);
+            assert.equal(await page.evaluate(() => JSON.parse(new TextDecoder().decode(
+                Module.tswStorage.read('settings.json'))).item_use_mode), value,
+                'Item use must cycle to ' + mode);
+        }
+        await click(568, 396); // Persist Description + confirm through the reload below.
         await click(400, 114);
         await page.screenshot({ path: path.join(output, 'settings-controls.png') });
         await click(534, 114);
@@ -494,6 +500,9 @@ async function languageSmoke(browser, url, output) {
         await fontReady('ja');
         assert.equal(await page.evaluate(() => JSON.parse(new TextDecoder().decode(
             Module.tswStorage.read('settings.json'))).language), 'ja');
+        assert.equal(await page.evaluate(() => JSON.parse(new TextDecoder().decode(
+            Module.tswStorage.read('settings.json'))).item_use_mode), 1,
+            'Item use mode must survive a browser reload');
         await page.screenshot({ path: path.join(output, 'startup-japanese.png') });
         assert.deepEqual(errors, []);
         console.log('PASS: settings tabs, native language labels, lazy CJK download, failure/retry, font reuse and saved-language startup');
