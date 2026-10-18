@@ -56,7 +56,10 @@ Run beside the original `Data3/`, `Data2/`, `Midi/` and `Wav/` folders, or pass
 | Esc | Close overlay or open main menu |
 
 Keyboard and touch directions step immediately, then repeat after a 250 ms hold
-at 120 ms intervals, independently of animation speed. Menus and dialogue require
+at 120 ms intervals, independently of animation speed.
+The hero slides between adjacent tiles over 120 ms on the same real-time clock for
+manual movement; automatic walking and replay use scaled animation time.
+Menus and dialogue require
 releasing a held direction before walking again. Above 1x, repeated sound effects
 are consolidated, crossfaded and shortened; music and effect pitch retain their
 normal playback rate.

@@ -66,7 +66,8 @@ void DesktopSession::dispatch(UiAction action) {
     if ((!ui.mouse_walking && !ui.blink_mode) || ui.modal() || ui.replay_active || ui.flight >= 0 ||
         ui.ending_wait)
         mouse_walk_.cancel();
-    renderer.moved(before, game.hero);
+    if (action.kind != Action::Move) // move() already starts the manual walking animation.
+        renderer.moved(before, game.hero);
     recording_status();
 }
 
@@ -83,10 +84,10 @@ void DesktopSession::move(Direction direction) {
     mouse_walk_.cancel();
     if (ui.modal() || ui.replay_active || ui.flight >= 0 || ui.ending_wait)
         return;
-    move_step(direction);
+    move_step(direction, true);
 }
 
-void DesktopSession::move_step(Direction direction) {
+void DesktopSession::move_step(Direction direction, bool manual) {
     // Read the category files before a Fairy encounter can calculate its rank.
     const int x = game.hero.x + (direction == Direction::Right) - (direction == Direction::Left);
     const int y = game.hero.y + (direction == Direction::Down) - (direction == Direction::Up);
@@ -97,7 +98,7 @@ void DesktopSession::move_step(Direction direction) {
     }
     const auto before = game.hero;
     play(PlayerInput::move(direction));
-    renderer.moved(before, game.hero);
+    renderer.moved(before, game.hero, manual);
 }
 
 bool DesktopSession::play(const PlayerInput& input) {

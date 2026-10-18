@@ -40,7 +40,16 @@ bool matches_original_hero(Presentation& renderer, Rectangle target, const Image
     const auto cell = [](int tile) -> Rectangle {
         return {float((tile - 1) % 11 * 40), float((tile - 1) / 11 * 40), 40, 40};
     };
-    Image expected = ImageFromImage(atlas, cell(Road));
+    Image road = ImageFromImage(atlas, cell(Road));
+    Image expected = GenImageColor(40, 40, BLANK);
+    // A sliding sprite spans tiles; the floor texture stays anchored to the board.
+    for (int y = 0; y <= 1; ++y)
+        for (int x = 0; x <= 1; ++x)
+            ImageDraw(&expected, road, {0, 0, 40, 40},
+                      {float(x * 40 - (int(target.x) - BoardX) % 40),
+                       float(y * 40 - (int(target.y) - BoardY) % 40), 40, 40},
+                      WHITE);
+    UnloadImage(road);
     Image color = ImageFromImage(atlas, cell(tile));
     Image mask = ImageFromImage(atlas, cell(tile + 1));
     ImageColorInvert(&mask);
@@ -220,18 +229,42 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
             const Rectangle target{float(BoardX + game.hero.x * TileSize),
                                    float(BoardY + game.hero.y * TileSize), TileSize, TileSize};
             renderer.moved(before, game.hero);
+            const Rectangle origin{float(BoardX + before.x * TileSize), float(BoardY + before.y * TileSize),
+                                   TileSize, TileSize};
             draw(game);
-            require(matches_original_hero(renderer, target, atlas, WalkingTiles[facing - 1]),
+            require(matches_original_hero(renderer, origin, atlas, WalkingTiles[facing - 1]),
                     "Direction " + std::to_string(facing) + " begins with the original first walking pose");
             renderer.advance(WalkAnimationSeconds * .6f);
             draw(game);
-            require(matches_original_hero(renderer, target, atlas, WalkingTiles[facing - 1] + 2),
+            const Rectangle intermediate{origin.x + (target.x - origin.x) * .6f,
+                                         origin.y + (target.y - origin.y) * .6f, TileSize, TileSize};
+            require(matches_original_hero(renderer, intermediate, atlas, WalkingTiles[facing - 1] + 2),
                     "Direction " + std::to_string(facing) + " advances to the original second walking pose");
             renderer.advance(WalkAnimationSeconds);
             draw(game);
             require(matches_original_hero(renderer, target, atlas, IdleTiles[facing - 1]),
                     "Direction " + std::to_string(facing) + " returns to the original standing pose");
             snapshot("idle-direction-" + std::to_string(facing));
+            for (float speed : {1.f, 3.f, 10.f}) {
+                renderer.reset();
+                renderer.moved(before, game.hero, true);
+                renderer.advance(WalkAnimationSeconds * .6f * speed, WalkAnimationSeconds * .6f);
+                draw(game);
+                require(matches_original_hero(renderer, intermediate, atlas, WalkingTiles[facing - 1] + 2),
+                        "Manual walking slides at the same real-time speed at 1x, 3x and 10x");
+                renderer.advance(WalkAnimationSeconds * speed, WalkAnimationSeconds);
+                draw(game);
+                require(matches_original_hero(renderer, target, atlas, IdleTiles[facing - 1]),
+                        "A released single step finishes at its destination without extra movement");
+            }
+            renderer.moved(game.hero, before);
+            renderer.advance(WalkAnimationSeconds * 3, WalkAnimationSeconds / 3);
+            Game automatic = game;
+            automatic.hero = before;
+            automatic.hero.facing = game.hero.facing;
+            draw(automatic);
+            require(matches_original_hero(renderer, origin, atlas, IdleTiles[facing - 1]),
+                    "Automatic walking still finishes on the scaled animation clock");
         }
         UnloadImage(atlas);
         std::array<int, 3> counts{};

@@ -676,9 +676,24 @@ void Presentation::reset() {
     collection_age_ = 0;
 }
 
-void Presentation::moved(const Hero& before, const Hero& after) {
-    if (before.floor == after.floor && (before.x != after.x || before.y != after.y))
-        walking_remaining_ = WalkAnimationSeconds;
+void Presentation::moved(const Hero& before, const Hero& after, bool manual) {
+    if (before.floor == after.floor && before.x == after.x && before.y == after.y)
+        return;
+    // Teleports and floor changes must never slide across intervening tiles.
+    if (before.floor != after.floor || abs(before.x - after.x) + abs(before.y - after.y) != 1) {
+        walking_remaining_ = 0;
+        return;
+    }
+    const float remaining = walking_remaining_ / WalkAnimationSeconds;
+    const bool continuing =
+        walking_floor_ == before.floor && walking_x_ == before.x && walking_y_ == before.y;
+    walking_offset_ = {float(before.x - after.x) + (continuing ? walking_offset_.x * remaining : 0.f),
+                       float(before.y - after.y) + (continuing ? walking_offset_.y * remaining : 0.f)};
+    walking_floor_ = after.floor;
+    walking_x_ = after.x;
+    walking_y_ = after.y;
+    manual_walking_ = manual;
+    walking_remaining_ = WalkAnimationSeconds;
 }
 
 void Presentation::collected(int floor, const std::vector<CollectedItem>& items) {
@@ -687,8 +702,9 @@ void Presentation::collected(int floor, const std::vector<CollectedItem>& items)
     collection_age_ = 0;
 }
 
-void Presentation::advance(float seconds) {
-    walking_remaining_ = std::max(0.f, walking_remaining_ - seconds);
+void Presentation::advance(float seconds, float real_seconds) {
+    const float walk_seconds = manual_walking_ && real_seconds >= 0 ? real_seconds : seconds;
+    walking_remaining_ = std::max(0.f, walking_remaining_ - walk_seconds);
     animation_seconds_ += seconds;
 }
 
@@ -841,8 +857,12 @@ void Presentation::draw_board(const Game& game, int floor, bool animated) {
                           : walking_remaining_ > WalkAnimationSeconds / 2 ? 0
                                                                           : HeroSecondStepOffset;
         const int pose = FirstHeroWalkingColor + (int(facing) - 1) * FacingSpriteStride + phase;
-        DrawTexture(art_->transparent(pose, pose + 1), BoardX + hero_x * TileSize, BoardY + hero_y * TileSize,
-                    WHITE);
+        const bool sliding =
+            !source_board && walking_floor_ == floor && walking_x_ == hero_x && walking_y_ == hero_y;
+        const float remaining = sliding ? walking_remaining_ / WalkAnimationSeconds : 0.f;
+        DrawTexture(art_->transparent(pose, pose + 1),
+                    BoardX + int(std::round((hero_x + walking_offset_.x * remaining) * TileSize)),
+                    BoardY + int(std::round((hero_y + walking_offset_.y * remaining) * TileSize)), WHITE);
     }
     if (active && v.raster_mode == RasterMode::VampireTransformation)
         draw_transformation(game, animation);

@@ -259,7 +259,7 @@ struct GameLoop {
         session->dispatch(keyboard(game, ui));
         const float real_elapsed = std::min(GetFrameTime(), .1f);
         const float game_elapsed = session->scaled_seconds(real_elapsed);
-        renderer.advance(game_elapsed);
+        renderer.advance(game_elapsed, ui.modal() ? 0.f : real_elapsed);
         constexpr std::array<std::tuple<int, int, Direction>, 4> directions{
             {{KEY_UP, KEY_W, Direction::Up},
              {KEY_DOWN, KEY_S, Direction::Down},

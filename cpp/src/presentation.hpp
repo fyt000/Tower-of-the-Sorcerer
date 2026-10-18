@@ -202,13 +202,13 @@ class Presentation {
     Presentation(const Presentation&) = delete;
     Presentation& operator=(const Presentation&) = delete;
     Vector2 mouse_position() const;
-    void moved(const Hero& before, const Hero& after);
+    void moved(const Hero& before, const Hero& after, bool manual = false);
     void collected(int floor, const std::vector<CollectedItem>&);
 
     bool collecting() const { return !collected_.empty(); }
 
-    void advance(float seconds);  // Scaled animation and command time.
-    void command(const Command&); // Original rendering callbacks, after run_one().
+    void advance(float seconds, float real_seconds = -1); // Manual walking uses real time.
+    void command(const Command&);                         // Original rendering callbacks, after run_one().
     void reset();
     UiAction draw(const Game&, DesktopUi&, Vector2 mouse, float real_seconds = 0);
     void present() const;
@@ -226,6 +226,9 @@ class Presentation {
     RasterMode previous_raster_ = RasterMode::Inactive;
     bool hide_panels_{}, cache_requested_{}, cache_valid_{};
     float walking_remaining_{};
+    Vector2 walking_offset_{};
+    int walking_floor_{}, walking_x_{}, walking_y_{};
+    bool manual_walking_{};
     float animation_seconds_{};
     std::vector<CollectedItem> collected_;
     int collection_floor_{};
