@@ -42,6 +42,11 @@ use a compact top bar. Fullscreen keeps Menu and exports accessible where the
 browser supports it. Android renders at native display resolution for consistent
 text and touch target sizing.
 
+On touch devices, fullscreen requests portrait orientation after entering fullscreen
+and releases the lock on exit. Browsers that reject or lack orientation locking keep
+the current orientation. The web canvas renders at device pixel density, with its
+game texture aligned to physical pixels so small text and box outlines remain visible.
+
 Outputs: `build/cpp/web/site/`, `build/cpp/web/tower-of-the-sorcerer-web.zip`,
 and `build/android/artifacts/`. Debug APKs are signed for local testing.
 
@@ -92,7 +97,8 @@ It keeps only characters used by the checked-in catalogs, plus ASCII and languag
 names. Rebuilding after catalog changes regenerates the subsets. An existing
 `cjk.ttf` is excluded from the web startup package; Android can still use it.
 
-A roughly 8 KiB subset for native language names loads with the game. The full
+A small subset for ASCII text and native language names loads with the game, so
+English text also uses fonts rasterized at the displayed resolution. The full
 Japanese or Chinese subset (roughly 440 KiB each) is a separate file fetched only
 when that language is selected, including a saved selection on startup. Both
 Chinese catalogs share one face. The game displays English until the font arrives;

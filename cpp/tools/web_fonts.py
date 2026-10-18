@@ -90,7 +90,7 @@ def build(cache: Path, output: Path, preload: Path, manifest: Path) -> None:
 
     preload.mkdir(parents=True, exist_ok=True)
     output.mkdir(parents=True, exist_ok=True)
-    make("jp.otf", {ord(c) for c in labels}, preload / "labels.otf")
+    make("jp.otf", set(range(32, 127)) | {ord(c) for c in labels}, preload / "labels.otf")
     files = {}
     for language, name in [("ja", "jp.otf"), ("zh", "sc.otf")]:
         temporary = output / f"{language}.tmp"

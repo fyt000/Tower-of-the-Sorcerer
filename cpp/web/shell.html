@@ -15,7 +15,7 @@
     .player-actions button { display: flex; align-items: center; justify-content: center; gap: 7px; }
     .player-actions svg { flex-shrink: 0; width: 20px; height: 20px; }
     #stage { position: relative; display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; overflow: hidden; background: black; }
-    canvas { display: block; width: var(--canvas-width, 800px); height: var(--canvas-height, 558px); max-width: 100%; max-height: 100%; background: black; touch-action: none; outline: none; }
+    canvas { position: absolute; display: block; left: var(--canvas-left, 0px); top: var(--canvas-top, 0px); width: var(--canvas-width, 800px); height: var(--canvas-height, 558px); max-width: 100%; max-height: 100%; background: black; image-rendering: pixelated; touch-action: none; outline: none; }
     #loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; box-sizing: border-box; background: radial-gradient(circle at center, #37303b, #19171e 70%); text-align: center; }
     #loading[hidden] { display: none; }
     .spinner { width: 52px; height: 52px; border: 4px solid #65515a; border-top-color: #f7d18a; border-radius: 50%; animation: spin .8s linear infinite; }
@@ -109,7 +109,8 @@
         <p>Tap the map to walk, or use the directional pad. Hold an arrow to keep moving;
           tap a conversation to continue, or drag its text to scroll.
           Change touch controls in Settings → Controls. The pad stays on the right.</p>
-        <p>Turn your phone sideways for a larger game. Full screen is available in supported browsers.</p>
+        <p>Full screen requests portrait orientation on phones where supported.
+          You can also turn your phone sideways for a larger game outside full screen.</p>
         <details>
           <summary>Keyboard controls</summary>
           <p>Arrows / WASD to move. Enter / Space to continue dialogue. I for inventory.
@@ -151,19 +152,27 @@
     var gameReady = false;
     function fitCanvas() {
       // GLFW resets inline width/height during startup; custom properties survive it.
-      canvas.style.setProperty('--canvas-width', stage.clientWidth + 'px');
-      canvas.style.setProperty('--canvas-height', stage.clientHeight + 'px');
+      // Align the outer canvas too: a fractional CSS origin would make the browser
+      // resample the finished framebuffer, even when its backing size is correct.
+      var bounds = stage.getBoundingClientRect(), density = window.devicePixelRatio || 1;
+      var left = Math.ceil(bounds.left * density) / density;
+      var top = Math.ceil(bounds.top * density) / density;
+      canvas.style.setProperty('--canvas-left', (left - bounds.left) + 'px');
+      canvas.style.setProperty('--canvas-top', (top - bounds.top) + 'px');
+      canvas.style.setProperty('--canvas-width', (Math.floor(bounds.right * density) / density - left) + 'px');
+      canvas.style.setProperty('--canvas-height', (Math.floor(bounds.bottom * density) / density - top) + 'px');
       if (window.Module) {
         Module.tswGameLeftInset = getComputedStyle(helpButton.parentElement.parentElement).position === 'absolute'
-          ? helpButton.getBoundingClientRect().right - stage.getBoundingClientRect().left + 8 : 0;
+          ? helpButton.getBoundingClientRect().right - left + 8 : 0;
       }
     }
     new ResizeObserver(fitCanvas).observe(stage);
+    window.addEventListener('resize', fitCanvas);
     fitCanvas();
     function openHelp() { helpPanel.showModal(); refreshFiles(); }
     helpButton.onclick = openHelp;
     document.getElementById('close-help').onclick = function () { helpPanel.close(); };
-    helpPanel.addEventListener('close', function () { if (gameReady) canvas.focus({ preventScroll: true }); });
+    helpPanel.addEventListener('close', function () { if (gameReady && !helpPanel.open) canvas.focus({ preventScroll: true }); });
     // GLFW listens on window: keep dialog keys and button activation out of the game.
     ['keydown', 'keypress', 'keyup'].forEach(function (type) {
       window.addEventListener(type, function (event) {
@@ -264,6 +273,7 @@
       } catch (error) { exportStatus.textContent = 'Export failed: ' + error.message; }
     };
     fullscreenButton.hidden = !document.fullscreenEnabled || !game.requestFullscreen;
+    var portraitRequested = false;
     fullscreenButton.onclick = function () {
       var action = document.fullscreenElement ? document.exitFullscreen() : game.requestFullscreen();
       action.catch(function () { Module.setStatus('Full screen is unavailable. You can keep playing here.'); });
@@ -271,6 +281,26 @@
     document.addEventListener('fullscreenchange', function () {
       document.getElementById('fullscreen-label').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen';
       fullscreenButton.setAttribute('aria-pressed', String(!!document.fullscreenElement));
+      if (document.fullscreenElement === game) {
+        // Fullscreen puts the game above an already-open modal in the top layer.
+        // Reinsert the dialog so its backdrop and controls stay above the game.
+        if (helpPanel.open) {
+          helpPanel.close();
+          helpPanel.showModal();
+        }
+        if (window.matchMedia('(pointer: coarse)').matches && screen.orientation && screen.orientation.lock) {
+          portraitRequested = true;
+          try {
+            screen.orientation.lock('portrait').catch(function () {
+              // Some browsers expose the API but do not allow orientation locking.
+            });
+          } catch (_) {}
+        }
+      } else if (portraitRequested) {
+        portraitRequested = false;
+        try { screen.orientation.unlock(); } catch (_) {}
+      }
+      fitCanvas();
     });
   </script>
   {{{ SCRIPT }}}

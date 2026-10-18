@@ -11,7 +11,9 @@ async function checkPlayerLayout(page, name) {
         const stage = document.getElementById('stage').getBoundingClientRect();
         return canvas.width > 0 && canvas.height > 0 &&
             Math.abs(canvas.width - stage.width) <= 1 && Math.abs(canvas.height - stage.height) <= 1 &&
-            window.Module?.tswCanvasViewport && canvas.width === Module.canvas.width && canvas.height === Module.canvas.height;
+            window.Module?.tswCanvasViewport &&
+            Math.round(canvas.width * devicePixelRatio) === Module.canvas.width &&
+            Math.round(canvas.height * devicePixelRatio) === Module.canvas.height;
     });
     const layout = await page.evaluate(() => {
         const bounds = id => {
@@ -41,6 +43,149 @@ async function checkPlayerLayout(page, name) {
         assert.ok(layout.game.x + layout.game.width <= layout.canvas.width - 176 + 1,
             name + ': the right-hand pad must leave the entire game and HUD visible');
     }
+}
+
+async function checkSmallText(page, name) {
+    const screenshot = await page.screenshot();
+    const pixels = await page.evaluate(async png => {
+        const image = new Image();
+        image.src = 'data:image/png;base64,' + png;
+        await image.decode();
+        const copy = document.createElement('canvas');
+        copy.width = image.width; copy.height = image.height;
+        const context = copy.getContext('2d');
+        context.drawImage(image, 0, 0);
+        const data = context.getImageData(0, 0, copy.width, copy.height).data;
+        const bounds = Module.canvas.getBoundingClientRect(), game = Module.tswCanvasViewport;
+        const sx = game.width * devicePixelRatio / 800, sy = game.height * devicePixelRatio / 558;
+        // The small Game button has a one-logical-pixel outline on all four sides.
+        const x = Math.round((bounds.x + game.x) * devicePixelRatio) + Math.round(6 * sx);
+        const y = Math.round((bounds.y + game.y) * devicePixelRatio) + Math.round(3 * sy);
+        const right = Math.round((bounds.x + game.x) * devicePixelRatio) + Math.round(64 * sx) - 1;
+        const bottom = Math.round((bounds.y + game.y) * devicePixelRatio) + Math.round(25 * sy) - 1;
+        const color = (x, y) => Array.from(data.slice(4 * (y * copy.width + x), 4 * (y * copy.width + x) + 3));
+        const border = (x, y) => color(x, y).every((c, i) => Math.abs(c - [168, 145, 118][i]) <= 2);
+        const sides = [[], [], [], []];
+        for (let px = x; px <= right; ++px) {
+            sides[0].push(border(px, y)); sides[1].push(border(px, bottom));
+        }
+        for (let py = y; py <= bottom; ++py) {
+            sides[2].push(border(x, py)); sides[3].push(border(right, py));
+        }
+        let ink = 0;
+        const shades = new Set();
+        for (let py = y + 1; py < bottom; ++py) for (let px = x + 1; px < right; ++px) {
+            const [r, g, b] = color(px, py);
+            // At a 320px, 1x viewport, antialiased glyphs can cover less than one
+            // full pixel per stroke. Require contrast, rather than opaque ink.
+            if (r > 130 && g > 120 && b > 110) ++ink;
+            if (r > 100 && g > 100 && b > 100) shades.add([r, g, b].join(','));
+        }
+        return { sides: sides.map(side => side.filter(Boolean).length / side.length), ink, shades: shades.size };
+    }, screenshot.toString('base64'));
+    assert.ok(pixels.sides.every(coverage => coverage >= .98), name + ': every box edge must stay visible: ' + JSON.stringify(pixels));
+    assert.ok(pixels.ink >= 5 && pixels.shades >= 8,
+        name + ': small English text must retain visible, antialiased glyphs: ' + JSON.stringify(pixels));
+}
+
+async function fullscreenSmoke(browser, url, output) {
+    for (const [name, viewport, density, mobile] of [
+        ['desktop-hidpi', { width: 1000, height: 800 }, 1.25, false],
+        ['phone-small', { width: 320, height: 568 }, 1, true],
+        ['phone-portrait', { width: 393, height: 851 }, 3, true],
+        ['phone-landscape', { width: 915, height: 412 }, 2, true]
+    ]) {
+        const context = await browser.newContext({ viewport, deviceScaleFactor: density, isMobile: mobile, hasTouch: mobile });
+        const page = await context.newPage();
+        const errors = [];
+        page.on('pageerror', error => errors.push(String(error)));
+        // Emulation cannot rotate hardware; verify requests and cleanup independently
+        // from viewport changes, and exercise both rejected and absent orientation APIs.
+        await page.addInitScript(() => {
+            window.orientationCalls = [];
+            Object.defineProperty(screen.orientation, 'lock', { configurable: true, value: async mode => {
+                orientationCalls.push([mode, document.fullscreenElement?.id]);
+            } });
+            Object.defineProperty(screen.orientation, 'unlock', { value: () => orientationCalls.push(['unlock']) });
+        });
+        try {
+            await page.goto(url);
+            await page.waitForFunction(() => document.getElementById('loading').hidden, null, { timeout: 60000 });
+            await page.keyboard.press('Enter', { delay: 100 });
+            await page.keyboard.press('F5', { delay: 100 });
+            await checkPlayerLayout(page, name);
+            await checkSmallText(page, name);
+            await page.locator('#help-button').click();
+            await page.locator('#fullscreen').click();
+            await page.waitForFunction(() => document.fullscreenElement?.id === 'game' &&
+                document.getElementById('fullscreen').getAttribute('aria-pressed') === 'true');
+            assert.equal(await page.locator('#help-panel').isVisible(), true);
+            assert.deepEqual(await page.evaluate(() => orientationCalls), mobile ? [['portrait', 'game']] : [],
+                'Only touch devices should request portrait, after fullscreen entry');
+            await page.locator('#close-help').click();
+            await checkPlayerLayout(page, name + ' fullscreen');
+            await checkSmallText(page, name + ' fullscreen');
+            await page.screenshot({ path: path.join(output, name + '-fullscreen.png') });
+            if (mobile) {
+                const client = await context.newCDPSession(page);
+                const box = await page.locator('#canvas').boundingBox();
+                await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{
+                    x: box.x + box.width - 144, y: box.y + box.height - 92, id: 1 }] });
+                await page.waitForTimeout(60);
+                await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+                await page.waitForTimeout(180);
+                await page.keyboard.press('F5', { delay: 100 });
+                assert.equal(await page.evaluate(() => {
+                    const bytes = Module.tswStorage.read('quick.save');
+                    return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getInt32(6297, true);
+                }), 4, 'Fullscreen must retain CSS-sized touch targets and correct input coordinates');
+                if (name === 'phone-landscape') {
+                    // Chromium disallows resizing a fullscreen native window. Device
+                    // metrics emulate a phone rotating without resizing that window.
+                    await client.send('Emulation.setDeviceMetricsOverride', { width: 393, height: 851,
+                        deviceScaleFactor: density, mobile: true,
+                        screenOrientation: { type: 'portraitPrimary', angle: 0 } });
+                    await checkPlayerLayout(page, 'Fullscreen rotated to portrait');
+                    await client.send('Emulation.setDeviceMetricsOverride', { ...viewport,
+                        deviceScaleFactor: density, mobile: true,
+                        screenOrientation: { type: 'landscapePrimary', angle: 90 } });
+                    await checkPlayerLayout(page, 'Fullscreen rotated back');
+                }
+            }
+            await page.locator('#help-button').click();
+            const download = page.waitForEvent('download');
+            await page.locator('#export').click();
+            assert.ok((await download).suggestedFilename(), 'Export must be clickable in fullscreen');
+            await page.locator('#fullscreen').click();
+            await page.waitForFunction(() => !document.fullscreenElement &&
+                document.getElementById('fullscreen').getAttribute('aria-pressed') === 'false');
+            assert.deepEqual(await page.evaluate(() => orientationCalls), mobile ? [['portrait', 'game'], ['unlock']] : []);
+            await page.locator('#close-help').click();
+            await checkPlayerLayout(page, name + ' restored');
+            await checkSmallText(page, name + ' restored');
+            if (mobile) {
+                for (const unavailable of ['rejected', 'missing']) {
+                    await page.evaluate(mode => Object.defineProperty(screen.orientation, 'lock', { value:
+                        mode === 'missing' ? undefined : async () => { throw new Error('Orientation lock unavailable'); }
+                    }), unavailable);
+                    await page.locator('#help-button').click();
+                    await page.locator('#fullscreen').click();
+                    await page.waitForFunction(() => document.fullscreenElement?.id === 'game' &&
+                        document.getElementById('fullscreen').getAttribute('aria-pressed') === 'true');
+                    await page.locator('#close-help').click();
+                    await page.locator('#help-button').click();
+                    // Browser-initiated exit must release a pending/rejected lock too.
+                    await page.evaluate(() => document.exitFullscreen());
+                    await page.waitForFunction(() => !document.fullscreenElement &&
+                        document.getElementById('fullscreen').getAttribute('aria-pressed') === 'false');
+                    await page.locator('#close-help').click();
+                }
+                assert.deepEqual(await page.evaluate(() => orientationCalls.at(-1)), ['unlock']);
+            }
+            assert.deepEqual(errors, []);
+        } finally { await context.close(); }
+    }
+    console.log('PASS: mobile/desktop fullscreen menu and export, portrait request/unlock/fallback, native resolution, small text and all four box edges at 1x/1.25x/2x/3x density');
 }
 
 async function mobileSmoke(browser, url, output) {
@@ -470,6 +615,7 @@ async function main() {
         assert.deepEqual(errors, [], 'Game must not report uncaught browser errors');
         console.log('PASS: game startup, native save, IndexedDB reload, companion history, original-format export, load and backup');
         await mobileSmoke(browser, url, output);
+        await fullscreenSmoke(browser, url, output);
         await languageSmoke(browser, url, output);
     } finally {
         console.log('Final page status:', await page.locator('body').innerText().catch(() => 'Page unavailable'));

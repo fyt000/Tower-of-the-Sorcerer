@@ -111,6 +111,8 @@ CanvasViewport window_viewport() {
     view.window_height = GetScreenHeight();
     view.framebuffer_width = GetRenderWidth();
     view.framebuffer_height = GetRenderHeight();
+    view.touch_scale = EM_ASM_DOUBLE(
+        { return Module['canvas'].width / Math.max(1, Module['canvas'].getBoundingClientRect().width); });
 #endif
     view.window_width = std::max(1, view.window_width);
     view.window_height = std::max(1, view.window_height);
@@ -120,7 +122,7 @@ CanvasViewport window_viewport() {
         // Keep both the map and the right HUD clear of the thumb controls.
         right -= (3 * 48 + 2 * 4 + 16 + 8) * view.touch_scale;
 #ifdef __EMSCRIPTEN__
-        left = EM_ASM_DOUBLE({ return Module['tswGameLeftInset'] || 0; });
+        left = EM_ASM_DOUBLE({ return Module['tswGameLeftInset'] || 0; }) * view.touch_scale;
 #endif
         scale = std::min(scale, std::max(.1f, (right - left) / CanvasWidth));
     }
@@ -128,10 +130,15 @@ CanvasViewport window_viewport() {
                             std::max(left, right - CanvasWidth * scale)),
                  (view.window_height - CanvasHeight * scale) / 2, CanvasWidth * scale, CanvasHeight * scale};
 #ifdef __EMSCRIPTEN__
+    // The game texture and its final destination must share a physical pixel grid.
+    // A fractional destination introduces a second resampling pass over small glyphs.
+    view.area = {std::round(view.area.x), std::round(view.area.y), std::round(view.area.width),
+                 std::round(view.area.height)};
     // Expose the actual letterboxing to the browser host, including compact phone layouts.
     EM_ASM(
-        { Module['tswCanvasViewport'] = ({x : $0, y : $1, width : $2, height : $3}); }, view.area.x,
-        view.area.y, view.area.width, view.area.height);
+        { Module['tswCanvasViewport'] = ({x : $0, y : $1, width : $2, height : $3}); },
+        view.area.x / view.touch_scale, view.area.y / view.touch_scale, view.area.width / view.touch_scale,
+        view.area.height / view.touch_scale);
 #endif
     return view;
 }
@@ -235,7 +242,9 @@ struct Typography {
         Font at(int size, float scale) const {
             if (bytes.empty())
                 return GetFontDefault();
-            const int pixels = std::max(1, int(std::round(size * scale)));
+            // Below nine physical pixels, outline-font strokes become nearly
+            // transparent even before compositing on a small, low-density screen.
+            const int pixels = std::max(9, int(std::round(size * scale)));
             auto& font = sizes[size];
             if (!font.get().texture.id || font.get().baseSize != pixels) {
                 font.reset(
@@ -259,6 +268,14 @@ struct Typography {
         japanese.load("assets/fonts/cjk.ttf");
         chinese.load("assets/fonts/cjk.ttf");
         labels.load("assets/fonts/labels.otf");
+#ifdef __EMSCRIPTEN__
+        // The startup subset also contains ASCII. Rasterize English at its actual
+        // display size instead of shrinking raylib's built-in bitmap glyphs.
+        if (body.bytes.empty())
+            body.load("assets/fonts/labels.otf");
+        if (numbers.bytes.empty())
+            numbers.load("assets/fonts/labels.otf");
+#endif
 #ifdef __ANDROID__
         if (body.bytes.empty())
             body.load("/system/fonts/Roboto-Regular.ttf");
@@ -345,6 +362,18 @@ struct Typography {
         return {std::round(x * scale.x) / scale.x, std::round(y * scale.y) / scale.y};
     }
 
+    void outline(Rectangle rect, float thickness, Color color) const {
+        const auto top = position(rect.x, rect.y);
+        const auto bottom = position(rect.x + rect.width, rect.y + rect.height);
+        const float width = bottom.x - top.x, height = bottom.y - top.y;
+        const float dx = std::max(1.f, std::round(thickness * scale.x)) / scale.x;
+        const float dy = std::max(1.f, std::round(thickness * scale.y)) / scale.y;
+        DrawRectangleRec({top.x, top.y, width, dy}, color);
+        DrawRectangleRec({top.x, bottom.y - dy, width, dy}, color);
+        DrawRectangleRec({top.x, top.y, dx, height}, color);
+        DrawRectangleRec({bottom.x - dx, top.y, dx, height}, color);
+    }
+
     void clip(Rectangle rect) const {
         const int x = int(std::floor(rect.x * scale.x)), y = int(std::floor(rect.y * scale.y));
         BeginScissorMode(x, y, int(std::ceil((rect.x + rect.width) * scale.x)) - x,
@@ -388,7 +417,7 @@ struct Typography {
             face, text.c_str(),
             position(rect.x + (options.alignment == TextAlignment::Right ? rect.width - measured - 3
                                                                          : (rect.width - measured) / 2),
-                     rect.y + (rect.height - size) / 2),
+                     rect.y + (rect.height - font_size(face, size)) / 2),
             font_size(face, size), spacing(face, size), color);
         EndScissorMode();
     }
@@ -423,8 +452,8 @@ struct Typography {
     bool button(Rectangle rect, const std::string& label, Vector2 mouse, bool enabled = true) const {
         const bool hover = enabled && CheckCollisionPointRec(mouse, rect);
         DrawRectangleRec(rect, hover ? Color{89, 78, 75, 255} : Panel);
-        DrawRectangleLinesEx(rect, 1, enabled ? Border : Color{99, 93, 94, 255});
         fit(label, rect, 18, enabled ? Ink : Color{145, 140, 143, 255});
+        outline(rect, 1, enabled ? Border : Color{99, 93, 94, 255});
         return enabled && clicked(rect, mouse);
     }
 
@@ -433,7 +462,7 @@ struct Typography {
         DrawRectangle(int(rect.x + 4), int(rect.y + 5), int(rect.width), int(rect.height),
                       Color{0, 0, 0, 170});
         DrawRectangleRec(rect, Panel);
-        DrawRectangleLinesEx(rect, 2, Border);
+        outline(rect, 2, Border);
         draw(title, int(rect.x + 18), int(rect.y + 16), 21, Gold);
         DrawLine(int(rect.x + 18), int(rect.y + 45), int(rect.x + rect.width - 18), int(rect.y + 45), Border);
     }
@@ -447,7 +476,7 @@ struct Typography {
                             : anchor.y - height - 6;
         const Rectangle rect{x, y, 324, height};
         DrawRectangleRec(rect, Color{38, 35, 43, 255});
-        DrawRectangleLinesEx(rect, 1, Gold);
+        outline(rect, 1, Gold);
         draw(wrapped, int(x + 12), int(y + 10), 16, Ink, false);
     }
 };
@@ -570,7 +599,7 @@ struct Presentation::Art {
                 DrawRectangle(int(rect.x) + 25 + i, int(rect.y) + 36 - i, 2, 2, enabled ? Ink : Muted);
         }
         if (hover) {
-            DrawRectangleLinesEx({rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2}, 1, Gold);
+            text.outline({rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2}, 1, Gold);
 #ifndef __ANDROID__
             SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
 #endif
@@ -1077,7 +1106,7 @@ UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mous
                                  game.visual.raster_mode == RasterMode::Inactive && !collecting();
         constexpr Rectangle all{28, 480, 40, 40}, except{88, 480, 40, 40};
         DrawRectangle(22, 476, 112, 48, Panel);
-        DrawRectangleLinesEx({22, 476, 112, 48}, 1, Border);
+        art_->text.outline({22, 476, 112, 48}, 1, Border);
         if (art_->collection_button(all, false, mouse, can_collect))
             action = {Action::CollectAll};
         if (art_->collection_button(except, true, mouse, can_collect))
@@ -1257,7 +1286,7 @@ void Presentation::draw_qol_status(const DesktopUi& ui, Rectangle rect, Vector2 
     const int count = int(ui.mouse_walking) + int(ui.blink_mode) + int(ui.hero_orb_actual_damage) +
                       int(ui.realtime_hero_orb) + int(ui.item_collection);
     DrawRectangleRec(rect, Bar);
-    DrawRectangleLinesEx(rect, 1, count ? Gold : Border);
+    art_->text.outline(rect, 1, count ? Gold : Border);
     art_->text.fit(count ? std::format("QOL: {} enabled", count) : "QOL: none", rect, 16,
                    count ? Gold : Muted);
     if (CheckCollisionPointRec(mouse, rect)) {
@@ -1346,7 +1375,7 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
     } else if (ui.menu == Menu::Game) {
         constexpr Rectangle rect{6, MenuHeight, 214, 339};
         DrawRectangleRec(rect, Panel);
-        DrawRectangleLinesEx(rect, 1, Border);
+        art_->text.outline(rect, 1, Border);
         const std::array<const char*, 10> labels{"New game [F2]",      "Save slots [F6]",
                                                  "Load slots [F7]",    "Quick save [F5]",
                                                  "Quick restore [F9]", "Fairy checkpoint [F8]",
@@ -1373,7 +1402,7 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
             if (art_->text.button(tab, tabs[i], mouse))
                 ui.settings_tab = static_cast<SettingsTab>(i);
             if (int(ui.settings_tab) == i)
-                DrawRectangleLinesEx(tab, 2, Gold);
+                art_->text.outline(tab, 2, Gold);
         }
         const float left = rect.x + 18;
         if (ui.settings_tab == SettingsTab::Game) {
@@ -1459,7 +1488,7 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
                 if (art_->text.button(choice, std::string(language_label(Languages[i])), mouse))
                     return {Action::Language, i};
                 if (ui.language == Languages[i])
-                    DrawRectangleLinesEx(choice, 2, Gold);
+                    art_->text.outline(choice, 2, Gold);
             }
         }
         if (art_->text.button({rect.x + 490, rect.y + 426, 192, 48}, "Done [Esc]", mouse))
@@ -1503,7 +1532,7 @@ UiAction Presentation::draw_rankings(const Game& game, DesktopUi& ui, Vector2 mo
                         16, Gold);
         const Rectangle input{128, 415, 430, 30};
         DrawRectangleRec(input, Bar);
-        DrawRectangleLinesEx(input, 1, Gold);
+        art_->text.outline(input, 1, Gold);
         art_->text.draw(ui.ranking_name + "_", 136, 420, 18, Ink, false);
     }
     if (art_->text.button({128, 464, 178, 30},
@@ -1535,7 +1564,7 @@ UiAction Presentation::draw_save_slots(const Game& game, DesktopUi& ui, Vector2 
         const bool selected = ui.selected_slot == i + 1;
         const bool hover = CheckCollisionPointRec(mouse, card);
         DrawRectangleRec(card, selected ? Color{84, 69, 65, 255} : Color{45, 43, 51, 255});
-        DrawRectangleLinesEx(card, selected ? 2.f : 1.f, selected || hover ? Gold : Border);
+        art_->text.outline(card, selected ? 2.f : 1.f, selected || hover ? Gold : Border);
         art_->text.draw(std::format("Slot {}", i + 1), int(card.x + 12), int(card.y + 7), 18, Gold);
         if (info.state == SaveSlotState::Ready) {
             const std::string mode = !info.backside     ? "Frontside"
@@ -1620,7 +1649,7 @@ UiAction Presentation::draw_replays(DesktopUi& ui, Vector2 mouse) {
         DrawRectangleRec(button, Panel);
         art_->text.fit(std::string(text.begin(), text.end()), button, 18, Ink, {.translate = false});
         if (ui.replay_selected == index)
-            DrawRectangleLinesEx(button, 2, Gold);
+            art_->text.outline(button, 2, Gold);
     }
     if (!count)
         art_->text.draw(
@@ -1629,7 +1658,7 @@ UiAction Presentation::draw_replays(DesktopUi& ui, Vector2 mouse) {
     art_->text.draw("Recording file  /  Ctrl+V to paste", int(rect.x + 18), int(rect.y + 292), 16, Muted);
     const Rectangle field{rect.x + 18, rect.y + 318, 644, 34};
     DrawRectangleRec(field, Color{31, 29, 36, 255});
-    DrawRectangleLinesEx(field, 1, ui.replay_path_focus ? Gold : Border);
+    art_->text.outline(field, 1, ui.replay_path_focus ? Gold : Border);
     if (clicked(field, mouse))
         ui.replay_path_focus = true;
     art_->text.clip(field);
@@ -1709,7 +1738,7 @@ UiAction Presentation::draw_ending_summary(const EndingSummary& summary, Desktop
         const float x = 32.f + (shown % 2) * 376, y = 272.f + (shown / 2) * 80;
         ++shown;
         DrawRectangleRec({x, y, 360, 74}, Panel);
-        DrawRectangleLinesEx({x, y, 360, 74}, 1, Border);
+        art_->text.outline({x, y, 360, 74}, 1, Border);
         art_->icon(entry.icon, {x + 10, y + 13, 48, 48});
         if (entry.overlay) {
             DrawRectangleRec({x + 40, y + 43, 24, 24}, Color{29, 27, 35, 255});
@@ -2011,7 +2040,7 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, floa
         if (!mouse_path(game, *destination).empty()) {
             const Rectangle target{float(BoardX + *destination % BoardWidth * TileSize),
                                    float(BoardY + *destination / BoardWidth * TileSize), TileSize, TileSize};
-            DrawRectangleLinesEx(target, 1.f, Gold);
+            art_->text.outline(target, 1.f, Gold);
 #ifndef __ANDROID__
             SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
 #endif

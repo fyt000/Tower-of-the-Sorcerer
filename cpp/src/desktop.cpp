@@ -227,8 +227,16 @@ struct GameLoop {
 
     void frame() {
 #ifdef __EMSCRIPTEN__
-        const int width = EM_ASM_INT({ return Module['canvas'].clientWidth; });
-        const int height = EM_ASM_INT({ return Module['canvas'].clientHeight; });
+        // Raylib's web backend does not enable GLFW HiDPI. Keep its window in
+        // physical pixels; the shell owns the CSS size and input is mapped by GLFW.
+        const int width = EM_ASM_INT({
+            return Math.round(Module['canvas'].getBoundingClientRect().width *
+                              (window.devicePixelRatio || 1));
+        });
+        const int height = EM_ASM_INT({
+            return Math.round(Module['canvas'].getBoundingClientRect().height *
+                              (window.devicePixelRatio || 1));
+        });
         if (width > 0 && height > 0 && (width != GetScreenWidth() || height != GetScreenHeight()))
             SetWindowSize(width, height);
 #endif
