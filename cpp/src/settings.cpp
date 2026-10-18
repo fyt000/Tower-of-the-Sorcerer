@@ -1,4 +1,5 @@
 #include "tsw/settings.hpp"
+#include <cmath>
 #include <glaze/json.hpp>
 #include <stdexcept>
 
@@ -14,6 +15,10 @@ void validate(const Settings& settings) {
     if (settings.game_speed_index < 0 || settings.game_speed_index >= std::ssize(GameSpeeds) ||
         settings.replay_speed_index < 0 || settings.replay_speed_index >= std::ssize(ReplaySpeeds))
         throw std::runtime_error("Saved speed setting is out of range");
+    if (settings.animation_speed &&
+        (!std::isfinite(*settings.animation_speed) || *settings.animation_speed < MinAnimationSpeed / 10.f ||
+         *settings.animation_speed > MaxAnimationSpeed / 10.f))
+        throw std::runtime_error("Saved animation speed is out of range");
 }
 } // namespace
 

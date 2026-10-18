@@ -29,9 +29,15 @@ int verify_localization(Presentation& renderer, const std::filesystem::path& out
         ui.home = true;
         capture("home");
         ui.menu = Menu::Options;
+        ui.animation_speed = 5.5f;
         capture("settings");
+        ui.settings_tab = SettingsTab::Qol;
+        capture("settings-qol");
         ui.item_collection = true;
         capture("settings-collection");
+        ui.skip_attack_animation = ui.skip_staircase_animation = true;
+        capture("settings-animation-skips");
+        ui.skip_attack_animation = ui.skip_staircase_animation = false;
         ui.item_collection = false;
         ui.settings_tab = SettingsTab::Controls;
         capture("settings-controls");
@@ -46,6 +52,14 @@ int verify_localization(Presentation& renderer, const std::filesystem::path& out
         ui.help = true;
         capture("help");
         ui.help = false;
+        ui.menu = Menu::Game;
+        capture("game-menu");
+        ui.menu = Menu::None;
+        ui.save_picker = SavePicker::Load;
+        ui.quick_available = ui.fairy_available = true;
+        ui.autosave_slot = {SaveSlotState::Ready, 12, 1234, 100, 100};
+        capture("load-autosave");
+        ui.save_picker = SavePicker::None;
         game.dialogue = Dialogue{std::string(Game::original_dialogue(static_cast<DialogueId>(52))),
                                  ContinuationStage::None,
                                  false,

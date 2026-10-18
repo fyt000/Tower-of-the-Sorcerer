@@ -36,18 +36,21 @@ DesktopSession::DesktopSession(const Assets& assets, const std::filesystem::path
         game.status = error.what();
         ui.notice = error.what();
     }
-    ui.game_speed_index = settings.game_speed_index;
+    ui.animation_speed = settings.effective_animation_speed();
     ui.replay_speed_index = settings.replay_speed_index;
     ui.muted = settings.muted;
     ui.hero_orb_actual_damage = settings.hero_orb_actual_damage;
     ui.mouse_walking = settings.mouse_walking;
     ui.blink_mode = settings.blink_mode;
     ui.item_collection = settings.item_collection;
+    ui.skip_attack_animation = settings.skip_attack_animation;
+    ui.skip_staircase_animation = settings.skip_staircase_animation;
     ui.realtime_hero_orb = settings.realtime_hero_orb;
     ui.touch_controls = settings.touch_controls;
     ui.language = parse_language(settings.language);
     recorder_.enable(record.value_or(settings.recording));
     recorder_.new_game(game.rankings);
+    autosave_.reset(game);
     recording_status();
     audio.mute(ui.muted);
     audio.restart(game);
@@ -76,8 +79,7 @@ float DesktopSession::scaled_seconds(float real_seconds) const {
         return real_seconds;
     if (ui.modal() || (ui.replay_active && ui.replay_paused))
         return 0;
-    return real_seconds *
-           (ui.replay_active ? ReplaySpeeds[ui.replay_speed_index] : GameSpeeds[ui.game_speed_index]);
+    return real_seconds * (ui.replay_active ? ReplaySpeeds[ui.replay_speed_index] : ui.animation_speed);
 }
 
 void DesktopSession::move(Direction direction) {
@@ -119,15 +121,12 @@ void DesktopSession::recording_status() {
         ui.replay_count = replay_->size();
         ui.replay_in_progress = replay_action_;
     }
-    audio.speed(ui.home            ? 1.f
-                : ui.replay_active ? ReplaySpeeds[ui.replay_speed_index]
-                                   : GameSpeeds[ui.game_speed_index]);
+    audio.speed(ui.home ? 1.f : ui.replay_active ? ReplaySpeeds[ui.replay_speed_index] : ui.animation_speed);
     audio.suspend(ui.replay_active && !ui.home && (ui.replay_paused || ui.modal()));
 }
 
 void DesktopSession::preferences() {
-    save_settings(save_directory_ / "settings.json", {.game_speed_index = ui.game_speed_index,
-                                                      .replay_speed_index = ui.replay_speed_index,
+    save_settings(save_directory_ / "settings.json", {.replay_speed_index = ui.replay_speed_index,
                                                       .recording = recorder_.enabled(),
                                                       .muted = ui.muted,
                                                       .hero_orb_actual_damage = ui.hero_orb_actual_damage,
@@ -136,7 +135,10 @@ void DesktopSession::preferences() {
                                                       .realtime_hero_orb = ui.realtime_hero_orb,
                                                       .touch_controls = ui.touch_controls,
                                                       .blink_mode = ui.blink_mode,
-                                                      .item_collection = ui.item_collection});
+                                                      .item_collection = ui.item_collection,
+                                                      .skip_attack_animation = ui.skip_attack_animation,
+                                                      .skip_staircase_animation = ui.skip_staircase_animation,
+                                                      .animation_speed = ui.animation_speed});
 }
 
 void DesktopSession::open_home(bool startup) {
@@ -160,6 +162,7 @@ void DesktopSession::open_home(bool startup) {
 void DesktopSession::load(const std::filesystem::path& path, SaveKind kind) {
     mouse_walk_.cancel();
     recorder_.load(game, path, kind);
+    autosave_.reset(game); // Restoring history must not immediately replace a floor-entry save.
     replay_.reset();
     ui.replay_active = ui.replay_paused = false;
     refresh_rankings();
@@ -169,7 +172,7 @@ void DesktopSession::load(const std::filesystem::path& path, SaveKind kind) {
     ui.close_overlays();
     ui.flight = -1;
     ui.ending_wait = false;
-    accumulator_ = 0;
+    playback_.reset();
     previous_dialogue_.clear();
     audio.suspend(false);
     audio.restart(game);
@@ -214,7 +217,8 @@ void DesktopSession::replay(const std::filesystem::path& path) {
     ui.replay_name = path_text(path.filename());
     ui.replay_error.clear();
     replay_action_ = replay_single_step_ = false;
-    accumulator_ = replay_age_ = replay_speech_ = 0;
+    playback_.reset();
+    replay_age_ = replay_speech_ = 0;
     previous_dialogue_.clear();
     audio.suspend(false);
     audio.restart(game);
@@ -225,7 +229,8 @@ void DesktopSession::seek_replay(std::size_t step) {
     replay_->seek(game, ui.flight, step);
     replay_action_ = replay_single_step_ = false;
     replay_commands_ = 0;
-    accumulator_ = replay_age_ = replay_speech_ = 0;
+    playback_.reset();
+    replay_age_ = replay_speech_ = 0;
     previous_dialogue_.clear();
     ui.replay_paused = true;
     ui.ending_wait = false;
@@ -235,23 +240,10 @@ void DesktopSession::seek_replay(std::size_t step) {
 }
 
 bool DesktopSession::advance_queue(float seconds) {
-    accumulator_ += seconds;
-    bool blocked = false;
-    for (int commands = 0; commands < 64; ++commands) {
-        if (ui.ending_wait || ui.save_picker != SavePicker::None) {
-            accumulator_ = 0;
-            break;
-        }
-        const float beat = command_interval(game);
-        if (accumulator_ < beat)
-            break;
-        Command command;
-        const bool backside = game.hero.cycle_factor_minus_one != 0;
-        if (!game.run_one(&command)) {
-            accumulator_ = 0;
-            blocked = true;
-            break;
-        }
+    if (ui.ending_wait || ui.save_picker != SavePicker::None)
+        return false;
+    bool backside = game.hero.cycle_factor_minus_one != 0;
+    const bool blocked = playback_.advance(game, seconds, ui, [&](const Command& command) {
         if (replay_ && ++replay_commands_ > 10000000)
             throw std::runtime_error("Replay action exceeded ten million operations");
         renderer.command(command);
@@ -265,8 +257,9 @@ bool DesktopSession::advance_queue(float seconds) {
             ui.ending_wait = true;
             replay_speech_ = 0;
         }
-        accumulator_ -= beat;
-    }
+        backside = game.hero.cycle_factor_minus_one != 0;
+        return !ui.ending_wait && ui.save_picker == SavePicker::None;
+    });
     audio.update(game);
     return blocked;
 }
@@ -314,7 +307,7 @@ void DesktopSession::advance_replay(float seconds) {
         if ((shop || (blocked && !game.dialogue && !ui.ending_wait)) &&
             (shop ? replay_speech_ >= SpeechSeconds : replay_age_ >= ReplayStepSeconds)) {
             replay_action_ = false;
-            accumulator_ = 0;
+            playback_.reset();
             if (replay_single_step_ || replay_->finished()) {
                 replay_single_step_ = false;
                 ui.replay_paused = true;
@@ -350,6 +343,13 @@ void DesktopSession::advance_commands(float seconds) {
             }
         }
     }
+    if (!ui.replay_active)
+        try {
+            autosave_.update(game, recorder_, save_directory_, ui.flight < 0 && !ui.ending_wait);
+        } catch (const std::exception& error) {
+            game.status = std::string("Floor autosave failed: ") + error.what();
+            ui.notice = game.status;
+        }
     recording_status();
     const auto dialogue = game.dialogue ? game.dialogue->text : std::string();
     if (dialogue != previous_dialogue_) {
@@ -371,6 +371,7 @@ void DesktopSession::apply(UiAction action) {
     case Action::Load:
     case Action::LoadSlot:
     case Action::OpenLoadSlots:
+    case Action::LoadAutosave:
     case Action::FairyCheckpoint:
         // Original item, Hero Orb and Flight panels call 0x450758. Enforce
         // their file-control gate here as well as in the rendered buttons:
@@ -461,13 +462,14 @@ void DesktopSession::apply(UiAction action) {
         ui.replay_active = ui.replay_paused = ui.home = false;
         ui.game_started = true;
         recorder_.new_game(game.rankings);
+        autosave_.reset(game, true);
         renderer.reset();
         audio.suspend(false);
         audio.restart(game);
         ui.close_overlays();
         ui.flight = -1;
         ui.ending_wait = false;
-        accumulator_ = 0;
+        playback_.reset();
         previous_dialogue_.clear();
         ui.notice.clear();
         break;
@@ -548,6 +550,7 @@ void DesktopSession::apply(UiAction action) {
             replay_.reset();
             replay_action_ = replay_single_step_ = false;
             ui.replay_active = ui.replay_paused = false;
+            autosave_.reset(game);
             ui.close_overlays();
             game.status = "You now control the hero.";
             audio.suspend(false);
@@ -566,6 +569,7 @@ void DesktopSession::apply(UiAction action) {
         if (action.kind == Action::OpenSaveSlots && game.busy())
             throw std::runtime_error("Finish the current action before saving");
         ui.save_slots = inspect_save_slots(save_directory_);
+        ui.autosave_slot = inspect_floor_autosave(save_directory_);
         ui.quick_available = std::filesystem::is_regular_file(save_directory_ / "quick.save");
         ui.fairy_available = std::filesystem::is_regular_file(save_directory_ / "save0.dat");
         ui.close_overlays();
@@ -587,8 +591,10 @@ void DesktopSession::apply(UiAction action) {
     case Action::Load:
     case Action::FairyCheckpoint:
     case Action::LoadSlot:
-        load(action.kind == Action::LoadSlot
-                 ? save_slot_path(save_directory_, action.value)
+    case Action::LoadAutosave:
+        load(action.kind == Action::LoadSlot ? save_slot_path(save_directory_, action.value)
+             : action.kind == Action::LoadAutosave
+                 ? floor_autosave_path(save_directory_)
                  : save_directory_ / (action.kind == Action::Load ? "quick.save" : "save0.dat"),
              action.kind == Action::FairyCheckpoint ? SaveKind::Checkpoint : SaveKind::Slot);
         if (action.kind == Action::LoadSlot) {
@@ -605,7 +611,7 @@ void DesktopSession::apply(UiAction action) {
     } break;
     case Action::ContinueEnding:
         ui.ending_wait = false;
-        accumulator_ = 0;
+        playback_.reset();
         break;
     case Action::Choose:
         play(PlayerInput::choose(action.value));
@@ -638,7 +644,7 @@ void DesktopSession::apply(UiAction action) {
         preferences();
         break;
     case Action::Speed:
-        ui.game_speed_index = std::clamp(action.value, 0, int(GameSpeeds.size()) - 1);
+        ui.animation_speed = std::clamp(action.value, MinAnimationSpeed, MaxAnimationSpeed) / 10.f;
         preferences();
         break;
     case Action::Recording:
@@ -662,6 +668,14 @@ void DesktopSession::apply(UiAction action) {
         break;
     case Action::ItemCollection:
         ui.item_collection = !ui.item_collection;
+        preferences();
+        break;
+    case Action::SkipAttackAnimation:
+        ui.skip_attack_animation = !ui.skip_attack_animation;
+        preferences();
+        break;
+    case Action::SkipStaircaseAnimation:
+        ui.skip_staircase_animation = !ui.skip_staircase_animation;
         preferences();
         break;
     case Action::RealtimeHeroOrb:

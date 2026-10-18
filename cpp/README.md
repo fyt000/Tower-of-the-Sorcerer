@@ -50,17 +50,22 @@ Run beside the original `Data3/`, `Data2/`, `Midi/` and `Wav/` folders, or pass
 | Enter / Space | Continue dialogue or ending |
 | Item click / I | Inspect/use items / open inventory |
 | Flight: Up/Down, Enter, Esc | Preview, travel, cancel |
-| F6 / F7 | Manual save/load; select slot with 1–8 or arrows |
-| F5 / F9 / F8 | Quick save / quick restore / Fairy checkpoint |
-| F2 / M / R | New game / mute / rankings |
+| K / L | Manual save/load; select slot with 1–8 or arrows |
+| Q / Shift+Q | Quick save / quick restore |
+| Shift+L | Restore latest floor-entry autosave |
+| Shift+F | Restore Fairy checkpoint |
+| Shift+N / M / R | New game / mute / rankings |
+| O / H | Settings / help |
 | Esc | Close overlay or open main menu |
 
 Keyboard and touch directions step immediately, then repeat after a 250 ms hold
 at 120 ms intervals, independently of animation speed.
 The hero slides between adjacent tiles over 120 ms on the same real-time clock for
 manual movement; automatic walking and replay use scaled animation time.
-Menus and dialogue require
-releasing a held direction before walking again. Above 1x, repeated sound effects
+Menus and dialogue require releasing a held direction before walking again. Held
+movement resumes as soon as a door or other event finishes, without losing a due
+step or accumulating extra steps.
+Above 1x, repeated sound effects
 are consolidated, crossfaded and shortened; music and effect pitch retain their
 normal playback rate.
 
@@ -72,7 +77,11 @@ and [languages](locales/README.md).
 ## Saves and replay
 
 Manual slots are `save1.dat`–`save8.dat`, quick save is `quick.save`, and the
-Fairy checkpoint is `save0.dat`. Saves retain the original format; replacement
+Fairy checkpoint is `save0.dat`. One rolling floor-entry autosave is kept in
+`autosave.save`; Shift+L or the load picker restores it. It updates on entering a
+floor, after arrival animations, fights and dialogue finish, including the first floor
+of a new game. It does not replace quick saves or manual slots. Loading a save or
+watching a replay does not overwrite it. Saves retain the original format; replacement
 keeps a `.bak`. Invalid loads preserve the running game. Rankings persist
 independently; settings are in `settings.json`.
 

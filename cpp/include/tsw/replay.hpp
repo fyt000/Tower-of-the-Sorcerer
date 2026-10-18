@@ -122,4 +122,15 @@ class Recorder {
     bool enabled_{};
     std::optional<std::vector<PlayerInput>> history_;
 };
+
+// Application-only floor-entry saves; the native command queue and replay format stay unchanged.
+class FloorAutosave {
+  public:
+    void reset(const Game&, bool save_current = false);
+    bool update(Game&, Recorder&, const std::filesystem::path& directory, bool ready = true);
+
+  private:
+    int floor_ = -1, cycle_{}, later_cycle_{};
+    bool pending_{};
+};
 } // namespace tsw

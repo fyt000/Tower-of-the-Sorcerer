@@ -28,9 +28,10 @@ class DesktopSession {
     bool replay_action_{}, replay_single_step_{};
     float replay_age_{}, replay_speech_{};
     std::size_t replay_commands_{};
-    float accumulator_{};
+    CommandPlayback playback_;
     std::string previous_dialogue_;
     MouseWalk mouse_walk_;
+    FloorAutosave autosave_;
     void move_step(Direction direction, bool manual = false);
     void apply(UiAction action);
     bool play(const PlayerInput&);

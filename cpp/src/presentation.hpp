@@ -10,6 +10,7 @@
 #include "tsw/settings.hpp"
 #include <array>
 #include <filesystem>
+#include <functional>
 #include <memory>
 
 namespace tsw {
@@ -33,20 +34,24 @@ CanvasViewport window_viewport();
 bool touch_device();
 
 enum class Menu { None, Game, Options, About };
-enum class SettingsTab { Game, Controls, Replay, Language };
+enum class SettingsTab { Game, Qol, Controls, Replay, Language };
 enum class SavePicker { None, Save, Load };
 
 struct DesktopUi {
     Language language = Language::English;
-    int flight = -1, selected_item = -1, game_speed_index{}, enemy_first_row{};
+    int flight = -1, selected_item = -1, enemy_first_row{};
+    float animation_speed = 1;
     int selected_slot = 1;
     SavePicker save_picker = SavePicker::None;
     SaveSlots save_slots;
+    SaveSlotInfo autosave_slot;
     bool inventory{}, enemies{}, help{}, muted{}, ending_wait{}, hero_orb_actual_damage{};
     bool recording_enabled{}, recording_active{};
     bool mouse_walking{};
     bool blink_mode{};
     bool item_collection{};
+    bool skip_attack_animation{};
+    bool skip_staircase_animation{};
     bool realtime_hero_orb{};
     std::optional<bool> touch_controls;
 
@@ -133,13 +138,19 @@ enum class Action {
     BlinkMode,
     CollectAll,
     CollectExceptPotions,
-    ItemCollection
+    ItemCollection,
+    SkipAttackAnimation,
+    SkipStaircaseAnimation,
+    LoadAutosave
 };
 
 struct UiAction {
     Action kind = Action::None;
     int value{};
 };
+
+UiAction keyboard_input(const Game&, DesktopUi&);
+bool game_shortcut_modifiers();
 
 inline constexpr float WalkInitialDelaySeconds = .25f, WalkRepeatSeconds = .12f, WalkAnimationSeconds = .12f;
 inline constexpr float ReplayStepSeconds = MouseWalk::StepSeconds;
@@ -148,10 +159,10 @@ std::optional<int> mouse_destination(const Game&, const DesktopUi&, Vector2 mous
 
 struct WalkRepeat {
     float remaining{};
-    bool active{}, blocked{};
+    bool active{}, blocked{}, first{};
 
     // Real time only. Disabled input requires release before another press can move.
-    bool update(bool pressed, bool held, float seconds, bool enabled = true) {
+    bool update(bool pressed, bool held, float seconds, bool enabled = true, bool ready = true) {
         if (!held) {
             *this = {};
             return false;
@@ -164,15 +175,23 @@ struct WalkRepeat {
             return false;
         if (pressed) {
             active = true;
-            remaining = WalkInitialDelaySeconds;
-            return true;
+            first = true;
+            remaining = 0;
+        } else if (active) {
+            remaining -= seconds;
         }
         if (!active)
             return false;
-        remaining -= seconds;
         if (remaining > 0)
             return false;
-        remaining = WalkRepeatSeconds;
+        if (!ready) {
+            remaining = 0; // Keep a due step pending, without building a backlog during an event.
+            return false;
+        }
+        remaining = first ? WalkInitialDelaySeconds : remaining + WalkRepeatSeconds;
+        if (remaining <= 0)
+            remaining = WalkRepeatSeconds; // A long frame emits at most one step.
+        first = false;
         return true;
     }
 };
@@ -191,7 +210,20 @@ struct TouchRepeat {
     bool blocked{};
 
     std::optional<TouchButton> update(TouchContext current, std::optional<TouchButton> hovered, bool down,
-                                      bool pressed, float seconds);
+                                      bool pressed, float seconds, bool ready = true);
+};
+
+// Command pacing shared by live play and replay; does not open an audio device.
+class CommandPlayback {
+  public:
+    bool advance(Game&, float seconds, const DesktopUi&,
+                 const std::function<bool(const Command&)>& observe = {});
+
+    void reset() { *this = {}; }
+
+  private:
+    float accumulator_{};
+    bool strike_pending_{}, battle_preview_shown_{}, finishing_battle_{};
 };
 
 // Owns raylib resources. Gameplay and save files never depend on this class.
@@ -238,6 +270,7 @@ class Presentation {
     TouchContext touch_context_ = TouchContext::Hidden;
     bool touch_busy_{}, pointer_down_{}, pointer_pressed_{}, pointer_cancelled_{};
     bool dialogue_dragging_{}, dialogue_moved_{};
+    bool speed_dragging_{};
     Vector2 dialogue_start_{}, dialogue_last_{};
     std::string dialogue_text_;
     UiAction draw_touch_controls(const Game&, TouchContext, std::optional<TouchButton>);

@@ -331,6 +331,7 @@ class Game {
     bool choose(int choice);
     bool run_one(Command* executed = nullptr); // One command, never a recursive timer call.
     void finish_commands(bool continue_speech = false);
+    void skip_battle_rounds(); // Collapse unshown rounds, retaining the native final strike and callbacks.
     bool busy() const;
 
     const std::optional<StatusMessage>& status_message() const { return displayed_status_; }

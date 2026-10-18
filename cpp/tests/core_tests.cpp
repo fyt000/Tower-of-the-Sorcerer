@@ -309,6 +309,66 @@ TEST_CASE("Long original fights complete with bounded command memory", "[combat]
     }
 }
 
+TEST_CASE("Skipping battle rounds preserves native damage rewards and final strikes", "[combat]") {
+    for (int target : {int(GreenSlime), int(Vampire), int(DragonHead), int(OctopusMouth), int(OctopusFirst),
+                       int(GreatMagicMaster)})
+        for (int cycle : {0, 43})
+            for (bool enemy_first : {false, true})
+                for (bool fatal : {false, true})
+                    for (int delay : {0, 1, 5, 13}) {
+                        CAPTURE(target, cycle, enemy_first, fatal, delay);
+                        auto native = room();
+                        native.hero.cycle_factor_minus_one = cycle;
+                        native.monsters[Game::monster_for_tile(target)] = {200, 40, 20, 7};
+                        native.hero.hp = fatal ? 7 : 100000;
+                        native.hero.attack = 20 * (cycle + 1) + 3;
+                        native.hero.defense = 40 * (cycle + 1) - 2;
+                        native.inventory(Item::Cross) = native.inventory(Item::DragonSlayer) = 1;
+                        native.inventory(Item::LuckyGold) = 1;
+                        native.contact_index = cell(5, 4);
+                        native.tile(1, native.contact_index) = std::uint8_t(target);
+                        native.battle(enemy_first);
+                        auto skipped = native;
+                        native.finish_commands();
+                        int commands = 0;
+                        for (; commands < 1000; ++commands) {
+                            if (commands >= delay)
+                                skipped.skip_battle_rounds();
+                            if (!skipped.run_one())
+                                break;
+                        }
+                        REQUIRE(commands < 1000);
+                        REQUIRE(skipped.hero == native.hero);
+                        REQUIRE(skipped.floors == native.floors);
+                        REQUIRE(skipped.run_history == native.run_history);
+                        REQUIRE(skipped.commands == native.commands);
+                        REQUIRE(skipped.status == native.status);
+                        REQUIRE(skipped.visual.enemy_hp == native.visual.enemy_hp);
+                        REQUIRE(skipped.visual.dead == native.visual.dead);
+                        REQUIRE(skipped.busy() == native.busy());
+                    }
+}
+
+TEST_CASE("Skipping a hundred million battle rounds takes bounded work", "[combat]") {
+    auto game = room();
+    game.monsters[0] = {100000000, 1, 1, 7};
+    game.hero.attack = 2;
+    game.hero.defense = 1;
+    game.tile_at(1, 5, 4) = GreenSlime;
+    game.move(Direction::Up);
+    int commands = 0;
+    for (; commands < 100; ++commands) {
+        game.skip_battle_rounds();
+        if (!game.run_one())
+            break;
+    }
+    REQUIRE(commands < 100);
+    REQUIRE_FALSE(game.busy());
+    REQUIRE(game.hero.hp == 1000);
+    REQUIRE(game.hero.gold == 7);
+    REQUIRE(game.tile_at(1, 5, 4) == Road);
+}
+
 TEST_CASE("49F summon executes only its 128 written commands", "[scenes]") {
     for (bool longer_event : {false, true}) {
         auto g = room(49);

@@ -55,7 +55,7 @@ bool touch_device() {
 }
 
 std::optional<TouchButton> TouchRepeat::update(TouchContext current, std::optional<TouchButton> hovered,
-                                               bool down, bool pressed, float seconds) {
+                                               bool down, bool pressed, float seconds, bool ready) {
     if (context != current) {
         active.reset();
         blocked = down;
@@ -84,7 +84,7 @@ std::optional<TouchButton> TouchRepeat::update(TouchContext current, std::option
     active = hovered;
     if (*active == TouchButton::Confirm)
         return pressed ? active : std::nullopt; // Confirm never repeats or fires on a slide.
-    if (repeat.update(pressed || changed, true, seconds)) {
+    if (repeat.update(pressed || changed, true, seconds, true, ready)) {
         return active;
     }
     return {};
@@ -1020,6 +1020,46 @@ float command_interval(const Game& game) {
     }
 }
 
+bool CommandPlayback::advance(Game& game, float seconds, const DesktopUi& ui,
+                              const std::function<bool(const Command&)>& observe) {
+    accumulator_ += seconds;
+    int paced = 0;
+    for (int commands = 0; commands < 1024 && paced < 64; ++commands) {
+        if (!game.visual.battle && !finishing_battle_)
+            strike_pending_ = battle_preview_shown_ = false;
+        const bool fast_battle =
+            ui.skip_attack_animation && ((battle_preview_shown_ && game.visual.battle) || finishing_battle_);
+        const bool fast_stairs = ui.skip_staircase_animation && game.visual.stair_source_floor >= 0;
+        if (fast_battle)
+            game.skip_battle_rounds();
+        const float beat = fast_battle || fast_stairs ? 0.f : command_interval(game);
+        if (accumulator_ < beat)
+            break;
+        Command command;
+        if (!game.run_one(&command)) {
+            reset();
+            return true;
+        }
+        accumulator_ -= beat;
+        paced += beat > 0;
+        if (command.op == Op::HeroStrike || command.op == Op::EnemyStrike)
+            strike_pending_ = true;
+        else if (command.op == Op::Wait && strike_pending_) {
+            strike_pending_ = false;
+            battle_preview_shown_ = true;
+        }
+        if (fast_battle && command.op == Op::Callback && command.a == int(Callback::BattleEnd))
+            finishing_battle_ = true;
+        if (command.op == Op::Callback && command.a == int(Callback::CheckGuards) && command.b == 5)
+            finishing_battle_ = strike_pending_ = battle_preview_shown_ = false;
+        if (observe && !observe(command)) {
+            accumulator_ = 0;
+            break;
+        }
+    }
+    return false;
+}
+
 UiAction Presentation::draw_panels(const Game& game, DesktopUi& ui, Vector2 mouse) {
     const auto& h = game.hero;
     art_->text.fit(std::format("Tower {}", ui.flight >= 0 ? ui.flight : h.floor),
@@ -1309,7 +1349,8 @@ void Presentation::draw_enemies(const Game& game, DesktopUi& ui, Vector2 mouse) 
 
 void Presentation::draw_qol_status(const DesktopUi& ui, Rectangle rect, Vector2 mouse) {
     const int count = int(ui.mouse_walking) + int(ui.blink_mode) + int(ui.hero_orb_actual_damage) +
-                      int(ui.realtime_hero_orb) + int(ui.item_collection);
+                      int(ui.realtime_hero_orb) + int(ui.item_collection) + int(ui.skip_attack_animation) +
+                      int(ui.skip_staircase_animation);
     DrawRectangleRec(rect, Bar);
     art_->text.outline(rect, 1, count ? Gold : Border);
     art_->text.fit(count ? std::format("QOL: {} enabled", count) : "QOL: none", rect, 16,
@@ -1327,6 +1368,10 @@ void Presentation::draw_qol_status(const DesktopUi& ui, Rectangle rect, Vector2 
             text += "\n" + localized_text(art_->text.language, "Realtime Hero Orb");
         if (ui.item_collection)
             text += "\n" + localized_text(art_->text.language, "Item collection");
+        if (ui.skip_attack_animation)
+            text += "\n" + localized_text(art_->text.language, "Skip attack animation");
+        if (ui.skip_staircase_animation)
+            text += "\n" + localized_text(art_->text.language, "Skip staircase animation");
         text += "\n" + localized_text(art_->text.language, "Change QOLs in Settings. Default: off.");
         art_->text.tooltip(rect, text);
     }
@@ -1358,26 +1403,33 @@ UiAction Presentation::draw_item(const Game& game, DesktopUi& ui, Vector2 mouse)
 }
 
 void Presentation::draw_help(DesktopUi& ui, Vector2 mouse) {
-    constexpr Rectangle rect{BoardX + 12, BoardY + 14, 416, 410};
+    constexpr Rectangle rect{140, 48, 520, 460};
     art_->text.modal(rect, "Tower of the Sorcerer");
-    const std::array<std::pair<const char*, const char*>, 9> controls{{{"Arrows / WASD", "Move"},
-                                                                       {"Click map tile", "Walk / contact"},
-                                                                       {"Enter / Space", "Continue dialogue"},
-                                                                       {"I", "Inventory"},
-                                                                       {"F6 / F7", "Save / load slots"},
-                                                                       {"F5 / F9", "Quick save / restore"},
-                                                                       {"F8", "Fairy checkpoint"},
-                                                                       {"F2", "New game"},
-                                                                       {"M", "Music and effects"}}};
+    const std::array<std::pair<const char*, const char*>, 13> controls{
+        {{"Arrows / WASD", "Move"},
+         {"Enter / Space", "Continue dialogue"},
+         {"I", "Inventory"},
+         {"Q / Shift+Q", "Quick save / restore"},
+         {"K / L", "Save / load slots"},
+         {"Shift+L", "Restore floor autosave"},
+         {"Shift+F", "Fairy checkpoint"},
+         {"Shift+N", "New game"},
+         {"O", "Settings"},
+         {"H", "Help"},
+         {"M", "Music and effects"},
+         {"R", "Rankings"},
+         {"Esc", "Main menu"}}};
     for (int i = 0; i < std::ssize(controls); ++i) {
-        art_->text.draw(controls[i].first, int(rect.x + 20), int(rect.y + 60 + i * 24), 17, Ink);
-        art_->text.draw(controls[i].second, int(rect.x + 170), int(rect.y + 60 + i * 24), 17, Ink);
+        art_->text.draw(controls[i].first, int(rect.x + 20), int(rect.y + 60 + i * 22), 17, Ink);
+        art_->text.fit(controls[i].second, {rect.x + 190, rect.y + 58 + i * 22, 310, 22}, 17, Ink,
+                       {.alignment = TextAlignment::Right});
     }
     art_->text.draw(
-        "Click an item to inspect or use it.\nHero Orb: view this floor's enemies.\nFlight: arrows, "
-        "Enter to travel, Esc to cancel.\nOptions: music and game speed.",
-        int(rect.x + 20), int(rect.y + 280), 17, Muted);
-    if (art_->text.button({rect.x + 20, rect.y + 365, 376, 29}, "Close  [Esc]", mouse))
+        art_->text.wrap(
+            "Click map tiles to walk or interact.\nFloor autosaves are written after arrival events finish.",
+            480, 16),
+        int(rect.x + 20), int(rect.y + 354), 16, Muted, false);
+    if (art_->text.button({rect.x + 20, rect.y + 418, 480, 29}, "Close  [Esc]", mouse))
         ui.help = false;
 }
 
@@ -1398,32 +1450,38 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
         if (art_->text.button({rect.x + 126, rect.y + 253, 168, 26}, "OK [Enter / Esc]", mouse))
             ui.menu = Menu::None;
     } else if (ui.menu == Menu::Game) {
-        constexpr Rectangle rect{6, MenuHeight, 214, 339};
+        constexpr Rectangle rect{6, MenuHeight, 252, 372};
         DrawRectangleRec(rect, Panel);
         art_->text.outline(rect, 1, Border);
-        const std::array<const char*, 10> labels{"New game [F2]",      "Save slots [F6]",
-                                                 "Load slots [F7]",    "Quick save [F5]",
-                                                 "Quick restore [F9]", "Fairy checkpoint [F8]",
-                                                 "Rankings [R]",       "Play replay",
-                                                 "Main menu [Esc]",    "Close"};
-        const std::array<Action, 9> actions{
-            Action::NewGame,      Action::OpenSaveSlots, Action::OpenLoadSlots,
-            Action::Save,         Action::Load,          Action::FairyCheckpoint,
-            Action::OpenRankings, Action::OpenReplays,   Action::MainMenu};
+        const std::array<const char*, 11> labels{"New game [Shift+N]",
+                                                 "Save slots [K]",
+                                                 "Load slots [L]",
+                                                 "Quick save [Q]",
+                                                 "Quick restore [Shift+Q]",
+                                                 "Fairy checkpoint [Shift+F]",
+                                                 "Floor autosave [Shift+L]",
+                                                 "Rankings [R]",
+                                                 "Play replay",
+                                                 "Main menu [Esc]",
+                                                 "Close"};
+        const std::array<Action, 10> actions{
+            Action::NewGame,     Action::OpenSaveSlots,   Action::OpenLoadSlots, Action::Save,
+            Action::Load,        Action::FairyCheckpoint, Action::LoadAutosave,  Action::OpenRankings,
+            Action::OpenReplays, Action::MainMenu};
         for (int i = 0; i < std::ssize(labels); ++i)
             if (art_->text.button({rect.x + 6, rect.y + 6 + i * 33, rect.width - 12, 27}, labels[i], mouse,
                                   ((i != 1 && i != 3) || !game.busy()) &&
-                                      (i < 1 || i > 5 || ui.file_controls_enabled()) &&
-                                      (i != 6 || !game.busy()))) {
+                                      (i < 1 || i > 6 || ui.file_controls_enabled()) &&
+                                      (i != 7 || !game.busy()))) {
                 ui.menu = Menu::None;
                 return i < std::ssize(actions) ? UiAction{actions[i]} : UiAction{};
             }
     } else if (ui.menu == Menu::Options) {
         constexpr Rectangle rect{50, 34, 700, 484};
         art_->text.modal(rect, "Settings");
-        constexpr std::array<const char*, 4> tabs{"Game", "Controls", "Replay", "Language"};
+        constexpr std::array<const char*, 5> tabs{"Game", "QOL", "Controls", "Replay", "Language"};
         for (int i = 0; i < std::ssize(tabs); ++i) {
-            const Rectangle tab{rect.x + 18 + i * 168, rect.y + 56, 160, 48};
+            const Rectangle tab{rect.x + 18 + i * 134, rect.y + 56, 128, 48};
             if (art_->text.button(tab, tabs[i], mouse))
                 ui.settings_tab = static_cast<SettingsTab>(i);
             if (int(ui.settings_tab) == i)
@@ -1431,19 +1489,43 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
         }
         const float left = rect.x + 18;
         if (ui.settings_tab == SettingsTab::Game) {
-            art_->text.draw("Sound", int(left), 158, 19, Gold);
-            if (art_->text.button({left, 184, 664, 48},
+            art_->text.draw("Sound", int(left), 150, 19, Gold);
+            if (art_->text.button({left, 174, 664, 48},
                                   ui.muted ? "Enable music and effects [M]" : "Mute music and effects [M]",
                                   mouse))
                 return {Action::Mute};
-            art_->text.draw("Animation and automatic walking speed", int(left), 252, 17, Muted);
-            for (int i = 0; i < std::ssize(GameSpeeds); ++i)
-                if (art_->text.button(
-                        {left + i * 224, 278, 216, 48},
-                        std::format("{}x{}", GameSpeeds[i], ui.game_speed_index == i ? " *" : ""), mouse))
-                    return {Action::Speed, i};
-            art_->text.draw("Quality of life", int(left), 348, 19, Gold);
-            const Rectangle qol{left, 378, 328, 48}, realtime{left + 336, 378, 328, 48};
+            art_->text.draw("Animation and automatic walking speed", int(left), 236, 17, Muted);
+            const int current = int(std::round(ui.animation_speed * 10));
+            art_->text.fit(std::format("{:.1f}x", ui.animation_speed), {left + 560, 232, 104, 28}, 21, Gold);
+            if (art_->text.button({left, 276, 48, 48}, "-", mouse, current > MinAnimationSpeed))
+                return {Action::Speed, current - 1};
+            if (art_->text.button({left + 616, 276, 48, 48}, "+", mouse, current < MaxAnimationSpeed))
+                return {Action::Speed, current + 1};
+            constexpr Rectangle slider{128, 276, 544, 48};
+            constexpr float start = slider.x + 12, width = slider.width - 24;
+            if (pointer_pressed_ && CheckCollisionPointRec(mouse, slider) && !pointer_cancelled_)
+                speed_dragging_ = true;
+            int selected = current;
+            if (speed_dragging_ && pointer_down_ && !pointer_cancelled_)
+                selected =
+                    int(std::round(MinAnimationSpeed + std::clamp((mouse.x - start) / width, 0.f, 1.f) *
+                                                           (MaxAnimationSpeed - MinAnimationSpeed)));
+            const float thumb =
+                start + width * (selected - MinAnimationSpeed) / (MaxAnimationSpeed - MinAnimationSpeed);
+            DrawRectangleRec({start, slider.y + 21, width, 6}, Bar);
+            DrawRectangleRec({start, slider.y + 21, thumb - start, 6}, Gold);
+            art_->text.outline({start, slider.y + 21, width, 6}, 1, Border);
+            DrawRectangleRec({thumb - 12, slider.y + 7, 24, 34},
+                             speed_dragging_ || CheckCollisionPointRec(mouse, slider) ? Gold : Ink);
+            art_->text.outline({thumb - 12, slider.y + 7, 24, 34}, 1, Border);
+            art_->text.fit("1x", {slider.x, 330, 48, 24}, 16, Muted);
+            art_->text.fit("10x", {slider.x + slider.width - 48, 330, 48, 24}, 16, Muted);
+            art_->text.draw("Click or drag to adjust. Default: 1x.", int(left), 372, 17, Muted);
+            if (selected != current)
+                return {Action::Speed, selected};
+        } else if (ui.settings_tab == SettingsTab::Qol) {
+            art_->text.draw("Quality of life", int(left), 158, 19, Gold);
+            const Rectangle qol{left, 192, 328, 48}, realtime{left + 336, 192, 328, 48};
             if (art_->text.button(qol,
                                   ui.hero_orb_actual_damage ? "Hero Orb actual damage: on"
                                                             : "Hero Orb actual damage: off",
@@ -1453,10 +1535,37 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
                                   ui.realtime_hero_orb ? "Realtime Hero Orb: on" : "Realtime Hero Orb: off",
                                   mouse))
                 return {Action::RealtimeHeroOrb};
-            const Rectangle collection{left, 438, 328, 48};
+            const Rectangle collection{left, 252, 328, 48};
             if (art_->text.button(collection,
                                   ui.item_collection ? "Item collection: on" : "Item collection: off", mouse))
                 return {Action::ItemCollection};
+            const Rectangle attack{left + 336, 252, 328, 48}, stairs{left, 312, 328, 48};
+            if (art_->text.button(attack,
+                                  ui.skip_attack_animation ? "Skip attack animation: on"
+                                                           : "Skip attack animation: off",
+                                  mouse))
+                return {Action::SkipAttackAnimation};
+            if (art_->text.button(stairs,
+                                  ui.skip_staircase_animation ? "Skip staircase animation: on"
+                                                              : "Skip staircase animation: off",
+                                  mouse))
+                return {Action::SkipStaircaseAnimation};
+            const Rectangle walking{left + 336, 312, 328, 48};
+            if (art_->text.button(walking, ui.mouse_walking ? "Mouse walking: on" : "Mouse walking: off",
+                                  mouse))
+                return {Action::MouseWalking};
+            const Rectangle blink{left, 372, 664, 48};
+            if (art_->text.button(blink, ui.blink_mode ? "Blink mode: on" : "Blink mode: off", mouse))
+                return {Action::BlinkMode};
+            art_->text.draw("Experienced players only. Default: off.", int(left), 430, 17, Muted);
+            if (CheckCollisionPointRec(mouse, attack))
+                art_->text.tooltip(
+                    attack,
+                    "Show the first strike, then resolve the rest of combat instantly. Default: off.");
+            if (CheckCollisionPointRec(mouse, stairs))
+                art_->text.tooltip(
+                    stairs,
+                    "Arrive on the destination floor immediately, without the spiral wipe. Default: off.");
             if (CheckCollisionPointRec(mouse, collection))
                 art_->text.tooltip(collection,
                                    "Show the two collection buttons beneath the inventory. Default: off.");
@@ -1471,29 +1580,20 @@ UiAction Presentation::draw_menu(const Game& game, DesktopUi& ui, Vector2 mouse)
                                    "Requires Hero Orb. Top: HP cost. Left: ATK. Right: DEF. Bottom: gold. "
                                    "∞ means defense cannot be penetrated. Hover a monster for exact "
                                    "values. Uses the Hero Orb damage setting. Default: off.");
+            if (CheckCollisionPointRec(mouse, walking))
+                art_->text.tooltip(walking, "Click floor to walk or an event to interact. Hidden events stop "
+                                            "the walk. Default: off.");
+            if (CheckCollisionPointRec(mouse, blink))
+                art_->text.tooltip(
+                    blink, "Blink across event-free floor, or beside the clicked event to interact once. "
+                           "Otherwise walk normally. Does not cross doors, monsters or hidden tunnels. "
+                           "Overrides mouse walking.");
         } else if (ui.settings_tab == SettingsTab::Controls) {
             art_->text.draw("Controls", int(left), 158, 19, Gold);
             if (art_->text.button({left, 192, 664, 48},
                                   ui.touch_enabled() ? "Touch controls: on" : "Touch controls: off", mouse))
                 return {Action::TouchControls};
             art_->text.draw("Show the directional pad. Default: automatic.", int(left), 252, 17, Muted);
-            const Rectangle walking{left, 276, 664, 48};
-            if (art_->text.button(walking, ui.mouse_walking ? "Mouse walking: on" : "Mouse walking: off",
-                                  mouse))
-                return {Action::MouseWalking};
-            art_->text.draw("Click or tap the map to walk.", int(left), 334, 17, Muted);
-            if (CheckCollisionPointRec(mouse, walking))
-                art_->text.tooltip(walking, "Click floor to walk or an event to interact. Hidden events stop "
-                                            "the walk. Default: off.");
-            const Rectangle blink{left, 372, 664, 48};
-            if (art_->text.button(blink, ui.blink_mode ? "Blink mode: on" : "Blink mode: off", mouse))
-                return {Action::BlinkMode};
-            art_->text.draw("Experienced players only. Default: off.", int(left), 430, 17, Muted);
-            if (CheckCollisionPointRec(mouse, blink))
-                art_->text.tooltip(
-                    blink, "Blink across event-free floor, or beside the clicked event to interact once. "
-                           "Otherwise walk normally. Does not cross doors, monsters or hidden tunnels. "
-                           "Overrides mouse walking.");
         } else if (ui.settings_tab == SettingsTab::Replay) {
             art_->text.draw("Recording", int(left), 158, 19, Gold);
             if (art_->text.button({left, 192, 664, 48},
@@ -1578,9 +1678,11 @@ UiAction Presentation::draw_save_slots(const Game& game, DesktopUi& ui, Vector2 
     const bool saving = ui.save_picker == SavePicker::Save;
     art_->text.modal(rect, saving ? "Save game - eight slots" : "Load game - eight slots");
     if (!saving) {
-        if (art_->text.button({rect.x + 344, rect.y + 14, 136, 28}, "Quick [F9]", mouse, ui.quick_available))
+        if (art_->text.button({rect.x + 344, rect.y + 14, 136, 28}, "Quick [Shift+Q]", mouse,
+                              ui.quick_available))
             return {Action::Load};
-        if (art_->text.button({rect.x + 488, rect.y + 14, 130, 28}, "Fairy [F8]", mouse, ui.fairy_available))
+        if (art_->text.button({rect.x + 488, rect.y + 14, 130, 28}, "Fairy [Shift+F]", mouse,
+                              ui.fairy_available))
             return {Action::FairyCheckpoint};
     }
     for (int i = 0; i < ManualSaveSlotCount; ++i) {
@@ -1619,7 +1721,21 @@ UiAction Presentation::draw_save_slots(const Game& game, DesktopUi& ui, Vector2 
                           std::format("{}{} [Enter]", label, ui.selected_slot), mouse,
                           saving ? !game.busy() : selected.state == SaveSlotState::Ready))
         return {saving ? Action::SaveSlot : Action::LoadSlot, ui.selected_slot};
-    if (art_->text.button({rect.x + 324, rect.y + 430, 294, 28}, "Cancel [Esc]", mouse))
+    const Rectangle autosave{rect.x + 324, rect.y + 430, 156, 28};
+    if (!saving &&
+        art_->text.button(autosave, "Floor autosave", mouse, ui.autosave_slot.state == SaveSlotState::Ready))
+        return {Action::LoadAutosave};
+    if (!saving && CheckCollisionPointRec(mouse, autosave)) {
+        if (ui.autosave_slot.state == SaveSlotState::Ready)
+            art_->text.tooltip(autosave, std::format("Floor {} / HP {} [Shift+L]", ui.autosave_slot.floor,
+                                                     ui.autosave_slot.hp));
+        else
+            art_->text.tooltip(autosave, ui.autosave_slot.state == SaveSlotState::Invalid
+                                             ? "Unreadable save"
+                                             : "No floor autosave yet.");
+    }
+    if (art_->text.button({rect.x + (saving ? 324 : 488), rect.y + 430, saving ? 294.f : 130.f, 28},
+                          "Cancel [Esc]", mouse))
         ui.close_overlays();
     return {};
 }
@@ -1886,9 +2002,12 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, floa
 #endif
     pointer_down_ = down;
     pointer_pressed_ = pressed;
+    if (!down || pointer_cancelled_ || ui.menu != Menu::Options || ui.settings_tab != SettingsTab::Game)
+        speed_dragging_ = false;
     if (!game.dialogue || ui.menu != Menu::None || ui.help || ui.replay_active)
         dialogue_dragging_ = false;
-    const auto touch_input = touch_.update(context, hovered, down, pressed, real_seconds);
+    const auto touch_input = touch_.update(context, hovered, down, pressed, real_seconds,
+                                           context != TouchContext::Walk || !game.busy());
     // Closing a panel must consume its click instead of selecting the floor underneath.
     const auto destination = mouse_destination(game, ui, mouse);
 #ifndef __ANDROID__
@@ -1993,10 +2112,9 @@ UiAction Presentation::draw(const Game& game, DesktopUi& ui, Vector2 mouse, floa
             ui.close_overlays();
             ui.menu = opened ? Menu::None : Menu::About;
         }
-        const auto label =
-            std::format("{}{}x  /  {}{}", game.hero.cycle_factor_minus_one ? "Backside  /  " : "",
-                        int(GameSpeeds[ui.game_speed_index]), ui.muted ? "Music off" : "Music on",
-                        ui.recording_active ? "  /  Recording" : "");
+        const auto label = std::format(
+            "{}{}x  /  {}{}", game.hero.cycle_factor_minus_one ? "Backside  /  " : "", ui.animation_speed,
+            ui.muted ? "Music off" : "Music on", ui.recording_active ? "  /  Recording" : "");
         art_->text.fit(label, {440, 3, 350, 22}, 17, Muted, {.alignment = TextAlignment::Right});
     }
     if (ui.menu != Menu::None)

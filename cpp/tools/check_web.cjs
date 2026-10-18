@@ -112,7 +112,7 @@ async function fullscreenSmoke(browser, url, output) {
             await page.goto(url);
             await page.waitForFunction(() => document.getElementById('loading').hidden, null, { timeout: 60000 });
             await page.keyboard.press('Enter', { delay: 100 });
-            await page.keyboard.press('F5', { delay: 100 });
+            await page.keyboard.press('q', { delay: 100 });
             await checkPlayerLayout(page, name);
             await checkSmallText(page, name);
             await page.locator('#help-button').click();
@@ -134,7 +134,7 @@ async function fullscreenSmoke(browser, url, output) {
                 await page.waitForTimeout(60);
                 await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
                 await page.waitForTimeout(180);
-                await page.keyboard.press('F5', { delay: 100 });
+                await page.keyboard.press('q', { delay: 100 });
                 assert.equal(await page.evaluate(() => {
                     const bytes = Module.tswStorage.read('quick.save');
                     return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getInt32(6297, true);
@@ -222,7 +222,7 @@ async function mobileSmoke(browser, url, output) {
     async function padTap(direction) { await padStart(direction); await page.waitForTimeout(60); await end(); }
     async function position() {
         await page.waitForTimeout(180);
-        await page.keyboard.press('F5', { delay: 100 });
+        await page.keyboard.press('q', { delay: 100 });
         return page.evaluate(() => {
             const bytes = Module.tswStorage.read('quick.save');
             const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
@@ -231,7 +231,7 @@ async function mobileSmoke(browser, url, output) {
     }
     async function toggle() {
         await tap(100, 14); // Options
-        await tap(316, 114); // Controls tab
+        await tap(400, 114); // Controls tab
         await tap(400, 216); // Touch controls
         await tap(636, 484); // Done
     }
@@ -260,7 +260,7 @@ async function mobileSmoke(browser, url, output) {
             set(656, sum); set(660, alternating);
             Module.FS.writeFile('/Savedat/quick.save', bytes);
         }, kind);
-        await page.keyboard.press('F9', { delay: 100 });
+        await page.keyboard.press('Shift+Q', { delay: 100 });
         await page.waitForTimeout(200);
     }
     async function dialogueSnapshot(header = false) {
@@ -387,10 +387,10 @@ async function mobileSmoke(browser, url, output) {
         await tap(532, 433); // Close a remaining offer, if any.
         await position();
         assert.ok(await gold() < 100, 'The explicit shop choice must still purchase');
-        for (const [index, speed] of [1, 3, 10].entries()) {
+        for (const speed of [1, 3, 10]) {
             await tap(100, 14); // Options
             await tap(148, 114); // Game tab
-            await tap(176 + index * 224, 302);
+            await tap(140 + (speed - 1) / 9 * 520, 300);
             await tap(636, 484); // Done
             await fixture('controls');
             assert.deepEqual(await position(), [5, 10]);
@@ -457,14 +457,19 @@ async function languageSmoke(browser, url, output) {
         await page.keyboard.press('Enter', { delay: 100 });
         await click(100, 14);
         await page.screenshot({ path: path.join(output, 'settings-game.png') });
-        await click(316, 114);
+        await click(400, 300); // Slider midpoint: 5.5x.
+        assert.equal(await page.evaluate(() => JSON.parse(new TextDecoder().decode(
+            Module.tswStorage.read('settings.json'))).animation_speed), 5.5);
+        await click(266, 114);
+        await page.screenshot({ path: path.join(output, 'settings-qol.png') });
+        await click(400, 114);
         await page.screenshot({ path: path.join(output, 'settings-controls.png') });
-        await click(484, 114);
+        await click(534, 114);
         await click(400, 216);
         assert.equal(await page.evaluate(() => JSON.parse(new TextDecoder().decode(
             Module.tswStorage.read('settings.json'))).recording), true, 'Recording belongs to Replay');
         await page.screenshot({ path: path.join(output, 'settings-replay.png') });
-        await click(652, 114);
+        await click(668, 114);
         await page.screenshot({ path: path.join(output, 'settings-language.png') });
         assert.equal(requests.length, 0, 'Native language labels must render without a full font download');
         await click(400, 350); // Chinese from Japanese.
@@ -539,7 +544,11 @@ async function main() {
         await page.waitForFunction(() => window.Module?.FS && !document.getElementById('retry').disabled, null, { timeout: 60000 });
         await page.locator('#canvas').focus();
     }
-    async function key(name) { await page.keyboard.press(name, { delay: 100 }); }
+    async function key(name) {
+        await page.keyboard.press(name, { delay: 100 });
+        // Shift+Q followed by Q reuses one physical key; let the game observe its release.
+        await page.waitForTimeout(50);
+    }
     try {
         console.log('Opening', url);
         await page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -555,15 +564,37 @@ async function main() {
         assert.equal(await page.evaluate(() => Module.tswTouchDevice), false, 'Desktop input must not auto-enable the pad');
         await page.screenshot({ path: path.join(output, 'startup.png') });
         await key('Enter');
-        await key('F5');
+        await key('q');
         await page.waitForFunction(() => Module.FS.analyzePath('/Savedat/quick.save').exists);
+        await page.waitForFunction(() => Module.FS.analyzePath('/Savedat/autosave.save').exists);
         await page.waitForFunction(() => document.getElementById('storage').textContent === 'Saved in this browser');
+        const autosave = await page.evaluate(() => Array.from(Module.tswStorage.read('autosave.save')));
+        assert.equal(autosave.length, 6957, 'Floor autosave must retain the original native format');
+        await page.evaluate(() => {
+            window.addEventListener('keydown', event => {
+                if (event.ctrlKey && event.key.toLowerCase() === 'l')
+                    window.browserShortcutPrevented = event.defaultPrevented;
+            });
+        });
+        await key('Control+l');
+        assert.equal(await page.evaluate(() => window.browserShortcutPrevented), false,
+            'Ctrl+L must remain available to the browser');
+        await page.locator('#canvas').focus();
+        await key('ArrowLeft');
+        await key('Shift+L');
+        await key('q');
         const original = await page.evaluate(() => Array.from(Module.tswStorage.read('quick.save')));
         assert.equal(original.length, 6957, 'Original-format save must retain its exact byte size');
+        assert.equal(new DataView(Uint8Array.from(original).buffer).getInt32(6297, true), 5,
+            'Shift+L must restore the entry position after walking away');
+        assert.deepEqual(await page.evaluate(() => Array.from(Module.tswStorage.read('autosave.save'))), autosave,
+            'Walking, restoring and quick saving must leave the floor entry intact');
         const history = await page.evaluate(() => Array.from(Module.tswStorage.read('quick.save.achievements.json')));
         await page.screenshot({ path: path.join(output, 'game.png') });
         await page.reload();
         await ready();
+        assert.deepEqual(await page.evaluate(() => Array.from(Module.tswStorage.read('autosave.save'))), autosave,
+            'The latest floor-entry autosave must survive a browser reload');
         assert.deepEqual(await page.evaluate(() => Array.from(Module.tswStorage.read('quick.save'))), original);
         assert.deepEqual(await page.evaluate(() => Array.from(Module.tswStorage.read('quick.save.achievements.json'))), history);
         await page.locator('#help-button').click();
@@ -603,9 +634,9 @@ async function main() {
         await checkPlayerLayout(page, 'Exited fullscreen');
         // Load through the actual game UI after hydration, then save again to exercise backups.
         await page.locator('#canvas').focus();
-        await key('F7');
-        await key('F9');
-        await key('F5');
+        await key('l');
+        await key('Shift+Q');
+        await key('q');
         await page.waitForFunction(() => Module.FS.analyzePath('/Savedat/quick.save.bak').exists);
         await page.waitForFunction(() => document.getElementById('storage').textContent === 'Saved in this browser');
         assert.deepEqual(await page.evaluate(() => Array.from(Module.tswStorage.read('quick.save.bak'))), original);

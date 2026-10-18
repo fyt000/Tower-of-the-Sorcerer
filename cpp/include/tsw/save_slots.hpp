@@ -15,4 +15,6 @@ struct SaveSlotInfo {
 using SaveSlots = std::array<SaveSlotInfo, ManualSaveSlotCount>;
 std::filesystem::path save_slot_path(const std::filesystem::path& directory, int number);
 SaveSlots inspect_save_slots(const std::filesystem::path& directory);
+std::filesystem::path floor_autosave_path(const std::filesystem::path& directory);
+SaveSlotInfo inspect_floor_autosave(const std::filesystem::path& directory);
 } // namespace tsw

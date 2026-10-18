@@ -1,10 +1,12 @@
 #include "tsw/replay.hpp"
+#include "tsw/save_slots.hpp"
 #include "tsw/settings.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 #include <chrono>
 #include <fstream>
 #include <glaze/json.hpp>
+#include <limits>
 #include <map>
 #include <sstream>
 
@@ -78,6 +80,108 @@ void matches_save(const std::filesystem::path& save, SaveKind kind = SaveKind::S
     REQUIRE(record.str().size() == 6957);
 }
 } // namespace
+
+TEST_CASE("Floor autosaves replace one rolling entry only after a safe arrival", "[autosave][saves]") {
+    ReplayDirectory directory;
+    Game game;
+    Recorder recorder;
+    FloorAutosave autosave;
+    const auto path = floor_autosave_path(directory.path);
+    autosave.reset(game);
+    REQUIRE_FALSE(autosave.update(game, recorder, directory.path));
+    REQUIRE(inspect_floor_autosave(directory.path).state == SaveSlotState::Empty);
+    autosave.reset(game, true);
+    REQUIRE(autosave.update(game, recorder, directory.path));
+    const auto original = contents(path);
+    const auto achievements = contents(achievement_path(path));
+    game.hero.hp -= 10;
+    REQUIRE_FALSE(autosave.update(game, recorder, directory.path));
+    REQUIRE(contents(path) == original);
+    // Entering another floor can leave a staircase or scripted arrival in progress.
+    game.hero.floor = 2;
+    game.dialogue = Dialogue{"Arrival event"};
+    REQUIRE_FALSE(autosave.update(game, recorder, directory.path));
+    REQUIRE(contents(path) == original);
+    game.dialogue.reset();
+    REQUIRE_FALSE(autosave.update(game, recorder, directory.path, false));
+    REQUIRE(autosave.update(game, recorder, directory.path));
+    REQUIRE(inspect_floor_autosave(directory.path).floor == 2);
+    REQUIRE(inspect_floor_autosave(directory.path).hp == game.hero.hp);
+    REQUIRE(contents(path.string() + ".bak") == original);
+    REQUIRE(contents(achievement_path(path.string() + ".bak")) == achievements);
+    REQUIRE_FALSE(autosave.update(game, recorder, directory.path));
+    game.hero.floor = 3;
+    game.hero.hp = 0;
+    REQUIRE_FALSE(autosave.update(game, recorder, directory.path));
+    REQUIRE(inspect_floor_autosave(directory.path).floor == 2);
+    // A restore suppresses an entry write until a subsequent floor/cycle change.
+    game.load(path);
+    autosave.reset(game);
+    REQUIRE_FALSE(autosave.update(game, recorder, directory.path));
+    game.hero.cycle_factor_minus_one = 43;
+    REQUIRE(autosave.update(game, recorder, directory.path));
+    REQUIRE(inspect_floor_autosave(directory.path).backside);
+    game.hero.floor = 1;
+    REQUIRE(autosave.update(game, recorder, directory.path));
+    REQUIRE(inspect_floor_autosave(directory.path).floor == 1);
+    REQUIRE_FALSE(std::filesystem::exists(directory.path / "quick.save"));
+    for (const auto& slot : inspect_save_slots(directory.path))
+        REQUIRE(slot.state == SaveSlotState::Empty);
+}
+
+TEST_CASE("Floor autosaves retain deterministic replay history across saves and restores",
+          "[autosave][replay]") {
+    ReplayDirectory directory;
+    Game game;
+    Recorder recorder(true);
+    recorder.new_game(game.rankings);
+    FloorAutosave autosave;
+    autosave.reset(game, true);
+    REQUIRE(autosave.update(game, recorder, directory.path));
+    const auto path = floor_autosave_path(directory.path);
+    matches_save(path);
+    const auto original = contents(path);
+    walk(game, recorder, Direction::Left);
+    REQUIRE_FALSE(autosave.update(game, recorder, directory.path));
+    recorder.save(game, directory.path / "quick.save");
+    REQUIRE(contents(path) == original);
+    recorder.load(game, path);
+    autosave.reset(game);
+    REQUIRE_FALSE(autosave.update(game, recorder, directory.path));
+    walk(game, recorder, Direction::Right);
+    recorder.save(game, directory.path / "continued.dat");
+    matches_save(directory.path / "continued.dat");
+    autosave.reset(game, true);
+    REQUIRE(autosave.update(game, recorder, directory.path));
+    matches_save(path);
+    matches_save(path.string() + ".bak");
+}
+
+TEST_CASE("A failed floor autosave attempts once per entry and can recover on the next floor",
+          "[autosave][saves]") {
+    ReplayDirectory directory;
+    const auto blocked = directory.path / "blocked";
+    {
+        std::ofstream file(blocked);
+        file << "Not a directory";
+    }
+    Game game;
+    Recorder recorder;
+    FloorAutosave autosave;
+    autosave.reset(game, true);
+    REQUIRE_THROWS(autosave.update(game, recorder, blocked));
+    REQUIRE_FALSE(autosave.update(game, recorder, blocked));
+    std::filesystem::remove(blocked);
+    REQUIRE_FALSE(autosave.update(game, recorder, blocked));
+    ++game.hero.floor;
+    REQUIRE(autosave.update(game, recorder, blocked));
+    REQUIRE(inspect_floor_autosave(blocked).state == SaveSlotState::Ready);
+    {
+        std::ofstream file(floor_autosave_path(blocked), std::ios::trunc);
+        file << "Damaged";
+    }
+    REQUIRE(inspect_floor_autosave(blocked).state == SaveSlotState::Invalid);
+}
 
 TEST_CASE("Replay streaming reader and writer share line numbering and prefix parsing", "[replay]") {
     std::istringstream recording("\n  \r\n{\"type\":\"new_game\"}\n\t\n"
@@ -523,10 +627,12 @@ TEST_CASE("Desktop settings persist opt in audio and both speeds with bounds che
     REQUIRE_FALSE(load_settings(path).mouse_walking);
     REQUIRE_FALSE(load_settings(path).blink_mode);
     REQUIRE_FALSE(load_settings(path).item_collection);
+    REQUIRE_FALSE(load_settings(path).skip_attack_animation);
+    REQUIRE_FALSE(load_settings(path).skip_staircase_animation);
     REQUIRE_FALSE(load_settings(path).realtime_hero_orb);
     REQUIRE_FALSE(load_settings(path).touch_controls.has_value());
     REQUIRE(load_settings(path).replay_speed_index == 2);
-    save_settings(path, {2, 6, true, true, true, "en", true, true, std::nullopt, true, true});
+    save_settings(path, {2, 6, true, true, true, "en", true, true, std::nullopt, true, true, true, true});
     const auto settings = load_settings(path);
     REQUIRE(settings.game_speed_index == 2);
     REQUIRE(settings.replay_speed_index == 6);
@@ -536,6 +642,8 @@ TEST_CASE("Desktop settings persist opt in audio and both speeds with bounds che
     REQUIRE(settings.mouse_walking);
     REQUIRE(settings.blink_mode);
     REQUIRE(settings.item_collection);
+    REQUIRE(settings.skip_attack_animation);
+    REQUIRE(settings.skip_staircase_animation);
     REQUIRE(settings.realtime_hero_orb);
     for (const bool enabled : {false, true}) {
         auto touch = settings;
@@ -560,16 +668,51 @@ TEST_CASE("Desktop settings persist opt in audio and both speeds with bounds che
     REQUIRE_FALSE(load_settings(path).mouse_walking);
     REQUIRE_FALSE(load_settings(path).blink_mode);
     REQUIRE_FALSE(load_settings(path).item_collection);
+    REQUIRE_FALSE(load_settings(path).skip_attack_animation);
+    REQUIRE_FALSE(load_settings(path).skip_staircase_animation);
     REQUIRE_FALSE(load_settings(path).realtime_hero_orb);
     REQUIRE_FALSE(load_settings(path).touch_controls.has_value());
     REQUIRE_THROWS(save_settings(path, {3, 0, false, false}));
-    for (const auto* source : {R"({"game_speed":-1})", R"({"replay_speed":7})", R"({"recording":"true"})",
-                               R"({"hero_orb_actual_damage":"true"})", R"({"mouse_walking":"true"})",
-                               R"({"realtime_hero_orb":"true"})", R"({"blink_mode":"true"})",
-                               R"({"item_collection":"true"})", "not json"}) {
+    for (const auto* source :
+         {R"({"game_speed":-1})", R"({"replay_speed":7})", R"({"recording":"true"})",
+          R"({"hero_orb_actual_damage":"true"})", R"({"mouse_walking":"true"})",
+          R"({"realtime_hero_orb":"true"})", R"({"blink_mode":"true"})", R"({"item_collection":"true"})",
+          R"({"skip_attack_animation":"true"})", R"({"skip_staircase_animation":"true"})", "not json"}) {
         std::ofstream output(path);
         output << source;
         output.close();
+        REQUIRE_THROWS(load_settings(path));
+    }
+}
+
+TEST_CASE("Animation slider speed persists fractions and migrates legacy presets", "[settings]") {
+    ReplayDirectory directory;
+    const auto path = directory.path / "settings.json";
+    REQUIRE(load_settings(path).effective_animation_speed() == 1.f);
+    for (int preset = 0; preset < std::ssize(GameSpeeds); ++preset) {
+        std::ofstream(path) << "{\"game_speed\":" << preset << "}";
+        const auto settings = load_settings(path);
+        REQUIRE(settings.effective_animation_speed() == GameSpeeds[preset]);
+        save_settings(path, settings);
+        REQUIRE(load_settings(path).effective_animation_speed() == GameSpeeds[preset]);
+    }
+    for (float speed : {1.f, 1.1f, 3.7f, 5.5f, 9.9f, 10.f}) {
+        Settings settings;
+        settings.animation_speed = speed;
+        save_settings(path, settings);
+        REQUIRE(load_settings(path).effective_animation_speed() == speed);
+    }
+    std::ofstream(path) << R"({"game_speed":2,"animation_speed":4.2})";
+    REQUIRE(load_settings(path).effective_animation_speed() == 4.2f);
+    for (float speed :
+         {0.f, .9f, 10.1f, std::numeric_limits<float>::infinity(), std::numeric_limits<float>::quiet_NaN()}) {
+        Settings settings;
+        settings.animation_speed = speed;
+        REQUIRE_THROWS(save_settings(path, settings));
+    }
+    for (const auto* source :
+         {R"({"animation_speed":0.9})", R"({"animation_speed":10.1})", R"({"animation_speed":"fast"})"}) {
+        std::ofstream(path) << source;
         REQUIRE_THROWS(load_settings(path));
     }
 }

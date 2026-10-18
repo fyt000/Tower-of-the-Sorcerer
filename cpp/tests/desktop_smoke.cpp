@@ -110,7 +110,7 @@ int verify_smoke(DesktopSession& session, const std::string& name, const std::fi
         session.dispatch({Action::OpenSettings});
         require(ui.home && ui.menu == Menu::Options, "Settings must open over the startup menu");
         require(!ui.hero_orb_actual_damage, "Hero Orb actual damage QOL must default off");
-        session.dispatch({Action::Speed, 2});
+        session.dispatch({Action::Speed, 55});
         session.dispatch({Action::ReplaySpeed, 4});
         if (!ui.recording_enabled)
             session.dispatch({Action::Recording});
@@ -118,13 +118,14 @@ int verify_smoke(DesktopSession& session, const std::string& name, const std::fi
             session.dispatch({Action::Mute});
         session.dispatch({Action::HeroOrbActualDamage});
         const auto settings = load_settings(output / "saves/settings.json");
-        require(settings.game_speed_index == 2 && settings.replay_speed_index == 4 && settings.recording &&
-                    settings.muted && settings.hero_orb_actual_damage,
+        require(settings.effective_animation_speed() == 5.5f && settings.replay_speed_index == 4 &&
+                    settings.recording && settings.muted && settings.hero_orb_actual_damage,
                 "All menu preferences must be saved");
         renderer.draw(game, ui, {-1, -1});
         require(renderer.screenshot(output / "settings.png"),
                 "Settings must render sharp labels and choices");
-        renderer.draw(game, ui, {400, 420});
+        ui.settings_tab = SettingsTab::Qol;
+        renderer.draw(game, ui, {232, 216});
         require(renderer.screenshot(output / "settings-qol-hover.png"),
                 "Settings QOL hover must explain the enabled option");
         ui.close_overlays();

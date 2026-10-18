@@ -109,6 +109,26 @@ void Game::battle(bool enemy_first) {
                    .base_commands = commands.size()};
 }
 
+void Game::skip_battle_rounds() {
+    if (!fight_ || commands.size() != fight_->base_commands)
+        return; // A partially displayed strike must finish before skipping more rounds.
+    auto& fight = *fight_;
+    const int count = fight.hero_strike_count + fight.enemy_strike_count - fight.turn - 1;
+    if (count <= 0)
+        return;
+    const bool enemy_turn = (fight.turn % 2 == 0) == fight.enemy_first;
+    const int enemy_hits = count / 2 + (count % 2 && enemy_turn);
+    const int hero_hits = count - enemy_hits;
+    const auto& row = monsters[fight.monster_index];
+    const int scale = hero.cycle_factor_minus_one + 1;
+    const int enemy_damage = std::max(0, row.attack * scale - hero.defense);
+    const int hero_damage = std::max(
+        0, hero.attack * attack_multiplier(fight.monster_index, fight.enemy_first) - row.defense * scale);
+    hero.hp = int(std::max<std::int64_t>(0, hero.hp - std::int64_t(enemy_hits) * enemy_damage));
+    visual.enemy_hp = int(std::max<std::int64_t>(0, visual.enemy_hp - std::int64_t(hero_hits) * hero_damage));
+    fight.turn += count;
+}
+
 void Game::battle_step() {
     if (!fight_)
         return;

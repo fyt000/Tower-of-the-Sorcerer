@@ -95,6 +95,65 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
     };
 
     {
+        Game game;
+        auto* window = glfwGetCurrentContext();
+        const auto callback = glfwSetKeyCallback(window, nullptr);
+        glfwSetKeyCallback(window, callback);
+        const auto key = [&](int code, int modifier = 0) {
+            if (modifier)
+                callback(window, modifier, 0, GLFW_PRESS, 0);
+            callback(window, code, 0, GLFW_PRESS, 0);
+            const auto action = keyboard_input(game, ui);
+            callback(window, code, 0, GLFW_RELEASE, 0);
+            if (modifier)
+                callback(window, modifier, 0, GLFW_RELEASE, 0);
+            renderer.present();
+            return action.kind;
+        };
+        require(key(KEY_Q) == Action::Save && key(KEY_Q, KEY_LEFT_SHIFT) == Action::Load,
+                "Q saves and Shift+Q restores without function keys");
+        require(key(KEY_K) == Action::OpenSaveSlots && key(KEY_L) == Action::OpenLoadSlots &&
+                    key(KEY_L, KEY_RIGHT_SHIFT) == Action::LoadAutosave,
+                "K and L select manual slots while Shift+L restores the floor autosave");
+        require(key(KEY_F) == Action::None && key(KEY_F, KEY_LEFT_SHIFT) == Action::FairyCheckpoint &&
+                    key(KEY_N) == Action::None && key(KEY_N, KEY_LEFT_SHIFT) == Action::NewGame,
+                "Fairy restore and New game require Shift");
+        for (int code = KEY_F1; code <= KEY_F12; ++code)
+            require(key(code) == Action::None, "Function keys no longer dispatch game actions");
+        for (const int modifier : {KEY_LEFT_CONTROL, KEY_RIGHT_CONTROL, KEY_LEFT_ALT, KEY_RIGHT_ALT,
+                                   KEY_LEFT_SUPER, KEY_RIGHT_SUPER}) {
+            require(key(KEY_Q, modifier) == Action::None && key(KEY_L, modifier) == Action::None &&
+                        key(KEY_O, modifier) == Action::None,
+                    "Browser and OS modifier combinations cannot invoke game shortcuts");
+            callback(window, modifier, 0, GLFW_PRESS, 0);
+            require(!game_shortcut_modifiers(), "Browser and OS modifiers also suspend WASD walking");
+            callback(window, modifier, 0, GLFW_RELEASE, 0);
+            renderer.present();
+        }
+        require(key(KEY_O) == Action::OpenSettings, "O opens Settings");
+        key(KEY_H);
+        require(ui.help, "H opens Help");
+        require(key(KEY_Q) == Action::None, "Help consumes game shortcuts");
+        ui.close_overlays();
+        ui.selected_item = int(Item::HeroOrb);
+        require(key(KEY_Q) == Action::None && key(KEY_L, KEY_LEFT_SHIFT) == Action::None,
+                "Save and restore shortcuts respect item panel file controls");
+        ui.close_overlays();
+        ui.replay_active = true;
+        require(key(KEY_Q) == Action::None && key(KEY_L, KEY_LEFT_SHIFT) == Action::None,
+                "Replay playback cannot save or restore through live shortcuts");
+        ui.replay_active = false;
+        ui.replay_picker = true;
+        require(key(KEY_Q) == Action::None && key(KEY_N, KEY_LEFT_SHIFT) == Action::None,
+                "Replay path entry consumes game shortcuts");
+        ui.close_overlays();
+        ui.save_picker = SavePicker::Load;
+        require(key(KEY_L, KEY_LEFT_SHIFT) == Action::LoadAutosave,
+                "The load picker can restore the floor autosave by shortcut");
+        ui.close_overlays();
+    }
+
+    {
         TouchRepeat pad;
         const auto left = TouchButton::Left, confirm = TouchButton::Confirm;
         pad.update(TouchContext::Walk, {}, false, false, 0);
@@ -210,6 +269,35 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         draw(game);
         require(press(control_point(TouchButton::Left)).kind == Action::None,
                 "A menu consumes touches where the hidden pad would otherwise appear");
+        ui.menu = Menu::Options; // That location can also activate the menu's Done button.
+        ui.settings_tab = SettingsTab::Game;
+        auto speed = begin({400, 300});
+        require(speed.kind == Action::Speed && speed.value == 55,
+                "Clicking the speed slider selects an intermediate 5.5x multiplier");
+        ui.animation_speed = 5.5f;
+        speed = renderer.draw(game, ui, {900, 260});
+        require(speed.kind == Action::Speed && speed.value == MaxAnimationSpeed,
+                "Dragging beyond the slider keeps capture and clamps at 10x");
+        speed = renderer.draw(game, ui, {-100, 260});
+        require(speed.kind == Action::Speed && speed.value == MinAnimationSpeed,
+                "Dragging below the slider clamps at 1x");
+        require(release({660, 300}).kind == Action::None &&
+                    renderer.draw(game, ui, {140, 300}).kind == Action::None,
+                "Releasing the slider stops speed changes");
+        require(press({708, 300}).value == 56 && press({92, 300}).value == 54,
+                "Speed buttons provide precise 0.1x adjustments");
+        begin({400, 350});
+        require(renderer.draw(game, ui, {660, 300}).kind == Action::None,
+                "A drag starting outside the slider cannot acquire it");
+        release({660, 300});
+        snapshot("settings-speed-slider");
+        ui.animation_speed = 1;
+        press({266, 114});
+        require(ui.settings_tab == SettingsTab::Qol, "Settings exposes a separate clickable QOL tab");
+        require(press({568, 276}).kind == Action::SkipAttackAnimation &&
+                    press({232, 336}).kind == Action::SkipStaircaseAnimation &&
+                    press({568, 336}).kind == Action::MouseWalking,
+                "Settings exposes separate clickable attack and staircase animation skips");
         ui.close_overlays();
         ui.touch_controls.reset();
     }
@@ -293,6 +381,119 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         }
         require(counts[0] > 10 && counts[0] == counts[1] && counts[0] == counts[2],
                 "1x, 3x and 10x animation speeds retain identical real-time keyboard repeat timing");
+        for (int fps : {30, 60, 144}) {
+            WalkRepeat walking;
+            int steps = walking.update(true, true, 0);
+            for (int frame = 0; frame < fps * 10; ++frame)
+                steps += walking.update(false, true, 1.f / fps);
+            require(steps == 83,
+                    "Held walking preserves its 120 ms cadence at " + std::to_string(fps) + " FPS");
+        }
+        WalkRepeat walking;
+        require(walking.update(true, true, 0), "Held event fixture starts with an immediate step");
+        require(!walking.update(false, true, .3f, true, false) &&
+                    !walking.update(false, true, 2.f, true, false) && walking.update(false, true, 0),
+                "A due held step waits for an event, then resumes immediately when movement is ready");
+        require(!walking.update(false, true, .1f) && walking.update(false, true, .021f),
+                "Resuming after an event retains the normal interval without a burst of queued steps");
+        walking.update(false, false, 0);
+        require(!walking.update(true, true, 0, true, false) && !walking.update(false, false, 0) &&
+                    !walking.update(false, true, 1),
+                "Releasing a direction during an event cancels its pending step");
+    }
+    {
+        // Use the desktop scheduler directly so these regressions do not open an audio device.
+        DesktopUi options;
+        options.skip_attack_animation = options.skip_staircase_animation = true;
+        for (bool replay : {false, true}) {
+            options.replay_active = replay;
+            Game game;
+            game.floors[1].tiles.fill(Road);
+            game.hero.x = game.hero.y = 5;
+            game.hero.hp = 10000;
+            game.hero.attack = game.hero.defense = 10;
+            game.monsters[0] = {500, 20, 5, 7};
+            game.tile_at(1, 5, 4) = GreenSlime;
+            game.move(Direction::Up);
+            auto native = game;
+            native.finish_commands();
+            CommandPlayback playback;
+            for (int beat = 0; beat < 5; ++beat)
+                playback.advance(game, .06f, options);
+            require(game.visual.battle && game.visual.enemy_hp == 495 && game.hero.gold == 0,
+                    "Attack skipping displays the first strike before resolving live or replay combat");
+            draw(game);
+            snapshot(replay ? "skip-attack-replay-preview" : "skip-attack-preview");
+            playback.advance(game, .06f, options);
+            require(!game.busy() && game.hero == native.hero && game.floors == native.floors &&
+                        game.run_history == native.run_history && game.status == native.status,
+                    "Attack skipping immediately retains native damage, rewards and map changes");
+
+            // The next encounter must earn its own preview even when the scheduler is reused.
+            game.tile_at(1, 5, 3) = GreenSlime;
+            game.move(Direction::Up);
+            playback.advance(game, .06f, options);
+            require(game.visual.battle && game.hero.gold == 7,
+                    "Every encounter shows a fresh attack preview");
+        }
+        Game stairs;
+        stairs.hero.x = 0;
+        stairs.hero.y = 1;
+        stairs.move(Direction::Up);
+        auto native = stairs;
+        auto paced = stairs;
+        CommandPlayback normal_playback;
+        normal_playback.advance(paced, .1f, DesktopUi{});
+        require(paced.busy() && paced.visual.stair_source_floor >= 0,
+                "Staircase animation remains paced by default");
+        native.finish_commands();
+        CommandPlayback playback;
+        playback.advance(stairs, 0, options);
+        require(stairs.hero.floor == 2 && stairs.visual.stair_source_floor == -1 &&
+                    std::none_of(stairs.visual.stair_cover.begin(), stairs.visual.stair_cover.end(),
+                                 [](bool covered) { return covered; }),
+                "Staircase skipping fully reveals the destination in a single frame without elapsed time");
+        playback.advance(stairs, .1f, options);
+        require(!stairs.busy() && stairs.hero == native.hero && stairs.floors == native.floors &&
+                    stairs.status == native.status,
+                "Skipping staircase presentation retains native arrival state and messages");
+        std::array<int, 3> stair_frames{};
+        for (int speed = 0; speed < 3; ++speed) {
+            Game animated;
+            animated.hero.x = 0;
+            animated.hero.y = 1;
+            animated.move(Direction::Up);
+            CommandPlayback clock;
+            while (animated.busy() && stair_frames[speed] < 600) {
+                clock.advance(animated, GameSpeeds[speed] / 60.f, DesktopUi{});
+                ++stair_frames[speed];
+            }
+        }
+        require(stair_frames[0] > stair_frames[1] && stair_frames[1] > stair_frames[2] &&
+                    std::abs(stair_frames[0] - stair_frames[2] * 10) <= 10,
+                "The shared animation speed accelerates staircase wipes at 1x, 3x and 10x");
+
+        Game door;
+        door.tile_at(1, 5, 4) = YellowDoor;
+        door.hero.yellow_keys = 1;
+        door.hero.x = door.hero.y = 5;
+        door.move(Direction::Up);
+        playback.reset();
+        playback.advance(door, .016f, options);
+        require(door.busy(), "Animation skips retain ordinary door pacing");
+
+        Game battle;
+        battle.floors[1].tiles.fill(Road);
+        battle.hero.x = battle.hero.y = 5;
+        battle.hero.attack = battle.hero.defense = 10;
+        battle.tile_at(1, 5, 4) = GreenSlime;
+        battle.waits(20);
+        battle.contact_index = cell(5, 4);
+        battle.battle(false);
+        playback.reset();
+        playback.advance(battle, .36f, options);
+        require(battle.hero.gold == 1 && battle.commands.size() == 20,
+                "Fast combat stops at its boundary and preserves following scripted event delays");
     }
     {
         renderer.reset();
@@ -357,7 +558,7 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         require(click.kind == Action::WalkTo && click.value == cell(8, 5),
                 "A left map click dispatches the selected destination");
         ui.help = true;
-        require(press_at({BoardX + 50, BoardY + 394}).kind == Action::None && !ui.help,
+        require(press_at({400, 480}).kind == Action::None && !ui.help,
                 "Closing Help consumes its click without selecting the floor underneath");
         ui.inventory = true;
         require(press_at({BoardX + 50, BoardY + 400}).kind == Action::None && !ui.inventory,
@@ -387,11 +588,11 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         snapshot("mouse-qol-tooltip");
         ui.mouse_walking = false;
         ui.menu = Menu::Options;
-        ui.settings_tab = SettingsTab::Controls;
+        ui.settings_tab = SettingsTab::Qol;
         renderer.draw(game, ui, {-1, -1});
         snapshot("blink-settings-off");
         require(press_at({300, 396}).kind == Action::BlinkMode,
-                "The Controls tab dispatches the Blink mode toggle");
+                "The QOL tab dispatches the Blink mode toggle");
         ui.blink_mode = true;
         renderer.draw(game, ui, {-1, -1});
         snapshot("blink-settings-on");
@@ -426,9 +627,9 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         require(press_at({48, 500}).kind == Action::None && press_at({108, 500}).kind == Action::None,
                 "Hidden collection buttons cannot be activated");
         ui.menu = Menu::Options;
-        ui.settings_tab = SettingsTab::Game;
-        require(press_at({232, 462}).kind == Action::ItemCollection,
-                "The Game tab dispatches the Item collection QOL toggle");
+        ui.settings_tab = SettingsTab::Qol;
+        require(press_at({232, 276}).kind == Action::ItemCollection,
+                "The QOL tab dispatches the Item collection toggle");
         ui.close_overlays();
         ui.item_collection = true;
         require(press_at({48, 500}).kind == Action::CollectAll,
@@ -1023,6 +1224,20 @@ int verify_presentation(Presentation& renderer, const std::filesystem::path& out
         draw(game);
         snapshot("save-slot-replace");
         ui.save_picker = SavePicker::Load;
+        ui.autosave_slot = {};
+        const auto callback = glfwSetMouseButtonCallback(glfwGetCurrentContext(), nullptr);
+        glfwSetMouseButtonCallback(glfwGetCurrentContext(), callback);
+        const auto click_autosave = [&] {
+            callback(glfwGetCurrentContext(), GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
+            const auto action = renderer.draw(game, ui, {480, MenuHeight + 460});
+            callback(glfwGetCurrentContext(), GLFW_MOUSE_BUTTON_LEFT, GLFW_RELEASE, 0);
+            renderer.present();
+            return action.kind;
+        };
+        require(click_autosave() == Action::None, "Missing floor autosaves cannot be restored");
+        ui.autosave_slot = {SaveSlotState::Ready, 12, 1234, 100, 100};
+        require(click_autosave() == Action::LoadAutosave,
+                "The load picker restores the independent rolling floor autosave");
         game.dialogue =
             Dialogue{"Dialogue remains paused under the load picker.", ContinuationStage::None, false, {}};
         draw(game);

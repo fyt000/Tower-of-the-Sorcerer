@@ -79,6 +79,25 @@ test('a write during synchronization queues another sync without overlapping ope
     assert.equal(f.events.at(-1).message, 'Saved in this browser');
 });
 
+test('rolling floor autosaves, their backup and history persist independently of quick saves', () => {
+    const f = fixture(); f.restore();
+    f.write('/Savedat/quick.save', [1]);
+    f.write('/Savedat/autosave.save', [12]);
+    f.write('/Savedat/autosave.save.replay.jsonl', [2]);
+    f.write('/Savedat/autosave.save.achievements.json', [3]);
+    f.FS.rename('/Savedat/autosave.save', '/Savedat/autosave.save.bak');
+    f.write('/Savedat/autosave.save', [13]);
+    f.storage.flush();
+    assert.equal(f.calls.length, 1);
+    f.calls.shift().callback();
+    assert.equal(f.events.at(-1).error, false);
+    assert.deepEqual([...f.storage.read('quick.save')], [1]);
+    assert.deepEqual([...f.storage.read('autosave.save')], [13]);
+    assert.deepEqual([...f.storage.read('autosave.save.bak')], [12]);
+    assert.ok(Array.from(f.storage.files()).includes('autosave.save.replay.jsonl'));
+    assert.ok(Array.from(f.storage.files()).includes('autosave.save.achievements.json'));
+});
+
 test('quota errors retain dirty data and exports, and explicit retry can persist it', () => {
     const f = fixture(); f.restore();
     f.write('/Savedat/save8.dat', [7, 8, 9]); f.storage.flush();
