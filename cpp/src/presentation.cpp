@@ -618,6 +618,11 @@ struct Presentation::Art {
 };
 
 Presentation::Presentation(const Assets& assets) : art_(std::make_unique<Art>(assets)) {
+#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
+    // GLFW cursor events already use the window units consumed by window_viewport().
+    // Raylib's HiDPI startup scale would shrink them again before canvas_point().
+    SetMouseScale(1, 1);
+#endif
 #ifdef __ANDROID__
     // raylib exposes cancellation as a release; retain the distinction for conversation taps.
     auto* app = GetAndroidApp();

@@ -1126,6 +1126,11 @@ int verify_window(Presentation& renderer, const std::filesystem::path& output) {
     DesktopUi ui;
     std::ofstream report(output / "window-report.json");
     report << "{\n  \"sizes\": [\n";
+    auto* native_window = glfwGetCurrentContext();
+    const auto cursor = glfwSetCursorPosCallback(native_window, nullptr);
+    glfwSetCursorPosCallback(native_window, cursor);
+    const auto button = glfwSetMouseButtonCallback(native_window, nullptr);
+    glfwSetMouseButtonCallback(native_window, button);
     bool first = true;
     const auto check = [&](const char* name) {
         // Render both swap buffers after the native resize notification settles.
@@ -1139,11 +1144,50 @@ int verify_window(Presentation& renderer, const std::filesystem::path& output) {
         if (area.width <= 0 || area.height <= 0 || area.x < -.01f || area.y < -.01f ||
             std::abs(area.width / area.height - float(CanvasWidth) / CanvasHeight) > .001f)
             throw std::runtime_error("Invalid window canvas bounds");
-        const Vector2 target{BoardX + 5.5f * TileSize, BoardY + 10.5f * TileSize};
-        const auto mapped = view.canvas_point(
-            {area.x + target.x * area.width / CanvasWidth, area.y + target.y * area.height / CanvasHeight});
-        if (std::abs(mapped.x - target.x) > .01f || std::abs(mapped.y - target.y) > .01f)
-            throw std::runtime_error("Window pointer mapping differs from canvas scaling");
+        const auto point = [&](Vector2 target) {
+            // Feed the real input callback without moving the system cursor. The pure
+            // viewport inverse alone cannot detect raylib applying an extra DPI scale.
+            cursor(native_window, area.x + target.x * area.width / CanvasWidth,
+                   area.y + target.y * area.height / CanvasHeight);
+            const auto mapped = renderer.mouse_position();
+            if (std::abs(mapped.x - target.x) > .01f || std::abs(mapped.y - target.y) > .01f)
+                throw std::runtime_error(std::string("Window pointer mapping differs from canvas after ") +
+                                         name);
+            return mapped;
+        };
+        for (const Vector2 target :
+             std::array<Vector2, 7>{{{1, 1},
+                                     {CanvasWidth - 1, CanvasHeight - 1},
+                                     {109, 14},
+                                     {BoardX + .5f * TileSize, BoardY + .5f * TileSize},
+                                     {BoardX + 10.5f * TileSize, BoardY + .5f * TileSize},
+                                     {BoardX + .5f * TileSize, BoardY + 10.5f * TileSize},
+                                     {BoardX + 10.5f * TileSize, BoardY + 10.5f * TileSize}}})
+            point(target);
+        const auto click = [&](Vector2 target) {
+            const auto mouse = point(target);
+            button(native_window, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0);
+            const auto action = renderer.draw(game, ui, mouse);
+            button(native_window, GLFW_MOUSE_BUTTON_LEFT, GLFW_RELEASE, 0);
+            return action;
+        };
+        click({109, 14});
+        if (ui.menu != Menu::Options)
+            throw std::runtime_error("Window click missed the visible Options button");
+        ui.close_overlays();
+        ui.mouse_walking = true;
+        const auto walk = click({BoardX + 8.5f * TileSize, BoardY + 5.5f * TileSize});
+        if (walk.kind != Action::WalkTo || walk.value != cell(8, 5))
+            throw std::runtime_error("Window click selected the wrong map tile");
+        for (const Vector2 outside : std::array<Vector2, 4>{{{BoardX - 1, BoardY},
+                                                             {BoardX, BoardY - 1},
+                                                             {BoardX + BoardPixels, BoardY},
+                                                             {BoardX, BoardY + BoardPixels}}})
+            if (mouse_destination(game, ui, point(outside)))
+                throw std::runtime_error("Window pointer outside the board selected a map tile");
+        ui.mouse_walking = false;
+        renderer.draw(game, ui, {-1, -1});
+        renderer.present();
         Image canvas = renderer.capture_canvas(), window = renderer.capture_window();
         Image native = renderer.capture_native_canvas();
         const int expected_width = int(std::round(area.width * view.framebuffer_width / view.window_width));

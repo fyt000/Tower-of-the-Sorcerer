@@ -94,6 +94,8 @@ int main(int argc, char** argv) try {
         return verify_presentation(renderer, presentation, assets);
     }
     if (!window.empty()) {
+        // Reproduce raylib's HiDPI startup transform even on a 100% scale display.
+        SetMouseScale(.5f, .5f);
         Presentation renderer(assets);
         return verify_window(renderer, window);
     }
