@@ -16,7 +16,7 @@ recovery work. I provide technical direction and look for unslop opportunities.
 ## Documentation
 
 - **Playing and building:** use the implementation READMEs above. The C++ README
-  also links to its [replay/CLI](docs/replay-verification.md),
+  also links to its [QOL](docs/qol.md), [replay/CLI](docs/replay-verification.md),
   [MCP](docs/cpp-mcp.md) and [fidelity](cpp/FIDELITY.md) guides.
 - **Game rules and formats:** [mechanics](docs/mechanics.md) and
   [original data and recovery](docs/original-data.md).
